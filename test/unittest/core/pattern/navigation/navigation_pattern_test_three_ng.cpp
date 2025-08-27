@@ -608,6 +608,53 @@ HWTEST_F(NavigationPatternTestThreeNg, IsLastStdChange006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: isNodeVisible
+ * @tc.desc: Test node visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, isNodeVisible, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation stack, and add navBar
+    */
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+   
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar", 201,
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+
+    /**
+     * @tc.steps: step2. set navigationMode stack
+    */
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add("A", navDestinationA);
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add("B", navDestinationB);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    navigationNode->UpdateLastStandardIndex();
+    
+    auto navBarNode2 = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    EXPECT_NE(navBarNode2, nullptr);
+    bool isInvisible = navBarNode2->IsNodeInvisible(navigationNode);
+    ASSERT_EQ(isInvisible, true);
+}
+
+/**
  * @tc.name: HandleTouchEvent001
  * @tc.desc: Branch: if (touchType == TouchType::DOWN) = false
  *           Branch: if (touchType == TouchType::UP || touchType == TouchType::CANCEL) = false
@@ -1168,7 +1215,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager001, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
 
     navigationPattern->RemoveFromDumpManager();
     EXPECT_EQ(mgr->dumpMap_.size(), 0);
@@ -1194,7 +1241,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager002, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     navigationPattern->frameNode_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();
@@ -1221,7 +1268,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager003, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     MockPipelineContext::pipeline_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();
@@ -1249,7 +1296,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager004, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     context->navigationMgr_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();
@@ -1997,7 +2044,7 @@ HWTEST_F(NavigationPatternTestThreeNg, UpdateNavPathList004, TestSize.Level1)
     EXPECT_EQ(navPathList[1].first, PAGE02);
     EXPECT_EQ(navPathList[1].second, nullptr);
     EXPECT_TRUE(navigationStack->GetIsForceSet(1));
-    EXPECT_EQ(navPathList[3].first, "");
+    EXPECT_EQ(navPathList[2].first, PAGE03);
     EXPECT_NE(AceType::DynamicCast<NavDestinationGroupNode>(navPathList[2].second), nullptr);
     EXPECT_FALSE(navigationStack->GetIsForceSet(2));
     NavigationPatternTestThreeNg::TearDownTestSuite();

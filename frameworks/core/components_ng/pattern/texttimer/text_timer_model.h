@@ -19,11 +19,18 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
+enum class JsTextTimerResourceType {
+    TEXTCOLOR,
+    FONTWEIGHT,
+    FONTSIZE,
+    FONTFAMILY
+};
 class ACE_FORCE_EXPORT TextTimerModel {
 public:
     static TextTimerModel* GetInstance();
@@ -35,11 +42,17 @@ public:
     virtual void SetInputCount(double count) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetTextColorByUser(bool isSetByUser) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetOnTimer(std::function<void(int64_t, int64_t)> &&onChange) = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
+    virtual void CreateWithResourceObj(
+        JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetFontSizeByUser(bool value) = 0;
+    virtual void SetFontWeightByUser(bool value) = 0;
+    virtual void SetFontFamilyByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<TextTimerModel> instance_;

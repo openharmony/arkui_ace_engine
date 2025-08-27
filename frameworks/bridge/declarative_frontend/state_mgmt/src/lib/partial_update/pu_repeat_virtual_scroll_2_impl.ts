@@ -266,6 +266,9 @@ enum NotificationType {
     START_CHANGE_POSITION = 0, END_CHANGE_POSITION, START_AND_END_CHANGE_POSITION
 }
 
+// empty function
+const NOOP : () => void = function() {};
+
 class __RepeatVirtualScroll2Impl<T> {
     public static readonly REF_META = Symbol('__repeat_ref_meta__');
 
@@ -293,12 +296,7 @@ class __RepeatVirtualScroll2Impl<T> {
     private ttypeGenFunc_?: RepeatTTypeGenFunc<T>;
 
     // virtualScroll({ totalCount: number }), optional to set
-    private totalCount_: number = 0;
-
-    // virtualScroll({ onTotalCount: () => number) }), optional to set
-    private totalCountFunc_?: () => number;
-
-    private totalCountSpecified_: boolean = false;
+    private totalCount_: (() => number) | number | undefined;
 
     // virtualScroll({ onLazyLoading: (index: number) => void }), optional to set
     private onLazyLoadingFunc_: (index : number) => void;
@@ -334,8 +332,14 @@ class __RepeatVirtualScroll2Impl<T> {
     // previously informed active range from - to
     private activeRange_: [number, number] = [Number.NaN, Number.NaN];
 
+    // previously informed visible range from - to
+    private visibleRange_: [number, number] = [Number.NaN, Number.NaN];
+
     // adjusted activeRange[0] based on accumulated array mutations
     private activeRangeAdjustedStart_ = Number.NaN;
+
+    // adjusted visibleRange[0] based on accumulated array mutations
+    private visibleRangeAdjustedStart_ = Number.NaN;
 
     // Map containing all rid: rid -> RepeatItem, ttype, key?
     // entires never change
@@ -352,8 +356,16 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    // record the additional spare rid added in addRemovedItemsToSpare()
+    private additionalSpareRid_: Set<number> = new Set<number>();
+
+    // record the rid that need to Call OnRecycle() on C++ side
+    private ridNeedToRecycle_: Set<number> = new Set<number>();
+
     // request container re-layout
     private firstIndexChanged_: number = 0;
+
+    private firstIndexChangedInTryFastRelayout_: number = Number.NaN;
 
     // optimization: true if any items have bindings with their indexes
     private hasItemBindingsToIndex_ = false;
@@ -362,7 +374,10 @@ class __RepeatVirtualScroll2Impl<T> {
     private rerenderOngoing_: boolean = false;
 
     // microtask to sync render-tree after tryFastRelayout
-    private nextTickTask: ((changeIndex?: number) => void) | undefined = undefined;
+    private nextTickTask_: ((changeIndex?: number) => void) | undefined = undefined;
+
+    // prevents reRender() trigger
+    private preventReRender_: boolean = false;
 
     // when access view model record dependency on 'this'.
     private startRecordDependencies(clearBindings: boolean = false): void {
@@ -408,33 +423,27 @@ class __RepeatVirtualScroll2Impl<T> {
         return [(index in this.arr_), result];
     }
 
-    // update totalCount if possible and return true if the value changed
-    private updateTotalCount(): boolean {
-        let totalCount = this.totalCountSpecified_ ? this.totalCount_ : this.arr_.length;
-        if (this.totalCountFunc_) {
-            totalCount = this.totalCountFunc_();
+    private totalCount(forceRetrieveTotalCount = false): number {
+        // when 'totalCount' is set as an <observable>, we call updateElement() just to
+        // retrieve its actual value - prevent triggering re-render here.
+        if (forceRetrieveTotalCount && typeof this.totalCount_ === 'number') {
+            this.preventReRender_ = true;
+            this.owningViewV2_.UpdateElement(this.repeatElmtId_);
+            this.preventReRender_ = false;
+            return this.totalCount();
         }
-        
-        // Check legal totalCount value
-        const oldTotalCount = this.totalCount_;
-        if (!Number.isInteger(totalCount) || totalCount < 0) {
-            this.totalCount_ = this.arr_.length;
-        } else {
-            this.totalCount_ = totalCount;
+        if (typeof this.totalCount_ === 'function') {
+            let totalCount = this.totalCount_();
+            return (Number.isInteger(totalCount) && totalCount >= 0) ? totalCount : this.arr_.length;
         }
-        return (totalCount !== oldTotalCount);
-    }
-
-    // Repeat can maintain correct totalCount only with totalCountFunc or default total count!
-    private canUpdateTotalCount(): boolean {
-        return (this.totalCountFunc_ !== undefined) || !this.totalCountSpecified_;
+        return this.totalCount_ ?? this.arr_.length;
     }
 
     // initial render
     // called from __Repeat.render
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
 
-        if (this.arr_ && this.arr_ !== config.arr) {
+        if (this.arr_ && this.arr_ !== config.arr && this.arr_[__RepeatVirtualScroll2Impl.REF_META] !== undefined) {
             // unsubscribe from the old source array
             this.arr_[__RepeatVirtualScroll2Impl.REF_META].delete(this.selfPtr_);
         }
@@ -448,7 +457,12 @@ class __RepeatVirtualScroll2Impl<T> {
         }
         
         // subscribe to the new source array
-        this.arr_[__RepeatVirtualScroll2Impl.REF_META].add(this.selfPtr_);
+        if (this.arr_[__RepeatVirtualScroll2Impl.REF_META] !== undefined) {
+            this.arr_[__RepeatVirtualScroll2Impl.REF_META].add(this.selfPtr_);
+        }
+
+        // totalCount can be function, number or undefined
+        this.totalCount_ = config.totalCount;
 
         this.onMoveHandler_ = config.onMoveHandler;
         this.itemDragEventHandler_ = config.itemDragEventHandler;
@@ -458,20 +472,10 @@ class __RepeatVirtualScroll2Impl<T> {
             this.onLazyLoadingFunc_ = config.onLazyLoading;
         }
 
-        // if totalCountSpecified==false, then need to create dependency on array length
-        // so when array length changes, will update totalCount. use totalCountFunc_ for this
-        this.totalCountSpecified_ = config.totalCountSpecified;
-        if (this.totalCountSpecified_) {
-            this.totalCountFunc_ = typeof config.totalCount === 'function' ? config.totalCount : undefined;
-            this.totalCount_ = this.totalCountFunc_ ? 0 : config.totalCount as number;
-        }
-        this.updateTotalCount();
-
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
-            `render: totalCountFunc_ ${this.totalCountFunc_ ? 'defined' : 'not defined'},`,
-            `totalCount ${this.totalCount_} arr length ${this.arr_.length} .`);
+            `totalCount ${this.totalCount()} arr length ${this.arr_.length} .`);
 
-        if (!this.onLazyLoadingFunc_ && this.totalCount_ > this.arr_.length) {
+        if (!this.onLazyLoadingFunc_ && this.totalCount() > this.arr_.length) {
             stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_})`,
                 `'totalCount' must not exceed the array length without 'onLazyLoading' being defined!`);
         }
@@ -482,8 +486,6 @@ class __RepeatVirtualScroll2Impl<T> {
             this.templateOptions_ = config.templateOptions;
 
             this.keyGenFunc_ = config.keyGenFunc;
-            this.useKeys_ = config.keyGenFuncSpecified;
-
             this.allowUpdate_ = config.reusable;
 
             this.mkRepeatItem_ = config.mkRepeatItem;
@@ -500,8 +502,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
             this.initialRender();
         } else {
-            this.reRender();
+            this.preventReRender_ || this.reRender();
         }
+
         this.updateTemplateOptions();
     }
 
@@ -517,12 +520,12 @@ class __RepeatVirtualScroll2Impl<T> {
         this.repeatElmtId_ = ObserveV2.getCurrentRecordedId();
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender()`,
-            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
-        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
         // Create the RepeatVirtualScroll2Node object
         // pass the C++ to TS callback functions.
-        RepeatVirtualScroll2Native.create(arrLen, this.totalCount_, {
+        RepeatVirtualScroll2Native.create(arrLen, this.totalCount(), {
             onGetRid4Index: this.onGetRid4Index.bind(this),
             onRecycleItems: this.onRecycleItems.bind(this),
             onActiveRange: this.onActiveRange.bind(this),
@@ -534,7 +537,7 @@ class __RepeatVirtualScroll2Impl<T> {
         RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_, this.itemDragEventHandler_);
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender() data array length: `,
-            `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
+            `${this.arr_.length}, totalCount: ${this.totalCount()} - done`);
     }
 
     // given data item and the ttype it needs to be rendered with from updated array:
@@ -566,7 +569,7 @@ class __RepeatVirtualScroll2Impl<T> {
     // update Repeat, see overview documentation at the top of this file.
     private reRender(): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
-            `${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+            `${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         this.rerenderOngoing_ = true;
 
@@ -576,6 +579,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         const activeRangeFrom = this.activeRange_[0];
         const activeRangeTo = this.activeRange_[1];
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
 
         stateMgmtConsole.debug(`checking range ${activeRangeFrom} - ${activeRangeTo}`);
 
@@ -628,14 +632,17 @@ class __RepeatVirtualScroll2Impl<T> {
             `\nnewL1Rid4Index: ${JSON.stringify(Array.from(newL1Rid4Index))}`,
             `\nfirst item changed at index ${this.firstIndexChanged_} .`);
 
-        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
-        RepeatVirtualScroll2Native.updateL1Rid4Index(
-            this.repeatElmtId_, arrLen, this.totalCount_, this.firstIndexChanged_, Array.from(newL1Rid4Index));
+        if (!isNaN(this.firstIndexChangedInTryFastRelayout_)) {
+            this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, this.firstIndexChangedInTryFastRelayout_);
+            this.firstIndexChangedInTryFastRelayout_ = Number.NaN;
+        }
+        RepeatVirtualScroll2Native.updateL1Rid4Index(this.repeatElmtId_, arrLen, this.totalCount(),
+            this.firstIndexChanged_, Array.from(newL1Rid4Index), Array.from(this.ridNeedToRecycle_));
 
         this.rerenderOngoing_ = false;
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
-            `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
+            `${this.arr_.length}, totalCount: ${this.totalCount()} - done`);
     }
 
     private moveItemsUnchanged(
@@ -647,7 +654,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 // out of range to consider
                 continue;
             }
-            if (activeIndex >= this.arr_.length || activeIndex >= this.totalCount_) {
+            if (activeIndex >= this.arr_.length || activeIndex >= this.totalCount()) {
                 // data item has been popped from arr_ array that are part of active range
                 hasChanges = true;
                 break;
@@ -674,7 +681,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(
                     `index ${activeIndex} ttype '${ttype}'${this.useKeys_ ? ', key ' + key : ''} `,
                     `and dataItem unchanged.`);
-                newActiveDataItems[activeIndex] = this.activeDataItems_[activeIndex]; 
+                newActiveDataItems[activeIndex] = this.activeDataItems_[activeIndex];
 
                 // add to index -> rid map to be sent to C++
                 newL1Rid4Index.set(activeIndex, this.activeDataItems_[activeIndex].rid);
@@ -693,23 +700,23 @@ class __RepeatVirtualScroll2Impl<T> {
             }
         } // for activeItems
 
+        // tells the container to adjust the scroll position (when it's needed)
+        const hasNotifiedLayoutChange = this.notifyContainerLayoutChangeAcc();
+
         if (hasChanges) {
             return true;
-        }
-
-        // number or NaN
-        const changeCount = this.activeRangeAdjustedStart_ - this.activeRange_[0];
-        if (!isNaN(changeCount) && changeCount !== 0) {
-            this.notifyContainerLayoutChange(this.activeRange_[0], changeCount, NotificationType.START_CHANGE_POSITION);
-            this.notifyContainerLayoutChange(this.totalCount_, 0, NotificationType.END_CHANGE_POSITION);
-            this.activeRangeAdjustedStart_ = NaN;
         }
 
         // invalidate the layout only for items beyond active range
         // this is for the case that there is space for more visible items in the container.
         // triggers layout to request FrameCount() / totalCount and if increased newly added source array items
         this.activeDataItems_ = newActiveDataItems;
-        this.requestContainerReLayout(Math.min(this.totalCount_ - 1, this.activeRange_[1] + 1));
+
+        if (hasNotifiedLayoutChange) {
+            this.requestContainerReLayout();
+        } else {
+            this.requestContainerReLayout(Math.min(this.totalCount() - 1, this.activeRange_[1] + 1));
+        }
 
         return false;
     }
@@ -771,9 +778,11 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private addRemovedItemsToSpare(): void {
+        this.additionalSpareRid_.clear();
         for (let oldIndex in this.activeDataItems_) {
             if (this.activeDataItems_[oldIndex].rid) {
                 this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
+                this.additionalSpareRid_.add(this.activeDataItems_[oldIndex].rid);
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
                 this.key4Index_.delete(index);
@@ -783,6 +792,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
     private newItemsNeedToRender(
         newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
+        this.ridNeedToRecycle_.clear();
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -817,6 +827,11 @@ class __RepeatVirtualScroll2Impl<T> {
 
                 // add to index -> rid map to be sent to C++
                 newL1Rid4Index.set(activeIndex, optRid);
+
+                // if the rid is recycled in current render, notify C++ to call OnRecycle()
+                if (this.additionalSpareRid_.has(optRid)) {
+                    this.ridNeedToRecycle_.add(optRid);
+                }
 
                 // don't need to call getItem here, already checked that the data item exists
                 ridMeta.repeatItem_.updateItem(newActiveDataItemAtActiveIndex.item as T);
@@ -904,14 +919,10 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
                     `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
                 activateDataItems[prevIndex].key = prevKey;
-
-                if (!this.rerenderOngoing_) {
-                    this.owningViewV2_.uiNodeNeedUpdateV2(this.repeatElmtId_);
-                }
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
-            `Detected duplicate key ${origKey} for index ${curIndex}! `,
+            `Detected duplicate key for index ${curIndex}! `,
             `Generated random key will decrease Repeat performance. Fix the key gen function in your application!`);
         return curKey;
     }
@@ -924,9 +935,9 @@ class __RepeatVirtualScroll2Impl<T> {
      * @returns 
      */
     private onGetRid4Index(forIndex: number): [number, number] {
-        if (forIndex < 0 || forIndex >= this.totalCount_) {
+        if (forIndex < 0 || forIndex >= this.totalCount()) {
             throw new Error(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
-                `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount_}: ` +
+                `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount()}: ` +
                 `Out of range, application error.`);
         }
         const [dataItemExists, dataItem] = this.getItemUnmonitored(forIndex);
@@ -940,7 +951,7 @@ class __RepeatVirtualScroll2Impl<T> {
         const ttype = this.computeTtype(dataItem, forIndex, /* enable monitored access */ true);
         const key = this.computeKey(dataItem, forIndex, /* monitor access*/ true, this.activeDataItems_);
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}, `,
-            `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+            `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // spare UINode / RID available to update?
         const optRid = this.canUpdateTryMatch(ttype, dataItem, key);
@@ -950,7 +961,7 @@ class __RepeatVirtualScroll2Impl<T> {
             : this.createNewChild(forIndex, ttype, key);
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex} `,
-            `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - DONE`);
+            `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - DONE`);
         return result;
     }
 
@@ -1018,7 +1029,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) createNewChild index ${forIndex} -> `,
             `new rid ${rid} / ttype ${ttype}, key ${key} - data array length: ${this.arr_.length}, `,
-            `totalCount: ${this.totalCount_} - start`);
+            `totalCount: ${this.totalCount()} - start`);
 
         try {
             // execute item builder function
@@ -1030,7 +1041,7 @@ class __RepeatVirtualScroll2Impl<T> {
             
             stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}) `,
                 `initialRenderChild(forIndex: ${forIndex}, templateId: '${ttype}') -> RID ${rid}: `,
-                `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - `,
+                `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - `,
                 `item initial render failed!`);
             this.activeDataItems_[forIndex] = ActiveDataItem.createFailedToCreateUINodeDataItem(this.arr_[forIndex]);
             return [0, /* did not success creating new UINode */ 0];
@@ -1047,7 +1058,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) createNewChild index ${forIndex} -> `,
             `new rid ${rid} / ttype ${ttype}, key ${key} - data array length: ${this.arr_.length}, `,
-            `totalCount: ${this.totalCount_} - done`);
+            `totalCount: ${this.totalCount()} - done`);
         return [rid, /* created new UINode successfully */ 1];
     }
 
@@ -1065,7 +1076,7 @@ class __RepeatVirtualScroll2Impl<T> {
             // error
             stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) `,
                 `updateChild(forIndex: ${forIndex}, templateId: ${ttype}) <- RID ${rid}: `,
-                `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_}. `,
+                `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()}. `,
                 `Failed to find RepeatItem. Internal error!.`);
             this.activeDataItems_[forIndex] = ActiveDataItem.createFailedToCreateUINodeDataItem(this.arr_[forIndex]);
             return [0, /* failed to update */ 0];
@@ -1073,7 +1084,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) updateChild`,
             `(forIndex: ${forIndex}, templateId: ${ttype}) <- RID ${rid}, key: ${key}: `,
-            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // item exists in arr_, has been checked before
         const [_, dataItem] = this.getItemMonitored(forIndex);
@@ -1120,7 +1131,7 @@ class __RepeatVirtualScroll2Impl<T> {
         for (let index = fromIndex; index < toIndex; index++) {
             // when ListItem is being dragged without dropping, index will be mapped.
             let indexMapped = this.convertFromToIndex(index);
-            if (indexMapped >= this.totalCount_ || !(indexMapped in this.activeDataItems_)) {
+            if (indexMapped >= this.totalCount() || !(indexMapped in this.activeDataItems_)) {
                 continue;
             }
             if (this.activeDataItems_[indexMapped].state === ActiveDataItem.UINodeExists) {
@@ -1263,23 +1274,32 @@ class __RepeatVirtualScroll2Impl<T> {
         return true;
     }
 
-    private onActiveRange(nStart: number, nEnd: number, isLoop: boolean): void {
+    private onActiveRange(nStart: number, nEnd: number, vStart: number, vEnd: number, isLoop: boolean,
+        forceUpdate: boolean): void {
         if (Number.isNaN(this.activeRange_[0])) {
             // first call to onActiveRange / no active node
             this.activeRange_ = [nStart, nEnd];
+            this.visibleRange_ = [vStart, vEnd];
             this.activeRangeAdjustedStart_ = nStart;
+            this.visibleRangeAdjustedStart_ = vStart;
         } else if (this.activeRange_[0] === nStart && this.activeRange_[1] === nEnd) {
-            if (!isLoop) {
+            if (this.visibleRange_[0] !== vStart || this.visibleRange_[1] !== vEnd) {
+                stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
+                    `update visibleRange_ (vStart: ${vStart}, vEnd: ${vEnd})`);
+                this.visibleRange_ = [vStart, vEnd];
+                this.visibleRangeAdjustedStart_ = vStart;
+            }
+            if (!isLoop && !forceUpdate) {
                 stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
                     `(nStart: ${nStart}, nEnd: ${nEnd})`,
-                    `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - unchanged, skipping.`);
+                    `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - unchanged, skipping.`);
                 return;
             }
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onActiveRange`,
-            `(nStart: ${nStart}, nEnd: ${nEnd})`,
-            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
+            `(nStart: ${nStart}, nEnd: ${nEnd}), (start: ${vStart}, end: ${vEnd})`,
+            `data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // check which of the activeDataItems needs to be removed from L1 & activeDataItems
         let numberOfActiveItems = 0;
@@ -1295,8 +1315,8 @@ class __RepeatVirtualScroll2Impl<T> {
             if (isLoop) {
                 remainInL1 = remainInL1 ||
                     (nStart > nEnd && (nStart <= index || index <= nEnd)) ||
-                    (nStart < 0 && index >= nStart + this.totalCount_) ||
-                    (nEnd >= this.totalCount_ && index <= nEnd - this.totalCount_);
+                    (nStart < 0 && index >= nStart + this.totalCount()) ||
+                    (nEnd >= this.totalCount() && index <= nEnd - this.totalCount());
             }
             stateMgmtConsole.debug(`index: ${index}: ${remainInL1 ? 'keep in L1' : 'drop from L1'}`,
                 `dataItem: ${this.activeDataItems_[index].dump()}`);
@@ -1314,7 +1334,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // memorize
         this.activeRange_ = [nStart, nEnd];
+        this.visibleRange_ = [vStart, vEnd];
         this.activeRangeAdjustedStart_ = nStart;
+        this.visibleRangeAdjustedStart_ = vStart;
 
         stateMgmtConsole.debug(`onActiveRange Result: number remaining activeItems ${numberOfActiveItems}.`,
             `\n${this.dumpDataItems()}\n${this.dumpSpareRid()}\n${this.dumpRepeatItem4Rid()}`);
@@ -1334,7 +1356,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // handles circular ranges by normalizing the start and end values within
     // the circular range [-totalCount, +totalCount]
-    private isIndexInRange(index: number, start: number, end: number, totalCount = this.totalCount_): boolean {
+    private isIndexInRange(index: number, start: number, end: number, totalCount = this.totalCount()): boolean {
         // to codechecker: yes, need switch to math names here
         let [i, a, b, n] = [index, start, end, totalCount];
 
@@ -1347,14 +1369,14 @@ class __RepeatVirtualScroll2Impl<T> {
         b = (b - a + n) % n;
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) isIndexInRange:`,
-            `${index} in [${start}, ${end}] totalCount=${this.totalCount_} =>`, i <= b);
+            `${index} in [${start}, ${end}] totalCount=${this.totalCount()} =>`, i <= b);
         return i <= b;
     }
 
     private hasOverlapWithActiveRange(startIndex: number, endIndex: number): boolean {
         // ensure we are not out of bounds
-        const start = Math.min(startIndex, this.totalCount_ - 1);
-        const end = Math.min(endIndex, this.totalCount_ - 1);
+        const start = Math.min(startIndex, this.totalCount() - 1);
+        const end = Math.min(endIndex, this.totalCount() - 1);
 
         // ranges ovelap if at least one boundary of one range is inside the other
         return this.isIndexInRange(start, this.activeRange_[0], this.activeRange_[1]) ||
@@ -1414,29 +1436,33 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // update this.activeRangeAdjustedStart_
     private adjustActiveRangeStart(index: number, deleteCount: number, addCount: number): void {
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) adjustActiveRangeStart(${index},`,
-            `${deleteCount}, ${addCount})`);
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
+            `adjustActiveRangeStart(${index}, ${deleteCount}, ${addCount})`);
 
         // If activeRange_ is not yet known, do nothing
-        if (isNaN(this.activeRangeAdjustedStart_)) {
+        if (isNaN(this.activeRangeAdjustedStart_) || isNaN(this.visibleRangeAdjustedStart_)) {
             this.activeRangeAdjustedStart_ = this.activeRange_[0];
+            this.visibleRangeAdjustedStart_ = this.visibleRange_[0];
         }
-        if (isNaN(this.activeRangeAdjustedStart_)) {
+        if (isNaN(this.activeRangeAdjustedStart_) || isNaN(this.visibleRangeAdjustedStart_)) {
             return;
         }
 
-        // We assume a) has the same effect as b) for layout calculations
-        //  a) splice(index, 10); splice(index, 0, ...items)
-        //  b) splice(index, 10, ...items)
-        if (index <= this.activeRangeAdjustedStart_) {
-            this.activeRangeAdjustedStart_ -= Math.min(deleteCount, this.activeRange_[0] - index);
-            this.activeRangeAdjustedStart_ += addCount;
-        } else {
-            // do nothing
+        // count changes before visible range
+        if (index <= this.visibleRangeAdjustedStart_) {
+            this.visibleRangeAdjustedStart_ -= Math.min(deleteCount, this.visibleRangeAdjustedStart_ - index);
+            this.visibleRangeAdjustedStart_ += addCount;
         }
 
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) activeRangeAdjustedStart_ = `,
-            `${this.activeRangeAdjustedStart_}`);
+        // count changes before active range
+        if (index <= this.activeRangeAdjustedStart_) {
+            this.activeRangeAdjustedStart_ -= Math.min(deleteCount, this.activeRangeAdjustedStart_ - index);
+            this.activeRangeAdjustedStart_ += addCount;
+        }
+
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
+            `activeRangeAdjustedStart_ = ${this.activeRangeAdjustedStart_}`,
+            `visibleRangeAdjustedStart_ = ${this.visibleRangeAdjustedStart_}`);
     }
 
     // Return false if a regular re-render is required. Otherwise, only notify the container
@@ -1453,8 +1479,7 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayout for '${arrChange}'`,
-            `args: ${args}, activeRange: ${this.activeRange_}`
-        );
+            `args: ${args}, activeRange: ${this.activeRange_}, visibleRange: ${this.visibleRange_}`);
 
         // Note that the change in the array has already been done!
         // Now our activeRange reflects the array before the change
@@ -1495,6 +1520,8 @@ class __RepeatVirtualScroll2Impl<T> {
             return (changeIndex >= 0) && this.tryFastRelayoutForChange(this.arr_.length, changeIndex, 0, 0);
         }
 
+        // discard nextTickTask if it's scheduled
+        this.nextTickTask_ &&= NOOP;
         return false;
     }
 
@@ -1520,86 +1547,88 @@ class __RepeatVirtualScroll2Impl<T> {
         nDeleteCount = Math.min(nDeleteCount, originalLength - nIndex);
         nDeleteCount = Math.max(nDeleteCount, 0);
 
-        this.adjustActiveRangeStart(nIndex, nDeleteCount, addCount);
-
-        if (this.lazyLoadingIndex_ === -1 && this.needRerenderChange(nIndex, nDeleteCount, addCount)) {
-            return false;
-        }
-
-        // when we know that the total count has changed but we can't update the value, we need to rerender
-        if ((nDeleteCount !== addCount) && !this.canUpdateTotalCount()) {
-            stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayoutForChange`,
-                `can't update total count, need to rerender! It's better to define onTotalCount!`);
-            return false;
-        }
-        
-        // ensure totalCount is up-to-date, before notifyContainerLayoutChange()
-        this.updateTotalCount();
-
-        return this.tryFastRelayoutFinalStep(nIndex);
+        return this.tryFastRelayoutForChangeNormalized(nIndex, nDeleteCount, addCount);
     }
 
-    private tryFastRelayoutFinalStep(changeIndex: number): boolean {
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayoutFinalStep`,
-            `changeIndex: ${changeIndex}, this.activeRange_:`, ...this.activeRange_);
+    private tryFastRelayoutForChangeNormalized(index: number, deleteCount: number, addCount: number): boolean {
+        // update accumulated active-range offset here
+        this.adjustActiveRangeStart(index, deleteCount, addCount);
 
-        // number or NaN
-        const changeCount = this.activeRangeAdjustedStart_ - this.activeRange_[0];
-        if (changeIndex < this.activeRange_[0] && changeCount) {
-            // items added or deleted BEFORE the active range
-            this.notifyContainerLayoutChange(this.activeRange_[0], changeCount, NotificationType.START_CHANGE_POSITION);
-            this.notifyContainerLayoutChange(this.totalCount_, 0, NotificationType.END_CHANGE_POSITION);
-            this.activeRangeAdjustedStart_ = NaN;
+        if (this.lazyLoadingIndex_ === -1 && this.needRerenderChange(index, deleteCount, addCount)) {
+            // discard nextTickTask if it's scheduled
+            this.nextTickTask_ &&= NOOP;
+            this.updateFirstIndexChangedInTryFastRelayout(index);
+            return false;
         }
 
-        if (changeIndex > this.activeRange_[1]) {
-            // items added or deleted AFTER the active range. As totalCount has changed, need to
-            // notify the layout to request the updated frameCount
-            const opt1 = Math.min(this.totalCount_ - 1, this.activeRange_[1] + 1);
-            const opt2 = Math.max(this.totalCount_ - 1, 0);
-            const index = !isNaN(opt1) ? opt1 : opt2;
-            this.notifyContainerLayoutChange(index, 0, NotificationType.START_AND_END_CHANGE_POSITION);
+        if (deleteCount !== addCount) {
+            // forcibly retrieve totalCount (needed only when 'totalCount' option is used)
+            this.totalCount(true);
         }
 
-        // TBD problem: notifyContainerLayoutChange()
-        //  - doesn’t update the active range,
-        //  - scroll position doesn't change on screen, regardless of changeCount
-        // Scenario: shift() is called when the active range [13 36]:
-        //   notifyContainerLayoutChange (13, -1, START_CHANGE_POSITION)
-        //   notifyContainerLayoutChange (36, 0, END_CHANGE_POSITION)
-        //   requestContainerReLayout() // is needed ?
-
-        if (!this.nextTickTask) {
-            // schedule microtask to sync render-tree after all synchronous array updates
-            this.nextTickTask = this.requestContainerReLayout.bind(this);
-            Promise.resolve().then(() => { this.nextTickTask?.(); this.nextTickTask = undefined; });
+        // schedule microtask to run after all synchronous array updates
+        if (this.nextTickTask_ === undefined) {
+            Promise.resolve().then(() => {
+                this.nextTickTask_?.();
+                this.nextTickTask_ = undefined;
+            });
+            this.nextTickTask_ = () : void => {
+                stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}), nextTickTask()`);
+                this.notifyContainerLayoutChangeAcc();
+                this.requestContainerReLayout();
+            };
         }
 
         return true;
     }
 
-    private notifyContainerLayoutChange(changeIndex: number, changeCount: number, notificationType: NotificationType): void {
-        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) notifyContainerLayoutChange`,
-            changeIndex, changeCount, notificationType);
+    private updateFirstIndexChangedInTryFastRelayout(index: number): void {
+        if (isNaN(this.firstIndexChangedInTryFastRelayout_)) {
+            this.firstIndexChangedInTryFastRelayout_ = index;
+        } else {
+            this.firstIndexChangedInTryFastRelayout_ = Math.min(this.firstIndexChangedInTryFastRelayout_, index);
+        }
+    }
 
-        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
+    private notifyContainerLayoutChangeAcc(): boolean {
+        const changeCount = this.visibleRangeAdjustedStart_ - this.visibleRange_[0];
+        if (isNaN(changeCount) || changeCount === 0) {
+            return false;
+        }
+
+        // get changeIndex to notify container with accumulated changes
+        let changeIndex = (changeCount < 0) ? 0 : this.visibleRange_[0];
+
+        // tells the container to adjust the scroll position, exact behavior is determined by
+        // List.maintainVisibleContentPosition(bool)
+        this.notifyContainerLayoutChange(changeIndex, changeCount);
+        this.visibleRangeAdjustedStart_ = NaN;
+        this.activeRangeAdjustedStart_ = NaN;
+        return true;
+    }
+
+    private notifyContainerLayoutChange(changeIndex: number, changeCount: number,
+        notificationType = NotificationType.END_CHANGE_POSITION): void {
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_})`,
+            `notifyContainerLayoutChange(${changeIndex}, ${changeCount}, ${NotificationType[notificationType]})`);
+
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
         // triggers FrameNode::NotifyChange in CPP side
-        RepeatVirtualScroll2Native.notifyContainerLayoutChange(this.repeatElmtId_, arrLen, this.totalCount_,
+        RepeatVirtualScroll2Native.notifyContainerLayoutChange(this.repeatElmtId_, arrLen, this.totalCount(),
             changeIndex, changeCount, notificationType);
     }
 
     private requestContainerReLayout(changeIndex?: number): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) requestContainerReLayout`, changeIndex);
 
-        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
         // trigger MarkNeedSyncRenderTree, MarkNeedFrameFlushDirty in CPP side
-        RepeatVirtualScroll2Native.requestContainerReLayout(
-            this.repeatElmtId_, arrLen, this.totalCount_, changeIndex);
+        RepeatVirtualScroll2Native.requestContainerReLayout(this.repeatElmtId_, arrLen, this.totalCount(), changeIndex);
     }
 
     private onPurge(): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) purge(), totalCount: `,
-            `${this.totalCount_} - start`);
+            `${this.totalCount()} - start`);
 
         // deep copy templateOptions_
         let availableCachedCount: { [ttype: string]: number } = {};

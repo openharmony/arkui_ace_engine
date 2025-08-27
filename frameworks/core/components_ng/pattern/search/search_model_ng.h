@@ -21,6 +21,7 @@
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::NG {
 
@@ -105,12 +106,19 @@ public:
     void SetSelectedBackgroundColor(const Color& value) override;
     void ResetSelectedBackgroundColor() override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetBackBorderRadius() override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
+    void SetStrokeWidth(const Dimension& value) override;
+    void SetStrokeColor(const Color& value) override;
+    void ResetStrokeColor() override;
+    void SetEnableAutoSpacing(bool enabled) override;
+    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
+    void SetUserMargin() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -188,9 +196,20 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnPrepareMenuCallbackUpdate(
+        FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static Dimension GetStrokeWidth(FrameNode* frameNode);
+    static Color GetStrokeColor(FrameNode* frameNode);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetStrokeColor(FrameNode* frameNode, const Color& value);
+    static void ResetStrokeColor(FrameNode* frameNode);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
+    static void SetUserMargin(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
@@ -201,6 +220,10 @@ private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool hasTextFieldNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static void CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentNode,
+        const std::optional<std::u16string>& placeholder,
+        const std::optional<std::u16string>& value, bool hasTextFieldNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode,
@@ -209,6 +232,7 @@ private:
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
+    static void TextFieldUpdateContextMultiThread(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };
 

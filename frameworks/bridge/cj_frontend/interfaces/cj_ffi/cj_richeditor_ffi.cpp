@@ -488,7 +488,7 @@ void FfiOHOSAceFrameworkRichEditorEditMenuOptions(
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 void FfiOHOSAceFrameworkRichEditorEnablePreviewText(bool enable)

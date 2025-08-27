@@ -17,6 +17,7 @@
 
 #include <mutex>
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
@@ -35,13 +36,9 @@ RefPtr<AceType> CanvasModelNG::Create()
     return frameNode->GetPattern<CanvasPattern>();
 }
 
-void CanvasModelNG::DetachRenderContext()
+RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CanvasPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->DetachRenderContext();
+    return pattern;
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
@@ -74,14 +71,29 @@ void CanvasModelNG::SetImageAIOptions(void* options)
     pattern->SetImageAIOptions(options);
 }
 
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
+}
+
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto func = onReady;
-    auto onReadyEvent = [func]() { func(); };
-    eventHub->SetOnReady(std::move(onReadyEvent));
+    eventHub->SetOnReady(std::move(onReady));
+}
+
+void CanvasModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EnableAnalyzer(enable);
 }
 
 RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
@@ -93,8 +105,7 @@ RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
 
 RefPtr<FrameNode> CanvasModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    return FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    return frameNode;
 }
 } // namespace OHOS::Ace::NG

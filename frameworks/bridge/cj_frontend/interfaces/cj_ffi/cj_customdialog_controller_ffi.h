@@ -87,7 +87,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkCustomDialogControllerClose(int64_t id);
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeCustomDialogController : public OHOS::FFI::FFIData, public virtual AceType {
-    DECLARE_ACE_TYPE(NativeCustomDialogController, AceType)
+    DECLARE_ACE_TYPE(NativeCustomDialogController, AceType);
 public:
     NativeCustomDialogController(NativeCustomDialogControllerOptions options);
     NativeCustomDialogController(NativeCustomDialogControllerOptionsV2 options);
@@ -111,6 +111,7 @@ private:
     NativeView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;
+    bool hasBind_ = false;
     // NG
     std::vector<WeakPtr<AceType>> dialogs_;
 

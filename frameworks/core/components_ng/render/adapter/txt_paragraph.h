@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 
 #include "base/utils/noncopyable.h"
@@ -27,7 +26,7 @@ namespace OHOS::Ace::NG {
 
 // Paragraph is interface for drawing text and text paragraph.
 class TxtParagraph : public Paragraph {
-    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
+    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph);
 
 public:
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
@@ -40,21 +39,7 @@ public:
         externalParagraph_ = reinterpret_cast<RSParagraph*>(paragraph);
     }
 
-    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
-    {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-        auto rsNode = context->GetRSNode();
-        rsSymbolAnimation_ = RSSymbolAnimation();
-        rsSymbolAnimation_.SetNode(rsNode);
-
-        std::function<bool(
-            const std::shared_ptr< RSSymbolAnimationConfig>& symbolAnimationConfig)>
-            scaleCallback = std::bind(&RSSymbolAnimation::SetSymbolAnimation,
-            rsSymbolAnimation_,
-            std::placeholders::_1);
-
-        SetAnimation(scaleCallback);
-    }
+    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override;
 
     void SetAnimation(
         std::function<bool(
@@ -88,6 +73,7 @@ public:
     void Layout(float width) override;
     // interfaces for reLayout
     void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
+    void ReLayoutForeground(const TextStyle& textStyle) override;
     float GetHeight() override;
     float GetTextWidth() override;
     size_t GetLineCount() override;
@@ -98,6 +84,8 @@ public:
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
     float GetCharacterWidth(int32_t index) override;
+
+    std::unique_ptr<RSParagraph> GetParagraphUniquePtr();
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
@@ -124,13 +112,6 @@ public:
     {
         return GetParagraphLength() == 0;
     }
-    void SetParagraphId(uint32_t id) override
-    {
-        auto paragraph = GetParagraph();
-        if (paragraph) {
-            paragraph->SetParagraghId(id);
-        }
-    }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     RectF GetPaintRegion(float x, float y) override;
@@ -140,10 +121,18 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
+    std::shared_ptr<RSParagraph> GetSharedParagraph()
+    {
+        std::shared_ptr<RSParagraph> paragraphSharedPtr(paragraph_.get(), [](RSParagraph *) {});
+        return paragraphSharedPtr;
+    }
+
+    bool DidExceedMaxLinesInner() override;
+    std::string GetDumpInfo() override;
 
 protected:
-    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     ParagraphStyle paraStyle_;
+    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     RSParagraph* GetParagraph();
     Rosen::RSSymbolAnimation rsSymbolAnimation_;
     std::unique_ptr<RSParagraph> paragraph_;

@@ -16,15 +16,51 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
 
+#include <functional>
+#include <list>
+#include <mutex>
+#include <shared_mutex>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
+using LoadFontCallback = std::function<void(const std::string&)>;
 
 class ACE_EXPORT FontCollection : public virtual AceType {
-    DECLARE_ACE_TYPE(FontCollection, AceType)
+    DECLARE_ACE_TYPE(FontCollection, AceType);
 public:
     static RefPtr<FontCollection> Current();
+
+    const std::list<LoadFontCallback>& GetUnloadFontFinishCallback()
+    {
+        std::shared_lock lock(unloadLock_);
+        return unloadFontFinishCallback_;
+    }
+
+    void RegisterUnloadFontFinishCallback(LoadFontCallback&& cb)
+    {
+        std::unique_lock lock(unloadLock_);
+        unloadFontFinishCallback_.emplace_back(std::move(cb));
+    }
+
+    const std::list<LoadFontCallback>& GetLoadFontFinishCallback()
+    {
+        std::shared_lock lock(loadLock_);
+        return loadFontFinishCallback_;
+    }
+
+    void RegisterLoadFontFinishCallback(LoadFontCallback&& cb)
+    {
+        std::unique_lock lock(loadLock_);
+        loadFontFinishCallback_.emplace_back(std::move(cb));
+    }
+
+private:
+    std::list<LoadFontCallback> unloadFontFinishCallback_;
+    std::list<LoadFontCallback> loadFontFinishCallback_;
+    std::shared_mutex mutable loadLock_;
+    std::shared_mutex mutable unloadLock_;
 };
 
 } // namespace OHOS::Ace::NG

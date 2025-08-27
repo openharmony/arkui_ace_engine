@@ -340,24 +340,41 @@ void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     OptionalSizeF frameSize;
-    do {
-        // Use idea size first if it is valid.
-        frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
-        if (frameSize.IsValid()) {
-            break;
+
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
+    if (frameSize.IsValid()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+        return;
+    }
+    // use the last child size.
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    auto childrenSize = children.size();
+    auto childFrame =
+        layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2)->GetGeometryNode()->GetMarginFrameSize();
+    AddPaddingToSize(padding, childFrame);
+    frameSize.UpdateIllegalSizeWithCheck(childFrame);
+    frameSize.Constrain(minSize, maxSize);
+    frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
+
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            frameSize.SetWidth(layoutConstraint->parentIdealSize.Width().value());
         }
-        // use the last child size.
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        auto children = host->GetChildren();
-        auto childrenSize = children.size();
-        auto childFrame =
-            layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2)->GetGeometryNode()->GetMarginFrameSize();
-        AddPaddingToSize(padding, childFrame);
-        frameSize.UpdateIllegalSizeWithCheck(childFrame);
-        frameSize.Constrain(minSize, maxSize);
-        frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
-    } while (false);
+        if (layoutPolicy->IsWidthFix()) {
+            frameSize.SetWidth(childFrame.Width());
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            frameSize.SetHeight(layoutConstraint->parentIdealSize.Height().value());
+        }
+        if (layoutPolicy->IsHeightFix()) {
+            frameSize.SetHeight(childFrame.Height());
+        }
+    }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }

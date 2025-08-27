@@ -41,7 +41,7 @@ public:
 
         RefPtr<VideoTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<VideoTheme> theme = AceType::Claim(new VideoTheme());
+            RefPtr<VideoTheme> theme = AceType::MakeRefPtr<VideoTheme>();
             if (!themeConstants) {
                 return theme;
             }

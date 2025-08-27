@@ -312,6 +312,19 @@ inline std::string ConvertWrapTextDecorationToStirng(TextDecoration decoration)
     return index < 0 ? "TextDecorationType.None" : decorationTable[index].value;
 }
 
+inline std::string ConvertWrapTextDecorationToStirng(std::vector<TextDecoration> decorations)
+{
+    if (decorations.size() == 0) {
+        return ConvertWrapTextDecorationToStirng(TextDecoration::NONE);
+    }
+    std::string ret = "";
+    for (TextDecoration decoration: decorations) {
+        ret += ConvertWrapTextDecorationToStirng(decoration) + ",";
+    }
+    ret.pop_back();
+    return ret;
+}
+
 inline std::string ConvertWrapTextDecorationStyleToString(TextDecorationStyle decorationStyle)
 {
     static const LinearEnumMapNode<TextDecorationStyle, std::string> decorationStyleTable[] = {
@@ -422,6 +435,32 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
         return iter->second;
     }
     return TextAlign::START;
+}
+
+inline std::string ConvertWrapTextVerticalAlignToString(TextVerticalAlign textVerticalAlign)
+{
+    static const LinearEnumMapNode<TextVerticalAlign, std::string> textVerticalAlignTable[] = {
+        { TextVerticalAlign::BASELINE, "TextVerticalAlign.BASELINE" },
+        { TextVerticalAlign::BOTTOM, "TextVerticalAlign.BOTTOM" },
+        { TextVerticalAlign::CENTER, "TextVerticalAlign.CENTER" },
+        { TextVerticalAlign::TOP, "TextVerticalAlign.TOP" },
+    };
+
+    auto index = BinarySearchFindIndex(
+        textVerticalAlignTable, ArraySize(textVerticalAlignTable), textVerticalAlign);
+    return index < 0 ? "TextVerticalAlign.BASELINE" : textVerticalAlignTable[index].value;
+}
+
+inline TextVerticalAlign ConvertWrapStringToTextVerticalAlign(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextVerticalAlign> uMap {
+        { "TextVerticalAlign.BASELINE", TextVerticalAlign::BASELINE },
+        { "TextVerticalAlign.BOTTOM", TextVerticalAlign::BOTTOM },
+        { "TextVerticalAlign.CENTER", TextVerticalAlign::CENTER },
+        { "TextVerticalAlign.TOP", TextVerticalAlign::TOP },
+    };
+    auto iter = uMap.find(str);
+    return iter != uMap.end() ? iter->second : TextVerticalAlign::BASELINE;
 }
 
 inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
@@ -552,6 +591,17 @@ inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
     return index < 0 ? "CopyOptions::None" : copyOptionsTable[index].value;
 }
 
+inline std::string ConvertEllipsisModeToString(EllipsisMode value)
+{
+    static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {
+        { EllipsisMode::HEAD, "EllipsisMode.START" },
+        { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
+        { EllipsisMode::TAIL, "EllipsisMode.END" },
+    };
+    auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
+    return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
+}
+
 inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 {
     static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
@@ -568,25 +618,14 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 inline std::string ConvertTextDirectionToString(TextDirection direction)
 {
     static const LinearEnumMapNode<TextDirection, std::string> textDirectionTable[] = {
-        { TextDirection::AUTO, "AUTO" },
-        { TextDirection::INHERIT, "INHERIT" },
         { TextDirection::LTR, "LTR" },
         { TextDirection::RTL, "RTL" },
+        { TextDirection::INHERIT, "INHERIT" },
+        { TextDirection::AUTO, "AUTO" },
     };
 
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), direction);
     return index < 0 ? "AUTO" : textDirectionTable[index].value;
-}
-
-inline std::string ConvertEllipsisModeToString(EllipsisMode value)
-{
-    static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {
-        { EllipsisMode::HEAD, "EllipsisMode.START" },
-        { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
-        { EllipsisMode::TAIL, "EllipsisMode.END" },
-    };
-    auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
-    return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
 }
 
 inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBreakStrategy)
@@ -697,6 +736,38 @@ inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
     return colorStr;
 }
 
+inline bool IsValidTextDecorations(const std::vector<TextDecoration>& decorations)
+{
+    if (decorations.size() <= 0) {
+        return false;
+    }
+    for (TextDecoration decoration : decorations) {
+        if (decoration != TextDecoration::NONE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool HasTextDecoration(const std::vector<TextDecoration>& decorations, TextDecoration value)
+{
+    auto iter = std::find(decorations.begin(), decorations.end(), value);
+    return iter != decorations.end();
+}
+
+inline bool IsEqualTextDecorations(
+    const std::vector<TextDecoration>& left, const std::vector<TextDecoration>& right)
+{
+    if (left.size() != right.size()) {
+        return false;
+    }
+    for (int index = 0; index < static_cast<int>(left.size()); index++) {
+        if (!HasTextDecoration(right, left[index])) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

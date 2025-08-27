@@ -16,6 +16,8 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/common/ace_application_info.h"
+#include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -24,6 +26,20 @@ void TouchPoint::CovertId()
     if (sourceTool == SourceTool::PEN) {
         originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         id = id + originalId;
+    }
+}
+
+int32_t TouchPoint::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if (sourceTool == SourceTool::PEN) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceTool == SourceTool::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
     }
 }
 
@@ -54,6 +70,18 @@ TouchEvent& TouchEvent::SetScreenX(float screenX)
 TouchEvent& TouchEvent::SetScreenY(float screenY)
 {
     this->screenY = screenY;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetGlobalDisplayX(double globalDisplayX)
+{
+    this->globalDisplayX = globalDisplayX;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetGlobalDisplayY(double globalDisplayY)
+{
+    this->globalDisplayY = globalDisplayY;
     return *this;
 }
 
@@ -199,12 +227,6 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
-{
-    this->operatingHand = operatingHand;
-    return *this;
-}
-
 TouchEvent& TouchEvent::SetPressedTime(TimeStamp pressedTime)
 {
     this->pressedTime = pressedTime;
@@ -223,6 +245,12 @@ TouchEvent& TouchEvent::SetHeight(int32_t height)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
+{
+    this->operatingHand = operatingHand;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -236,6 +264,8 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.y = (y - offsetY) / scale;
     event.screenX = (screenX - offsetX) / scale;
     event.screenY = (screenY - offsetY) / scale;
+    event.globalDisplayX = (globalDisplayX - offsetX) / scale;
+    event.globalDisplayY = (globalDisplayY - offsetY) / scale;
     event.type = type;
     event.pullType = pullType;
     event.time = time;
@@ -260,10 +290,15 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
     event.isPassThroughMode = isPassThroughMode;
-    event.operatingHand = operatingHand;
     event.width = width;
     event.height = height;
     event.pressedTime = pressedTime;
+    event.passThrough = passThrough;
+    event.operatingHand = operatingHand;
+    event.convertInfo = convertInfo;
+    if (passThrough) {
+        event.postEventNodeId = postEventNodeId;
+    }
     return event;
 }
 
@@ -339,11 +374,30 @@ Offset TouchEvent::GetScreenOffset() const
     return Offset(screenX, screenY);
 }
 
+Offset TouchEvent::GetGlobalDisplayOffset() const
+{
+    return Offset(globalDisplayX, globalDisplayY);
+}
+
 void TouchEvent::CovertId()
 {
     if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
         id = id + TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    }
+}
+
+int32_t TouchEvent::GetOriginalReCovertId() const
+{
+    if (!AceApplicationInfo::GetInstance().GetTouchPadIdChanged()) {
+        return originalId;
+    }
+    if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+        return originalId - TOUCH_TOOL_BASE_ID - static_cast<int32_t>(sourceTool);
+    } else if (sourceType == SourceType::MOUSE) {
+        return originalId - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+    } else {
+        return originalId;
     }
 }
 
@@ -358,6 +412,8 @@ TouchEvent TouchEvent::CreateScalePoint(float scale) const
         point.y = point.y / scale;
         point.screenX = point.screenX / scale;
         point.screenY = point.screenY / scale;
+        point.globalDisplayX = point.globalDisplayX / scale;
+        point.globalDisplayY = point.globalDisplayY / scale;
     });
     return CloneWith(scale);
 }
@@ -371,6 +427,8 @@ TouchEvent TouchEvent::UpdateScalePoint(float scale, float offsetX, float offset
             point.y = point.y - offsetY;
             point.screenX = point.screenX - offsetX;
             point.screenY = point.screenY - offsetY;
+            point.globalDisplayX = point.globalDisplayX - offsetX;
+            point.globalDisplayY = point.globalDisplayY - offsetY;
         });
         return CloneWith(1, offsetX, offsetY, pointId);
     }
@@ -380,6 +438,8 @@ TouchEvent TouchEvent::UpdateScalePoint(float scale, float offsetX, float offset
         point.y = (point.y - offsetY) / scale;
         point.screenX = (point.screenX - offsetX) / scale;
         point.screenY = (point.screenY - offsetY) / scale;
+        point.globalDisplayX = (point.globalDisplayX - offsetX) / scale;
+        point.globalDisplayY = (point.globalDisplayY - offsetY) / scale;
     });
     return CloneWith(scale, offsetX, offsetY, pointId);
 }
@@ -391,6 +451,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .y = y,
         .screenX = screenX,
         .screenY = screenY,
+        .globalDisplayX = globalDisplayX,
+        .globalDisplayY = globalDisplayY,
         .downTime = time,
         .size = size,
         .force = force,
@@ -402,6 +464,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetY(y)
         .SetScreenX(screenX)
         .SetScreenY(screenY)
+        .SetGlobalDisplayX(globalDisplayX)
+        .SetGlobalDisplayY(globalDisplayY)
         .SetType(type)
         .SetTime(time)
         .SetSize(size)
@@ -429,6 +493,14 @@ int32_t TouchEvent::GetTargetDisplayId() const
     return targetDisplayId;
 }
 
+int32_t TouchEvent::GetEventIdentity() const
+{
+    if (passThrough) {
+        return id;
+    }
+    return originalId;
+}
+
 void TouchCallBackInfo::SetScreenX(float screenX)
 {
     screenX_ = screenX;
@@ -447,6 +519,26 @@ void TouchCallBackInfo::SetScreenY(float screenY)
 float TouchCallBackInfo::GetScreenY() const
 {
     return screenY_;
+}
+
+void TouchCallBackInfo::SetGlobalDisplayX(double globalDisplayX)
+{
+    globalDisplayX_ = globalDisplayX;
+}
+
+double TouchCallBackInfo::GetGlobalDisplayX() const
+{
+    return globalDisplayX_;
+}
+
+void TouchCallBackInfo::SetGlobalDisplayY(double globalDisplayY)
+{
+    globalDisplayY_ = globalDisplayY;
+}
+
+double TouchCallBackInfo::GetGlobalDisplayY() const
+{
+    return globalDisplayY_;
 }
 
 void TouchCallBackInfo::SetLocalX(float localX)
@@ -504,6 +596,12 @@ TouchLocationInfo& TouchLocationInfo::SetLocalLocation(const Offset& localLocati
 TouchLocationInfo& TouchLocationInfo::SetScreenLocation(const Offset& screenLocation)
 {
     screenLocation_ = screenLocation;
+    return *this;
+}
+
+TouchLocationInfo& TouchLocationInfo::SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+{
+    globalDisplayLocation_ = globalDisplayLocation;
     return *this;
 }
 
@@ -633,6 +731,22 @@ std::string GestureSnapshot::TransTouchType(TouchType type)
             return "TouchCancel";
         default:
             return std::string("Type:").append(std::to_string(static_cast<int32_t>(type)));
+    }
+}
+
+std::string GestureSnapshot::TransAxisType(AxisAction action)
+{
+    switch (action) {
+        case AxisAction::BEGIN:
+            return "AxisBegin";
+        case AxisAction::UPDATE:
+            return "AxisUpdate";
+        case AxisAction::END:
+            return "AxisEnd";
+        case AxisAction::CANCEL:
+            return "AxisCancel";
+        default:
+            return std::string("Type:").append(std::to_string(static_cast<int32_t>(action)));
     }
 }
 
@@ -846,6 +960,8 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.screenY = static_cast<float>(changedTouches_.front().GetScreenLocation().GetY());
         touchEvent.localX = static_cast<float>(changedTouches_.front().GetLocalLocation().GetX());
         touchEvent.localY = static_cast<float>(changedTouches_.front().GetLocalLocation().GetY());
+        touchEvent.globalDisplayX = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetX());
+        touchEvent.globalDisplayY = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetY());
         touchEvent.id = changedTouches_.front().GetFingerId();
         touchEvent.force = changedTouches_.front().GetForce();
         touchEvent.type = changedTouches_.front().GetTouchType();

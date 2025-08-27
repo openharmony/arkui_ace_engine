@@ -94,7 +94,6 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
         return;
     }
-    CHECK_NULL_VOID(CheckChildrenConstrains());
 
     isDragedMoving_ = true;
 
@@ -257,8 +256,6 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
         }
         return;
     }
-
-    CHECK_NULL_VOID(CheckChildrenConstrains());
 
     if (splitType_ == SplitType::ROW_SPLIT) {
         float locationDiff = childrenDragPos_[dragedSplitIndex_ + 1] - gestureOffsetX;
@@ -526,25 +523,6 @@ void LinearSplitPattern::UpdateDragFRCSceneInfo(const GestureEvent& info, SceneS
         host->AddFRCSceneInfo(
             SPLIT_DRAG_SCENE, fabs(static_cast<float>(info.GetVelocity().GetVelocityY())), sceneStatus);
     }
-}
-
-bool LinearSplitPattern::CheckChildrenConstrains()
-{
-    // If the minimum size of the child is greater than the split line interval, return false.
-    auto preInterval = childrenDragPos_[dragedSplitIndex_ + SPLIT_INDEX_INC_ONE] - childrenDragPos_[dragedSplitIndex_] -
-                       static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-    float curInterval = 0.0f;
-    if (dragedSplitIndex_ + SPLIT_INDEX_INC_TWO == childrenDragPos_.size() - 1) {
-        curInterval = childrenDragPos_[dragedSplitIndex_ + SPLIT_INDEX_INC_TWO] -
-                      childrenDragPos_[dragedSplitIndex_ + SPLIT_INDEX_INC_ONE];
-    } else {
-        curInterval = childrenDragPos_[dragedSplitIndex_ + SPLIT_INDEX_INC_TWO] -
-                      childrenDragPos_[dragedSplitIndex_ + SPLIT_INDEX_INC_ONE] -
-                      static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-    }
-
-    return !(GreatNotEqual(childrenConstrains_[dragedSplitIndex_], preInterval) ||
-             GreatNotEqual(childrenConstrains_[dragedSplitIndex_ + SPLIT_INDEX_INC_ONE], curInterval));
 }
 
 void LinearSplitPattern::OnModifyDone()

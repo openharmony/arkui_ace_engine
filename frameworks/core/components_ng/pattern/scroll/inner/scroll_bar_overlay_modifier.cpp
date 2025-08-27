@@ -74,6 +74,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
         canvas.DetachBrush();
+        SetBoundsRect(RectF { barX, barY, barX + barWidth, barY + barHeight });
     }
 }
 
@@ -150,7 +151,13 @@ void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimati
     CHECK_NULL_VOID(barY_);
     CHECK_NULL_VOID(barWidth_);
     CHECK_NULL_VOID(barHeight_);
-    if (hoverAnimationType == HoverAnimationType::NONE && !needAdaptAnimation) {
+    if (opacityAnimationType == OpacityAnimationType::NONE && GetOpacity() == 0) {
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), fgRect]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetRect(fgRect);
+        });
+    } else if (hoverAnimationType == HoverAnimationType::NONE && !needAdaptAnimation) {
         SetRect(fgRect);
     } else {
         StartHoverAnimation(fgRect, hoverAnimationType);

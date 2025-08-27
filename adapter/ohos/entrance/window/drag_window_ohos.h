@@ -45,6 +45,7 @@ public:
     void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) override;
 
 private:
+    void FlushImplicitTransaction();
     OHOS::sptr<Rosen::Window> dragWindow_;
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSNode> rootNode_;

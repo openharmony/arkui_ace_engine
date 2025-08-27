@@ -21,6 +21,8 @@
 #include <cstdint>
 #include <string>
 
+#include "ui/base/macros.h"
+
 #define CHECK_NULL_VOID(ptr) \
     do {                     \
         if (!(ptr)) {        \
@@ -56,10 +58,38 @@
         }                                   \
     } while (0)
 
+#define CHECK_NE_VOID(var, value) \
+    do {                             \
+        if ((var) != (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)
+
+#define CHECK_NE_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) != (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)
+
 #define CHECK_NULL_CONTINUE(ptr) \
     if (!(ptr)) {                \
         continue;                \
     }
+
+#define CHECK_NE_VOID(var, value) \
+    do {                             \
+        if ((var) != (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)
+
+#define CHECK_NE_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) != (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)
 
 #define CHECK_INITIALIZED_FIELDS_BEGIN() \
     constexpr auto _lineBegin = __LINE__;
@@ -306,7 +336,7 @@ inline bool IsDarkColor(uint32_t color)
 
 bool RealPath(const std::string& fileName, char* realPath);
 
-double RoundToMaxPrecision(double value);
+ACE_FORCE_EXPORT double RoundToMaxPrecision(double value);
 
 } // namespace OHOS::Ace
 

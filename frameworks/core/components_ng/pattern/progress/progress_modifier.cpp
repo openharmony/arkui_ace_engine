@@ -17,6 +17,8 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/base/constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -45,9 +47,12 @@ constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
+constexpr int32_t ANIMATION_MIN_FFR = 15;
+constexpr int32_t ANIMATION_MAX_FFR = 60;
+constexpr int32_t ANIMATION_EXPECT_FFR = 30;
 } // namespace
 ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
-    const ProgressAnimatableProperty& progressAnimatableProperty_)
+    const ProgressAnimatableProperty& progressAnimatableProperty_, const WeakPtr<Pattern>& pattern)
     : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeWidth)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
@@ -77,7 +82,8 @@ ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
       isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressUpdate_(AceType::MakeRefPtr<PropertyBool>(false)),
       capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
-      host_(host)
+      host_(host),
+      pattern_(pattern)
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -220,6 +226,9 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
     option.SetIteration(-1);
     option.SetDuration(time);
 
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         option,
         [value, id = Container::CurrentId(), weak = WeakClaim(this)]() {
@@ -241,7 +250,7 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
                 auto context = PipelineBase::GetCurrentContext();
                 context->RequestFrame();
             }
-        });
+        }, context);
 }
 
 void ProgressModifier::SetRingProgressColor(const Gradient& color)
@@ -313,6 +322,9 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
     optionHead.SetDuration(LOADING_ANIMATION_DURATION);
     optionHead.SetCurve(curveHead);
     optionHead.SetIteration(isFormRender ? 1 : -1);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         optionHead, [&]() { trailingHeadDate_->Set(ANGLE_360); }, nullptr,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -322,7 +334,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
             if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
                 modifier->StopRingLoadingHeadAnimation();
             }
-        });
+        }, contextPtr);
 }
 
 void ProgressModifier::StartRingLoadingTailAnimation()
@@ -335,6 +347,9 @@ void ProgressModifier::StartRingLoadingTailAnimation()
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
     optionTail.SetCurve(curveTail);
     optionTail.SetIteration(isFormRender ? 1 : -1);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         optionTail,
         [&]() { trailingTailDate_->Set(ANGLE_360); },
@@ -349,21 +364,27 @@ void ProgressModifier::StartRingLoadingTailAnimation()
                     modifier->SetValue(modifier->valueBackup_);
                 }
             }
-        });
+        }, contextPtr);
 }
 
 void ProgressModifier::StopRingLoadingHeadAnimation()
 {
     AnimationOption option = AnimationOption();
     option.SetDuration(0);
-    AnimationUtils::Animate(option, [&]() { trailingHeadDate_->Set(0.0f); });
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
+    AnimationUtils::Animate(option, [&]() { trailingHeadDate_->Set(0.0f); }, nullptr, nullptr, contextPtr);
 }
 
 void ProgressModifier::StopRingLoadingTailAnimation()
 {
     AnimationOption option = AnimationOption();
     option.SetDuration(0);
-    AnimationUtils::Animate(option, [&]() { trailingTailDate_->Set(0.0f); });
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
+    AnimationUtils::Animate(option, [&]() { trailingTailDate_->Set(0.0f); }, nullptr, nullptr, contextPtr);
     isLoading_ = false;
 }
 
@@ -425,6 +446,9 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
     option.SetDuration(time);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         option,
         [&]() { sweepingDate_->Set(date); },
@@ -441,7 +465,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
                 auto context = PipelineBase::GetCurrentContext();
                 context->RequestFrame();
             }
-        });
+        }, contextPtr);
 }
 
 void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float newDate, float speed)
@@ -463,6 +487,9 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
     auto motion = AceType::MakeRefPtr<LinearCurve>();
     option.SetCurve(motion);
     option.SetDuration(time);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         option,
         [&]() { sweepingDate_->Set(newDate); },
@@ -494,7 +521,7 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
                 auto context = PipelineBase::GetCurrentContext();
                 context->RequestFrame();
             }
-        });
+        }, nullptr, contextPtr);
 }
 
 bool ProgressModifier::IsSweepEffectOn()
@@ -518,7 +545,10 @@ void ProgressModifier::StopSweepingAnimation(float date)
         dateUpdated_ = false;
         AnimationOption option = AnimationOption();
         option.SetDuration(0);
-        AnimationUtils::Animate(option, [&]() { sweepingDate_->Set(date); });
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto contextPtr = host? host->GetContextRefPtr(): nullptr;
+        AnimationUtils::Animate(option, [&]() { sweepingDate_->Set(date); }, nullptr, nullptr, contextPtr);
     }
 }
 
@@ -594,6 +624,9 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
     option.SetDuration(time);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto contextPtr = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         option,
         [&]() { sweepingDate_->Set(date); },
@@ -610,7 +643,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
                 auto context = PipelineBase::GetCurrentContext();
                 context->RequestFrame();
             }
-        });
+        }, contextPtr);
 }
 
 void ProgressModifier::SetMaxValue(float value)
@@ -637,7 +670,13 @@ void ProgressModifier::SetValue(float value)
         } else {
             option.SetDuration(0);
         }
-        AnimationUtils::Animate(option, [&]() { value_->Set(value); });
+        RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+        option.SetFrameRateRange(frameRateRange);
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto contextPtr = host? host->GetContextRefPtr(): nullptr;
+        AnimationUtils::Animate(option, [&]() { value_->Set(value); }, nullptr, nullptr, contextPtr);
     } else {
         value_->Set(value);
     }
@@ -1385,7 +1424,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
-    double pathDistance = FLOAT_TWO_ZERO * M_PI * radius / scaleCount_->Get();
+    double pathDistance = FLOAT_TWO_ZERO * ACE_PI * radius / scaleCount_->Get();
     if (scaleWidth_->Get() > pathDistance) {
         PaintRing(canvas, offset, contentSize);
         return;
@@ -1558,6 +1597,7 @@ void ProgressModifier::PaintCapsuleRightBorder(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     if (LessNotEqual(progressWidth, borderRadius)) {
         PaintCapsuleProgressLessRadiusScene(path, offset, contentSize, borderRadius);
     } else if (GreatNotEqual(progressWidth, contentSize.Width() - borderRadius)) {
@@ -1621,6 +1661,7 @@ void ProgressModifier::PaintCapsuleProgressGreaterRadiusScene(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     if (isDefault) {
         if (!isRightToLeft_->Get()) {
@@ -1667,6 +1708,7 @@ void ProgressModifier::PaintVerticalCapsule(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height(), contentSize.Height());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Width() / INT32_TWO);
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -1911,7 +1953,7 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     if (lengthOfScale > radius) {
         lengthOfScale = radius / 2;
     }
-    double pathDistance = 2.0 * M_PI * radius / scaleCount_->Get();
+    double pathDistance = 2.0 * ACE_PI * radius / scaleCount_->Get();
     if (scaleWidth > pathDistance) {
         PaintRing(canvas, offset, frameSize);
         return;

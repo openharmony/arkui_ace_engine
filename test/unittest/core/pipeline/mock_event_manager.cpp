@@ -99,7 +99,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     return true;
 }
 
-void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
+void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event, bool isMockEvent)
 {
     SetInstanceId(instanceId_ | DISPATCH_MOUSE_HOVER_ANIMATION_NG_FLAG);
 }

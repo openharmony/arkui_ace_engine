@@ -28,6 +28,7 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewTextStyle, std::string, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
 
     // placeholder
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
@@ -47,6 +48,24 @@ public:
     {
         TextLayoutProperty::ToJsonValue(json, filter);
         json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+    }
+
+    void UpdateScrollBarColor(const std::optional<Color>& color)
+    {
+        if (color.has_value()) {
+            auto& value = color.value();
+            auto hasColor = propScrollBarColor_.has_value();
+            auto scrollBarColor = propScrollBarColor_.value_or(Color());
+            CHECK_NULL_VOID(!hasColor || scrollBarColor != value ||
+                !NearEqual(scrollBarColor.GetResourceId(), value.GetResourceId()));
+            propScrollBarColor_ = value;
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+            return;
+        }
+        if (HasScrollBarColor()) {
+            ResetScrollBarColor();
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+        }
     }
 };
 } // namespace OHOS::Ace::NG

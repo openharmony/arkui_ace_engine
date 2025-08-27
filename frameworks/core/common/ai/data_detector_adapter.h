@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_PROPERTIES_H
 
 #include <set>
+#include <unordered_map>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 #include "interfaces/inner_api/ace/ai/data_url_analyzer.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 
+#include "frameworks/core/components/common/layout/constants.h"
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
@@ -43,7 +45,8 @@ struct AISpan {
     int32_t start = 0;
     int32_t end = 0;
     std::string content = "";
-    TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
+    TextDataDetectType type = TextDataDetectType::INVALID;
+    std::map<std::string, std::string> params;
     bool operator==(const AISpan& span) const
     {
         return start == span.start && end == span.end && content == span.content && type == span.type;
@@ -87,17 +90,26 @@ public:
         }
         aiDetectInitialized_ = false;
     }
-    bool ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode,
-        bool isShowCopy = true, bool isShowSelectText = true);
+    struct AIMenuInfo {
+        bool isShowCopy = true;
+        bool isShowSelectText = true;
+    };
+
+    bool ShowAIEntityMenu(
+        const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
+    bool GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info,
+        std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
+    RefPtr<NG::FrameNode> CreateAIEntityMenu(
+        const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
     void MarkDirtyNode() const;
-
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
 
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
+    std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
     void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,
         const RefPtr<NG::FrameNode>& targetNode = nullptr);
 
@@ -108,6 +120,7 @@ private:
     bool typeChanged_ = false;
     bool hasClickedMenuOption_ = false;
     bool hasUrlType_ = false;
+    bool enablePreviewMenu_ = false;
     uint8_t aiDetectFlag_ = 0;
     std::vector<NG::RectF> aiSpanRects_;
     AISpan clickedAISpan_;

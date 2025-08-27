@@ -40,11 +40,14 @@ public:
     ImageObject() = delete;
     ImageObject(const ImageSourceInfo& sourceInfo, const SizeF& imageSize, const RefPtr<ImageData>& data)
         : src_(sourceInfo), imageSize_(imageSize), data_(data)
-    {}
+    {
+        imageDataSize_ = data ? data_->GetSize() : 0;
+    }
     ~ImageObject() override = default;
 
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
+    void SetImageSourceInfoHdr(bool isHdr);
     RefPtr<ImageData> GetData() const;
     int32_t GetFrameCount() const;
     ImageRotateOrientation GetOrientation() const;
@@ -56,6 +59,9 @@ public:
     void SetFrameCount(int32_t frameCount);
     void SetOrientation(ImageRotateOrientation orientation);
     void SetUserOrientation(ImageRotateOrientation orientation);
+    void SetImageFileSize(size_t fileSize);
+    size_t GetImageFileSize() const;
+    size_t GetImageDataSize() const;
 
     virtual RefPtr<SvgDomBase> GetSVGDom() const
     {
@@ -89,7 +95,7 @@ public:
     }
 
 protected:
-    const ImageSourceInfo src_;
+    ImageSourceInfo src_;
     ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     SizeF imageSize_ { -1.0, -1.0 };
@@ -97,6 +103,8 @@ protected:
     mutable std::shared_mutex dataMutex_;
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
+    size_t fileSize_ = 0; // size of file in bytes
+    size_t imageDataSize_ = 0; // size of image data in bytes
     int32_t frameCount_ = 1;
     ImageDfxConfig imageDfxConfig_;
     // Mutex for controlling access to prepareImageData operations.

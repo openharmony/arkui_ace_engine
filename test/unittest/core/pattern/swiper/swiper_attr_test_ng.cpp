@@ -1219,6 +1219,14 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto onSelected = [](const BaseEventInfo* info) {};
     model.SetOnSelected(std::move(onSelected));
     EXPECT_NE(pattern->selectedEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.9 Test SetOnScrollStateChanged function.
+     * @tc.expected:pattern->scrollStateChangedEvent_ not null.
+     */
+    auto onScrollStateChanged = [](const BaseEventInfo* info) {};
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    EXPECT_NE(eventHub->scrollStateChangedEvent_, nullptr);
 }
 
 /**
@@ -2233,5 +2241,25 @@ HWTEST_F(SwiperAttrTestNg, CheckSwiperModelNG002, TestSize.Level1)
     EXPECT_EQ(swiperModel.GetShowIndicator(frameNode), false);
     EXPECT_EQ(swiperModel.GetShowDisplayArrow(frameNode), 0);
     EXPECT_EQ(swiperModel.GetEffectMode(frameNode), EdgeEffect::SPRING);
+}
+
+/**
+ * @tc.name: CreateDotWithResourceObj001
+ * @tc.desc: Test Swiper Model CreateDotWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, CreateDotWithResourceObj001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color(Color::BLUE);
+    model.CreateDotWithResourceObj(frameNode, swiperParameters);
+    model.SetIndicatorStyle(swiperParameters);
+    EXPECT_EQ(pattern->swiperParameters_->colorVal, swiperParameters.colorVal);
 }
 } // namespace OHOS::Ace::NG

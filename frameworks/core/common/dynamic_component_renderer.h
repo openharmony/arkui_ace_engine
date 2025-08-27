@@ -85,9 +85,10 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
     virtual bool IsRestrictedWorkerThread() { return false; }
-    virtual bool HasWorkerUsing(void *worker) { return false; }
-    virtual bool CheckWorkerMaxConstraint() { return true; }
+    virtual bool CheckDCMaxConstraintInWorker(void *worker) { return false; }
+    virtual bool CheckWorkerMaxConstraint(void *worker) { return true; }
     virtual void UpdateParentOffsetToWindow(const OffsetF& offset) = 0;
+    virtual void OnAccessibilityParentRectInfoUpdate() {}
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) {}

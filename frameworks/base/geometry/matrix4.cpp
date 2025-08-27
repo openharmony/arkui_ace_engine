@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/matrix4.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -54,7 +55,7 @@ Matrix4 Matrix4::CreateRotate(double angle, double dx, double dy, double dz)
     double x = dx / sqrt(sum);
     double y = dy / sqrt(sum);
     double z = dz / sqrt(sum);
-    double redian = static_cast<double>(angle * (M_PI / 180.0f));
+    double redian = static_cast<double>(angle * (ACE_PI / 180.0f));
     double cosValue = cosf(redian);
     double sinValue = sinf(redian);
 
@@ -102,7 +103,7 @@ Matrix4 Matrix4::Invert(const Matrix4& matrix)
     Matrix4 inverted = CreateInvert(matrix);
     double determinant = matrix(0, 0) * inverted(0, 0) + matrix(0, 1) * inverted(1, 0) + matrix(0, 2) * inverted(2, 0) +
                          matrix(0, 3) * inverted(3, 0);
-    if (!NearZero(determinant)) {
+    if (!NearZero(determinant, 1e-7f)) {
         inverted = inverted * (1.0f / determinant);
     } else {
         inverted = CreateIdentity();
@@ -258,6 +259,16 @@ Matrix4 Matrix4::CreateInvert(const Matrix4& matrix)
 bool Matrix4::operator==(const Matrix4& matrix) const
 {
     return std::equal(&matrix4x4_[0][0], &matrix4x4_[0][0] + MATRIX_LENGTH, &matrix.matrix4x4_[0][0], IsEqual);
+}
+
+bool Matrix4::operator==(const double (&matrix)[4][4]) const
+{
+    return std::equal(&matrix4x4_[0][0], &matrix4x4_[0][0] + MATRIX_LENGTH, &matrix[0][0], IsEqual);
+}
+
+void Matrix4::CopyMatrix(double (&matrix)[4][4])
+{
+    std::copy_n(&matrix[0][0], MATRIX_LENGTH, &matrix4x4_[0][0]);
 }
 
 Matrix4 Matrix4::operator*(double num)

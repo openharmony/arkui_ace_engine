@@ -204,6 +204,62 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure001, TestSize.L
 }
 
 /**
+ * @tc.name: NodeContainerLayoutAlgorithmMeasure002
+ * @tc.desc: Test the Measure function of NodeContainerLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. create frameNode.
+      */
+     RefPtr<FrameNode> nodeContainerNode = CreateNode();
+     ASSERT_NE(nodeContainerNode, nullptr);
+     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+     ASSERT_NE(geometryNode, nullptr);
+     RefPtr<FrameNode> childHostNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+     ASSERT_NE(childHostNode, nullptr);
+     auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
+     auto layoutWrapperTwo = LayoutWrapperNode(childHostNode, geometryNode, childHostNode->GetLayoutProperty());
+
+     auto contentChanges = layoutWrapper.GetContentChanges();
+     contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+     layoutWrapper.GetContentChanges().ToString();
+     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+     ASSERT_NE(layoutAlgorithm, nullptr);
+     RefPtr<FrameNode> childNodeOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<Pattern>());
+     RefPtr<FrameNode> childNodeTwo = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+     
+     auto childLayoutProperty=childNodeTwo->GetLayoutProperty();
+     ASSERT_NE(childLayoutProperty, nullptr);
+     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+     auto childLayoutPropertyOne=childNodeOne->GetLayoutProperty();
+     ASSERT_NE(childLayoutPropertyOne, nullptr);
+     childLayoutPropertyOne->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+     /**
+      * @tc.steps: step2. update layoutWrapper.
+      */
+     auto childLayoutWrapperOne = childNodeOne->CreateLayoutWrapper();
+     ASSERT_NE(childLayoutWrapperOne, nullptr);
+     auto childLayoutWrapperTwo = childNodeTwo->CreateLayoutWrapper();
+     ASSERT_NE(childLayoutWrapperTwo, nullptr);
+     layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+     layoutWrapper.cachedList_.push_back(childLayoutWrapperOne);
+     layoutWrapper.cachedList_.push_back(childLayoutWrapperTwo);
+     layoutWrapperTwo.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+     layoutWrapperTwo.cachedList_.push_back(childLayoutWrapperOne);
+     layoutWrapperTwo.cachedList_.push_back(childLayoutWrapperTwo);
+     /**
+      * @tc.steps: step3. call the function Measure.
+      */
+     layoutAlgorithm->Measure(&layoutWrapper);
+     layoutAlgorithm->Measure(&layoutWrapperTwo);
+
+     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+     EXPECT_EQ(layoutWrapperTwo.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+ }
+
+/**
  * @tc.name: NodeContainerModelNGSetMakeFunction001
  * @tc.desc: Test the SetMakeFunction function of NodeContainerModelNG.
  * @tc.type: FUNC
@@ -1081,5 +1137,83 @@ HWTEST_F(NodeContainerTestNg, GetNodeContainerEventHub001, TestSize.Level1)
     CHECK_NULL_VOID(pattern);
     auto eventHub = pattern->GetNodeContainerEventHub();
     EXPECT_NE(eventHub, nullptr);
+}
+
+/**
+ * @tc.name: HandleTextureExport002
+ * @tc.desc: Test the EmbedNode Query with ElementRegister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, HandleTextureExport002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create node and get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    pattern->surfaceId_ = 1U;
+    
+    auto exportNode = AceType::MakeRefPtr<FrameNode>("exportNode", -1, AceType::MakeRefPtr<Pattern>());
+    pattern->exportTextureNode_ = AceType::WeakClaim(AceType::RawPtr(exportNode));
+ 
+    /**
+     * @tc.steps: step2: Directly call HandleTextureExport.
+     * @tc.expected: ret is false.
+     */
+    bool ret = pattern->HandleTextureExport(false, frameNode);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3: Get embedNode and surfaceId with ElementRegister.
+     * @tc.expected: get expected embedNode and surfaceId.
+     */
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_TRUE(elementRegister);
+    auto node = elementRegister->GetEmbedNodeBySurfaceId(1U);
+    auto nodeRef = node.Upgrade();
+    EXPECT_TRUE(nodeRef);
+    EXPECT_EQ(AceType::RawPtr(nodeRef), AceType::RawPtr(exportNode));
+    auto surfaceIdGet = elementRegister->GetSurfaceIdByEmbedNode(AceType::RawPtr(exportNode));
+    EXPECT_EQ(surfaceIdGet, 1U);
+    EXPECT_TRUE(elementRegister->IsEmbedNode(AceType::RawPtr(exportNode)));
+    /**
+     * @tc.steps: step4: GetSurfaceIdByEmbedNode for nullptr.
+     * @tc.expected: get surfaceId equals 0U.
+     */
+    auto surfaceIdNull = elementRegister->GetSurfaceIdByEmbedNode(nullptr);
+    EXPECT_EQ(surfaceIdNull, 0U);
+}
+
+/**
+ * @tc.name: AddBaseNode001
+ * @tc.desc: Test the add base node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, AddBaseNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    ASSERT_TRUE(pattern);
+    auto frameNodeRef = FrameNode::CreateFrameNode("testAddBaseNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_TRUE(frameNodeRef);
+    auto frameNodeChild = FrameNode::CreateFrameNode("testAddBaseNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_TRUE(frameNodeChild);
+    frameNode->AddChild(frameNodeChild);
+
+    /**
+     * @tc.steps: step2. call AddBaseNode.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    pattern->AddBaseNode(nullptr);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
+    pattern->AddBaseNode(frameNodeRef);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG

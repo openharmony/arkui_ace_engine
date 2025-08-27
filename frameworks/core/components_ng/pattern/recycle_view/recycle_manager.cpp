@@ -26,6 +26,13 @@ void RecycleManager::Push(int32_t elmtId, WeakPtr<CustomNodeBase> &&node)
     context->GetRecycleManager()->PushNode(elmtId, std::move(node));
 }
 
+void RecycleManager::ClearAll()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->GetRecycleManager()->ClearAllNodes();
+}
+
 void RecycleManager::Pop(int32_t elmtId)
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -50,6 +57,11 @@ void RecycleManager::Notify(const ConfigurationChange &config)
 void RecycleManager::PushNode(int32_t elmtId, WeakPtr<CustomNodeBase>&& node)
 {
     recyclePool_.try_emplace(elmtId, std::make_unique<RecycleNodeState>(std::move(node)));
+}
+
+void RecycleManager::ClearAllNodes()
+{
+    recyclePool_.clear();
 }
 
 void RecycleManager::PopNode(int32_t elmtId)

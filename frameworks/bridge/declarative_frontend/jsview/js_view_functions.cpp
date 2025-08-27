@@ -112,7 +112,8 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("height"), measureHeight)) {
         measureWidth = { -1.0f };
     }
-    NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
+    NG::SizeF frameSize = { static_cast<float>(measureWidth.ConvertToPx()),
+        static_cast<float>(measureHeight.ConvertToPx()) };
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
@@ -259,6 +260,17 @@ std::string ViewFunctions::ExecuteOnDumpInfo()
     return res;
 }
 
+void ViewFunctions::ExecuteClearAllRecycle()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsClearAllRecycle_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+    } else {
+        LOGE("the clearAllRecycle func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -346,6 +358,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
         if (jsOnDumpInspector->IsFunction()) {
             jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
+        }
+
+        JSRef<JSVal> jsClearAllRecycle = jsObject->GetProperty("__ClearAllRecyle__PUV2ViewBase__Internal");
+        if (jsClearAllRecycle->IsFunction()) {
+            jsClearAllRecycle_ = JSRef<JSFunc>::Cast(jsClearAllRecycle);
         }
 
         JSRef<JSVal> jsPrebuildComponent = jsObject->GetProperty("prebuildComponent");
@@ -786,7 +803,7 @@ std::string ViewFunctions::ExecuteOnFormRecycle()
         std::string statusData = ret->ToString();
         return statusData.empty() ? EMPTY_STATUS_DATA : statusData;
     }
-    LOGE("ExecuteOnFormRecycle failed");
+    TAG_LOGE(AceLogTag::ACE_FORM, "ExecuteOnFormRecycle failed");
     return "";
 }
 
@@ -794,7 +811,7 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsOnFormRecoverFunc_.IsEmpty()) {
-        LOGE("jsOnFormRecoverFunc_ is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "jsOnFormRecoverFunc_ is null");
         return;
     }
 

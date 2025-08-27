@@ -42,6 +42,7 @@ public:
     static void IsFollowingSystemFontScale(const JSCallbackInfo& info);
     static void GetMaxFontScale(const JSCallbackInfo& info);
     static void SetEnableSwipeBack(const JSCallbackInfo& info);
+    static void JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info);
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);
 };

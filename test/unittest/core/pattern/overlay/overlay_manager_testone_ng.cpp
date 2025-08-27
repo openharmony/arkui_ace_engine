@@ -313,11 +313,14 @@ HWTEST_F(OverlayManagerTestOneNG, SheetSpringBack001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         V2::SHEET_PAGE_TAG, -1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
+    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateSheetType();
+    pattern->InitSheetObject();
+    ASSERT_NE(pattern->GetSheetObject(), nullptr);
     overlayManager->dismissTarget_ = DismissTarget(SheetKey(-1));
     overlayManager->sheetMap_.emplace(SheetKey(-1), Ace::Referenced::WeakClaim(Ace::Referenced::RawPtr(sheetNode)));
     overlayManager->SheetSpringBack();
-    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(pattern, nullptr);
     EXPECT_FALSE(pattern->isDismissProcess_);
 }
 
@@ -439,9 +442,13 @@ HWTEST_F(OverlayManagerTestOneNG, UpdateSheetPage001, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetNodePattern, nullptr);
+    sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->InitSheetObject();
+    ASSERT_NE(sheetNodePattern->GetSheetObject(), nullptr);
     overlayManager->UpdateSheetPage(sheetNode, sheetStyle, 2, false, false, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
-    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     overlayManager->UpdateSheetPage(sheetNode, sheetStyle, 1, false, false, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(sheetNodePattern->GetSheetType(), SheetType::SHEET_BOTTOM);
@@ -1361,11 +1368,20 @@ HWTEST_F(OverlayManagerTestOneNG, RemoveFilterAnimation001, TestSize.Level1)
 {
     SetUpTestCase();
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    EXPECT_NE(rootNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_NE(overlayManager, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_NE(columnNode, nullptr);
+    columnNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+
     overlayManager->SetHasFilter(true);
-    overlayManager->SetFilterColumnNode(rootNode);
+    overlayManager->SetFilterColumnNode(columnNode);
     overlayManager->RemoveFilterAnimation();
-    EXPECT_FALSE(!overlayManager->hasFilter_);
+    EXPECT_FALSE(overlayManager->hasFilter_);
 }
 
 /**
@@ -1426,6 +1442,8 @@ HWTEST_F(OverlayManagerTestOneNG, PlayBubbleStyleSheetTransition001, TestSize.Le
     bool isShow = true;
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->overlayManager_ = overlayManager;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());

@@ -62,6 +62,21 @@ void ParticlePattern::OnAttachToMainTree()
     }
 }
 
+std::unique_ptr<JsonValue> ParticlePattern::ParseAnnulusRegionJson(const ParticleAnnulusRegion& annulusRegion) const
+{
+    auto objectAnnulusRegionJson = JsonUtil::Create(true);
+    auto center = annulusRegion.GetCenter();
+    auto centerObj = JsonUtil::Create(true);
+    centerObj->Put("x", center.first.ToString().c_str());
+    centerObj->Put("y", center.second.ToString().c_str());
+    objectAnnulusRegionJson->Put("center", centerObj);
+    objectAnnulusRegionJson->Put("innerRadius", std::to_string(annulusRegion.GetInnerRadius().ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("outerRadius", std::to_string(annulusRegion.GetOuterRadius().ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("startAngle", std::to_string(annulusRegion.GetStartAngle()).c_str());
+    objectAnnulusRegionJson->Put("endAngle", std::to_string(annulusRegion.GetEndAngle()).c_str());
+    return objectAnnulusRegionJson;
+}
+
 std::unique_ptr<JsonValue> ParticlePattern::ParseEmitterParticleJson(const ParticleOption& particleOption) const
 {
     auto emitterOptionOpt = particleOption.GetEmitterOption();
@@ -132,6 +147,8 @@ void ParticlePattern::GetEmitterJson(const std::unique_ptr<JsonValue>& objectPar
             objectEmitterJson->Put("shape", "ParticleEmitterShape.CIRCLE");
         } else if (shapeInt == ParticleEmitterShape::ELLIPSE) {
             objectEmitterJson->Put("shape", "ParticleEmitterShape.ELLIPSE");
+        } else if (shapeInt == ParticleEmitterShape::ANNULUS) {
+            objectEmitterJson->Put("shape", "ParticleEmitterShape.ANNULUS");
         } else {
             objectEmitterJson->Put("shape", "ParticleEmitterShape.RECTANGLE");
         }
@@ -145,6 +162,11 @@ void ParticlePattern::GetEmitterJson(const std::unique_ptr<JsonValue>& objectPar
     if (sizeOpt.has_value()) {
         auto position = "[" + sizeOpt.value().first.ToString() + "," + sizeOpt.value().second.ToString() + "]";
         objectEmitterJson->Put("size", position.c_str());
+    }
+    auto annulusRegionOpt = emitterOptionOpt.GetAnnulusRegion();
+    if (annulusRegionOpt.has_value()) {
+        auto objectAnnulusRegionJson = ParseAnnulusRegionJson(annulusRegionOpt.value());
+        objectEmitterJson->Put("annulusRegion", objectAnnulusRegionJson);
     }
     objectParticlesJson->Put("emitter", objectEmitterJson);
 }
@@ -382,23 +404,7 @@ void ParticlePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     if (props.size() > 0) {
         auto array = JsonUtil::CreateArray(true);
         for (size_t i = 0; i < props.size(); i++) {
-            auto object = JsonUtil::Create(true);
-            object->Put("index", std::to_string(props[i].index).c_str());
-            if (props[i].emitRate.has_value()) {
-                object->Put("emitRate", std::to_string(*props[i].emitRate).c_str());
-            }
-            if (props[i].position.has_value()) {
-                auto positionObj = JsonUtil::Create(true);
-                positionObj->Put("x", std::to_string(props[i].position->x).c_str());
-                positionObj->Put("y", std::to_string(props[i].position->y).c_str());
-                object->Put("position", positionObj);
-            }
-            if (props[i].size.has_value()) {
-                auto sizeObj = JsonUtil::Create(true);
-                sizeObj->Put("x", std::to_string(props[i].size->x).c_str());
-                sizeObj->Put("y", std::to_string(props[i].size->y).c_str());
-                object->Put("size", sizeObj);
-            }
+            auto object = ToEmitterPropertyJsonValue(props[i]);
             array->Put(std::to_string(i).c_str(), object);
         }
         json->Put("emitter", array);
@@ -426,6 +432,32 @@ void ParticlePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
         json->Put("disturbanceFields", disturbanceFieldsArray);
     }
     ParseParticleObject(json, filter);
+}
+
+std::unique_ptr<JsonValue> ParticlePattern::ToEmitterPropertyJsonValue(const EmitterProperty& emitterProperty) const
+{
+    auto object = JsonUtil::Create(true);
+    object->Put("index", std::to_string(emitterProperty.index).c_str());
+    if (emitterProperty.emitRate.has_value()) {
+        object->Put("emitRate", std::to_string(*emitterProperty.emitRate).c_str());
+    }
+    if (emitterProperty.position.has_value()) {
+        auto positionObj = JsonUtil::Create(true);
+        positionObj->Put("x", std::to_string(emitterProperty.position->x).c_str());
+        positionObj->Put("y", std::to_string(emitterProperty.position->y).c_str());
+        object->Put("position", positionObj);
+    }
+    if (emitterProperty.size.has_value()) {
+        auto sizeObj = JsonUtil::Create(true);
+        sizeObj->Put("x", std::to_string(emitterProperty.size->x).c_str());
+        sizeObj->Put("y", std::to_string(emitterProperty.size->y).c_str());
+        object->Put("size", sizeObj);
+    }
+    if (emitterProperty.annulusRegion.has_value()) {
+        auto annulusRegionObj = ParseAnnulusRegionJson(emitterProperty.annulusRegion.value());
+        object->Put("annulusRegion", annulusRegionObj);
+    }
+    return object;
 }
 
 void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbanceArray)

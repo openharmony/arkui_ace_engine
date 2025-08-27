@@ -51,7 +51,7 @@ struct FadeoutInfo {
 };
 
 class TextContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:
     explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
@@ -112,10 +112,8 @@ public:
     }
     void TextColorModifier(const Color& value);
     void ContentModifierDump();
-#ifdef ACE_ENABLE_VK
-    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager,
-        RefPtr<FrameNode>& host);
-#endif
+    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
+        const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host);
 
 protected:
     OffsetF GetPaintOffset() const
@@ -181,8 +179,10 @@ private:
     bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
     void DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info, RefPtr<ParagraphManager> pManager);
-    void DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager);
+    void DrawText(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern);
     void DrawContent(DrawingContext& drawingContext, const FadeoutInfo& info);
+    void DrawActualText(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
+        const RefPtr<ParagraphManager>& pManager, const FadeoutInfo& fadeoutInfo);
     void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info);
     FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
     float GetFadeoutPercent();
@@ -192,6 +192,7 @@ private:
         return marqueeState_ == state;
     }
     bool IsMarqueeVisible() const;
+    void UpdateTextDecorationColorAlpha();
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

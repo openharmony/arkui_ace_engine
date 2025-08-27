@@ -26,6 +26,8 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnDetectResultUpdate(ArkUINodeHandle node);
+    template<typename T>
+    void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H

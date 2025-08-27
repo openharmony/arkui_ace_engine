@@ -14,8 +14,11 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "gtest/gtest.h"
+
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -459,6 +462,91 @@ HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(algorithm.GetNearScale(95.0), 0.950898));
     EXPECT_TRUE(NearEqual(algorithm.GetNearScale(10.0), 1.077197));
     EXPECT_TRUE(NearEqual(algorithm.GetNearScale(-10.0), 1.077197));
+}
+
+/**
+ * @tc.name: GetNearScale002
+ * @tc.desc: Test GetNearScale when the height of the item is large
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetNearScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with a large height of one of the items in the list.
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(1);
+    CreateListItemsWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(1000.f)));
+    CreateListItems(1);
+    CreateDone();
+    auto maxScale = 1.08f;
+    auto minScale = 0.406643271f;
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: The distance between the item and the middle point of the list does not reach the threshold.
+     * Therefore, the scale is minimum.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 250.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1250.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step3. Scroll to 50.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 50.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1050.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step4. Scroll to 100.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1000.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step5. Scroll to 400.
+     * @tc.expected: The distance is 0. Therefore, the scale reaches the maximum value.
+     */
+    ScrollTo(400);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -300.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step6. Scroll to 700.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(700);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -600.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 400.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step7. Scroll to 750.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale reaches the minimum value.
+     */
+    ScrollTo(750);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -650.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 350.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step8. Scroll to 800.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(800);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -700.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
 }
 
 /**
@@ -974,6 +1062,65 @@ HWTEST_F(ArcListLayoutTestNg, LayoutHeader003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutHeader004
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader when the height of first item changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with header.
+     */
+    ListModelNG model = CreateList();
+    auto headerSize = 50.0f;
+    auto column = CreateColumn([headerSize](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(headerSize));
+        ViewAbstract::SetHeight(CalcLength(headerSize));
+    });
+    model.SetHeader(column);
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The distance between the header and the first item
+     * is greater than 0, that is, the value of headerOffset_ is greater than 0.
+     */
+    FlushUITasks(frameNode_);
+    auto headerDist = 40.0f;
+    auto headerOffset = (LIST_HEIGHT - ITEM_HEIGHT * 1.08f) / 2.0f - headerDist - headerSize;
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->oldHeaderSize_, headerSize);
+
+    /**
+     * @tc.steps: step3. Scroll list.
+     * @tc.expected: The value of headerOffset_ unchanged.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+
+    /**
+     * @tc.steps: step4. Decrease the height of the first item.
+     * @tc.expected: The value of headerOffset_ becomes larger.
+     */
+    auto firstItem = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(firstItem), CalcLength(ITEM_HEIGHT / 2.0f));
+    FlushUITasks(frameNode_);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT / 2.0f);
+
+    /**
+     * @tc.steps: step5. Scroll list.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The value of headerOffset_ unchanged.
+     */
+    ScrollTo(-200);
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
+}
+
+/**
  * @tc.name: CreateLayoutAlgorithm001
  * @tc.desc: Test ArcListPattern::CreateLayoutAlgorithm
  * @tc.type: FUNC
@@ -1181,6 +1328,362 @@ HWTEST_F(ArcListLayoutTestNg, GetItemDisplayInfo001, TestSize.Level1)
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
     EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset001
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    arcListPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    arcListPattern->scrollableEvent_->scrollable_ =
+        AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the IsScrollableStopped function to true
+     */
+    arcListPattern->scrollableEvent_->scrollable_->state_ = Scrollable::AnimationState::SPRING;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return false
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset002
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    arcListPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    arcListPattern->scrollableEvent_->scrollable_ =
+        AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the IsScrollableStopped function to return false
+     * set IsOutOfBoundary function to return true
+     */
+    arcListPattern->scrollableEvent_->scrollable_->state_ = Scrollable::AnimationState::IDLE;
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    std::map<int32_t, ListItemInfo> itemPosition = { { 0, info } };
+    arcListPattern->itemPosition_ = itemPosition;
+    arcListPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    arcListPattern->startIndex_ = 0;
+    arcListPattern->endIndex_ = 6;
+    arcListPattern->startMainPos_ = 20.0f;
+    arcListPattern->endMainPos_ = 30.0f;
+    arcListPattern->contentMainSize_ = 8.0f;
+    arcListPattern->contentEndOffset_ = 4.0f;
+    arcListPattern->contentStartOffset_ = 2.0f;
+    arcListPattern->isStackFromEnd_ = false;
+    arcListPattern->isScrollable_ = false;
+    arcListPattern->scrollBarOutBoundaryExtent_ = 2.0f;
+    arcListPattern->currentDelta_ = 0.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return false
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset003
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to true
+     */
+    arcAlgorithm->headerStayNear_ = true;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return false
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset004
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm less than 0
+     * set itemPosition_.count(0) equal to 0
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    std::map<int32_t, ListItemInfo> itemPosition = { { 1, info } };
+    arcAlgorithm->itemPosition_ = itemPosition;
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = -2.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return true and headerStayNear_ to be true
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(arcAlgorithm->headerStayNear_);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset005
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm greater than 0
+     * set itemPosition_.count(0) equal to 0
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    std::map<int32_t, ListItemInfo> itemPosition = { { 1, info } };
+    arcAlgorithm->itemPosition_ = itemPosition;
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return false
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset006
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm less than 0
+     * set itemPosition_.count(0) not equal to 0
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    arcAlgorithm->itemPosition_.clear();
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = -2.0f;
+    arcAlgorithm->oldFirstItemSize_ = 1.0f;
+    arcAlgorithm->headerMainSize_ = 5.0f;
+    arcAlgorithm->oldHeaderSize_ = 3.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The oldFirstItemSize_ to be the difference between endPos and startPos
+     * the oldHeaderSize_ to be headerMainSize_
+     * the result of function return true
+     */
+    auto value = arcAlgorithm->itemPosition_[0].endPos - arcAlgorithm->itemPosition_[0].startPos;
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(arcAlgorithm->oldFirstItemSize_, value);
+    EXPECT_EQ(arcAlgorithm->oldHeaderSize_, arcAlgorithm->headerMainSize_);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset007
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm greater than 0
+     * set itemPosition_.count(0) not equal to 0
+     * the oldFirstItemSize_ not equal to  the difference between endPos and startPos
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    arcAlgorithm->itemPosition_.clear();
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = 2.0f;
+    arcAlgorithm->oldFirstItemSize_ = 1.0f;
+    arcAlgorithm->headerMainSize_ = 5.0f;
+    arcAlgorithm->oldHeaderSize_ = 3.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The oldFirstItemSize_ to be the difference between endPos and startPos
+     * the oldHeaderSize_ to be headerMainSize_
+     * the result of function return true
+     */
+    auto value = arcAlgorithm->itemPosition_[0].endPos - arcAlgorithm->itemPosition_[0].startPos;
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(arcAlgorithm->oldFirstItemSize_, value);
+    EXPECT_EQ(arcAlgorithm->oldHeaderSize_, arcAlgorithm->headerMainSize_);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset008
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm greater than 0
+     * set itemPosition_.count(0) not equal to 0
+     * the oldFirstItemSize_ equal to  the difference between endPos and startPos
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    arcAlgorithm->itemPosition_.clear();
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = 3.0f;
+    arcAlgorithm->oldFirstItemSize_ = 2.0f;
+    arcAlgorithm->headerMainSize_ = 5.0f;
+    arcAlgorithm->oldHeaderSize_ = 3.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The oldFirstItemSize_ to be the difference between endPos and startPos
+     * the oldHeaderSize_ to be headerMainSize_
+     * the result of function return true
+     */
+    auto value = arcAlgorithm->itemPosition_[0].endPos - arcAlgorithm->itemPosition_[0].startPos;
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(arcAlgorithm->oldFirstItemSize_, value);
+    EXPECT_EQ(arcAlgorithm->oldHeaderSize_, arcAlgorithm->headerMainSize_);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckNeedUpdateHeaderOffset009
+ * @tc.desc: Test ArcListLayoutAlgorithm CheckNeedUpdateHeaderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CheckNeedUpdateHeaderOffset009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ArcListPattern> arcListPattern = AceType::MakeRefPtr<ArcListPattern>();
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, arcListPattern);
+    auto layoutWrapper = wrapperNode->CreateLayoutWrapper(true, true);
+    RefPtr<ArcListLayoutAlgorithm> arcAlgorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(500, 200);
+
+    /**
+     * @tc.steps: step2. Set the headerStayNear_ of ArcListLayoutAlgorithm to false
+     * set the headerOffset_ of ArcListLayoutAlgorithm greater than 0
+     * set itemPosition_.count(0) not equal to 0 and  the oldHeaderSize_ not equal to headerMainSize_
+     * the oldFirstItemSize_ equal to  the difference between endPos and startPos
+     */
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    arcAlgorithm->itemPosition_.clear();
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcListPattern->startIndex_ = 1;
+    arcListPattern->endIndex_ = 2;
+    arcAlgorithm->headerStayNear_ = false;
+    arcAlgorithm->headerOffset_ = 3.0f;
+    arcAlgorithm->oldFirstItemSize_ = 2.0f;
+    arcAlgorithm->headerMainSize_ = 5.0f;
+    arcAlgorithm->oldHeaderSize_ = 5.0f;
+
+    /**
+     * @tc.steps: step3. Call the CheckNeedUpdateHeaderOffset
+     * @tc.expected: The result of function return false
+     */
+    auto result = arcAlgorithm->CheckNeedUpdateHeaderOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(result);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

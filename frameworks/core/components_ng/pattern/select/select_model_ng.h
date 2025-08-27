@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace::NG {
 class MenuItemConfiguration : public CommonConfiguration {
@@ -74,14 +76,23 @@ public:
     void SetAvoidance(AvoidanceMode mode) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
-    void SetOptionWidth(const Dimension& value) override;
-    void SetOptionHeight(const Dimension& value) override;
-    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     void SetHasOptionWidth(bool hasOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override;
     void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override;
+    void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override;
+    void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    static RefPtr<SelectTheme> GetSelectTheme(FrameNode* frameNode);
+    static void SetDefaultBackGroundColor(FrameNode* frameNode);
+    static void ResetComponentColor(FrameNode* frameNode, const SelectColorType& type);
+    static std::string ModifierColorTypeToString(const SelectColorType& selectColorType);
+    static void CreateWithColorResourceObj(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectColorType& type);
+    static void CreateWithIntegerResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider);
     static void SetDividerStyle(FrameNode* frameNode, const NG::SelectDivider& divider, const DividerMode& mode);
     static void ResetDividerStyle(FrameNode* frameNode);
@@ -94,11 +105,15 @@ public:
     void BackgroundColor(const Color& color) override;
     void ResetBackgroundColor() override;
     void ResetFontColor() override;
-    void SetMenuOutline(const MenuParam& menuParam) override;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override;
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override;
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override;
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override;
+    void SetShowInSubWindow(bool isShowInSubWindow) override;
+    void ResetShowInSubWindow() override;
+    void SetShowDefaultSelectedIcon(bool show) override;
+    void ResetShowDefaultSelectedIcon() override;
+    void SetMenuOutline(const MenuParam& menuParam) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -127,15 +142,38 @@ public:
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    void SetOptionWidth(const Dimension& value) override;
+    void SetOptionHeight(const Dimension& value) override;
+    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
-    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
+    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
+    static void SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow);
+    static void SetArrowColor(FrameNode* frameNode, const Color& color);
+    static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
+    static void SetColorStatus(FrameNode* frameNode, const SelectColorType& type);
+    void SetMenuBackgroundColorByUser(bool isValidValue = true) override;
+    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetOptionFontColorByUser(bool isValidValue = true) override;
+    static void SetOptionFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetFontColorByUser(bool isValidValue = true) override;
+    static void SetFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetSelectedOptionFontColorByUser(bool isValidValue = true) override;
+    static void SetSelectedOptionFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetOptionBgColorByUser(bool isValidValue = true) override;
+    static void SetOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetSelectedOptionBgColorByUser(bool isValidValue = true) override;
+    static void SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
+
+private:
+    void AddResObjWithCallBack(
+        std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

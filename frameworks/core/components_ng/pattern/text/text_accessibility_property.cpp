@@ -24,17 +24,29 @@ std::string TextAccessibilityProperty::GetText() const
     std::string value = "";
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, value);
-    auto children = frameNode->GetChildren();
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    if (textPattern && textPattern->GetSpanStringMode()) {
+        auto spans = textPattern->GetSpanItemChildren();
+        for (const auto& span : spans) {
+            value += UtfUtils::Str16DebugToStr8(span->content);
+        }
+        return value;
+    }
+    auto children = GetChildren(frameNode);
     if (children.empty()) {
         auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, value);
         value = UtfUtils::Str16DebugToStr8(textLayoutProperty->GetContentValue(std::u16string(u"")));
     } else {
-        auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_RETURN(textPattern, value);
         value = UtfUtils::Str16DebugToStr8(textPattern->GetTextForDisplay());
     }
     return value;
+}
+
+const std::list<RefPtr<UINode>>& TextAccessibilityProperty::GetChildren(const RefPtr<FrameNode>& host) const
+{
+    return host->GetChildren();
 }
 
 bool TextAccessibilityProperty::IsSelected() const

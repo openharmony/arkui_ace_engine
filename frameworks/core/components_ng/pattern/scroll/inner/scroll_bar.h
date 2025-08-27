@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -63,6 +64,16 @@ public:
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
+    virtual bool InBarTouchRegion(const Point& point) const;
+    virtual bool InBarHoverRegion(const Point& point) const;
+    virtual bool InBarRectRegion(const Point& point) const;
+    bool NeedScrollBar() const;
+    bool NeedPaint() const;
+    void UpdateScrollBarRegion(
+        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource);
+    double GetNormalWidthToPx() const;
+    virtual float CalcPatternOffset(float scrollBarOffset) const;
+
     ShapeMode GetShapeMode() const
     {
         return shapeMode_;
@@ -83,16 +94,24 @@ public:
     {
         return padding_;
     }
-    void SetBackgroundColor(const Color& backgroundColor)
+    void SetBackgroundColor(const Color& backgroundColor, const bool isRoundScroll = false)
     {
+        if (isRoundScroll) {
+            arcBackgroundColor_ = backgroundColor;
+            return;
+        }
         backgroundColor_ = backgroundColor;
     }
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
     }
-    void SetForegroundColor(const Color& foregroundColor)
+    void SetForegroundColor(const Color& foregroundColor, const bool isRoundScroll = false)
     {
+        if (isRoundScroll) {
+            arcForegroundColor_ = foregroundColor;
+            return;
+        }
         foregroundColor_ = foregroundColor;
     }
     void SetForegroundHoverBlendColor(const Color& foregroundHoverBlendColor)
@@ -171,6 +190,7 @@ public:
     {
         return positionModeUpdate_;
     }
+
     void SetShapeMode(ShapeMode shapeMode)
     {
         shapeMode_ = shapeMode;
@@ -210,6 +230,14 @@ public:
     bool IsHover() const
     {
         return isHover_;
+    }
+    void SetHoverSlider(bool hover)
+    {
+        isHoverSlider_ = hover;
+    }
+    bool IsHoverSlider() const
+    {
+        return isHoverSlider_;
     }
     OpacityAnimationType GetOpacityAnimationType() const
     {
@@ -331,28 +359,21 @@ public:
     {
         axis_ = axis;
     }
-    void SetScrollPageCallback(ScrollPageCallback&& scrollPageCallback)
+    void SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)
     {
-        scrollPageCallback_ = std::move(scrollPageCallback);
+        scrollBarMargin_ = scrollBarMargin;
+        isScrollBarMarginUpdate_ = true;
+    }
+    const std::optional<ScrollBarMargin>& GetScrollBarMargin() const
+    {
+        return scrollBarMargin_;
     }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
-    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
-    virtual bool InBarTouchRegion(const Point& point) const;
-    virtual bool InBarHoverRegion(const Point& point) const;
-    virtual bool InBarRectRegion(const Point& point) const;
-    bool NeedScrollBar() const;
-    bool NeedPaint() const;
-    void UpdateScrollBarRegion(
-        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource);
-    double GetNormalWidthToPx() const;
-    virtual float CalcPatternOffset(float scrollBarOffset) const;
     Color GetForegroundColor() const;
     void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
-    void SetNormalWidth(const Dimension& normalWidth);
+    void SetNormalWidth(const Dimension& normalWidth, const RefPtr<PipelineContext>& context = nullptr);
     void SetScrollable(bool isScrollable);
     void SetPositionMode(PositionMode positionMode);
     void SetDisplayMode(DisplayMode displayMode);
@@ -365,17 +386,13 @@ public:
     void SetGestureEvent();
     void SetMouseEvent();
     void SetHoverEvent();
-    void FlushBarWidth();
-    virtual void CalcReservedHeight();
+    void FlushBarWidth(const RefPtr<PipelineContext>& context = nullptr);
+    virtual void CalcReservedHeight(const RefPtr<PipelineContext>& context = nullptr);
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
     float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);
     BarDirection CheckBarDirection(const Point& point);
-    void InitLongPressEvent();
-    void HandleLongPress(bool smooth);
-    bool AnalysisUpOrDown(Point point, bool& reverse);
-    void ScheduleCaretLongPress();
     Axis GetPanDirection() const;
     // infos for dump
     void AddScrollBarLayoutInfo();
@@ -390,21 +407,33 @@ public:
     void DumpAdvanceInfo();
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
     void StopFlingAnimation();
-
-    void SetActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
+    void SetScrollPageCallback(ScrollPageCallback&& scrollPageCallback)
     {
-        activeBackgroundWidth_ = activeBackgroundWidth;
+        scrollPageCallback_ = std::move(scrollPageCallback);
+    }
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+    void InitLongPressEvent();
+    void HandleLongPress(bool smooth);
+    bool AnalysisUpOrDown(Point point, bool& reverse);
+    void ScheduleCaretLongPress();
+
+    void SetArcActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
+    {
+        arcActiveBackgroundWidth_ = activeBackgroundWidth;
     }
 
-    void SetActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
+    void SetArcActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
     {
-        activeScrollBarWidth_ = activeScrollBarWidth;
+        arcActiveScrollBarWidth_ = activeScrollBarWidth;
     }
 
     void SetArcBackgroundColor(const Color& backgroundColor)
     {
         arcBackgroundColor_ = backgroundColor;
     }
+
     const Color& GetArcBackgroundColor() const
     {
         return arcBackgroundColor_;
@@ -422,10 +451,10 @@ public:
 
 protected:
     void InitTheme();
-    virtual void SetBarRegion(const Offset& offset, const Size& size);
+    virtual void SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context = nullptr);
     virtual void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
         double mainScrollExtent);
-    double NormalizeToPx(const Dimension& dimension) const;
+    double NormalizeToPx(const Dimension& dimension, const RefPtr<PipelineContext>& context = nullptr) const;
     Dimension GetNormalWidth()
     {
         return normalWidth_;
@@ -526,80 +555,80 @@ protected:
         offsetScale_ = offsetScale;
     }
     
-    void SetNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
+    void SetArcNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
     {
-        normalBackgroundWidth_ = normalBackgroundWidth;
+        arcNormalBackgroundWidth_ = normalBackgroundWidth;
     }
 
-    const Dimension& GetNormalBackgroundWidth() const
+    const Dimension& GetArcNormalBackgroundWidth() const
     {
-        return normalBackgroundWidth_;
+        return arcNormalBackgroundWidth_;
+    }
+ 
+    const Dimension& GetArcActiveBackgroundWidth() const
+    {
+        return arcActiveBackgroundWidth_;
     }
 
-    const Dimension& GetActiveBackgroundWidth() const
+    void SetArcNormalMaxOffsetAngle(double normalMaxOffsetAngle)
     {
-        return activeBackgroundWidth_;
+        arcNormalMaxOffsetAngle_ = normalMaxOffsetAngle;
     }
 
-    void SetNormaMaxOffsetAngle(double normaMaxOffsetAngle)
+    double GetArcNormalMaxOffsetAngle() const
     {
-        normaMaxOffsetAngle_ = normaMaxOffsetAngle;
+        return arcNormalMaxOffsetAngle_;
     }
 
-    double GetNormaMaxOffsetAngle() const
+    void SetArcNormalStartAngle(double normalStartAngle)
     {
-        return normaMaxOffsetAngle_;
+        arcNormalStartAngle_ = normalStartAngle;
     }
 
-    void SetNormalStartAngle(double normalStartAngle)
-    {
-        normalStartAngle_ = normalStartAngle;
-    }
-
-    double GetNormalStartAngle() const
+    double GetArcNormalStartAngle() const
     {
         if (positionMode_ == PositionMode::LEFT) {
-            return -normalStartAngle_ - STRAIGHT_ANGLE;
+            return -arcNormalStartAngle_ - STRAIGHT_ANGLE;
         }
-        return normalStartAngle_;
+        return arcNormalStartAngle_;
     }
 
-    void SetActiveStartAngle(double activeStartAngle)
+    void SetArcActiveStartAngle(double activeStartAngle)
     {
-        activeStartAngle_ = activeStartAngle;
+        arcActiveStartAngle_ = activeStartAngle;
     }
 
-    double GetActiveStartAngle() const
+    double GetArcActiveStartAngle() const
     {
         if (positionMode_ == PositionMode::LEFT) {
-            return -activeStartAngle_ - STRAIGHT_ANGLE;
+            return -arcActiveStartAngle_ - STRAIGHT_ANGLE;
         }
-        return activeStartAngle_;
+        return arcActiveStartAngle_;
     }
 
-    void SetActiveMaxOffsetAngle(double activeMaxOffsetAngle)
+    void SetArcActiveMaxOffsetAngle(double activeMaxOffsetAngle)
     {
-        activeMaxOffsetAngle_ = activeMaxOffsetAngle;
+        arcActiveMaxOffsetAngle_ = activeMaxOffsetAngle;
     }
 
-    double GetActiveMaxOffsetAngle() const
+    double GetArcActiveMaxOffsetAngle() const
     {
-        return activeMaxOffsetAngle_;
+        return arcActiveMaxOffsetAngle_;
     }
 
-    void SetNormalScrollBarWidth(const Dimension& normalScrollBarWidth)
+    void SetArcNormalScrollBarWidth(const Dimension& normalScrollBarWidth)
     {
-        normalScrollBarWidth_ = normalScrollBarWidth;
+        arcNormalScrollBarWidth_ = normalScrollBarWidth;
     }
 
-    const Dimension& GetNormalScrollBarWidth() const
+    const Dimension& GetArcNormalScrollBarWidth() const
     {
-        return normalScrollBarWidth_;
+        return arcNormalScrollBarWidth_;
     }
 
-    const Dimension& GetActiveScrollBarWidth() const
+    const Dimension& GetArcActiveScrollBarWidth() const
     {
-        return activeScrollBarWidth_;
+        return arcActiveScrollBarWidth_;
     }
 
     double GetMinAngle() const
@@ -609,8 +638,7 @@ protected:
 
 private:
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent,
-        int32_t scrollSource);
-    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+        int32_t scrollSource, const RefPtr<PipelineContext>& context = nullptr);
 
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);
@@ -623,7 +651,8 @@ private:
     void ProcessFrictionMotionStop();
     void CalcScrollBarRegion(double activeMainOffset, double activeSize, const Offset& offset, const Size& size,
         double& inactiveMainOffset, double& inactiveSize);
-    void GetRadiusAndPadding(float& startRadius, float& endRadius, float& padding);
+    void GetRadiusAndPadding(
+        float& startRadius, float& endRadius, float& padding, const RefPtr<PipelineContext>& context = nullptr);
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
@@ -643,12 +672,13 @@ private:
     Dimension endReservedHeight_;   // this is reservedHeight on the end
     Dimension inactiveWidth_;
     Dimension activeWidth_;
-    Dimension normalWidth_; // user-set width of the scrollbar
+    Dimension normalWidth_;         // user-set width of the scrollbar
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
-    double barWidth_ = 0.0; // actual width of the scrollbar
+    double barWidth_ = 0.0;         // actual width of the scrollbar
     Dimension position_;
+    int32_t fingerId_ = -1;
     double trickStartAngle_ = 0.0;
     double trickSweepAngle_ = 0.0;
     double topAngle_ = DEFAULT_TOPANGLE;
@@ -666,6 +696,7 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
+    bool isHoverSlider_ = false;
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
@@ -673,6 +704,7 @@ private:
     bool isReverse_ = false;
     bool isReverseUpdate_ = false;
     bool isShowScrollBar_ = false;
+    bool isScrollBarMarginUpdate_ = false;
     Offset paintOffset_;
     Size viewPortSize_;
     Offset lastOffset_;
@@ -691,24 +723,27 @@ private:
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
-    DragFRCSceneCallback dragFRCSceneCallback_;
     Axis axis_ = Axis::VERTICAL;
-    RefPtr<ClickEvent> clickevent_;
-    RefPtr<LongPressRecognizer> longPressRecognizer_;
-    Offset locationInfo_;
+    std::optional<ScrollBarMargin> scrollBarMargin_;
+    DragFRCSceneCallback dragFRCSceneCallback_;
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+
+    RefPtr<ClickEvent> clickevent_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    Offset locationInfo_;
     bool isMousePressed_ = false;
 
-    Dimension normalBackgroundWidth_;
-    Dimension activeBackgroundWidth_;
-    double normalStartAngle_ = 0.0;
-    double activeStartAngle_ = 0.0;
-    double normaMaxOffsetAngle_ = 0.0;
-    double activeMaxOffsetAngle_ = 0.0;
-    Dimension normalScrollBarWidth_;
-    Dimension activeScrollBarWidth_;
+    //arcScrollBar info
+    Dimension arcNormalBackgroundWidth_;
+    Dimension arcActiveBackgroundWidth_;
+    double arcNormalStartAngle_ = 0.0;
+    double arcActiveStartAngle_ = 0.0;
+    double arcNormalMaxOffsetAngle_ = 0.0;
+    double arcActiveMaxOffsetAngle_ = 0.0;
+    Dimension arcNormalScrollBarWidth_;
+    Dimension arcActiveScrollBarWidth_;
     Color arcBackgroundColor_;
     Color arcForegroundColor_;
 };

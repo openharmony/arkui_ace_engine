@@ -66,8 +66,12 @@ namespace {
     const std::string MSG = "Test msg";
     const std::string BOUNDLE_NAME = "com.example.test";
     const std::string ABILITY_NAME = "UIExtensionAbility";
+    const std::string BOUNDLE_NAME_NEW = "com.example.test.new";
+    const std::string ABILITY_NAME_NEW = "UIExtensionAbilityNew";
     const std::string ABILITY_KEY_UIEXTENSIONTYPE = "ability.want.params.uiExtensionType";
     const std::string ABILITY_VALUE_UIEXTENSIONTYPE = "sysPicker/PhotoPicker";
+    const char UEC_ERROR_NAME_1[] = "UEC Error Name 1";
+    const char UEC_ERROR_MSG_1[] = "UEC Error Msg 1";
 } // namespace
 
 class SecurityUIExtensionComponentTestNg : public testing::Test {
@@ -87,6 +91,7 @@ public:
         MockContainer::TearDown();
     }
     RefPtr<SecurityUIExtensionPattern> CreateSecurityUEC();
+    RefPtr<SecurityUIExtensionPattern> CreateSecurityUEC(NG::UIExtensionConfig config);
     void InvalidSession(RefPtr<SecurityUIExtensionPattern> pattern);
     void ValidSession(RefPtr<SecurityUIExtensionPattern> pattern);
     void InvalidSessionWrapper(RefPtr<SecurityUIExtensionPattern> pattern);
@@ -144,6 +149,29 @@ RefPtr<SecurityUIExtensionPattern> SecurityUIExtensionComponentTestNg::CreateSec
     // get pattern
     auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
 
+    return pattern;
+}
+
+RefPtr<SecurityUIExtensionPattern> SecurityUIExtensionComponentTestNg::CreateSecurityUEC(NG::UIExtensionConfig config)
+{
+    // create SecurityUEC
+    UIExtensionModelNG uecNG;
+    config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    uecNG.Create(config);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    // set callbacks
+    auto onReceive = [](const AAFwk::WantParams& wantParams) {};
+    auto onError = [](int32_t code, const std::string& name, const std::string& message) {};
+    auto onRemoteReady = [](const RefPtr<SecurityUIExtensionProxy>&) {};
+    auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    uecNG.SetOnReceive(onReceive, SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    uecNG.SetOnError(onError, SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    uecNG.SetSecurityOnRemoteReady(onRemoteReady);
+    uecNG.SetOnTerminated(onTerminated, SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    // get pattern
+    auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
     return pattern;
 }
 
@@ -869,7 +897,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionOnWindowTest, Te
 
 /**
  * @tc.name: SecurityUIExtensionVisibleTest
- * @tc.desc: Test pattern onVisibleChange function
+ * @tc.desc: Test pattern OnVisibleChange function
  * @tc.type: FUNC
  */
 HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, TestSize.Level1)
@@ -1042,7 +1070,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, OnLanguageConfigurationUpdateTest00
      */
     auto pattern = CreateSecurityUEC();
     pattern->sessionWrapper_ = nullptr;
-    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
 
     /**
      * @tc.steps: step2. sessionWrapper_ is nullptr
@@ -1081,7 +1108,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
      * @tc.steps: step2. test DumpInfo
      */
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo();
 
     pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
@@ -1095,7 +1121,6 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
     std::unique_ptr<JsonValue> testValue = JsonUtil::ParseJsonString(testJson);
 
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo(testValue);
 
     pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
@@ -1587,5 +1612,203 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg0
     EXPECT_TRUE(event.IsEscapeKey());
     pattern->HandleKeyEvent(event);
 #endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentMemberVariablesTestNg
+ * @tc.desc: Test securityUIExtension pattern base member variables
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentMemberVariablesTestNg, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    OHOS::AAFwk::Want want;
+    want.SetElementName(BOUNDLE_NAME, ABILITY_NAME);
+    want.SetParam(ABILITY_KEY_UIEXTENSIONTYPE, ABILITY_VALUE_UIEXTENSIONTYPE);
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode = FrameNode::GetOrCreateFrameNode(
+        "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    NG::UIExtensionConfig config;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
+    config.placeholderNode = placeholderNode;
+    config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    config.transferringCaller = true;
+    config.densityDpi = true;
+    auto pattern = CreateSecurityUEC(config);
+    ValidSessionWrapper(pattern);
+    /**
+     * @tc.steps: step2. test base member variables
+     */
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isVisible_, true);
+    EXPECT_NE(pattern->placeholderNode_, nullptr);
+    EXPECT_EQ(pattern->sessionType_, config.sessionType);
+    EXPECT_EQ(pattern->densityDpi_, config.densityDpi);
+    EXPECT_EQ(pattern->contentNode_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentLifeCycleTestNg_1
+ * @tc.desc: Test securityUIExtension pattern life cycle OnTerminated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCycleTestNg_1, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    ValidSessionWrapper(pattern);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. test Life Cycle OnConnect
+     */
+    pattern->OnConnect();
+    EXPECT_NE(pattern->contentNode_, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    EXPECT_TRUE(pattern->sessionWrapper_->IsSessionValid());
+    /**
+     * @tc.steps: step3. test Life Cycle NotifyForeground
+     */
+    pattern->NotifyForeground();
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
+    /**
+     * @tc.steps: step4. test Life Cycle OnWindowHide
+     */
+    pattern->OnWindowHide();
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
+    /**
+     * @tc.steps: step5. test Life Cycle OnWindowShow
+     */
+    pattern->OnWindowShow();
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
+    /**
+     * @tc.steps: step6. test Life Cycle OnVisibleChange false
+     */
+    pattern->OnVisibleChange(false);
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
+    /**
+     * @tc.steps: step7. test Life Cycle OnVisibleChange true
+     */
+    pattern->OnVisibleChange(true);
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
+    /**
+     * @tc.steps: step8. test Life Cycle OnTerminated
+     */
+    pattern->FireOnTerminatedCallback(0, nullptr);
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::DESTRUCTION);
+    EXPECT_EQ(host->TotalChildCount(), 0);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentLifeCycleTestNg_2
+ * @tc.desc: Test securityUIExtension pattern life cycle FireOnErrorCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCycleTestNg_2, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    OHOS::AAFwk::Want want1;
+    want1.SetElementName(BOUNDLE_NAME, ABILITY_NAME);
+    want1.SetParam(ABILITY_KEY_UIEXTENSIONTYPE, ABILITY_VALUE_UIEXTENSIONTYPE);
+    NG::UIExtensionConfig config;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want1);
+    auto pattern = CreateSecurityUEC(config);
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. test Life Cycle OnConnect
+     */
+    pattern->OnConnect();
+    EXPECT_NE(pattern->contentNode_, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    EXPECT_TRUE(pattern->sessionWrapper_->IsSessionValid());
+    /**
+     * @tc.steps: step4. test Life Cycle NotifyForeground
+     */
+    pattern->NotifyForeground();
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
+    /**
+     * @tc.steps: step5. test Life Cycle OnTerminated
+     */
+    pattern->FireOnErrorCallback(0, "123", "123");
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::NONE);
+    EXPECT_EQ(host->TotalChildCount(), 0);
+    /**
+     * @tc.steps: step6. test Life Cycle UpdateWant
+     */
+    OHOS::AAFwk::Want want2;
+    want2.SetElementName(BOUNDLE_NAME_NEW, ABILITY_NAME_NEW);
+    pattern->instanceId_ = 2;
+    EXPECT_EQ(pattern->CheckConstraint(), true);
+    pattern->UpdateWant(want2);
+    EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
+    pattern->OnConnect();
+    EXPECT_NE(pattern->contentNode_, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    EXPECT_TRUE(pattern->sessionWrapper_->IsSessionValid());
+    /**
+     * @tc.steps: step7. test Life Cycle OnDisconnect
+     */
+    pattern->OnDisconnect(true);
+    EXPECT_EQ(host->TotalChildCount(), 0);
+#endif
+}
+
+/**
+ * @tc.name: UpdateWant001
+ * @tc.desc: Test func UpdateWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, UpdateWant001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isVisible_ = true;
+    pattern->instanceId_= 2;
+    pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->needReNotifyForeground_ = false;
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    InvalidSession(pattern);
+    ASSERT_TRUE(pattern->CheckConstraint());
+
+    pattern->sessionType_ = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    OHOS::AAFwk::Want want;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+
+    pattern->sessionType_ = SessionType::PREVIEW_UI_EXTENSION_ABILITY;
+    pattern->hasAttachContext_ = false;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = false;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
 }
 } //namespace OHOS::Ace::NG

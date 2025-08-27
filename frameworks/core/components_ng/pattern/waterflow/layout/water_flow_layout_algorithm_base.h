@@ -76,8 +76,11 @@ protected:
 
     bool CheckNeedLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool isCache) const
     {
-        return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_;
+        return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_ ||
+               layoutWrapper->IsIgnoreOptsValid();
     }
+
+    bool syncLoad_ = false;
 
 private:
     /**

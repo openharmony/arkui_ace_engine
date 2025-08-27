@@ -83,12 +83,17 @@ private:
     double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
     float CalculateTextFieldWidth(
         LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
+    float GetSearchFieldMinWidth(LayoutWrapper* layoutWrapper);
+    std::optional<float> GetSearchFixAtIdealMaxWidth(LayoutWrapper* layoutWrapper);
+    float GetTextFieldMinWidth(LayoutWrapper* layoutWrapper, const RefPtr<SearchTheme>& searchTheme);
+    float GetTextFieldMaxWidth(LayoutWrapper* layoutWrapper, LayoutCalPolicy layoutPolicy, float maxWidth);
+    void ResetChildrenMeasureSize();
 
     // cached data
     float maxFontScale_;
     float minFontScale_;
     double searchHeight_;
-
+    float searchWidthReducedLength_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

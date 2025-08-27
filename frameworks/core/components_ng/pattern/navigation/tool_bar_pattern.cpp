@@ -68,7 +68,7 @@ void SetBackgroundEffect(RefPtr<FrameNode>& host, const EffectOption &effectOpti
     }
 }
 }
-void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
+void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions& opt)
 {
     bool needUpdateBgOptions = options_ != opt;
     if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
@@ -78,7 +78,7 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
         return;
     }
 
-    options_ = std::move(opt);
+    options_ = opt;
     UpdateBackgroundStyle();
 }
 
@@ -154,7 +154,7 @@ void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
 void NavToolbarPattern::UpdateBarItemBackgroundColor(const RefPtr<FrameNode>& toolBarItemNode,
     const RefPtr<ButtonTheme>& buttonTheme)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         auto renderContext = toolBarItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(buttonTheme->GetClickedColor());
@@ -182,7 +182,7 @@ void NavToolbarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             CHECK_NULL_VOID(buttonTheme);
             auto buttonPattern = toolBarItemNode->GetPattern<ButtonPattern>();
             CHECK_NULL_VOID(buttonPattern);
-            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
                 buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
             }
             if (!toolBarPattern->moveIndex_.has_value()) {
@@ -218,7 +218,7 @@ void NavToolbarPattern::HandleLongPressEvent(const GestureEvent& info)
     CHECK_NULL_VOID(barItemNode);
     ShowDialogWithNode(barItemNode);
     moveIndex_ = containerNode->GetChildIndex(toolBarItem);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         auto pipeline = hostNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto buttonTheme = pipeline->GetTheme<ButtonTheme>();

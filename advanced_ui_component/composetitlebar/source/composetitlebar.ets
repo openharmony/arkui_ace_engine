@@ -172,7 +172,14 @@ struct ComposeTitleBar {
       }
     }
     .onAppear(() => {
-      this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+      try {
+        this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+      } catch (exception) {
+        let code: number = (exception as BusinessError)?.code;
+        let message: string = (exception as BusinessError)?.message;
+        hilog.error(0x3900, 'ComposeTitleBar',
+          `Faild to getFrameNodeByUniqueId,cause, code: ${code}, message: ${message}`);
+      }
     })
     .width('100%')
     .height(ComposeTitleBar.totalHeight)
@@ -260,8 +267,8 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
       hilog.error(0x3900, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
@@ -285,8 +292,8 @@ struct CollapsibleMenuSection {
       }
       return Math.min(this.systemFontScale, this.maxFontScale);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -490,13 +497,27 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_BACK) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace',
+          `Faild to ComposeTitleBar getStringByNameSync icon_back,code: ${code},message:${message}`);
+      }
     } else if (this.item.value === PUBLIC_MORE) {
-      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace',
+          `Faild to ComposeTitleBar getStringByNameSync ohos_toolbar_more,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -531,8 +552,8 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
       hilog.error(0x3900, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
@@ -552,8 +573,8 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale, this.maxFontScale);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -595,7 +616,7 @@ struct ImageMenuItem {
       .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
@@ -701,7 +722,7 @@ struct ImageMenuItem {
       .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
@@ -887,14 +908,20 @@ struct ComposeTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'ComposeTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

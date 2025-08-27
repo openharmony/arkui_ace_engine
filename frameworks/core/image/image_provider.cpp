@@ -23,7 +23,7 @@
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_object.h"
@@ -234,7 +234,8 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
-    auto data = imageLoader->LoadImageData(imageInfo, context);
+    NG::ImageLoadResultInfo errorInfo;
+    auto data = imageLoader->LoadImageData(imageInfo, errorInfo, context);
     if (data && imageCache) {
         // cache drawing data.
         imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<NG::DrawingImageData>(data));
@@ -274,7 +275,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
             LOGE("load image failed when create image loader.");
             return;
         }
-        auto imageData = imageLoader->LoadImageData(info, context);
+        NG::ImageLoadResultInfo errorInfo;
+        auto imageData = imageLoader->LoadImageData(info, errorInfo, context);
         if (imageData) {
             auto skData = SkData::MakeWithoutCopy(imageData->GetData(), imageData->GetSize());
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(skData));
@@ -499,7 +501,8 @@ std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(
         LOGE("Invalid src, src is %{private}s", src.c_str());
         return nullptr;
     }
-    auto imageData = imageLoader->LoadImageData(info, context);
+    NG::ImageLoadResultInfo errorInfo;
+    auto imageData = imageLoader->LoadImageData(info, errorInfo, context);
     if (!imageData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;

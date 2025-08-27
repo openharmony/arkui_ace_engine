@@ -90,9 +90,11 @@ export struct CalendarPickerDialogBootcamp {
   @State enableCompDisabledDateRange: boolean = false;
   @State compDisabledDateRange: DateRange[] = [{ start: new Date('2020-12-10'), end: new Date('2020-12-11') }];
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   build() {
     NavDestination() {
       Drawer({

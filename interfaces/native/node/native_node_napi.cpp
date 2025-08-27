@@ -15,7 +15,7 @@
 
 #include "native_node_napi.h"
 
-
+#include "napi/native_node_api.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 
@@ -167,6 +167,45 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
     }
     *content = reinterpret_cast<ArkUI_NodeContentHandle>(nativePtr);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
+{
+    CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto callback = [](const char* moduleName) -> bool {
+        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext",
+            "arkui.observer", "arkui.inspector", "font", "arkui.uicontext" };
+        for (const char* allowedModule : allowedModules) {
+            if (std::strcmp(moduleName, allowedModule) == 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    // This function is guaranteed to be called only from a single thread,
+    // so there is no need for synchronization or thread-safety mechanisms.
+    static std::once_flag set_callback_flag;
+    static napi_status ret = napi_ok;
+    std::call_once(set_callback_flag, [callback]() {
+        ret = napi_set_module_validate_callback(callback);
+    });
+    if (ret != napi_ok) {
+        LOGE("fail to set module validate callback");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getRuntimeInit()->registerViews(reinterpret_cast<void*>(env));
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_NotifyArkTSEnvDestroy(napi_env env)
+{
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(OHOS::Ace::NodeModel::InitialFullImpl());
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_VOID(impl);
+    impl->getRuntimeInit()->notifyArkTSEnvDestroy(reinterpret_cast<void*>(env));
 }
 
 int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
@@ -427,6 +466,24 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
     auto ret = basicAPI->postFrameCallback(id, userData, callback);
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
         LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
+    }
+    return static_cast<ArkUI_ErrorCode>(ret);
+}
+
+int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto basicAPI = fullImpl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    auto id = context->id;
+    auto ret = basicAPI->postIdleCallback(id, userData, callback);
+    if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
+        LOGF_ABORT("OH_ArkUI_PostIdleCallback doesn't run on UI thread!");
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }

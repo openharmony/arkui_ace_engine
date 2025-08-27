@@ -46,6 +46,7 @@ public:
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;
+    void UpdateMouseHotZone();
 
 private:
     bool UpdateHandleHotZoneWithPoint();
@@ -53,6 +54,7 @@ private:
     DimensionRect ConvertToHotRect(const RectF& rect);
     bool IsHandleInSameLine(const RectF& first, const RectF& second);
     OffsetF GetHandleHotZoneOffset(bool isFirst, float raidus, bool handleOnTop);
+    bool IsDraggingSingleHandle();
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayPattern);

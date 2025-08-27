@@ -20,6 +20,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -151,12 +152,20 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushMessages();
 }
 
-void PipelineContext::FlushMessages()
+void PipelineContext::FlushMessages(std::function<void()> callback)
 {
     ACE_FUNCTION_TRACK();
+    if (isFirstPage_) {
+        LOGI("page not loaded, wait..");
+        return;
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SendMessages();
+        if (!callback) {
+            rsUIDirector_->SendMessages();
+        } else {
+            rsUIDirector_->SendMessages(callback);
+        }
     }
 #endif
 }
@@ -166,6 +175,10 @@ void PipelineContext::FlushBuild()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+    if (vsyncListener_) {
+        ACE_SCOPED_TRACE("arkoala build");
+        vsyncListener_();
+    }
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
@@ -838,7 +851,8 @@ void PipelineContext::SetupRootElement()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
-        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootRenderNode->GetRSNode()));
         if (windowModal_ == WindowModal::CONTAINER_MODAL) {
             rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
         } else {
@@ -891,7 +905,8 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     window_->SetRootRenderNode(rootRenderNode);
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootRenderNode->GetRSNode()));
         auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
         if (renderRoot) {
             rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
@@ -1270,7 +1285,7 @@ void PipelineContext::ExitAnimation()
 }
 
 // return true if user accept or page is not last, return false if others condition
-bool PipelineContext::CallRouterBackToPopPage()
+bool PipelineContext::CallRouterBackToPopPage(bool* isUserAccept)
 {
     CHECK_RUN_ON(PLATFORM);
     auto frontend = weakFrontend_.Upgrade();
@@ -1282,6 +1297,9 @@ bool PipelineContext::CallRouterBackToPopPage()
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
+        if (isUserAccept) {
+            *isUserAccept = true;
+        }
         return true;
     }
     auto stageElement = GetStageElement();
@@ -1527,7 +1545,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
+    ReportConfig config;
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -1965,7 +1984,7 @@ void PipelineContext::SetCardViewAccessibilityParams(const std::string& key, boo
     accessibilityManager->SetCardViewParams(key, focus);
 }
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
@@ -3274,7 +3293,8 @@ void PipelineContext::AddKeyFrame(
     pendingImplicitLayout_.pop();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    RSNode::AddKeyFrame(rsUIContext, fraction, NativeCurveHelper::ToNativeCurve(curve), propertyChangeCallback);
 #endif
 }
 
@@ -3303,7 +3323,8 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
     pendingImplicitLayout_.pop();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    RSNode::AddKeyFrame(fraction, propertyChangeCallback);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    RSNode::AddKeyFrame(rsUIContext, fraction, propertyChangeCallback);
 #endif
 }
 

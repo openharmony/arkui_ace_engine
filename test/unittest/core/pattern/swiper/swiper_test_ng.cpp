@@ -140,6 +140,18 @@ void SwiperTestNg::CreateSwiperItems(int32_t itemNumber)
     }
 }
 
+RefPtr<FrameNode> SwiperTestNg::CreateSwiper(const std::function<void(SwiperModelNG)>& callback)
+{
+    SwiperModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
 void SwiperTestNg::CreateItemWithSize(float width, float height)
 {
     ButtonModelNG buttonModelNG;
@@ -301,6 +313,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.expected: Related function is called.
      */
     auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;
@@ -1448,6 +1461,7 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     CreateSwiperDone();
     int32_t expectedRate = 60;
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
+    EXPECT_NE(frameRateRange, nullptr);
     pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
     auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
     int32_t nodeId = frameNode_->GetId();
@@ -1592,40 +1606,84 @@ HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level
 }
 
 /**
- * @tc.name: OnInjectionEventTest001
- * @tc.desc: test OnInjectionEvent
+ * @tc.name: OnModifyDone_StopAndResetSpringAnimation
+ * @tc.desc: Test SwiperPattern OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, OnModifyDone_StopAndResetSpringAnimation, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    int32_t currentIndex = 3;
-    auto onChange = [&currentIndex](const BaseEventInfo* info) {
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (swiperInfo != nullptr) {
-            currentIndex = swiperInfo->GetIndex();
-        }
-    };
-    SwiperModelNG model = CreateSwiper();
-    model.SetOnChange(std::move(onChange));
-    CreateSwiper();
-    CreateSwiperItems();
-    CreateSwiperDone();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 2);
-    command = R"({"cmd":"changeIndex","params":{"index":100}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 0);
-    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
-    EXPECT_EQ(currentIndex, 0);
-    pattern->OnInjectionEvent(command);
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.clear();
+    frameNode->nodeId_ = 2;
+    RefPtr<SwiperEventHub> swiperEventHub = AceType::MakeRefPtr<SwiperEventHub>();
+    WeakPtr<EventHub> eventHub = swiperEventHub;
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    swiperEventHub->gestureEventHub_ = gestureEventHub;
+    frameNode->eventHub_ = swiperEventHub;
+    swiperLayoutProperty->propIndex_ = 2;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->isTouchDownSpringAnimation_ = false;
+    swiperPattern->springAnimationIsRunning_ = true;
+    swiperPattern->isBindIndicator_ = true;
+    swiperPattern->currentDelta_ = 2.0f;
+    swiperPattern->OnModifyDone();
+    EXPECT_EQ(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE_SELF);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.0f);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap_GetJumpIndex
+ * @tc.desc: Test SwiperPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnDirtyLayoutWrapperSwap_GetJumpIndex, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    RefPtr<SwiperPaintProperty> swiperPaintProperty = AceType::MakeRefPtr<SwiperPaintProperty>();
+    RefPtr<SwiperLayoutAlgorithm> swiperLayoutAlgorithm = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
+    swiperLayoutAlgorithm->jumpIndex_ = 3;
+    swiperPaintProperty->UpdateAutoPlay(true);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.clear();
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    frameNode->paintProperty_ = swiperPaintProperty;
+    swiperPattern->frameNode_ = frameNode;
+    RefPtr<SwiperIndicatorLayoutProperty> swiperIndicatorLayoutProperty =
+        AceType::MakeRefPtr<SwiperIndicatorLayoutProperty>();
+    swiperPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, swiperLayoutProperty);
+    layoutWrapper->hostNode_ = frameNode;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
+    layoutAlgorithmWrapper->layoutAlgorithm_ = swiperLayoutAlgorithm;
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    SwiperItemInfo itemInfo;
+    itemInfo.startPos = 2.0f;
+    itemInfo.endPos = 8.0f;
+    swiperPattern->itemPosition_.clear();
+    swiperPattern->itemPosition_[0] = itemInfo;
+    DirtySwapConfig config;
+    config.skipLayout = false;
+    config.skipMeasure = false;
+    swiperPattern->isDragging_ = true;
+    swiperPattern->isInit_ = false;
+    swiperPattern->isUserFinish_ = false;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->targetIndex_.reset();
+    swiperPattern->jumpIndex_.reset();
+    swiperPattern->currentIndexOffset_ = 2.0f;
+    swiperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 0.0f);
 }
 
 /**
@@ -1646,5 +1704,590 @@ HWTEST_F(SwiperTestNg, SwipeAutoLinearIsOutOfBoundary001, TestSize.Level1)
     EXPECT_FALSE(pattern_->itemPosition_.empty());
     EXPECT_FALSE(pattern_->itemPosition_.size() < pattern_->TotalCount());
     EXPECT_FALSE(pattern_->AutoLinearIsOutOfBoundary(0.f));
+}
+
+/**
++ * @tc.name: BuildAxisInfo001
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::NONE;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "NONE");
+}
+
+/**
++ * @tc.name: BuildAxisInfo002
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "HORIZONTAL");
+}
+
+/**
++ * @tc.name: BuildAxisInfo003
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::FREE;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "FREE");
+}
+
+/**
++ * @tc.name: BuildAxisInfo004
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::VERTICAL;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "VERTICAL");
+}
+
+/**
++ * @tc.name: BuildAxisInfo005
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto direct = 5;
+    swiperPattern->direction_ = (Axis)direct;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "");
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo001
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, swiperPattern);
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, swiperPattern);
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperPattern->itemPosition_ = itemPosition;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_TRUE(json->GetValue("itemPosition"));
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo002
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperPattern->itemPosition_ = itemPosition;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_EQ(json->GetString("itemPosition"), "");
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo003
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPositionInAnimation.insert(std::make_pair(0, item1));
+    itemPositionInAnimation.insert(std::make_pair(1, item2));
+    swiperPattern->itemPositionInAnimation_ = itemPositionInAnimation;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_TRUE(json->GetValue("itemPositionInAnimation"));
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo004
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation;
+    swiperPattern->itemPositionInAnimation_ = itemPositionInAnimation;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("itemPositionInAnimation"), "");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo001
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DOT");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo002
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DIGIT");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo003
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto lastSwiperIndicatorType = 5;
+    swiperPattern->lastSwiperIndicatorType_ = (SwiperIndicatorType)lastSwiperIndicatorType;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo004
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("lastSwiperIndicatorType"), "null");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo001
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::NONE;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "NONE");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo002
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::LEFT;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "LEFT");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo003
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::RIGHT;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "RIGHT");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo004
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::HORIZONTAL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "HORIZONTAL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo005
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::UP;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "UP");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo006
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo006, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::DOWN;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "DOWN");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo007
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo007, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::VERTICAL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "VERTICAL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo008
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo008, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::ALL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "ALL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo009
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo009, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    uint32_t type = 10;
+    swiperPattern->panDirection_.type = type;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "");
+}
+
+/**
+ * @tc.name: CustomAnimationHandleDragEnd001
+ * @tc.desc: Test SwiperPattern HandleDragEnd on custom animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomAnimationHandleDragEnd001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    SwiperContentAnimatedTransition transitionInfo;
+    transitionInfo.timeout = 0;
+    transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+    model.SetCustomContentTransition(transitionInfo);
+    auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::TOUCHPAD);
+    info.SetGlobalLocation(Offset(100.f, 100.f));
+    info.SetMainDelta(100.0f);
+    info.SetMainVelocity(2000.f);
+
+    pattern_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+    auto offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
+
+    pattern_->HandleDragEnd(2000.f, 0.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+
+    offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
+}
+
+/**
+ * @tc.name: CheckTargetPositon001
+ * @tc.desc: Test SwiperPattern CheckTargetPositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CheckTargetPositon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Change contentMainSize_ to a value different from contentMainSizeBeforeAni_
+     */
+    pattern_->contentMainSizeBeforeAni_ = pattern_->contentMainSize_ * 2;
+    pattern_->targetIndex_ = 1;
+    float offset = 0.f;
+    /**
+     * @tc.steps: step3. The offset will be adjusted
+     */
+    pattern_->CheckTargetPositon(offset);
+    EXPECT_EQ(offset, -pattern_->itemPosition_[1].startPos);
+}
+
+/**
+ * @tc.name: NotifyDataChange001
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    swiperPattern->oldChildrenSize_ = std::nullopt;
+    swiperPattern->jumpIndex_ = 3;
+    swiperPattern->NotifyDataChange(0, 0);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 3);
+}
+
+/**
+ * @tc.name: NotifyDataChange002
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->jumpIndex_ = 2;
+    swiperPattern->NotifyDataChange(0, 0);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 2);
+}
+
+/**
+ * @tc.name: NotifyDataChange003
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    swiperNode->children_.clear();
+    swiperNode->children_ = { frameNode, frameNode, frameNode, frameNode, frameNode, frameNode, frameNode, frameNode };
+    swiperLayoutProperty->propMinSize_ = std::nullopt;
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    swiperLayoutProperty->propDisplayCount_ = 5;
+    swiperLayoutProperty->propSwipeByGroup_ = true;
+    swiperNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = swiperNode;
+    swiperPattern->hasCachedCapture_ = true;
+    swiperPattern->isBindIndicator_ = true;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 2);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 3);
+}
+
+/**
+ * @tc.name: NotifyDataChange004
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = false;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 2);
+    EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
+}
+
+/**
+ * @tc.name: NotifyDataChange005
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(4, 2);
+    EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
+}
+
+/**
+ * @tc.name: NotifyDataChange006
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange006, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    swiperNode->children_.clear();
+    swiperNode->children_ = { frameNode, frameNode };
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    swiperNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = swiperNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 0;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 1);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 1);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding001
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(padding.top, 10);
+    EXPECT_EQ(padding.bottom, 10);
+    EXPECT_EQ(padding.left, std::nullopt);
+    EXPECT_EQ(padding.right, std::nullopt);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding002
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(padding.top, std::nullopt);
+    EXPECT_EQ(padding.bottom, std::nullopt);
+    EXPECT_EQ(padding.left, 10);
+    EXPECT_EQ(padding.right, 10);
 }
 } // namespace OHOS::Ace::NG

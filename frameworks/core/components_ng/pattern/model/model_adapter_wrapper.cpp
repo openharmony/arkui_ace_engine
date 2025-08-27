@@ -64,6 +64,9 @@ std::shared_future<void> ModelAdapterWrapper::Deinit()
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
         sceneAdapter_->Deinit();
+        if (textureLayer_) {
+            textureLayer_->DestroyRenderTarget();
+        }
         return std::shared_future<void>();
     }
 #endif

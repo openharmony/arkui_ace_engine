@@ -37,7 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
@@ -93,7 +93,6 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     jsEvent(&eventInfo);
                 }, true);
         }
-        pattern->ReportComponentChangeEvent(currentIndex);
     });
 
     if (onChangeEvent_) {
@@ -578,7 +577,6 @@ void TabsPattern::InitAccessibilityZIndex()
     CHECK_NULL_VOID(tabsLayoutProperty);
     BarPosition barPosition = tabsLayoutProperty->GetTabBarPositionValue(BarPosition::START);
     if (barPosition != barPosition_) {
-        barPosition_ = barPosition;
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -594,6 +592,7 @@ void TabsPattern::InitAccessibilityZIndex()
             swiperAccessibilityProperty->SetAccessibilityZIndex(0);
             tabBarAccessibilityProperty->SetAccessibilityZIndex(1);
         }
+        barPosition_ = barPosition;
     }
 }
 
@@ -660,7 +659,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     }
     if (!tabsLayoutProperty->GetIndex().has_value()) {
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
-        tabsLayoutProperty->UpdateIndex(indexSetByUser);
+        tabsLayoutProperty->UpdateIndex(indexSetByUser < 0 ? 0 : indexSetByUser);
     } else {
         auto preIndex = tabsLayoutProperty->GetIndex().value();
         if (preIndex == index || index < 0) {
@@ -793,65 +792,33 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
     }
 }
 
-void TabsPattern::ReportComponentChangeEvent(int32_t currentIndex)
+void TabsPattern::OnColorModeChange(uint32_t colorMode)
 {
-    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
-        return;
-    }
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("index", currentIndex);
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("cmd", "onTabBarClick");
-    json->Put("params", params);
-
-    auto result = JsonUtil::Create();
-    CHECK_NULL_VOID(result);
-    auto nodeId = host->GetId();
-    result->Put("nodeId", nodeId);
-    result->Put("event", json);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
-}
-
-bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
-{
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || !json->IsValid() || !json->IsObject()) {
-        return false;
-    }
-
-    if (json->GetString("cmd") != "changeIndex") {
-        TAG_LOGW(AceLogTag::ACE_TABS, "Invalid command");
-        return false;
-    }
-
-    auto paramJson = json->GetValue("params");
-    if (!paramJson || !paramJson->IsObject()) {
-        return false;
-    }
-
-    targetIndex = paramJson->GetInt("index");
-    return true;
-}
-
-int32_t TabsPattern::OnInjectionEvent(const std::string& command)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, RET_FAILED);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_RETURN(tabsNode, RET_FAILED);
-    int32_t targetIndex = 0;
-    if (!GetTargetIndex(command, targetIndex)) {
-        return RET_FAILED;
-    }
+    CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_RETURN(tabBarNode, RET_FAILED);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_RETURN(tabBarPattern, RET_FAILED);
-    tabBarPattern->ChangeIndex(targetIndex);
-    return RET_SUCCESS;
+    CHECK_NULL_VOID(tabBarNode);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(theme);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() ||
+        (tabsLayoutProperty->HasDividerColorSetByUser() && !tabsLayoutProperty->GetDividerColorSetByUserValue())) {
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.color = theme->GetDividerColor();
+        auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+        CHECK_NULL_VOID(dividerFrameNode);
+        auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(currentDivider.color);
+    }
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

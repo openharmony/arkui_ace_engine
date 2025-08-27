@@ -6,11 +6,6 @@
       "buildFunction": "NavIndexBuilder"
     },
     {
-      "name": "UIExtensionTest",
-      "pageSourceFile": "src/main/ets/pages/UIExtensionTestPage.ets",
-      "buildFunction": "NavIndexBuilder"
-    },
-    {
       "name": "DialogIndex",
       "pageSourceFile": "src/main/ets/pages/components/dialog/Index.ets",
       "buildFunction": "DialogIndexBuilder"
@@ -51,14 +46,39 @@
       "buildFunction": "DialogFocusableBuilder"
     },
     {
+      "name": "AlertDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialogAvoidTest.ets",
+      "buildFunction": "AlertDialogAvoidBuilder"
+    },
+    {
+      "name": "CustomDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialogAvoidTest.ets",
+      "buildFunction": "CustomDialogAvoidBuilder"
+    },
+    {
       "name": "EmbeddedDialogPageOne",
       "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
       "buildFunction": "EmbeddedDialogPageOneBuilder"
     },
     {
+      "name": "DialogLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevel0.ets",
+      "buildFunction": "DialogLevelOBuilder"
+    },
+    {
       "name": "MenuIndex",
       "pageSourceFile": "src/main/ets/pages/components/menu/Index.ets",
       "buildFunction": "MenuIndexBuilder"
+    },
+    {
+      "name": "MultiMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/multiMenu.ets",
+      "buildFunction": "MultiMenuBuilder"
+    },
+    {
+      "name": "MultiMenuSymbol",
+      "pageSourceFile": "src/main/ets/pages/components/menu/multiMenuSymbol.ets",
+      "buildFunction": "MultiMenuSymbolBuilder"
     },
     {
       "name": "BindMenu",
@@ -71,6 +91,166 @@
       "buildFunction": "BindContextMenuBuilder"
     },
     {
+      "name": "BindContextMenuRightClick",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuRightClick.ets",
+      "buildFunction": "BindContextMenuRightClickBuilder"
+    },
+    {
+      "name": "BindMenuCustomBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuCustomBuilder.ets",
+      "buildFunction": "BindMenuCustomBuilder"
+    },
+    {
+      "name": "BindContextMenuPreviewMode",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewMode.ets",
+      "buildFunction": "BindContextMenuPreviewModeBuilder"
+    },
+    {
+      "name": "BindContextMenuPreviewCustomBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewCustomBuilder.ets",
+      "buildFunction": "BindContextMenuPreviewCustomBuilder"
+    },
+    {
+      "name": "BindContextMenuIsShown",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuIsShown.ets",
+      "buildFunction": "BindContextMenuIsShownBuilder"
+    },
+    {
+      "name": "BindContextMenuTransition",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuTransition.ets",
+      "buildFunction": "BindContextMenuTransitionBuilder"
+    },
+    {
+      "name": "BindMenuSymbolIcon",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuSymbolIcon.ets",
+      "buildFunction": "BindMenuSymbolIconBuilder"
+    },
+    {
+      "name": "BindContextMenuHoverScale",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuHoverScale.ets",
+      "buildFunction": "BindContextMenuHoverScaleBuilder"
+    },
+    {
+      "name": "BindMenuBackgroundBlurStyle",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuBackgroundBlurStyle.ets",
+      "buildFunction": "BindMenuBackgroundBlurStyleBuilder"
+    },
+    {
+      "name": "BindMenuBackgroundEffect",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuBackgroundEffect.ets",
+      "buildFunction": "BindMenuBackgroundEffectBuilder"
+    },
+    {
+      "name": "MenuDivider",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuDivider.ets",
+      "buildFunction": "MenuDividerBuilder"
+    },
+    {
+      "name": "MenuExpand",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuExpand.ets",
+      "buildFunction": "MenuExpandBuilder"
+    },
+    {
+      "name": "MenuPressStatus",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuPressStatus.ets",
+      "buildFunction": "MenuPressStatusBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewBottom",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewBottom.ets",
+      "buildFunction": "bindContextMenuPreviewBottomBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewRight",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewRight.ets",
+      "buildFunction": "bindContextMenuPreviewRightBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewLeft",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewLeft.ets",
+      "buildFunction": "bindContextMenuPreviewLeftBuilder"
+    },
+    {
+      "name": "bindContextMenuPreviewTop",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewTop.ets",
+      "buildFunction": "bindContextMenuPreviewTopBuilder"
+    },
+    {
+      "name": "bindContextMenuBottom",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuBottom.ets",
+      "buildFunction": "bindContextMenuBottomBuilder"
+    },
+    {
+      "name": "bindContextMenuTop",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuTop.ets",
+      "buildFunction": "bindContextMenuTopBuilder"
+    },
+    {
+      "name": "bindContextMenuRight",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuRight.ets",
+      "buildFunction": "bindContextMenuRightBuilder"
+    },
+    {
+      "name": "bindContextMenuLeft",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuLeft.ets",
+      "buildFunction": "bindContextMenuLeftBuilder"
+    },
+    {
+      "name": "bindContextMenuPreview",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreview.ets",
+      "buildFunction": "bindContextMenuPreviewBuilder"
+    },
+    {
+      "name": "MenuLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel0.ets",
+      "buildFunction": "MenuLevel0Builder"
+    },
+    {
+      "name": "MenuLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel1.ets",
+      "buildFunction": "MenuLevel1Builder"
+    },
+    {
+      "name": "MenuLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel2.ets",
+      "buildFunction": "MenuLevel2Builder"
+    },
+    {
+      "name": "stackMenuAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/menu/stackMenuAvoid.ets",
+      "buildFunction": "stackMenuAvoidBuilder"
+    },
+    {
+      "name": "MultiLevelSubMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MultiLevelSubMenu.ets",
+      "buildFunction": "MultiLevelSubMenuBuilder"
+    },
+    {
+      "name": "MenuTestLevel0_0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel0_0.ets",
+      "buildFunction": "MenuTestLevel0_0Builder"
+    },
+    {
+      "name": "MenuTestLevel01",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel01.ets",
+      "buildFunction": "MenuTestLevel01Builder"
+    },
+    {
+      "name": "MenuTestLevel010",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel010.ets",
+      "buildFunction": "MenuTestLevel010Builder"
+    },
+    {
+      "name": "MenuTestLevel011",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel011.ets",
+      "buildFunction": "MenuTestLevel011Builder"
+    },
+    {
+      "name": "MenuTestLevel012",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel012.ets",
+      "buildFunction": "MenuTestLevel012Builder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"
@@ -80,6 +260,12 @@
       "pageSourceFile": "src/main/ets/pages/components/overlay/overlayLevelOrder.ets",
       "buildFunction": "OverlayLevelOrderBuilder"
     },
+    {
+      "name": "OverlayManagerHitTest",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
+      "buildFunction": "OverlayManagerHitBuilder"
+    },
+
     {
       "name": "PopupIndex",
       "pageSourceFile": "src/main/ets/pages/components/popup/Index.ets",
@@ -91,6 +277,86 @@
       "buildFunction": "PopupBuilder"
     },
     {
+      "name": "popupPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupPositionTest.ets",
+      "buildFunction": "PopupPositionBuilder"
+    },
+    {
+      "name": "PopupStyleBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupStyleTest.ets",
+      "buildFunction": "PopupStyleBuilder"
+    },
+    {
+      "name": "PopupDismissTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDismissTets.ets",
+      "buildFunction": "PopupDismissBuilder"
+    },
+    {
+      "name": "PopupAdvancedTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAdvancedTest.ets",
+      "buildFunction": "PopupAdvancedBuilder"
+    },
+    {
+      "name": "PopupAnimateTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAnimateTest.ets",
+      "buildFunction": "PopupAnimateBuilder"
+    },
+    {
+      "name": "PopupTipTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupTipTest.ets",
+      "buildFunction": "PopupTipBuilder"
+    },
+    {
+      "name": "PopupDragTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDragTest.ets",
+      "buildFunction": "PopupDragBuilder"
+    },
+    {
+      "name": "PopupMessageTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMessageTest.ets",
+      "buildFunction": "PopupMessageBuilder"
+    },
+    {
+      "name": "PopupComplexTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupComplexTest.ets",
+      "buildFunction": "PopupComplexBuilder"
+    },
+    {
+      "name": "popupMutiTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMutiTest.ets",
+      "buildFunction": "PopupMutiBuilder"
+    },
+    {
+      "name": "openPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/openPopupTest.ets",
+      "buildFunction": "OpenPopupBuilder"
+    },
+    {
+      "name": "popupBlurTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBlurTest.ets",
+      "buildFunction": "PopupBlurBuilder"
+    },
+    {
+      "name": "popupBuilderTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBuilderTest.ets",
+      "buildFunction": "PopupBuilderTestBuilder"
+    },
+    {
+      "name": "PopupKeyboardTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupKeyboardTest.ets",
+      "buildFunction": "PopupKeyboardBuilder"
+    },
+    {
+      "name": "UIContextPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/UIContextPopup.ets",
+      "buildFunction": "UIContextPopupBuilder"
+    },
+    {
+      "name": "PopupBigTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBigTest.ets",
+      "buildFunction": "PopupBigBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"
@@ -99,6 +365,16 @@
       "name": "Toast",
       "pageSourceFile": "src/main/ets/pages/components/toast/toast.ets",
       "buildFunction": "ToastBuilder"
+    },
+    {
+      "name": "showToastTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/showToastTest.ets",
+      "buildFunction": "ShowToastBuilder"
+    },
+    {
+      "name": "toastPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
+      "buildFunction": "ToastPositionBuilder"
     }
   ]
 }

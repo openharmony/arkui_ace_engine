@@ -253,6 +253,21 @@ public:
     {
         return nullptr;
     }
+
+    virtual bool ExistDarkResById(const std::string& resourceId)
+    {
+        return false;
+    }
+
+    virtual bool ExistDarkResByName(const std::string& resourceName, const std::string& resourceType)
+    {
+        return false;
+    }
+
+    virtual uint32_t GetResId(const std::string &resTypeName) const
+    {
+        return -1;
+    }
 };
 
 } // namespace OHOS::Ace

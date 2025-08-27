@@ -52,6 +52,7 @@ public:
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
+    void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
@@ -65,6 +66,8 @@ public:
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
+    void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) override;
+    void ResetContentTransition() override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
@@ -82,10 +85,18 @@ public:
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetEnableAutoSpacing(bool enabled) override;
+    void SetLineThicknessScale(float value) override;
+    void SetOptimizeTrailingSpace(bool trim) override;
+    void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetColorShaderStyle(const Color& value) override;
+    void ResetGradientShaderStyle() override;
+    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -102,7 +113,7 @@ public:
     static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
-    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
     static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -181,9 +192,26 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnPrepareMenuCallbackUpdate(
+        FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static size_t GetLineCount(FrameNode* frameNode);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetLineThicknessScale(FrameNode* frameNode, float value);
+    static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
+    static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
+    static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
+    static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static NG::Gradient GetGradientStyle(FrameNode* frameNode);
+    static void ResetTextGradient(FrameNode* frameNode);
+    static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);
+    static TextVerticalAlign GetTextVerticalAlign(FrameNode* frameNode);
+    static void SetContentTransition(
+        FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur);
+    static void ResetContentTransition(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -59,6 +59,21 @@ public:
         return RunCustomizeExpandIfNeeded(host);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(NavigationContentPattern);
 };
 } // namespace OHOS::Ace::NG

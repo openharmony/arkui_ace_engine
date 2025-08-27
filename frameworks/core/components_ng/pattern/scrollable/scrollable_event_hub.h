@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ScrollableEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ScrollableEventHub, EventHub)
+    DECLARE_ACE_TYPE(ScrollableEventHub, EventHub);
 
 public:
     ScrollableEventHub() = default;
@@ -105,6 +105,16 @@ public:
     const OnReachEvent& GetOnReachEnd() const
     {
         return onReachEndEvent_;
+    }
+
+    void SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopdragging)
+    {
+        onWillStopDraggingEvent_ = std::move(onWillStopdragging);
+    }
+
+    const OnWillStopDraggingEvent& GetOnWillStopDragging() const
+    {
+        return onWillStopDraggingEvent_;
     }
 
     void SetJSFrameNodeOnReachStart(OnReachEvent&& onScroll)
@@ -235,6 +245,7 @@ private:
     OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
     OnReachEvent onReachStartEvent_;
     OnReachEvent onReachEndEvent_;
+    OnWillStopDraggingEvent onWillStopDraggingEvent_;
 
     OnReachEvent onJSFrameNodeReachStartEvent_;
     OnReachEvent onJSFrameNodeReachEndEvent_;

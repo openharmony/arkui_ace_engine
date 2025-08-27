@@ -186,7 +186,7 @@ OffsetF GridRowTestNg::GetColOffset(RefPtr<LayoutWrapperNode>& layoutWrapper, in
  * @tc.desc: Test GridRow Measure().
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm001, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm001, TestSize.Level0)
 {
     TestGridColWidth(0, 0);
     TestGridColWidth(1, 1);
@@ -198,7 +198,7 @@ HWTEST_F(GridRowTestNg, Algorithm001, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different span/offset.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm002, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm002, TestSize.Level0)
 {
     // Set the first col: span + offset == columns
     // Test second col position
@@ -219,7 +219,7 @@ HWTEST_F(GridRowTestNg, Algorithm002, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different sizetype.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm003, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm003, TestSize.Level0)
 {
     /* update grid-row columns of LG size */
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -242,7 +242,7 @@ HWTEST_F(GridRowTestNg, Algorithm003, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different gutter.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm004, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm004, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     constexpr float gutterVal = 20.0f;
@@ -262,7 +262,7 @@ HWTEST_F(GridRowTestNg, Algorithm004, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different direction.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm005, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. V2::GridRowDirection::Row
@@ -303,7 +303,7 @@ HWTEST_F(GridRowTestNg, Algorithm005, TestSize.Level1)
  * @tc.desc: Test GridCol layout order.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level0)
 {
     auto colLayoutFront = colNodes_.front()->GetLayoutProperty<GridColLayoutProperty>();
     colLayoutFront->UpdateOrder(V2::GridContainerSize(6));
@@ -322,7 +322,7 @@ HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level1)
  *           System parameter is left to right.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm007, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm007, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -354,7 +354,7 @@ HWTEST_F(GridRowTestNg, Algorithm007, TestSize.Level1)
  *           System parameter is right to left.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm008, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm008, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -387,7 +387,7 @@ HWTEST_F(GridRowTestNg, Algorithm008, TestSize.Level1)
  *           Layout direction is auto, System parameter is left to right.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm009, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm009, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -423,7 +423,7 @@ HWTEST_F(GridRowTestNg, Algorithm009, TestSize.Level1)
  *           Layout direction is auto, System parameter is right to left.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm010, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm010, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -459,7 +459,7 @@ HWTEST_F(GridRowTestNg, Algorithm010, TestSize.Level1)
  *           Layout direction is auto, System parameter is left to right.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm011, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm011, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -495,7 +495,7 @@ HWTEST_F(GridRowTestNg, Algorithm011, TestSize.Level1)
  *           Layout direction is auto, System parameter is right to left.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Algorithm012, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Algorithm012, TestSize.Level0)
 {
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
@@ -530,7 +530,7 @@ HWTEST_F(GridRowTestNg, Algorithm012, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with default ItemAlign.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign001, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign001, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     auto direction = layoutProperty->GetDirection();
@@ -581,7 +581,7 @@ HWTEST_F(GridRowTestNg, ItemAlign001, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.Start.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign002, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign002, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
@@ -629,7 +629,7 @@ HWTEST_F(GridRowTestNg, ItemAlign002, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.Center.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign003, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign003, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
@@ -677,7 +677,7 @@ HWTEST_F(GridRowTestNg, ItemAlign003, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.End.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign004, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign004, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
@@ -725,7 +725,7 @@ HWTEST_F(GridRowTestNg, ItemAlign004, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.STRETCH.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign005, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign005, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
@@ -773,7 +773,7 @@ HWTEST_F(GridRowTestNg, ItemAlign005, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with diferent direction and default ItemAlign
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign006, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign006, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->ResetAlignItems();
@@ -824,7 +824,7 @@ HWTEST_F(GridRowTestNg, ItemAlign006, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with diferent direction and ItemAlign.Start.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign007, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign007, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -873,7 +873,7 @@ HWTEST_F(GridRowTestNg, ItemAlign007, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with diferent direction and ItemAlign.Center.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign008, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign008, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -921,7 +921,7 @@ HWTEST_F(GridRowTestNg, ItemAlign008, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.End.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign009, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign009, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -970,7 +970,7 @@ HWTEST_F(GridRowTestNg, ItemAlign009, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with ItemAlign.STRETCH.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign010, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign010, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -1019,7 +1019,7 @@ HWTEST_F(GridRowTestNg, ItemAlign010, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with diferent offset and default ItemAlign
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign011, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign011, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->ResetAlignItems();
@@ -1070,7 +1070,7 @@ HWTEST_F(GridRowTestNg, ItemAlign011, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.Start.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign012, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign012, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
@@ -1118,7 +1118,7 @@ HWTEST_F(GridRowTestNg, ItemAlign012, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.Center.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign013, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign013, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
@@ -1166,7 +1166,7 @@ HWTEST_F(GridRowTestNg, ItemAlign013, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.End.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign014, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign014, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
@@ -1214,7 +1214,7 @@ HWTEST_F(GridRowTestNg, ItemAlign014, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.STRETCH.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign015, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign015, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
@@ -1261,7 +1261,7 @@ HWTEST_F(GridRowTestNg, ItemAlign015, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with diferent offset, direction and default ItemAlign
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign016, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign016, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->ResetAlignItems();
@@ -1312,7 +1312,7 @@ HWTEST_F(GridRowTestNg, ItemAlign016, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.Start.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign017, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign017, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -1361,7 +1361,7 @@ HWTEST_F(GridRowTestNg, ItemAlign017, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.Center.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign018, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign018, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -1410,7 +1410,7 @@ HWTEST_F(GridRowTestNg, ItemAlign018, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.End.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign019, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign019, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -1459,7 +1459,7 @@ HWTEST_F(GridRowTestNg, ItemAlign019, TestSize.Level1)
  * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.STRETCH.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, ItemAlign020, TestSize.Level1)
+HWTEST_F(GridRowTestNg, ItemAlign020, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
@@ -1509,7 +1509,7 @@ HWTEST_F(GridRowTestNg, ItemAlign020, TestSize.Level1)
  *           trigerring event when breakpoint changes.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level1)
+HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level0)
 {
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
     constexpr int32_t mdCols = 6;
@@ -1551,7 +1551,7 @@ HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level1)
  * @tc.desc: Test the default values of GridRow's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, GridRowDefault001, TestSize.Level1)
+HWTEST_F(GridRowTestNg, GridRowDefault001, TestSize.Level0)
 {
     GridRowModelNG gridRowModelNG;
     gridRowModelNG.Create();
@@ -1594,7 +1594,7 @@ HWTEST_F(GridRowTestNg, GridRowDefault001, TestSize.Level1)
  * @tc.desc: Test GridRow's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, GridRowDefault002, TestSize.Level1)
+HWTEST_F(GridRowTestNg, GridRowDefault002, TestSize.Level0)
 {
     GridRowModelNG gridRowModelNG;
 
@@ -1624,7 +1624,7 @@ HWTEST_F(GridRowTestNg, GridRowDefault002, TestSize.Level1)
  * @tc.desc: Test the default values of GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level1)
+HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level0)
 {
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
@@ -1660,7 +1660,7 @@ HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level1)
  * @tc.desc: Test GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowTestNg, GridColDefault002, TestSize.Level1)
+HWTEST_F(GridRowTestNg, GridColDefault002, TestSize.Level0)
 {
     GridColModelNG gridColModelNG;
     V2::GridContainerSize spanVal = V2::GridContainerSize(1);

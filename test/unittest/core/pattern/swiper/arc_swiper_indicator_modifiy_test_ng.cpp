@@ -1052,4 +1052,15 @@ HWTEST_F(ArcSwiperIndicatorModifyTestNg, UpdateNormalIndicator001, TestSize.Leve
     paintMethod->UpdateNormalIndicator(longPointCenterX, &paintWrapper);
     EXPECT_TRUE(paintMethod->gestureState_ == GestureState::GESTURE_STATE_INIT);
 }
+
+/**
+ * @tc.name: GetAccessibilityLevel001
+ * @tc.desc: Test GetAccessibilityLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperIndicatorModifyTestNg, GetAccessibilityLevel001, TestSize.Level1)
+{
+    ArcSwiperIndicatorAccessibilityProperty accessibilityProperty;
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityLevel(), AccessibilityProperty::Level::NO_STR);
+}
 } // namespace OHOS::Ace::NG

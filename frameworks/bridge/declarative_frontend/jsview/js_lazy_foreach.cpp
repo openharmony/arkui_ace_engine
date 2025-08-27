@@ -83,8 +83,6 @@ void JSDataChangeListener::JSBind(BindingTarget globalObj)
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkAdd", &JSDataChangeListener::OnDataBulkAdded);
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDeleted", &JSDataChangeListener::OnDataBulkDeleted);
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDelete", &JSDataChangeListener::OnDataBulkDeleted);
-    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkChanged", &JSDataChangeListener::OnDataBulkChanged);
-    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkChange", &JSDataChangeListener::OnDataBulkChanged);
     // API12 onDatasetChange
     JSClass<JSDataChangeListener>::CustomMethod("onDatasetChange", &JSDataChangeListener::OnDatasetChange);
     JSClass<JSDataChangeListener>::Bind(
@@ -144,7 +142,7 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
         return false;
     }
 
-    for (int32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
+    for (uint32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
         params[idx] = info[idx];
     }
     return true;
@@ -253,10 +251,8 @@ void JSLazyForEach::OnMove(const JSCallbackInfo& info)
 }
 
 void JSLazyForEach::JsParseItemDragEventHandler(
-    const JsiExecutionContext& context, const JSRef<JSVal>& jsValue)
+    const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
-    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {

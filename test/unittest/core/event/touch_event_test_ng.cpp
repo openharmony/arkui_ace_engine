@@ -24,6 +24,7 @@
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/event/touch_event.h"
@@ -48,6 +49,8 @@ const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const std::string TOUCH_EVENT_INFO_TYPE = "onTouchDown";
 const std::vector<TouchPoint> POINTERS = { TouchPoint(), TouchPoint(), TouchPoint() };
 const std::vector<TouchPoint> POINTERS_2 = { { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE } };
+constexpr int32_t DEFAULT_PEN_ID = 102;
+constexpr int32_t DEFAULT_MOUSE_ID = 1001;
 } // namespace
 
 class TouchEventTestNg : public testing::Test {
@@ -461,6 +464,7 @@ HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
     EXPECT_NE(touchEventActuator, nullptr);
+
     /**
      * @tc.steps: step2. Replace ClickEvent when userCallback_ is not nullptr.
      * @tc.expected: userCallback_ will be reset and Make an new instance.
@@ -599,5 +603,115 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
     TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
     touchEventActuator->commonTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: StopPass001
+ * @tc.desc: test functions SetNeedPropagation IsNeedPropagation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, StopPass001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call IsNeedPropagation.
+     * @tc.expected: Execute function return value is false.
+     */
+    EXPECT_FALSE(touchEventActuator->IsNeedPropagation());
+
+    /**
+     * @tc.steps: step3. call SetNeedPropagation(true).
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->SetNeedPropagation(true);
+    EXPECT_TRUE(touchEventActuator->IsNeedPropagation());
+}
+
+/**
+ * @tc.name: TouchEventOriginalIdTest001
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.originalId = 0;
+    touchEvent.sourceType = SourceType::TOUCH;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.CovertId();
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), DEFAULT_PEN_ID);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    touchEvent.originalId = DEFAULT_MOUSE_ID;
+    touchEvent.sourceType = SourceType::MOUSE;
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchEvent.GetOriginalReCovertId(), DEFAULT_MOUSE_ID);
+}
+
+/**
+ * @tc.name: TouchEventOriginalIdTest002
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest002, TestSize.Level1)
+{
+    TouchPoint touchPoint;
+    touchPoint.originalId = 0;
+    touchPoint.sourceTool = SourceTool::PEN;
+    touchPoint.CovertId();
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), DEFAULT_PEN_ID);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
+    touchPoint.originalId = DEFAULT_MOUSE_ID;
+    touchPoint.sourceTool = SourceTool::MOUSE;
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), 0);
+    AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
+    EXPECT_EQ(touchPoint.GetOriginalReCovertId(), DEFAULT_MOUSE_ID);
+}
+
+/**
+ * @tc.name: CreateTouchItemInfoTest001
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, CreateTouchItemInfoTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.originalId = 0;
+    touchEvent.type = TouchType::DOWN;
+    std::vector<int32_t> touchPointIds = { 0, 1 };
+    std::vector<TouchType> touchPointExpectTypes = { TouchType::DOWN, TouchType::MOVE };
+
+    for (const auto& item : touchPointIds) {
+        TouchPoint touchPoint;
+        touchPoint.originalId = item;
+        touchEvent.pointers.emplace_back(touchPoint);
+    }
+
+    std::vector<TouchType> touchesTypes;
+    TouchEventFunc callback = [&touchesTypes](TouchEventInfo& info) {
+        auto touches = info.GetTouches();
+        for (const auto& touch : touches) {
+            touchesTypes.emplace_back(touch.GetTouchType());
+        }
+    };
+
+    auto clickEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEventActuator->AddTouchAfterEvent(clickEvent);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+
+    for (int32_t i = 0; (i < touchPointExpectTypes.size()) && (i < touchesTypes.size()); i++) {
+        EXPECT_EQ(touchesTypes[i], touchPointExpectTypes[i]);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -20,13 +20,13 @@
 
 namespace OHOS::Ace::Framework {
 class JsWebViewFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsWebViewFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsWebViewFunction, JsFunction);
 
 public:
     explicit JsWebViewFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsWebViewFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

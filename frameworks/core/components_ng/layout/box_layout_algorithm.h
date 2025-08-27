@@ -18,11 +18,12 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG {
 // BoxLayout is the class for box type measure, layout.
 class ACE_FORCE_EXPORT BoxLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm)
+    DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm);
 public:
     BoxLayoutAlgorithm() = default;
     ~BoxLayoutAlgorithm() override = default;
@@ -47,6 +48,15 @@ public:
 
     static std::optional<SizeF> PerformMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize);
+    
+    static Alignment MapLocalizedToAlignment(std::string localizedAlignment);
+
+    static void CalcSingleSideMarginFrame(
+        MarginPropertyF& margin, const OptionalSizeF& singleSideFrame, float& maxWidth, float& maxHeight);
+protected:
+    std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);

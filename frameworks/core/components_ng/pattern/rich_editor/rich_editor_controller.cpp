@@ -21,28 +21,28 @@ int32_t RichEditorController::AddImageSpan(const ImageSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    return richEditorPattern->AddImageSpan(options);
+    return richEditorPattern->AddImageSpan(options, TextChangeReason::CONTROLLER);
 }
 
 int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    return richEditorPattern->AddTextSpan(options);
+    return richEditorPattern->AddTextSpan(options, TextChangeReason::CONTROLLER);
 }
 
 int32_t RichEditorController::AddSymbolSpan(const SymbolSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    return richEditorPattern->AddSymbolSpan(options);
+    return richEditorPattern->AddSymbolSpan(options, TextChangeReason::CONTROLLER);
 }
 
 int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    return richEditorPattern->AddPlaceholderSpan(customNode, options);
+    return richEditorPattern->AddPlaceholderSpan(customNode, options, TextChangeReason::CONTROLLER);
 }
 
 void RichEditorController::UpdateSpanStyle(
@@ -100,7 +100,7 @@ void RichEditorController::DeleteSpans(const RangeOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->DeleteSpans(options);
+    richEditorPattern->DeleteSpans(options, TextChangeReason::CONTROLLER);
 }
 
 void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)

@@ -39,6 +39,12 @@ public:
     void SetLabelFontColor(const std::optional<Color>& color) override;
     void SetLabelFontFamily(const std::vector<std::string> &families) override;
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontColorType type) override {};
+    void CreateWithDimensionFpResourceObj(
+        const RefPtr<ResourceObject>& resObj, MenuItemFontSizeType type) override {};
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontFamilyType type) override {};
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemStringType type) override {};
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const MenuItemIconType type) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MENU_ITEM_MODEL_IMPL_H

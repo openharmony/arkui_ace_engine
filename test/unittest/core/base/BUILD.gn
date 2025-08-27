@@ -36,6 +36,7 @@ ace_unittest("frame_node_test_ng") {
     "frame_node_test_ng_coverage_new.cpp",
     "frame_node_test_ng_new.cpp",
     "frame_node_test_ng_v3.cpp",
+    "frame_node_test_ng_dump.cpp",
   ]
 }
 
@@ -57,6 +58,18 @@ ace_unittest("inspector_test_ng") {
   sources = [ "inspector_test_ng.cpp" ]
 }
 
+ace_unittest("simplified_inspector_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "simplified_inspector_test_ng.cpp" ]
+}
+
+ace_unittest("ui_node_gc_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "ui_node_gc_test_ng.cpp" ]
+}
+
 ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
@@ -69,6 +82,7 @@ ace_unittest("view_abstract_test_ng") {
   sources = [
     "view_abstract_test_ng.cpp",
     "view_abstract_test_ng_for_property_config.cpp",
+    "view_abstract_test_ng_for_visual_effect.cpp",
     "view_abstract_test_ng_new.cpp",
   ]
 }
@@ -121,6 +135,24 @@ ace_unittest("extension_handler_test_ng") {
   sources = [ "extension_handler_test_ng.cpp" ]
 }
 
+ace_unittest("node_render_status_monitor_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "node_render_status_monitor_test_ng.cpp" ]
+}
+
+ace_unittest("force_split_base_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "force_split_base_test_ng.cpp" ]
+}
+
+ace_unittest("thread_safe_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "thread_safe_node_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
@@ -130,9 +162,13 @@ group("core_base_unittest") {
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
+    ":node_render_status_monitor_test_ng",
     ":observer_test_ng",
     ":short_cuts_little_test_ng",
     ":short_cuts_test_ng",
+    ":simplified_inspector_test_ng",
+    ":thread_safe_node_test_ng",
+    ":ui_node_gc_test_ng",
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",
@@ -141,8 +177,7 @@ group("core_base_unittest") {
     ":view_stack_processor_test_ng",
   ]
 
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_base_test_ng)) {
-    deps += vendor_configs.ace_engine_advanced_split_mode_base_test_ng
+  if (ace_engine_feature_enable_split_mode) {
+    deps += [":force_split_base_test_ng"]
   }
 }

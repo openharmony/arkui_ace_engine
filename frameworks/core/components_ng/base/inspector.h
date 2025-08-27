@@ -27,8 +27,9 @@
 namespace OHOS::Ace::NG {
 const char KEY_METHOD[] = "method";
 const char KEY_PARAMS[] = "params";
-const char SUPPORT_METHOD[] = "ArkUI.tree";
+
 const uint32_t INVALID_WINDOW_ID = 0;
+const int32_t INVALID_METHOD_ID = -1;
 class InspectorFilter;
 using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
 
@@ -36,6 +37,7 @@ struct InspectorChildrenParameters {
     int32_t pageId = 0;
     bool isActive = false;
     bool isLayoutInspector = false;
+    bool needHandleInternal = false;
 };
 
 class ACE_FORCE_EXPORT Inspector {
@@ -56,7 +58,7 @@ public:
     static void GetInspectorTree(InspectorTreeMap& treesInfo);
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
     static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
-    static uint32_t ParseWindowIdFromMsg(const std::string& message);
+    static std::pair<uint32_t, int32_t> ParseWindowIdFromMsg(const std::string& message);
     static RefPtr<UINode> GetInspectorByKey(
         const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false);
 private:

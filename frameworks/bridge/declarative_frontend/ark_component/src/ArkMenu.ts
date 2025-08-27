@@ -81,9 +81,7 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
@@ -145,9 +143,7 @@ class MenuItemDividerModifier extends ModifierWithKey<DividerStyleOptions> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
@@ -174,9 +170,7 @@ class MenuItemGroupDividerModifier extends ModifierWithKey<DividerStyleOptions> 
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
@@ -199,6 +193,23 @@ class SubMenuExpandingModeModifier extends ModifierWithKey<number> {
     } else {
       getUINativeModule().menu.setSubMenuExpandingMode(node, this.value);
     }
+  }
+}
+
+class SubMenuExpandSymbolModifier extends ModifierWithKey<SymbolGlyphModifier> {
+  constructor(value: SymbolGlyphModifier) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('subMenuExpandSymbol');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetSubMenuExpandSymbol(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandSymbol(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -236,6 +247,10 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   }
   subMenuExpandingMode(value: SubMenuExpandingMode): this {
     modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
+    return this;
+  }
+  subMenuExpandSymbol(value: SymbolGlyphModifier): this {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandSymbolModifier.identity, SubMenuExpandSymbolModifier, value);
     return this;
   }
 }

@@ -41,8 +41,8 @@ const LeadingMarginSize TEST_LEADING_MARGIN_SIZE = { Dimension(5.0), Dimension(1
 const LeadingMargin TEST_LEADING_MARGIN = { .size = TEST_LEADING_MARGIN_SIZE };
 const Font TEST_FONT = { FONT_WEIGHT_BOLD, FONT_SIZE_VALUE, ITALIC_FONT_STYLE_VALUE, FONT_FAMILY_VALUE,
     OHOS::Ace::Color::RED, FONT_FAMILY_VALUE};
-const SpanParagraphStyle TEST_PARAGRAPH_STYLE = { TextAlign::END, TEST_MAX_LINE, WordBreak::BREAK_ALL,
-    TextOverflow::ELLIPSIS, TEST_LEADING_MARGIN, TEST_TEXT_INDENT};
+const SpanParagraphStyle TEST_PARAGRAPH_STYLE = { TextAlign::END, TextVerticalAlign::BASELINE, TEST_MAX_LINE,
+    WordBreak::BREAK_ALL, TextOverflow::ELLIPSIS, TEST_LEADING_MARGIN, TEST_TEXT_INDENT};
 StyledStringChangeValue onStyledStringWillChangeValue;
 StyledStringChangeValue onStyledStringDidChangeValue;
 Testing::MockCanvas canvas;
@@ -96,8 +96,9 @@ RefPtr<MutableSpanString> RichEditorContentModifierTestNg::CreateTextStyledStrin
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
     styledString->AddSpan(AceType::MakeRefPtr<FontSpan>(TEST_FONT, 0, length));
-    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TEXT_DECORATION_VALUE, TEXT_DECORATION_COLOR_VALUE,
-        TextDecorationStyle::WAVY, 0, length));
+    std::optional<TextDecorationOptions> options;
+    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({TEXT_DECORATION_VALUE}),
+        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, options, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(TEST_BASELINE_OFFSET, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(LETTER_SPACING, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(SHADOWS, 0, length));
@@ -164,8 +165,10 @@ HWTEST_F(RichEditorContentModifierTestNg, onDraw001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 2,
         .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
@@ -185,8 +188,10 @@ HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectX001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
 
     ASSERT_NE(testContentModifier, nullptr);
     testContentModifier->SetRichTextRectX(TEXTRICHTEXTRECTX);
@@ -202,8 +207,10 @@ HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectY001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
 
     ASSERT_NE(testContentModifier, nullptr);
     testContentModifier->SetRichTextRectY(TEXTRICHTEXTRECTY);
@@ -219,8 +226,10 @@ HWTEST_F(RichEditorContentModifierTestNg, SetClipOffset001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     OffsetF testOffset = {};
     ASSERT_NE(testContentModifier, nullptr);
     testContentModifier->SetClipOffset(testOffset);
@@ -236,8 +245,10 @@ HWTEST_F(RichEditorContentModifierTestNg, SetClipSize001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     SizeF testSize = {};
     ASSERT_NE(testContentModifier, nullptr);
     testContentModifier->SetClipSize(testSize);
@@ -253,8 +264,10 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     richEditorPattern->contentMod_ = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 2,
         .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
@@ -274,12 +287,13 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan002, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     CustomSpanPlaceholderInfo info;
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(testContentModifier->pattern_.Upgrade());
-    pattern->customSpanPlaceholder_.emplace_back(info);
+    richEditorPattern->customSpanPlaceholder_.emplace_back(info);
     testContentModifier->PaintCustomSpan(context);
     EXPECT_FALSE(info.onDraw);
 }
@@ -293,13 +307,14 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan003, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     CustomSpanPlaceholderInfo info;
     info.onDraw = [](NG::DrawingContext& context, CustomSpanOptions options) {};
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(testContentModifier->pattern_.Upgrade());
-    pattern->customSpanPlaceholder_.emplace_back(info);
+    richEditorPattern->customSpanPlaceholder_.emplace_back(info);
     testContentModifier->PaintCustomSpan(context);
     EXPECT_TRUE(info.onDraw);
 }
@@ -313,15 +328,16 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan004, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     CustomSpanPlaceholderInfo info;
     info.customSpanIndex = 0;
     info.onDraw = [](NG::DrawingContext& context, CustomSpanOptions options) {};
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(testContentModifier->pattern_.Upgrade());
-    pattern->rectsForPlaceholders_.emplace_back();
-    pattern->customSpanPlaceholder_.emplace_back(info);
+    richEditorPattern->rectsForPlaceholders_.emplace_back();
+    richEditorPattern->customSpanPlaceholder_.emplace_back(info);
     TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0,
         .end = 2,
@@ -341,22 +357,23 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan005, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     CustomSpanPlaceholderInfo info;
     info.customSpanIndex = -1;
     info.onDraw = [](NG::DrawingContext& context, CustomSpanOptions options) {};
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(testContentModifier->pattern_.Upgrade());
-    pattern->rectsForPlaceholders_.emplace_back();
-    pattern->customSpanPlaceholder_.emplace_back(info);
+    richEditorPattern->rectsForPlaceholders_.emplace_back();
+    richEditorPattern->customSpanPlaceholder_.emplace_back(info);
     TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0,
         .end = 2,
         .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
-    auto rectsForPlaceholderSize = pattern->GetRectsForPlaceholders().size();
+    auto rectsForPlaceholderSize = richEditorPattern->GetRectsForPlaceholders().size();
     testContentModifier->PaintCustomSpan(context);
     EXPECT_FALSE(info.customSpanIndex >= static_cast<int32_t>(rectsForPlaceholderSize));
 }
@@ -370,22 +387,23 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan006, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
     auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
-        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     CustomSpanPlaceholderInfo info;
     info.customSpanIndex = 1;
     info.onDraw = [](NG::DrawingContext& context, CustomSpanOptions options) {};
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(testContentModifier->pattern_.Upgrade());
-    pattern->rectsForPlaceholders_.emplace_back();
-    pattern->customSpanPlaceholder_.emplace_back(info);
+    richEditorPattern->rectsForPlaceholders_.emplace_back();
+    richEditorPattern->customSpanPlaceholder_.emplace_back(info);
     TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0,
         .end = 2,
         .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
-    auto rectsForPlaceholderSize = pattern->GetRectsForPlaceholders().size();
+    auto rectsForPlaceholderSize = richEditorPattern->GetRectsForPlaceholders().size();
     testContentModifier->PaintCustomSpan(context);
     EXPECT_TRUE(info.customSpanIndex >= static_cast<int32_t>(rectsForPlaceholderSize));
 }

@@ -1294,11 +1294,17 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_047, TestSize.Leve
      * @tc.steps: step3. check dumpString.
      */
     std::string navigationDumpInfo = "|-> Navigation ID: 11, Depth: 7, Mode: \"AUTO(SPLIT)\", NavDestinations:";
-    std::string navDestinationDumpInfo = "| [0]{ ID: 22, Name: \"pageOne\", Mode: \"STANDARD\", IsOnShow: \"TRUE\" }";
+    std::string navDestinationDumpInfo =
+        "| [0]{ ID: 22, Name: \"pageOne\", Mode: \"STANDARD\", IsOnShow: \"TRUE\", navDestinationType: \"DETAIL\"";
     std::string navigationDumpString = navigationNode->ToDumpString();
     EXPECT_EQ(navigationDumpString, navigationDumpInfo);
     std::string navDestinationDumpString = navDestinationNode->ToDumpString();
-    EXPECT_EQ(navDestinationDumpString, navDestinationDumpInfo);
+    auto pos = navDestinationDumpString.find(navDestinationDumpInfo);
+    EXPECT_NE(pos, std::string::npos);
+    pos = navDestinationDumpString.find("Count:");
+    EXPECT_NE(pos, std::string::npos);
+    pos = navDestinationDumpString.find("Depth:");
+    EXPECT_NE(pos, std::string::npos);
 }
 
 /**

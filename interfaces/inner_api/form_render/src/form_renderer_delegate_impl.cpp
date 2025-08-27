@@ -14,6 +14,7 @@
  */
 #include "form_renderer_delegate_impl.h"
 
+#include "form_mgr_errors.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
@@ -24,20 +25,19 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(const std::shared_ptr<Rosen::R
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceNode) {
         HILOG_ERROR("surface is invalid");
-        return ERR_NULL_OBJECT;
+        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
     int64_t formId = formJsInfo.formId;
     if (formId < 0) {
         HILOG_ERROR("%{public}s error, the passed form id can't be negative.", __func__);
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 
     if (!surfaceCreateEventHandler_) {
         HILOG_ERROR("surfaceCreateEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
-    surfaceCreateEventHandler_(surfaceNode, formJsInfo, want);
-    return ERR_OK;
+    return surfaceCreateEventHandler_(surfaceNode, formJsInfo, want);
 }
 
 int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
@@ -57,7 +57,7 @@ int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::st
     HILOG_INFO("OnError code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     if (!errorEventHandler_) {
         HILOG_ERROR("errorEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
 
     errorEventHandler_(code, msg);
@@ -80,7 +80,7 @@ int32_t FormRendererDelegateImpl::OnSurfaceDetach(uint64_t surfaceId)
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceDetachEventHandler_) {
         HILOG_ERROR("surfaceDetachEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
     surfaceDetachEventHandler_();
     return ERR_OK;
@@ -112,14 +112,29 @@ int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
 {
     if (!checkManagerDelegate_) {
         HILOG_ERROR("checkManagerDelegate_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
     checkManagerDelegate_(checkFlag);
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnUpdateFormDone(const int64_t formId)
+{
+    if (formId < 0) {
+        HILOG_ERROR("invalid formId");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!updateFormEventHandler_) {
+        HILOG_ERROR("updateFormEventHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    updateFormEventHandler_(formId);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
-    std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
+    std::function<int32_t(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
 {
     surfaceCreateEventHandler_ = std::move(listener);
@@ -163,6 +178,11 @@ void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(
 void FormRendererDelegateImpl::SetCheckManagerDelegate(std::function<void(bool&)>&& listener)
 {
     checkManagerDelegate_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener)
+{
+    updateFormEventHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

@@ -27,6 +27,11 @@ static void DragActionConvert(
     CHECK_NULL_VOID(internalDragAction);
     internalDragAction->dragPointerEvent.pointerId = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
+    auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
+    for (int index = 0; index < dragAction->size; index++) {
+        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapTemp[index]);
+        internalDragAction->pixelMapList.push_back(pixelMap);
+    }
     internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
     if (!internalDragAction->previewOption.isScaleEnabled) {
         internalDragAction->previewOption.isDefaultShadowEnabled = dragAction->dragPreviewOption.isDefaultShadowEnabled;
@@ -43,8 +48,14 @@ static void DragActionConvert(
     } else {
         internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
     }
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
-    internalDragAction->unifiedData = udData;
+    if (!dragAction->useDataLoadParams) {
+        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
+        internalDragAction->unifiedData = udData;
+    } else {
+        RefPtr<DataLoadParams> udDataLoadParams =
+            UdmfClient::GetInstance()->TransformDataLoadParamsForNative(dragAction->dataLoadParams);
+        internalDragAction->dataLoadParams = udDataLoadParams;
+    }
     internalDragAction->instanceId = dragAction->instanceId;
     internalDragAction->touchPointX = dragAction->touchPointX;
     internalDragAction->touchPointY = dragAction->touchPointY;
@@ -77,14 +88,15 @@ ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
         CHECK_NULL_VOID(listener);
         listener(&outInfo, userData);
     };
-    auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
-    for (int index = 0; index < dragAction->size; index++) {
-        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapTemp[index]);
-        internalDragAction->pixelMapList.push_back(pixelMap);
-    }
     internalDragAction->callback = callbacks;
     DragActionConvert(dragAction, internalDragAction);
-    OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
+    auto ret = OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
+    if (ret == -1) {
+        DragNotifyMsg dragNotifyMsg;
+        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
+        OHOS::Ace::NG::DragDropFuncWrapper::HandleCallback(internalDragAction,
+            dragNotifyMsg, NG::DragAdapterStatus::ENDED);
+    }
     return 0;
 }
 
@@ -143,6 +155,11 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
     NG::ViewAbstract::SetDragEventStrictReportingEnabled(instanceId, enabled);
 }
 
+void EnableDropDisallowedBadge(bool enabled)
+{
+    NG::ViewAbstract::EnableDropDisallowedBadge(enabled);
+}
+
 ArkUI_Int32 RequestDragEndPending()
 {
     return NG::DragDropFuncWrapper::RequestDragEndPending();
@@ -173,7 +190,8 @@ const ArkUIDragAdapterAPI* GetDragAdapterAPI()
         .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
         .requestDragEndPending = RequestDragEndPending,
         .notifyDragResult = NotifyDragResult,
-        .notifyDragEndPendingDone = NotifyDragEndPendingDone
+        .notifyDragEndPendingDone = NotifyDragEndPendingDone,
+        .enableDropDisallowedBadge = EnableDropDisallowedBadge,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

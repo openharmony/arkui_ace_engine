@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -557,6 +558,16 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     ViewStackProcessor::GetInstance()->Finish();
     auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_RETURN(monthPattern, nullptr);
+
+    if (settingData.dayRadiusResObj) {
+        auto&& updateFunc = [monthPattern, monthFrameNode](const RefPtr<ResourceObject>& resObj) {
+            CalcDimension dayRadius;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, dayRadius);
+            monthPattern->UpdateDayRadius(dayRadius);
+        };
+        monthPattern->AddResObj("CalendarDayRadius", settingData.dayRadiusResObj, std::move(updateFunc));
+    }
+
     monthPattern->SetCalendarDialogFlag(true);
     auto calendarEventHub = monthPattern->GetEventHub<CalendarEventHub>();
     CHECK_NULL_RETURN(calendarEventHub, nullptr);
@@ -1278,15 +1289,17 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    auto value = InspectorJsonUtil::Create();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
+    params->Put("month", static_cast<int32_t>(pickerDate.GetMonth()));
+    params->Put("day", static_cast<int32_t>(pickerDate.GetDay()));
+    auto value = JsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
+    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
-    value->Put("year", pickerDate.GetYear());
-    value->Put("month", pickerDate.GetMonth());
-    value->Put("day", pickerDate.GetDay());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
-#endif
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
     return true;
 }
 

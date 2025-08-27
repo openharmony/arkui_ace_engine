@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
+#include "core/common/builder_util.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,14 +46,23 @@ void NodeContainerPattern::RemakeNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto newNode = FireMakeFunction();
+    AddBaseNode(newNode);
+}
+
+void NodeContainerPattern::AddBaseNode(const RefPtr<UINode>& newNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto oldChild = host->GetChildAtIndex(0);
     if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
         return;
     }
     host->RemoveChildAtIndex(0);
+    BuilderUtils::RemoveBuilderFromParent(host, oldChild);
     if (newNode) {
         CHECK_NULL_VOID(CheckBeforeAddNode(host, newNode));
         host->AddChild(newNode, 0);
+        BuilderUtils::AddBuilderToParent(host, newNode);
         newNode->UpdateGeometryTransition();
     }
     OnAddBaseNode();
@@ -109,8 +120,15 @@ bool NodeContainerPattern::HandleTextureExport(bool isStop, FrameNode* frameNode
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->SetIsNeedRebuildRSTree(isStop);
     }
+    auto elementRegister = ElementRegister::GetInstance();
     if (isStop) {
+        if (elementRegister) {
+            elementRegister->UnregisterEmbedNode(surfaceId_, WeakPtr(exportTextureNode));
+        }
         return exportTextureRenderContext->StopTextureExport();
+    }
+    if (elementRegister) {
+        elementRegister->RegisterEmbedNode(surfaceId_, WeakPtr(exportTextureNode));
     }
     return exportTextureRenderContext->DoTextureExport(surfaceId_);
 }

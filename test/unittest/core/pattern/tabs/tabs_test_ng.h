@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_pattern.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr float TABS_WIDTH = 720.f;

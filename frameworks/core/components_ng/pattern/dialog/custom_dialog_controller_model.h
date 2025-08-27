@@ -21,6 +21,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 namespace OHOS::Ace {
+struct DialogProperties;
 enum class DialogOperation {
     DIALOG_OPEN = 0,
     DIALOG_CLOSE,
@@ -34,12 +35,13 @@ public:
     virtual void SetOpenDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
         std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
-        std::list<DialogOperation>& dialogOperation) = 0;
+        std::list<DialogOperation>& dialogOperation, bool& hasBind) = 0;
     virtual void SetCloseDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
         std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) = 0;
 
+    virtual PromptActionCommonState GetState(std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind) = 0;
 private:
     static std::unique_ptr<CustomDialogControllerModel> instance_;
     static std::mutex mutex_;

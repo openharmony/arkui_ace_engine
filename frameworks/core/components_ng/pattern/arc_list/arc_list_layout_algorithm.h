@@ -109,13 +109,14 @@ private:
 
     float CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos);
 
-    static float GetNearScale(float pos);
+    float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
     float GetHeaderAreaSize() const;
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;
+    float CalculateHeaderOffset(LayoutWrapper* layoutWrapper, const ListItemInfo& info);
     bool CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalcContentOffset(const RefPtr<ListLayoutProperty>& property) override

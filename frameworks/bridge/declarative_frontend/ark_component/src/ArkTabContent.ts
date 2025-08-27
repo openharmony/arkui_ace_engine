@@ -142,9 +142,9 @@ class TabContentOnWillHideModifier extends ModifierWithKey<VoidCallback> {
   static identity: Symbol = Symbol('contentonwillhide');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabContent.resetContentOnWillHide(node);
+      getUINativeModule().tabContent.resetTabContentOnWillHide(node);
     } else {
-      getUINativeModule().tabContent.setContentOnWillHide(node, this.value);
+      getUINativeModule().tabContent.setTabContentOnWillHide(node, this.value);
     }
   }
 

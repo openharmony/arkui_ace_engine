@@ -18,6 +18,8 @@
 
 #include "base/utils/singleton.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT DialogManager : public Singleton<DialogManager> {
@@ -28,7 +30,10 @@ public:
     static RefPtr<OverlayManager> GetEmbeddedOverlay(int32_t uniqueId, const RefPtr<PipelineContext>& context);
 
     static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
-    
+
+    static RefPtr<PipelineContext> GetMainPipelineContext(
+        const RefPtr<FrameNode>& frameNode, bool isTargetNodeInSubwindow = false);
+
     RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 
     RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);
@@ -48,6 +53,8 @@ public:
     {
         return dialogTag_;
     }
+
+    bool IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) const;
 
 private:
     int32_t dismissDialogId_ = 0;

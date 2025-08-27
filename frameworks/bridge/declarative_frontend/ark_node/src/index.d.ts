@@ -15,12 +15,21 @@
 
 declare class UIContext {
   instanceId_: number;
+  isAvailable(): boolean;
 }
 
 declare interface TouchEvent {
 }
 
+declare interface MouseEvent {
+}
+
+declare interface AxisEvent {
+}
+
 declare interface Position { x?: number; y?: number; }
+
+declare type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 
 interface UpdateFuncRecord {
   updateFunc: UpdateFunc;
@@ -59,6 +68,8 @@ declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
+  localStorage?:LocalStorage;
+  enableProvideConsumeCrossing?:boolean;
 }
 
 declare interface RegisterParams {
@@ -176,7 +187,15 @@ declare class ArkToggleComponent extends ArkComponent {}
 
 declare class ArkLazyVGridLayoutComponent extends ArkComponent {}
 
+declare class SwiperController {}
+
 declare class Scroller {}
+
+declare class TextController {}
+
+declare class TextInputController {}
+
+declare class TextAreaController {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
@@ -233,3 +252,13 @@ declare class NativeUtils {
 
 declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;
 declare function __getCustomPropertyString__(nodeId: number, key: string): string | undefined;
+
+declare enum AnimationPropertyType {
+  ROTATION = 0,
+  TRANSLATION = 1,
+  SCALE = 2,
+  OPACITY = 3,
+}
+
+declare interface AnimateParam {
+}

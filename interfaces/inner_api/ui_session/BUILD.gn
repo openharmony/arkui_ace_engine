@@ -20,6 +20,7 @@ config("uisession_manager_public_config") {
     "$ace_root/frameworks",
     "include/",
     "$ace_root/interfaces/inner_api/ui_session",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
   if (current_os == "ohos") {
     defines = [ "OHOS_PLATFORM" ]
@@ -54,6 +55,8 @@ ohos_shared_library("ui_session") {
 
   external_deps = [
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "cJSON:cjson",
     "c_utils:utils",
     "graphic_2d:2d_graphics",

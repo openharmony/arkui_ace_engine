@@ -79,6 +79,7 @@ void NotifyCard(const RefPtr<StatusBarClickListener>& listener)
 
 void StatusBarEventProxyOhos::OnStatusBarClick()
 {
+    std::scoped_lock lock(listenersMutex_);
     for (auto it = listeners_.begin(); it != listeners_.end();) {
         auto listener = it->first.Upgrade();
         if (listener) {
@@ -98,6 +99,7 @@ void StatusBarEventProxyOhos::OnStatusBarClick()
 
 void StatusBarEventProxyOhos::Register(const WeakPtr<StatusBarClickListener>& listener)
 {
+    std::scoped_lock lock(listenersMutex_);
     if (listeners_.empty()) {
         CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
     }
@@ -106,6 +108,7 @@ void StatusBarEventProxyOhos::Register(const WeakPtr<StatusBarClickListener>& li
 
 void StatusBarEventProxyOhos::UnRegister(const WeakPtr<StatusBarClickListener>& listener)
 {
+    std::scoped_lock lock(listenersMutex_);
     if (listeners_.empty()) {
         return;
     }

@@ -146,12 +146,30 @@ public:
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 protected:
     void OnModifyDone() override;
 
 private:
     void SetAccessibilityAction();
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void InitFocusPaintRect(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     Color GetBlendGgColor();

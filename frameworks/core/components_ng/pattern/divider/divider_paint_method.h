@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(DividerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(DividerPaintMethod, NodePaintMethod);
 public:
     DividerPaintMethod(float constrainStrokeWidth, float dividerLength, bool vertical, bool strokeWidthLimitation,
         RefPtr<DividerModifier> dividerModifier)
@@ -70,6 +70,7 @@ public:
             }
             RectF boundsRect(offset_.GetX(), offset_.GetY(), boundsRectWidth, boundsRectHeight);
             dividerModifier_->SetBoundsRect(boundsRect);
+            paintWrapper->FlushContentModifier();
         }
         dividerModifier_->SetStrokeWidth(constrainStrokeWidth_);
         dividerModifier_->SetDividerLength(dividerLength_);

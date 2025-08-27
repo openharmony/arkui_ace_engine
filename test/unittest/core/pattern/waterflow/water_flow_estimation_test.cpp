@@ -53,7 +53,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
 
     UpdateCurrentOffset(300.0f);
-    EXPECT_NEAR(info->Offset(), 150.0f, 1.0f);
+    EXPECT_NEAR(info->Offset(), 46.0f, 1.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5100.0f, 100.0f);
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -61,7 +61,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     EXPECT_NEAR(info->EstimateTotalHeight(), 5150.0f, 100.0f);
 
     UpdateCurrentOffset(-300.0f);
-    EXPECT_NEAR(info->Offset(), -4500.0f, 100.0f);
+    EXPECT_NEAR(info->Offset(), -4396.0f, 100.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5150.0f, 100.0f);
 }
 
@@ -86,7 +86,7 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     EXPECT_EQ(info->EstimateTotalHeight(), 250.0F);
     EXPECT_EQ(GetChildHeight(frameNode_, 0), 50.0f);
 
-    UpdateCurrentOffset(-300.0f);
+    UpdateCurrentOffset(-8000.0f);
     EXPECT_NEAR(info->Offset(), -50.0f, 10.0f);
     EXPECT_EQ(info->EstimateTotalHeight(), 250.0f);
 
@@ -206,5 +206,30 @@ HWTEST_F(WaterFlowTestNg, LargeOffset003, TestSize.Level1)
     UpdateCurrentOffset(5000.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 9);
+}
+
+/**
+ * @tc.name: Offset003
+ * @tc.desc: waterFlow offset estimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Offset003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems(60);
+    CreateDone();
+    auto info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-5000.0f);
+    EXPECT_EQ(info->startIndex_, 33);
+    EXPECT_EQ(info->endIndex_, 37);
+    EXPECT_EQ(info->EstimateTotalHeight(), 9920);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(info->startIndex_, 33);
+    EXPECT_EQ(info->endIndex_, 43);
+    EXPECT_NEAR(info->EstimateTotalHeight(), 4995.4f, 0.1);
 }
 } // namespace OHOS::Ace::NG

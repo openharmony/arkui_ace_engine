@@ -120,6 +120,9 @@ public:
 
     virtual bool NeedRender() const
     {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            return needRender_ ;
+        }
         return drawModifier_ || needRender_ ;
     }
 

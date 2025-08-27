@@ -47,69 +47,162 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000,
     NONE = 40000
 };
+
+struct NodeInfo {
+    std::string nodeTag;
+    ColorMode localColorMode;
+};
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
     static bool ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
+        std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
+        Color& result, const Color& defaultColor, RefPtr<ResourceObject>& resourceObject,
+        const NodeInfo& nodeInfo);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
-    static bool ParseJsDimensionFromResource(
-        const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
+    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
+        RefPtr<ResourceObject>& resourceObject);
+    static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
+    static bool ParseColorMetricsToColor(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
+        DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
+    static bool ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
+        DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseStringArray(
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result);
     static bool ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result);
+    static bool ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
+    static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
+    static bool ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
+    static bool ParseAllRadius(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsFontFamiliesToString(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string &result);
+    static bool ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsFontFamilies(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
-    static bool ParseJsFontFamiliesFromResource(
-        const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
+    static bool ParseJsFontFamilies(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsLengthMetrics(
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
+    static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObj);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject,
+        bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         bool isSupportPercent = true);
+    static bool ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsDimensionVp(
         const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value,
+        CalcDimension& result, RefPtr<ResourceObject>& resourceObject, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         bool isSupportPercent = true);
+    static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
-    static bool ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
-    static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result);
+    static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject);
+    static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result,
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
+    static bool ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsString(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
+    static bool ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject);
     static panda::Local<panda::ObjectRef> GetContext(EcmaVM* vm);
     static bool ParseJsStringFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
+    static bool ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static uint32_t parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static double parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
+    static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId,
+        RefPtr<ResourceObject>& resourceObject);
     static void ParseJsSymbolFontFamilyName(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
         std::string& customFamilyName);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
+    static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
+    static bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result);
+    static bool ParseJsIgnoresLayoutSafeAreaEdges(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges);
+    static void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
+    static void ParseGradientCenter(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+        const NodeInfo& nodeInfo);
+    static void ParseGradientColorStops(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
+    static void ParseGradientAngle(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)
@@ -133,8 +226,37 @@ public:
         }
         return true;
     }
+    template <class T>
+    static bool ParseArrayWithResObj(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
+        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &,
+        const std::optional<NodeInfo> &)> getValue,
+        std::vector<RefPtr<ResourceObject>>& resObjArray, const std::optional<NodeInfo>& nodeInfo = std::nullopt)
+    {
+        CHECK_NULL_RETURN(vm, false);
+        CHECK_NULL_RETURN(array, false);
+        if (defaultLength <= 0) {
+            return false;
+        }
+        auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
+        if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
+            return false;
+        }
+        int32_t length = static_cast<int32_t>(handle->Length(vm));
+        if (length != defaultLength) {
+            return false;
+        }
+        for (int32_t i = 0; i < length; i++) {
+            RefPtr<ResourceObject> resObj;
+            auto value = handle->GetValueAt(vm, arg, i);
+            *(array + i) = getValue(vm, value, resObj, nodeInfo);
+            resObjArray.emplace_back(resObj);
+        }
+        return true;
+    }
     static void GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
+    static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        RefPtr<ResourceObject>& resourceObject);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseJsColorStrategy(
@@ -143,6 +265,8 @@ public:
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
     static void ParsePadding(
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+                             ArkUISizeType& result, RefPtr<ResourceObject>& resObj);
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
@@ -175,15 +299,24 @@ public:
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
+    static void SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,
+        RefPtr<ResourceObject>& colorResObj, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    static void RegisterTextBackgroundStyleResource(std::shared_ptr<TextBackgroundStyle> textBackgroundStyle,
+        RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+        RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex,
+        std::shared_ptr<TextBackgroundStyle> style);
     static void PushOuterBorderStyleVector(
         const std::optional<BorderStyle>& value, std::vector<uint32_t> &options);
     static void ParseOuterBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
-    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
+    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg,
+        RefPtr<ResourceObject>& resObj);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
@@ -192,15 +325,20 @@ public:
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
 #endif
     static bool ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
-        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
+        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+        NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode,
         const Local<JSValueRef>& jsValueOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
+        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
     static Local<panda::ArrayRef> CreateJsSystemMenuItems(
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextMenuId(const EcmaVM* vm, const std::string& id);
-    static void WrapMenuParams(
-        const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams, const Local<JSValueRef>& menuItems);
+    static void ParseMenuItemsSymbolId(
+        const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
+    static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
+        const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
         const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
@@ -213,6 +351,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info);
 
     template<typename T>
     static panda::Local<panda::JSValueRef> ToJSValueWithVM(const EcmaVM* vm, T val)
@@ -237,6 +376,12 @@ public:
         return panda::JSValueRef::Undefined(vm);
     }
     static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
+    static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        Color& color, bool state, const NodeInfo& nodeInfo);
+
+private:
+    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

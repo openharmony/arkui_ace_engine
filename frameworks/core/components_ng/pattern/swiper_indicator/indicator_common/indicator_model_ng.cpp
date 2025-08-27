@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<IndicatorController> IndicatorModelNG::Create()
@@ -102,6 +103,9 @@ void IndicatorModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParame
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDotWithResourceObj(indicatorNode, swiperParameters);
+    }
 };
 
 void IndicatorModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& indicatorDigitalParameters)
@@ -111,6 +115,9 @@ void IndicatorModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& ind
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(indicatorDigitalParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDigitWithResourceObj(indicatorNode, indicatorDigitalParameters);
+    }
 };
 
 void IndicatorModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
@@ -155,6 +162,9 @@ void IndicatorModelNG::SetDigitIndicatorStyle(
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDigitWithResourceObj(frameNode, swiperDigitalParameters);
+    }
 }
 
 void IndicatorModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
@@ -168,6 +178,9 @@ void IndicatorModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperPa
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateDotWithResourceObj(frameNode, swiperParameters);
+    }
 }
 
 void IndicatorModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange)
@@ -201,5 +214,176 @@ int32_t  IndicatorModelNG::GetCount(FrameNode* frameNode)
     int32_t  value = 0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperIndicatorLayoutProperty, Count, value, frameNode, value);
     return value;
+}
+
+void IndicatorModelNG::ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<IndicatorPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            if (!(parseOk && result > 0.0_vp)) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetSize();
+            }
+            auto param = pattern->GetIndicatorParameters();
+            CHECK_NULL_VOID(param);
+            if (name == "itemWidth") {
+                param->itemWidth = result;
+            } else if (name == "itemHeight") {
+                param->itemHeight = result;
+            } else if (name == "selectedItemWidth") {
+                param->selectedItemWidth = result;
+            } else if (name == "selectedItemHeight") {
+                param->selectedItemHeight = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void IndicatorModelNG::ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<IndicatorPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionFpNG(theObj, result);
+            if (!parseOk || LessOrEqual(result.Value(), 0.0) || result.Unit() == DimensionUnit::PERCENT) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetDigitalIndicatorTextStyle().GetFontSize();
+            }
+            auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
+            if (name == "fontSize") {
+                params->fontSize = result;
+            } else if (name == "selectedFontSize") {
+                params->selectedFontSize = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void IndicatorModelNG::ProcessDotColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<IndicatorPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            if (!parseOk) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = name == "colorVal" ? theme->GetColor() : theme->GetSelectedColor();
+            }
+            auto param = pattern->GetIndicatorParameters();
+            CHECK_NULL_VOID(param);
+            name == "colorVal" ? param->colorVal = result : param->selectedColorVal = result;
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void IndicatorModelNG::ProcessDigitalColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<IndicatorPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            if (!parseOk) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetDigitalIndicatorTextStyle().GetTextColor();
+            }
+            auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
+            if (name == "fontColor") {
+                params->fontColor = result;
+            } else if (name == "selectedFontColor") {
+                params->selectedFontColor = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void IndicatorModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperParameters& swiperParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto resObj = swiperParameters.resourceColorValueObject;
+    ProcessDotColorWithResourceObj(frameNode, "colorVal", resObj);
+    resObj = swiperParameters.resourceSelectedColorValueObject;
+    ProcessDotColorWithResourceObj(frameNode, "selectedColorVal", resObj);
+    resObj = swiperParameters.resourceItemWidthValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "itemWidth", resObj);
+    resObj = swiperParameters.resourceItemHeightValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "itemHeight", resObj);
+    resObj = swiperParameters.resourceSelectedItemWidthValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "selectedItemWidth", resObj);
+    resObj = swiperParameters.resourceSelectedItemHeightValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "selectedItemHeight", resObj);
+}
+
+void IndicatorModelNG::CreateDigitWithResourceObj(FrameNode* frameNode,
+    const SwiperDigitalParameters& swiperDigitalParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto resObj = swiperDigitalParameters.resourceFontColorValueObject;
+    ProcessDigitalColorWithResourceObj(frameNode, "fontColor", resObj);
+    resObj = swiperDigitalParameters.resourceFontSizeValueObject;
+    ProcessDigitalFontSizeWithResourceObj(frameNode, "fontSize", resObj);
+    resObj = swiperDigitalParameters.resourceSelectedFontColorValueObject;
+    ProcessDigitalColorWithResourceObj(frameNode, "selectedFontColor", resObj);
+    resObj = swiperDigitalParameters.resourceSelectedFontSizeValueObject;
+    ProcessDigitalFontSizeWithResourceObj(frameNode, "selectedFontSize", resObj);
 }
 } // namespace OHOS::Ace::NG

@@ -17,12 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_TRANSITION_EFFECT_IMPL_H
 
 #include "modifier/rs_property.h"
-#include "modifier/rs_property_modifier.h"
 
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+using RSPropertyType = Rosen::ModifierNG::RSPropertyType;
+
 // Identity transition effect, do nothing and execute immediately.
 class RosenIdentityTransitionEffect final : public RosenTransitionEffect {
 public:
@@ -42,19 +43,19 @@ private:
 };
 
 // Template class for single property transition effect, applying identity and active value to target property/modifier.
-template<typename Modifier, typename PropertyType>
+template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
 class PropertyTransitionEffectTemplate : public RosenTransitionEffect {
 public:
     PropertyTransitionEffectTemplate() : RosenTransitionEffect() {}
-    PropertyTransitionEffectTemplate(PropertyType identityProperty, PropertyType activeValue)
+    PropertyTransitionEffectTemplate(ValueType identityProperty, ValueType activeValue)
         : RosenTransitionEffect(), identityValue_(identityProperty), activeValue_(activeValue)
     {}
     ~PropertyTransitionEffectTemplate() override = default;
 
-    void SetIdentityValue(PropertyType identityValue);
-    void SetActiveValue(PropertyType activeValue);
+    void SetIdentityValue(ValueType identityValue);
+    void SetActiveValue(ValueType activeValue);
 
-    void SetKeyframes(const std::vector<std::pair<float, PropertyType>>& keyframes)
+    void SetKeyframes(const std::vector<std::pair<float, ValueType>>& keyframes)
     {
         keyframes_ = keyframes;
     }
@@ -93,18 +94,19 @@ protected:
 
 private:
     std::shared_ptr<Modifier> modifier_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<PropertyType>> property_;
-    PropertyType identityValue_ {};
-    PropertyType activeValue_ {};
-    std::vector<std::pair<float, PropertyType>> keyframes_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<ValueType>> property_;
+    ValueType identityValue_ {};
+    ValueType activeValue_ {};
+    std::vector<std::pair<float, ValueType>> keyframes_;
     bool isActive_ = false;
 
     DECLARE_ACE_TYPE(PropertyTransitionEffectTemplate, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(PropertyTransitionEffectTemplate);
 };
 
-using RosenOpacityTransitionEffect = PropertyTransitionEffectTemplate<Rosen::RSAlphaModifier, float>;
-template<>
+using RosenOpacityTransitionEffect =
+    PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSAlphaModifier, RSPropertyType::ALPHA, float>;
+template <>
 RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate();
 
 // Set pivot during transition effect.
@@ -165,8 +167,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RosenAsymmetricTransitionEffect);
 };
 
-using InternalTranslateEffect = PropertyTransitionEffectTemplate<Rosen::RSTranslateModifier, Rosen::Vector2f>;
-template<>
+using InternalTranslateEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::TRANSLATE, Rosen::Vector2f>;
+template <>
 InternalTranslateEffect::PropertyTransitionEffectTemplate();
 
 // Move in and out to (same) screen edge.
@@ -251,8 +254,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RosenCompositeTransitionEffect);
 };
 
-using InternalTranslateZEffect = PropertyTransitionEffectTemplate<Rosen::RSTranslateZModifier, float>;
-template<>
+using InternalTranslateZEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::TRANSLATE_Z, float>;
+template <>
 InternalTranslateZEffect::PropertyTransitionEffectTemplate();
 // 3D Translate effect that accepts Dimension.
 class RosenTranslateTransitionEffect final
@@ -272,14 +276,17 @@ private:
 };
 
 // 3D rotation composite effect with pivot.
-using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationXModifier, float>;
-using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationYModifier, float>;
-using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationModifier, float>;
-template<>
+using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::ROTATION_X, float>;
+using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::ROTATION_Y, float>;
+using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::ROTATION, float>;
+template <>
 InternalRotationXEffect::PropertyTransitionEffectTemplate();
-template<>
+template <>
 InternalRotationYEffect::PropertyTransitionEffectTemplate();
-template<>
+template <>
 InternalRotationZEffect::PropertyTransitionEffectTemplate();
 class RosenRotation3DTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalRotationXEffect, InternalRotationYEffect, InternalRotationZEffect,
@@ -295,8 +302,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RosenRotation3DTransitionEffect);
 };
 
-using InternalScaleEffect = PropertyTransitionEffectTemplate<Rosen::RSScaleModifier, Rosen::Vector2f>;
-template<>
+using InternalScaleEffect = PropertyTransitionEffectTemplate<Rosen::ModifierNG::RSTransformModifier,
+    RSPropertyType::SCALE, Rosen::Vector2f>;
+template <>
 InternalScaleEffect::PropertyTransitionEffectTemplate();
 // 2D scale composite effect with pivot.
 class RosenScaleTransitionEffect final

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/form_link/form_link_pattern.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,17 @@ void FormLinkPattern::OnAreaChangedInner()
     auto linkRect = geometryNode->GetFrameRect();
     linkRect.SetOffset(GetHost()->GetTransformRelativeOffset());
     formLinkInfo_.SetFomLinkRect(linkRect);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
+}
+
+void FormLinkPattern::SetAction(const std::string& action)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "SetAction:%{public}s", action.c_str());
+    formLinkInfo_.SetAction(action);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());

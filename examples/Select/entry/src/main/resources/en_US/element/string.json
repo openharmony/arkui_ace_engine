@@ -1,0 +1,52 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "Select_Option_1",
+      "value": "OptionOne"
+    },
+    {
+      "name": "Select_Option_2",
+      "value": "OptionTwo"
+    },
+    {
+      "name": "Select_Option_3",
+      "value": "OptionThree"
+    },
+    {
+      "name": "Select_Option_4",
+      "value": "OptionFour"
+    },
+    {
+      "name": "Select_Option_5",
+      "value": "OptionFive"
+    },
+    {
+      "name": "Select_Option_6",
+      "value": "OptionSix"
+    },
+    {
+      "name": "Select_Option_7",
+      "value": "OptionSeven"
+    },
+    {
+      "name": "Select_Option_8",
+      "value": "OptionEight"
+    },
+    {
+      "name": "Select_Option_9",
+      "value": "OptionNine"
+    }
+  ]
+}

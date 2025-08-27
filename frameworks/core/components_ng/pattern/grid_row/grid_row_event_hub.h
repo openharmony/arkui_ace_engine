@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const std::string)>;
 
 class GridRowEventHub : public EventHub {
-    DECLARE_ACE_TYPE(GridRowEventHub, EventHub)
+    DECLARE_ACE_TYPE(GridRowEventHub, EventHub);
 
 public:
     void SetOnBreakpointChange(ChangeEvent&& changeEvent)

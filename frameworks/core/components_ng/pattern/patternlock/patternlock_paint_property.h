@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class PatternLockPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty);
 
 public:
     PatternLockPaintProperty() = default;
@@ -111,6 +111,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableWaveEffect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableForeground, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SkipUnselectedPoint, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PathColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RegularColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveCircleColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

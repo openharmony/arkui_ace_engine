@@ -42,7 +42,7 @@ class TapGestureHandler extends GestureHandler {
 
     constructor(options?: TapGestureHandlerOptions) {
         super(CommonGestureType.TAP_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.count = options.count;
             this.limitFingerCount = options.isFingerCountLimited;
@@ -74,7 +74,7 @@ class LongPressGestureHandler extends GestureHandler {
     onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: LongPressGestureHandlerOptions) {
         super(CommonGestureType.LONG_PRESS_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.repeat = options.repeat;
             this.duration = options.duration;
@@ -122,7 +122,7 @@ class PanGestureHandler extends GestureHandler {
     onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: PanGestureHandlerOptions) {
         super(CommonGestureType.PAN_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.direction = options.direction;
             this.distance = options.distance;
@@ -177,7 +177,7 @@ class SwipeGestureHandler extends GestureHandler {
     onActionCallback?: Callback<GestureEvent>;
     constructor(options?: SwipeGestureHandlerOptions) {
         super(CommonGestureType.PAN_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.direction = options.direction;
             this.speed = options.speed;
@@ -213,7 +213,7 @@ class PinchGestureHandler extends GestureHandler {
     onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: PinchGestureHandlerOptions) {
         super(CommonGestureType.PINCH_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.distance = options.distance;
             this.limitFingerCount = options.isFingerCountLimited;
@@ -263,7 +263,7 @@ class RotationGestureHandler extends GestureHandler {
     onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: RotationGestureHandlerOptions) {
         super(CommonGestureType.ROTATION_GESTURE);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.angle = options.angle;
             this.limitFingerCount = options.isFingerCountLimited;
@@ -308,7 +308,7 @@ class GestureGroupHandler extends GestureHandler {
     onCancelCallback?: Callback<void>;
     constructor(options?: GestureGroupGestureHandlerOptions) {
         super(CommonGestureType.GESTURE_GROUP);
-        if (options !== undefined) {
+        if (options !== undefined && options !== null) {
             this.mode = options.mode;
             this.gestures = options.gestures;
         }

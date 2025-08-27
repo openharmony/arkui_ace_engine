@@ -33,7 +33,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ListComponent : public ComponentGroup {
-    DECLARE_ACE_TYPE(V2::ListComponent, ComponentGroup)
+    DECLARE_ACE_TYPE(V2::ListComponent, ComponentGroup);
 
 public:
     ListComponent() = default;

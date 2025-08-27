@@ -22,9 +22,9 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-constexpr int SIZE_OF_TWO = 2;
 constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
+const std::string FORMAT_FONT = "%s|%s";
 
 void ParseCalendarPickerPadding(
     const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dim, ArkUISizeType& result)
@@ -91,21 +91,33 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color textColor = calendarTheme->GetEntryFontColor();
+    RefPtr<ResourceObject> textColorResObj;
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColorSetByUser = false;
     if (!colorArg->IsUndefined()) {
-        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor);
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
+            textStyleStruct.textColorSetByUser = true;
+        }
     }
     CalcDimension fontSizeData(DEFAULT_TEXTSTYLE_FONTSIZE);
     std::string fontSize = fontSizeData.ToString();
-    if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
-        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData, fontSizeResObj) &&
+        !fontSizeData.IsNegative() && fontSizeData.Unit() != DimensionUnit::PERCENT) {
         fontSize = fontSizeData.ToString();
     }
     std::string fontWeight = "regular";
     if (fontWeightArg->IsString(vm) || fontWeightArg->IsNumber()) {
         fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
     }
-    GetArkUINodeModifiers()->getCalendarPickerModifier()->setTextStyle(
-        nativeNode, textColor.GetValue(), fontSize.c_str(), fontWeight.c_str());
+
+    std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str());
+    textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.textColor = textColor.GetValue();
+    textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -134,20 +146,24 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
     }
     CalcDimension dx;
     CalcDimension dy;
+    RefPtr<ResourceObject> dxResObj;
+    RefPtr<ResourceObject> dyResObj;
     if (!dxArg->IsNull() && !dxArg->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
+        ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx, dxResObj);
     }
     if (!dyArg->IsNull() && !dyArg->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
+        ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy, dyResObj);
     }
-    ArkUI_Float32 values[SIZE_OF_TWO];
-    int units[SIZE_OF_TWO];
-    values[NUM_0] = dx.Value();
-    units[NUM_0] = static_cast<int>(dx.Unit());
-    values[NUM_1] = dy.Value();
-    units[NUM_1] = static_cast<int>(dy.Unit());
-    GetArkUINodeModifiers()->getCalendarPickerModifier()->setEdgeAlign(
-        nativeNode, values, units, SIZE_OF_TWO, alignType);
+
+    ArkUIPickerEdgeAlignStruct edgeAlignStruct;
+    edgeAlignStruct.dxValue = dx.Value();
+    edgeAlignStruct.dxUnit = static_cast<int>(dx.Unit());
+    edgeAlignStruct.dyValue = dy.Value();
+    edgeAlignStruct.dyUnit = static_cast<int>(dy.Unit());
+    edgeAlignStruct.dxRawPtr = AceType::RawPtr(dxResObj);
+    edgeAlignStruct.dyRawPtr = AceType::RawPtr(dyResObj);
+    edgeAlignStruct.alignType = alignType;
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setEdgeAlignWithResObj(nativeNode, &edgeAlignStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -258,10 +274,20 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerHeight(ArkUIRuntim
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+        if (jsValue->IsObject(vm)) {
+            auto obj = jsValue->ToObject(vm);
+            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+            if (layoutPolicy->IsString(vm)) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
                 return panda::JSValueRef::Undefined(vm);
             }
             height.SetValue(0.0);
@@ -274,6 +300,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerHeight(ArkUIRuntim
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
         }
     }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -381,7 +408,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerOnChange(ArkUIRunt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }

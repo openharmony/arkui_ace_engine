@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -343,11 +343,17 @@ ArkUINativeModuleValue GridBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runti
         }
     }
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color)) {
+    RefPtr<ResourceObject> resObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getGridModifier()->setGridScrollBarColor(
             nativeNode, color.GetValue());
     } else {
         GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarColor(nativeNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjScrollBarColor(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -360,6 +366,9 @@ ArkUINativeModuleValue GridBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarColor(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjScrollBarColor(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -667,8 +676,13 @@ ArkUINativeModuleValue GridBridge::SetFriction(ArkUIRuntimeCallInfo* runtimeCall
     double friction = -1.0;
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    if (!ArkTSUtils::ParseJsDouble(vm, arg_friction, friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, arg_friction, friction, resObj)) {
         friction = -1.0;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjFriction(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
     }
     GetArkUINodeModifiers()->getGridModifier()->setFriction(nativeNode, static_cast<ArkUI_Float32>(friction));
 
@@ -682,6 +696,39 @@ ArkUINativeModuleValue GridBridge::ResetFriction(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetFriction(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjFriction(nativeNode, nullptr);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_focusWrapMode = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (!arg_focusWrapMode->IsNull() && arg_focusWrapMode->IsNumber()) {
+        int32_t focusWrapMode = arg_focusWrapMode->Int32Value(vm);
+        if (focusWrapMode < 0 || focusWrapMode > 1) {
+            GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getGridModifier()->setGridFocusWrapMode(nativeNode, focusWrapMode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::ResetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetGridFocusWrapMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue GridBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -714,6 +761,35 @@ ArkUINativeModuleValue GridBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridAlignItems(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> argSyncLoad = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool syncLoad = true;
+    if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
+        syncLoad = argSyncLoad->BooleaValue(vm);
+    }
+
+    GetArkUINodeModifiers()->getGridModifier()->setSyncLoad(nativeNode, syncLoad);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetSyncLoad(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -841,7 +917,7 @@ ArkUINativeModuleValue GridBridge::SetOnGridScrollBarUpdate(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<std::pair<float, float>(int32_t, Dimension&)> callback =
+    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)> callback =
         [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const int32_t index, const Dimension& offset) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);

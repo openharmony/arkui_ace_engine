@@ -21,6 +21,63 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_DOUBLE_50 = 50.0;
 constexpr double DEFAULT_DOUBLE_100 = 100.0;
+
+struct MockClickRecognizerCase {
+    int32_t fingers;
+    int32_t count;
+    Dimension distanceThreshold;
+    double moveDistance;
+    RefereeState refereeState;
+    int32_t expectedFingers;
+    int32_t expectedCount;
+    Dimension expectedDistanceThreshold;
+    RefereeState expectedRefereeState;
+    std::vector<TouchEvent> inputTouchEvents;
+};
+
+struct ClickRecognizerConstructorTestCase {
+    int32_t count_;
+    int32_t finger_;
+    double distanceThreshold_;
+    ClickRecognizerConstructorTestCase(
+        int32_t count, int32_t finger, double distanceThreshold)
+        : count_(count), finger_(finger), distanceThreshold_(distanceThreshold) {}
+};
+
+const std::vector<ClickRecognizerConstructorTestCase> CLICK_RECOGNIZER_FINGER_TEST_CASES = {
+    ClickRecognizerConstructorTestCase(COUNT, 0, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 1, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 100, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 0, 10),
+    ClickRecognizerConstructorTestCase(COUNT, 1, 10),
+    ClickRecognizerConstructorTestCase(COUNT, 100, 10),
+};
+
+struct ClickRecognizerCheckReconcileFromPropertiesTestCase {
+    ClickRecognizerConstructorTestCase originRecognizer_;
+    ClickRecognizerConstructorTestCase currentRecognizer_;
+    bool expectReconcileFrom_;
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(ClickRecognizerConstructorTestCase originRecognizer,
+        ClickRecognizerConstructorTestCase currentRecognizer, bool expectReconcileFrom)
+        : originRecognizer_(originRecognizer), currentRecognizer_(currentRecognizer),
+        expectReconcileFrom_(expectReconcileFrom) {}
+};
+
+const std::vector<ClickRecognizerCheckReconcileFromPropertiesTestCase> CLICK_RECOGNIZER_RECONCILEFROM_TEST_CASES = {
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1), ClickRecognizerConstructorTestCase(COUNT, 1, 1), false),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 0), ClickRecognizerConstructorTestCase(COUNT, 1, 1), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()),
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1),
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()),
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()), false),
+};
 } // namespace
 
 class ClickRecognizerTestNg : public GesturesCommonTestNg {
@@ -497,7 +554,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -506,7 +563,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -515,7 +572,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -525,7 +582,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      */
     TouchEvent touchEvent;
     clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -536,7 +593,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
 }
 
@@ -1123,7 +1180,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 }
 
@@ -1686,6 +1743,8 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     touchEvent.SetTiltX(0);
     touchEvent.SetTiltY(0);
     touchEvent.rollAngle = 0;
+    touchEvent.convertInfo.first = UIInputEventType::AXIS;
+    touchEvent.convertInfo.second = UIInputEventType::TOUCH;
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->touchPoints_[0] = touchEvent;
     GestureEvent result = clickRecognizer->GetGestureEventInfo();
@@ -1693,6 +1752,8 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     EXPECT_EQ(result.GetTiltX(), 0);
     EXPECT_EQ(result.GetTiltY(), 0);
     EXPECT_EQ(result.GetRollAngle(), 0);
+    EXPECT_EQ(result.GetOriginUIInputEventType(), UIInputEventType::AXIS);
+    EXPECT_EQ(result.GetCurrentUIInputEventType(), UIInputEventType::TOUCH);
 }
 
 /**
@@ -1745,6 +1806,42 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: TriggerGestureJudgeCallbackTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(2, COUNT, 0, true);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case1: targetComponent is default.
+     * @tc.expected: step2. result equals.
+     */
+
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    touchEvent.rollAngle = 0;
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    clickRecognizer->touchPoints_[1] = touchEvent;
+    clickRecognizer->touchPoints_[2] = touchEvent;
+    clickRecognizer->targetComponent_ = targetComponent;
+    clickRecognizer->TriggerClickAccepted(touchEvent);
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
  * @tc.name: OnAcceptedTest001
  * @tc.desc: Test OnAccepted
  */
@@ -1785,5 +1882,316 @@ HWTEST_F(ClickRecognizerTestNg, UpdateInfoWithDownEventTest001, TestSize.Level1)
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->UpdateInfoWithDownEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer->equalsToFingers_);
+}
+
+
+/**
+ * @tc.name: ClickRecognizerBasicInfoTest001
+ * @tc.desc: Test case basic input info check.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerBasicInfoTest001, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {1, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::READY, {}},
+        {-1, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::READY, {}},
+        {1, -1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, -1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::READY, {}},
+        {1, 1, Dimension(-1), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::READY, {}}
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count,
+            mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_.ConvertToPx(),
+            mockClickRecognizerCases[i].expectedDistanceThreshold.ConvertToPx());
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerInjectEventsTest001
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerInjectEventsTest001, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    TouchEvent downEvent = TouchEvent();
+    downEvent.type = TouchType::DOWN;
+    TouchEvent upEvent = TouchEvent();
+    upEvent.type = TouchType::UP;
+
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {1, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {-1, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {1, -1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, -1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::PENDING, {downEvent, upEvent}},
+        {1, 1, Dimension(-1), 1, RefereeState::READY, 1, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {1, 2, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 2,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::PENDING, {downEvent, upEvent}},
+        {1, 2, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 1, 2,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED,
+            {downEvent, upEvent, downEvent, upEvent}},
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count,
+            mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockClickRecognizerCases[i].inputTouchEvents.size(); j++) {
+            clickRecognizer->ProcessTouchEvent(mockClickRecognizerCases[i].inputTouchEvents[j]);
+        }
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_.ConvertToPx(),
+            mockClickRecognizerCases[i].expectedDistanceThreshold.ConvertToPx());
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerInjectEventsTest002
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerInjectEventsTest002, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    TouchEvent downEventFinger0 = TouchEvent();
+    TouchEvent downEventFinger1 = TouchEvent();
+    downEventFinger0.type = TouchType::DOWN;
+    downEventFinger1.type = TouchType::DOWN;
+    downEventFinger0.id = 0;
+    downEventFinger1.id = 1;
+
+    TouchEvent upEventFinger0 = TouchEvent();
+    TouchEvent upEventFinger1 = TouchEvent();
+    upEventFinger0.type = TouchType::UP;
+    upEventFinger1.type = TouchType::UP;
+    upEventFinger0.id = 0;
+    upEventFinger1.id = 1;
+
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {2, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 2, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::FAIL,
+            {downEventFinger0, upEventFinger0}},
+        {2, -1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 2, -1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::FAIL,
+            {downEventFinger0, upEventFinger0}},
+        {2, 1, Dimension(-1), 1, RefereeState::READY, 2, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::FAIL,
+            {downEventFinger0, upEventFinger0}},
+        {2, 2, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 2, 2,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::FAIL,
+            {downEventFinger0, upEventFinger0}},
+        {2, 2, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 2, 2,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::FAIL,
+            {downEventFinger0, upEventFinger0, downEventFinger0, upEventFinger0}},
+        {2, 1, Dimension(std::numeric_limits<double>::infinity()), 1, RefereeState::READY, 2, 1,
+            Dimension(std::numeric_limits<double>::infinity()), RefereeState::SUCCEED,
+            {downEventFinger0, downEventFinger1, upEventFinger0, upEventFinger1}},
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count,
+            mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockClickRecognizerCases[i].inputTouchEvents.size(); j++) {
+            clickRecognizer->ProcessTouchEvent(mockClickRecognizerCases[i].inputTouchEvents[j]);
+        }
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_.ConvertToPx(),
+            mockClickRecognizerCases[i].expectedDistanceThreshold.ConvertToPx());
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerTypeTest001
+ * @tc.desc: Test ClickRecognizer Type function: ClickRecognizerTypeTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer.
+     */
+    GestureEvent info = GestureEvent();
+    /**
+     * @tc.steps: step2. call SetGestureTypeName
+     * @tc.expected: result equals.
+     */
+    info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
+    EXPECT_EQ(info.GetGestureTypeName(), GestureTypeName::TAP_GESTURE);
+}
+
+/**
+ * @tc.name: ClickRecognizerTypeTest002
+ * @tc.desc: Test ClickRecognizerType
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, TAPPED_COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    GestureEvent info = GestureEvent();
+    clickRecognizer->HandleReports(info, GestureCallbackType::START);
+    EXPECT_EQ(clickRecognizer->GetRecognizerType(), GestureTypeName::CLICK);
+}
+
+/**
+ * @tc.name: ClickRecognizerTypeTest003
+ * @tc.desc: Test ClickRecognizerType
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, TAPPED_COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+    GestureEvent info = GestureEvent();
+    clickRecognizer->HandleReports(info, GestureCallbackType::START);
+    EXPECT_EQ(clickRecognizer->GetRecognizerType(), GestureTypeName::TAP_GESTURE);
+}
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    clickRecognizer->inputEventType_ = InputEventType::KEYBOARD;
+    clickRecognizer->deviceId_ = 1;
+
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) {
+        EXPECT_EQ(info->rawInputEventType_, InputEventType::KEYBOARD);
+        EXPECT_EQ(info->rawInputDeviceId_, 1);
+        return GestureJudgeResult::REJECT;
+    };
+    TouchEvent touchEvent;
+    touchEvent.rollAngle = 0;
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    clickRecognizer->targetComponent_ = targetComponent;
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    clickRecognizer->TriggerGestureJudgeCallback();
+}
+
+/**
+ * @tc.name: ClickRecognizerDistanceThresholdTest001
+ * @tc.desc: Test ClickRecognizer construct with dimension distanceThreshold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerDistanceThresholdTest001, TestSize.Level1)
+{
+    for (const auto &testCase : CLICK_RECOGNIZER_FINGER_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create ClickRecognizer.
+         */
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(testCase.finger_, COUNT);
+        ASSERT_NE(clickRecognizer, nullptr);
+        EXPECT_EQ(clickRecognizer->fingers_, 1);
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+        RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+        EXPECT_TRUE(clickRecognizer->CheckReconcileFromProperties(exclusiveRecognizer));
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerDistanceThresholdTest002
+ * @tc.desc: Test ClickRecognizer CheckReconcileFromProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerDistanceThresholdTest002, TestSize.Level1)
+{
+    for (const auto &testCase : CLICK_RECOGNIZER_RECONCILEFROM_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create ClickRecognizer.
+         */
+        RefPtr<ClickRecognizer> originClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            testCase.originRecognizer_.finger_, testCase.originRecognizer_.count_,
+            testCase.originRecognizer_.distanceThreshold_);
+        ASSERT_NE(originClickRecognizer, nullptr);
+        RefPtr<ClickRecognizer> currentClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            testCase.currentRecognizer_.finger_, testCase.currentRecognizer_.count_,
+            testCase.currentRecognizer_.distanceThreshold_);
+        ASSERT_NE(currentClickRecognizer, nullptr);
+        EXPECT_EQ(originClickRecognizer->CheckReconcileFromProperties(currentClickRecognizer),
+            testCase.expectReconcileFrom_);
+    }
+}
+
+/**
+ * @tc.name: ResetStatusInHandleOverdueDeadlineTest001
+ * @tc.desc: Test ResetStatusInHandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ResetStatusInHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer and SetResponseLinkRecognizers.
+     */
+    RefPtr<ClickRecognizer> triggerClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::list<RefPtr<NGGestureRecognizer>> responseLinkResult;
+    responseLinkResult.push_back(triggerClickRecognizer);
+    RefPtr<NGGestureRecognizer> targetPtr1 = nullptr;
+    responseLinkResult.push_back(targetPtr1);
+    RefPtr<NGGestureRecognizer> targetPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    responseLinkResult.push_back(targetPtr2);
+    triggerClickRecognizer->SetResponseLinkRecognizers(responseLinkResult);
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+
+    /**
+     * @tc.steps: step2. Do ResetStatusInHandleOverdueDeadline.
+     * @tc.expected: responseLinkRecognizer_ is empty().
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->eventManager_ = eventManager;
+    triggerClickRecognizer->ResetStatusInHandleOverdueDeadline();
+    EXPECT_EQ(triggerClickRecognizer->responseLinkRecognizer_.size(), 0);
+    EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Do ResetStatusInHandleOverdueDeadline with not QueryAllDone.
+     * @tc.expected: responseLinkRecognizer_ is same as before.
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    ASSERT_NE(gestureScope, nullptr);
+    triggerClickRecognizer->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), triggerClickRecognizer);
+    ASSERT_NE(context->eventManager_, nullptr);
+    ASSERT_NE(context->eventManager_->refereeNG_, nullptr);
+    context->eventManager_->refereeNG_->gestureScopes_.insert(std::make_pair(0, gestureScope));
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+    triggerClickRecognizer->ResetStatusInHandleOverdueDeadline();
+    EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 3);
 }
 } // namespace OHOS::Ace::NG

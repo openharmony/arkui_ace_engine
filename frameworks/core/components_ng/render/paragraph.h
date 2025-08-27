@@ -132,9 +132,17 @@ struct LeadingMargin {
     }
 };
 
+enum TextHeightBehavior {
+    ALL = 0x0,
+    DISABLE_FIRST_ASCENT = 0x1,
+    DISABLE_LAST_ASCENT = 0x2,
+    DISABLE_ALL = 0x1 | 0x2,
+};
+
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
+    TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
     uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
@@ -150,15 +158,20 @@ struct ParagraphStyle {
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
     int32_t textStyleUid = 0;
+    bool isOnlyBetweenLines = false;
+    bool isFirstParagraphLineSpacing = true;
+    bool optimizeTrailingSpace = false;
+    bool enableAutoSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
-        return direction == others.direction && align == others.align && maxLines == others.maxLines &&
-               fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
+        return direction == others.direction && align == others.align && verticalAlign == others.verticalAlign &&
+               maxLines == others.maxLines && fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
-               paragraphSpacing == others.paragraphSpacing;
+               paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
+               enableAutoSpacing == others.enableAutoSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -170,6 +183,8 @@ struct ParagraphStyle {
     {
         std::string result = "TextAlign: ";
         result += V2::ConvertWrapTextAlignToString(align);
+        result += ", TextVerticalAlign: ";
+        result += V2::ConvertWrapTextVerticalAlignToString(verticalAlign);
         result += ", maxLines: ";
         result += std::to_string(maxLines);
         result += ", wordBreak: ";
@@ -181,9 +196,11 @@ struct ParagraphStyle {
         result += ", fontSize: ";
         result += std::to_string(fontSize);
         result += ", indent: ";
-        result += indent.ToString();
         result += ", paragraphSpacing: ";
         result += paragraphSpacing.ToString();
+        result += indent.ToString();
+        result += ", enableAutoSpacing: ";
+        result += enableAutoSpacing;
         return result;
     }
 };
@@ -226,7 +243,7 @@ struct PositionWithAffinity {
 
 // Paragraph is interface for drawing text and text paragraph.
 class Paragraph : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::Paragraph, AceType)
+    DECLARE_ACE_TYPE(NG::Paragraph, AceType);
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
@@ -250,6 +267,7 @@ public:
     virtual void Layout(float width) = 0;
     // interfaces for reLayout
     virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) = 0;
+    virtual void ReLayoutForeground(const TextStyle& textStyle) = 0;
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;
@@ -288,7 +306,6 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
-    virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual RectF GetPaintRegion(float x, float y) = 0;
@@ -301,6 +318,14 @@ public:
     {
         return false;
     };
+    virtual bool DidExceedMaxLinesInner()
+    {
+        return false;
+    }
+    virtual std::string GetDumpInfo()
+    {
+        return "";
+    }
 };
 } // namespace OHOS::Ace::NG
 

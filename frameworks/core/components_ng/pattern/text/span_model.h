@@ -36,6 +36,7 @@ public:
     virtual ~SpanModel() = default;
 
     virtual void Create(const std::u16string& content) = 0;
+    virtual void Create(const std::u16string& content, RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void ResetFont() = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
@@ -61,6 +62,9 @@ public:
     virtual void SetAccessibilityText(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
+    virtual void SetLineThicknessScale(float value) = 0;
+    virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void ResetOnHover() = 0;
 
     virtual void CreateContainSpan() {};
     virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style) {};

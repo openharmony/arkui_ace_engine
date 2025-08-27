@@ -123,10 +123,14 @@ public:
         RADIO_DOT_SVG,
         IC_TAKEPHOTO_SVG,
         APP_LOCK_SVG,
+        IC_TIME_LIMIT_SVG,
         CONTAINER_MODAL_WINDOW_CLOSE,
         CONTAINER_MODAL_WINDOW_MAXIMIZE,
         CONTAINER_MODAL_WINDOW_MINIMIZE,
         CONTAINER_MODAL_WINDOW_RECOVER,
+        IC_PERSON_FILL_SVG,
+        IC_LINK_SVG,
+        IC_LOACTION_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

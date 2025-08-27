@@ -32,6 +32,10 @@
 #include "core/event/crown_event.h"
 #endif
 
+namespace OHOS::Ace::Framework {
+class JSIndicatorController;
+}
+
 namespace OHOS::Ace {
 
 struct SwiperParameters {
@@ -52,6 +56,19 @@ struct SwiperParameters {
     std::optional<bool> ignoreSizeValue;
     std::optional<bool> setIgnoreSizeValue;
     std::optional<Dimension> dimSpace;
+
+    RefPtr<ResourceObject> resourceDimLeftValueObject;
+    RefPtr<ResourceObject> resourceDimTopValueObject;
+    RefPtr<ResourceObject> resourceDimRightValueObject;
+    RefPtr<ResourceObject> resourceDimBottomValueObject;
+    RefPtr<ResourceObject> resourceColorValueObject;
+    RefPtr<ResourceObject> resourceSelectedColorValueObject;
+    RefPtr<ResourceObject> resourceItemWidthValueObject;
+    RefPtr<ResourceObject> resourceItemHeightValueObject;
+    RefPtr<ResourceObject> resourceSelectedItemWidthValueObject;
+    RefPtr<ResourceObject> resourceSelectedItemHeightValueObject;
+    RefPtr<ResourceObject> resourceItemSizeValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct SwiperDigitalParameters {
@@ -69,6 +86,16 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
     std::optional<bool> ignoreSizeValue;
     std::optional<bool> setIgnoreSizeValue;
+
+    RefPtr<ResourceObject> resourceDimLeftValueObject;
+    RefPtr<ResourceObject> resourceDimTopValueObject;
+    RefPtr<ResourceObject> resourceDimRightValueObject;
+    RefPtr<ResourceObject> resourceDimBottomValueObject;
+    RefPtr<ResourceObject> resourceFontColorValueObject;
+    RefPtr<ResourceObject> resourceSelectedFontColorValueObject;
+    RefPtr<ResourceObject> resourceFontSizeValueObject;
+    RefPtr<ResourceObject> resourceSelectedFontSizeValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct SwiperArcDotParameters {
@@ -86,6 +113,12 @@ struct SwiperArrowParameters {
     std::optional<Color> backgroundColor;
     std::optional<Dimension> arrowSize;
     std::optional<Color> arrowColor;
+
+    RefPtr<ResourceObject> resourceBackgroundSizeValueObject;
+    RefPtr<ResourceObject> resourceBackgroundColorValueObject;
+    RefPtr<ResourceObject> resourceArrowSizeValueObject;
+    RefPtr<ResourceObject> resourceArrowColorValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct AnimationCallbackInfo {
@@ -137,9 +170,11 @@ public:
     virtual void SetDisableSwipe(bool disableSwipe);
     virtual void SetEdgeEffect(EdgeEffect EdgeEffect);
     virtual void SetDisplayMode(SwiperDisplayMode displayMode);
+    virtual void ResetDisplayMode() {}
     virtual void SetDisplayCount(int32_t displayCount);
     virtual void ResetDisplayCount() {}
     virtual void SetMinSize(const Dimension& minSize);
+    virtual void ResetMinSize() {}
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
@@ -176,12 +211,19 @@ public:
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
+    virtual void SetOnScrollStateChanged(
+        std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
     virtual void SetBindIndicator(bool bind) {}
     virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
+    virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
+    virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
+    virtual void SetMaintainVisibleContentPosition(bool value) {}
+    virtual void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {}
+    virtual void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

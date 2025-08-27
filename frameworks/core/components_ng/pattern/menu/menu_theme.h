@@ -30,6 +30,7 @@ constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
 constexpr int32_t HOVER_IMAGE_OPACITY_CHANGE_DURATION = 150;
 constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 200;
+constexpr int32_t HOVER_IMAGE_DELAY_DURATION_INTERRUPT = 350;
 constexpr int32_t HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION = 650;
 constexpr int32_t HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION = 450;
 constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
@@ -39,6 +40,8 @@ constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
 constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
+constexpr uint32_t MENU_MASK_COLOR = 0x33182431;
+constexpr uint32_t MENU_OUTLINE_COLOR = 0x19FFFFFF;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -55,11 +58,13 @@ public:
 
         RefPtr<MenuTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MenuTheme> theme = AceType::Claim(new MenuTheme());
+            RefPtr<MenuTheme> theme = AceType::MakeRefPtr<MenuTheme>();
             if (!themeConstants) {
                 return theme;
             }
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
+            theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -75,7 +80,7 @@ public:
                 LOGE("Pattern of menu is null, please check!");
                 return;
             }
-            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(0x33182431));
+            theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(MENU_MASK_COLOR));
             theme->bgBlurEffectEnable_ =
                 StringUtils::StringToInt(pattern->GetAttr<std::string>("menu_bg_blur_effect_enable", "0"));
             theme->bgEffectSaturation_ = pattern->GetAttr<double>("menu_blur_effect_saturation", 1.0);
@@ -94,6 +99,7 @@ public:
             theme->previewAnimationDuration_ = 300;
             theme->hoverImageSwitchToPreviewOpacityDuration_ = HOVER_IMAGE_OPACITY_CHANGE_DURATION;
             theme->hoverImageDelayDuration_ = HOVER_IMAGE_DELAY_DURATION;
+            theme->hoverImageDelayDurationForInterrupt_ = HOVER_IMAGE_DELAY_DURATION_INTERRUPT;
             theme->hoverImageCustomPreviewScaleDuration_ = HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION;
             theme->hoverImagePreviewDisappearDuration_ = HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION;
             theme->previewBeforeAnimationScale_ = 0.95f;
@@ -111,13 +117,13 @@ public:
             theme->previewMenuScaleNumber_ = 0.95f;
             std::string hasFilter = pattern->GetAttr<std::string>("menu_has_filter", "true");
             theme->hasFilter_ = (hasFilter == "true");
+            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
+            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
+            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
             theme->bigFontSizeScale_ = MENU_BIG_FONT_SIZE_SCALE;
             theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
             theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
             theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
-            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
-            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
-            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
             theme->enableDirectionalKeyFocus_ = pattern->GetAttr<int>("menu_focus_directional_key_enable", 0);
             theme->menuShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
@@ -129,6 +135,7 @@ public:
                 pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
             theme->menuHapticFeedback_ =
                 pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
+            theme->menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -164,9 +171,9 @@ public:
         return hoverImageSwitchToPreviewOpacityDuration_;
     }
 
-    int32_t GetHoverImageDelayDuration() const
+    int32_t GetHoverImageDelayDuration(bool canInterrupt = false) const
     {
-        return hoverImageDelayDuration_;
+        return canInterrupt ? hoverImageDelayDurationForInterrupt_ : hoverImageDelayDuration_;
     }
 
     int32_t GetHoverImageCustomPreviewScaleDuration() const
@@ -314,6 +321,21 @@ public:
         return hasFilter_;
     }
 
+    bool GetNormalLayout() const
+    {
+        return normalLayout_;
+    }
+
+    bool GetNormalPlacement() const
+    {
+        return normalPlacement_;
+    }
+
+    bool GetHasBackBlur() const
+    {
+        return hasBackBlur_;
+    }
+
     float GetBigFontSizeScale() const
     {
         return bigFontSizeScale_;
@@ -332,21 +354,6 @@ public:
     int32_t GetTextMaxLines() const
     {
         return textMaxLines_;
-    }
-
-    bool GetNormalLayout() const
-    {
-        return normalLayout_;
-    }
-
-    bool GetNormalPlacement() const
-    {
-        return normalPlacement_;
-    }
-
-    bool GetHasBackBlur() const
-    {
-        return hasBackBlur_;
     }
 
     bool GetEnableDirectionalKeyFocus() const
@@ -383,7 +390,7 @@ public:
     {
         return menuShadowStyle_;
     }
-    
+
     int GetMenuBackgroundBlurStyle() const
     {
         return menuBackGroundBlurStyle_;
@@ -404,6 +411,21 @@ public:
         return menuHapticFeedback_;
     }
 
+    uint32_t GetEmbeddedExpandIconId() const
+    {
+        return embeddedExpandIconId_;
+    }
+
+    uint32_t GetStackExpandIconId() const
+    {
+        return stackExpandIconId_;
+    }
+
+    Color GetMenuOutlineColor() const
+    {
+        return menuOutlineColor_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -412,6 +434,7 @@ private:
     int32_t previewAnimationDuration_ = 0;
     int32_t hoverImageSwitchToPreviewOpacityDuration_ = 0;
     int32_t hoverImageDelayDuration_ = 0;
+    int32_t hoverImageDelayDurationForInterrupt_ = 0;
     int32_t hoverImageCustomPreviewScaleDuration_ = 0;
     int32_t hoverImagePreviewDisappearDuration_ = 0;
     int32_t subMenuShowDelayDuration_ = SUB_MENU_SHOW_DELAY_DURATION;
@@ -442,15 +465,15 @@ private:
     double innerBorderWidth_ = 1.0f;
     Dimension innerBorderRadius_;
     Color innerBorderColor_ = Color::TRANSPARENT;
-    uint32_t symbolId_;
     bool hasFilter_ = true;
+    uint32_t symbolId_;
+    bool normalLayout_ = true;
+    bool normalPlacement_ = true;
+    bool hasBackBlur_ = true;
     float bigFontSizeScale_ = 1.75f;
     float largeFontSizeScale_ = 2.0f;
     float maxFontSizeScale_ = 3.2f;
     int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
-    bool normalLayout_ = true;
-    bool normalPlacement_ = true;
-    bool hasBackBlur_ = true;
     bool enableDirectionalKeyFocus_ = false;
     bool hasBackBlurColor_ = false;
     Dimension borderWidth_;
@@ -460,6 +483,9 @@ private:
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     std::string menuHapticFeedback_;
+    uint32_t embeddedExpandIconId_ = 0;
+    uint32_t stackExpandIconId_ = 0;
+    Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
 };
 
 } // namespace OHOS::Ace::NG

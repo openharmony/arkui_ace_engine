@@ -154,6 +154,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
                                   std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
+    std::string OnHandleOverrideErrorPage(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                          std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
@@ -184,6 +186,7 @@ public:
     void OnQuickMenuDismissed() override;
     void HideHandleAndQuickMenuIfNecessary(bool hide) override;
     void ChangeVisibilityOfQuickMenu() override;
+    bool ChangeVisibilityOfQuickMenuV2() override;
     void OnTouchSelectionChanged(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -196,6 +199,7 @@ public:
         bool isAlert,
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnActivateContentByJS() override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
     void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
@@ -228,11 +232,13 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) override;
     void OnOverScrollFlingEnd() override;
     void OnScrollState(bool scrollState) override;
+    void EnableSecurityLayer(bool isNeedSecurityLayer) override;
     void OnRootLayerChanged(int width, int height) override;
     void ReleaseResizeHold() override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
+    void OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event) override;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
     void OnTooltip(const std::string& tooltip) override;
@@ -281,6 +287,8 @@ public:
 
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 
+    void OnTakeFocus(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event) override;
+
     void OnCursorUpdate(double x, double y, double width, double height) override;
 
     void StartVibraFeedback(const std::string& vibratorType) override;
@@ -301,6 +309,35 @@ public:
     void OnScrollStart(const float x, const float y) override;
 
     void RestoreRenderFit() override;
+
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
+
+    void OnLoadStarted(const std::string& url) override;
+
+    void OnLoadFinished(const std::string& url) override;
+
+    void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
+
+    bool OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result, OHOS::NWeb::SslError error,
+        const std::string& url, const std::string& originalUrl, const std::string& referrer, bool isFatalError,
+        bool isMainFrame, const std::vector<std::string>& certChainData) override;
+
+    void ShowMagnifier() override;
+
+    void HideMagnifier() override;
+
+    void OnPageTitleV2(const std::string &title, bool isRealTitle) override;
+
+    void OnInsertBlanklessFrame(const std::string& pathToFrame) override;
+    void OnRemoveBlanklessFrame(int delayTime) override;
+    bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
+        std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+
+    void OnPdfScrollAtBottom(const std::string& url) override;
+    void OnPdfLoadEvent(int32_t result, const std::string& url) override;
+    void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
+                                        uint32_t width,
+                                        uint32_t height) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

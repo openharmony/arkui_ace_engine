@@ -74,7 +74,7 @@ declare class RepeatVirtualScroll2Native {
     handlers: {
       onGetRid4Index: (forIndex: number) => [number, number],
       onRecycleItems: (fromIndex: number, toIndex: number) => void,
-      onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
+      onActiveRange: (fromIndex: number, toIndex: number, vStart: number, vEnd: number, isLoop: boolean) => void,
       onMoveFromTo: (moveFrom: number, moveTo: number) => void,
       onPurge: () => void;
     }
@@ -96,7 +96,8 @@ declare class RepeatVirtualScroll2Native {
     arrLen: number,
     totalCount: number,
     invalidateContainerLayoutFromChildIndex: number,
-    l1rid4index: Array<Array<number>>): void;
+    l1rid4index: Array<Array<number>>,
+    ridNeedToRecycle: Array<number>): void;
 
   // drag and drop
   static onMove(repeatElmtId: number, handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);

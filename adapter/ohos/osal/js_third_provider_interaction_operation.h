@@ -52,6 +52,8 @@ public:
         const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback,
         const int32_t mode) override;
+    void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
+        const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
     void SearchElementInfosByText(
         const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback) override;

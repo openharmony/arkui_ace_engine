@@ -203,6 +203,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent001, TestSize.Level0)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
 
     pattern->obscureTickCountDown_ = 1;
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->HandleClickEvent(info);
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
@@ -275,7 +276,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent002, TestSize.Level0)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto geometryNode = selectOverlayNode->GetGeometryNode();
     geometryNode->frame_.rect_.SetRect(100, 100, 200, 200);
-
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.impl_ = nullptr;
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1167,44 +1168,6 @@ HWTEST_F(TextFieldPatternTestTwo, NotifyFillRequestSuccess001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ParseFillContentJsonValue001
- * @tc.desc: test testInput text ParseFillContentJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestTwo, ParseFillContentJsonValue001, TestSize.Level0)
-{
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /* Construct JSON object */
-    auto jsonObject = JsonUtil::Create(true);
-    auto childJsonObject = JsonUtil::Create(true);
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> map;
-
-    childJsonObject->Put("name", "textfieldtest");
-    jsonObject->Put("child0", childJsonObject);
-    jsonObject->Put("child1", "child1");
-    jsonObject->Put("child2", "child2");
-    jsonObject->Put("child3", "child3");
-    jsonObject->Put("child4", "child4");
-    jsonObject->Put("child5", "child5");
-    jsonObject->Put("child6", "child6");
-    jsonObject->Put("child7", "child7");
-
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject, map), true);
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(jsonObject->GetChild()->GetNext(), map), false);
-
-    /* Construct an array JSON object */
-    auto arrayJsonObject = JsonUtil::CreateArray(true);
-    arrayJsonObject->Put("name", "textfieldtest");
-
-    EXPECT_EQ(pattern->ParseFillContentJsonValue(arrayJsonObject, map), false);
-}
-
-/**
  * @tc.name: GetDragUpperLeftCoordinates001
  * @tc.desc: test testInput text GetDragUpperLeftCoordinates
  * @tc.type: FUNC
@@ -1457,5 +1420,73 @@ HWTEST_F(TextFieldPatternTestTwo, CheckIfNeedToResetKeyboard001, TestSize.Level0
     pattern->keyboard_ = TextInputType::UNSPECIFIED;
     pattern->CheckIfNeedToResetKeyboard();
     EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
+
+    pattern->isCustomKeyboardAttached_ = false;
+    pattern->keyboard_ = TextInputType::ONE_TIME_CODE;
+    pattern->CheckIfNeedToResetKeyboard();
+    EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
+}
+
+/**
+ * @tc.name: AddTextFireOnChange001
+ * @tc.desc: Test AddTextFireOnChange No PasswordMode with content added
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->contentController_->content_ = u"abcd";
+    pattern->textCache_ = "abc";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abcd");
+}
+
+/**
+ * @tc.name: AddTextFireOnChange002
+ * @tc.desc: Test AddTextFireOnChange IsInPasswordMode with content removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange002, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern->contentController_->content_ = u"abc";
+    pattern->textCache_ = "abcd";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abc");
+}
+
+/**
+ * @tc.name: AddTextFireOnChange003
+ * @tc.desc: Test AddTextFireOnChange No PasswordMode with content modified
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange003, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->contentController_->content_ = u"abcd content";
+    pattern->textCache_ = "abcdefg";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abcd content");
 }
 } // namespace OHOS::Ace::NG

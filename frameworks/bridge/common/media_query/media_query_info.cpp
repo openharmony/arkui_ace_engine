@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -47,12 +46,28 @@ std::string MediaQueryInfo::GetDeviceType()
     }
 }
 
-std::string MediaQueryInfo::GetOrientation()
+std::string MediaQueryInfo::GetSystemOrientation()
 {
     switch (SystemProperties::GetDeviceOrientation()) {
         case DeviceOrientation::PORTRAIT:
             return "portrait";
         case DeviceOrientation::LANDSCAPE:
+            return "landscape";
+        default:
+            break;
+    }
+    return "";
+}
+
+std::string MediaQueryInfo::GetOrientation(const RefPtr<OHOS::Ace::Container>& container)
+{
+    CHECK_NULL_RETURN(container, GetSystemOrientation());
+    switch (container->GetCurrentDisplayOrientation()) {
+        case DisplayOrientation::PORTRAIT:
+        case DisplayOrientation::PORTRAIT_INVERTED:
+            return "portrait";
+        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::LANDSCAPE_INVERTED:
             return "landscape";
         default:
             break;
@@ -85,6 +100,9 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
         height -= static_cast<int32_t>(
             2 * CONTAINER_BORDER_WIDTH.ConvertToPx() + (CONTENT_PADDING + CONTAINER_TITLE_HEIGHT).ConvertToPx());
     }
+    if (pipeline) {
+        width = pipeline->CalcPageWidth(width);
+    }
     double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
     json->Put("width", width);
     json->Put("height", height);
@@ -93,7 +111,11 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     json->Put("device-width", SystemProperties::GetDeviceWidth());
     json->Put("device-height", SystemProperties::GetDeviceHeight());
     json->Put("resolution", PipelineBase::GetCurrentDensity());
-    json->Put("orientation", GetOrientation().c_str());
+#if defined(PREVIEW)
+    json->Put("orientation", GetSystemOrientation().c_str());
+#else
+    json->Put("orientation", GetOrientation(container).c_str());
+#endif
     json->Put("device-type", GetDeviceType().c_str());
     json->Put("dark-mode", PipelineBase::GetCurrentColorMode() == ColorMode::DARK);
     json->Put("api-version", StringUtils::StringToInt(SystemProperties::GetApiVersion()));

@@ -27,6 +27,7 @@
 #include "mock_touch_event_target.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
+#include "core/event/resample_algo.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -103,6 +105,12 @@ enum class CtrlKeysBit {
 RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
 const int32_t CONTAINER_INSTANCE_ID = 777;
 } // namespace
+
+struct MockMouseEvent {
+    MouseAction action;
+    MouseButton button;
+    bool expectedResult;
+};
 
 class EventManagerTestNg : public testing::Test {
 public:

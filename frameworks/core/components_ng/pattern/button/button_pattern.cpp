@@ -32,7 +32,7 @@ constexpr float MAXFONTSCALE = 3.20f;
 
 inline std::string ToString(const ButtonType& type)
 {
-    static const LinearEnumMapNode<ButtonType, std::string> table[] = {
+    const LinearEnumMapNode<ButtonType, std::string> table[] = {
         { ButtonType::NORMAL, "NORMAL" }, { ButtonType::CAPSULE, "CAPSULE" },
         { ButtonType::CIRCLE, "CIRCLE" }, { ButtonType::TEXT, "TEXT" },
         { ButtonType::ARC, "ARC" }, { ButtonType::DOWNLOAD, "DOWNLOAD" },
@@ -45,7 +45,7 @@ inline std::string ToString(const ButtonType& type)
 
 inline std::string ToString(const ButtonStyleMode& mode)
 {
-    static const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
+    const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
         { ButtonStyleMode::NORMAL, "NORMAL" },
         { ButtonStyleMode::EMPHASIZE, "EMPHASIZE" },
         { ButtonStyleMode::TEXT, "TEXT" },
@@ -56,7 +56,7 @@ inline std::string ToString(const ButtonStyleMode& mode)
 
 inline std::string ToString(const ControlSize& size)
 {
-    static const LinearEnumMapNode<ControlSize, std::string> table[] = {
+    const LinearEnumMapNode<ControlSize, std::string> table[] = {
         { ControlSize::SMALL, "SMALL" },
         { ControlSize::NORMAL, "NORMAL" },
     };
@@ -66,7 +66,7 @@ inline std::string ToString(const ControlSize& size)
 
 inline std::string ToString(const ButtonRole& role)
 {
-    static const LinearEnumMapNode<ButtonRole, std::string> table[] = {
+    const LinearEnumMapNode<ButtonRole, std::string> table[] = {
         { ButtonRole::NORMAL, "NORMAL" },
         { ButtonRole::ERROR, "ERROR" },
     };
@@ -76,7 +76,7 @@ inline std::string ToString(const ButtonRole& role)
 
 inline std::string ToString(const TextHeightAdaptivePolicy& policy)
 {
-    static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
+    const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
         { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "MAX_LINES_FIRST" },
         { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "MIN_FONT_SIZE_FIRST" },
         { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "LAYOUT_CONSTRAINT_FIRST" },
@@ -297,20 +297,6 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
     }
 }
 
-void ButtonPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    clickedColor_ = buttonTheme->GetClickedColor();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetAlphaOffscreen(true);
-}
-
 bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
 {
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -395,6 +381,170 @@ void ButtonPattern::UpdateTextLayoutProperty(
     }
     // update text style defined by buttonStyle and control size
     UpdateTextStyle(layoutProperty, textLayoutProperty);
+}
+
+void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonColorType) {
+            case ButtonColorType::FONT_COLOR:
+                textRenderContext->UpdateForegroundColor(color);
+                textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+                break;
+            case ButtonColorType::BACKGROUND_COLOR:
+                renderContext->UpdateBackgroundColor(color);
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::LABEL:
+                textLayoutProperty->UpdateContent(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentFamilies(const std::vector<std::string>& value,
+    const ButtonStringType buttonStringType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::FONT_FAMILY:
+                textLayoutProperty->UpdateFontFamily(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentDimension(const CalcDimension value, const ButtonDimensionType buttonDimensionType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonDimensionType) {
+            case ButtonDimensionType::MIN_FONT_SIZE:
+                textLayoutProperty->UpdateAdaptMinFontSize(value);
+                break;
+            case ButtonDimensionType::MAX_FONT_SIZE:
+                textLayoutProperty->UpdateAdaptMaxFontSize(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentDouble(const double value, const ButtonDoubleType buttonDoubleType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonDoubleType) {
+            case ButtonDoubleType::MIN_FONT_SCALE:
+                textLayoutProperty->UpdateMinFontScale(value);
+                break;
+            case ButtonDoubleType::MAX_FONT_SCALE:
+                textLayoutProperty->UpdateMaxFontScale(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+std::string ButtonPattern::VectorToString(const std::vector<std::string>& vec, const std::string& delimiter)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i != 0)
+            oss << delimiter;
+        oss << vec[i];
+    }
+    return oss.str();
+}
+
+std::vector<std::string> ButtonPattern::StringToVector(const std::string& str, char delimiter)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+    while (std::getline(ss, item, delimiter)) {
+        result.push_back(item);
+    }
+    return result;
 }
 
 void ButtonPattern::UpdateTextStyle(
@@ -482,6 +632,7 @@ void ButtonPattern::InitButtonLabel()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitButtonAlphaOffscreen();
     CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
@@ -492,6 +643,19 @@ void ButtonPattern::OnModifyDone()
     HandleBorderAndShadow();
     HandleFocusStatusStyle();
     HandleFocusActiveStyle();
+}
+
+void ButtonPattern::InitButtonAlphaOffscreen()
+{
+    if (isInitButtonAlphaOffscreen_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
+    isInitButtonAlphaOffscreen_ = true;
 }
 
 void ButtonPattern::CheckLocalizedBorderRadiuses()
@@ -622,9 +786,9 @@ void ButtonPattern::HandlePressedStyle()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_);
+            renderContext->UpdateBackgroundColor(clickedColor_.value());
             return;
         }
         // for system default
@@ -651,7 +815,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
@@ -973,7 +1137,7 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -984,7 +1148,9 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
     AnimationOption option = AnimationOption();
     option.SetDuration(duration);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); });
+    AnimationUtils::Animate(
+        option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); }, nullptr, nullptr,
+        pipeline);
 }
 
 void ButtonPattern::SetButtonPress(double xPos, double yPos)
@@ -1059,6 +1225,7 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
@@ -1094,6 +1261,10 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+        themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
     }
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
     CHECK_NULL_VOID(textNode);

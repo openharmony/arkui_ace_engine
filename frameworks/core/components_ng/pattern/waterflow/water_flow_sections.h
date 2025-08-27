@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 
 class ACE_FORCE_EXPORT WaterFlowSections : public virtual AceType {
-    DECLARE_ACE_TYPE(WaterFlowSections, AceType)
+    DECLARE_ACE_TYPE(WaterFlowSections, AceType);
 public:
     struct Section {
         bool operator==(const Section& other) const
@@ -82,7 +82,7 @@ public:
     // replace all sections from start
     void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
 
-    virtual const std::vector<Section>& GetSectionInfo() const
+    const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
     }

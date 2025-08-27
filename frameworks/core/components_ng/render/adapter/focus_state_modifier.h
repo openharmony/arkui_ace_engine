@@ -15,7 +15,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_STATE_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_STATE_MODIFIER_H
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -26,19 +25,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-
-using RSModifierType = Rosen::RSModifierType;
-using RSExtendedModifier = Rosen::RSExtendedModifier;
 using RSPropertyBase = Rosen::RSPropertyBase;
 
 class RS_EXPORT FocusStateModifier : public FocusModifier, public RSOverlayStyleModifier {
 public:
     FocusStateModifier() = default;
-
-    RSModifierType GetModifierType() const override
-    {
-        return RSModifierType::OVERLAY_STYLE;
-    }
 
     void Draw(RSDrawingContext& context) const override
     {
@@ -88,5 +79,4 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(FocusStateModifier);
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_STATE_MODIFIER_H

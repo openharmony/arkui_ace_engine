@@ -49,7 +49,7 @@ class RSUIDirector;
 namespace OHOS::Ace {
 
 class SubwindowOhos : public Subwindow {
-    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow)
+    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow);
 
 public:
     explicit SubwindowOhos(int32_t instanceId);
@@ -181,6 +181,12 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
+    bool SetFollowParentWindowLayoutEnabled(bool enable) override
+    {
+        CHECK_NULL_RETURN(window_, false);
+        OHOS::Rosen::WMError ret = window_->SetFollowParentWindowLayoutEnabled(enable);
+        return ret == OHOS::Rosen::WMError::WM_OK;
+    }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -214,6 +220,33 @@ public:
         detachState_ = t;
     }
 
+    void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) override;
+    bool NeedFollowParentWindowLayout() override
+    {
+        return !followParentWindowLayoutNodeIds_.empty();
+    }
+    void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
+    void SetNodeId(int32_t nodeId) override
+    {
+        nodeId_ = nodeId;
+    }
+    int32_t GetNodeId() const override
+    {
+        return nodeId_;
+    }
+    void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
+    Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
+
+#if defined(ACE_STATIC)
+    void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
+    void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) override;
+    void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback) override;
+    void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback) override;
+    void OpenCustomDialogStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) override;
+#endif
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -252,7 +285,6 @@ private:
         std::function<void(int32_t)>&& callback);
     void ContainerModalUnFocus();
 
-    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
@@ -261,11 +293,15 @@ private:
         OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
         const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
 
+    void InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+    void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
     uint64_t defaultDisplayId_ = 0;
+    int32_t nodeId_ = -1;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -280,6 +316,7 @@ private:
     bool isShowed_ = false;
     bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
+    bool ifNeedSetCurrentWindow_ = true;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
@@ -288,6 +325,19 @@ private:
     std::mutex eventRunnerMutex_;
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+    std::list<int32_t> followParentWindowLayoutNodeIds_;
+#if defined(ACE_STATIC)
+    void ShowDialogForAbilityStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowDialogForServiceStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForAbilityStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForServiceStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void OpenCustomDialogForAbilityStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback);
+    void OpenCustomDialogForServiceStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback);
+#endif
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

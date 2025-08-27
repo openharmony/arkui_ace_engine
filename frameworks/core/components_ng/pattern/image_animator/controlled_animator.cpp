@@ -251,7 +251,7 @@ void ControlledAnimator::Backward()
 void ControlledAnimator::Cancel()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::IDLE || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already initial, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already initial.");
         return;
     }
     if (cancelEvent_) {
@@ -271,7 +271,7 @@ void ControlledAnimator::Cancel()
 void ControlledAnimator::Pause()
 {
     if (!iteration_ || controlStatus_ == ControlledAnimator::ControlStatus::PAUSED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already paused, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already paused.");
         return;
     }
     if (pauseEvent_) {
@@ -301,7 +301,9 @@ int32_t ControlledAnimator::CalFinishIdx(bool checkWithFillMode)
 void ControlledAnimator::MovePictureToRightPosition(bool checkWithFillMode)
 {
     auto finishIdx = CalFinishIdx(checkWithFillMode);
-    if (runningIdx_ != finishIdx) {
+    // Ensure the first picture is displayed when only one image exists;
+    // without this, the image may not show if runningIdx_ == finishIdx
+    if (runningIdx_ != finishIdx || pictureInfos_.size() == 1) {
         playbackListener_(pictureInfos_[finishIdx].second);
         runningIdx_ = finishIdx;
     }
@@ -310,7 +312,7 @@ void ControlledAnimator::MovePictureToRightPosition(bool checkWithFillMode)
 void ControlledAnimator::Finish()
 {
     if (!iteration_ || controlStatus_ == ControlStatus::STOPPED || pictureInfos_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already stopped, do not need pause again.");
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Already stopped.");
         return;
     }
     if (stopEvent_) {

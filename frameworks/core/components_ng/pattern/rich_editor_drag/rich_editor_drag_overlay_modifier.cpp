@@ -60,9 +60,14 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.Save();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
-    for (auto &&info : hostPattern->GetParagraphs()) {
-        info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
-        offset.AddY(info.paragraph->GetHeight());
+    auto textEffect = hostPattern->GetTextEffect();
+    if (textEffect) {
+        textEffect->NoEffect(canvas, offset.GetX(), offset.GetY());
+    } else {
+        for (auto&& info : hostPattern->GetParagraphs()) {
+            info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
+            offset.AddY(info.paragraph->GetHeight());
+        }
     }
     PaintImage(context);
     canvas.Restore();
@@ -70,14 +75,13 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*path, RSClipOp::INTERSECT, true);
     PaintSelBackground(canvas, textDragPattern, richEditor);
     canvas.Restore();
-
-    if (firstHandle_) {
+    if (firstHandle_ && isFirstHandleAnimated_) {
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = firstHandle_->Get();
         auto startY = rect.Top() - selectPosition.globalY_;
         PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
     }
-    if (secondHandle_) {
+    if (secondHandle_ && isSecondHandleAnimated_) {
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = secondHandle_->Get();
         auto startY = rect.Bottom() - selectPosition.globalY_;

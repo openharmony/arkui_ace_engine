@@ -11,6 +11,254 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "entry_desc",
+      "value": "description"
+    },
+    {
+      "name": "MainAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "MainAbility_label",
+      "value": "ToastX"
+    },
+    {
+      "name": "Color_invalid",
+      "value": "invalid value"
+    },
+    {
+      "name": "Color_undefined",
+      "value": "undefined"
+    },
+    {
+      "name": "Color_exception",
+      "value": "Exception"
+    },
+    {
+      "name": "Font_size",
+      "value": "24"
+    },
+    {
+      "name": "Font_size_minus",
+      "value": "-100"
+    },
+    {
+      "name": "Font_size_zero",
+      "value": "0"
+    },
+    {
+      "name": "Font_size_large",
+      "value": "60"
+    },
+    {
+      "name": "Font_size_invalid",
+      "value": "invalid_value"
+    },
+    {
+      "name": "showToast_String",
+      "value": "here is your message"
+    },
+    {
+      "name": "showDialog_text",
+      "value": "this is button"
+    },
+    {
+      "name": "showDialog_title",
+      "value": "this is showDialog title"
+    },
+    {
+      "name": "showDialog_message",
+      "value": "this is showDialog message, this is showDialog message"
+    },
+    {
+      "name": "showActionMenu_title",
+      "value": "this is showActionMenu title"
+    },
+    {
+      "name": "string_color",
+      "value": "#ff18ec09"
+    },
+    {
+      "name": "dy",
+      "value": "50"
+    },
+    {
+      "name": "dx",
+      "value": "50"
+    },
+    {
+      "name": "custom_dialog",
+      "value": "Custom dialog"
+    },
+    {
+      "name": "custom_dialog_style_custom",
+      "value": "Whether the dialog style is customized"
+    },
+    {
+      "name": "custom_dialog_style_custom_true",
+      "value": "Custom"
+    },
+    {
+      "name": "custom_dialog_style_custom_false",
+      "value": "Non-custom"
+    },
+    {
+      "name": "custom_dialog_title",
+      "value": "The component collection requests to enable the following permissions"
+    },
+    {
+      "name": "custom_dialog_permission_microphone",
+      "value": "Microphone permission"
+    },
+    {
+      "name": "custom_dialog_permission_microphone_info",
+      "value": "Microphone permission is required for voice calls"
+    },
+    {
+      "name": "custom_dialog_permission_location",
+      "value": "Location permissions"
+    },
+    {
+      "name": "custom_dialog_permission_location_info",
+      "value": "Location permission is required for navigation"
+    },
+    {
+      "name": "custom_dialog1",
+      "value": "customStyle: true"
+    },
+    {
+      "name": "custom_dialog2",
+      "value": "customStyle: false"
+    },
+    {
+      "name": "AlertDialog_message",
+      "value": "告警信息res"
+    },
+    {
+      "name": "AlertDialog_title",
+      "value": "标题res"
+    },
+    {
+      "name": "AlertDialog_confirmValue",
+      "value": "confirm按键Res"
+    },
+    {
+      "name": "AlertDialog_fontColor_il",
+      "value": "非法值"
+    },
+    {
+      "name": "ActionSheet_show_title1",
+      "value": "标题res"
+    },
+    {
+      "name": "ActionSheet_show_title2",
+      "value": "action标题res"
+    },
+    {
+      "name": "ActionSheet_show_message",
+      "value": "消息内容res"
+    },
+    {
+      "name": "TimePicker_text_size",
+      "value": "30"
+    },
+    {
+      "name": "showDialog_meesage",
+      "value": "this is showDialog message, this is showDialog message"
+    },
+    {
+      "name": "purple",
+      "value": "#FF6C0D94"
+    },
+    {
+      "name": "rFontSize",
+      "value": "16"
+    },
+    {
+      "name": "rStr",
+      "value": "menu content "
+    },
+    {
+      "name": "Length_50percent",
+      "value": "50%"
+    },
+    {
+      "name": "Length_100percent",
+      "value": "100%"
+    },
+    {
+      "name": "Length_75percent",
+      "value": "75%"
+    },
+    {
+      "name": "Length_150percent",
+      "value": "150%"
+    },
+    {
+      "name": "Length_125percent",
+      "value": "125%"
+    },
+    {
+      "name": "Length_minus150percent",
+      "value": "-150%"
+    },
+    {
+      "name": "Length_0",
+      "value": "0"
+    },
+    {
+      "name": "Length_10",
+      "value": "10"
+    },
+    {
+      "name": "Length_minus10",
+      "value": "-10"
+    },
+    {
+      "name": "Length_20",
+      "value": "20"
+    },
+    {
+      "name": "Length_minus20",
+      "value": "-20"
+    },
+    {
+      "name": "Length_30",
+      "value": "30"
+    },
+    {
+      "name": "Length_minus30",
+      "value": "-30"
+    },
+    {
+      "name": "Length_30vp",
+      "value": "30vp"
+    },
+    {
+      "name": "Length_90px",
+      "value": "90px"
+    },
+    {
+      "name": "Length_105pix",
+      "value": "105pix"
+    },
+    {
+      "name": "Length_360vp",
+      "value": "360vp"
+    },
+    {
+      "name": "Length_780vp",
+      "value": "780vp"
+    },
+    {
+      "name": "string_20",
+      "value": "20"
+    },
+    {
+      "name": "string_20percent",
+      "value": "20%"
     }
   ]
 }

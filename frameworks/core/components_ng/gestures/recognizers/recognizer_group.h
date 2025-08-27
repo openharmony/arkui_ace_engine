@@ -53,6 +53,7 @@ public:
     ~RecognizerGroup() override = default;
 
     void AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers);
+    void RemoveRecognizerInGroup(const RefPtr<NGGestureRecognizer>& recognizer);
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
@@ -145,6 +146,8 @@ public:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+
+    void ForceCleanRecognizerWithGroup() override;
 
     void CleanRecognizerState() override;
 

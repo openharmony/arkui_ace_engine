@@ -14,20 +14,25 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchParentBlock,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export default function TimePicker2() {
-  describe('TimePicker2', () => {
+export default function TextPicker2() {
+  describe('TextPicker2', () => {
 
     beforeAll(async (done: Function) => {
       await TextPickerStart(done)

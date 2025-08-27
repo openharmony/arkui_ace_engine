@@ -100,6 +100,8 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
+    void UpdateTextAreaMaxLines(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
+    bool ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
@@ -108,6 +110,8 @@ protected:
     void CreateParagraph(const TextStyle& textStyle, const std::vector<std::u16string>& contents,
         const std::u16string& content, bool needObscureText, CreateParagraphData paragraphData);
     void CreateInlineParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
+        int32_t nakedCharPosition, CreateParagraphData paragraphData);
+    void CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
         int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
@@ -164,6 +168,8 @@ protected:
     bool isFontSizeNonPositive_ = false;
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
+    bool isInlineFocus_ = false;
+    bool isPlaceHolderOverSize_ = false;
 
 private:
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
@@ -174,7 +180,7 @@ private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled);
     static void UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TextFieldLayoutProperty>& layoutPropeerty, TextStyle& textStyle);
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
         TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern);
     static void UpdatePlaceholderTextStyleSetTextColor(
@@ -196,6 +202,10 @@ private:
     void ApplyIndent(LayoutWrapper* layoutWrapper, double width);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    void CalculateContentMaxSizeWithPolicy(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& contentConstraint, SizeF& maxIdealSize);
+    double GetMaxIndent(LayoutWrapper* layoutWrapper, double width);
+    bool HasCalcMinWidthVersion11OrLarger(LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

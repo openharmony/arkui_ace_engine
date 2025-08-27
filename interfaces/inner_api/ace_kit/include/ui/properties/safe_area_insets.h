@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace OHOS::Ace::NG {
 /**
@@ -194,6 +195,128 @@ struct SafeAreaExpandOpts {
             default:
                 return "SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);;
         }
+    }
+};
+
+using LayoutSafeAreaType = uint32_t;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_NONE = 0;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_KEYBOARD = 1 << 1;
+inline constexpr LayoutSafeAreaType LAYOUT_SAFE_AREA_TYPE_ALL =
+    LAYOUT_SAFE_AREA_TYPE_SYSTEM | LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+const uint32_t TYPE_MASK_LIMIT = 2;
+
+using LayoutSafeAreaEdge = uint32_t;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_NONE = 0;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_TOP = 1;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_START = 1 << 2;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_END = 1 << 3;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_VERTICAL =
+    LAYOUT_SAFE_AREA_EDGE_TOP | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_HORIZONTAL =
+    LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_END;
+inline constexpr LayoutSafeAreaEdge LAYOUT_SAFE_AREA_EDGE_ALL =
+    LAYOUT_SAFE_AREA_EDGE_VERTICAL | LAYOUT_SAFE_AREA_EDGE_HORIZONTAL;
+const uint32_t EDGE_MASK_LIMIT = 6;
+
+struct IgnoreLayoutSafeAreaOpts {
+    LayoutSafeAreaType type = LAYOUT_SAFE_AREA_TYPE_NONE;
+    LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+    LayoutSafeAreaEdge rawEdges = LAYOUT_SAFE_AREA_EDGE_NONE;
+
+    bool operator==(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return type == other.type && edges == other.edges;
+    }
+
+    bool NeedUpdateWithCheck(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return (type != other.type) || (rawEdges != other.rawEdges);
+    }
+
+    bool operator!=(const IgnoreLayoutSafeAreaOpts& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool NeedIgnoreLayoutSafeArea() const
+    {
+        return (type != LAYOUT_SAFE_AREA_TYPE_NONE) && (edges != LAYOUT_SAFE_AREA_EDGE_NONE);
+    }
+
+    bool IsTrivial() const
+    {
+        return type == LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    }
+
+    const std::string ToString()
+    {
+        return "IgnoreLayoutSafeAreaOpts: type:" + TypeToString() + ", edges: " + EdgeToString();
+    }
+
+    const std::string TypeToString()
+    {
+        switch (type) {
+            case LAYOUT_SAFE_AREA_TYPE_NONE:
+                return "LAYOUT_SAFE_AREA_TYPE_NONE";
+            case LAYOUT_SAFE_AREA_TYPE_SYSTEM:
+                return "LAYOUT_SAFE_AREA_TYPE_SYSTEM";
+            case LAYOUT_SAFE_AREA_TYPE_KEYBOARD:
+                return "LAYOUT_SAFE_AREA_TYPE_KEYBOARD";
+            case LAYOUT_SAFE_AREA_TYPE_ALL:
+                return "LAYOUT_SAFE_AREA_TYPE_ALL";
+            default:
+                return "LAYOUT_SAFE_AREA_TYPE_OTHERS_" + std::to_string(type);
+        }
+    }
+
+    const std::string EdgeToString()
+    {
+        switch (edges) {
+            case LAYOUT_SAFE_AREA_EDGE_NONE:
+                return "LAYOUT_SAFE_AREA_EDGE_NONE";
+            case LAYOUT_SAFE_AREA_EDGE_TOP:
+                return "LAYOUT_SAFE_AREA_EDGE_TOP";
+            case LAYOUT_SAFE_AREA_EDGE_BOTTOM:
+                return "LAYOUT_SAFE_AREA_EDGE_BOTTOM";
+            case LAYOUT_SAFE_AREA_EDGE_START:
+                return "LAYOUT_SAFE_AREA_EDGE_START";
+            case LAYOUT_SAFE_AREA_EDGE_END:
+                return "LAYOUT_SAFE_AREA_EDGE_END";
+            case LAYOUT_SAFE_AREA_EDGE_VERTICAL:
+                return "LAYOUT_SAFE_AREA_EDGE_VERTICAL";
+            case LAYOUT_SAFE_AREA_EDGE_HORIZONTAL:
+                return "LAYOUT_SAFE_AREA_EDGE_HORIZONTAL";
+            case LAYOUT_SAFE_AREA_EDGE_ALL:
+                return "LAYOUT_SAFE_AREA_EDGE_ALL";
+            default:
+                return "LAYOUT_SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);
+        }
+    }
+
+    static LayoutSafeAreaType TypeToMask(uint32_t index)
+    {
+        static std::vector<LayoutSafeAreaType> LayoutTypeEnum {
+            NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+            NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
+            NG::LAYOUT_SAFE_AREA_TYPE_ALL
+        };
+        return index > TYPE_MASK_LIMIT ? 0 : LayoutTypeEnum[index];
+    }
+
+    static LayoutSafeAreaType EdgeToMask(uint32_t index)
+    {
+        static std::vector<LayoutSafeAreaType> LayoutEdgeEnum {
+            NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+            NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+            NG::LAYOUT_SAFE_AREA_EDGE_START,
+            NG::LAYOUT_SAFE_AREA_EDGE_END,
+            NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+            NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+            NG::LAYOUT_SAFE_AREA_EDGE_ALL
+        };
+        return index > EDGE_MASK_LIMIT ? 0 : LayoutEdgeEnum[index];
     }
 };
 } // namespace OHOS::Ace::NG

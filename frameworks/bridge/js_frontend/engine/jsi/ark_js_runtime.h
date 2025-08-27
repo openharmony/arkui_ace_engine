@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/native_engine.h"
 
 #include "base/log/log.h"
@@ -63,8 +64,6 @@ public:
 #if !defined(PREVIEW)
     void StartDebuggerForSocketPair(std::string& option, uint32_t socketFd);
 #endif
-    void SetUniqueId(const std::string& uniqueId) override;
-    const std::string& GetUniqueId() const override;
     bool Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
@@ -78,6 +77,7 @@ public:
     bool ExecuteJsBinForAOT(const std::string& fileName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
+    shared_ptr<JsValue> GetGlobal(ArkNativeEngine* nativeArkEngine);
     void RunGC() override;
     void RunFullGC() override;
 
@@ -105,6 +105,7 @@ public:
     void DestroyHeapProfiler() override;
     bool IsExecuteModuleInAbcFile(
         const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl);
+    bool IsStaticOrInvalidFile(const uint8_t *data, int32_t size);
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
@@ -252,7 +253,6 @@ public:
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
-    std::string uniqueId_;
     std::string language_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };

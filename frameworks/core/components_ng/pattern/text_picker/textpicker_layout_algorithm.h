@@ -43,7 +43,6 @@ public:
         const RefPtr<FrameNode>& pickerNode, const Dimension& defaultPickerItemHeightValue);
     float GetGradientPercent(const RefPtr<TextPickerLayoutProperty>& LayoutProperty,
         const RefPtr<TextPickerPattern>& textPickerPattern, SizeF& frameSize, const RefPtr<PickerTheme>& pickerTheme);
-    void UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper);
 
     std::vector<int32_t> GetCurrentOffset() const
     {
@@ -71,18 +70,20 @@ public:
     }
 
 private:
-    float pickerItemHeight_ = 0.0f;
-    std::vector<int32_t> currentOffset_;
-    double defaultPickerItemHeight_ = 0.0;
-    bool isDefaultPickerItemHeight_ = false;
-    int32_t halfDisplayCounts_ = 0;
-    float dividerSpacingFontScale_ = 1.0f;
-    float gradientFontScale_ = 1.0f;
     const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     bool NeedAdaptForAging();
     float ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing = true);
     void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
         const RefPtr<FrameNode> columnNode);
+    void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme, const SizeF& size);
+
+    bool isDefaultPickerItemHeight_ = false;
+    int32_t halfDisplayCounts_ = 0;
+    float pickerItemHeight_ = 0.0f;
+    float dividerSpacingFontScale_ = 1.0f;
+    float gradientFontScale_ = 1.0f;
+    double defaultPickerItemHeight_ = 0.0f;
+    std::vector<int32_t> currentOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutAlgorithm);
 };

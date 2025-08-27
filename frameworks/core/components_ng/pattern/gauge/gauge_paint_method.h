@@ -23,7 +23,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GaugePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(GaugePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(GaugePaintMethod, NodePaintMethod);
 public:
     GaugePaintMethod() = default;
     ~GaugePaintMethod() override = default;

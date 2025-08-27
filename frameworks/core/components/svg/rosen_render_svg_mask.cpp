@@ -33,27 +33,6 @@ void RosenRenderSvgMask::PaintMaskLayer(RenderContext& context, const Offset& of
         return;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkRect maskBounds = SkRect::MakeXYWH(SkDoubleToScalar(paintRect.Left() + ParseUnitsAttr(x_, paintRect.Width())),
-        SkDoubleToScalar(paintRect.Top() + ParseUnitsAttr(y_, paintRect.Height())),
-        SkDoubleToScalar(ParseUnitsAttr(width_, paintRect.Width())),
-        SkDoubleToScalar(ParseUnitsAttr(height_, paintRect.Height())));
-
-    // create mask layer
-    canvas->saveLayer(maskBounds, nullptr);
-    {
-        // render mask content
-        SkAutoCanvasRestore save(canvas, false);
-        RosenSvgPainter::SetMask(canvas);
-        PaintDirectly(context, offset);
-    }
-
-    // create content layer and render content
-    SkPaint maskPaint;
-    maskPaint.setBlendMode(SkBlendMode::kSrcIn);
-    canvas->saveLayer(maskBounds, &maskPaint);
-    canvas->clipRect(maskBounds, true);
-#else
     RSRect maskBounds = RSRect(static_cast<RSScalar>(paintRect.Left() + ParseUnitsAttr(x_, paintRect.Width())),
         static_cast<RSScalar>(paintRect.Top() + ParseUnitsAttr(y_, paintRect.Height())),
         static_cast<RSScalar>(ParseUnitsAttr(width_, paintRect.Width()) +
@@ -77,7 +56,6 @@ void RosenRenderSvgMask::PaintMaskLayer(RenderContext& context, const Offset& of
     RSSaveLayerOps maskSlo(&maskBounds, &maskBrush);
     canvas->SaveLayer(maskSlo);
     canvas->ClipRect(maskBounds, RSClipOp::INTERSECT, true);
-#endif
 }
 
 } // namespace OHOS::Ace

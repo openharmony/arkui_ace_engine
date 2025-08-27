@@ -125,11 +125,13 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::NONE: {
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(event);
+                AddGestureProcedure(event, activeRecognizer_);
             } else {
                 auto copyRecognizers = recognizers_;
                 for (const auto& recognizer : copyRecognizers) {
                     if (recognizer) {
                         recognizer->HandleEvent(event);
+                        AddGestureProcedure(event, activeRecognizer_);
                     }
                 }
             }

@@ -143,8 +143,13 @@ void JSMarquee::SetTextColor(const JSCallbackInfo& info)
     }
     std::optional<Color> colorOpt;
     Color color;
-    if (ParseJsColor(info[0], color)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("TextColor");
+    if (ParseJsColor(info[0], color, resObj)) {
         colorOpt = color;
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("TextColor", resObj, color);
+        }
     }
     MarqueeModel::GetInstance()->SetTextColor(colorOpt);
 }
@@ -156,8 +161,13 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
     }
     std::optional<Dimension> fontSizeOpt;
     CalcDimension fontSize;
-    if (ParseJsDimensionFp(info[0], fontSize)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("FontSize");
+    if (ParseJsDimensionFp(info[0], fontSize, resObj)) {
         if (!fontSize.IsNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+            if (SystemProperties::ConfigChangePerform() && resObj) {
+                RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
+            }
             fontSizeOpt = fontSize;
         }
     }
@@ -189,8 +199,13 @@ void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
     }
     std::optional<std::vector<std::string>> fontFamiliesOpt;
     std::vector<std::string> fontFamilies;
-    if (ParseJsFontFamilies(info[0], fontFamilies)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("FontFamily");
+    if (ParseJsFontFamilies(info[0], fontFamilies, resObj)) {
         fontFamiliesOpt = fontFamilies;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<std::vector<std::string>>("FontFamily", resObj, fontFamilies);
     }
     MarqueeModel::GetInstance()->SetFontFamily(fontFamiliesOpt);
 }

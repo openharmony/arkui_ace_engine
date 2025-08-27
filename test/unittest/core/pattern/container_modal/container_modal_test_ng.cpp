@@ -472,6 +472,9 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty001, TestSize.Level1)
 HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
 {
     CreateContainerModal();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
     auto customRow = pattern_->GetCustomTitleRow();
     ASSERT_NE(customRow, nullptr);
     auto customLayoutProperty = customRow->GetLayoutProperty();
@@ -786,6 +789,7 @@ HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     auto column = pattern_->GetColumnNode();
     auto eventHub = column->GetOrCreateGestureEventHub();
@@ -807,6 +811,7 @@ HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc2, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     auto column = pattern_->GetColumnNode();
     auto eventHub = column->GetOrCreateGestureEventHub();
@@ -827,6 +832,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
@@ -858,6 +864,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent2, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
@@ -889,6 +896,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonOnEvent, TestSize.Level1)
 {
     bool result = true;
     CreateContainerModal();
+    pattern_->customTitleSettedShow_ = false;
     pattern_->InitColumnTouchTestFunc();
     RefPtr<FrameNode> content = CreateContent();
     ContainerModalView view;
@@ -939,5 +947,117 @@ HWTEST_F(ContainerModelTestNg, ConfigCustomWindowMask, TestSize.Level1)
     processor->SetCustomWindowMaskNode(buttonNode);
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, true));
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, false));
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test SetToolbarBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetToolbarBuilder, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+    ASSERT_NE(pattern_->titleMgr_, nullptr);
+    ASSERT_NE(pattern_->floatTitleMgr_, nullptr);
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: IsContainerModalTransparent
+ * @tc.desc: Test IsContainerModalTransparent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, IsContainerModalTransparent, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+    pattern_->activeColor_ = Color::TRANSPARENT;
+    pattern_->inactiveColor_ = Color::TRANSPARENT;
+    pattern_->isCustomColor_ = true;
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor
+ * @tc.desc: Test SetWindowContainerColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetWindowContainerColor, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto title = pattern_->GetCustomTitleRow();
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(parentNode, nullptr);
+
+    pattern_->SetWindowContainerColor(Color::RED, Color::RED);
+    bool ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+
+    pattern_->SetWindowContainerColor(Color::TRANSPARENT, Color::TRANSPARENT);
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: InitColumnTouchTestFunc3
+ * @tc.desc: Test InitColumnTouchTestFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc3, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    /**
+     * @tc.steps: step1. Get column node and check it's not null
+     * @tc.expected: Column node is valid
+     */
+    auto column = pattern_->GetColumnNode();
+    ASSERT_NE(column, nullptr);
+
+    /**
+     * @tc.steps: step2. Get gesture event hub and check it's not null
+     * @tc.expected: Gesture event hub is valid
+     */
+    auto eventHub = column->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize touch test function
+     * @tc.expected: Touch test function is set
+     */
+    pattern_->InitColumnTouchTestFunc();
+    auto callback = eventHub->GetOnTouchTestFunc();
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step4. Create frame node and set toolbar builder
+     * @tc.expected: Frame node created and toolbar builder set
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+    ASSERT_NE(pattern_->titleMgr_, nullptr);
+
+    /**
+     * @tc.steps: step5. Test different combinations of custom title and update target node
+     * @tc.expected: Touch test function set/unset based on conditions
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (auto p : vec) {
+        pattern_->customTitleSettedShow_ = p.first;
+        pattern_->titleMgr_->isUpdateTargetNode_ = p.second;
+        pattern_->InitColumnTouchTestFunc();
+        callback = eventHub->GetOnTouchTestFunc();
+        if (p.first && p.second) {
+            EXPECT_EQ(callback, nullptr);
+        } else {
+            EXPECT_NE(callback, nullptr);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

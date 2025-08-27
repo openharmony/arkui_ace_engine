@@ -113,28 +113,35 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> foregroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> secondaryUriArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
+    ArkUIRatingStyleStruct resObj;
     std::string backgroundUri;
-    if (backgroundUriArg->IsString(vm)) {
-        backgroundUri = backgroundUriArg->ToString(vm)->ToString(vm);
+    RefPtr<ResourceObject> backgroundResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri, backgroundResObj)) {
+        ArkTSUtils::ParseJsString(vm, backgroundUriArg, backgroundUri, backgroundResObj);
     }
+    resObj.backgroundResObj = AceType::RawPtr(backgroundResObj);
 
     std::string foregroundUri;
-    if (foregroundUriArg->IsString(vm)) {
-        foregroundUri = foregroundUriArg->ToString(vm)->ToString(vm);
+    RefPtr<ResourceObject> foregroundResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri, foregroundResObj)) {
+        ArkTSUtils::ParseJsString(vm, foregroundUriArg, foregroundUri, foregroundResObj);
     }
+    resObj.foregroundResObj = AceType::RawPtr(foregroundResObj);
 
     std::string secondaryUri;
-    if (secondaryUriArg->IsString(vm)) {
-        secondaryUri = secondaryUriArg->ToString(vm)->ToString(vm);
+    RefPtr<ResourceObject> secondaryResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri, secondaryResObj)) {
+        ArkTSUtils::ParseJsString(vm, secondaryUriArg, secondaryUri, secondaryResObj);
     }
+    resObj.secondaryResObj = AceType::RawPtr(secondaryResObj);
 
     if (secondaryUri.empty() && !backgroundUri.empty()) {
         secondaryUri = backgroundUri;
+        resObj.secondaryResObj = AceType::RawPtr(backgroundResObj);
     }
 
-    GetArkUINodeModifiers()->getRatingModifier()->setStarStyle(
-        nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());
+    GetArkUINodeModifiers()->getRatingModifier()->setStarStylePtr(
+        nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str(), resObj);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -230,7 +237,7 @@ ArkUINativeModuleValue RatingBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
     if (argsNumber != NUM_2) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -249,7 +256,7 @@ ArkUINativeModuleValue RatingBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::NumberRef> starParam = panda::NumberRef::New(vm, std::stod(star));
+        panda::Local<panda::NumberRef> starParam = panda::NumberRef::New(vm, StringUtils::StringToDouble(star));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { starParam };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };

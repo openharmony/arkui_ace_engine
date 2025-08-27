@@ -18,6 +18,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEFAULT_CENTER_VALUE = 0.5f;
+constexpr float DEFAULT_START_ANGLE_VALUE = 0.0f;
+constexpr float DEFAULT_END_ANGLE_VALUE = 360.0f;
+
 void SetDisturbanceField(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -46,26 +50,56 @@ void ResetDisturbanceField(ArkUINodeHandle node)
     ParticleModelNG::DisturbanceField(dataArray, frameNode);
 }
 
-void setEmitter(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 length)
+void setEmitter(ArkUINodeHandle node, const ArkEmitterPropertyOptions* values, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<EmitterProperty> emitterProperties;
-    for (ArkUI_Int32 i = 0; i < length / 9; i++) {
+    for (ArkUI_Int32 i = 0; i < length; i++) {
         EmitterProperty prop;
+        prop.index = values[i].index;
+        if (values[i].isSetEmitRate == 1) {
+            prop.emitRate = values[i].emitRate;
+        }
+        if (values[i].isSetPosition == 1) {
+            prop.position = VectorF(values[i].positionX, values[i].positionY);
+        }
+        if (values[i].isSetSize == 1) {
+            prop.size = VectorF(values[i].sizeWidth, values[i].sizeHeight);
+        }
 
-        //The numbers 0-9 represent each attribute in the object, corresponding to index，hasEmitRate，emitRate,
-        //hasPosition，positionX，positionY，hasSize，sizeX，sizeY. Among them, index 1, 3, and 6 are marker values,
-        // indicating whether the attributes following the markers exist.
-        prop.index = values[i * 9].i32;
-        if (values[i * 9 + 1].i32 == 1) {
-            prop.emitRate = values[i * 9 + 2].i32;
-        }
-        if (values[i * 9 + 3].i32 == 1) {
-            prop.position = VectorF(values[i * 9 + 4].f32, values[i * 9 + 5].f32);
-        }
-        if (values[i * 9 + 6].i32 == 1) {
-            prop.size = VectorF(values[i * 9 + 7].f32, values[i * 9 + 8].f32);
+        if (values[i].isSetAnnulusRegion == 1) {
+            std::pair<CalcDimension, CalcDimension> center = {
+                CalcDimension(DEFAULT_CENTER_VALUE, DimensionUnit::PERCENT),
+                CalcDimension(DEFAULT_CENTER_VALUE, DimensionUnit::PERCENT)};
+            CalcDimension innerRadius;
+            CalcDimension outerRadius;
+            float startAngle = DEFAULT_START_ANGLE_VALUE;
+            float endAngle = DEFAULT_END_ANGLE_VALUE;
+
+            if (values[i].isSetCenter == 1) {
+                center.first = CalcDimension(values[i].centerX.value,
+                    static_cast<DimensionUnit>(values[i].centerX.units));
+                center.second = CalcDimension(values[i].centerY.value,
+                    static_cast<DimensionUnit>(values[i].centerY.units));
+            }
+
+            if (values[i].isSetInnerRadius == 1) {
+                innerRadius = CalcDimension(values[i].innerRadius.value,
+                    static_cast<DimensionUnit>(values[i].innerRadius.units));
+            }
+            if (values[i].isSetOuterRadius == 1) {
+                outerRadius = CalcDimension(values[i].outerRadius.value,
+                    static_cast<DimensionUnit>(values[i].outerRadius.units));
+            }
+
+            if (values[i].isSetStartAngle == 1) {
+                startAngle = values[i].startAngle;
+            }
+            if (values[i].isSetEndAngle == 1) {
+                endAngle = values[i].endAngle;
+            }
+            prop.annulusRegion = {center, innerRadius, outerRadius, startAngle, endAngle};
         }
         emitterProperties.push_back(prop);
     }

@@ -47,10 +47,16 @@ public:
     void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
+    void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src,
+        RefPtr<ThemeConstants> themeConstant) override {};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
-    void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
-    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
+    void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) override;
+    void SetBackgroundImageSizeUpdateFunc(
+        BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) override {};
+    void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
+    void ClearResObj(const std::string resObjName) override {};
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
@@ -89,6 +95,7 @@ public:
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
     void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
+    void SetOuterBorderWidthNew(const NG::BorderWidthProperty& property) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
     void SetOuterBorderStyle(const BorderStyle& value) override {}
@@ -103,6 +110,9 @@ public:
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
+    void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
+    void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
@@ -125,7 +135,9 @@ public:
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
+    void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
+    void SetTransform3DMatrix(const std::vector<float>& matrix) override {};
 
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
@@ -187,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(
@@ -194,6 +208,7 @@ public:
     {}
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
+    void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -221,11 +236,14 @@ public:
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) override;
+    void SetOnDragSpringLoadingConfiguration(
+        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetOnVisibleChange(
-        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios,
+        bool isOutOfBoundsAllowed = false) override;
     void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override {};
     void SetOnAreaChanged(
@@ -254,6 +272,7 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
     void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override {};
 
     // Disable event.
     void DisableOnClick() override {};
@@ -277,6 +296,14 @@ public:
     void DisableOnFocusAxisEvent() override {};
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+    void SetBackground(std::function<void()>&& buildFunc) override {};
+    void SetBackgroundAlign(const Alignment& align) override {};
+    void SetCustomBackgroundColor(const Color& color) override {};
+    void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override {};
+    void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
+    void SetIsTransitionBackground(bool val) override {};
+    void SetIsBuilderBackground(bool val) override {};
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
@@ -328,7 +355,8 @@ public:
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
@@ -349,6 +377,7 @@ public:
     void ResetOnAccessibilityFocus() override;
     void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
@@ -372,11 +401,14 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
+    void UpdateIgnoreLayoutSafeAreaOpts(const NG::IgnoreLayoutSafeAreaOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    void EnableDropDisallowedBadge(bool dragEventStrictReportingEnabled) override {};
     int32_t CancelDataLoading(const std::string& key) override { return 0; };
     void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
-    void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
+    void SetBackgroundImageResizableSlice(ImageResizableSlice& Slice) override {};
     // global light
+    void SetLightPosition(const NG::TranslateOptions& option) override {};
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
@@ -388,6 +420,12 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override {};
+    void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override {};
 };
 
 } // namespace OHOS::Ace::Framework

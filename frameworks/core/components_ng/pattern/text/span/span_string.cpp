@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 
 namespace OHOS::Ace {
 
@@ -119,6 +120,183 @@ SpanString::~SpanString()
 {
     spansMap_.clear();
     spans_.clear();
+}
+
+void UpdateImageLayoutPropertyByImageSpanAttribute(std::optional<ImageSpanAttribute>& imageAttribute,
+    RefPtr<NG::ImageSpanNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageAttribute.has_value());
+    auto imgAttr = imageAttribute.value();
+    auto imagePattern = imageNode->GetPattern<NG::ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<NG::ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imagePattern->SetSyncLoad(imgAttr.syncLoad);
+    if (imgAttr.size.has_value()) {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
+    }
+    if (imgAttr.verticalAlign.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+    }
+    if (imgAttr.objectFit.has_value()) {
+        imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+    }
+    if (imgAttr.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+    }
+    if (imgAttr.paddingProp.has_value()) {
+        imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+    }
+    if (imgAttr.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
+}
+
+PlaceholderRun GetImageSpanItemPlaceholderRun(const RefPtr<NG::SpanItem>& child,
+    std::optional<double>& maxWidth)
+{
+    PlaceholderRun run;
+    auto imageSpanItem = AceType::DynamicCast<NG::ImageSpanItem>(child);
+    CHECK_NULL_RETURN(imageSpanItem, run);
+    auto imageNode = NG::ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NG::ImagePattern>(); });
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<NG::ImageLayoutProperty>();
+    auto options = imageSpanItem->options;
+    imageLayoutProperty->UpdateImageSourceInfo(NG::ParagraphUtil::CreateImageSourceInfo(options));
+    UpdateImageLayoutPropertyByImageSpanAttribute(options.imageAttribute, imageNode);
+
+    std::optional<NG::LayoutConstraintF> constraint = std::make_optional<NG::LayoutConstraintF>();
+    constraint->maxSize.SetWidth(maxWidth.has_value() ? maxWidth.value() : std::numeric_limits<float>::infinity());
+    imageNode->Measure(constraint);
+    TextStyle spanTextStyle;
+    auto baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
+    auto geometryNode = imageNode->GetGeometryNode();
+    run.width = geometryNode->GetMarginFrameSize().Width();
+    run.height = geometryNode->GetMarginFrameSize().Height();
+    auto base = baselineOffset.ConvertToPxDistribute(
+        spanTextStyle.GetMinFontScale(), spanTextStyle.GetMaxFontScale(), spanTextStyle.IsAllowScale());
+    if (!NearZero(base)) {
+        run.baseline_offset = base;
+        run.alignment = PlaceholderAlignment::BASELINE;
+    } else {
+        run.alignment = NG::GetPlaceHolderAlignmentFromVerticalAlign(
+            imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM));
+    }
+    return run;
+}
+
+void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::SpanItem>& child,
+    std::optional<double>& maxWidth)
+{
+    CHECK_NULL_VOID(child);
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    if (child->spanItemType == SpanItemType::NORMAL) {
+        TextStyle spanTextStyle = CreateTextStyleUsingTheme(child->fontStyle, child->textLineStyle, theme, false);
+        paragraph->PushStyle(spanTextStyle);
+        if (!child->content.empty()) {
+            auto displayText = child->content;
+            auto textCase = spanTextStyle.GetTextCase();
+            StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+            UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()),
+                displayText.length(), 0);
+            paragraph->AddText(displayText);
+        }
+        paragraph->PopStyle();
+        return;
+    }
+    PlaceholderRun run;
+    if (child->spanItemType == SpanItemType::IMAGE) {
+        run = GetImageSpanItemPlaceholderRun(child, maxWidth);
+    } else if (child->spanItemType == SpanItemType::CustomSpan) {
+        auto customSpanItem = AceType::DynamicCast<NG::CustomSpanItem>(child);
+        CHECK_NULL_VOID(customSpanItem);
+        auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+        if (customSpanItem->onMeasure.has_value()) {
+            auto onMeasure = customSpanItem->onMeasure.value();
+            CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+            run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
+            run.height = static_cast<float>(
+                customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+        }
+    }
+    TextStyle spanTextStyle;
+    paragraph->PushStyle(spanTextStyle);
+    paragraph->AddPlaceholder(run);
+    paragraph->PopStyle();
+}
+
+RefPtr<NG::SpanItem> GetParagraphStyleSpanItem(std::list<RefPtr<NG::SpanItem>>& group)
+{
+    RefPtr<NG::SpanItem> paraStyleSpanItem = *group.begin();
+    auto it = group.begin();
+    while (it != group.end()) {
+        if (!AceType::DynamicCast<NG::PlaceholderSpanItem>(*it)) {
+            paraStyleSpanItem = *it;
+            break;
+        }
+        ++it;
+    }
+    return paraStyleSpanItem;
+}
+
+std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanString>& spanStr,
+    std::optional<double>& maxWidth)
+{
+    auto spans = spanStr->GetSpanItems();
+    std::vector<std::list<RefPtr<NG::SpanItem>>> spanGroupVec;
+    bool spanStringHasMaxLines = false;
+    NG::ParagraphUtil::ConstructParagraphSpanGroup(spans, spanGroupVec, spanStringHasMaxLines);
+    TextStyle textStyle;
+    std::vector<RefPtr<NG::Paragraph>> paraVec;
+    auto paraStyle = NG::ParagraphUtil::GetParagraphStyle(textStyle);
+    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    paraStyle.leadingMarginAlign = Alignment::CENTER;
+
+    auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
+    for (auto groupIt = spanGroupVec.begin(); groupIt != spanGroupVec.end(); groupIt++) {
+        auto& group = *(groupIt);
+        NG::ParagraphStyle spanParagraphStyle = paraStyle;
+        if (paraStyle.maxLines != UINT32_MAX) {
+            if (!paraVec.empty()) {
+                maxLines -= static_cast<int32_t>(paraVec.back()->GetLineCount());
+            }
+            spanParagraphStyle.maxLines = std::max(maxLines, 0);
+        }
+        RefPtr<NG::SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
+        if (paraStyleSpanItem) {
+            // unable to get text direction because no layoutwrapper
+            NG::ParagraphUtil::GetSpanParagraphStyle(nullptr, paraStyleSpanItem, spanParagraphStyle);
+            if (paraStyleSpanItem->fontStyle->HasFontSize()) {
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            }
+            spanParagraphStyle.isEndAddParagraphSpacing = paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
+                Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
+                std::next(groupIt) != spanGroupVec.end();
+            spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spanGroupVec.begin());
+        }
+        auto&& paragraph = NG::Paragraph::Create(spanParagraphStyle, NG::FontCollection::Current());
+        if (!paragraph) {
+            continue;
+        }
+        for (const auto& child : group) {
+            AddSpanItemToParagraph(paragraph, child, maxWidth);
+        }
+        NG::ParagraphUtil::HandleEmptyParagraph(paragraph, group);
+        paragraph->Build();
+        auto maxWidthVal = maxWidth.has_value()? maxWidth.value() : std::numeric_limits<float>::max();
+        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle, maxWidthVal);
+        paragraph->Layout(maxWidthVal);
+        paraVec.emplace_back(paragraph);
+    }
+    return paraVec;
 }
 
 std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
@@ -355,7 +533,134 @@ RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpa
     return spanItem;
 }
 
-void SpanString::AddSpan(const RefPtr<SpanBase>& span)
+bool SpanString::CheckMultiTypeDecorationSpan(const RefPtr<SpanBase>& span)
+{
+    if (span->GetSpanType() != SpanType::Decoration) {
+        return false;
+    }
+    auto decorationSpan = AceType::DynamicCast<DecorationSpan>(span);
+    if (!decorationSpan->GetTextDecorationOptions().has_value()) {
+        return false;
+    }
+    auto options = decorationSpan->GetTextDecorationOptions().value();
+    return options.enableMultiType.value_or(false);
+}
+
+std::vector<RefPtr<SpanBase>> SpanString::GetWholeSpans(int32_t start, int32_t end, SpanType spanType) const
+{
+    std::vector<RefPtr<SpanBase>> res;
+    if (!CheckRange(start, end - start)) {
+        return res;
+    }
+
+    auto spans = spansMap_.find(spanType)->second;
+    for (const auto& span : spans) {
+        int32_t tempStart = span->GetStartIndex();
+        int32_t tempEnd = span->GetEndIndex();
+        if ((tempStart <= start && tempEnd > start) ||
+            (tempStart <= end && tempEnd > end) ||
+            (tempStart >= start && tempEnd <= end)) {
+            res.push_back(span);
+        }
+    }
+    return res;
+}
+
+void SpanString::ProcessMultiDecorationSpanForIntersection(
+    const RefPtr<SpanBase>& span, const RefPtr<SpanBase>& lastSpan,
+    std::vector<int32_t>& spanNoIntersection, int32_t start, int32_t end)
+{
+    auto lastDecorationSpan = AceType::DynamicCast<DecorationSpan>(lastSpan);
+    auto lastDecorations = lastDecorationSpan->GetTextDecorationTypes();
+
+    int32_t lastSpanStart = lastSpan->GetStartIndex();
+    int32_t lastSpanEnd = lastSpan->GetEndIndex();
+    int32_t intersectionStart = std::max(start, lastSpanStart);
+    int32_t intersectionEnd = std::min(end, lastSpanEnd);
+
+    bool spanInRight = lastSpanStart <= start && lastSpanEnd <= end;
+    bool isInclude = lastSpanStart <= start && lastSpanEnd >= end;
+
+    int32_t newStart = 0;
+    int32_t newEnd = 0;
+    if (isInclude) {
+        newStart = intersectionStart;
+        newEnd = intersectionEnd;
+    } else if (spanInRight) {
+        newStart = intersectionStart;
+        newEnd = lastSpanEnd;
+    } else {
+        newStart = lastSpanStart;
+        newEnd = intersectionEnd;
+    }
+    auto intersectionSpan = span->GetSubSpan(newStart, newEnd);
+    auto intersectionDecorationSpan = AceType::DynamicCast<DecorationSpan>(intersectionSpan);
+    // apply new data to newSpan
+    if (CheckMultiTypeDecorationSpan(lastSpan) && CheckMultiTypeDecorationSpan(intersectionSpan)) {
+        for (TextDecoration value : lastDecorations) {
+            intersectionDecorationSpan->AddTextDecorationType(value);
+        }
+    } else {
+        TextDecorationOptions option { false };
+        intersectionDecorationSpan->SetTextDecorationOptions(option);
+    }
+    AddSpan(intersectionSpan, false);
+    for (int32_t index = newStart; index < newEnd; index++) {
+        spanNoIntersection[index] = 0; //unmark
+    }
+}
+
+void SpanString::ProcessMultiDecorationSpanForNoIntersection(
+    const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
+    int32_t start, int32_t end)
+{
+    int32_t tempStart = start;
+    int32_t tempEnd = start;
+    for (int32_t index = start; index < end;) {
+        index++;
+        if (spanNoIntersection[tempStart] != 0) {
+            while (tempEnd < end && spanNoIntersection[tempEnd] != 0) {
+                tempEnd++;
+            }
+            if (tempEnd == tempStart) {
+                continue;
+            }
+            auto tempSpan = span->GetSubSpan(tempStart, tempEnd);
+            AddSpan(tempSpan, false);
+        } else {
+            tempStart = index;
+            tempEnd = index;
+        }
+    }
+}
+
+bool SpanString::ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end)
+{
+    bool multiTypeDecoration = CheckMultiTypeDecorationSpan(span);
+    if (!multiTypeDecoration) {
+        return false;
+    }
+    auto lastSpans = GetWholeSpans(start, end, SpanType::Decoration);
+    if (lastSpans.size() <= 0) {
+        return false;
+    }
+    std::vector<int32_t> spanNoIntersection;
+    for (int32_t index = 0; index <= end; index++) {
+        if (index >= start) {
+            spanNoIntersection.push_back(1); // mark
+        } else {
+            spanNoIntersection.push_back(0);
+        }
+    }
+    for (const RefPtr<SpanBase>& lastSpan : lastSpans) {
+        ProcessMultiDecorationSpanForIntersection(span, lastSpan, spanNoIntersection, start, end);
+    }
+    ProcessMultiDecorationSpanForNoIntersection(span, spanNoIntersection, start, end);
+    return true;
+}
+
+void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration, bool isFromHtml,
+    bool removeOriginStyle)
 {
     if (!span || !CheckRange(span)) {
         return;
@@ -371,7 +676,18 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
     }
-    RemoveSpan(start, end - start, span->GetSpanType());
+    // If the span type is Font and the span is from HTML, directly add it to the spansMap_ and apply it.
+    else if (span->GetSpanType() == SpanType::Font && isFromHtml) {
+        spansMap_[span->GetSpanType()].emplace_back(span);
+        ApplyToSpans(span, { start, end }, SpanOperation::ADD);
+        return;
+    }
+    if (processMultiDecoration && ProcessMultiDecorationSpan(span, start, end)) {
+        return;
+    }
+    if (removeOriginStyle) {
+        RemoveSpan(start, end - start, span->GetSpanType());
+    }
     auto spans = spansMap_[span->GetSpanType()];
     ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
@@ -774,8 +1090,8 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
     count = 0;
     for (auto iter = spans_.begin(); iter != spans_.end();) {
         if ((*iter)->interval.first >= start && (*iter)->interval.first < end - count
-            && ((type == SpanType::Image && (*iter)->spanItemType == NG::SpanItemType::IMAGE)
-                || (type == SpanType::CustomSpan && (*iter)->spanItemType == NG::SpanItemType::CustomSpan))) {
+            && ((type == SpanType::Image && (*iter)->spanItemType == SpanItemType::IMAGE)
+                || (type == SpanType::CustomSpan && (*iter)->spanItemType == SpanItemType::CustomSpan))) {
             UpdateSpansWithOffset((*iter)->interval.first, -1);
             iter = spans_.erase(iter);
             ++count;
@@ -862,8 +1178,8 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteInt32(buff, spans_.size());
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto spanItem = (*it);
-        if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
-            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+        if (spanItem->spanItemType == SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(SpanItemType::NORMAL));
             auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
             placeHolderSpan->content = u" ";
             placeHolderSpan->interval = spanItem->interval;
@@ -876,13 +1192,18 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
     TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(text_));
     TLVUtil::WriteUint8(buff, TLV_END);
+    std::vector<uint8_t> otherInfo;
+    TLVUtil::WriteInt32(otherInfo, isFromStyledStringMode ? 1 : 0);
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_MODE_FLAG);
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(otherInfo.size()));
+    buff.insert(buff.end(), otherInfo.begin(), otherInfo.end());
     return true;
 }
 
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = Referenced::RawPtr(spanStr);
+    SpanString* spanString = AceType::RawPtr(spanStr);
     std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback));
     return spanStr;
@@ -893,7 +1214,7 @@ RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff,
     int32_t instanceId)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = Referenced::RawPtr(spanStr);
+    SpanString* spanString = AceType::RawPtr(spanStr);
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback), instanceId);
     return spanStr;
 }
@@ -905,9 +1226,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
     CHECK_NULL_VOID(spanString);
     int32_t cursor = 0;
     DecodeTlvOldExt(buff, spanString, cursor);
-    if (!unmarshallCallback) {
-        return;
-    }
+    
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         auto buffLength = TLVUtil::ReadInt32(buff, cursor);
         if (buffLength == 0) {
@@ -916,6 +1235,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
         auto lastCursor = cursor;
         switch (tag) {
             case TLV_CUSTOM_MARSHALL_BUFFER_START: {
+                CHECK_NULL_BREAK(unmarshallCallback);
                 auto start = TLVUtil::ReadInt32(buff, cursor);
                 auto length = TLVUtil::ReadInt32(buff, cursor);
                 auto endOfUserDataArrBuff = buffLength + cursor + cursor - lastCursor;
@@ -931,6 +1251,10 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
                     }, TaskExecutor::TaskType::UI, "SpanstringDecodeTlvExt", PriorityType::IMMEDIATE);
                 cursor = lastCursor + buffLength;
                 break;
+            }
+            case TLV_SPAN_STRING_MODE_FLAG: {
+                auto isFromStyledStringMode = TLVUtil::ReadInt32(buff, cursor);
+                spanString->isFromStyledStringMode = isFromStyledStringMode == 1;
             }
             default:
                 break;
@@ -966,7 +1290,7 @@ void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& curs
     int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
     for (auto i = 0; i < spanLength; i++) {
         auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
-        if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
+        if (spanItemType == static_cast<int32_t>(SpanItemType::IMAGE)) {
             auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
             spanStr->AppendSpanItem(imageSpanItem);
         } else {
@@ -993,9 +1317,9 @@ void SpanString::UpdateSpansMap()
         auto start = spanItem->interval.first;
         auto end = spanItem->interval.second;
         std::list<RefPtr<SpanBase>> spanBases;
-        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+        if (spanItem->spanItemType == SpanItemType::IMAGE) {
             spanBases = { ToImageSpan(spanItem, start, end) };
-        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL)
+        } else if (spanItem->spanItemType == SpanItemType::NORMAL)
             spanBases = { ToFontSpan(spanItem, start, end),
                 ToDecorationSpan(spanItem, start, end),
                 ToBaselineOffsetSpan(spanItem, start, end),
@@ -1003,7 +1327,8 @@ void SpanString::UpdateSpansMap()
                 ToGestureSpan(spanItem, start, end),
                 ToParagraphStyleSpan(spanItem, start, end),
                 ToLineHeightSpan(spanItem, start, end),
-                ToBackgroundColorSpan(spanItem, start, end) };
+                ToBackgroundColorSpan(spanItem, start, end),
+                ToUrlSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
@@ -1044,6 +1369,9 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.fontSize = spanItem->fontStyle->GetFontSize();
     font.fontStyle = spanItem->fontStyle->GetItalicFontStyle();
     font.fontWeight = spanItem->fontStyle->GetFontWeight();
+    font.strokeWidth = spanItem->fontStyle->GetStrokeWidth();
+    font.strokeColor = spanItem->fontStyle->GetStrokeColor();
+    font.superscript = spanItem->fontStyle->GetSuperscript();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
@@ -1051,10 +1379,14 @@ RefPtr<DecorationSpan> SpanString::ToDecorationSpan(
     const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    TextDecoration type = spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE);
+    std::vector<TextDecoration> types = spanItem->fontStyle->GetTextDecoration().value_or(
+        std::vector<TextDecoration>({TextDecoration::NONE}));
     std::optional<Color> color = spanItem->fontStyle->GetTextDecorationColor();
     std::optional<TextDecorationStyle> style = spanItem->fontStyle->GetTextDecorationStyle();
-    return AceType::MakeRefPtr<DecorationSpan>(type, color, style, start, end);
+    std::optional<float> lineThicknessScale = spanItem->fontStyle->GetLineThicknessScale();
+    std::optional<TextDecorationOptions> options;
+    return AceType::MakeRefPtr<DecorationSpan>(
+        types, color, style, lineThicknessScale, options, start, end);
 }
 
 RefPtr<BaselineOffsetSpan> SpanString::ToBaselineOffsetSpan(
@@ -1112,6 +1444,7 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
     SpanParagraphStyle paragraphStyle;
     paragraphStyle.align = spanItem->textLineStyle->GetTextAlign();
+    paragraphStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     paragraphStyle.maxLines = spanItem->textLineStyle->GetMaxLines();
     paragraphStyle.textOverflow = spanItem->textLineStyle->GetTextOverflow();
     paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
@@ -1144,8 +1477,8 @@ RefPtr<BackgroundColorSpan> SpanString::ToBackgroundColorSpan(
 
 RefPtr<UrlSpan> SpanString::ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
-    CHECK_NULL_RETURN(spanItem && spanItem->urlOnRelease && !spanItem->urlAddress.empty(), nullptr);
-    std::string urlAddress = UtfUtils::Str16DebugToStr8(spanItem->urlAddress);
+    CHECK_NULL_RETURN(spanItem && spanItem->urlOnRelease && !spanItem->GetUrlAddress().empty(), nullptr);
+    std::string urlAddress = UtfUtils::Str16DebugToStr8(spanItem->GetUrlAddress());
     return AceType::MakeRefPtr<UrlSpan>(urlAddress, start, end);
 }
 

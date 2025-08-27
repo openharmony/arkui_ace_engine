@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
+
 class FrameNode;
 
 class ACE_EXPORT GridRowModelNG : public GridRowModel {
@@ -31,11 +33,11 @@ public:
     void SetAlignItems(FlexAlign alignItem) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& alignItem);
+    static void SetAlignItems(FrameNode* frameNode, FlexAlign alignItem);
     static void SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter);
     static void SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col);
     static void SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints);
-    static void SetDirection(FrameNode* frameNode, const std::optional<V2::GridRowDirection>& direction);
+    static void SetDirection(FrameNode* frameNode, V2::GridRowDirection direction);
     static void SetOnBreakPointChange(FrameNode* frameNode,
         std::function<void(const std::string)>&& onBreakPointChange);
 };

@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 class RenderingContext2DModel : public AceType {
-    DECLARE_ACE_TYPE(RenderingContext2DModel, AceType)
+    DECLARE_ACE_TYPE(RenderingContext2DModel, AceType);
 
 public:
     RenderingContext2DModel()
@@ -90,6 +90,7 @@ public:
     virtual void SetClipRuleForPath(const CanvasFillRule& fillRule) = 0;
     virtual void SetClipRuleForPath2D(const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void AddRect(const Rect& rect) = 0;
+    virtual void AddRoundRect(const Rect& rect, const std::vector<double>& radii) {};
     virtual void BeginPath() = 0;
     virtual void ClosePath() = 0;
     virtual void Restore() = 0;
@@ -142,7 +143,7 @@ protected:
 };
 
 class CanvasRenderingContext2DModel : public RenderingContext2DModel {
-    DECLARE_ACE_TYPE(CanvasRenderingContext2DModel, RenderingContext2DModel)
+    DECLARE_ACE_TYPE(CanvasRenderingContext2DModel, RenderingContext2DModel);
 
 public:
     CanvasRenderingContext2DModel() = default;
@@ -169,7 +170,7 @@ protected:
 };
 
 class OffscreenCanvasRenderingContext2DModel : public RenderingContext2DModel {
-    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModel, RenderingContext2DModel)
+    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModel, RenderingContext2DModel);
 
 public:
     OffscreenCanvasRenderingContext2DModel() = default;

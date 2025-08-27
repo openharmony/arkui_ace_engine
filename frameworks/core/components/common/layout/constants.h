@@ -334,18 +334,37 @@ enum class TextAlign {
     END = 2,
 };
 
+enum class TextVerticalAlign {
+    BASELINE = 0,
+    BOTTOM = 1,
+    CENTER = 2,
+    TOP = 3,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextAlign& textAlign)
 {
     static const LinearEnumMapNode<TextAlign, std::string> table[] = {
+        { TextAlign::START, "START" },
+        { TextAlign::CENTER, "CENTER" },
+        { TextAlign::END, "END" },
+        { TextAlign::JUSTIFY, "JUSTIFY" },
         { TextAlign::LEFT, "LEFT" },
         { TextAlign::RIGHT, "RIGHT" },
-        { TextAlign::CENTER, "CENTER" },
-        { TextAlign::JUSTIFY, "JUSTIFY" },
-        { TextAlign::START, "START" },
-        { TextAlign::END, "END" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const TextVerticalAlign& textVerticalAlign)
+{
+    static const LinearEnumMapNode<TextVerticalAlign, std::string> table[] = {
+        { TextVerticalAlign::BASELINE, "BASELINE" },
+        { TextVerticalAlign::BOTTOM, "BOTTOM" },
+        { TextVerticalAlign::CENTER, "CENTER" },
+        { TextVerticalAlign::TOP, "TOP" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textVerticalAlign);
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
@@ -362,11 +381,13 @@ enum class MarqueeStartPolicy {
 };
 
 enum class TextDataDetectType {
+    INVALID = -1,
     PHONE_NUMBER = 0,
     URL,
     EMAIL,
     ADDRESS,
     DATE_TIME,
+    ASK_CELIA, // ask Celia tag, not a valid ai entity
 };
 
 enum class LineBreakStrategy {
@@ -392,11 +413,29 @@ enum class TextOverflow {
     DEFAULT,
 };
 
+enum class OverflowMode {
+    CLIP,
+    SCROLL,
+};
+
 enum class TextSelectableMode {
     SELECTABLE_UNFOCUSABLE = 0,
     SELECTABLE_FOCUSABLE,
     UNSELECTABLE,
 };
+
+namespace StringUtils {
+inline std::string ToString(const TextSelectableMode& textSelectableMode)
+{
+    static const LinearEnumMapNode<TextSelectableMode, std::string> table[] = {
+        { TextSelectableMode::SELECTABLE_UNFOCUSABLE, "SELECTABLE_UNFOCUSABLE" },
+        { TextSelectableMode::SELECTABLE_FOCUSABLE, "SELECTABLE_FOCUSABLE" },
+        { TextSelectableMode::UNSELECTABLE, "UNSELECTABLE" }
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textSelectableMode);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 namespace StringUtils {
 inline std::string ToString(const TextOverflow& textOverflow)
@@ -462,10 +501,32 @@ enum class TextDecorationStyle {
     INHERIT,
 };
 
+namespace StringUtils {
+inline std::string ToString(const TextDecorationStyle& textDecorationStyle)
+{
+    static const LinearEnumMapNode<TextDecorationStyle, std::string> table[] = {
+        { TextDecorationStyle::SOLID, "SOLID" },
+        { TextDecorationStyle::DOUBLE, "DOUBLE" },
+        { TextDecorationStyle::DOTTED, "DOTTED" },
+        { TextDecorationStyle::DASHED, "DASHED" },
+        { TextDecorationStyle::WAVY, "WAVY" },
+        { TextDecorationStyle::INITIAL, "INITIAL" },
+        { TextDecorationStyle::INHERIT, "INHERIT" }
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDecorationStyle);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class TextHeightAdaptivePolicy {
     MAX_LINES_FIRST,
     MIN_FONT_SIZE_FIRST,
     LAYOUT_CONSTRAINT_FIRST,
+};
+
+enum class TextEffectStrategy {
+    NONE = 0,
+    FLIP,
 };
 
 enum class MarqueeDirection {
@@ -508,6 +569,22 @@ enum class KeyboardAppearance {
     IMMERSIVE = 1,
     LIGHT_IMMERSIVE = 2,
     DARK_IMMERSIVE = 3
+};
+
+enum class TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
 };
 
 namespace StringUtils {
@@ -555,6 +632,16 @@ enum class ImageRotateOrientation {
     RIGHT = 2,
     DOWN = 3,
     LEFT = 4,
+    UP_MIRRORED = 5,    // Reflected across x-axis
+    RIGHT_MIRRORED = 6, // Reflected across x-axis, Rotated 90 CW
+    DOWN_MIRRORED = 7,  // Reflected across y-axis
+    LEFT_MIRRORED = 8,  // Reflected across x-axis, Rotated 90 CCW
+};
+
+enum class OrientationFit {
+    NONE = 0,
+    VERTICAL_FLIP = 1,
+    HORIZONTAL_FLIP = 2
 };
 
 enum class ImageRenderMode {
@@ -579,6 +666,11 @@ enum class EffectEdge {
     START = 1,
     END = 2,
     ALL = 3,
+};
+
+enum class FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW,
 };
 
 enum class BorderStyle {
@@ -683,6 +775,8 @@ enum class PixelRoundMode {
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,
+    WRAP_CONTENT = 2,
+    FIX_AT_IDEAL_SIZE = 3,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {
@@ -791,12 +885,6 @@ enum class RefreshType {
     PULL_DOWN,
 };
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABLE,
-    FIXED_START,
-};
-
 enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,
@@ -822,6 +910,7 @@ enum class VerticalAlign {
     CENTER,
     BOTTOM,
     BASELINE,
+    FOLLOW_PARAGRAPH,
     NONE,
 };
 
@@ -897,6 +986,20 @@ enum class CopyOptions {
     Local,
     Distributed,
 };
+
+namespace StringUtils {
+inline std::string ToString(const CopyOptions& copyOptions)
+{
+    static const LinearEnumMapNode<CopyOptions, std::string> table[] = {
+        { CopyOptions::None, "None" },
+        { CopyOptions::InApp, "InApp" },
+        { CopyOptions::Local, "Local" },
+        { CopyOptions::Distributed, "Distributed" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), copyOptions);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class VisibleType {
     VISIBLE = 0,
@@ -998,7 +1101,8 @@ enum class GestureTypeName {
     CLICK = 7,
     BOXSELECT = 8,
     WEBSCROLL = 9,
-    TEXTFIELD_BOXSELECT = 10
+    TEXTFIELD_BOXSELECT = 10,
+    CONTEXT_MENU_HOVER = 11,
 };
 
 enum class ModifierKey {
@@ -1136,6 +1240,12 @@ enum class SwiperAnimationMode {
 enum class DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1,
+};
+
+enum class LayoutType : int32_t {
+    NONE = 0,
+    MEASURE_FOR_IGNORE = 1,
+    LAYOUT_FOR_IGNORE = 2
 };
 } // namespace OHOS::Ace
 

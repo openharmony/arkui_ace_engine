@@ -235,6 +235,13 @@ std::string Color::ToString() const
     return ColorToString();
 }
 
+std::string Color::ToSvgFillColorKey() const
+{
+    std::ostringstream oss;
+    oss << ColorToString() << "_cs" << static_cast<int32_t>(colorSpace_);
+    return oss.str();
+}
+
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
     ColorParam colorValue {
@@ -269,7 +276,9 @@ Color Color::BlendColor(const Color& overlayColor) const
     auto newRed = static_cast<uint8_t>(GetRed() * (1.0f - alphaRate) + overlayColor.GetRed() * alphaRate);
     auto newGreen = static_cast<uint8_t>(GetGreen() * (1.0f - alphaRate) + overlayColor.GetGreen() * alphaRate);
     auto newBlue = static_cast<uint8_t>(GetBlue() * (1.0f - alphaRate) + overlayColor.GetBlue() * alphaRate);
-    return Color::FromRGB(newRed, newGreen, newBlue);
+    auto newColor = Color::FromRGB(newRed, newGreen, newBlue);
+    newColor.SetColorSpace(GetColorSpace());
+    return newColor;
 }
 
 float Color::CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const

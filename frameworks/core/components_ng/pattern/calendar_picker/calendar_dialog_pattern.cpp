@@ -1355,6 +1355,40 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
     }
 }
 
+void CalendarDialogPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(TITLE_NODE_INDEX));
+    CHECK_NULL_VOID(titleNode);
+    auto layoutProps = titleNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(scrollNode);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
+    CHECK_NULL_VOID(calendarNode);
+    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+
+    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty, calendarNode);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
+    CHECK_NULL_VOID(swiperNode);
+    for (auto&& child : swiperNode->GetChildren()) {
+        auto monthFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(monthFrameNode);
+        auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+        CHECK_NULL_VOID(monthPattern);
+        CalendarDialogView::UpdatePaintProperties(monthFrameNode, currentSettingData_);
+        monthPattern->UpdateColRowSpace();
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void CalendarDialogPattern::InitSurfaceChangedCallback()
 {
     auto pipelineContext = GetContext();
@@ -1456,8 +1490,14 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    
+
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+
+    if (SystemProperties::ConfigChangePerform()) {
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        MarkMonthNodeDirty();
+        OnModifyDone();
+    }
 }
 
 void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1483,4 +1523,19 @@ void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
     }
 }
+
+void CalendarDialogPattern::MarkMonthNodeDirty()
+{
+    auto swiperNode = GetSwiperFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(currentIndex));
+    if (monthFrameNode) {
+        monthFrameNode->MarkModifyDone();
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 } // namespace OHOS::Ace::NG

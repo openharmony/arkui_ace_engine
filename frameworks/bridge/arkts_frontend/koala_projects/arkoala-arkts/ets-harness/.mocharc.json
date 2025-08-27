@@ -1,0 +1,4 @@
+{
+    "ui": "tdd",
+    "spec": "../build/index.js"
+}

@@ -26,7 +26,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
-
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -87,6 +87,8 @@ constexpr double DAMPING = 22.0f;
 constexpr double DIP_SCALE = 1.5;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float MENU_OFFSET_X = 10.0f;
+constexpr float MENU_OFFSET_Y = 10.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 } // namespace
 class MenuAnimationTestNg : public testing::Test {
@@ -405,6 +407,63 @@ HWTEST_F(MenuAnimationTestNg, CheckAndShowAnimation001, TestSize.Level1)
     EXPECT_TRUE(wrapperPattern->isFirstShow_);
     wrapperPattern->CheckAndShowAnimation();
     EXPECT_FALSE(wrapperPattern->isFirstShow_);
+}
+
+/**
+ * @tc.name: CheckAndShowAnimation002
+ * @tc.desc: test MenuWrapperPattern::CheckAndShowAnimation function with duration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuAnimationTestNg, CheckAndShowAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenu, nullptr);
+    auto geometryNode = mainMenu->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(mainMenu);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    /**
+     * @tc.steps: step2. execute CheckAndShowAnimation with duration
+     * @tc.expected: property is set as expected
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->menuAnimationDuration_ = 100;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    wrapperPattern->CheckAndShowAnimation();
+    EXPECT_FALSE(wrapperPattern->isFirstShow_);
+    auto context = wrapperNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context->GetTransformCenter(), std::nullopt);
+    EXPECT_EQ(context->GetTransformCenter()->GetX().Value(), MENU_OFFSET_X);
+    EXPECT_EQ(context->GetTransformCenter()->GetY().Value(), MENU_OFFSET_Y);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::INIT);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    menuItemPattern->OnClick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_HIDE_ANIMATION);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::Enable(false);
+    EXPECT_TRUE(menuItemPattern->IsSelected());
 }
 
 /**

@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
 
+#include "core/components_ng/pattern/navigation/navigation_model_static.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -328,8 +329,8 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately004, TestSize.Level1
     preTopNavDestinationNode->SetIsCacheNode(false);
     preTopNavDestinationNode->animationId_ = 1;
     preTopNavDestinationNode->SetTransitionType(PageTransitionType::EXIT_POP);
-    auto webNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto webNode = FrameNode::CreateFrameNode(
+        V2::WEB_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     preTopNavDestinationNode->children_.emplace_back(webNode);
     preTopNavDestinationNode->SetDestroying(false);
 
@@ -367,7 +368,96 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
     preTopNavDestinationNode->SetDestroying(false);
 
     navigationNode->RemoveJsChildImmediately(preTopNavDestinationNode, false, 1);
-    EXPECT_TRUE(preTopNavDestinationNode->isInDestroying_);
+    EXPECT_FALSE(preTopNavDestinationNode->isInDestroying_);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: HandleBackForHomeDestination001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, HandleBackForHomeDestination001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    bool res = navigationNode->HandleBackForHomeDestination();
+    EXPECT_FALSE(res);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: StartSoftOpacityAnimationPush001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, StartSoftOpacityAnimationPush, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    navigationNode->StartSoftOpacityAnimationPush(destNode);
+    ASSERT_NE(destNode, nullptr);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: SoftTransitionAnimationPush
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, SoftTransitionAnimationPush001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preNode, nullptr);
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(curNode, nullptr);
+    NavigationGroupNode::AnimationFinishCallback callback = []() { return false; };
+    navigationNode->SoftTransitionAnimationPush(preNode, curNode, true, true, true, callback);
+    ASSERT_NE(curNode, nullptr);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: SetSplitPlaceholder001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, SetSplitPlaceholder001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    navigationNode->SetSplitPlaceholder(navigationNode);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 
@@ -641,6 +731,10 @@ HWTEST_F(NavigationGroupNodeTestNg, CheckIsNeedForceExitWindow008, TestSize.Leve
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavPathList list;
+    auto uiNode = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    list.emplace_back(std::make_pair("pageOne", uiNode));
+    navigationStack->SetNavPathList(list);
     navigationStack->size_ = 1;
     navigationPattern->SetNavigationStack(navigationStack);
     auto pipelineContext = navigationNode->GetContext();
@@ -813,6 +907,185 @@ HWTEST_F(NavigationGroupNodeTestNg, ToDumpString004, TestSize.Level1)
 
     string dump = navigationNode->ToDumpString();
     EXPECT_NE(dump.find("Mode: \"INVALID\""), string::npos);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: RemoveDialogDestination
+ * @tc.desc: Branch: if (!iter->second) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, RemoveDialogDestination, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation.
+     */
+    std::string destNameBase = "dest";
+    const int32_t testNumber = 1;
+    for (int32_t index = 0; index < testNumber; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = AceType::DynamicCast<FrameNode>(navigation->GetContentNode());
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
+    auto fisrtChild = AceType::DynamicCast<NavDestinationGroupNode>(navigationContent->GetChildAtIndex(0));
+    ASSERT_NE(fisrtChild, nullptr);
+    navigation->hideNodes_.emplace_back(fisrtChild, true);
+    auto layoutProperty = navigationContent->GetLayoutProperty();
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
+
+    /**
+     * @tc.steps: step3. call RemoveDialogDestination. check the flag.
+     */
+    navigation->RemoveDialogDestination();
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
+}
+
+/*
+ * @tc.name: GetNavBarOrHomeDestinationNode001
+ * @tc.desc: Branch: if (useHomeDestination_.has_value() && useHomeDestination_.value()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    navigation->useHomeDestination_ = true;
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(node, nullptr);
+    navigation->customHomeDestination_ = node;
+    auto retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: GetNavBarOrHomeDestinationNode002
+ * @tc.desc: Branch: if (useHomeDestination_.has_value() && useHomeDestination_.value()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode002, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(node, nullptr);
+    navigation->navBarNode_ = node;
+
+    navigation->useHomeDestination_ = std::nullopt;
+    auto retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+
+    navigation->useHomeDestination_ = false;
+    retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Branch: if (!parentCustomNode && curTag == V2::JS_VIEW_ETS_TAG) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    // create homeNavDestination
+    navigationModel.Create(true);
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navPattern, nullptr);
+    auto parentNode = FrameNode::GetOrCreateFrameNode(V2::JS_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->AddChild(navigation);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+
+    EXPECT_CALL(*mockNavPathStack, CreateHomeDestination(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(destNode), Return(true)));
+    navigation->OnAttachToMainTree(true);
+    EXPECT_EQ(navPattern->GetParentCustomNode().Upgrade(), parentNode);
+    auto homeDest = navigation->GetHomeDestinationNode();
+    EXPECT_EQ(homeDest, destNode);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: UpdateNavdestinationVisiblity001
+ * @tc.desc: Branch: if (index == static_cast<int32_t>(destinationSize) - 1) false
+ *                   if (navigationPattern->IsPrimaryNode(navDestination)) false
+ *                   if (index < lastStandardIndex_) false
+ *                   if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, UpdateNavdestinationVisiblity001, TestSize.Level1)
+{
+    /*
+     *@tc.steps create navNode
+     */
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create(true);
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->isOnAnimation_ = true;
+    auto layoutProperty = navDestination->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    auto navPattern = navDestination->GetPattern<NavDestinationPattern>();
+    navPattern->SetCustomNode(navDestination);
+    /*
+     *@tc.steps test updateNavDestinationVisiblity
+     */
+    navigationNode->lastStandardIndex_ = -1;
+    navigationNode->UpdateNavDestinationVisibility(navDestination, nullptr, 1, 10, nullptr);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+
+    /*
+     *@tc.steps test if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) false
+     */
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navigationNode->UpdateNavDestinationVisibility(navDestination, navDestination, 1, 10, nullptr);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

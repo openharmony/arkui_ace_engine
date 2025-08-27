@@ -28,11 +28,11 @@ class GridColumnInfo : public GridLayoutInfo {
 
 public:
     class Builder : public AceType {
-        DECLARE_ACE_TYPE(Builder, AceType)
+        DECLARE_ACE_TYPE(Builder, AceType);
     public:
         Builder()
         {
-            columnInfo_ = AceType::Claim(new GridColumnInfo());
+            columnInfo_ = AceType::MakeRefPtr<GridColumnInfo>();
         }
         void SetXsSizeColumn(uint32_t xsSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {

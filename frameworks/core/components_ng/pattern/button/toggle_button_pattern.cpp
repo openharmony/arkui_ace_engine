@@ -49,9 +49,6 @@ void ToggleButtonPattern::InitParameters()
     buttonRadius_ = toggleTheme_->GetButtonRadius();
     textFontSize_ = toggleTheme_->GetTextFontSize();
     textColor_ = toggleTheme_->GetTextColor();
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    clickedColor_ = buttonTheme->GetClickedColor();
 }
 
 void ToggleButtonPattern::OnModifyDone()
@@ -299,12 +296,12 @@ void ToggleButtonPattern::SetBlurButtonStyle(RefPtr<FrameNode>& textNode,
 {
     CHECK_NULL_VOID(toggleTheme_);
     CHECK_NULL_VOID(renderContext);
-    if (isCheckedShadow_ && isOn_.value()) {
+    if (isCheckedShadow_ && isOn_.value_or(false)) {
         isCheckedShadow_ = false;
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal());
         renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
     }
-    if (isShadow_ && !isOn_.value()) {
+    if (isShadow_ && !isOn_.value_or(false)) {
         isShadow_ = false;
         renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
     }
@@ -442,6 +439,7 @@ void ToggleButtonPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->UpdateSelectStatus(false);
     });
+    FireBuilder();
 }
 
 void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
@@ -528,9 +526,9 @@ void ToggleButtonPattern::OnTouchDown()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_);
+            renderContext->UpdateBackgroundColor(clickedColor_.value());
             return;
         }
         // for system default
@@ -553,7 +551,7 @@ void ToggleButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
@@ -728,6 +726,22 @@ void ToggleButtonPattern::OnRestoreInfo(const std::string& restoreInfo)
 void ToggleButtonPattern::OnColorConfigurationUpdate()
 {
     OnModifyDone();
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ToggleTheme>();
+        CHECK_NULL_VOID(theme);
+        auto pops = host->GetPaintProperty<ToggleButtonPaintProperty>();
+        CHECK_NULL_VOID(pops);
+        if (!pops->GetSelectedColorSetByUserValue(false)) {
+            Color color = theme->GetCheckedColor();
+            pops->UpdateSelectedColor(color);
+        }
+        host->MarkModifyDone();
+        host->MarkDirtyNode();
+    }
 }
 
 bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)

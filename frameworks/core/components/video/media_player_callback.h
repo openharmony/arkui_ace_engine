@@ -20,6 +20,7 @@
 
 #include "core/common/container_scope.h"
 #include "core/components/video/video_utils.h"
+#include "media_errors.h"
 #include "player.h"
 
 namespace OHOS::Ace {
@@ -70,6 +71,7 @@ public:
     using SeekDoneEvent = std::function<void(uint32_t)>;
     using StateChangedEvent = std::function<void(PlaybackStatus)>;
     using CommonEvent = std::function<void()>;
+    using VideoErrorEvent = std::function<void(int32_t code, const std::string& message)>;
 
     MediaPlayerCallback() = default;
     explicit MediaPlayerCallback(int32_t instanceId)
@@ -84,7 +86,11 @@ public:
     {
         LOGE("OnError callback, errorCode: %{public}d, error message: %{public}s", errorCode, errorMsg.c_str());
         ContainerScope scope(instanceId_);
-        if (errorEvent_) {
+        if (videoErrorEvent_) {
+            auto newCode = OHOS::Media::MSErrorToExtErrorAPI9(static_cast<Media::MediaServiceErrCode>(errorCode));
+            auto newMsg = OHOS::Media::MSExtAVErrorToString(newCode) + errorMsg;
+            videoErrorEvent_(newCode, newMsg);
+        } else if (errorEvent_) {
             errorEvent_();
         }
     }
@@ -174,6 +180,11 @@ public:
         errorEvent_ = std::move(errorEvent);
     }
 
+    void SetErrorEvent(VideoErrorEvent&& errorEvent)
+    {
+        videoErrorEvent_ = std::move(errorEvent);
+    }
+
     void SetResolutionChangeEvent(CommonEvent&& resolutionChangeEvent)
     {
         resolutionChangeEvent_ = std::move(resolutionChangeEvent);
@@ -195,6 +206,7 @@ private:
     CommonEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
     CommonEvent errorEvent_;
+    VideoErrorEvent videoErrorEvent_;
     CommonEvent resolutionChangeEvent_;
     CommonEvent startRenderFrameEvent_;
     int32_t instanceId_ = -1;

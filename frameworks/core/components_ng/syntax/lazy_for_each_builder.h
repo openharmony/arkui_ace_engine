@@ -54,7 +54,7 @@ using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
 using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
 class ACE_EXPORT LazyForEachBuilder : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType)
+    DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType);
 public:
     LazyForEachBuilder() = default;
     ~LazyForEachBuilder() override = default;
@@ -301,6 +301,12 @@ public:
     }
 
     void SetDestroying(bool isDestroying, bool cleanStatus);
+    void NotifyColorModeChange(uint32_t colorMode, bool rerenderable);
+
+    void EnablePreBuild(bool enable)
+    {
+        enablePreBuild_ = enable;
+    }
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -359,6 +365,7 @@ private:
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;
+    bool enablePreBuild_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

@@ -74,6 +74,36 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
       RadioResponseRegionModifier, value);
     return this;
   }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, RadioMarginModifier.identity, RadioMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioMarginModifier.identity, RadioMarginModifier, undefined);
+    }
+    return this;
+  }
   contentModifier(value: ContentModifier<RadioConfiguration>): this {
     modifierWithKey(this._modifiersWithKeys, RadioContentModifier.identity, RadioContentModifier, value);
     return this;
@@ -273,9 +303,7 @@ class RadioPaddingModifier extends ModifierWithKey<Padding | Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as Padding).left === (this.value as Padding).left &&
         (this.stageValue as Padding).right === (this.value as Padding).right &&
         (this.stageValue as Padding).top === (this.value as Padding).top &&
@@ -362,6 +390,28 @@ class RadioOnChangeModifier extends ModifierWithKey<(isChecked: boolean) => void
     } else {
       getUINativeModule().radio.setRadioOnChange(node, this.value);
     }
+  }
+}
+
+class RadioMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetMargin(node);
+    } else {
+      getUINativeModule().radio.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
 }
 

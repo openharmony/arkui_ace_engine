@@ -15,15 +15,33 @@
 
 #include "ui/base/agingadapation/aging_adapation_dialog_util.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 
 namespace OHOS::Ace::Kit {
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const int32_t iconNodeId, const IconNodeType type)
+    const std::string& message, const int32_t iconNodeId, const IconNodeType type, bool isWithDialogTheme)
 {
+    int32_t themeScopedId = 0;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopedId);
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    float scale = context->GetFontScale();
+    if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        return nullptr;
+    }
+    if (type == IconNodeType::TEXT) {
+        auto dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(UtfUtils::Str8ToStr16(message));
+        CHECK_NULL_RETURN(dialogNode, nullptr);
+        RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(dialogNode));
+        dialogNode->SetKitNode(node);
+        return node;
+    }
     auto uiNode = ElementRegister::GetInstance()->GetUINodeById(iconNodeId);
     CHECK_NULL_RETURN(uiNode, nullptr);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
@@ -31,7 +49,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     RefPtr<AceNode> dialogNode = nullptr;
     switch (type) {
         case IconNodeType::SYMBOL:
-            dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(message, frameNode);
+            dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, frameNode, isWithDialogTheme);
             break;
         case IconNodeType::IMAGE:
             {

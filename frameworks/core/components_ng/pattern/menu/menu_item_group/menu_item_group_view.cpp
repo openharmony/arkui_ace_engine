@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -25,7 +26,7 @@ namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
     CHECK_NULL_VOID(row);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = row->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -37,6 +38,48 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
         std::nullopt });
 }
 } // namespace
+
+void MenuItemGroupView::CreateWithStringResourceObj(
+    const RefPtr<ResourceObject>& resObj, const MenuItemGroupStringType type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItemGroup" + StringTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key, type](const RefPtr<ResourceObject>& resObj) {
+        std::string str = pattern->GetResCacheMapByKey(key);
+        if (str.empty()) {
+            CHECK_NE_VOID(ResourceParseUtils::ParseResString(resObj, str), true);
+            pattern->AddResCache(key, str);
+        }
+        if (type == MenuItemGroupStringType::HEADER) {
+            pattern->SetHeaderContent(str);
+        } else if (type == MenuItemGroupStringType::FOOTER) {
+            pattern->SetFooterContent(str);
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+const std::string MenuItemGroupView::StringTypeToString(const MenuItemGroupStringType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemGroupStringType::HEADER:
+            rst = "Header";
+            break;
+        case MenuItemGroupStringType::FOOTER:
+            rst = "Footer";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
 
 void MenuItemGroupView::Create()
 {
@@ -80,7 +123,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(headerStr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -128,7 +171,7 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(footerStr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

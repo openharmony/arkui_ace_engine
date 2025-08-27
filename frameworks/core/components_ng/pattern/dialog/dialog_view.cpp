@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
@@ -105,8 +104,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
-
-    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
+    auto isSubwindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+    if (isSubwindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
@@ -124,6 +123,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
     pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
+    pattern->SetOnWillDismissRelease(param.onWillDismissRelease);
 
     SetDialogTransitionEffects(dialog, param, pattern);
 

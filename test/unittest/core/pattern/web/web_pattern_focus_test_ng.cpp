@@ -28,6 +28,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -250,7 +251,7 @@ public:
         return false;
     }
     void OnScrollStartCallback() override {}
-    void FireOnScrollStart() override {}
+    void FireOnScrollStart(bool withPerfMonitor) override {}
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
@@ -265,7 +266,7 @@ public:
 
     void StopAnimate() override {}
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return 0.0f;
     }
@@ -508,11 +509,11 @@ HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay_003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAccessibilityHoverEvent
- * @tc.desc: OnAccessibilityHoverEvent.
+ * @tc.name: OnAccessibilityHoverEvent1
+ * @tc.desc: OnAccessibilityHoverEvent1.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent1, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -525,20 +526,30 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    SourceType sourceType = SourceType::NONE;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+    TimeStamp time;
+    if (IS_CALLING_FROM_M114()) {
+        auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("arbitraryString");
+        ASSERT_EQ(result1, -1);
+    } else {
+        auto result2 = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+        ASSERT_EQ(result2, -1);
 
-    PointF point(20.0f, 100.0f);
-    bool web = webPattern->OnAccessibilityHoverEvent(point);
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    ASSERT_FALSE(web);
+        const NG::PointF point(20, 100);
+        webPattern->OnAccessibilityHoverEvent(point, sourceType, eventType, time);
+        result2 = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+        ASSERT_NE(result2, -1);
+    }
 #endif
 }
 
 /**
- * @tc.name: RegisterTextBlurCallback
- * @tc.desc: RegisterTextBlurCallback.
+ * @tc.name: OnAccessibilityHoverEvent2
+ * @tc.desc: OnAccessibilityHoverEvent2.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, RegisterTextBlurCallback, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent2, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -551,19 +562,54 @@ HWTEST_F(WebPatternFocusTestNg, RegisterTextBlurCallback, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    SourceType sourceType = SourceType::NONE;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+    TimeStamp time;
+    if (IS_CALLING_FROM_M114()) {
+        auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("arbitraryString");
+        ASSERT_EQ(result1, -1);
+    } else {
+        auto result2 = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+        ASSERT_NE(result2, -1);
 
-    WebPattern::TextBlurCallback callback = [](int64_t id, const std::string& data) {};
-    webPattern->RegisterTextBlurCallback(std::move(callback));
-    EXPECT_TRUE(webPattern->textBlurAccessibilityEnable_);
+        const NG::PointF point(-1, -1);
+        webPattern->OnAccessibilityHoverEvent(point, sourceType, eventType, time);
+        result2 = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+        ASSERT_EQ(result2, -1);
+    }
 #endif
 }
 
 /**
- * @tc.name: UnRegisterTextBlurCallback
- * @tc.desc: UnRegisterTextBlurCallback.
+ * @tc.name: GetSurfaceIdByHtmlElementId001
+ * @tc.desc: GetSurfaceIdByHtmlElementId delegate_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, UnRegisterTextBlurCallback, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, GetSurfaceIdByHtmlElementId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    ASSERT_EQ(webPattern->delegate_, nullptr);
+
+    std::string htmlElementId = "testElementId";
+    std::string result = webPattern->GetSurfaceIdByHtmlElementId(htmlElementId);
+    ASSERT_EQ(result, "");
+#endif
+}
+
+/**
+ * @tc.name: GetSurfaceIdByHtmlElementId002
+ * @tc.desc: GetSurfaceIdByHtmlElementId delegate_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetSurfaceIdByHtmlElementId002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -576,8 +622,98 @@ HWTEST_F(WebPatternFocusTestNg, UnRegisterTextBlurCallback, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->UnRegisterTextBlurCallback();
-    EXPECT_FALSE(webPattern->textBlurAccessibilityEnable_);
+
+    std::string result1 = webPattern->GetSurfaceIdByHtmlElementId("existhtmlElementId");
+    ASSERT_EQ(result1, "existSurfaceId");
+    std::string result2 = webPattern->GetSurfaceIdByHtmlElementId("existhtmlElementIdOther");
+    ASSERT_EQ(result2, "existSurfaceIdOther");
+    std::string result3 = webPattern->GetSurfaceIdByHtmlElementId("noExisthtmlElementId");
+    ASSERT_EQ(result3, "");
+#endif
+}
+
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId001
+ * @tc.desc: GetWebAccessibilityIdBySurfaceId delegate_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    ASSERT_EQ(webPattern->delegate_, nullptr);
+
+    std::string surfaceId = "testSurfaceId";
+    auto result = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    ASSERT_EQ(result, -1);
+#endif
+}
+
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId002
+ * @tc.desc: GetWebAccessibilityIdBySurfaceId delegate_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    if (IS_CALLING_FROM_M114()) {
+        auto result = webPattern->GetWebAccessibilityIdBySurfaceId("arbitraryString");
+        ASSERT_EQ(result, -1);
+    } else {
+        auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
+        ASSERT_EQ(result1, 123);
+        auto result2 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceIdOther");
+        ASSERT_EQ(result2, 456);
+        auto result3 = webPattern->GetWebAccessibilityIdBySurfaceId("noexistSurfaceId");
+        ASSERT_EQ(result3, -1);
+    }
+#endif
+}
+
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId003
+ * @tc.desc: GetWebAccessibilityIdBySurfaceId delegate_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    if (IS_CALLING_FROM_M114()) {
+        auto result = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
+        ASSERT_EQ(result, -1);
+    } else {
+        auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
+        ASSERT_EQ(result1, 123);
+    }
 #endif
 }
 

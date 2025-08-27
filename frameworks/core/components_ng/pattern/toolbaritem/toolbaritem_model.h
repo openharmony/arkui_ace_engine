@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_H
 
-#include <mutex>
-
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT ToolBarItemModel {
@@ -29,12 +25,7 @@ public:
 
     virtual void Create(int32_t value);
     virtual void SetIsFirstCreate(bool value);
-
-private:
-    static std::unique_ptr<ToolBarItemModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_H

@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/models/relative_container_model_impl.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -158,18 +159,25 @@ void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo
         JSRef<JSObject> val = JSRef<JSObject>::Cast(positionVal);
         JSRef<JSVal> startVal = val->GetProperty("start");
         JSRef<JSVal> endVal = val->GetProperty("end");
+        RefPtr<ResourceObject> startResObj;
+        RefPtr<ResourceObject> endResObj;
 
-        if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start)) {
+        if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start, startResObj)) {
             guidelineInfoItem.start = start;
         }
-        if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end)) {
+        NG::RelativeContainerModelNG::SetPositionResObj(
+            startResObj, guidelineInfoItem, "relativeContainer.guideLine.position.start");
+        if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end, endResObj)) {
             guidelineInfoItem.end = end;
         }
+        NG::RelativeContainerModelNG::SetPositionResObj(
+            endResObj, guidelineInfoItem, "relativeContainer.guideLine.position.end");
     }
 }
 
 void JSRelativeContainer::JsGuideline(const JSCallbackInfo& info)
 {
+    RelativeContainerModel::GetInstance()->ResetResObj("relativeContainer.guideLine");
     auto tmpInfo = info[0];
     std::vector<GuidelineInfo> guidelineInfos;
     if (tmpInfo->IsUndefined()) {

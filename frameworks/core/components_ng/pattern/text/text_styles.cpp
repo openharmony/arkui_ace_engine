@@ -90,6 +90,8 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
+        textStyle.SetSymbolShadow(property->GetSymbolShadowValue(textTheme->GetTextStyle().GetSymbolShadow()));
+        textStyle.SetShaderStyle(property->GetShaderStyleValue(textTheme->GetTextStyle().GetShaderStyle()));
     }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
@@ -99,11 +101,14 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, MaxLines, MaxLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineBreakStrategy, LineBreakStrategy);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
@@ -113,8 +118,6 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
     }
     if (fontStyle) {
-        // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
-        // depend on its value.
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
 
@@ -129,9 +132,13 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
         UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
+        UPDATE_TEXT_STYLE(fontStyle, StrokeWidth, SetStrokeWidth);
+        UPDATE_TEXT_STYLE(fontStyle, StrokeColor, SetStrokeColor);
+        UPDATE_TEXT_STYLE(fontStyle, Superscript, SetSuperscript);
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
+        UPDATE_TEXT_STYLE(fontStyle, LineThicknessScale, SetLineThicknessScale);
         UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
 
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
@@ -155,11 +162,14 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
+        UPDATE_TEXT_STYLE(textLineStyle, TextVerticalAlign, SetParagraphVerticalAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
+        UPDATE_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, SetIsOnlyBetweenLines);
         UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
+        UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
     }
 }
 
@@ -177,9 +187,9 @@ std::string GetFontWeightInJson(const std::optional<FontWeight>& value)
 }
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value)
 {
-    std::vector<std::string> fontFamilyVector = value.value_or<std::vector<std::string>>({"HarmonyOS Sans"});
+    std::vector<std::string> fontFamilyVector = value.value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
     if (fontFamilyVector.empty()) {
-        fontFamilyVector = std::vector<std::string>({"HarmonyOS Sans"});
+        fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
     }
     std::string fontFamily = fontFamilyVector.at(0);
     for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
@@ -247,6 +257,72 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
     return text;
 }
 
+std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value)
+{
+    auto res = JsonUtil::Create(true);
+    if (!value.has_value()) {
+        return res;
+    }
+    const auto& shadow = value.value();
+    res->Put("color", (shadow.color).ColorToString().c_str());
+    std::string offsetStr = "[" + std::to_string(shadow.offset.first) + ", "
+                           + std::to_string(shadow.offset.second) + "]";
+    res->Put("offset", offsetStr.c_str());
+    res->Put("radius", std::to_string(shadow.radius).c_str());
+    return res;
+}
+
+std::string GradientTypeToString(SymbolGradientType type)
+{
+    switch (type) {
+        case SymbolGradientType::COLOR_SHADER:
+            return "COLOR_SHADER";
+        case SymbolGradientType::RADIAL_GRADIENT:
+            return "RADIAL_GRADIENT";
+        case SymbolGradientType::LINEAR_GRADIENT:
+            return "LINEAR_GRADIENT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value)
+{
+    auto array = JsonUtil::CreateArray(true);
+    if (!value.has_value() || value->empty()) {
+        return array;
+    }
+    for (const auto& gradient : *value) {
+        auto obj = JsonUtil::Create(true);
+        obj->Put("type", GradientTypeToString(gradient.type).c_str());
+        auto colorsArray = JsonUtil::CreateArray(true);
+        for (const auto& color : gradient.symbolColor) {
+            colorsArray->Put("", color.ColorToString().c_str());
+        }
+        obj->Put("symbolColor", colorsArray);
+        auto opacitiesArray = JsonUtil::CreateArray(true);
+        for (float opacity : gradient.symbolOpacities) {
+            opacitiesArray->Put("", std::to_string(opacity).c_str());
+        }
+        obj->Put("symbolOpacities", opacitiesArray);
+        obj->Put("repeating", gradient.repeating ? "true" : "false");
+        if (gradient.angle.has_value()) {
+            obj->Put("angle", std::to_string(*gradient.angle).c_str());
+        }
+        if (gradient.radius.has_value()) {
+            obj->Put("radius", gradient.radius->ToString().c_str());
+        }
+        if (gradient.radialCenterX.has_value()) {
+            obj->Put("radialCenterX", gradient.radialCenterX->ToString().c_str());
+        }
+        if (gradient.radialCenterY.has_value()) {
+            obj->Put("radialCenterY", gradient.radialCenterY->ToString().c_str());
+        }
+        array->Put(obj);
+    }
+    return array;
+}
+
 void FontStyle::UpdateColorByResourceId()
 {
     if (propTextColor) {
@@ -263,5 +339,31 @@ void FontStyle::UpdateColorByResourceId()
         auto& colors = propSymbolColorList.value();
         std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     }
+}
+
+PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign)
+{
+    PlaceholderAlignment alignment;
+    switch (verticalAlign) {
+        case VerticalAlign::TOP:
+            alignment = PlaceholderAlignment::TOP;
+            break;
+        case VerticalAlign::CENTER:
+            alignment = PlaceholderAlignment::MIDDLE;
+            break;
+        case VerticalAlign::BOTTOM:
+        case VerticalAlign::NONE:
+            alignment = PlaceholderAlignment::BOTTOM;
+            break;
+        case VerticalAlign::BASELINE:
+            alignment = PlaceholderAlignment::ABOVEBASELINE;
+            break;
+        case VerticalAlign::FOLLOW_PARAGRAPH:
+            alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
+            break;
+        default:
+            alignment = PlaceholderAlignment::BOTTOM;
+    }
+    return alignment;
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -99,7 +100,8 @@ public:
 #ifdef WEB_SUPPORTED
     MOCK_METHOD(bool, RegisterWebInteractionOperationAsChildTree,
         (int64_t accessibilityId, const WeakPtr<NG::WebPattern>& webPattern), (override));
-    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
+    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree,
+        (int32_t treeId, const WeakPtr<NG::WebPattern>& webPattern), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
         int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
@@ -139,6 +141,10 @@ static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
 static bool g_isDragging = false;
 static bool hasModalButtonsRect_;
+static bool g_isContainerCustomTitleVisible = false;
+static bool g_isContainerControlButtonVisible = false;
+static RectF g_buttonRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+static int32_t g_containerModalTitleHeight = 0;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -166,6 +172,16 @@ void MockPipelineContext::TearDown()
     predictTasks_.clear();
 }
 
+std::string PipelineContext::GetBundleName()
+{
+    return "";
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    return "";
+}
+
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
@@ -191,6 +207,26 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 {
     windowRect_ = rect;
 }
+
+void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
+{
+    g_isContainerCustomTitleVisible = visible;
+}
+
+void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
+{
+    g_isContainerControlButtonVisible = visible;
+}
+
+void MockPipelineContext::SetContainerModalButtonsRect(RectF buttons)
+{
+    g_buttonRect = buttons;
+}
+
+void MockPipelineContext::SetContainerModalTitleHeight(int32_t height)
+{
+    g_containerModalTitleHeight = height;
+}
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
@@ -198,6 +234,9 @@ PipelineContext::PipelineContext()
 {
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (forceSplitMgr_) {
+        forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
 }
 
@@ -221,6 +260,11 @@ std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(c
 void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node) {}
 
 void PipelineContext::DeleteNavigationNode(const std::string& id) {}
+
+void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
+{
+    lastHostParentOffsetToWindow_ = offset;
+}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -424,7 +468,7 @@ void PipelineContext::FlushBuildFinishCallbacks()
 
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
-void PipelineContext::FlushMessages() {}
+void PipelineContext::FlushMessages(std::function<void()> callback) {}
 
 void PipelineContext::FlushModifier() {}
 
@@ -450,7 +494,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -518,7 +562,10 @@ void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
 
 bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 {
-    return false;
+    if (!isFormRender_) {
+        return false;
+    }
+    return true;
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
@@ -540,6 +587,8 @@ void PipelineContext::OriginalAvoidanceLogic(
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
+void PipelineContext::OnRawKeyboardChangedCallback() {}
+
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -556,6 +605,8 @@ bool PipelineContext::CheckOverlayFocus()
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
+
+void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
@@ -631,6 +682,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
 bool PipelineContext::OnBackPressed()
 {
+    auto deviceType = SystemProperties::GetDeviceType();
+    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
+        return true;
+    }
     return false;
 }
 
@@ -654,6 +709,14 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
         taskScheduler_->AddDirtyLayoutNode(dirty);
+    }
+}
+
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks())
+    {
+        taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
 }
 
@@ -682,6 +745,15 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 {
     if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
         taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
+    } else if (task) {
+        task();
+    }
+}
+
+void PipelineContext::AddAfterModifierTask(std::function<void()>&& task)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddAfterModifierTask(std::move(task));
     } else if (task) {
         task();
     }
@@ -754,6 +826,8 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
+void PipelineContext::SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates) {}
+
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
@@ -809,6 +883,36 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
+void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(
+    const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
+
+void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(
+    const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
+
+void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
+    const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
+}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;
@@ -828,7 +932,6 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
     return false;
 }
 
-void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
@@ -860,6 +963,8 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& root
 }
 
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+void PipelineContext::DisableNotifyResponseRegionChanged() {};
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
@@ -897,7 +1002,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault(int32_t windowId) {}
+void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 
@@ -964,7 +1069,7 @@ void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
-bool PipelineContext::IsContainerModalVisible()
+bool PipelineContext::IsContainerModalVisible() const
 {
     return false;
 }
@@ -1007,11 +1112,12 @@ void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& p
 
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
-    return 0;
+    return g_containerModalTitleHeight;
 }
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
+    buttons = g_buttonRect;
     return hasModalButtonsRect_;
 }
 
@@ -1020,6 +1126,21 @@ ColorMode PipelineContext::GetColorMode() const
     return MockContainer::mockColorMode_;
 }
 
+const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonitor()
+{
+    if (!nodeRenderStatusMonitor_) {
+        nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
+    }
+    return nodeRenderStatusMonitor_;
+}
+
+void PipelineContext::FlushDirtyPropertyNodes()
+{
+}
+
+void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1047,11 +1168,16 @@ bool PipelineBase::IsDestroyed()
     return false;
 }
 
+bool PipelineBase::CheckIfGetTheme()
+{
+    return false;
+}
+
 void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
-    return nullptr;
+    return weakFrontend_.Upgrade();
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
@@ -1070,7 +1196,12 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
+
+bool PipelineBase::ReachResponseDeadline() const
+{
+    return false;
+}
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
 
@@ -1181,9 +1312,33 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
 
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    return rootWidth;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    return 0;
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
+{
+    return NG::windowRect_;
+}
+
+Rect PipelineBase::GetGlobalDisplayWindowRect() const
 {
     return NG::windowRect_;
 }
@@ -1210,6 +1365,14 @@ void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId ev
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
+}
+
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -1273,15 +1436,15 @@ bool NG::PipelineContext::GetContainerFloatingTitleVisible()
 
 bool NG::PipelineContext::GetContainerCustomTitleVisible()
 {
-    return false;
+    return g_isContainerCustomTitleVisible;
 }
 
 bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
-    return false;
+    return g_isContainerControlButtonVisible;
 }
 
-void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {
@@ -1313,5 +1476,79 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 {
     windowSizeChangeReason_ = reason;
 }
+
+void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
+
+std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
+{
+    return nullptr;
+}
+
+std::string NG::PipelineContext::GetCurrentPageNameCallback()
+{
+    return "";
+}
+
+void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
+}
+
+void NG::PipelineContext::RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback)
+{
+    objectLifecycleCallback_ = std::move(callback);
+}
+
+void NG::PipelineContext::UnregisterArkUIObjectLifecycleCallback()
+{
+    objectLifecycleCallback_ = nullptr;
+}
+
+void NG::PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
+{
+    CHECK_NULL_VOID(objectLifecycleCallback_);
+    objectLifecycleCallback_(data);
+}
+
+bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
+{
+    bool ret = false;
+    if (currentSourceType != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = currentSourceType;
+    }
+    return ret;
+}
+
+const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
+}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
+
+// WindowManager ===============================================================
+namespace OHOS::Ace {
+RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+{
+    if (getCurrentViewportConfigCallback_) {
+        return getCurrentViewportConfigCallback_();
+    }
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
+    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
+{
+    if (getTargetViewportConfigCallback_) {
+        return getTargetViewportConfigCallback_(
+            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+    }
+    return nullptr;
+}
+} // namespace OHOS::Ace
+// WindowManager ===============================================================

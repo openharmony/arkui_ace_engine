@@ -120,6 +120,11 @@ public:
     {
         return -1;
     }
+    // Gets current page's init params
+    virtual std::string GetInitParams()
+    {
+        return "";
+    }
     // Gets current page's params
     virtual std::string GetParams()
     {
@@ -136,6 +141,8 @@ public:
     virtual void ResetRequestFocusCallback();
 
     virtual bool Activate(bool isActive, bool autoInactive = true);
+
+    virtual bool GetFocusActive();
 
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
@@ -279,6 +286,12 @@ public:
     {
         return {};
     }
+
+    virtual void GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID,
+        const bool isStartRect,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options)
+    {}
 
     virtual void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,

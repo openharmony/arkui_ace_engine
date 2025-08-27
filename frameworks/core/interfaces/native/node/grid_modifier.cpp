@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -343,6 +343,28 @@ void ResetFriction(ArkUINodeHandle node)
     GridModelNG::SetFriction(frameNode, friction);
 }
 
+void SetGridFocusWrapMode(ArkUINodeHandle node, int32_t focusWrapMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FocusWrapMode mode = static_cast<FocusWrapMode>(focusWrapMode);
+    GridModelNG::SetFocusWrapMode(frameNode, mode);
+}
+
+void ResetGridFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetFocusWrapMode(frameNode, FocusWrapMode::DEFAULT);
+}
+
+ArkUI_Int32 GetGridFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(GridModelNG::GetFocusWrapMode(frameNode));
+}
+
 void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -370,6 +392,27 @@ void ResetGridAlignItems(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetAlignItems(frameNode, GridItemAlignment::DEFAULT);
+}
+
+void SetGridSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoad)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSyncLoad(frameNode, syncLoad);
+}
+
+void ResetGridSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return GridModelNG::GetSyncLoad(frameNode);
 }
 
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
@@ -529,6 +572,9 @@ const ArkUIGridModifier* GetGridModifier()
         .resetEnableScroll = ResetEnableScroll,
         .setFriction = SetFriction,
         .resetFriction = ResetFriction,
+        .setGridFocusWrapMode = SetGridFocusWrapMode,
+        .resetGridFocusWrapMode = ResetGridFocusWrapMode,
+        .getGridFocusWrapMode = GetGridFocusWrapMode,
         .getGridColumnsTemplate = GetColumnsTemplate,
         .getGridRowsTemplate = GetRowsTemplate,
         .getGridColumnsGap = GetColumnsGap,
@@ -541,6 +587,9 @@ const ArkUIGridModifier* GetGridModifier()
         .getCachedCount = GetCachedCount,
         .setGridAlignItems = SetGridAlignItems,
         .resetGridAlignItems = ResetGridAlignItems,
+        .setSyncLoad = SetGridSyncLoad,
+        .resetSyncLoad = ResetGridSyncLoad,
+        .getSyncLoad = GetGridSyncLoad,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,
@@ -557,6 +606,8 @@ const ArkUIGridModifier* GetGridModifier()
         .resetOnGridItemDragLeave = ResetOnGridItemDragLeave,
         .setOnGridItemDrop = SetOnGridItemDrop,
         .resetOnGridItemDrop = ResetOnGridItemDrop,
+        .createWithResourceObjFriction = CreateWithResourceObjGridFriction,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjGridScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -604,6 +655,9 @@ const CJUIGridModifier* GetCJUIGridModifier()
         .resetEnableScroll = ResetEnableScroll,
         .setFriction = SetFriction,
         .resetFriction = ResetFriction,
+        .setGridFocusWrapMode = SetGridFocusWrapMode,
+        .resetGridFocusWrapMode = ResetGridFocusWrapMode,
+        .getGridFocusWrapMode = GetGridFocusWrapMode,
         .getGridColumnsTemplate = GetColumnsTemplate,
         .getGridRowsTemplate = GetRowsTemplate,
         .getGridColumnsGap = GetColumnsGap,
@@ -768,6 +822,24 @@ void ResetOnGridItemDrop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnItemDrop(frameNode, nullptr);
+}
+
+void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    GridModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    GridModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

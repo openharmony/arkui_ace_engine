@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class MockCanvasImage : public CanvasImage {
-    DECLARE_ACE_TYPE(MockCanvasImage, CanvasImage)
+    DECLARE_ACE_TYPE(MockCanvasImage, CanvasImage);
 public:
     MockCanvasImage() = default;
     ~MockCanvasImage() override = default;
@@ -30,6 +30,12 @@ public:
     MOCK_METHOD3(DrawRect, void(RSCanvas&, const RSRect&, const RSRect&));
     MOCK_CONST_METHOD0(GetWidth, int32_t());
     MOCK_CONST_METHOD0(GetHeight, int32_t());
+    MOCK_METHOD0(IsStatic, bool());
+
+    bool IsHdrPixelMap() override
+    {
+        return true;
+    }
 
     void SetRedrawCallback(std::function<void()>&& callback)  override
     {

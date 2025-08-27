@@ -34,7 +34,7 @@ public:
     static RefPtr<ContentSlotNode> GetOrCreateContentSlot(int32_t nodeId);
 
     explicit ContentSlotNode(int32_t nodeId) : UINode(V2::JS_NODE_SLOT_ETS_TAG, nodeId) {}
-    ~ContentSlotNode() override = default;
+    ~ContentSlotNode() override;
 
     bool IsAtomicNode() const override
     {

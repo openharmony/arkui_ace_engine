@@ -1,0 +1,12 @@
+{
+  "boolean": [
+    {
+      "name": "true",
+      "value": true
+    },
+    {
+      "name": "false",
+      "value": false
+    }
+  ]
+}

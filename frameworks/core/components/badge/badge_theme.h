@@ -36,7 +36,7 @@ public:
 
         RefPtr<BadgeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<BadgeTheme> theme = AceType::Claim(new BadgeTheme());
+            RefPtr<BadgeTheme> theme = AceType::MakeRefPtr<BadgeTheme>();
             if (!themeConstants) {
                 return theme;
             }

@@ -24,12 +24,12 @@ class RichEditorAccessibilityProperty : public TextAccessibilityProperty {
 
 public:
     RichEditorAccessibilityProperty() = default;
-
     ~RichEditorAccessibilityProperty() override = default;
 
     bool IsEditable() const override;
-
+    bool IsHint() const override;
     std::string GetHintText() const override;
+    const std::list<RefPtr<UINode>>& GetChildren(const RefPtr<FrameNode>& host) const override;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorAccessibilityProperty);
 };

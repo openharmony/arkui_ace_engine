@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 class GestureEventHub;
 
 class LongPressEvent : public virtual AceType {
-    DECLARE_ACE_TYPE(LongPressEvent, AceType)
+    DECLARE_ACE_TYPE(LongPressEvent, AceType);
 public:
     explicit LongPressEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~LongPressEvent() override = default;
@@ -52,7 +52,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT LongPressEventActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(LongPressEventActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(LongPressEventActuator, GestureEventActuator);
 public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~LongPressEventActuator() override = default;
@@ -82,6 +82,8 @@ public:
         ResponseLinkResult& responseLinkResult) override;
 
     GestureEventFunc GetGestureEventFunc();
+
+    void SetLongPressEventType(GestureTypeName typeName);
 
     void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
     {

@@ -16,7 +16,11 @@
 #include "base/base64/base64_util.h"
 
 #include "include/core/SkData.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 
 namespace OHOS::Ace {
 

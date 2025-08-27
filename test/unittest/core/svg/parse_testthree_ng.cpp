@@ -212,6 +212,7 @@ public:
 HWTEST_F(ParseTestThreeNg, GetRegionLengthTest001, TestSize.Level1)
 {
     auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
     auto dimension = Dimension(1.0, DimensionUnit::PERCENT);
     Rect containerRect(0, 0, 1, 1);
     Size viewPort(1, 1);

@@ -25,6 +25,7 @@
 #include "native_node.h"
 #include "native_type.h"
 
+#include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
@@ -35,6 +36,7 @@ struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
     bool cNode = false;
+    bool threadSafeNode = false;
     bool buildNode = false;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
@@ -42,25 +44,28 @@ struct ArkUI_Node {
     void* eventListeners = nullptr;
     void* barrierOption = nullptr;
     void* guidelineOption = nullptr;
-    void* alignRuleOption = nullptr;  
+    void* alignRuleOption = nullptr;
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
-    void* imageFrameInfos = nullptr;
-    void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
+    void* drawableDescriptor = nullptr;
+    void* imageFrameInfos = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
     void* progressLinearStyle = nullptr;
     void* visibleAreaEventOptions = nullptr;
     bool isBindNative = false;
+    void* commonEventListeners = nullptr;
+    void* extraCommonData = nullptr;
 };
 
 struct ArkUI_Context {
     int32_t id;
 };
 
+constexpr int BASIC_COMPONENT_NUM = 22;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
@@ -107,7 +112,15 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 22;
+struct InnerEventExtraParam {
+    int32_t targetId;
+    ArkUI_NodeHandle nodePtr;
+    void* userData;
+};
+
+struct ExtraData {
+    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
+};
 
 #ifdef __cplusplus
 };
@@ -125,6 +138,7 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
+void DisposeNativeSource(ArkUI_NodeHandle nativePtr);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr);
 
@@ -144,6 +158,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId);
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
+bool GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion platfromVersion);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();
@@ -155,9 +170,13 @@ void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
-int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent);
 void HandleNodeEvent(ArkUI_NodeEvent* event);
 void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet);
+void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent);
+void HandleNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType);
+void TriggerNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType,
+    std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>* commonEventListenersMap);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
@@ -171,6 +190,7 @@ bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
+std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);
 void RegisterBindNativeNode(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

@@ -75,6 +75,11 @@ enum CrossAxisState {
     STATE_NO_CROSS,
 };
 
+enum class TipPosition : int32_t {
+    ABOVE_BOTTOM = 0,
+    BELOW_TOP
+};
+
 class SecCompBase {
 public:
     SecCompBase() = default;
@@ -129,6 +134,8 @@ public:
     bool isIconExceeded_ = false;
     bool isBorderCovered_ = false;
     bool isWearableDevice_ = false;
+    bool isCustomizable_ = false;
+    TipPosition tipPosition_ = TipPosition::ABOVE_BOTTOM;
 };
 }  // namespace SecurityComponent
 }  // namespace Security

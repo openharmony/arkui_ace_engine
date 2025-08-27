@@ -580,7 +580,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      */
     PanRecognizer::GestureAcceptResult result;
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -589,7 +589,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. return DETECTING.
      */
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
 
@@ -599,7 +599,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
 
@@ -609,7 +609,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -619,7 +619,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -629,7 +629,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
@@ -654,7 +654,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest007, TestSize.Level1)
     PanRecognizer::GestureAcceptResult result;
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(-1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
 
@@ -665,7 +665,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest007, TestSize.Level1)
     panRecognizer->direction_.type = PanDirection::DOWN;
     panRecognizer->averageDistance_ = Offset(-1, 1);
     panRecognizer->touchPointsDistance_[0] = Offset(-1, 1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -675,7 +675,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest007, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::UP;
     panRecognizer->averageDistance_ = Offset(-1, 1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -685,7 +685,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest007, TestSize.Level1)
      */
     panRecognizer->direction_.type = PanDirection::UP;
     panRecognizer->averageDistance_ = Offset(-1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
@@ -803,6 +803,8 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
     panRecognizer->lastTouchEvent_ = touchEvent;
     panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::END);
+    EXPECT_TRUE(panRecognizer->localMatrix_.empty());
 }
 
 /**
@@ -1000,44 +1002,44 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest014, TestSize.Level1)
      * @tc.steps: case1: distance not same, refereeState is READY
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->ChangeDistance(1);
     panRecognizer->refereeState_ = RefereeState::READY;
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case2: distance not same, refereeState is DETECTING
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->ChangeDistance(1);
     panRecognizer->refereeState_ = RefereeState::DETECTING;
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case3: distance not same, refereeState is FAIL
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->ChangeDistance(1);
     panRecognizer->refereeState_ = RefereeState::FAIL;
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case4: distance same
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->ChangeDistance(0);
     panRecognizer->refereeState_ = RefereeState::FAIL;
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 0);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 0);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 }
 
 /**
@@ -1058,43 +1060,43 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest001, TestSize.Level
      * @tc.steps: case1: distance not same, refereeState is READY
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->refereeState_ = RefereeState::READY;
     panRecognizer->ChangeDistance(1);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case2: distance not same, refereeState is DETECTING
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->ChangeDistance(1);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case3: distance not same, refereeState is FAIL
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->refereeState_ = RefereeState::FAIL;
     panRecognizer->ChangeDistance(1);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case4: distance same
      * @tc.expected: step2. result equals.
      */
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizer->refereeState_ = RefereeState::FAIL;
     panRecognizer->ChangeDistance(1);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 0);
-    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN], 1);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 0);
+    EXPECT_EQ(panRecognizer->newDistanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 1);
 }
 
 /**
@@ -1412,7 +1414,7 @@ HWTEST_F(PanRecognizerTestNg, PanGestureTest001, TestSize.Level1)
     ASSERT_NE(panRecognizer, nullptr);
     EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], DEFAULT_PAN_DISTANCE.ConvertToPx());
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], DEFAULT_PAN_DISTANCE);
 }
 
 /**
@@ -1635,7 +1637,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1645,7 +1647,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
      * @tc.expected: step2. return DETECTING.
      */
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
@@ -1656,7 +1658,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
@@ -1667,7 +1669,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1678,7 +1680,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1689,7 +1691,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1715,13 +1717,13 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest007, TestSize
      */
     PanRecognizer::GestureAcceptResult result;
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1734,14 +1736,14 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest007, TestSize
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1754,14 +1756,14 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest007, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1821,7 +1823,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1831,7 +1833,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
      * @tc.expected: step2. return DETECTING.
      */
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
@@ -1842,7 +1844,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
@@ -1853,7 +1855,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1864,7 +1866,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1875,7 +1877,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -1901,13 +1903,13 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest010, TestSize
      */
     PanRecognizer::GestureAcceptResult result;
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     panRecognizer->direction_.type = PanDirection::ALL;
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1920,14 +1922,14 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest010, TestSize
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 1;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(1, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1940,14 +1942,14 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest010, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
@@ -1982,7 +1984,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -1992,7 +1994,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
@@ -2002,7 +2004,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -2013,7 +2015,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -2024,7 +2026,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -2035,7 +2037,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
-    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
+    panRecognizer->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
@@ -2426,5 +2428,77 @@ HWTEST_F(PanRecognizerTestNg, HandleTouchUpEvent001, TestSize.Level1)
     panRecognizer.HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(panRecognizer.globalPoint_.GetX(), axisEvent.x);
     EXPECT_EQ(panRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
+/**
+ * @tc.name: PanRecognizerTypeTest001
+ * @tc.desc: Test PanRecognizerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTypeTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer.AttachFrameNode(frameNode);
+    panRecognizer.SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    GestureEvent info;
+    panRecognizer.HandleReports(info, GestureCallbackType::END);
+    EXPECT_EQ(panRecognizer.GetRecognizerType(), GestureTypeName::PAN_GESTURE);
+}
+
+/**
+ * @tc.name: OnResetStatus001
+ * @tc.desc: Test OnResetStatus function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, OnResetStatus001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create PanRecognizer.
+      */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+  
+    /**
+      * @tc.steps: step2. call OnResetStatus function.
+      * @tc.expected: result equals.
+      */
+    panRecognizer.OnResetStatus();
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.isStartTriggered_, false);
+}
+
+/**
+ * @tc.name: HandlePanExtAccept001
+ * @tc.desc: Test HandlePanExtAccept function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, HandlePanExtAccept001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create PanRecognizer.
+      */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+      * @tc.steps: step2. call HandlePanExtAccept function.
+      * @tc.describe: set onActionExtUpdate_ to null.
+      * @tc.expected: result equals.
+      */
+    uint32_t tag = 0;
+    panRecognizer.onActionExtUpdate_ = nullptr;
+    panRecognizer.HandlePanExtAccept();
+
+    /**
+      * @tc.steps: step3. call HandlePanExtAccept function.
+      * @tc.describe: set onActionExtUpdate_ to custom callback.
+      * @tc.expected: result equals.
+      */
+    panRecognizer.onActionExtUpdate_ = std::make_unique<GestureEventFunc>([&tag](GestureEvent& info) {
+        tag = 1;
+    });
+    panRecognizer.HandlePanExtAccept();
+    EXPECT_NE(tag, 0);
 }
 } // namespace OHOS::Ace::NG

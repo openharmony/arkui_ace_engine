@@ -25,13 +25,16 @@
 #include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#include "form_mgr_errors.h"
 #include "form_callback_client.h"
 #include "form_host_client.h"
 #include "form_info.h"
@@ -132,11 +135,12 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "Add form success, formId: %{public}s, type: %{public}d, uiSyntax: %{public}d, isDynamic: %{public}d",
         std::to_string(formJsInfo.formId).c_str(), static_cast<int>(formJsInfo.type),
         static_cast<int>(formJsInfo.uiSyntax), isDynamic_);
@@ -162,19 +166,28 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 }
 
-void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
+void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    if (rsUIContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormManagerDelegate: rsUIContext is nullptr");
+        return;
+    }
+    rsUIContext_ = rsUIContext;
+}
+
+int32_t FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
     const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "Form OnSurfaceCreate formId: %{public}s, isDynamic: %{public}d",
         std::to_string(formInfo.formId).c_str(), formInfo.isDynamic);
     if (!rsSurfaceNode) {
         TAG_LOGE(AceLogTag::ACE_FORM, "rsSurfaceNode is null");
-        return;
+        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 
     if (!onFormSurfaceNodeCallback_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "onFormSurfaceNodeCallback is null");
-        return;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
 
     bool needHandleCachedClick =
@@ -203,6 +216,10 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
+    if (formRendererDispatcher_) {
+        formRendererDispatcher_->SetMultiInstanceEnabled(SystemProperties::GetMultiInstanceEnabled());
+    }
+    return ERR_OK;
 }
 
 void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
@@ -424,7 +441,7 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -447,6 +464,14 @@ void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
         return;
     }
     lockFormCallback_ = std::move(callback);
+}
+
+void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    updateFormDoneCallback_ = std::move(callback);
 }
 
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
@@ -535,30 +560,39 @@ void FormManagerDelegate::AddRenderDelegate()
 void FormManagerDelegate::RegisterRenderDelegateEvent()
 {
     CHECK_NULL_VOID(renderDelegate_);
-    auto&& surfaceCreateEventHandler = [weak = WeakClaim(this)](
-                                           const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-                                           const OHOS::AppExecFwk::FormJsInfo& formInfo, const AAFwk::Want& want) {
+    auto &&surfaceCreateEventHandler = [weak = WeakClaim(this)](
+                                           const std::shared_ptr<Rosen::RSSurfaceNode> &surfaceNode,
+                                           const OHOS::AppExecFwk::FormJsInfo &formInfo,
+                                           const AAFwk::Want &want) -> int32_t {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnSurfaceCreate(formInfo, surfaceNode, want);
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM,
+                "SurfaceCreateEventHandle - formManagerDelegate is null, formId:%{public}" PRId64, formInfo.formId);
+            return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
+        }
+        return formManagerDelegate->OnSurfaceCreate(formInfo, surfaceNode, want);
     };
     renderDelegate_->SetSurfaceCreateEventHandler(std::move(surfaceCreateEventHandler));
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        TAG_LOGI(AceLogTag::ACE_FORM, "ActionEventHandle - AddActionEventHandle");
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "ActionEventHandle - formManagerDelegate is null");
             return;
         }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
-    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
+    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& code, const std::string& msg) -> int32_t {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ErrorEventHandle - formManagerDelegate is null");
+            return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
+        }
         formManagerDelegate->OnFormError(code, msg);
+        return ERR_OK;
     };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 
@@ -593,11 +627,19 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
         auto formManagerDelegate = weak.Upgrade();
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "CheckManagerDelegateEventHandle - formManagerDelegate is null");
             checkFlag = false;
         }
     };
     renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
+
+    auto &&onUpdateFormDoneEventHandler = [weak = WeakClaim(this)](const int64_t formId) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGD(AceLogTag::ACE_FORM, "UpdateFormEventHandle - formId:%{public}" PRId64, formId);
+        formManagerDelegate->OnFormUpdateDone(formId);
+    };
+    renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -755,13 +797,27 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     if (FormManager::GetInstance().IsSizeChangeByRotate()) {
         sizeChangeReason = WindowSizeChangeReason::ROTATION;
     }
-    std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (FormManager::GetInstance().GetRSTransaction().lock()) {
-        transaction = FormManager::GetInstance().GetRSTransaction().lock();
-    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-        transaction = transactionController->GetRSTransaction();
+    bool isMultiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled();
+    std::shared_ptr<Rosen::RSTransaction> transaction = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionControllerHandler = nullptr;
+    Rosen::RSSyncTransactionController* transactionController = nullptr;
+    if (isMultiInstanceEnabled) {
+        if (rsUIContext_ == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "NotifySurfaceChange: rsUIContext_ is nullptr");
+            return;
+        }
+        transactionControllerHandler = rsUIContext_->GetSyncTransactionHandler();
+    } else {
+        transactionController = Rosen::RSSyncTransactionController::GetInstance();
     }
 
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (transactionController != nullptr) {
+        transaction = transactionController->GetRSTransaction();
+    } else if (transactionControllerHandler != nullptr) {
+        transaction = transactionControllerHandler->GetRSTransaction();
+    }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
         static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
 }
@@ -814,7 +870,7 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
@@ -827,7 +883,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     std::string errorMsg;
     int64_t parsedRequestCode = static_cast<int64_t>(StringUtils::StringToLongInt(code.c_str()));
     OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
-    TAG_LOGI(AceLogTag::ACE_FORM,
+    TAG_LOGW(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
@@ -845,6 +901,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
                 onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
             }
             break;
+    }
+}
+
+void FormManagerDelegate::OnFormUpdateDone(const int64_t formId)
+{
+    if (updateFormDoneCallback_) {
+        updateFormDoneCallback_(formId);
     }
 }
 
@@ -896,7 +959,7 @@ void FormManagerDelegate::ReAddForm()
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
-        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
+        TAG_LOGW(AceLogTag::ACE_FORM, "Re-add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
@@ -1183,7 +1246,7 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
 
 void FormManagerDelegate::ProcessLockForm(bool lock)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}" PRId64, runningCardId_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessLockForm, formId is %{public}" PRId64, runningCardId_);
     HandleLockFormCallback(lock);
 }
 #endif

@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "bridge/declarative_frontend/jsview/js_accessibility.h"
+
+#include "bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -364,8 +366,29 @@ void JSViewAbstract::JsOnAccessibilityActionIntercept(const JSCallbackInfo& info
         node = frameNode](AccessibilityInterfaceAction action) -> AccessibilityActionInterceptResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, AccessibilityActionInterceptResult::ACTION_CONTINUE);
         ACE_SCORING_EVENT("onAccessibilityActionIntercept");
+        PipelineContext::SetCallBackNode(node);
         return func->Execute(action);
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityActionIntercept(std::move(onAccessibilityActionIntercept));
+}
+
+void JSViewAbstract::JsOnAccessibilityHoverTransparent(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined() || !args[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnAccessibilityHoverTransparent(nullptr);
+        return;
+    }
+    auto jsOnHoverTransparentFunc =
+        AceType::MakeRefPtr<JsAccessibilityHoverTransparentFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onHoverTransparentFunc = [execCtx = args.GetExecutionContext(),
+        func = jsOnHoverTransparentFunc, node = frameNode](
+        TouchEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHoverTransparent");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnAccessibilityHoverTransparent(std::move(onHoverTransparentFunc));
 }
 }

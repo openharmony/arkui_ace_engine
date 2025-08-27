@@ -46,6 +46,8 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
     CHECK_NULL_VOID(paintProperty);
     auto geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
 
     // TODO use theme.
     constexpr float FADE_MAX_DISTANCE = 2000.0f;
@@ -55,7 +57,7 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
     constexpr float FADE_SCALE_RATE = 0.2f;
 
     bool isVertical = (axis_ == Axis::VERTICAL);
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = renderContext->GetPaintRectWithoutTransform();
     float width = frameSize.Width();
     float height = frameSize.Height();
     float centerX = 0.0;
@@ -96,6 +98,9 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
             radius = sqrt(pow(centerX - width, 2) + pow(centerY, 2));
         }
     }
+
+    auto clipRect = RSRect(0, 0, width, height);
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
 
     RSBrush brush;
     brush.SetColor(ToRSColor(paintProperty->GetFadeColor().value_or(Color::GRAY)));

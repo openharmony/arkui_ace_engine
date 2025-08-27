@@ -107,6 +107,16 @@ public:
         return GetHost();
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
@@ -161,11 +171,18 @@ public:
         copyOption_ = value;
     }
 
+    CopyOptions GetCopyOption()
+    {
+        return copyOption_;
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
 
     std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
+
+    std::string GetSrcTypeToString(SrcType srcType);
 
     void SetSyncLoad(bool value)
     {
@@ -188,7 +205,6 @@ public:
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpLayoutInfo();
     void DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
     inline void DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
@@ -210,6 +226,7 @@ public:
     inline void DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpOtherInfo();
+    inline void DumpMenmoryNameId();
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -224,6 +241,7 @@ public:
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
     void EnableAnalyzer(bool value);
+    bool IsEnableAnalyzer() const;
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
@@ -385,6 +403,12 @@ public:
 
     void DrawDrawable(RSCanvas& canvas);
 
+    void OnConfigurationUpdate();
+    void UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo);
+    void UpdateImageFill(const Color& color);
+    void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
+    void OnColorModeChange(uint32_t colorMode) override;
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -412,6 +436,11 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
 
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
     void OnModifyDone() override;
     void OnPixelMapDrawableModifyDone();
     ImagePaintConfig CreatePaintConfig();
@@ -433,8 +462,11 @@ private:
     bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnCompleteInDataReady();
-    void OnImageLoadFail(const std::string& errorMsg);
+    void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
+    bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
+    std::string HandleSrcForMemoryName(std::string url);
+    std::string MaskUrl(std::string url);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
@@ -449,6 +481,7 @@ private:
     void InitCopy();
     void HandleCopy();
     void OpenSelectOverlay();
+    void HandleMoveDone(bool isFirst);
     void CloseSelectOverlay();
 
     void TriggerFirstVisibleAreaChange();
@@ -471,8 +504,10 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
-    void OnConfigurationUpdate();
-    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
+    ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
+    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state);
+    void ClearReloadFlagsAfterLoad();
+    void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -507,7 +542,8 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
-    void OnKeyEvent();
+    void OnKeyEvent(const KeyEvent& event);
+    void InitFromThemeIfNeed();
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -547,11 +583,13 @@ private:
     bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSceneBoardWindow_ = false;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
+    bool isFullyInitializedFromTheme_ = false;
     Color selectedColor_;
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
@@ -588,6 +626,8 @@ private:
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
+    bool hasSetPixelMapMemoryName_ = false;
+    bool previousVisibility_ = false;
 };
 
 } // namespace OHOS::Ace::NG

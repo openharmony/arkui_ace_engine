@@ -278,7 +278,8 @@ bool Dimension::NormalizeToPx(
 {
     auto func = calcDimensionFuncMap_.find(unit_);
     if (func != calcDimensionFuncMap_.end()) {
-        CalcDimensionParam param = { value_, vpScale, fpScale, lpxScale, parentLength };
+        CalcDimensionParam param = { static_cast<float>(value_), static_cast<float>(vpScale),
+            static_cast<float>(fpScale), static_cast<float>(lpxScale), static_cast<float>(parentLength) };
         return func->second(param, result);
     }
     return false;

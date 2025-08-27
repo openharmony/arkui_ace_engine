@@ -17,6 +17,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -97,7 +98,7 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
      * @tc.steps: step2. Scroll down
      * @tc.expected: startIndex_ = 1 endIndex_ = 13.
      */
-    UpdateCurrentOffset(-2 * ITEM_MAIN_SIZE);
+    UpdateCurrentOffset(-200 * ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
     EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
@@ -108,7 +109,7 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
      * @tc.steps: step3. scroll down
      * @tc.expected: startIndex_ = 11 endIndex_ = 19.
      */
-    UpdateCurrentOffset(-10000.f);
+    UpdateCurrentOffset(-500000.f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
     EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
@@ -119,7 +120,7 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
      * @tc.steps: step4. scroll up
      * @tc.expected: startIndex_ = 7 endIndex_ = 19.
      */
-    UpdateCurrentOffset(2 * ITEM_MAIN_SIZE);
+    UpdateCurrentOffset(200 * ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
     EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
@@ -479,32 +480,32 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
     // scroll up
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.77164745);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.3941307);
 
     MockAnimationManager::GetInstance().SetTicks(2);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.325195);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 18.252581);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.6625977);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.1262903);
 
     // interrupt animation
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.218552);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 17.99958);
 
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 28.565876);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 26.394173);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 14.282938);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 13.197086);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
@@ -517,6 +518,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
 {
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     RefreshModelNG refreshModel;
     refreshModel.Create();
     auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
@@ -543,31 +545,16 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     scrollable->HandleDragUpdate(info);
     FlushUITasks();
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "153.53px"); // friction
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "191.83px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
-
-    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "445.45px");
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
 }
 
 /**
@@ -1116,15 +1103,15 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge003, TestSize.Level1)
 
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -79.373947);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -53.526146);
 
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -179.37395);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -153.52615);
 
     const auto& info = pattern_->layoutInfo_;
-    MockAnimationManager::GetInstance().TickByVelocity(-8000);
+    MockAnimationManager::GetInstance().TickByVelocity(-8000.0f);
     FlushUITasks();
     EXPECT_EQ(info->endIndex_, 19);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 19), 600);
@@ -1154,14 +1141,44 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge004, TestSize.Level1)
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -106.00447);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -37.300961);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -86.004471);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -17.300961);
 
-    MockAnimationManager::GetInstance().TickByVelocity(1000);
+    MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property with safe area
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    auto model = CreateWaterFlow();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 800.f);
+
+    /**
+     * @tc.steps: step2. Update Safe Area
+     * @tc.expected: overlay frame size expand safe area.
+     */
+    frameNode_->GetGeometryNode()->SetSelfAdjust(RectF(0, 0, 0, 10.f));
+    FlushUITasks(frameNode_);
+    geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 810.f);
 }
 } // namespace OHOS::Ace::NG

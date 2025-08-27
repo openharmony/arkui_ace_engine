@@ -46,7 +46,7 @@ struct TransitionUnitInfo {
 };
 
 class ACE_FORCE_EXPORT NavigationGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
+    DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode);
 public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
@@ -68,6 +68,23 @@ public:
         return false;
     }
 
+    void SetPrimaryContentNode(const RefPtr<UINode>& content)
+    {
+        primaryContentNode_ = content;
+    }
+    const RefPtr<UINode>& GetPrimaryContentNode() const
+    {
+        return primaryContentNode_;
+    }
+    void SetForceSplitPlaceHolderNode(const RefPtr<UINode>& node)
+    {
+        forceSplitPlaceHolderNode_ = node;
+    }
+    const RefPtr<UINode>& GetForceSplitPlaceHolderNode() const
+    {
+        return forceSplitPlaceHolderNode_;
+    }
+
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
         navBarNode_ = navBarNode;
@@ -76,6 +93,44 @@ public:
     const RefPtr<UINode>& GetNavBarNode() const
     {
         return navBarNode_;
+    }
+    const RefPtr<UINode>& GetHomeDestinationNode() const
+    {
+        return customHomeDestination_;
+    }
+    const RefPtr<UINode>& GetNavBarOrHomeDestinationNode() const;
+    bool IsNavBarOrHomeDestination(const RefPtr<UINode>& node) const;
+
+    const std::optional<bool> GetUseHomeDestination() const
+    {
+        return useHomeDestination_;
+    }
+    void SetUseHomeDestinatoin(bool use)
+    {
+        useHomeDestination_ = use;
+    }
+
+    void CreateHomeDestinationIfNeeded();
+
+    void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
+
+    void SetPlaceholderContentNode(const RefPtr<NG::UINode>& placeholderContentNode)
+    {
+        placeholderContentNode_ = placeholderContentNode;
+    }
+
+    RefPtr<UINode> GetPlaceholderContentNode() const
+    {
+        return placeholderContentNode_;
+    }
+
+    void ResetSplitPlaceholder()
+    {
+        if (placeholderContentNode_) {
+            RemoveChild(placeholderContentNode_);
+        }
+        placeholderContentNode_ = nullptr;
+        splitPlaceholder_ = nullptr;
     }
 
     void SetContentNode(const RefPtr<UINode>& contentNode)
@@ -168,11 +223,17 @@ public:
     void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     void ResetTransitionAnimationNodeState(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     RefPtr<NavigationManager> FetchNavigationManager();
-    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBarOrHomeDestination = false);
+    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
+    void CreateSoftAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    void CreateSoftAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void ResetSystemAnimationProperties(const RefPtr<FrameNode>& navDestinationNode);
 
@@ -181,8 +242,9 @@ public:
     std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<FrameNode>& curNode, bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(
         const RefPtr<FrameNode>& node, bool isTransitionOut);
-    void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
-    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
+    void TransitionWithReplace(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBarOrHomeDestination);
+    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBarOrHomeDestination, bool isAnimated = true);
     void NotifyPageHide();
     void UpdateLastStandardIndex();
 
@@ -203,11 +265,12 @@ public:
     void StartDialogtransition(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         bool isTransitionIn);
 
-    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList);
+    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
+        const std::vector<WeakPtr<FrameNode>>& curNavList);
     void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
         bool isNavbarNeedAnimation);
     void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
-        bool isNavbarNeedAnimation);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation);
     void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
 
     std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
@@ -333,15 +396,33 @@ private:
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
     RefPtr<FrameNode> TransitionAnimationIsValid(
-        const RefPtr<FrameNode>& node, bool isNavBar, bool isUseNavDestCustomTransition);
+        const RefPtr<FrameNode>& node, bool isNavBarOrHomeDestination, bool isUseNavDestCustomTransition);
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
+    bool CheckEnableCustomNodeDel() const {
+        return false;
+    }
 
+    void StartSoftOpacityAnimationPush(const RefPtr<FrameNode>& curNode);
+    void StartSoftOpacityAnimationPop(const RefPtr<FrameNode>& preNode);
+    void SoftTransitionAnimationPush(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
+    void SoftTransitionAnimationPop(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
+    bool HandleBackForHomeDestination();
+
+    std::optional<bool> useHomeDestination_;
+    RefPtr<UINode> customHomeNode_;
+    RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
     RefPtr<UINode> dragBarNode_;
+    RefPtr<UINode> splitPlaceholder_;
+    RefPtr<UINode> placeholderContentNode_;
     WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
@@ -358,6 +439,12 @@ private:
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
     int32_t preLastStandardIndex_ = -1;
+
+    //-------for force split------- begin------
+    std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    RefPtr<UINode> primaryContentNode_;
+    RefPtr<UINode> forceSplitPlaceHolderNode_;
+    //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

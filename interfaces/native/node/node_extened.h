@@ -101,6 +101,13 @@ struct ArkUI_OptionalCharPtr {
     const char* value;
 };
 
+struct ArkUI_PositionEdges {
+    ArkUI_OptionalFloat top;
+    ArkUI_OptionalFloat left;
+    ArkUI_OptionalFloat bottom;
+    ArkUI_OptionalFloat right;
+};
+
 struct ArkUI_SwiperIndicator {
     ArkUI_SwiperIndicatorType type;
     ArkUI_OptionalFloat dimLeft;

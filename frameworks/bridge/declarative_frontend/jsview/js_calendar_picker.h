@@ -36,6 +36,8 @@ public:
 
 private:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
+    static void ParseTextStyleWithResObj(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle,
+        const std::string& key);
     static void ParseSelectedDateObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate = true);
     static void ParseCalendarPickerBorderColor(const JSRef<JSVal>& args);
@@ -44,6 +46,9 @@ private:
         const std::optional<CalcDimension>& right);
     static bool ParseJsDimensionVpWithCheck(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void ParseDisabledDateRange(const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData);
+    static void ParseHintRadius(JSRef<JSObject>& obj, NG::CalendarSettingData& settingData, CalcDimension& dayRadius);
+    static void ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle,
+        const std::string& key);
 };
 
 class JSCalendarPickerDialog : JSAlertDialog {

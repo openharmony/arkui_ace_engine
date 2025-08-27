@@ -31,6 +31,10 @@
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
+constexpr uint32_t MIN_LINES = 1;
+constexpr uint32_t MAX_LINES_MODE_CLIP = 0;
+constexpr uint32_t MAX_LINES_MODE_SCROLL = 1;
+constexpr uint32_t TWO_ARGS = 2;
 }
 
 void JSTextArea::JSBind(BindingTarget globalObj)
@@ -65,6 +69,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextArea::SetMaxLines);
+    JSClass<JSTextArea>::StaticMethod("minLines", &JSTextArea::SetMinLines);
     JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextArea>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
@@ -119,6 +124,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     JSClass<JSTextArea>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
     JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
+    JSClass<JSTextArea>::StaticMethod("strokeWidth", &JSTextField::SetStrokeWidth);
+    JSClass<JSTextArea>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
+    JSClass<JSTextArea>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -138,6 +146,29 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetNormalMaxViewLines(normalMaxViewLines);
     TextFieldModel::GetInstance()->SetMaxViewLines(inlineMaxViewLines);
+
+    auto overflow = MAX_LINES_MODE_CLIP;
+    if (info.Length() == TWO_ARGS && info[1]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto overflowMode = paramObject->GetProperty("overflowMode");
+        auto modeValue = overflowMode->IsNumber() ? overflowMode->ToNumber<int32_t>() : -1;
+        if (modeValue >= 0 && (modeValue == MAX_LINES_MODE_CLIP || modeValue == MAX_LINES_MODE_SCROLL)) {
+            overflow = static_cast<uint32_t>(modeValue);
+        }
+    }
+    TextFieldModel::GetInstance()->SetOverflowMode(OVERFLOWS_MODE[overflow]);
+}
+
+void JSTextArea::SetMinLines(const JSCallbackInfo& info)
+{
+    auto minLines = MIN_LINES;
+    if (info.Length() == 1) {
+        auto tmpInfo = info[0];
+        if (tmpInfo->IsNumber() && tmpInfo->ToNumber<int32_t>() > 0) {
+            minLines = tmpInfo->ToNumber<uint32_t>();
+        }
+    }
+    TextFieldModel::GetInstance()->SetMinLines(minLines);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

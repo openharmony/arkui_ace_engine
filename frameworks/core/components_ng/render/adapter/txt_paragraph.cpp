@@ -18,6 +18,7 @@
 #include "base/log/ace_performance_monitor.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -43,6 +44,20 @@ RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
     return AceType::MakeRefPtr<TxtParagraph>(rsParagraph);
 }
 
+void TxtParagraph::SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    auto rsNode = context->GetRSNode();
+    rsSymbolAnimation_ = RSSymbolAnimation();
+    rsSymbolAnimation_.SetNode(rsNode);
+
+    std::function<bool(const std::shared_ptr<RSSymbolAnimationConfig>& symbolAnimationConfig)> scaleCallback =
+        std::bind(&RSSymbolAnimation::SetSymbolAnimation, rsSymbolAnimation_, std::placeholders::_1);
+
+    SetAnimation(scaleCallback);
+}
+
 bool TxtParagraph::IsValid()
 {
     return GetParagraph() != nullptr;
@@ -62,6 +77,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 {
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle.align);
+    style.verticalAlignment = Constants::ConvertTxtTextVerticalAlign(paraStyle.verticalAlign);
     style.maxLines = paraStyle.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle.maxLines;
     style.fontSize = paraStyle.fontSize; // Rosen style.fontSize
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -69,13 +85,21 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
     style.lineStyleHalfLeading = paraStyle.halfLeading;
+    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
+    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.locale = paraStyle.fontLocale;
     if (paraStyle.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
-    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
+    style.enableAutoSpace = paraStyle.enableAutoSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
+    if (paraStyle.isOnlyBetweenLines) {
+        style.textHeightBehavior =
+            paraStyle.isFirstParagraphLineSpacing
+                ? static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_ALL)
+                : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
+    }
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -85,8 +109,8 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_);
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle id:%d", style.GetTextStyleUid());
     if (!builder_) {
         CreateBuilder();
     }
@@ -107,11 +131,11 @@ void TxtParagraph::PopStyle()
 void TxtParagraph::AddText(const std::u16string& text)
 {
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
-    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     builder_->AppendText(text);
 }
 
@@ -179,14 +203,14 @@ void TxtParagraph::Layout(float width)
         id = Container::CurrentId();
     }
     OTHER_DURATION(id);
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout, width:%f", width);
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
 }
 
 void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles)
 {
-    CHECK_NULL_VOID(paragraph_);
+    CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paraStyle_ = paraStyle;
     std::stringstream nodeID;
     nodeID << "[";
@@ -200,12 +224,42 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
         txtStyles.emplace_back(txtStyle);
     }
     nodeID << "]";
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::ReLayout node Size:%d nodeID:%s paraStyle id:%d",
-        static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid);
+    if (SystemProperties::GetTextTraceEnabled() && !txtStyles.empty()) {
+        ACE_TEXT_SCOPED_TRACE(
+            "TxtParagraph::ReLayout node size:%d id:%s paraStyle id:%d paragraphStyleBitmap:%s width:%f",
+            static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid,
+            textStyles.front().GetReLayoutParagraphStyleBitmap().to_string().c_str(), width);
+    }
     Rosen::TypographyStyle style;
     ConvertTypographyStyle(style, paraStyle_);
-    style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    auto bitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    auto size = std::min(bitmap.size(), style.relayoutChangeBitmap.size());
+    for (size_t i = 0; i < size; ++i) {
+        style.relayoutChangeBitmap.set(i, bitmap.test(i));
+    }
     paragraph_->Relayout(width, style, txtStyles);
+}
+
+void TxtParagraph::ReLayoutForeground(const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
+    Rosen::TextStyle txtStyle;
+    Constants::ConvertForegroundPaint(textStyle, paragraph_->GetMaxWidth(), paragraph_->GetHeight(), txtStyle);
+    std::vector<Rosen::TextStyle> txtStyles;
+    txtStyles.emplace_back(txtStyle);
+    Rosen::TypographyStyle style;
+    ConvertTypographyStyle(style, paraStyle_);
+    bool isTextStyleChange = std::any_of(txtStyles.begin(), txtStyles.end(), [](const Rosen::TextStyle& style) {
+        return style.relayoutChangeBitmap.any();
+    });
+    if (SystemProperties::GetTextTraceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "ReLayoutForeground id:%{public}d ReLayoutForeground: %{public}s parid:%{public}d "
+            "isTextStyleChange:%{public}d",
+            textStyle.GetTextStyleUid(), txtStyles.front().relayoutChangeBitmap.to_string().c_str(),
+            paraStyle_.textStyleUid, isTextStyleChange);
+    }
+    paragraph_->Relayout(paragraph_->GetMaxWidth(), style, txtStyles);
 }
 
 float TxtParagraph::GetHeight()
@@ -525,6 +579,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             boxes = getTextRects(extent, end);
         }
     }
+    
     if (boxes.empty()) {
         return false;
     }
@@ -968,10 +1023,19 @@ RSParagraph* TxtParagraph::GetParagraph()
     return externalParagraph_;
 }
 
+std::unique_ptr<RSParagraph> TxtParagraph::GetParagraphUniquePtr()
+{
+    return std::move(paragraph_);
+}
+
 void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
 {
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TxtParagraph::UpdateColor[id:%d][from:%d][to:%d][color:%s]", paraStyle_.textStyleUid,
+            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ColorToString().c_str());
+    }
     auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));
@@ -998,5 +1062,19 @@ bool TxtParagraph::IsIndexAtLineEnd(const Offset& offset, int32_t index)
 {
     LineMetrics lineMetrics;
     return GetLineMetricsByCoordinate(offset, lineMetrics) && (index == lineMetrics.endIndex);
+}
+
+bool TxtParagraph::DidExceedMaxLinesInner()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
+    return !paragrah->CanPaintAllText();
+}
+
+std::string TxtParagraph::GetDumpInfo()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, "");
+    return paragrah->GetDumpInfo();
 }
 } // namespace OHOS::Ace::NG

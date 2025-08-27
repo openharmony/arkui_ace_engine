@@ -20,17 +20,28 @@
 
 extern const char _binary_multinavigation_abc_start[];
 extern const char _binary_multinavigation_abc_end[];
+extern const char _binary_mock_multinavigation_abc_start[];
+extern const char _binary_mock_multinavigation_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
 void NAPI_arkui_advanced_MultiNavigation_GetABCCode(const char **buf, int *buflen)
 {
+#ifdef PREVIEW
+    if (buf != nullptr) {
+        *buf = _binary_mock_multinavigation_abc_start;
+    }
+    if (buflen != nullptr) {
+        *buflen = _binary_mock_multinavigation_abc_end - _binary_mock_multinavigation_abc_start;
+    }
+#else
     if (buf != nullptr) {
         *buf = _binary_multinavigation_abc_start;
     }
     if (buflen != nullptr) {
         *buflen = _binary_multinavigation_abc_end - _binary_multinavigation_abc_start;
     }
+#endif
 }
 
 /*

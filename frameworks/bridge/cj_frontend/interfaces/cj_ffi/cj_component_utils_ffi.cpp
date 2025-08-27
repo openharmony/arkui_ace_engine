@@ -53,11 +53,10 @@ CComponentInfo FFIOHOSAceFrameworkComponentUtilsGetById(const char *id)
     const size_t TRANSFORM_SIZE = 16;
     CArrFloat32 transform = {NULL, 0};
     transform.head = static_cast<float *>(malloc(sizeof(float) * TRANSFORM_SIZE));
-    if (transform.head == nullptr) {
-        LOGE("component info transform malloc failed.");
-    }
-    for (size_t i = 0; i < TRANSFORM_SIZE; ++i) {
-        transform.head[i] = rectangle.matrix4[i];
+    if (transform.head != NULL) {
+        for (size_t i = 0; i < TRANSFORM_SIZE; ++i) {
+            transform.head[i] = rectangle.matrix4[i];
+        }
     }
     transform.size = TRANSFORM_SIZE;
     info.transform = transform;

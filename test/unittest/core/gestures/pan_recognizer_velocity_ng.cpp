@@ -89,7 +89,7 @@ HWTEST_F(PanRecognizerVelocityTestNg, PanRecognizerHandleTouchUpVelocityTest001,
     panRecognizer->currentFingers_ = 1;
     panRecognizer->fingers_ = 1;
     panRecognizer->HandleTouchUpEvent(triggerTouchEvent);
-    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 6);
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 5);
 
     /**
      * @tc.steps: step5. test panVelocity_.Reset.
@@ -98,6 +98,18 @@ HWTEST_F(PanRecognizerVelocityTestNg, PanRecognizerHandleTouchUpVelocityTest001,
     panRecognizer->currentFingers_ = 2;
     panRecognizer->fingers_ = 1;
     panRecognizer->HandleTouchUpEvent(triggerTouchEvent);
-    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 1);
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 0);
+
+    
+    /**
+     * @tc.steps: step5. test panVelocity_.Reset.
+     * @tc.expected: if not last finger up, reset finger's velocity.
+     */
+    panRecognizer->refereeState_ = RefereeState::FAIL;
+    TouchEvent moveEvent;
+    moveEvent.type = TouchType::MOVE;
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 0);
+    panRecognizer->HandleTouchMoveEvent(moveEvent);
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 0);
 }
 } // namespace OHOS::Ace::NG

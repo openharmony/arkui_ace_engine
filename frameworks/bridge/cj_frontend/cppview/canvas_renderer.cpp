@@ -308,6 +308,9 @@ Metrics NativeCanvasRenderer::MeasureText(const std::string& text)
 
     double density = Positive(GetDensity()) ? GetDensity() : 1;
     TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    if (NearZero(density)) {
+        density = 1.0;
+    }
     double width = textMetrics.width / density;
     double height = textMetrics.height / density;
     double actualBoundingBoxLeft = textMetrics.actualBoundingBoxLeft / density;
@@ -424,19 +427,6 @@ void NativeCanvasRenderer::Ellipse(const EllipseParam& param)
 void NativeCanvasRenderer::SaveLayer()
 {
     renderingContext2DModel_->SaveLayer();
-}
-
-void NativeCanvasRenderer::SetFilter(const std::string& value)
-{
-    renderingContext2DModel_->SetFilterParam(value);
-}
-
-double NativeCanvasRenderer::GetHeight()
-{
-    double width = 0.0;
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    canvasRenderingContext2DModel->GetWidth(width);
-    return width;
 }
 
 void NativeCanvasRenderer::NormalRect(const Rect& rect)
@@ -591,7 +581,7 @@ int64_t NativeCanvasRenderer::CreateConicGradient(const double startAngle, const
     double density = GetDensity();
     Gradient gradient = Gradient();
     gradient.SetType(GradientType::CONIC);
-    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * M_PI))));
+    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * ACE_PI))));
     gradient.GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient.GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
 
@@ -690,6 +680,11 @@ int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width,
         LOGE("NativeCanvasRenderer GetPixelMap failed");
         return 0;
     }
+}
+
+void NativeCanvasRenderer::SetFilter(const std::string& filterStr)
+{
+    renderingContext2DModel_->SetFilterParam(filterStr);
 }
 
 void NativeCanvasRenderer::SetDirection(const std::string& directionStr)
@@ -792,6 +787,17 @@ double NativeCanvasRenderer::GetWidth()
     double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
     width /= density;
     return width;
+}
+
+double NativeCanvasRenderer::GetHeight()
+{
+    double height = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
+    canvasRenderingContext2DModel->GetHeight(height);
+    double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
+    height /= density;
+    return height;
 }
 
 void NativeCanvasRenderer::TransferFromImageBitmap(const sptr<CJRenderImage> cjImage)

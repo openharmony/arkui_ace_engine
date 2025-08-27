@@ -39,7 +39,8 @@ public:
     ~StageManager() override = default;
 
     // PushUrl and ReplaceUrl both use PushPage function
-    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
+        const std::function<bool()>&& pushIntentPageCallback = nullptr);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     virtual bool PopPage(const RefPtr<FrameNode>& inPageNode, bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
@@ -49,6 +50,7 @@ public:
     virtual void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
 
     void PageChangeCloseKeyboard();
+    void UpdateColorModeForPage(const RefPtr<FrameNode>& page);
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
@@ -73,6 +75,34 @@ public:
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
+    }
+
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation = false);
+
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
+    std::string GetHomePageConfig() const
+    {
+        return homePageConfig_;
+    }
+
+    bool GetIgnoreOrientation() const
+    {
+        return ignoreOrientation_;
+    }
+
+    bool GetDetectPrimaryPageEnable() const
+    {
+        return isDetectPrimaryPage_;
+    }
+
+    void OnForceSplitConfigUpdate()
+    {
+        CHECK_NULL_VOID(stagePattern_);
+        stagePattern_->OnForceSplitConfigUpdate();
     }
 
 #if defined(ENABLE_SPLIT_MODE)
@@ -151,6 +181,12 @@ protected:
     std::function<std::string(const std::string& url)> getPagePathCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
+
+private:
+    bool isForceSplit_ = false;
+    std::string homePageConfig_;
+    bool isDetectPrimaryPage_ = false;
+    bool ignoreOrientation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

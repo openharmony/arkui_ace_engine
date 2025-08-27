@@ -50,7 +50,7 @@ HWTEST_F(AnimateImplTest, AnimateImplTest001, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = InitCurve(ArkUI_AnimationCurve::ARKUI_CURVE_EASE);
     ASSERT_EQ(curve, nullptr);
-
+    
     DisposeCurve(curve);
 }
 

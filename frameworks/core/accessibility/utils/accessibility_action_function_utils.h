@@ -51,6 +51,17 @@ public:
         return true;
     }
 
+    static bool CheckCurrentHasFunc(ActionSecurityClickAction& ptr, const RefPtr<FrameNode>& node)
+    {
+        ptr = nullptr;
+        CHECK_NULL_RETURN(node, false);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        ptr = accessibilityProperty->GetSecurityClickActionFunc();
+        CHECK_NULL_RETURN(ptr, false);
+        return true;
+    }
+
     template <typename T>
     static bool CheckAncestorHasFunc(T& ptr, const RefPtr<FrameNode>& node, RefPtr<FrameNode>& parentNode)
     {
@@ -71,14 +82,16 @@ public:
         auto result = AccessibilityActionResult::ACTION_OK;
         CHECK_NULL_RETURN(node, result);
         RefPtr<FrameNode> parentNode = nullptr;
+        RefPtr<FrameNode> childNode = node;
         ActionNotifyChildAction func = nullptr;
-        if (CheckAncestorHasFunc(func, node, parentNode)) {
+        while (CheckAncestorHasFunc(func, childNode, parentNode)) {
             if (func) {
-                result = func(type);
+                result = func(node, type);
             }
-        }
-        if (result == AccessibilityActionResult::ACTION_RISE) {
-            result = HandleNotifyChildAction(parentNode, type);
+            if (result != AccessibilityActionResult::ACTION_RISE) {
+                break;
+            }
+            childNode = parentNode;
         }
         return result;
     }
@@ -104,6 +117,18 @@ public:
         } else {
             return AccessibilityActionInterceptResult::ACTION_CONTINUE;
         }
+    }
+
+    static bool HandleClickBySecComponent(const RefPtr<FrameNode>& node, const SecCompEnhanceEvent& secEvent)
+    {
+        CHECK_NULL_RETURN(node, false);
+        ActionSecurityClickAction func = nullptr;
+        if (!CheckCurrentHasFunc(func, node)) {
+            return false;
+        }
+        CHECK_NULL_RETURN(func, false);
+        func(secEvent);
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG

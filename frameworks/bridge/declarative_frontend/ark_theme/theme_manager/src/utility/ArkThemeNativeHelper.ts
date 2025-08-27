@@ -16,7 +16,9 @@
 class ArkThemeNativeHelper {
     static sendThemeToNative(theme: ThemeInternal, elmtId: number) {
         // @ts-ignore
-        WithTheme.sendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
+        const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.darkColors);
+        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId);
     }
 
     static createInternal(themeScopeId: number, themeId: number, theme: CustomTheme, colorMode: ThemeColorMode,
@@ -27,8 +29,9 @@ class ArkThemeNativeHelper {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
 
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId,
-            ArkThemeNativeHelper.convertColorsToArray(theme?.colors), colorMode, onThemeScopeDestroy);
+        const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.darkColors);
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
 
         // reset local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
@@ -38,11 +41,12 @@ class ArkThemeNativeHelper {
 
     static setDefaultTheme(theme: CustomTheme) {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.darkColors);
 
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
-        getUINativeModule().theme.setDefaultTheme(colorArray, true);
+        getUINativeModule().theme.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
 

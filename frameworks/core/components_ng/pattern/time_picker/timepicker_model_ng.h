@@ -73,7 +73,7 @@ public:
     static PickerTime getTimepickerSelected(FrameNode* frameNode);
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
-    static int32_t getTimepickerEnableCascade(FrameNode* frameNode);
+    static int32_t GetTimepickerEnableCascade(FrameNode* frameNode);
     static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
@@ -85,6 +85,11 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
 };
 
 class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {

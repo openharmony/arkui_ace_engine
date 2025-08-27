@@ -1,0 +1,19 @@
+/** @memo */
+export function kla(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: string, 
+/** @memo */
+por: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, n: string) => string, los: (n: string) => string) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("13___key_id_DIRNAME/module.test.ts" as __memo_id_type), 3);
+    const __memo_parameter_arg = __memo_scope.param(0, arg);
+    const __memo_parameter_por = __memo_scope.param(1, por);
+    const __memo_parameter_los = __memo_scope.param(2, los);
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    log(__memo_parameter_por.value(__memo_context, __memo_id + ("12___key_id_DIRNAME/module.test.ts" as __memo_id_type), "funny") + " " + __memo_parameter_arg.value);
+    log(__memo_parameter_los.value("happy") + " " + __memo_parameter_arg.value);
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@ohos/arkui",
+  "version": "1.4.1",
+  "description": "",
+  "main": "build/ts/src/index.js",
+  "types": "build/ts/src/index.d.ts",
+  "scripts": {
+    "clean": "rimraf build && rm -f arktsconfig-unmemoized-merged.json",
+    "build:arkui-components": "npm run unmemoize && fast-arktsc --input-files ./arktsconfig-unmemoized-merged.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name arkui-components && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+    "unmemoize": "ets-tsc -b ./tsconfig-unmemoize.json && cp -r ./src/component/arkts ./build/unmemoized/src/component"
+  }
+}

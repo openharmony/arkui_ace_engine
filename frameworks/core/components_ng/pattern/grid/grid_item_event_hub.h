@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 using SelectFunc = std::function<void(bool)>;
 
 class GridItemEventHub : public EventHub {
-    DECLARE_ACE_TYPE(GridItemEventHub, EventHub)
+    DECLARE_ACE_TYPE(GridItemEventHub, EventHub);
 
 public:
     GridItemEventHub() = default;

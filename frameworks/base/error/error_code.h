@@ -22,6 +22,8 @@ namespace OHOS::Ace {
 // Common error code
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
+// Permission verification failed, application which is not a system application uses system API.
+constexpr int32_t ERROR_CODE_VERIFICATION_FAILED = 202;
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
 constexpr int32_t ERROR_CODE_CAPI_INIT_ERROR = 500;     // C-API impl not initialized yet.
 constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
@@ -76,6 +78,15 @@ constexpr int32_t ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED  = 106201;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_BUFFER_SIZE_ERROR  = 106202;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD  = 106301;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE  = 106203;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD = 106204;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_FORCE_DARK_CONFIG_INVALID = 106205;
+
+// C-API RenderNode errors
+constexpr int32_t ERROR_CODE_NOT_CUSTOM_NODE = 106401;
+constexpr int32_t ERROR_CODE_CHILD_EXISTED = 106402;
+constexpr int32_t ERROR_CODE_RENDER_PARENT_EXISTED = 106403;
+constexpr int32_t ERROR_CODE_CHILD_RENDER_NOT_EXIST = 106404;
+constexpr int32_t ERROR_CODE_PARAM_OUT_OF_RANGE = 106405;
 
 // AI error for Canvas,XComponent
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
@@ -85,7 +96,7 @@ constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_STOPPED = 110003;
 // Drag event error code (190001 ~ 191000)
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001;  // GetData failed, data not found.
 constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;      // GetData failed, data error.
-constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_ONDROP = 190003; // Operation no allowed for current pharse.
+constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_ONDROP = 190003; // Operation not allowed for current phase.
 constexpr int32_t ERROR_CODE_DRAG_OPERATION_FAILED = 190004; // Operation failed.
 
 // custom dialog error code
@@ -100,6 +111,13 @@ constexpr int32_t ERROR_CODE_TOAST_NOT_FOUND = 103401;
 
 // XComponent error code
 constexpr int32_t ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501;
+
+// Video error Code
+constexpr int32_t ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED = 103601;
+constexpr int32_t ERROR_CODE_VIDEO_SOURCE_INVALID = 103602;
+
+// Canvas error code
+constexpr int32_t ERROR_CODE_CANVAS_PARAM_INVALID = 103701;
 
 // BindSheet error code
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ERROR = 120001;
@@ -117,6 +135,8 @@ constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 // ComponentSnapshot error code (160001 ~ 161000), 1610001 ~ 163000 reserved
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
+// observer node render state error code
+constexpr int32_t NODE_RENDER_STATE_REGISTER_ERR_CODE = 161001;
 
 // FromHtml error code
 constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;
@@ -125,4 +145,5 @@ constexpr int32_t ERROR_CODE_STYLED_STRING_CONVERT_ERROR = 170002;
 // Gesture error code (180001 ~ 181000)
 constexpr int32_t ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001;
 constexpr int32_t ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002;
+constexpr int32_t ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT = 180006;
 } // namespace OHOS::Ace

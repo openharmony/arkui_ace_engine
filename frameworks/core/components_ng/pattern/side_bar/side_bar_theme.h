@@ -36,7 +36,7 @@ public:
 
         RefPtr<SideBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SideBarTheme> theme = AceType::Claim(new SideBarTheme());
+            RefPtr<SideBarTheme> theme = AceType::MakeRefPtr<SideBarTheme>();
             InitTheme(theme, themeConstants);
             return theme;
         }

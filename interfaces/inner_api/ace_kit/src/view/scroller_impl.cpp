@@ -39,6 +39,9 @@ void ScrollerImpl::AddObserver(const Observer& observer, int32_t id)
     scrollerObserver.onScrollStartEvent = observer.onScrollStartEvent;
     scrollerObserver.onScrollStopEvent = observer.onScrollStopEvent;
     scrollerObserver.onDidScrollEvent = observer.onDidScrollEvent;
+    scrollerObserver.onScrollerAreaChangeEvent = observer.onScrollerAreaChangeEvent;
+    scrollerObserver.onWillScrollEventEx = observer.onWillScrollEventEx;
+    scrollerObserver.twoDimensionOnWillScrollEvent = observer.twoDimensionOnWillScrollEvent;
     jsScroller_->AddObserver(scrollerObserver, id);
 }
 
@@ -93,14 +96,14 @@ bool ScrollerImpl::IsAtStart()
     return scrollablePattern->IsAtTop();
 }
 
-double GetScrollableOffsetY(const RefPtr<NG::ScrollablePattern>& listPattern, const RefPtr<FrameNode>& node)
+double GetScrollableOffsetY(const RefPtr<NG::ScrollablePattern>& pattern, const RefPtr<FrameNode>& node)
 {
-    auto listNode = listPattern->GetHost();
-    CHECK_NULL_RETURN(listNode, 0.0f);
-    auto context = listNode->GetRenderContext();
+    auto scrollableNode = pattern->GetHost();
+    CHECK_NULL_RETURN(scrollableNode, 0.0f);
+    auto context = scrollableNode->GetRenderContext();
     CHECK_NULL_RETURN(context, 0.0f);
     auto offset = context->GetPaintRectWithTransform().GetOffset();
-    auto parent = listNode->GetAncestorNodeOfFrame(true);
+    auto parent = scrollableNode->GetAncestorNodeOfFrame(true);
     auto nodeImpl = AceType::DynamicCast<FrameNodeImpl>(node);
     while (parent && parent != nodeImpl->GetAceNode()) {
         auto renderContext = parent->GetRenderContext();
@@ -201,14 +204,59 @@ double GetContentEdge(const RefPtr<Framework::JSScroller>& jsScroller, const Ref
     return 0.0;
 }
 
-double ScrollerImpl::GetContentBottom(const RefPtr<FrameNode>& node)
+template<Edge edge>
+double GetScrollableEdge(const RefPtr<NG::ScrollablePattern>& pattern, const RefPtr<FrameNode>& node)
 {
-    return GetContentEdge<Edge::BOTTOM>(jsScroller_, node);
+    auto edgePosition = 0.0;
+    auto scrollableNode = pattern->GetHost();
+    CHECK_NULL_RETURN(scrollableNode, edgePosition);
+    auto geometryNode = scrollableNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, edgePosition);
+    const auto& rect = geometryNode->GetFrameRect();
+    if constexpr (edge != Edge::TOP) {
+        edgePosition = rect.Bottom() - rect.Top();
+    }
+    APP_LOGD("[HDS_TABS]  ScrollerImpl::GetScrollableEdge(): edge = %{public}f", edgePosition);
+    edgePosition += GetScrollableOffsetY(pattern, node);
+    return edgePosition;
+}
+
+template<Edge edge>
+double GetScrollableEdge(const RefPtr<Framework::JSScroller>& jsScroller, const RefPtr<FrameNode>& node)
+{
+    auto scrollablePattern = GetScrollablePattern(jsScroller);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0);
+    return GetScrollableEdge<edge>(scrollablePattern, node);
 }
 
 double ScrollerImpl::GetContentTop(const RefPtr<FrameNode>& node)
 {
+    auto scrollablePattern = GetScrollablePattern(jsScroller_);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0);
+    auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
+    auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
+
+    bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemStart()) ||
+        (!waterFlowPattern && !scrollPattern && !IsAtStart());
+    if (isNeedGetScrollableEdge) {
+        return GetScrollableEdge<Edge::TOP>(jsScroller_, node);
+    }
     return GetContentEdge<Edge::TOP>(jsScroller_, node);
+}
+
+double ScrollerImpl::GetContentBottom(const RefPtr<FrameNode>& node)
+{
+    auto scrollablePattern = GetScrollablePattern(jsScroller_);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0);
+    auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
+    auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
+
+    bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemEnd()) ||
+        (!waterFlowPattern && !scrollPattern && !IsAtEnd());
+    if (isNeedGetScrollableEdge) {
+        return GetScrollableEdge<Edge::BOTTOM>(jsScroller_, node);
+    }
+    return GetContentEdge<Edge::BOTTOM>(jsScroller_, node);
 }
 
 bool ScrollerImpl::AnimateTo(const Dimension& position, float duration,
@@ -228,4 +276,19 @@ bool ScrollerImpl::operator==(const Ace::RefPtr<Scroller>& other) const
     return jsScroller_ == impl->jsScroller_;
 }
 
+RefPtr<FrameNode> ScrollerImpl::GetBindingFrameNode()
+{
+    auto pattern = GetScrollablePattern(jsScroller_);
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto kitNode = host->GetKitNode();
+    if (kitNode) {
+        return kitNode;
+    }
+
+    kitNode = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(host));
+    host->SetKitNode(kitNode);
+    return kitNode;
+}
 } // namespace OHOS::Ace::Kit

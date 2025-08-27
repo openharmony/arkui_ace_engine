@@ -151,7 +151,7 @@ public:
 
     bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
-    bool CallRouterBackToPopPage() override;
+    bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) override;
 
     void SetSinglePageId(int32_t pageId);
 
@@ -803,16 +803,30 @@ public:
 
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
-    void FlushMessages() override;
+    void FlushMessages(std::function<void()> callback = nullptr) override;
 
     bool IsDensityChanged() const override
     {
         return isDensityUpdate_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
+
+    void SetVsyncListener(const std::function<void()>& vsync)
+    {
+        vsyncListener_ = vsync;
+    }
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
@@ -962,6 +976,7 @@ private:
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDensityUpdate_ = false;
+    bool isNeedReloadDensity_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     int32_t modalHeight_ = 0;
@@ -1011,6 +1026,7 @@ private:
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
+    std::function<void()> vsyncListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

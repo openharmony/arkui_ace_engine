@@ -859,6 +859,70 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWillShowAndOnWillHideTest006
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create parent node
+     */
+    int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model = CreateTabs(BarPosition::START, -1);
+    bool isShow = false;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        std::function<void()> showEvent = [&isShow]() { isShow = true; };
+        std::function<void()> hideEvent = [&isShow]() { isShow = false; };
+        tabContentModel.SetOnWillShow(std::move(showEvent));
+        tabContentModel.SetOnWillHide(std::move(hideEvent));
+        tabContentModel.Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step3. first display.
+     * @tc.expected: isShow = true
+     */
+    EXPECT_TRUE(isShow);
+
+    /**
+     * @tc.steps: step4. callback.
+     * @tc.expected: isShow = false
+     */
+    auto callback = parentNode->GetPattern<PagePattern>()->onHiddenChange_;
+    EXPECT_FALSE(callback.empty());
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(false);
+        }
+    }
+    EXPECT_FALSE(isShow);
+
+    /**
+     * @tc.steps: step5. callback.
+     * @tc.expected: isShow = true
+     */
+    for (auto& OnHiddenChangeInfo : callback) {
+        if (OnHiddenChangeInfo.second) {
+            auto OnHiddenChange = OnHiddenChangeInfo.second;
+            OnHiddenChange(true);
+        }
+    }
+    EXPECT_TRUE(isShow);
+}
+
+/**
  * @tc.name: TabBarPatternHandleTouchEvent001
  * @tc.desc: test HandleTouchEvent
  * @tc.type: FUNC
@@ -1256,6 +1320,53 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAppearAndOnDisappearTest001
+ * @tc.desc: test OnAppear and OnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabs
+     */
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    CreateTabsDone(model);
+
+    auto isOnAppear = false;
+    auto isOnDisappear = false;
+    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
+    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
+    eventHub->SetOnAppear(std::move(appearEvent));
+    eventHub->SetOnDisappear(std::move(disappearEvent));
+
+    EXPECT_FALSE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step2. trigger OnAttachToMainTree.
+     * @tc.expected: isOnAppear is true.
+     */
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step3. trigger OnDetachFromMainTree.
+     * @tc.expected: isOnDisappear is true.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_TRUE(isOnDisappear);
+
+    eventHub->ClearUserOnAppear();
+    eventHub->ClearUserOnDisAppear();
+}
+
+/**
  * @tc.name: SetOnUnselectedEvent001
  * @tc.desc: test SetOnUnselectedEvent, event will be triggered when index unselected
  * @tc.type: FUNC
@@ -1349,48 +1460,4 @@ HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
     EXPECT_EQ(currentIndex, 3);
 }
 
-/**
- * @tc.name: OnAppearAndOnDisappearTest001
- * @tc.desc: test OnAppear and OnDisappear
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Create tabs
-     */
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    CreateTabsDone(model);
-
-    auto isOnAppear = false;
-    auto isOnDisappear = false;
-    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
-    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
-    eventHub->SetOnAppear(std::move(appearEvent));
-    eventHub->SetOnDisappear(std::move(disappearEvent));
-    auto pipeline = frameNode_->GetContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-
-    EXPECT_FALSE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step2. trigger OnAttachToMainTree.
-     * @tc.expected: isOnAppear is true.
-     */
-    tabContentFrameNode->OnAttachToMainTree(true);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step3. trigger OnDetachFromMainTree.
-     * @tc.expected: isOnDisappear is true.
-     */
-    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_TRUE(isOnDisappear);
-}
 } // namespace OHOS::Ace::NG

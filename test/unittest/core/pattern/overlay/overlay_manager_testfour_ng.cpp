@@ -22,6 +22,7 @@
 
 #include "test/mock/base/mock_foldable_window.h"
 #include "test/mock/base/mock_subwindow.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -30,6 +31,7 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -45,6 +47,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -488,5 +491,115 @@ HWTEST_F(OverlayManagerTestFourNg, RemoveGatherNode002, TestSize.Level1)
     overlayManager.hasGatherNode_ = true;
     overlayManager.RemoveGatherNode();
     EXPECT_FALSE(overlayManager.hasGatherNode_);
+}
+
+/**
+ * @tc.name: ShowFilterDisappearAnimation001
+ * @tc.desc: Test ShowFilterDisappearAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, ShowFilterDisappearAnimation001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    RefPtr<FrameNode> filterNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU); });
+    overlayManager.ShowFilterDisappearAnimation(filterNode);
+    auto callback = []() {};
+    overlayManager.previewFilterTask_.Reset(callback);
+    overlayManager.ShowFilterDisappearAnimation(filterNode);
+    EXPECT_FALSE(overlayManager.previewFilterTask_);
+}
+
+/**
+ * @tc.name: ShowFilterAnimation001
+ * @tc.desc: Test ShowFilterAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, ShowFilterAnimation001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    RefPtr<FrameNode> columnNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU); });
+    auto menuWrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
+    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->hoverScaleInterruption_ = true;
+    auto pipelineContext = menuWrapperNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    pipelineContext->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    menuTheme->hoverImageDelayDurationForInterrupt_ = 10;
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
+    EXPECT_TRUE(overlayManager.previewFilterTask_);
+}
+
+/**
+ * @tc.name: GetMainPipelineContext001
+ * @tc.desc: Test GetMainPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext001, TestSize.Level1)
+{
+    DialogManager dialogManager;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    frameNode->MountToParent(node);
+    bool isTargetNodeInSubwindow = false;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipelineContext);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    containerTwo->pipelineContext_ = AceType::RawPtr(pipelineContext);
+    containerOne->isSubContainer_ = true;
+    containerTwo->isSubContainer_ = false;
+    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(1, containerTwo);
+    SubwindowManager::GetInstance()->AddParentContainerId(0, 1);
+    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
+    EXPECT_EQ(context, pipelineContext);
+}
+
+/**
+ * @tc.name: GetMainPipelineContext002
+ * @tc.desc: Test GetMainPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext002, TestSize.Level1)
+{
+    DialogManager dialogManager;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    frameNode->MountToParent(node);
+    bool isTargetNodeInSubwindow = true;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipelineContext);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    containerOne->isSubContainer_ = true;
+    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
+    AceEngine::Get().AddContainer(0, containerOne);
+    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
+    EXPECT_EQ(context, AceType::Claim(pipeline));
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -355,7 +356,7 @@ void CircleDotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, floa
     float itemCenterY = 0.0;
     float centerX = axis_ == Axis::HORIZONTAL ? centerX_ : centerY_;
     float centerY = axis_ == Axis::HORIZONTAL ? centerY_ : centerX_;
-    double radians = std::abs(itemAngle) * M_PI / HALF_CIRCLE_ANGLE;
+    double radians = std::abs(itemAngle) * ACE_PI / HALF_CIRCLE_ANGLE;
     // The number 2 represents multiplying by 2 times or dividing equally
     if (GreatOrEqualCustomPrecision(itemAngle, 0.0f)) {
         if (arcDirection_ == SwiperArcDirection::SIX_CLOCK_DIRECTION) {

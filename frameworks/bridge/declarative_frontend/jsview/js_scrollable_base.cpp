@@ -126,6 +126,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("scrollBarMargin", &JSScrollableBase::SetScrollBarMargin);
     JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -151,6 +152,39 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     }
     // default
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::SetScrollBarMargin(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    ScrollBarMargin scrollBarMargin;
+    if (!info[0]->IsObject()) {
+        NG::ScrollableModelNG::SetScrollBarMargin(scrollBarMargin);
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension start;
+    CalcDimension end;
+    auto startObj = obj->GetProperty("start");
+    if (!(startObj->IsNull() || startObj->IsUndefined() || !startObj->IsObject())) {
+        if (JSViewAbstract::ParseJsLengthMetricsVp(startObj, start)) {
+            if (GreatOrEqual(start.Value(), 0.0)) {
+                scrollBarMargin.start_ = start;
+            }
+        }
+    }
+    auto endObj = obj->GetProperty("end");
+    if (!(endObj->IsNull() || endObj->IsUndefined() || !endObj->IsObject())) {
+        if (JSViewAbstract::ParseJsLengthMetricsVp(endObj, end)) {
+            if (GreatOrEqual(end.Value(), 0.0)) {
+                scrollBarMargin.end_ = end;
+            }
+        }
+    }
+
+    NG::ScrollableModelNG::SetScrollBarMargin(scrollBarMargin);
 }
 
 void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)

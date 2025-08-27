@@ -14,11 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/common/utils/utils.h"
+
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -62,7 +63,20 @@ NativeNGScroller::NativeNGScroller() : FFIData()
     LOGI("Scroller constructed: %{public}" PRId64, GetID());
 }
 
-void NativeNGScroller::ScrollTo(const Dimension& xOffset, const Dimension& yOffset, double duration,
+void NativeNGScroller::ScrollTo(
+    const Dimension& xOffset, const Dimension& yOffset, double duration, const RefPtr<Curve>& curve)
+{
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    auto direction = controller_->GetScrollDirection();
+    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    bool smooth = false;
+    controller_->AnimateTo(position, duration, curve, smooth);
+}
+
+void NativeNGScroller::ScrollToWithAnimationOptions(const Dimension& xOffset, const Dimension& yOffset, double duration,
     const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     if (!controller_) {
@@ -102,7 +116,16 @@ void NativeNGScroller::ScrollBy(const Dimension& xOffset, const Dimension& yOffs
     controller_->ScrollBy(deltaX, deltaY, false);
 }
 
-void NativeNGScroller::ScrollEdge(ScrollEdgeType edge, float velocity)
+void NativeNGScroller::ScrollEdge(ScrollEdgeType edge)
+{
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    controller_->ScrollToEdge(edge, true);
+}
+
+void NativeNGScroller::ScrollEdgeWithVelocity(ScrollEdgeType edge, float velocity)
 {
     if (!controller_) {
         LOGE("controller_ is nullptr");
@@ -129,7 +152,16 @@ void NativeNGScroller::ScrollFling(double velocity)
     controller_->Fling(velocity);
 }
 
-void NativeNGScroller::ScrollPage(bool next, bool animation)
+void NativeNGScroller::ScrollPage(bool next)
+{
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    controller_->ScrollPage(!next, true);
+}
+
+void NativeNGScroller::ScrollPageWithAniamtion(bool next, bool animation)
 {
     if (!controller_) {
         LOGE("controller_ is nullptr");
@@ -138,7 +170,16 @@ void NativeNGScroller::ScrollPage(bool next, bool animation)
     controller_->ScrollPage(!next, animation);
 }
 
-void NativeNGScroller::ScrollToIndex(int32_t index, bool smooth, int32_t align, double offset, int32_t unit)
+void NativeNGScroller::ScrollToIndex(int32_t index, bool smooth, int32_t align)
+{
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    controller_->ScrollToIndex(index, smooth, SCROLL_ALIGN_LIST[align]);
+}
+
+void NativeNGScroller::ScrollToIndexWithUnit(int32_t index, bool smooth, int32_t align, double offset, int32_t unit)
 {
     if (!controller_) {
         LOGE("controller_ is nullptr");
@@ -422,15 +463,24 @@ int64_t FfiOHOSAceFrameworkScrollerCtor()
 
 void FfiOHOSAceFrameworkScrollerScrollTo(int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit)
 {
-    double duration = 0.0;
-    bool smooth = false;
-    bool canOverScroll = false;
-    RefPtr<Curve> curve = Curves::EASE;
     Dimension xValue(xOffset, static_cast<DimensionUnit>(xUnit));
     Dimension yValue(yOffset, static_cast<DimensionUnit>(yUnit));
     auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
     if (self_ != nullptr) {
-        self_->ScrollTo(xValue, yValue, duration, curve, smooth, canOverScroll);
+        self_->ScrollTo(xValue, yValue, 0.0, Curves::EASE);
+    } else {
+        LOGE("invalid scrollerID");
+    }
+}
+
+void FfiOHOSAceFrameworkScrollerScrollToByCurve(
+    int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit, double duration, const char* curve)
+{
+    Dimension xValue(xOffset, static_cast<DimensionUnit>(xUnit));
+    Dimension yValue(yOffset, static_cast<DimensionUnit>(yUnit));
+    auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
+    if (self_ != nullptr) {
+        self_->ScrollTo(xValue, yValue, duration, CreateCurve(curve, false));
     } else {
         LOGE("invalid scrollerID");
     }
@@ -446,7 +496,7 @@ void FfiOHOSAceFrameworkScrollerScrollToAnimation(
     Dimension yValue(yOffset, static_cast<DimensionUnit>(yUnit));
     auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
     if (self_ != nullptr) {
-        self_->ScrollTo(xValue, yValue, duration, curve, smooth, canOverScroll);
+        self_->ScrollToWithAnimationOptions(xValue, yValue, duration, curve, smooth, canOverScroll);
     } else {
         LOGE("invalid scrollerID");
     }
@@ -464,7 +514,8 @@ void FfiOHOSAceFrameworkScrollerScrollToAnimationOptions(int64_t selfID, double 
             duration = DEFAULT_DURATION;
             hasDuration = false;
         }
-        self_->ScrollTo(xValue, yValue, duration, CreateCurve(curve, false), !hasDuration, canOverScroll);
+        self_->ScrollToWithAnimationOptions(
+            xValue, yValue, duration, CreateCurve(curve, false), !hasDuration, canOverScroll);
     } else {
         LOGE("invalid scrollerID");
     }
@@ -482,18 +533,17 @@ void FfiOHOSAceFrameworkScrollerScrollBy(int64_t selfID, double xOffset, int32_t
     }
 }
 
-void FfiOHOSAceFrameworkScrollerScrollToIndex(
-    int64_t selfID, int32_t index, bool smooth, int32_t align, double offset, int32_t unit)
+void FfiOHOSAceFrameworkScrollerScrollToIndex(int64_t selfID, int32_t index, bool smooth, int32_t align)
 {
     auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
     if (self_ != nullptr) {
-        self_->ScrollToIndex(index, smooth, align, offset, unit);
+        self_->ScrollToIndex(index, smooth, align);
     } else {
         LOGE("invalid scrollerID");
     }
 }
 
-void FfiOHOSAceFrameworkScrollerScrollEdge(int64_t selfID, int32_t edge, float velocity)
+void FfiOHOSAceFrameworkScrollerScrollEdge(int64_t selfID, int32_t edge)
 {
     if (!Utils::CheckParamsValid(edge, SCROLL_EDGE_TYPES.size())) {
         LOGE("invalid value for DisplayMode");
@@ -501,7 +551,42 @@ void FfiOHOSAceFrameworkScrollerScrollEdge(int64_t selfID, int32_t edge, float v
     }
     auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
     if (self_ != nullptr) {
-        self_->ScrollEdge(SCROLL_EDGE_TYPES[edge], velocity);
+        self_->ScrollEdge(SCROLL_EDGE_TYPES[edge]);
+    } else {
+        LOGE("invalid scrollerID");
+    }
+}
+
+void FfiOHOSAceFrameworkScrollerScrollPage(int64_t selfID, bool next)
+{
+    auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
+    if (self_ != nullptr) {
+        self_->ScrollPage(next);
+    } else {
+        LOGE("invalid scrollerID");
+    }
+}
+
+void FfiOHOSAceFrameworkScrollerScrollToIndexWithUnit(
+    int64_t selfID, int32_t index, bool smooth, int32_t align, double offset, int32_t unit)
+{
+    auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
+    if (self_ != nullptr) {
+        self_->ScrollToIndexWithUnit(index, smooth, align, offset, unit);
+    } else {
+        LOGE("invalid scrollerID");
+    }
+}
+
+void FfiOHOSAceFrameworkScrollerScrollEdgeWithVelocity(int64_t selfID, int32_t edge, float velocity)
+{
+    if (!Utils::CheckParamsValid(edge, SCROLL_EDGE_TYPES.size())) {
+        LOGE("invalid value for DisplayMode");
+        return;
+    }
+    auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
+    if (self_ != nullptr) {
+        self_->ScrollEdgeWithVelocity(SCROLL_EDGE_TYPES[edge], velocity);
     } else {
         LOGE("invalid scrollerID");
     }
@@ -517,11 +602,11 @@ void FfiOHOSAceFrameworkScrollerScrollFling(int64_t selfID, double velocity)
     }
 }
 
-void FfiOHOSAceFrameworkScrollerScrollPage(int64_t selfID, bool next, bool animation)
+void FfiOHOSAceFrameworkScrollerScrollPageWithAnimation(int64_t selfID, bool next, bool animation)
 {
     auto self_ = FFIData::GetData<NativeNGScroller>(selfID);
     if (self_ != nullptr) {
-        self_->ScrollPage(next, animation);
+        self_->ScrollPageWithAniamtion(next, animation);
     } else {
         LOGE("invalid scrollerID");
     }

@@ -50,7 +50,6 @@ struct DragDataCore {
     int32_t sourceType = -1;
     int32_t dragNum = -1;
     int32_t pointerId = -1;
-    int32_t toolType = -1;
     int32_t displayX = -1;
     int32_t displayY = -1;
     int32_t displayId = -1;
@@ -58,6 +57,16 @@ struct DragDataCore {
     bool hasCanceledAnimation = false;
     bool hasCoordinateCorrected = false;
     std::map<std::string, int64_t> summarys;
+    bool isDragDelay = false;
+    std::map<std::string, int64_t> detailedSummarys;
+    std::map<std::string, std::vector<int32_t>> summaryFormat;
+    int32_t version { 0 };
+    int64_t totalSize { -1 };
+};
+
+struct DragBundleInfo {
+    std::string bundleName;
+    bool isRemoteDev { false };
 };
 
 struct DragNotifyMsg {

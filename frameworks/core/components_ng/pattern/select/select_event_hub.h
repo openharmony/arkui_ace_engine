@@ -27,7 +27,7 @@ using SelectChangeEvent = std::function<void(int32_t)>;
 using ValueChangeEvent = std::function<void(const std::string&)>;
 
 class SelectEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SelectEventHub, EventHub)
+    DECLARE_ACE_TYPE(SelectEventHub, EventHub);
 public:
     SelectEventHub() = default;
 

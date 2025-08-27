@@ -23,6 +23,7 @@ build_component_ng("event_ng") {
     "focus_box.cpp",
     "focus_event_handler.cpp",
     "focus_hub.cpp",
+    "focus_hub_multithread.cpp",
     "gesture_event_hub.cpp",
     "gesture_event_hub_drag.cpp",
     "input_event.cpp",
@@ -36,9 +37,11 @@ build_component_ng("event_ng") {
     "touch_event.cpp",
   ]
 
-  standard_input_deps = [
-    "hilog:libhilog",
-    "imf:inputmethod_client",
-    "input:libmmi-client",
-  ]
+  standard_input_deps = [ "imf:inputmethod_client" ]
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    external_deps = [
+      "hilog:libhilog",
+      "input:libmmi-client",
+    ]
+  }
 }

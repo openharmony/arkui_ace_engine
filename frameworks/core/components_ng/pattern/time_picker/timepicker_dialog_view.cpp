@@ -86,6 +86,11 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         timePickerLayout->UpdatePrefixMinute(static_cast<int32_t>(minuteOptions));
     }
 
+    auto language = AceApplicationInfo::GetInstance().GetLanguage();
+    if (language == "ar") {
+        timePickerLayout->UpdateLayoutDirection(TextDirection::LTR);
+    }
+
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
 

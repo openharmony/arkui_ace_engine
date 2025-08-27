@@ -15,14 +15,17 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   searchToggle,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
-export default function TimePicker9() {
-  describe('TimePicker9', () => {
+export default function TextPicker9() {
+  describe('TextPicker9', () => {
 
     beforeAll(async (done: Function) => {
       await TextPickerStart(done)

@@ -50,7 +50,7 @@ void MenuDividerModifier::onDraw(DrawingContext& context)
     float centerY = context.height / 2;
     RSPen paint;
     paint.SetColor(dividerColor_->Get().GetValue());
-    paint.SetWidth(strokeWidth_->Get());
+    paint.SetWidth(context.height);
     paint.SetAntiAlias(true);
     canvas.AttachPen(paint);
 

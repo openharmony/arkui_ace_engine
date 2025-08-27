@@ -52,7 +52,12 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
     bool hasResult = false;
     RectF result;
     RectF preBox;
-    auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
+    auto deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    auto container = Container::CurrentSafely();
+    if (container && container->GetDisplayInfo()) {
+        deviceHeight = container->GetDisplayInfo()->GetHeight();
+    }
+    auto maxBottom = contentRect.GetY() + deviceHeight;
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
         bool isReachingBottom = (caculateBottom >= maxBottom) || (caculateBottom >= contentRect.Bottom());
@@ -105,6 +110,13 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
+
+    auto onDetachFromMainTreeCallback = [weak = WeakPtr<TextDragBase>(hostPattern)]() {
+        auto textDragBasePattern = weak.Upgrade();
+        CHECK_NULL_VOID(textDragBasePattern);
+        textDragBasePattern->OnDragNodeDetachFromMainTree();
+    };
+    dragPattern->SetOnDetachFromMainTree(std::move(onDetachFromMainTreeCallback));
     return dragNode;
 }
 
@@ -386,5 +398,12 @@ Dimension TextDragPattern::GetDragCornerRadius()
         return TEXT_DRAG_RADIUS_2IN1;
     }
     return TEXT_DRAG_RADIUS;
+}
+
+void TextDragPattern::OnDetachFromMainTree()
+{
+    ResetAnimatingParagraph();
+    CHECK_NULL_VOID(onDetachFromMainTree_);
+    onDetachFromMainTree_();
 }
 } // namespace OHOS::Ace::NG

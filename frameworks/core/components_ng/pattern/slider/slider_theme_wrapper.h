@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new SliderThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<SliderThemeWrapper>();
             if (!themeConstants) {
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return wrapper;

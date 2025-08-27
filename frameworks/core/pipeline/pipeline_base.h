@@ -93,7 +93,7 @@ class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
-using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -164,6 +164,11 @@ public:
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
+    bool HasPendingAnimation() const
+    {
+        return !pendingFrontendAnimation_.empty();
+    }
+
     void PrepareCloseImplicitAnimation();
 
     bool CloseImplicitAnimation();
@@ -214,7 +219,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount);
 
     // Called by viewr
     virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
@@ -319,7 +324,7 @@ public:
 
     virtual void NotifyOnPreDraw() = 0;
 
-    virtual bool CallRouterBackToPopPage() = 0;
+    virtual bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) = 0;
 
     virtual bool PopPageStackOverlay()
     {
@@ -719,10 +724,12 @@ public:
         return {};
     }
 
+    bool CheckIfGetTheme();
+
     template<typename T>
     bool GetDraggable()
     {
-        if (isJsCard_ || isFormRender_) {
+        if (!CheckIfGetTheme()) {
             return false;
         }
         auto theme = GetTheme<T>();
@@ -860,6 +867,12 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetIsArkUIHookEnabled(bool enable)
+    {
+        isArkUIHookEnabled_ = enable;
+    }
+    bool IsArkUIHookEnabled() const;
+
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {
         realHostWindowId_ = realHostWindowId;
@@ -880,6 +893,20 @@ public:
         return viewScale_;
     }
 
+    void SetIsCurrentInForceSplitMode(bool split)
+    {
+        isCurrentInForceSplitMode_ = split;
+    }
+
+    bool IsCurrentInForceSplitMode() const
+    {
+        return isCurrentInForceSplitMode_;
+    }
+
+    double CalcPageWidth(double rootWidth) const;
+
+    double GetPageWidth() const;
+
     double GetRootWidth() const
     {
         return rootWidth_;
@@ -888,6 +915,11 @@ public:
     double GetRootHeight() const
     {
         return rootHeight_;
+    }
+
+    int32_t GetWindowOriginalWidth() const
+    {
+        return width_;
     }
 
     void SetWindowModal(WindowModal modal)
@@ -1047,6 +1079,8 @@ public:
         }
     }
 
+    virtual void NotifyColorModeChange(uint32_t colorMode) {}
+
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
     void SetPostRTTaskCallBack(PostRTTaskCallback&& callback)
     {
@@ -1062,7 +1096,11 @@ public:
 
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
+    void InitGetGlobalWindowRectCallback(std::function<Rect()>&& callback);
+
     Rect GetCurrentWindowRect() const;
+
+    Rect GetGlobalDisplayWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
 
@@ -1071,6 +1109,15 @@ public:
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false) {}
 
     virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+        bool checkSceneBoardWindow = false) {}
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
@@ -1093,8 +1140,6 @@ public:
     {
         return pixelRoundMode_;
     }
-
-    virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -1131,7 +1176,7 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushModifier() {}
-    virtual void FlushMessages() = 0;
+    virtual void FlushMessages(std::function<void()> callback = nullptr) = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
         gsVsyncCallback_ = std::move(callback);
@@ -1204,6 +1249,7 @@ public:
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
     virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
     virtual void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+    virtual void OnRawKeyboardChangedCallback() {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -1299,7 +1345,7 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    bool GetOnFoucs() const
+    bool GetOnFocus() const
     {
         return onFocus_;
     }
@@ -1319,6 +1365,8 @@ public:
         vsyncTime_ = time;
     }
 
+    virtual bool ReachResponseDeadline() const;
+
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
@@ -1326,7 +1374,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault(int32_t windowId = 0) {}
+    virtual void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {
@@ -1371,7 +1419,7 @@ public:
 
     virtual void ChangeSensitiveNodes(bool flag) {}
 
-    virtual bool IsContainerModalVisible()
+    virtual bool IsContainerModalVisible() const
     {
         return false;
     }
@@ -1405,12 +1453,18 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    virtual bool IsNeedReloadDensity() const = 0;
+
+    virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
+
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
         return "";
     };
 
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+    virtual void DisableNotifyResponseRegionChanged() {};
 
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
@@ -1435,7 +1489,7 @@ public:
 #endif
     virtual bool IsWindowFocused() const
     {
-        return GetOnFoucs();
+        return GetOnFocus();
     }
 
     virtual bool IsWindowActivated() const
@@ -1468,6 +1522,11 @@ public:
         return true;
     }
 
+    virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
+    {
+        /* only implemented in PipelineContext for NG */
+    }
+
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
@@ -1484,16 +1543,6 @@ public:
         return isOpenInvisibleFreeze_;
     }
 
-    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
-    {
-        visibleAreaRealTime_ = visibleAreaRealTime;
-    }
-
-    bool GetVisibleAreaRealTime() const
-    {
-        return visibleAreaRealTime_;
-    }
-
     // Prints out the count of the unexecuted finish callback
     std::string GetUnexecutedFinishCount() const;
 
@@ -1507,6 +1556,17 @@ public:
     virtual void SetTouchAccelarate(bool isEnable) {}
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
+    virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
+    bool IsSystmColorChange()
+    {
+        return isSystemColorChange_;
+    }
+
+    void SetIsSystemColorChange(bool isSystemColorChange)
+    {
+        isSystemColorChange_ = isSystemColorChange;
+    }
 
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
 
@@ -1552,6 +1612,18 @@ public:
         return apiTargetVersion_ < static_cast<int32_t>(version);
     }
 
+    void SaveConfigurationConfig(const ConfigurationChange& configurationChange)
+    {
+        configurationChange_ = configurationChange;
+    }
+
+    const ConfigurationChange& GetConfigurationChange() const
+    {
+        return configurationChange_;
+    }
+
+    void SetUiDVSyncCommandTime(uint64_t vsyncTime);
+    void ForceUpdateDesignWidthScale(int32_t width);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1567,7 +1639,7 @@ protected:
     {
         return false;
     }
-    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
@@ -1589,8 +1661,10 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
-    
+
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
+
+    double Vp2PxInner(double vpValue) const;
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1606,6 +1680,8 @@ protected:
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
     bool isReloading_ = false;
+
+    bool isSystemColorChange_ = false;
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
@@ -1626,10 +1702,12 @@ protected:
     float viewScale_ = 1.0f;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    bool isCurrentInForceSplitMode_ = false;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    bool isArkUIHookEnabled_ = false;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1699,11 +1777,16 @@ protected:
 
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
+    int64_t currRecvTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    uint64_t DVSyncChangeTime_ = 0;
+    bool commandTimeUpdate_ = false;
+    bool dvsyncTimeUpdate_ = false;
+    int32_t dvsyncTimeUseCount_ = 0;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;
@@ -1730,7 +1813,6 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
-    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool destroyed_ = false;
@@ -1739,6 +1821,7 @@ private:
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     int32_t apiTargetVersion_ = 0;
+    bool lastUiDvsyncStatus_ = false;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
@@ -1750,6 +1833,7 @@ private:
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
+    ConfigurationChange configurationChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

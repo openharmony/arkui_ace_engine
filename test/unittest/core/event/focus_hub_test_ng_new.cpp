@@ -2896,6 +2896,52 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusToHeadOrTailChild003
+ * @tc.desc: Test the function FocusToHeadOrTailChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    ASSERT_FALSE(context->isFocusingByTab_);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    ASSERT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    ASSERT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    ASSERT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    ASSERT_FALSE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    ASSERT_FALSE(res);
+}
+
+/**
  * @tc.name: GetUnfocusableParentFocusNode001
  * @tc.desc:
  * @tc.type: FUNC

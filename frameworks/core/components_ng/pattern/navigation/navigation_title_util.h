@@ -50,7 +50,7 @@ public:
         bool isButtonEnabled, const std::string& field, const std::string& parentId,
         bool isCreateLandscapeMenu = false);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
-        const RefPtr<FrameNode>& barMenuNode);
+        const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam);
 
     static bool BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
         const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
@@ -113,6 +113,7 @@ public:
     static void UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
         const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
     static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
+    static bool SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode);
 };
 
 } // namespace OHOS::Ace::NG

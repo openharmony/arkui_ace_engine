@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,12 @@
 #include "modules/svg/include/SkSVGDOM.h"
 
 #include "base/image/pixel_map.h"
+#include "core/components/svg/parse/svg_dom.h"
 #include "core/image/animated_image_player.h"
 #include "core/image/image_source_info.h"
-#include "frameworks/core/components/svg/parse/svg_dom.h"
+#ifdef USE_NEW_SKIA
+#include "include/core/SkStream.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -78,11 +81,6 @@ public:
         return isSvg_;
     }
 
-    bool IsAPng() const
-    {
-        return isApng_;
-    }
-
     virtual void UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
         const UploadSuccessCallback& successCallback, const FailedCallback& failedCallback, const Size& imageSize,
         bool forceResize, bool syncMode = false)
@@ -113,7 +111,6 @@ protected:
     Size imageSize_;
     int32_t frameCount_ = 1;
     bool isSvg_ = false;
-    bool isApng_ = false;
 };
 
 class SvgSkiaImageObject : public ImageObject {

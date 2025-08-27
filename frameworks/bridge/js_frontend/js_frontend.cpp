@@ -735,6 +735,21 @@ void JsFrontend::OnDrawCompleted(const std::string& componentId)
     }
 }
 
+void JsFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawChildrenCompleted(componentId);
+    }
+}
+
+bool JsFrontend::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    if (delegate_) {
+        return delegate_->IsDrawChildrenCallbackFuncExist(componentId);
+    }
+    return false;
+}
+
 void JsFrontend::DumpFrontend() const
 {
     int32_t routerIndex = 0;

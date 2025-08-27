@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
+constexpr int32_t DOUBLE = 2;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const std::string RESULT_SUCCESS_ONE = "sucess1";
 const std::string RESULT_SUCCESS_TWO = "sucess2";
@@ -81,7 +82,7 @@ HWTEST_F(InputEventTestNg, InputEventTest001, TestSize.Level1)
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     OnMouseEventFunc onMouse1 = onMouse;
-    inputEventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouse1));
+    inputEventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouse1));
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse2));
 
@@ -108,7 +109,7 @@ HWTEST_F(InputEventTestNg, InputEventTest002, TestSize.Level1)
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
     OnHoverFunc onHoverEventFunc2;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     inputEventHub->SetHoverEvent(std::move(onHoverEventFunc2));
 
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
@@ -163,7 +164,7 @@ HWTEST_F(InputEventTestNg, InputEventTest004, TestSize.Level1)
     inputEventHub->hoverEventActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -295,6 +296,59 @@ HWTEST_F(InputEventTestNg, InputEventTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InputEventTest010
+ * @tc.desc: test InputEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, InputEventTest010, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    int32_t count = 0;
+    MouseInfo mouse;
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+
+    auto mouseTask = [&count](MouseInfo& info) { count++; };
+    auto mouseEvent1 = AceType::MakeRefPtr<InputEvent>(mouseTask);
+    mouseEvent1->SetIstips(true);
+    mouseEvent1->SetTipsFollowCursor(true);
+    inputEventHub->mouseEventActuator_->inputEvents_.clear();
+    inputEventHub->AddOnMouseEvent(std::move(mouseEvent1));
+    inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
+    EXPECT_EQ(count, 1);
+
+    auto mouseEvent2 = AceType::MakeRefPtr<InputEvent>(mouseTask);
+    mouseEvent2->SetIstips(true);
+    inputEventHub->mouseEventActuator_->inputEvents_.clear();
+    inputEventHub->AddOnMouseEvent(std::move(mouseEvent2));
+    inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
+    EXPECT_EQ(count, 1);
+
+    auto mouseEvent3 = AceType::MakeRefPtr<InputEvent>(mouseTask);
+    mouseEvent3->SetTipsFollowCursor(true);
+    inputEventHub->mouseEventActuator_->inputEvents_.clear();
+    inputEventHub->AddOnMouseEvent(std::move(mouseEvent3));
+    inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
+    EXPECT_EQ(count, 1);
+
+    inputEventHub->mouseEventActuator_->inputEvents_.clear();
+    inputEventHub->AddOnMouseEvent(nullptr);
+    inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
+    EXPECT_EQ(count, 1);
+}
+
+/**
  * @tc.name: OnCollectPenHoverEventTest001
  * @tc.desc: test InputEvent
  * @tc.type: FUNC
@@ -329,7 +383,7 @@ HWTEST_F(InputEventTestNg, OnCollectPenHoverEventTest002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -396,7 +450,7 @@ HWTEST_F(InputEventTestNg, OnCollectPenHoverMoveEvent002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -485,7 +539,7 @@ HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEvent002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -571,5 +625,47 @@ HWTEST_F(InputEventTestNg, OnCollectAxisEvent001, TestSize.Level1)
     AxisInfo axisInfo;
     inputEventHub->axisEventActuator_->axisEventTarget_->onAxisCallback_(axisInfo);
     EXPECT_NE(inputEventHub, nullptr);
+}
+
+/**
+ * @tc.name: ProcessTipsMouseTestHit001
+ * @tc.desc: test ProcessTipsMouseTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, ProcessTipsMouseTestHit001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    inputEventHub->ProcessTipsMouseTestHit(COORDINATE_OFFSET, result);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveAllTipsEvents001
+ * @tc.desc: test RemoveAllTipsEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, RemoveAllTipsEvents001, TestSize.Level1)
+{
+    auto actuator = AceType::MakeRefPtr<InputEventActuator>(nullptr);
+    auto hoverTask1 = [](bool isHover) {};
+    auto hoverTask2 = [](bool isHover) {};
+    auto hoverEvent1 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask1));
+    auto hoverEvent2 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask2));
+    hoverEvent1->SetIstips(true);
+    hoverEvent2->SetIstips(true);
+    actuator->AddInputEvent(hoverEvent1);
+    actuator->AddInputEvent(hoverEvent2);
+    EXPECT_EQ(actuator->inputEvents_.size(), DOUBLE);
+    actuator->RemoveAllTipsEvents();
+    EXPECT_EQ(actuator->inputEvents_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -42,13 +43,19 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+
+constexpr int32_t SWIPER_Z_INDEX = 0;
+constexpr int32_t DIVIDER_Z_INDEX = 2;
+constexpr int32_t TAB_BAR_Z_INDEX = 3;
+constexpr int32_t EFFECT_Z_INDEX = 1;
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -71,6 +78,10 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         }
     }
     tabsLayoutProperty->UpdateIndexSetByUser(index);
+    if (SystemProperties::ConfigChangePerform()) {
+        tabsLayoutProperty->ResetDividerColorSetByUser();
+        tabsLayoutProperty->ResetBarBackgroundColorSetByUser();
+    }
 }
 
 RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
@@ -126,6 +137,27 @@ void TabsModelNG::InitUnselectedMaskNode(const RefPtr<FrameNode>& unselectedMask
     unselectedMaskRenderContext->SetClipToBounds(true);
 }
 
+RefPtr<OHOS::Ace::NG::FrameNode> InitEffectNode(RefPtr<TabsNode> tabsNode)
+{
+    auto effectNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, tabsNode->GetEffectId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+
+    auto accessibilityProperty = effectNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, effectNode);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+
+    auto effectNodeLayoutProperty = effectNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(effectNodeLayoutProperty, effectNode);
+    if (!effectNodeLayoutProperty->GetSafeAreaExpandOpts()) {
+        effectNodeLayoutProperty->UpdateSafeAreaExpandOpts(
+            { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+    }
+    auto effectNodeContext = effectNode->GetRenderContext();
+    CHECK_NULL_RETURN(effectNodeContext, effectNode);
+    effectNodeContext->UpdateClipEdge(false);
+    return effectNode;
+}
+
 void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController)
 {
     bool hasSwiperNode = tabsNode->HasSwiperNode();
@@ -133,25 +165,18 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     bool hasDividerNode = tabsNode->HasDividerNode();
     bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
     bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
-    auto swiperId = tabsNode->GetSwiperId();
-    auto tabBarId = tabsNode->GetTabBarId();
-    auto dividerId = tabsNode->GetDividerId();
-    auto selectedMaskId = tabsNode->GetSelectedMaskId();
-    auto unselectedMaskId = tabsNode->GetUnselectedMaskId();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto controller = GetSwiperController(swiperNode, swiperController);
+        V2::SWIPER_ETS_TAG, tabsNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        V2::DIVIDER_ETS_TAG, tabsNode->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TAB_BAR_ETS_TAG, tabBarId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    if (tabBarPattern) {
-        tabBarPattern->SetController(controller);
+        V2::TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+    if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
+        tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
 
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
@@ -160,11 +185,11 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     }
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, unselectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
@@ -183,19 +208,6 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
     }
-    InitAccessibilityZIndex(swiperNode, tabBarNode);
-}
-
-void TabsModelNG::InitAccessibilityZIndex(RefPtr<FrameNode>& swiperNode, RefPtr<FrameNode>& tabBarNode)
-{
-    CHECK_NULL_VOID(swiperNode);
-    CHECK_NULL_VOID(tabBarNode);
-    auto swiperAccessibilityProperty = swiperNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(swiperAccessibilityProperty);
-    auto tabBarAccessibilityProperty = tabBarNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(tabBarAccessibilityProperty);
-    swiperAccessibilityProperty->SetAccessibilityZIndex(1);
-    tabBarAccessibilityProperty->SetAccessibilityZIndex(0);
 }
 
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
@@ -310,6 +322,13 @@ void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
     tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
 }
 
+void TabsModelNG::SetNoMinHeightLimit(bool noMinHeightLimit)
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateNoMinHeightLimit(noMinHeightLimit);
+}
+
 void TabsModelNG::SetIsVertical(bool isVertical)
 {
     auto axis = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -368,6 +387,11 @@ void TabsModelNG::SetScrollable(bool scrollable)
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetIsDisableSwipe(!scrollable);
+}
+
+void TabsModelNG::SetAnimationCurve(const RefPtr<Curve>& curve)
+{
+    SetAnimationCurve(ViewStackProcessor::GetInstance()->GetMainFrameNode(), curve);
 }
 
 void TabsModelNG::SetAnimationDuration(float duration)
@@ -480,9 +504,9 @@ void TabsModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const B
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
-    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(1));
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
     CHECK_NULL_VOID(dividerNode);
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
@@ -500,6 +524,16 @@ void TabsModelNG::SetDivider(const TabsItemDivider& divider)
     }
 }
 
+void TabsModelNG::SetDividerColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, DividerColorSetByUser, isByUser);
+}
+
+void TabsModelNG::SetDividerColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, DividerColorSetByUser, isByUser, frameNode);
+}
+
 void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -509,6 +543,11 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void TabsModelNG::SetBarBackgroundColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser);
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
@@ -741,7 +780,9 @@ void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const
 void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
     CHECK_NULL_VOID(dividerNode);
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
@@ -757,6 +798,38 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divide
         dividerRenderContext->UpdateOpacity(1.0f);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, frameNode);
     }
+}
+
+void TabsModelNG::SetEffectNodeOption(FrameNode* frameNode, const TabsEffectNodeOption& option)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim(frameNode));
+    CHECK_NULL_VOID(tabsNode);
+    auto effectNode = AceType::DynamicCast<FrameNode>(tabsNode->GetEffectNode());
+    if (option.isNull) {
+        if (effectNode) {
+            tabsNode->RemoveChild(effectNode);
+        }
+    } else {
+        if (!effectNode) {
+            effectNode = InitEffectNode(tabsNode);
+            effectNode->MountToParent(tabsNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(effectNode), EFFECT_Z_INDEX);
+
+            auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+            CHECK_NULL_VOID(swiperNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(swiperNode), SWIPER_Z_INDEX);
+
+            auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+            CHECK_NULL_VOID(dividerNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(dividerNode), DIVIDER_Z_INDEX);
+
+            auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+            CHECK_NULL_VOID(tabBarNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(tabBarNode), TAB_BAR_Z_INDEX);
+        }
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, EffectNodeOption, option, frameNode);
 }
 
 void TabsModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
@@ -777,6 +850,11 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void TabsModelNG::SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser, frameNode);
 }
 
 void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
@@ -924,6 +1002,21 @@ void TabsModelNG::SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarH
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetAnimationCurve(curve);
+    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateCurve(tabBarPattern->GetAnimationCurve(TabBarPhysicalCurve));
+}
+
 void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
 {
     CHECK_NULL_VOID(frameNode);
@@ -956,6 +1049,14 @@ void TabsModelNG::SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHei
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
+}
+
+void TabsModelNG::SetNoMinHeightLimit(FrameNode* frameNode, bool noMinHeightLimit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateNoMinHeightLimit(noMinHeightLimit);
 }
 
 void TabsModelNG::SetIsCustomAnimation(bool isCustom)
@@ -1064,6 +1165,17 @@ void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperCon
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     CHECK_NULL_VOID(tabsNode);
     InitTabsNode(tabsNode, tabsController);
+}
+
+void TabsModelNG::SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+{
+    CHECK_NULL_VOID(onApply);
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    onApply(tabBarNode);
 }
 
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
@@ -1211,5 +1323,412 @@ void TabsModelNG::SetOnContentWillChange(
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetInterceptStatus(true);
     tabPattern->SetOnContentWillChange(std::move(callback));
+}
+void TabsModelNG::CreateWithResourceObj(TabJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string key = "tabs." + std::to_string(static_cast<int32_t>(jsResourceType));
+        pattern->RemoveResObj(key);
+    }
+    switch (jsResourceType) {
+        case TabJsResType::BAR_BACKGROUND_COLOR:
+            HandleBarBackgroundColor(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_WIDTH:
+            HandleBarWidth(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_HEIGHT:
+            HandleBarHeight(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_GRID_GUTTER:
+            HandleBarGridGutter(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_GRID_MARGIN:
+            HandleBarGridMargin(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_STROKE_WIDTH:
+            HandleDividerStrokeWidth(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_COLOR:
+            HandleDividerColor(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_START_MARGIN:
+            HandleDividerStartMargin(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_END_MARGIN:
+            HandleDividerEndMargin(frameNode, resObj);
+            break;
+        case TabJsResType::SCROLLABLE_BAR_MARGIN:
+            HandleScrollableBarMargin(frameNode, resObj);
+            break;
+        case TabJsResType::COLOR:
+            HandleBackgroundEffectColor(frameNode, resObj);
+            break;
+        case TabJsResType::INACTIVE_COLOR:
+            HandleBackgroundEffectInactiveColor(frameNode, resObj);
+            break;
+        case TabJsResType::BlurStyle_INACTIVE_COLOR:
+            HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void TabsModelNG::HandleBarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBarBackgroundColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        Color result = Color::BLACK.BlendOpacity(0.0f);
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetBarBackgroundColor(AceType::RawPtr(node), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBarWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        CalcDimension result = Dimension(-1.0, DimensionUnit::VP);
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        TabsModelNG::SetTabBarWidth(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBarHeight";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        CalcDimension result = Dimension(-1.0, DimensionUnit::VP);
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        TabsModelNG::SetTabBarHeight(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBarGridGutter(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBarGridGutter";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        CalcDimension result;
+        BarGridColumnOptions tempUsed;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            tempUsed.gutter = result;
+        }
+        BarGridColumnOptions columnOption;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        columnOption.gutter = tempUsed.gutter;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBarGridMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBarGridMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        CalcDimension result;
+        BarGridColumnOptions tempUsed;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            tempUsed.margin = result;
+        }
+        BarGridColumnOptions columnOption;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        columnOption.margin = tempUsed.margin;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsDividerStrokeWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto tabsPattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.strokeWidth.Reset();
+        } else {
+            divider.strokeWidth = result;
+        }
+        TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
+        tabsPattern->UpdateDividerStrokeWidth();
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsDividerColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto tabsPattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        Color result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            divider.color = result;
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), true);
+        } else {
+            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_VOID(tabTheme);
+            divider.color = tabTheme->GetDividerColor();
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), false);
+        }
+        TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
+        tabsPattern->UpdateDividerColor();
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsDividerStartMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.startMargin.Reset();
+        } else {
+            divider.startMargin = result;
+        }
+        TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsDividerEndMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.endMargin.Reset();
+        } else {
+            divider.endMargin = result;
+        }
+        TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsScrollableBarMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        CalcDimension result;
+        ScrollableBarModeOptions option;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || Negative(result.Value()) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            option.margin = 0.0_vp;
+        } else {
+            option.margin = result;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBackGroundEffectColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode),
+                                        weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                        const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto target = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(target);
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        Color result = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        option.color = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBackGroundEffectInactiveColor";
+    pattern->RemoveResObj(key);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto target = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(target);
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        if (!resObj) {
+            TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
+            return;
+        }
+        Color result = Color::TRANSPARENT;
+        option.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        option.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
+    };
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsBackGroundBlurStyle";
+    pattern->RemoveResObj(key);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto target = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(target);
+        BlurStyleOption styleOption = target->GetBackBlurStyle().value_or(BlurStyleOption{});
+        styleOption.isWindowFocused = true; // set to default value
+        if (!resObj) {
+            TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
+            return;
+        }
+        Color result = Color::TRANSPARENT;
+        styleOption.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        styleOption.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
+    };
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

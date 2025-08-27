@@ -40,6 +40,11 @@ public:
         return touchPoints_.find(touchId) != touchPoints_.end();
     }
 
+    std::map<int32_t, TouchEvent> GetTouchPoints() override
+    {
+        return touchPoints_;
+    }
+
     int GetFingers()
     {
         return fingers_;
@@ -74,10 +79,12 @@ public:
         fingerList_.clear();
         activeFingers_.clear();
         currentFingers_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         lastPointEvent_.reset();
         backupTouchPointsForSucceedBlock_.reset();
+        preventBegin_ = false;
     }
 
     void CleanRecognizerState() override;
@@ -129,9 +136,11 @@ protected:
         activeFingers_.clear();
         lastPointEvent_.reset();
         currentFingers_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         backupTouchPointsForSucceedBlock_.reset();
+        preventBegin_ = false;
     }
 
     bool IsNeedResetStatus();
@@ -140,6 +149,8 @@ protected:
     {
         return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
+
+    bool CheckFingerListInDownFingers(int32_t pointId) const;
 
     std::string DumpGestureInfo() const;
 

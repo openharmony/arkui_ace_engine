@@ -443,6 +443,7 @@ public:
     void UpdateForceDarkAccess(const bool& access) override;
     void UpdateAudioResumeInterval(const int32_t& resumeInterval) override;
     void UpdateAudioExclusive(const bool& audioExclusive) override;
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) override;
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled) override;
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled) override;
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) override;
@@ -493,6 +494,8 @@ private:
     bool OnShowFileChooser(void* object);
     void OnGeolocationPermissionsShowPrompt(void* object);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
+    void RunJsProxyCallback();
+    RefPtr<WebResponse> OnInterceptRequest(void* object);
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;

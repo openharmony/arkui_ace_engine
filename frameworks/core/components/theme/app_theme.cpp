@@ -19,12 +19,12 @@
 #include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace {
 namespace {
-constexpr uint64_t FOCUS_COLOR = 125831021;
+constexpr uint64_t FOCUS_COLOR = 125830265;
 }
 
 RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
-    RefPtr<AppTheme> theme = AceType::Claim(new AppTheme());
+    RefPtr<AppTheme> theme = AceType::MakeRefPtr<AppTheme>();
     if (!themeConstants) {
         return theme;
     }

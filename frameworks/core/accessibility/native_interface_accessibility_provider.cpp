@@ -154,21 +154,16 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(
     const int64_t elementId, const int32_t mode, const int32_t requestId,
     std::vector<ArkUI_AccessibilityElementInfo>& infos)
 {
-    ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
-        = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
-    if (accessibilityElementInfoList == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
-        return AccessibilityProviderOperatorErrorCode::NOT_REGISTERED;
-    }
+    auto accessibilityElementInfoList = std::make_unique<ArkUI_AccessibilityElementInfoList>();
     int32_t ret = 0;
     if (accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosById) {
         ret = accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosById(instanceId_.c_str(),
             elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
-            requestId, accessibilityElementInfoList);
+            requestId, accessibilityElementInfoList.get());
     } else if (accessibilityProviderCallbacks_.findAccessibilityNodeInfosById) {
         ret = accessibilityProviderCallbacks_.findAccessibilityNodeInfosById(
             elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
-            requestId, accessibilityElementInfoList);
+            requestId, accessibilityElementInfoList.get());
     } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosById is null");
         return AccessibilityProviderOperatorErrorCode::NOT_REGISTERED;
@@ -177,9 +172,6 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(
     if (!accessibilityElementInfoList->CopyAccessibilityElementInfo(infos)) {
         ret = AccessibilityProviderOperatorErrorCode::COPY_FAILED;
     }
-
-    delete accessibilityElementInfoList;
-    accessibilityElementInfoList = nullptr;
     return ret;
 }
 
@@ -187,19 +179,14 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(
     const int64_t elementId, std::string text, const int32_t requestId,
     std::vector<ArkUI_AccessibilityElementInfo>& infos)
 {
-    ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
-        = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
-    if (accessibilityElementInfoList == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
-        return AccessibilityProviderOperatorErrorCode::NOT_REGISTERED;
-    }
+    auto accessibilityElementInfoList = std::make_unique<ArkUI_AccessibilityElementInfoList>();
     int32_t ret = 0;
     if (accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosByText) {
         ret = accessibilityProviderCallbacksWithInstance_.findAccessibilityNodeInfosByText(instanceId_.c_str(),
-            elementId, text.c_str(), requestId, accessibilityElementInfoList);
+            elementId, text.c_str(), requestId, accessibilityElementInfoList.get());
     } else if (accessibilityProviderCallbacks_.findAccessibilityNodeInfosByText) {
         ret = accessibilityProviderCallbacks_.findAccessibilityNodeInfosByText(
-            elementId, text.c_str(), requestId, accessibilityElementInfoList);
+            elementId, text.c_str(), requestId, accessibilityElementInfoList.get());
     } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "findAccessibilityNodeInfosByText is null");
         return AccessibilityProviderOperatorErrorCode::NOT_REGISTERED;
@@ -208,9 +195,6 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(
     if (!accessibilityElementInfoList->CopyAccessibilityElementInfo(infos)) {
         ret = AccessibilityProviderOperatorErrorCode::COPY_FAILED;
     }
-
-    delete accessibilityElementInfoList;
-    accessibilityElementInfoList = nullptr;
     return ret;
 }
 
@@ -250,15 +234,16 @@ int32_t ArkUI_AccessibilityProvider::ExecuteAccessibilityAction(
     const int64_t elementId, int32_t action, const int32_t requestId,
     const std::map<std::string, std::string>& actionArguments)
 {
+    auto actionArgumentsUnique = std::make_unique<ArkUI_AccessibilityActionArguments>(actionArguments);
     if (accessibilityProviderCallbacksWithInstance_.executeAccessibilityAction) {
         return accessibilityProviderCallbacksWithInstance_.executeAccessibilityAction(instanceId_.c_str(), elementId,
             static_cast<ArkUI_Accessibility_ActionType>(action),
-            new ArkUI_AccessibilityActionArguments(actionArguments),
+            actionArgumentsUnique.get(),
             requestId);
     } else if (accessibilityProviderCallbacks_.executeAccessibilityAction) {
         return accessibilityProviderCallbacks_.executeAccessibilityAction(
             elementId, static_cast<ArkUI_Accessibility_ActionType>(action),
-            new ArkUI_AccessibilityActionArguments(actionArguments), requestId);
+            actionArgumentsUnique.get(), requestId);
     } else {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "executeAccessibilityAction is null");
         return AccessibilityProviderOperatorErrorCode::NOT_REGISTERED;

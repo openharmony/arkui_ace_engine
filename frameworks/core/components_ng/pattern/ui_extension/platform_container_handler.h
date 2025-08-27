@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_PLATFORM_CONTAINER_HANDLER_H
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "frameworks/core/common/container_handler.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 
@@ -40,10 +41,19 @@ public:
         hostPattern_ = hostPattern;
     }
 
+    void UpdateAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
+
+    void GetHostFocusWindowSceneCloseKeyboard(const std::function<void(bool)>& getKeyCallback) override;
+
+    virtual void OnAccessibilityParentRectInfoUpdate() {};
+
 private:
     bool GetAccessibilityParentRect(HandlerReply& reply);
+    void GetDCAccessibilityParentRect(HandlerReply& reply);
 
     WeakPtr<Pattern> hostPattern_;
+    AccessibilityParentRectInfo rectInfo_;
+    mutable std::shared_mutex rectInfoMutex_;
 };
 
 } // namespace OHOS::Ace

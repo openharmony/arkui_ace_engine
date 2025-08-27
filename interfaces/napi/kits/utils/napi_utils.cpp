@@ -51,7 +51,7 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_value msg = nullptr;
     auto iter = ERROR_CODE_TO_MSG.find(errCode);
     std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
-    LOGE("napi throw errCode %d strMsg %s", errCode, strMsg.c_str());
+    LOGE("napi throw errCode %{public}d strMsg %{public}s", errCode, strMsg.c_str());
     napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
     napi_value error = nullptr;
@@ -529,22 +529,21 @@ napi_valuetype GetValueType(napi_env env, napi_value value)
 
 std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value)
 {
-    static constexpr size_t maxLength = 2048;
     if (GetValueType(env, value) != napi_string) {
         return std::nullopt;
     }
 
     size_t paramLen = 0;
     napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &paramLen);
-    if (paramLen == 0 || paramLen > maxLength || status != napi_ok) {
+    if (paramLen == 0 || status != napi_ok) {
         return std::nullopt;
     }
-    char params[maxLength] = { 0 };
-    status = napi_get_value_string_utf8(env, value, params, paramLen + 1, &paramLen);
+    std::unique_ptr<char[]> params = std::make_unique<char[]>(paramLen + 1);
+    status = napi_get_value_string_utf8(env, value, params.get(), paramLen + 1, &paramLen);
     if (status != napi_ok) {
         return std::nullopt;
     }
-    return params;
+    return std::optional<std::string>(params.get());
 }
 
 bool GetIntProperty(napi_env env, napi_value value, const std::string& key, int32_t& result)
@@ -584,17 +583,17 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
         LOGE("Parse color from resource failed");
         return false;
     }
-    auto themeConstants = GetThemeConstants(resourceInfo.bundleName, resourceInfo.moduleName);
-    if (themeConstants == nullptr) {
-        LOGE("themeConstants is nullptr");
+    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
+    if (resourceWrapper == nullptr) {
+        LOGE("resourceWrapper is nullptr");
         return false;
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto colorString = themeConstants->GetString(resourceInfo.type);
+        auto colorString = resourceWrapper->GetString(resourceInfo.resId);
         return Color::ParseColorString(colorString, colorResult);
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto colorInt = themeConstants->GetInt(resourceInfo.type);
+        auto colorInt = resourceWrapper->GetInt(resourceInfo.resId);
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
@@ -603,9 +602,9 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
             LOGE("resourceParams is empty");
             return false;
         }
-        colorResult = themeConstants->GetColorByName(resourceInfo.params[0]);
+        colorResult = resourceWrapper->GetColorByName(resourceInfo.params[0]);
     } else {
-        colorResult = themeConstants->GetColor(resourceInfo.resId);
+        colorResult = resourceWrapper->GetColor(resourceInfo.resId);
     }
     return true;
 }
@@ -734,6 +733,7 @@ std::string DimensionToString(Dimension dimension)
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
+    CHECK_NULL_RETURN(resourceWrapper, true);
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
@@ -828,6 +828,7 @@ std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuet
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
+    CHECK_NULL_RETURN(resourceWrapper, true);
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));

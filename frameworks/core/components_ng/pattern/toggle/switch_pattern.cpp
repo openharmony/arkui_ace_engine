@@ -119,7 +119,6 @@ void SwitchPattern::HandleBlurEvent()
 {
     RemoveIsFocusActiveUpdateEvent();
     OnIsFocusActiveUpdate(false);
-    UpdateSwitchStyle();
 }
 
 void SwitchPattern::HandleFocusEvent()
@@ -131,37 +130,7 @@ void SwitchPattern::HandleFocusEvent()
     AddIsFocusActiveUpdateEvent();
     if (pipeline->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
-        UpdateSwitchStyle();
     }
-}
-
-void SwitchPattern::UpdateSwitchStyle()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    CHECK_NULL_VOID(switchTheme_);
-    CHECK_NULL_VOID(paintMethod_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-
-    Color bgColor = switchTheme_->GetInactiveColor();
-    if (!isOn_.value_or(false)  && isFocus_) {
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
-            isBgColorUnselectFocus_ = true;
-            Color focusedBGColor = switchTheme_->GetFocusedBGColorUnselected();
-            switchPaintProperty->UpdateUnselectedColor(focusedBGColor);
-        }
-        switchModifier->SetFocusPointColor(switchTheme_->GetPointColorUnselectedFocus());
-    }
-    if (!isFocus_) {
-        if (isBgColorUnselectFocus_) {
-            isBgColorUnselectFocus_ = false;
-            switchPaintProperty->UpdateUnselectedColor(switchTheme_->GetInactiveColor());
-        }
-    }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwitchPattern::AddIsFocusActiveUpdateEvent()
@@ -171,7 +140,6 @@ void SwitchPattern::AddIsFocusActiveUpdateEvent()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-            pattern->UpdateSwitchStyle();
         };
     }
     auto host = GetHost();
@@ -192,20 +160,14 @@ void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
 
 void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
 {
-    CHECK_NULL_VOID(paintMethod_);
-    CHECK_NULL_VOID(switchTheme_);
-    auto switchModifier = paintMethod_->GetSwitchModifier();
-    CHECK_NULL_VOID(switchModifier);
-    switchModifier->SetIsFocused(isFocusAcitve);
-    isFocus_ = isFocusAcitve;
-    Color color;
-    if (isFocus_) {
-        color = isOn_.value_or(false) ? switchTheme_->GetActiveColor() : switchTheme_->GetFocusedBGColorUnselected();
+    if (isFocusAcitve) {
+        touchHoverType_ = TouchHoverAnimationType::FOCUS;
     } else {
-        color = isOn_.value_or(false) ? switchTheme_->GetActiveColor() : switchTheme_->GetInactiveColor();
+        touchHoverType_ = TouchHoverAnimationType::NONE;
     }
-    switchModifier->SetIsFocusOrBlur(true);
-    switchModifier->SetBoardColor(color);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwitchPattern::HandleEnabled()
@@ -253,16 +215,39 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
-    MarginProperty margin;
-    margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
+    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     direction_ = layoutProperty->GetNonAutoLayoutDirection();
+    InitDefaultMargin();
+    if (layoutProperty->GetPositionProperty()) {
+        layoutProperty->UpdateAlignment(
+            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+    } else {
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+}
+
+void SwitchPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -279,16 +264,19 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
-    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
-    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
+}
+
+void SwitchPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void SwitchPattern::SetAccessibilityAction()
@@ -369,7 +357,7 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
-    switchModifier->SetIsOn(isOn_.value());
+    switchModifier->SetIsOn(isOn_.value_or(false));
     switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
     UpdateChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -398,7 +386,7 @@ void SwitchPattern::UpdateChangeEvent() const
 {
     auto switchEventHub = GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
-    switchEventHub->UpdateChangeEvent(isOn_.value());
+    switchEventHub->UpdateChangeEvent(isOn_.value_or(false));
 }
 
 void SwitchPattern::OnClick()
@@ -699,11 +687,11 @@ void SwitchPattern::HandleDragEnd()
     auto mainSize = GetSwitchWidth();
     auto contentOffset = GetSwitchContentOffsetX();
     if ((direction_ == TextDirection::RTL &&
-        ((isOn_.value() && dragOffsetX_ - contentOffset > mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset <= mainSize / 2))) ||
+        ((isOn_.value_or(false) && dragOffsetX_ - contentOffset > mainSize / 2) ||
+        (!isOn_.value_or(false) && dragOffsetX_ - contentOffset <= mainSize / 2))) ||
         (direction_ != TextDirection::RTL &&
-        ((isOn_.value() && dragOffsetX_ - contentOffset < mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset >= mainSize / 2)))) {
+        ((isOn_.value_or(false) && dragOffsetX_ - contentOffset < mainSize / 2) ||
+        (!isOn_.value_or(false) && dragOffsetX_ - contentOffset >= mainSize / 2)))) {
         OnClick();
     }
     isDragEvent_ = false;
@@ -768,10 +756,34 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(switchTheme);
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
     switchModifier->InitializeParam(host->GetThemeScopeId());
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(theme);
+        auto pops = host->GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(pops);
+        if (!pops->GetSelectedColorSetByUserValue(false)) {
+            Color color = theme->GetActiveColor();
+            pops->UpdateSelectedColor(color);
+        }
+        if (!pops->GetSwitchPointColorSetByUserValue(false)) {
+            Color color = theme->GetPointColor();
+            pops->UpdateSwitchPointColor(color);
+        }
+        if (!pops->GetUnselectedColorSetByUserValue(false)) {
+            Color color = theme->GetInactiveColor();
+            pops->UpdateUnselectedColor(color);
+        }
+    }
     host->MarkDirtyNode();
     host->SetNeedCallChildrenUpdate(false);
 }

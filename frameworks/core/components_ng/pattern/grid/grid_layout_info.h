@@ -130,6 +130,8 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
+    bool IsAllItemsMeasured() const;
+
     float GetTotalLineHeight(float mainGap, bool removeLastGap = true) const
     {
         float totalHeight = 0.0f;
@@ -365,6 +367,8 @@ struct GridLayoutInfo {
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    std::string ToString() const;
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -389,6 +393,7 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
+    int32_t jumpForRecompose_ = EMPTY_JUMP_INDEX; // new mark index to notify frontend recomposition
     std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
@@ -431,8 +436,6 @@ struct GridLayoutInfo {
     int32_t defCachedCount_ = 1;
 
     int32_t times_ = 0;
-
-    float endHeight_ = 0.0f;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

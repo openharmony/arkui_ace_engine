@@ -27,12 +27,15 @@ namespace OHOS::Ace::NG {
 
 class AgingAdapationDialogUtil {
 public:
-    static RefPtr<FrameNode> ShowLongPressDialog(const std::string& message, const RefPtr<FrameNode>& iconNode);
-    static RefPtr<FrameNode> ShowLongPressDialog(const std::u16string& message, const RefPtr<FrameNode>& iconNode);
+    static RefPtr<FrameNode> ShowLongPressDialog(
+        const std::string& message, const RefPtr<FrameNode>& iconNode, bool isWithDialogTheme = false);
+    static RefPtr<FrameNode> ShowLongPressDialog(
+        const std::u16string& message, const RefPtr<FrameNode>& iconNode, bool isWithDialogTheme = false);
     static RefPtr<FrameNode> ShowLongPressDialog(
         const std::string& message, ImageSourceInfo& imageSourceInfo, int32_t themeScopeId = 0);
     static RefPtr<FrameNode> ShowLongPressDialog(
         const std::u16string& message, ImageSourceInfo& imageSourceInfo, int32_t themeScopeId = 0);
+    static RefPtr<FrameNode> ShowLongPressDialog(const std::u16string& message);
     static float GetDialogBigFontSizeScale();
     static float GetDialogLargeFontSizeScale();
     static float GetDialogMaxFontSizeScale();

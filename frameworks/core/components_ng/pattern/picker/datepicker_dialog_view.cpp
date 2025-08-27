@@ -48,12 +48,12 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
+constexpr Dimension LUNAR_SWITCH_MIN_FONT_SIZE = 1.0_vp;
+constexpr uint32_t LUNAR_SWITCH_MAX_LINES = 1;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
-constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
-constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t RATIO_SEVEN = 7;
@@ -101,6 +101,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     } else {
         auto dateOrder = orderResult.dateOrder;
         pickerPattern->SetDateOrder(dateOrder);
+    }
+    if (language == "ar" && dateNode->GetLayoutProperty()) {
+        dateNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
     }
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
@@ -189,6 +192,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
+    textLayoutProperty->UpdateAdaptMaxFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
+    textLayoutProperty->UpdateAdaptMinFontSize(ConvertFontScaleValue(LUNAR_SWITCH_MIN_FONT_SIZE));
+    textLayoutProperty->UpdateMaxLines(LUNAR_SWITCH_MAX_LINES);
+    textLayoutProperty->UpdateLayoutWeight(RATIO_ONE);
     textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     textNode->MarkModifyDone();
@@ -326,7 +333,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
 
 void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -993,8 +1002,7 @@ void DatePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
-    std::map<std::string, PickerDate> datePickerProperty, const PickerTextProperties& properties, bool isLunar,
-    bool showTime)
+    const DatePickerSettingData& settingData, bool showTime)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATE_PICKER_ETS_TAG, dateNodeId);
     auto dateNode = FrameNode::GetOrCreateFrameNode(
@@ -1022,8 +1030,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate = PickerDate::Current();
-    SetShowLunar(dateNode, isLunar);
-    SetDateTextProperties(dateNode, properties);
+    SetShowLunar(dateNode, settingData.isLunar);
+    SetCanLoop(dateNode, settingData.canLoop);
+    SetDateTextProperties(dateNode, settingData.properties);
+
+    auto datePickerProperty = settingData.datePickerProperty;
     auto iterStart = datePickerProperty.find("start");
     if (iterStart != datePickerProperty.end()) {
         parseStartDate = iterStart->second;
@@ -1311,18 +1322,23 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    marginCheckbox.right = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    marginCheckbox.left = isRtl ? CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON)
+                                : CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = isRtl ? CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE)
+                                 : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
+    checkboxLayoutProps->UpdateLayoutWeight(RATIO_ZERO);
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetLunarSwitchCheckbox(checkbox);
 
     auto textNode = CreateLunarSwitchTextNode();
     CHECK_NULL_VOID(textNode);
     textNode->MountToParent(contentRow);
-    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
@@ -1373,6 +1389,13 @@ void DatePickerDialogView::SetShowLunar(const RefPtr<FrameNode>& frameNode, bool
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
     pickerProperty->UpdateLunar(lunar);
+}
+
+void DatePickerDialogView::SetCanLoop(const RefPtr<FrameNode>& frameNode, bool isLoop)
+{
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateCanLoop(isLoop);
 }
 
 void DatePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
@@ -1551,6 +1574,7 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto context = titleButton->GetContextRefPtr();
     AnimationUtils::Animate(option, [weak = WeakPtr<FrameNode>(titleButton), color]() {
         auto titleButton = weak.Upgrade();
         auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleButton);
@@ -1558,7 +1582,7 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
         auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
         buttonTitleRenderContext->UpdateBackgroundColor(color);
         buttonTitleNode->MarkDirtyNode();
-    });
+    }, nullptr, nullptr, context);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
@@ -1566,8 +1590,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
 {
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     datePickerMode_ = settingData.mode;
-    auto dateNode =
-        CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto dateNode = CreateDateNode(dateNodeId, settingData, false);
     SetMode(dateNode, settingData.mode);
     ViewStackProcessor::GetInstance()->Push(dateNode);
     dateNode->MountToParent(pickerStack);
@@ -1625,8 +1648,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = CreateDateNode(monthDaysNodeId, settingData, true);
     lunarChangeEvent = [monthDaysNodeWeak = AceType::WeakClaim(AceType::RawPtr(monthDaysNode)),
                            dateNodeWeak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
         auto monthDaysNode = monthDaysNodeWeak.Upgrade();
@@ -1676,6 +1698,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     timePickerRowPattern->SetShowLunarSwitch(settingData.lunarswitch);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(timePickerLayout, nullptr);
+    timePickerLayout->UpdateLoop(settingData.canLoop);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
         ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
@@ -1998,7 +2021,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& contentRow)
 {
     CHECK_NULL_RETURN(dateNode, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = dateNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();

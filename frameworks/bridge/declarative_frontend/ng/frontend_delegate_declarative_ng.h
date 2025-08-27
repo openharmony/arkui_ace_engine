@@ -53,6 +53,11 @@ public:
         const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
+    void RunIntentPage();
+    void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback);
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
+
     void OnConfigurationUpdated(const std::string& data);
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
@@ -71,6 +76,9 @@ public:
     void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback);
     void SetLayoutInspectorCallback(const LayoutInspectorCallback& layoutInspectorCallback);
     void SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback);
+    void SetDrawChildrenInspectorCallback(const DrawChildrenInspectorCallback& drawChildrenInspectorCallback);
+    void SetIsDrawChildrenCallbackFuncExistCallback(
+        const IsDrawChildrenCallbackFuncExistCallback& IsDrawChildrenCallbackFuncExistCallback);
     void SetOnStartContinuationCallBack(OnStartContinuationCallBack&& onStartContinuationCallBack);
     void SetOnCompleteContinuationCallBack(OnCompleteContinuationCallBack&& onCompleteContinuationCallBack);
     void SetOnSaveDataCallBack(OnSaveDataCallBack&& onSaveDataCallBack);
@@ -94,6 +102,8 @@ public:
     void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId);
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
@@ -123,6 +133,7 @@ public:
         return nullptr;
     }
     size_t GetComponentsCount() override;
+    std::string GetInitParams() override;
     std::string GetParams() override;
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 
@@ -149,6 +160,7 @@ public:
     void ShowDialog(const PromptDialogAttr &dialogAttr, const std::vector<ButtonInfo> &buttons,
         std::function<void(int32_t, int32_t)> &&callback, const std::set<std::string> &callbacks,
         std::function<void(bool)>&& onStatusChanged) override;
+    void RemoveCustomDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
@@ -236,6 +248,10 @@ public:
         const NG::SnapshotOptions& options) override;
 
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
+        const NG::SnapshotOptions& options) override;
+
+    void GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID, const bool isStartRect,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         const NG::SnapshotOptions& options) override;
 
     void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
@@ -342,6 +358,8 @@ private:
     MediaQueryCallback mediaQueryCallback_;
     LayoutInspectorCallback layoutInspectorCallback_;
     DrawInspectorCallback drawInspectorCallback_;
+    DrawChildrenInspectorCallback drawChildrenInspectorCallback_;
+    IsDrawChildrenCallbackFuncExistCallback isDrawChildrenCallbackFuncExistCallback_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnSaveDataCallBack onSaveDataCallBack_;

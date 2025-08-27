@@ -30,7 +30,11 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -39,6 +43,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1038,7 +1043,11 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
         return UNSUPPORTED;
     }
     SkString info(len);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(result->data(), result->size(), info.data());
+#else
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
@@ -1243,8 +1252,8 @@ void RosenRenderOffscreenCanvas::Arc(const ArcParam& param)
     double top = param.y - param.radius;
     double right = param.x + param.radius;
     double bottom = param.y + param.radius;
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -1579,8 +1588,8 @@ void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
     double r = args.para3;
 #ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(x - r, y - r, x + r, y + r);
-    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
         sweepAngle =
@@ -1602,8 +1611,8 @@ void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
 #else
     RSPoint point1(x - r, y - r);
     RSPoint point2(x + r, y + r);
-    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
         sweepAngle =
@@ -1677,12 +1686,12 @@ void RosenRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
     double y = args.para2;
     double rx = args.para3;
     double ry = args.para4;
-    double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double rotation = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double startAngle = std::fmod(args.para6, ACE_PI * 2.0);
+    double endAngle = std::fmod(args.para7, ACE_PI * 2.0);
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    startAngle = (startAngle < 0.0 ? startAngle + ACE_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + ACE_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -1943,9 +1952,9 @@ void RosenRenderOffscreenCanvas::ClosePath()
 void RosenRenderOffscreenCanvas::Rotate(double angle)
 {
 #ifndef USE_ROSEN_DRAWING
-    skCanvas_->rotate(angle * 180 / M_PI);
+    skCanvas_->rotate(angle * 180 / ACE_PI);
 #else
-    canvas_->Rotate(angle * 180 / M_PI);
+    canvas_->Rotate(angle * 180 / ACE_PI);
 #endif
 }
 void RosenRenderOffscreenCanvas::Scale(double x, double y)
@@ -2306,14 +2315,14 @@ void RosenRenderOffscreenCanvas::QuadraticCurveTo(const QuadraticCurveParam& par
 void RosenRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(param.startAngle, ACE_PI * 2.0);
+    double endAngle = std::fmod(param.endAngle, ACE_PI * 2.0);
+    startAngle = (startAngle < 0.0 ? startAngle + ACE_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + ACE_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
-    double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = param.rotation * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.

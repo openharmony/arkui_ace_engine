@@ -80,11 +80,6 @@ void CheckboxTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeCon
     theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
     theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
     SetCheckboxFocus(themeConstants, theme);
-
-    if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
-        return;
-    }
-    SetCheckboxSize(themeConstants, theme);
 }
 
 void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConstants,
@@ -130,14 +125,6 @@ void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConst
     theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
     theme->interactiveHoverColor_ = switchPattern->GetAttr<Color>("interactive_hover", Color::RED);
     theme->interactivePressedColor_ = switchPattern->GetAttr<Color>("interactive_pressed", Color::RED);
-    if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
-        return;
-    }
-    theme->width_ = switchPattern->GetAttr<Dimension>(SWITCH_WIDTH, 40.0_vp);
-    theme->height_ = switchPattern->GetAttr<Dimension>(SWITCH_HEIGHT, 26.0_vp);
-    theme->shadowWidth_ = switchPattern->GetAttr<Dimension>(SWITCH_SHADOW_WIDTH, 2.0_vp);
-    theme->hotZoneHorizontalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_HORIZONTAL_PADDING, 4.0_vp);
-    theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
 }
 
 void SwitchTheme::Builder::ParseSubStylePattern(const RefPtr<ThemeConstants>& themeConstants,

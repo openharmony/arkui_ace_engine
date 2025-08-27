@@ -131,6 +131,8 @@ public:
     {
         return TestingMatrix();
     }
+
+    void ResetHybridRenderSize(float width, float height) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H

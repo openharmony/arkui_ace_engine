@@ -37,6 +37,7 @@ public:
     void SetOnSelect(SelectFunc&& onSelect) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static RefPtr<FrameNode> CreateGridItem(int32_t nodeId);
     static void SetForceRebuild(FrameNode* frameNode, bool value);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
@@ -47,6 +48,7 @@ public:
     static void SetColumnEnd(FrameNode* frameNode, int32_t columnEnd);
     static void SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle);
     static void SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect);
+    static void SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_MODEL_NG_H

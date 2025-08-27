@@ -68,6 +68,7 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
             ret = AceTextCategory::INPUT_TYPE_EMAIL;
             break;
         case TextInputType::VISIBLE_PASSWORD:
+        case TextInputType::NUMBER_PASSWORD:
             ret = AceTextCategory::INPUT_TYPE_PASSWORD;
             break;
         case TextInputType::USER_NAME:
@@ -128,16 +129,12 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = UtfUtils::Str16DebugToStr8(textFieldLayoutProperty->GetValueValue(u""));
+    auto text = textFieldLayoutProperty->GetValueValue(u"");
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
 
-    if ((IsShowCount() || IsShowError()) && IsHint()) {
-        return GetHintText();
-    }
-
-    return text;
+    return UtfUtils::Str16DebugToStr8(text);
 }
 
 bool TextFieldAccessibilityProperty::IsHint() const

@@ -46,6 +46,7 @@
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -55,6 +56,8 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
+
+#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -72,13 +75,17 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+class DragDropRelatedConfigurations;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
+    OffsetF innerWindowOffset = OffsetF();
     RectF visibleRect = RectF();
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
+    VectorF innerCumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerFrameRect = RectF();
     RectF innerBoundaryRect = RectF();
 };
 
@@ -130,6 +137,8 @@ public:
         bool isRoot = false, bool isLayoutNode = false);
 
     ~FrameNode() override;
+
+    void OnDelete() override;
 
     int32_t FrameCount() const override
     {
@@ -237,7 +246,7 @@ public:
     RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
         RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
-    void CreateLayoutTask(bool forceUseMainThread = false);
+    void CreateLayoutTask(bool forceUseMainThread = false, LayoutType layoutTaskType = LayoutType::NONE);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -248,7 +257,7 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -286,13 +295,14 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(
+        uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
 
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+    void SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();
 
@@ -375,12 +385,6 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
-    template<typename T>
-    RefPtr<T> GetEventHubOnly()
-    {
-        return DynamicCast<T>(eventHub_);
-    }
-
     RefPtr<GestureEventHub> GetOrCreateGestureEventHub()
     {
         CreateEventHubInner();
@@ -398,6 +402,8 @@ public:
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
         const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
     const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    const RefPtr<DragDropRelatedConfigurations>& GetOrCreateDragDropRelatedConfigurations();
 
     void CreateEventHubInner();
 
@@ -438,10 +444,12 @@ public:
 
     HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
         TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
-
-    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+    ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
-        TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict, bool blockHierarchy);
+    void HitTestChildren(const PointF& globalPoint, const PointF& localPoint, const PointF& subRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& newComingTargets, bool& preventBubbling, bool& consumed,
+        bool& blockHierarchy);
 
     void AnimateHoverEffect(bool isHovered) const;
 
@@ -520,9 +528,15 @@ public:
     void OnRecycle() override;
     void OnReuse() override;
 
+    void NotifyColorModeChange(uint32_t colorMode) override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
     OffsetF GetPositionToScreen();
+
+    OffsetF GetGlobalPositionOnDisplay() const;
+
+    OffsetF GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext) const;
 
     OffsetF GetPositionToParentWithTransform() const;
 
@@ -539,7 +553,8 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
-    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
+    // checkScreen takes effect only when checkBoundary is false.
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
     // and accumulate every ancestor node's graphic properties such as rotate and transform
@@ -555,7 +570,7 @@ public:
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
         bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetToStage() const;
+    OffsetF GetPaintRectOffsetToPage() const;
 
     RectF GetPaintRectWithTransform() const;
 
@@ -585,13 +600,13 @@ public:
         AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
+        AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
+        AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -601,9 +616,14 @@ public:
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
 
-    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {
         destroyCallbacksMap_[tag] = callback;
+    }
+
+    void RemoveDestroyCallbackWithTag(const std::string& tag)
+    {
+        destroyCallbacksMap_.erase(tag);
     }
 
     void SetConfigurationModeUpdateCallback(
@@ -685,24 +705,23 @@ public:
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        if (isResetOptions) {
-            previewOption_ = previewOption;
-        } else {
-            auto options = previewOption_.options;
-            previewOption_ = previewOption;
-            previewOption_.options = options;
-        }
-        previewOption_.onApply = std::move(previewOption.onApply);
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetDragPreviewOption(previewOption, isResetOptions);
     }
 
     void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
     {
-        previewOption_.options = optionsAfterApplied;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetOptionsAfterApplied(optionsAfterApplied);
     }
 
-    DragPreviewOption GetDragPreviewOption() const
+    DragPreviewOption GetDragPreviewOption()
     {
-        return previewOption_;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_RETURN(dragDropRelatedConfigurations, DragPreviewOption());
+        return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
     }
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
@@ -811,9 +830,9 @@ public:
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
-    double GetPreviewScaleVal() const;
+    double GetPreviewScaleVal();
 
-    bool IsPreviewNeedScale() const;
+    bool IsPreviewNeedScale();
 
     void SetViewPort(RectF viewPort)
     {
@@ -836,8 +855,38 @@ public:
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
-    // layoutwrapper function override
+    // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    bool EnsureDelayedMeasureBeingOnlyOnce();
+
+    bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
+
+    bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
+
+    void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
+
+    void PostTaskForIgnore();
+
+    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes);
+
+    bool PostponedTaskForIgnore();
+
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+    {
+        if (child) {
+            delayLayoutChildren_.emplace_back(child);
+        }
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
+    {
+        return delayLayoutChildren_;
+    }
+
+    void TraverseForIgnore();
+
+    void TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subtreeCollection, int& subtreeRecheck);
 
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
@@ -846,6 +895,9 @@ public:
 
     int32_t GetTotalChildCount() const override
     {
+        if (arkoalaLazyAdapter_) {
+            return arkoalaLazyAdapter_->GetTotalCount();
+        }
         return UINode::TotalChildCount();
     }
 
@@ -940,9 +992,11 @@ public:
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
+    bool ReachResponseDeadline() const override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode();
+    bool IsGeometrySizeChange() const;
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -1026,9 +1080,9 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
-    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& windowRect);
 
-    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect);
 
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
 
@@ -1065,7 +1119,8 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
+                                bool withClip = false) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1157,9 +1212,9 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode();
+    void MarkAndCheckNewOpIncNode(Axis axis);
     ChildrenListWithGuard GetAllChildren();
-    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
@@ -1220,7 +1275,33 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
+    void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper);
+    /**
+     * @description: this callback triggered by ai assistant by ui_session proxy.
+     * @param funcName function name of the target function.
+     * @param params params for target function in json format.
+     * @return check ai function call success or not:
+     * 0 means success, 1 means aiCallerHelper_ is null, 2 means functionName not found
+     */
+    uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
+
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
+private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index, bool active);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
+    /* temporary adapter to provide LazyForEach feature in Arkoala */
+    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
+
+public:
+    /* ============================== Arkoala LazyForEach adapter section END ================================*/
 
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const
@@ -1235,6 +1316,8 @@ public:
 
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
+
+    void SetCustomPropertyMapFlagByKey(const std::string& key);
 
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
@@ -1281,7 +1364,8 @@ public:
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+    OffsetF CalculateOffsetRelativeToWindow(
+        uint64_t nanoTimestamp, bool logFlag = false, int32_t areaChangeMinDepth = -1);
 
     bool IsDebugInspectorId();
 
@@ -1313,6 +1397,7 @@ public:
     }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback);
     void FireFrameNodeDestructorCallback();
 
     bool CheckTopWindowBoundary() const
@@ -1320,10 +1405,26 @@ public:
         return topWindowBoundary_;
     }
 
+    void ClearCachedGlobalOffset()
+    {
+        cachedGlobalOffset_ = { 0, OffsetF() };
+    }
+
+    void ClearCachedIsFrameDisappear()
+    {
+        cachedIsFrameDisappear_ = { 0, false };
+    }
+
     void SetTopWindowBoundary(bool topWindowBoundary)
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+
+    bool CheckTopScreen() const
+    {
+        return GetTag() == V2::SCREEN_ETS_TAG;
+    }
+
     bool CheckVisibleOrActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
@@ -1353,12 +1454,9 @@ public:
         layoutProperty_->SetNeedLazyLayout(value);
     }
 
-    void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
-
-    std::string PrintVisibilityDumpInfo() const;
-    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
     {
-        detachRelatedNodeCallback_ = std::move(callback);
+        removeToolbarItemCallbacks_[id] = callback;
     }
 
     int32_t OnRecvCommand(const std::string& command) override;
@@ -1370,17 +1468,33 @@ public:
         }
     }
 
+    bool HasMultipleChild();
+
+    void UpdateOcclusionCullingStatus(bool enable)
+    {
+        if (renderContext_) {
+            renderContext_->UpdateOcclusionCullingStatus(enable);
+        }
+    }
+
+    void AddToOcclusionMap(bool enable);
+    void MarkModifyDoneUnsafely();
+    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
+    void UpdateIgnoreCount(int inc);
+    void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
+        bool addDefaultTransition = false, bool addModalUiextension = false) override;
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void OnCollectRemoved() override;
 
 private:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -1419,7 +1533,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json);
     void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
@@ -1459,21 +1573,22 @@ private:
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
-    bool IsFrameDisappear(uint64_t timestamp);
-    bool IsFrameAncestorDisappear(uint64_t timestamp);
+    bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
-    // set costom background layoutConstraint
+    // set custom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
+    void AddFrameNodeSnapshot(
+        bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1501,7 +1616,8 @@ private:
     CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+        uint64_t timestamp);
 
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
@@ -1516,11 +1632,23 @@ private:
     void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
 
+    RectF CheckResponseRegionForStylus(RectF& rect, const TouchEvent& touchEvent);
+
     void ResetPredictNodes();
+    void HandleAreaChangeDestruct();
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
+    void AddNodeToRegisterTouchTest();
+    void CleanupPipelineResources();
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void UpdateBackground();
+    void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1634,9 +1762,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_;
-
-    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 
@@ -1663,6 +1789,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
 
     bool topWindowBoundary_ = false;
 
@@ -1671,12 +1798,18 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
-    std::deque<std::pair<uint64_t, std::pair<VisibleType, bool>>> visibilityDumpInfos_;
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
-    std::function<void()> detachRelatedNodeCallback_;
+    std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
+
+    RefPtr<FrameNode> cornerMarkNode_ = nullptr;
+    RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
+
+    std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
+    std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
+    std::shared_ptr<AICallerHelper> aiCallerHelper_;
 };
 } // namespace OHOS::Ace::NG
 

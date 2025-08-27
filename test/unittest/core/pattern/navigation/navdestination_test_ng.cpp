@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -35,7 +36,10 @@
 #include "core/pipeline/pipeline_base.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "mock_navdestination_scrollable_processor.h"
 #include "mock_navigation_stack.h"
 
 using namespace testing;
@@ -44,8 +48,12 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NAVIGATION_TITLE = "NavdestinationTestNg";
 const std::string NAVIGATION_SUBTITLE = "NavdestinationSubtitle";
+const std::string BUNDLE_NAME = "com.example.test";
+const std::string MODULE_NAME = "entry";
 constexpr float TITLEBAR_WIDTH = 480.0f;
 constexpr float TITLEBAR_HEIGHT = 100.0f;
+constexpr float TOOLBAR_WIDTH = 400.0f;
+constexpr float TOOLBAR_HEIGHT = 150.0f;
 constexpr Dimension MAX_PADDING_START = 28.0_vp;
 constexpr float BACK_BUTTON_FRAME_SIZE = 32.0f;
 constexpr float TITLE_FRAME_WIDTH = 60.0f;
@@ -54,6 +62,7 @@ constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
 const CalcDimension DEFAULT_PADDING = 24.0_vp;
 const Dimension DEFAULT_MENU_BUTTON_PADDING = 8.0_vp;
+const TranslateOptions DEFAULT_TRANSLATEOPTIONS = TranslateOptions(0.0f, 0.0f, 0.0f);
 
 struct UIComponents {
     RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
@@ -1291,6 +1300,94 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTitlebarOptions003
+ * @tc.desc: Test SetTitlebarOptions function with resource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetTitlebarOptions003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    EffectOption effectOption;
+    effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    opt.bgOptions.effectOption = effectOption;
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.SetTitlebarOptions(std::move(opt));
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    titleBarPattern->OnColorModeChange(1);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
+
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
+    EXPECT_TRUE(options.bgOptions.effectOption.has_value());
+    EXPECT_EQ(options.bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetMenuOptions001
+ * @tc.desc: Test SetMenuOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetMenuOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+
+    NavigationMenuOptions opt;
+    opt.mbOptions.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.mbOptions.bgOptions.blurStyleOption = blurStyleOption;
+    EffectOption effectOption;
+    effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    opt.mbOptions.bgOptions.effectOption = effectOption;
+    navDestinationModelNG.SetMenuOptions(std::move(opt));
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.SetMenuOptions(std::move(opt));
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    navDestinationPattern->OnColorModeChange(1);
+
+    auto options = navDestinationPattern->GetMenuOptions();
+    EXPECT_TRUE(options.mbOptions.bgOptions.color.has_value());
+    EXPECT_EQ(options.mbOptions.bgOptions.color.value(), Color(0xff0000ff));
+    EXPECT_TRUE(options.mbOptions.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.mbOptions.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_TRUE(options.mbOptions.bgOptions.effectOption.has_value());
+    EXPECT_EQ(options.mbOptions.bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+    g_isConfigChangePerform = false;
+}
+
+/**
  * @tc.name: SetToolbarConfiguration001
  * @tc.desc: Test SetToolbarConfiguration and cover all conditions of "GetPrevToolBarIsCustom.value_or".
  * @tc.type: FUNC
@@ -1373,6 +1470,175 @@ HWTEST_F(NavdestinationTestNg, SetToolbarConfiguration003, TestSize.Level1)
     toolBarItems.insert(toolBarItems.end(), std::begin(newBars), std::end(newBars));
     EXPECT_TRUE(toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR);
     navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: SetToolbarConfiguration004
+ * @tc.desc: Test SetToolbarConfiguration with resource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetToolbarConfiguration004, TestSize.Level1)
+{
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    bar.status = NG::NavToolbarItemStatus::NORMAL;
+    std::vector<NG::BarItem> toolBarItems;
+    for (int i = 0; i < 4; i++) {
+        toolBarItems.push_back(bar);
+    }
+    MoreButtonOptions opt;
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems), std::move(opt));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    EXPECT_NE(navDestinationGroupNode, nullptr);
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navDestinationGroupNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto barItemSize = static_cast<int32_t>(containerNode->GetChildren().size());
+    EXPECT_EQ(barItemSize, 4);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(toolbarPattern, nullptr);
+    EXPECT_EQ(
+        toolbarPattern->GetToolbarMoreButtonOptions().bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EffectOption effectOption;
+    effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    opt.bgOptions.effectOption = effectOption;
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems), std::move(opt));
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    navDestinationPattern->OnColorModeChange(1);
+    EXPECT_EQ(
+        toolbarPattern->GetToolbarMoreButtonOptions().bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: ResetResObj001
+ * @tc.desc: Test ResetResObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, ResetResObj001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    std::string key = "navDestination.resetResObj";
+    navDestinationPattern->AddResObj(key, resObj, std::move(updateFunc));
+    auto resMgr = navDestinationPattern->resourceMgr_;
+    EXPECT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    navDestinationModelNG.ResetResObj(NavDestinationPatternType::NAV_DESTINATION, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.ResetResObj(NavDestinationPatternType::NAV_DESTINATION, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 0);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    auto titleBarUpdateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    titleBarPattern->AddResObj(key, resObj, std::move(titleBarUpdateFunc));
+    resMgr = titleBarPattern->resourceMgr_;
+    EXPECT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    navDestinationModelNG.ResetResObj(NavDestinationPatternType::TITLE_BAR, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: ResetResObj002
+ * @tc.desc: Test ResetResObj with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, ResetResObj002, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    std::string key = "navDestination.resetResObj";
+    navDestinationPattern->AddResObj(key, resObj, std::move(updateFunc));
+    auto resMgr = navDestinationPattern->resourceMgr_;
+    EXPECT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    navDestinationModelNG.ResetResObj(frameNode, NavDestinationPatternType::NAV_DESTINATION, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.ResetResObj(frameNode, NavDestinationPatternType::NAV_DESTINATION, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 0);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    auto titleBarUpdateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    titleBarPattern->AddResObj(key, resObj, std::move(titleBarUpdateFunc));
+    resMgr = titleBarPattern->resourceMgr_;
+    EXPECT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    navDestinationModelNG.ResetResObj(frameNode, NavDestinationPatternType::TITLE_BAR, key);
+    EXPECT_EQ(resMgr->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: RegisterBackgroundColorUpdateCallback001
+ * @tc.desc: Test RegisterBackgroundColorUpdateCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, RegisterBackgroundColorUpdateCallback001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::Claim(AceType::DynamicCast<NavDestinationGroupNode>(frameNode));
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+
+    navDestinationModelNG.RegisterBackgroundColorUpdateCallback(navDestinationGroupNode);
+    g_isConfigChangePerform = true;
+    navDestinationModelNG.RegisterBackgroundColorUpdateCallback(navDestinationGroupNode);
+    auto resMgr = navDestinationPattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    navDestinationPattern->OnColorModeChange(1);
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -1659,5 +1925,399 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest015, TestSize.Level1)
     EXPECT_EQ(padding->right.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
     EXPECT_EQ(padding->top.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
     EXPECT_EQ(padding->bottom.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
+}
+
+/**
+ * @tc.name: NavdestinationTest016
+ * @tc.desc: Test BuildMoreItemNodeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavdestinationTest016, TestSize.Level1)
+{
+    OptionParam optionParam;
+    std::vector<OptionParam> params = {};
+    params.push_back(optionParam);
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto barItemNode = NavigationTitleUtil::CreateBarItemNode(true, theme);
+    ASSERT_NE(barItemNode, nullptr);
+    auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
+    ASSERT_NE(menuItemNode, nullptr);
+    auto barMenuNode = MenuView::Create(
+        std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+    ASSERT_NE(barMenuNode, nullptr);
+    NavigationTitleUtil::BuildMoreItemNodeAction(menuItemNode,barItemNode, barMenuNode, menuParam);
+    bool isClick = false;
+    BarItem barItem;
+    barItem.action = [&isClick]() { isClick = !isClick; };
+    auto gestureEventHub = menuItemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto clickListener = gestureEventHub->clickEventActuator_->clickEvents_.back();
+    ASSERT_NE(clickListener, nullptr);
+    ASSERT_NE(clickListener->callback_, nullptr);
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    clickListener->callback_(info);
+    EXPECT_FALSE(isClick);
+}
+
+/**
+ * @tc.name: SetScrollableProcessor001
+ * @tc.desc: Test SetScrollableProcessor function of NavDestinationModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetScrollableProcessor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get processor from Pattern.
+     * @tc.expected: No processor was setted.
+     */
+    auto processor = pattern->GetScrollableProcessor();
+    ASSERT_EQ(processor, nullptr);
+
+    /**
+     * @tc.steps: step3. create mock Processor.
+     * @tc.expected: success to create processor.
+     */
+    auto newProcessor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    ASSERT_NE(newProcessor, nullptr);
+    int32_t createTimes = 0;
+    auto creator = [&newProcessor, &createTimes]() {
+        createTimes++;
+        return newProcessor;
+    };
+    EXPECT_CALL(*newProcessor, SetNodeId(_)).Times(1);
+    EXPECT_CALL(*newProcessor, SetNavDestinationPattern(_)).Times(1);
+
+    /**
+     * @tc.steps: step4. Call NavDestinationModelNG::SetScrollableProcessor with creator.
+     *                   Branch: if (!pattern->GetScrollableProcessor()) {
+     *                   Condition: !pattern->GetScrollableProcessor() => true
+     * @tc.expected: creator function will be called only once time,
+     *               processor of pattern will be setted to expected value,
+     *               SetNodeId & SetNavDestinationPattern of pattern will be called only once time.
+     */
+    navDestinationModelNG.SetScrollableProcessor(creator);
+    ASSERT_EQ(createTimes, 1);
+    auto processor2 = pattern->GetScrollableProcessor();
+    ASSERT_EQ(newProcessor, processor2);
+
+    /**
+     * @tc.steps: step5. Call NavDestinationModelNG::SetScrollableProcessor with creator again.
+     *                   Branch: if (!pattern->GetScrollableProcessor()) {
+     *                   Condition: !pattern->GetScrollableProcessor() => false
+     * @tc.expected: creator function will not be called.
+     */
+    navDestinationModelNG.SetScrollableProcessor(creator);
+    ASSERT_EQ(createTimes, 1);
+    processor2 = pattern->GetScrollableProcessor();
+    ASSERT_EQ(newProcessor, processor2);
+}
+
+/**
+ * @tc.name: UpdateBindingWithScrollable001
+ * @tc.desc: Test UpdateBindingWithScrollable function of NavDestinationModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateBindingWithScrollable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set processor to pattern.
+     * @tc.expected: success to set processor.
+     */
+    auto processor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    pattern->scrollableProcessor_ = processor;
+    ASSERT_NE(pattern->scrollableProcessor_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call UpdateBindingWithScrollable function.
+     * @tc.expected: callback function will be called, the processor argument equal to that one created in step2.
+     */
+    int32_t callTimes = 0;
+    bool isSameProcessor = false;
+    auto callback = [&callTimes, &processor, &isSameProcessor](
+        const RefPtr<NG::NavDestinationScrollableProcessor>& processorIn) {
+        callTimes++;
+        isSameProcessor = processor == processorIn;
+    };
+    auto callback2 = callback;
+    navDestinationModelNG.UpdateBindingWithScrollable(std::move(callback2));
+    ASSERT_EQ(callTimes, 1);
+    ASSERT_TRUE(isSameProcessor);
+
+    /**
+     * @tc.steps: step4. Call UpdateBindingWithScrollable function again.
+     * @tc.expected: callback function will be called again, the processor argument equal to that one created in step2.
+     */
+    navDestinationModelNG.UpdateBindingWithScrollable(std::move(callback));
+    ASSERT_EQ(callTimes, 2);
+    ASSERT_TRUE(isSameProcessor);
+}
+
+/**
+ * @tc.name: UpdateBindingRelation001
+ * @tc.desc: Test UpdateBindingRelation function of NavDestinationScrollableProcessor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateBindingRelation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set processor to pattern.
+     * @tc.expected: success to set processor.
+     */
+    auto processor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    pattern->scrollableProcessor_ = processor;
+    ASSERT_NE(pattern->scrollableProcessor_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnModifyDone twice.
+     *                   Branch: if (scrollableProcessor_) { in NavDestinationPattern::OnModifyDone
+     *                   Condition: scrollableProcessor_ => true
+     * @tc.expected: pattern will update binding relation for twice.
+     */
+    EXPECT_CALL(*processor, UpdateBindingRelation()).Times(2);
+    pattern->OnModifyDone();
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step4. Destroy NavDestationGroupNode & NavDestinationPattern.
+     *                   Branch: if (scrollableProcessor_) { in NavDestinationPattern::~NavDestinationPattern
+     *                   Condition: scrollableProcessor_ => true
+     * @tc.expected: pattern will unbind all scrollers.
+     */
+    EXPECT_CALL(*processor, UnbindAllScrollers()).Times(1);
+    pattern = nullptr;
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: CancelShowTitleAndToolBarTask001
+ * @tc.desc: Test CancelShowTitleAndToolBarTask function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, CancelShowTitleAndToolBarTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern, has no task for showing titleBar.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_FALSE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step2. Set show titleBar task.
+     * @tc.expected: pattern has task for showing titleBar.
+     */
+    pattern->titleBarSwipeContext_.showBarTask.Reset([]() {});
+    ASSERT_TRUE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step3. Call pattern::CancelShowTitleAndToolBarTask.
+     *                   Branch: if (titleBarSwipeContext_.showBarTask) {
+     *                   Condition: titleBarSwipeContext_.showBarTask => true
+     * @tc.expected: Task for showing titleBar will be cancel and reseted.
+     */
+    pattern->CancelShowTitleAndToolBarTask();
+    ASSERT_FALSE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step4. Set show toolBar task.
+     * @tc.expected: pattern has task for showing toolBar.
+     */
+    pattern->toolBarSwipeContext_.showBarTask.Reset([]() {});
+    ASSERT_TRUE(pattern->toolBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step5. Call pattern::CancelShowTitleAndToolBarTask.
+     *                   Branch: if (toolBarSwipeContext_.showBarTask) {
+     *                   Condition: toolBarSwipeContext_.showBarTask => true
+     * @tc.expected: Task for showing toolBar will be cancel and reseted.
+     */
+    pattern->CancelShowTitleAndToolBarTask();
+    ASSERT_FALSE(pattern->toolBarSwipeContext_.showBarTask);
+}
+
+/**
+ * @tc.name: StartHideOrShowBarInner001
+ * @tc.desc: Test StartHideOrShowBarInner function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, StartHideOrShowBarInner001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto titleNode = AceType::DynamicCast<FrameNode>(nodeBase->GetTitleBarNode());
+    ASSERT_NE(titleNode, nullptr);
+    auto renderContext = titleNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, TITLEBAR_WIDTH, TITLEBAR_HEIGHT));
+    renderContext->UpdateTransformTranslate(DEFAULT_TRANSLATEOPTIONS);
+
+    /**
+     * @tc.steps: step2. Start hide titleBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: true, isTitle: true
+     * @tc.expected: titleBar should has translate: -TITLEBAR_HEIGHT.
+     */
+    constexpr float TITLEBAR_TRANSLATE = -50.0f;
+    pattern->StartHideOrShowBarInner(nodeBase, TITLEBAR_HEIGHT, TITLEBAR_TRANSLATE, true, true);
+    auto translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(-TITLEBAR_HEIGHT, translateY));
+
+    /**
+     * @tc.steps: step3. Start show titleBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: false, isTitle: true
+     * @tc.expected: titleBar should has translate: 0.0f.
+     */
+    pattern->StartHideOrShowBarInner(nodeBase, TITLEBAR_HEIGHT, TITLEBAR_TRANSLATE, true, false);
+    translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(0.0f, translateY));
+}
+
+/**
+ * @tc.name: StartHideOrShowBarInner002
+ * @tc.desc: Test StartHideOrShowBarInner function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, StartHideOrShowBarInner002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto toolNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+    ASSERT_NE(toolNode, nullptr);
+    auto renderContext = toolNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, TOOLBAR_WIDTH, TOOLBAR_HEIGHT));
+    renderContext->UpdateTransformTranslate(DEFAULT_TRANSLATEOPTIONS);
+
+    /**
+     * @tc.steps: step2. Start hide toolBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: true, isTitle: false
+     * @tc.expected: toolBar should has translate: TOOLBAR_HEIGHT.
+     */
+    constexpr float TOOLBAR_TRANSLATE = 50.0f;
+    pattern->StartHideOrShowBarInner(nodeBase, TOOLBAR_HEIGHT, TOOLBAR_TRANSLATE, false, true);
+    auto translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(TOOLBAR_HEIGHT, translateY));
+
+    /**
+     * @tc.steps: step3. Start show toolBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: false, isTitle: false
+     * @tc.expected: toolBar should has translate: 0.0f.
+     */
+    pattern->StartHideOrShowBarInner(nodeBase, TOOLBAR_HEIGHT, TOOLBAR_TRANSLATE, false, false);
+    translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(0.0f, translateY));
+}
+/**
+ * @tc.name: UpdateTitleHeight001
+ * @tc.desc: Test UpdateTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateTitleHeight001, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    titleBarNode->title_ = FrameNode::CreateFrameNode("title", 101, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->subtitle_ = FrameNode::CreateFrameNode("subTitle", 102, AceType::MakeRefPtr<TextPattern>());
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    navdestinationModel.UpdateTitleHeight(titleBarNode, resObj);
+    std::string titleKey = "navDestination.title.customtitle";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(titleKey), "");
+    titleBarPattern->OnColorModeChange(1);
+    CalcDimension height;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, height);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(titleKey), height.ToString());
 }
 } // namespace OHOS::Ace::NG

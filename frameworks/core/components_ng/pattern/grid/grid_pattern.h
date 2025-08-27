@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+
 
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
@@ -153,12 +154,12 @@ public:
 
     bool IsAtTopWithDelta() const override
     {
-        return info_.reachStart_ || EstimateHeight() < 0;
+        return info_.reachStart_ || LessNotEqual(EstimateHeight(), 0);
     }
 
     bool IsAtBottomWithDelta() const override
     {
-        return info_.offsetEnd_ || (EstimateHeight() + info_.lastMainSize_ > GetTotalHeight());
+        return info_.offsetEnd_ || GreatNotEqual(EstimateHeight() + info_.lastMainSize_, GetTotalHeight());
     }
 
     bool IsFadingBottom() const override;
@@ -173,7 +174,7 @@ public:
 
     bool UpdateStartIndex(int32_t index, ScrollAlign align);
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return EstimateHeight();
     }
@@ -258,10 +259,16 @@ public:
         focusHandler_.ResetFocusIndex();
     }
 
+    std::optional<int32_t> GetFocusedIndex() const
+    {
+        return focusHandler_.GetFocusIndex();
+    }
+
     SizeF GetChildrenExpandedSize() override;
 
     void HandleOnItemFocus(int32_t index);
 
+    void OnColorModeChange(uint32_t colorMode) override;
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -297,7 +304,7 @@ private:
      */
     void SyncLayoutBeforeSpring();
 
-    void FireOnScrollStart() override;
+    void FireOnScrollStart(bool withPerfMonitor = true) override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
@@ -316,8 +323,13 @@ private:
     RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
+    float mainSizeChanged_ = 0.0f;
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
+
+    // index of first and last GridItem in viewport
+    int32_t startIndex_ = 0;
+    int32_t endIndex_ = -1;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

@@ -25,6 +25,7 @@ public:
     static bool ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo);
     static bool IsTouchEventNeedAbandoned(const TouchEventInfo& touchEventInfo);
     static bool MatchCompatibleCondition();
+    static bool IfNeedMouseTransform();
 private:
     EventInfoConvertor() = default;
     ~EventInfoConvertor() = default;

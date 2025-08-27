@@ -15,10 +15,10 @@
 
 #include "node_model.h"
 
-
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
+#include "node_model_safely.h"
 #include "style_modifier.h"
 
 #include "base/error/error_code.h"
@@ -99,6 +99,7 @@ bool InitialFullNodeImpl(int version)
 
     impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
     impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
+    impl->getBasicAPI()->registerNodeAsyncCommonEventReceiver(OHOS::Ace::NodeModel::HandleInnerNodeCommonEvent);
     return true;
 }
 } // namespace
@@ -113,24 +114,17 @@ bool InitialFullImpl()
     return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
 }
 
-struct InnerEventExtraParam {
-    int32_t targetId;
-    ArkUI_NodeHandle nodePtr;
-    void* userData;
-};
-
-struct ExtraData {
-    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
-};
-
 std::set<ArkUI_NodeHandle> g_nodeSet;
 
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
 {
-    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
+    if (!nodePtr) {
         return false;
     }
-    return true;
+    if (g_nodeSet.count(nodePtr) > 0) {
+        return true;
+    }
+    return IsValidArkUINodeMultiThread(nodePtr);
 }
 
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
@@ -141,7 +135,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
         ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
         ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
-        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN };
+        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN, ARKUI_EMBEDDED_COMPONENT };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
@@ -192,6 +186,15 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
         delete nativePtr->areaChangeRadio;
         nativePtr->areaChangeRadio = nullptr;
     }
+    if (nativePtr->commonEventListeners) {
+        auto commonEventListenersSet =
+            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(nativePtr->eventListeners);
+        if (commonEventListenersSet) {
+            commonEventListenersSet->clear();
+        }
+        delete commonEventListenersSet;
+        nativePtr->commonEventListeners = nullptr;
+    }
 }
 
 void DisposeNode(ArkUI_NodeHandle nativePtr)
@@ -216,7 +219,7 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    // a
+    // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -447,6 +450,13 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType));
 }
 
+bool GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion platfromVersion)
+{
+    const auto* impl = GetFullImpl();
+    CHECK_NULL_RETURN(impl, false);
+    return impl->getBasicAPI()->greatOrEqualTargetAPIVersion(static_cast<int32_t>(platfromVersion));
+}
+
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event))
 {
@@ -480,12 +490,14 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
 
 void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
     uiEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
 }
@@ -514,7 +526,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if (!innerEvent) {
         return;
     }
-    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent, false);
     if (nativeNodeEventType == -1) {
         return;
     }
@@ -557,6 +569,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         auto it = eventHandlers.find(eventType);
         if (it != eventHandlers.end()) {
             it->second(uiEvent, innerEvent);
+            uiEvent.apiVersion = innerEvent->apiVersion;
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
@@ -574,17 +587,17 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     }
 }
 
-int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
 {
     int32_t invalidType = -1;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
+    if (!IsValidArkUINode(nodePtr) && !(isCommonEvent && nodePtr)) {
         return invalidType;
     }
-    if (!nodePtr->extraData) {
+    if (isCommonEvent ? !nodePtr->extraCommonData : !nodePtr->extraData) {
         return invalidType;
     }
-    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    auto extraData = reinterpret_cast<ExtraData*>(isCommonEvent ? nodePtr->extraCommonData : nodePtr->extraData);
     ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(-1);
     switch (innerEvent->kind) {
         case COMPONENT_ASYNC_EVENT:
@@ -664,6 +677,90 @@ void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*
                 break;
             }
         }
+    }
+}
+
+void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent)
+{
+    if (!innerEvent) {
+        return;
+    }
+    
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent, true);
+    if (nativeNodeEventType == -1) {
+        return;
+    }
+    
+    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    auto extraCommonData = reinterpret_cast<ExtraData*>(nodePtr->extraCommonData);
+    if (!extraCommonData) {
+        return;
+    }
+    
+    auto innerEventExtraParam = extraCommonData->eventMap.find(eventType);
+    if (innerEventExtraParam == extraCommonData->eventMap.end()) {
+        return;
+    }
+    ArkUI_NodeEvent event;
+    event.node = nodePtr;
+    event.eventId = innerEventExtraParam->second->targetId;
+    event.userData = innerEventExtraParam->second->userData;
+    if (event.node && !event.node->commonEventListeners) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Common event receiver is not register");
+        return;
+    }
+    if ((event.node && event.node->commonEventListeners) && ConvertEvent(innerEvent, &event)) {
+        event.targetId = innerEvent->nodeId;
+        ArkUI_UIInputEvent uiEvent;
+        std::map<ArkUI_NodeEventType, std::function<void(ArkUI_UIInputEvent&, ArkUINodeEvent*)>> eventHandlers = {
+            {NODE_TOUCH_EVENT, HandleTouchEvent},
+            {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
+            {NODE_ON_MOUSE, HandleMouseEvent},
+            {NODE_ON_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
+            {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_AXIS, HandleAxisEvent},
+            {NODE_ON_CLICK_EVENT, HandleClickEvent},
+            {NODE_ON_HOVER_EVENT, HandleHoverEvent},
+            {NODE_ON_HOVER_MOVE, HandleTouchEvent},
+        };
+
+        auto it = eventHandlers.find(eventType);
+        if (it != eventHandlers.end()) {
+            it->second(uiEvent, innerEvent);
+            uiEvent.apiVersion = innerEvent->apiVersion;
+            event.origin = &uiEvent;
+        } else {
+            event.origin = innerEvent;
+        }
+        HandleNodeCommonEvent(&event, nativeNodeEventType);
+    }
+}
+
+void HandleNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType)
+{
+    if (!event) {
+        return;
+    }
+    if (event->node && event->node->commonEventListeners) {
+        auto commonEventListenersMap =
+            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(event->node->commonEventListeners);
+        TriggerNodeCommonEvent(event, eventType, commonEventListenersMap);
+    }
+}
+
+void TriggerNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType,
+    std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>* commonEventListenersMap)
+{
+    if (!commonEventListenersMap) {
+        return;
+    }
+    auto it = commonEventListenersMap->find(eventType);
+    if (it != commonEventListenersMap->end()) {
+        const auto& eventListener = it->second;
+        (*eventListener)(event);
     }
 }
 
@@ -865,6 +962,7 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::GRID_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID },
         { OHOS::Ace::V2::GRID_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID_ITEM },
         { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
+        { OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT },
     };
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -874,6 +972,56 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         return iter->second;
     }
     return -1;
+}
+
+std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
+{
+    static const std::unordered_map<uint32_t, std::string> nodeTypeConvertMap = {
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT), OHOS::Ace::V2::TEXT_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_SPAN), OHOS::Ace::V2::SPAN_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_IMAGE_SPAN), OHOS::Ace::V2::IMAGE_SPAN_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_IMAGE), OHOS::Ace::V2::IMAGE_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TOGGLE), OHOS::Ace::V2::TOGGLE_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_LOADING_PROGRESS), OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_INPUT), OHOS::Ace::V2::TEXTINPUT_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_AREA), OHOS::Ace::V2::TEXTAREA_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_BUTTON), OHOS::Ace::V2::BUTTON_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_PROGRESS), OHOS::Ace::V2::PROGRESS_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CHECKBOX), OHOS::Ace::V2::CHECK_BOX_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_XCOMPONENT), OHOS::Ace::V2::XCOMPONENT_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_DATE_PICKER), OHOS::Ace::V2::DATE_PICKER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TIME_PICKER), OHOS::Ace::V2::TIME_PICKER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_PICKER), OHOS::Ace::V2::TEXT_PICKER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CALENDAR_PICKER), OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_SLIDER), OHOS::Ace::V2::SLIDER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_RADIO), OHOS::Ace::V2::RADIO_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_IMAGE_ANIMATOR), OHOS::Ace::V2::IMAGE_ANIMATOR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_STACK), OHOS::Ace::V2::STACK_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_SWIPER), OHOS::Ace::V2::SWIPER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_SCROLL), OHOS::Ace::V2::SCROLL_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_LIST), OHOS::Ace::V2::LIST_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_LIST_ITEM), OHOS::Ace::V2::LIST_ITEM_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_LIST_ITEM_GROUP), OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_COLUMN), OHOS::Ace::V2::COLUMN_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ROW), OHOS::Ace::V2::ROW_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_FLEX), OHOS::Ace::V2::FLEX_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_REFRESH), OHOS::Ace::V2::REFRESH_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_WATER_FLOW), OHOS::Ace::V2::WATERFLOW_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_FLOW_ITEM), OHOS::Ace::V2::FLOW_ITEM_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_RELATIVE_CONTAINER),
+            OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_GRID), OHOS::Ace::V2::GRID_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_GRID_ITEM), OHOS::Ace::V2::GRID_ITEM_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN), OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT),
+            OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG }
+    };
+    auto iter = nodeTypeConvertMap.find(static_cast<uint32_t>(nodeType));
+    if (iter == nodeTypeConvertMap.end()) {
+        return OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG;
+    }
+    return iter->second;
 }
 
 void RegisterBindNativeNode(ArkUI_NodeHandle node)

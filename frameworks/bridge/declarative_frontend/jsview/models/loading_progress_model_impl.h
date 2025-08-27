@@ -24,8 +24,10 @@ class LoadingProgressModelImpl : public OHOS::Ace::LoadingProgressModel {
 public:
     void Create() override;
     void SetColor(const Color& value) override;
-    void SetEnableLoading(bool enable) override {}
-    void ResetColor() override {}
+    void SetColorByUser(bool isSetByUser) override {};
+    void SetEnableLoading(bool enable) override {};
+    void ResetColor() override {};
+    void CreateWithResourceObj(LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_LOADING_PROGRESS_MODEL_IMPL_H

@@ -74,10 +74,9 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     hitTestBehavior(value: HitTestMode): this;
     layoutWeight(value: number | string): this;
     padding(value: Padding | Length): this;
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
-    background(builder: CustomBuilder, options?: {
-        align?: Alignment;
-    }): this;
+    background(content: CustomBuilder | ResourceColor, options?: BackgroundOptions): this;
     backgroundColor(value: ResourceColor): this;
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this;
     backgroundImageSize(value: SizeOptions | ImageSize): this;
@@ -172,9 +171,10 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
-    onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions?: DropOptions): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
@@ -199,6 +199,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
         end?: number | string;
         rotation?: number | string;
         colors: Array<any>;
+        metricsColors?: Array<any>;
         repeating?: boolean;
     }): this;
     radialGradient(value: {
@@ -391,11 +392,20 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     fillMode(value: FillMode): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
     monitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
-    onStart(event: () => void): ImageAnimatorAttribute;
-    onPause(event: () => void): ImageAnimatorAttribute;
-    onRepeat(event: () => void): ImageAnimatorAttribute;
-    onCancel(event: () => void): ImageAnimatorAttribute;
-    onFinish(event: () => void): ImageAnimatorAttribute;
+    onStart(event: VoidCallback): VideoAttribute;
+    onPause(event: VoidCallback): VideoAttribute;
+    onFinish(event: VoidCallback): VideoAttribute;
+    onFullscreenChange(callback: Callback<FullscreenInfo>): VideoAttribute;
+    onPrepared(callback: Callback<PreparedInfo>): VideoAttribute;
+    onSeeking(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onSeeked(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onUpdate(callback: Callback<PlaybackInfo>): VideoAttribute;
+    onError(event: VoidCallback | ErrorCallback): VideoAttribute;
+    onStop(event: Callback<void>): VideoAttribute;
+    enableAnalyzer(enable: boolean): VideoAttribute;
+    analyzerConfig(config: ImageAnalyzerConfig): VideoAttribute;
+    surfaceBackgroundColor(color: ColorMetrics): VideoAttribute;
+    enableShortcutKey(enabled: boolean): VideoAttribute;
 }
 declare class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -448,6 +458,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
+    enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -492,6 +504,8 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     copyOption(value: CopyOptions): SearchAttribute;
     textAlign(value: TextAlign): SearchAttribute;
     height(value: Length): this;
+    strokeWidth(value: LengthMetrics): SearchAttribute;
+    strokeColor(valeu: ResourceColor): SearchAttribute;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
@@ -614,6 +628,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     clickEffect(value: ClickEffect | null): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
@@ -709,6 +724,11 @@ declare class ArkStackComponent extends ArkComponent implements StackAttribute {
     alignContent(value: Alignment): StackAttribute;
     align(value: Alignment): this;
 }
+declare class ArkFolderStackComponent extends ArkStackComponent implements FolderStackAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFolderStateChange(callback: (event: { foldStatus: FoldStatus }) => void): this;
+    onHoverStatusChange(handler: (param: HoverEventParam) => void): this;
+}
 declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     enableDataDetector(enable: boolean): this;
@@ -733,7 +753,8 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         color?: ResourceColor;
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
-    lineSpacing(value: LengthMetrics): TextAttribute;
+    lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
+    optimizeTrailingSpace(trim: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -750,6 +771,14 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     marqueeOptions(value: MarqueeOptions): TextAttribute;
     onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
+    shaderStyle(value: {
+        center: Array<any>;
+        radius: number | string;
+        angle?: number | string;
+        direction?: GradientDirection;
+        colors: Array<[ ResourceColor, number ]>;
+        repeating?: boolean;
+    }): this;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -778,9 +807,11 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     style(value: TextContentStyle): TextAreaAttribute;
     barState(value: BarState): TextAreaAttribute;
     selectionMenuHidden(value: boolean): TextAreaAttribute;
-    maxLines(value: number): TextAreaAttribute;
+    maxLines(value: number, options?: MaxLinesOptions): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
+    strokeWidth(value: LengthMetrics): TextAreaAttribute;
+    strokeColor(value: ResourceColor): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -831,6 +862,8 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     maxLines(value: number): TextInputAttribute;
     customKeyboard(event: () => void): TextInputAttribute;
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
+    strokeWidth(value: LengthMetrics): TextInputAttribute;
+    strokeColor(value: ResourceColor): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1014,7 +1047,7 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     selectedColor(value: ResourceColor): this;
     minLabel(value: string): this;
     maxLabel(value: string): this;
-    showSteps(value: boolean): this;
+    showSteps(value: boolean, options?: SliderShowStepOptions): this;
     showTips(value: boolean, content?: any): this;
     trackThickness(value: Length): this;
     onChange(callback: (value: number, mode: SliderChangeMode) => void): this;
@@ -1025,6 +1058,8 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     blockSize(value: SizeOptions): this;
     blockStyle(value: SliderBlockStyle): this;
     stepSize(value: Length): this;
+    prefix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
+    suffix(value: CustomBuilder, options?: SliderCustomContentOptions): this;
 }
 declare class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1063,6 +1098,14 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
+}
+declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onFinish(callback: () => void): this;
+    onSkip(callback: () => void): this;
+    onChange(callback: (prevIndex: number, index: number) => void): this;
+    onNext(callback: (index: number, pendingIndex: number) => void): this;
+    onPrevious(callback: (index: number, pendingIndex: number) => void): this;
 }
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1128,6 +1171,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
     recoverable(value: boolean | undefined): NavigationAttribute;
     enableDragBar(value: boolean | undefined): NavigationAttribute;
+    splitPlaceholder(placeholder: ComponentContent): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1214,6 +1258,15 @@ declare class ArkFormComponentComponent extends ArkComponent implements FormComp
         id: number;
     }) => void): this;
     onLoad(callback: () => void): this;
+}
+declare class ArkEmbeddedComponent extends ArkComponent implements EmbeddedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onTerminated(callback: (info: TerminationInfo) => void): this;
+    onError(callback: (info: ErrorCallback) => void): this;
+}
+declare class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onError(callback: any): this;
 }
 declare class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1463,6 +1516,10 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onInterceptRequest(callback: (event?: {
         request: WebResourceRequest;
     } | undefined) => WebResourceResponse): this;
+    onOverrideErrorPage(callback: (event?: {
+        webResourceRequest: WebResourceRequest;
+        error: WebResourceError;
+    } | undefined) => string): this;
     onPermissionRequest(callback: (event?: {
         request: PermissionRequest;
     } | undefined) => void): this;
@@ -1557,6 +1614,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         viewportFit: ViewportFit;
     }) => void): this;
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
+    onActivateContent(callback: () => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1674,6 +1732,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     clickEffect(value: ClickEffect): this;
     onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this;
+    onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
     onDragMove(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event: DragEvent, extraParams?: string) => void): this;
@@ -1873,6 +1932,8 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     onContentDidScroll(handler: ContentDidScrollCallback): this;
     pageFlipMode(value: PageFlipMode): this;
     onContentWillScroll(handler: ContentWillScrollCallback): this;
+    maintainVisibleContentPosition(value: boolean): this;
+    onScrollStateChanged(event: Callback<ScrollState>): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1885,6 +1946,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barMode(value: BarMode, options?: ScrollableBarModeOptions | undefined): TabsAttribute;
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
+    animationCurve(value: Curve | ICurve): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
     animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
@@ -2015,7 +2077,8 @@ declare class ArkShapeComponent extends ArkCommonShapeComponent implements Shape
 }
 declare class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onReady(event: () => void): this;
+    onReady(event: VoidCallback): this;
+    enableAnalyzer(value: boolean): this;
 }
 declare class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2045,6 +2108,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
+    shaderStyle(value: (ShaderStyle | undefined)[] | ShaderStyle): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

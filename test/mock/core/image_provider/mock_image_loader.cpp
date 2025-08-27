@@ -22,14 +22,14 @@ namespace OHOS::Ace {
 RefPtr<MockImageLoader> g_loader;
 
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context)
 {
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(100ms);
     if (imageSourceInfo.IsPixmap()) {
-        return LoadDecodedImageData(imageSourceInfo, context);
+        return LoadDecodedImageData(imageSourceInfo, errorInfo, context);
     }
-    this->LoadImageData(imageSourceInfo, context);
+    this->LoadImageData(imageSourceInfo, errorInfo, context);
     return nullptr;
 }
 

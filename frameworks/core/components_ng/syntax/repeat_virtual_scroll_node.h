@@ -76,7 +76,7 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
-    const std::list<RefPtr<UINode>>& GetChildrenForInspector() const override;
+    const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const override;
 
     void OnRecycle() override;
     void OnReuse() override;

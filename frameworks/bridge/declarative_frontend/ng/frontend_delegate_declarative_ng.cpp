@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,13 @@
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -74,6 +76,18 @@ void FrontendDelegateDeclarativeNG::SetLayoutInspectorCallback(const LayoutInspe
 void FrontendDelegateDeclarativeNG::SetDrawInspectorCallback(const DrawInspectorCallback& drawInspectorCallback)
 {
     drawInspectorCallback_ = drawInspectorCallback;
+}
+
+void FrontendDelegateDeclarativeNG::SetDrawChildrenInspectorCallback(
+    const DrawChildrenInspectorCallback& drawChildrenInspectorCallback)
+{
+    drawChildrenInspectorCallback_ = drawChildrenInspectorCallback;
+}
+
+void FrontendDelegateDeclarativeNG::SetIsDrawChildrenCallbackFuncExistCallback(
+    const IsDrawChildrenCallbackFuncExistCallback& IsDrawChildrenCallbackFuncExistCallback)
+{
+    isDrawChildrenCallbackFuncExistCallback_ = IsDrawChildrenCallbackFuncExistCallback;
 }
 
 void FrontendDelegateDeclarativeNG::SetOnStartContinuationCallBack(
@@ -211,6 +225,37 @@ void FrontendDelegateDeclarativeNG::RunPage(
             auto pipeline = delegate->GetPipelineContext();
         },
         TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
+}
+
+void FrontendDelegateDeclarativeNG::RunIntentPage()
+{
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunIntentPage();
+        },
+        TaskExecutor::TaskType::JS, "ArkUIRunIntentPage");
+}
+
+void FrontendDelegateDeclarativeNG::SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    taskExecutor_->PostTask([weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_),
+        intentInfoSerialized, isColdStart, callback = std::move(loadPageCallback)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(callback));
+        },
+        TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
+}
+
+std::string FrontendDelegateDeclarativeNG::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (pageRouterManager_) {
+        return pageRouterManager_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
 }
 
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
@@ -524,6 +569,12 @@ void FrontendDelegateDeclarativeNG::GetRouterStateByUrl(std::string& url, std::v
     pageRouterManager_->GetStateByUrl(url, stateArray);
 }
 
+std::string FrontendDelegateDeclarativeNG::GetInitParams()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    return pageRouterManager_->GetInitParams();
+}
+
 std::string FrontendDelegateDeclarativeNG::GetParams()
 {
     CHECK_NULL_RETURN(pageRouterManager_, "");
@@ -726,6 +777,10 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -780,6 +835,13 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarativeNG::RemoveCustomDialog(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
+    NG::ViewAbstract::DismissDialog();
+}
+
 void FrontendDelegateDeclarativeNG::ParsePartialPropertiesFromAttr(
     DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
 {
@@ -812,7 +874,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
 {
     DialogProperties dialogProperties = {
         .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
@@ -1043,6 +1106,26 @@ void FrontendDelegateDeclarativeNG::OnDrawCompleted(const std::string& component
             delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS, "ArkUIDrawCompleted");
+}
+
+void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->drawChildrenInspectorCallback_) {
+                delegate->drawChildrenInspectorCallback_(componentId);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
+}
+
+bool FrontendDelegateDeclarativeNG::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    if (isDrawChildrenCallbackFuncExistCallback_) {
+        return isDrawChildrenCallbackFuncExistCallback_(componentId);
+    }
+    return false;
 }
 
 void FrontendDelegateDeclarativeNG::SetColorMode(ColorMode colorMode)
@@ -1319,6 +1402,16 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID,
+    const bool isStartRect,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
 }
 
 void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,

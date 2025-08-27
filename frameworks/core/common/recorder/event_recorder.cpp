@@ -22,10 +22,38 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::Recorder {
+namespace {
 constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
+
+void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
+{
+    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
+        return;
+    }
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
+        return;
+    }
+    if (!host->GetChildren().empty()) {
+        return;
+    }
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_VOID(parent);
+    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(property);
+    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
+}
+
+std::string GetNavDstNameByNode(const RefPtr<NG::FrameNode>& host)
+{
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, "");
+    return context->GetCurrentPageNameCallback();
+}
+} // namespace
 
 bool IsCacheAvaliable()
 {
@@ -118,35 +146,20 @@ EventParamsBuilder& EventParamsBuilder::SetTextArray(const std::vector<std::stri
     return *this;
 }
 
-void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
-{
-    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
-        return;
-    }
-    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
-        return;
-    }
-    if (!host->GetChildren().empty()) {
-        return;
-    }
-    auto parent = host->GetParentFrameNode();
-    CHECK_NULL_VOID(parent);
-    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(property);
-    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
-}
-
 EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& node)
 {
     if (!node) {
         return *this;
     }
+    ContainerScope scope(Container::CurrentIdSafely());
     if (EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_RECT)) {
         auto rect = node->GetTransformRectRelativeToWindow().ToBounds();
         params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
     }
     params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
+    params_->emplace("accessilityId", std::to_string(node->GetAccessibilityId()));
     SetPageUrl(GetPageUrlByNode(node));
+    SetNavDst(GetNavDstNameByNode(node));
     FillExtraTextIfNeed(eventType_, *this, node);
     auto parent = node->GetParent();
     if (parent) {
@@ -236,40 +249,53 @@ EventRecorder::EventRecorder()
 
 void EventRecorder::UpdateEventSwitch(const std::vector<bool>& eventSwitch)
 {
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
     eventSwitch_ = eventSwitch;
 }
 
-void EventRecorder::UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap)
+void EventRecorder::UpdateGlobalEventSwitch(const std::vector<bool>& eventSwitch)
 {
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
+    globalSwitch_ = eventSwitch;
+}
+
+void EventRecorder::UpdateWebIdentifier(const std::unordered_map<std::string, std::string>& identifierMap)
+{
+    std::unique_lock<std::shared_mutex> lock(switchLock_);
     webIdentifierMap_ = identifierMap;
 }
 
 bool EventRecorder::IsPageRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsPageParamRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE_PARAM);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsExposureRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_EXPOSURE);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsComponentRecordEnable() const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_COMPONENT);
     return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsRecordEnable(EventCategory category) const
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     int32_t index = static_cast<int32_t>(category);
     return globalSwitch_[index] && eventSwitch_[index];
 }
@@ -292,9 +318,9 @@ void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t
     focusContainerId_ = id;
 }
 
-int32_t EventRecorder::GetContainerId(bool isFoucs)
+int32_t EventRecorder::GetContainerId(bool isFocus)
 {
-    if (isFoucs) {
+    if (isFocus) {
         return focusContainerId_;
     } else {
         return containerId_;
@@ -340,6 +366,7 @@ void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
 
 bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)
 {
+    std::shared_lock<std::shared_mutex> lock(switchLock_);
     auto iter = webIdentifierMap_.find(webCategory);
     if (iter == webIdentifierMap_.end()) {
         return false;
@@ -384,7 +411,6 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto params = builder.build();
     taskExecutor_->PostTask(
         [taskExecutor = taskExecutor_, params]() {
@@ -399,7 +425,6 @@ void EventRecorder::OnChange(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto params = builder.build();
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(EventType::CHANGE), std::move(params));
@@ -410,7 +435,6 @@ void EventRecorder::OnEvent(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto eventType = builder.GetEventType();
     auto params = builder.build();
     EventController::Get().NotifyEvent(builder.GetEventCategory(), static_cast<int32_t>(eventType), std::move(params));

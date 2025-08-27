@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class ACE_EXPORT FoldableWindow : public AceType {
-    DECLARE_ACE_TYPE(FoldableWindow, AceType)
+    DECLARE_ACE_TYPE(FoldableWindow, AceType);
 
 public:
     static RefPtr<FoldableWindow> CreateFoldableWindow(int32_t instanceId);

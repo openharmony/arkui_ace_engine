@@ -1,4 +1,3 @@
-
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
 
@@ -9,6 +8,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 /*
  * Copyright (c) 2025 Hunan OpenValley Digital Industry Development Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ const driver = Driver.create();
  * limitations under the License.
  */
 
-export async function SwiperStart(done:Function){
+export async function SwiperStart(done: Function) {
 
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',

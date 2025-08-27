@@ -35,7 +35,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new TextClockThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<TextClockThemeWrapper>();
             auto theme = AceType::DynamicCast<TextClockTheme>(wrapper);
             if (!themeConstants) {
                 return wrapper;

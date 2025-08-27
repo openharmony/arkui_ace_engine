@@ -27,6 +27,7 @@ using RouterCallback = void (*)(int32_t);
 CJ_EXPORT void FfiOHOSAceFrameworkRouterPush(const char* url, const char* param);
 CJ_EXPORT void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param);
 CJ_EXPORT ExternalString FfiOHOSAceFrameworkRouterGetParams();
+CJ_EXPORT void FfiOHOSAceFrameworkRouterReplace(const char* url, const char* param, int32_t modeValue);
 CJ_EXPORT void FfiOHOSAceFrameworkRouterBackIndex(int32_t index, const char* param);
 CJ_EXPORT void FfiOHOSAceFrameworkRouterPushUrl(
     const char* url, const char* param, int32_t modeValue, RouterCallback callbackRef);

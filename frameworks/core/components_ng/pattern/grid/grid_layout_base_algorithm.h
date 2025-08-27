@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,12 @@ public:
         }
     }
 
+    static void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
+    bool MeasureInNextFrame() const override
+    {
+        return measureInNextFrame_;
+    }
+
 protected:
     void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
 
@@ -87,7 +93,8 @@ protected:
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     GridLayoutInfo info_;
-
+    bool measureInNextFrame_ = false;
+    bool syncLoad_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };
 

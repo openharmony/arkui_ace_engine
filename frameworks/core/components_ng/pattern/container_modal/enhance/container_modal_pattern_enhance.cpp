@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -354,17 +355,17 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [floatingContext, height]() {
             auto rect = floatingContext->GetPaintRectWithoutTransform();
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height]() {
+        auto buttonPopupDistance =
+            floatTitleMgr_ ? 0.0f : ((titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2);
+        AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height, buttonPopupDistance]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
-            buttonsContext->OnTransformTranslateUpdate({ 0.0f,
-                static_cast<float>(
-                    height - (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2 - rect.GetY()),
-                0.0f });
-        });
+            buttonsContext->OnTransformTranslateUpdate(
+                { 0.0f, static_cast<float>(height - buttonPopupDistance - rect.GetY()), 0.0f });
+        }, nullptr, nullptr, GetContextRefPtr());
     }
 
     if (!isShow && CanHideFloatingTitle()) {
@@ -381,9 +382,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 CHECK_NULL_VOID(pattern);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
-            });
+            }, nullptr, GetContextRefPtr());
     }
 }
+
+void ContainerModalPatternEnhance::AddPointLight() {}
 
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
@@ -391,7 +394,7 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    textCtx.textContent = theme->GetWindowScreen(true);
+    textCtx.textContent = theme->GetWindowScreen(false);
 
     textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
     auto textSize = MeasureUtil::MeasureTextSize(textCtx);
@@ -876,6 +879,12 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
 
     auto controlButtonsRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto controlButtonsRowLayoutProperty = controlButtonsRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsRowLayoutProperty, false);
+    if (controlButtonsRowLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons row failed, buttonRow are hidden");
+        return false;
+    }
     auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
     buttons = buttonRect;
     if (buttons.Width() == 0) {
@@ -958,6 +967,14 @@ void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containe
         if (pair.second) {
             pair.second(containerModal, buttonsRect);
         }
+    }
+
+    if (titleMgr_ != nullptr) {
+        titleMgr_->AdjustNavDestRowWidth();
+    }
+
+    if (floatTitleMgr_ != nullptr) {
+        floatTitleMgr_->AdjustNavDestRowWidth();
     }
 }
 } // namespace OHOS::Ace::NG

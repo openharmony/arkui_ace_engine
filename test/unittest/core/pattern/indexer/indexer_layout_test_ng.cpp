@@ -115,11 +115,14 @@ HWTEST_F(IndexerLayoutTestNg, Style002, TestSize.Level1)
     EXPECT_TRUE(IsEqual(popupRenderContext_->GetBorderRadius().value(), expectPopupBorderRadius));
     EXPECT_FALSE(popupItemRenderContext_->GetBorderRadius().has_value());
     EXPECT_EQ(letterNodeRenderContext_->GetBackgroundColor().value(), Color::RED);
-    auto listNode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild()->GetFirstChild());
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProperty->GetTextColor().value(), Color::BLUE);
+    auto listPaintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_NE(listPaintProperty, nullptr);
+    EXPECT_FALSE(listPaintProperty->GetFadingEdgeValue(true));
 }
 
 /**

@@ -53,4 +53,8 @@ Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const
 {
     return Rect();
 }
+Rect DisplayInfoUtils::GetFoldExpandAvailableRect() const
+{
+    return Rect();
+}
 } // namespace OHOS::Ace::DisplayInfoUtils

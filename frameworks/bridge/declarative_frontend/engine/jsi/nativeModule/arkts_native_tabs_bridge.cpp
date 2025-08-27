@@ -48,6 +48,51 @@ constexpr int32_t DEFAULT_COLUMN = -1;
 constexpr int REMAINDER = 2;
 constexpr int TABBARMODE_SCROLLABLE = 1;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
+constexpr int ANIMATION_CURVE_TYPE_DEFAULT = 0;
+constexpr int ANIMATION_CURVE_TYPE_STR = 1;
+constexpr int ANIMATION_CURVE_TYPE_FUNC = 2;
+namespace {
+void GetAnimationCurveInfo(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Uint32& type, std::string& aniTimFunc,
+    std::function<float(float)>& customCallBack)
+{
+    type = ANIMATION_CURVE_TYPE_DEFAULT;
+    aniTimFunc.clear();
+    customCallBack = nullptr;
+    CHECK_NULL_VOID(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (!valueArg->IsObject(vm)) {
+        return;
+    }
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto object = Framework::JSRef<Framework::JSObject>::Cast(info[TABS_ARG_INDEX_1]);
+    Framework::JSRef<Framework::JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
+    if (onCallBack->IsFunction()) {
+        RefPtr<Framework::JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            Framework::JSRef<Framework::JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            ContainerScope scope(id);
+            Framework::JSRef<Framework::JSVal> params[1];
+            params[0] = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+            return resultValue;
+        };
+    }
+    auto jsCurveString = object->GetProperty("__curveString");
+    if (jsCurveString->IsString()) {
+        aniTimFunc = jsCurveString->ToString();
+        if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
+            type = ANIMATION_CURVE_TYPE_FUNC;
+        } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            type = ANIMATION_CURVE_TYPE_STR;
+        }
+    }
+}
+} // namespace
+
 ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -68,6 +113,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCa
     int32_t tabBarMode = static_cast<int32_t>(barMode);
     GetArkUINodeModifiers()->getTabsModifier()->setTabBarMode(nativeNode, tabBarMode);
 
+    GetArkUINodeModifiers()->getTabsModifier()->createScrollableBarModeOptionsWithResourceObj(nativeNode, nullptr);
     if (tabBarMode == TABBARMODE_SCROLLABLE) {
         if (marginArg->IsNull() || marginArg->IsUndefined() || nonScrollableLayoutStyleArg->IsNull() ||
             nonScrollableLayoutStyleArg->IsUndefined()) {
@@ -76,12 +122,15 @@ ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCa
         }
         int barModeStyle = nonScrollableLayoutStyleArg->Int32Value(vm);
         CalcDimension margin(0.0, DimensionUnit::VP);
-        if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, margin)) {
+        RefPtr<ResourceObject> marginResObj;
+        if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, margin, marginResObj)) {
             margin.Reset();
         }
 
         GetArkUINodeModifiers()->getTabsModifier()->setScrollableBarModeOptions(
             nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
+        GetArkUINodeModifiers()->getTabsModifier()->createScrollableBarModeOptionsWithResourceObj(
+            nativeNode, AceType::RawPtr(marginResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -114,12 +163,15 @@ ArkUINativeModuleValue TabsBridge::SetScrollableBarModeOptions(ArkUIRuntimeCallI
     int barModeStyle = thirdArg->Int32Value(vm);
 
     CalcDimension margin(0.0, DimensionUnit::VP);
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, margin)) {
+    RefPtr<ResourceObject> marginResObj;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, margin, marginResObj)) {
         margin.Reset();
     }
 
     GetArkUINodeModifiers()->getTabsModifier()->setScrollableBarModeOptions(
         nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
+    GetArkUINodeModifiers()->getTabsModifier()->createScrollableBarModeOptionsWithResourceObj(
+        nativeNode, AceType::RawPtr(marginResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -165,28 +217,28 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
 
     CalcDimension columnGutter;
     CalcDimension columnMargin;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
+    RefPtr<ResourceObject> columnGutterResObj;
+    RefPtr<ResourceObject> columnMarginResObj;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, columnGutter, columnGutterResObj) ||
+        !NonNegative(columnGutter.Value()) ||
         columnGutter.Unit() == DimensionUnit::PERCENT) {
         columnGutter.Reset();
     }
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, columnMargin) || !NonNegative(columnMargin.Value()) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, columnMargin, columnMarginResObj) ||
+        !NonNegative(columnMargin.Value()) ||
         columnMargin.Unit() == DimensionUnit::PERCENT) {
         columnMargin.Reset();
     }
 
-    int unitsAndColumn[SIZE_OF_FIVE];
-    ArkUI_Float32 values[SIZE_OF_VALUES];
-
-    values[TABS_ARG_INDEX_0] = static_cast<ArkUI_Float32>(columnGutter.Value());
-    values[TABS_ARG_INDEX_1] = static_cast<ArkUI_Float32>(columnMargin.Value());
-    unitsAndColumn[TABS_ARG_INDEX_0] = static_cast<int>(columnGutter.Unit());
-    unitsAndColumn[TABS_ARG_INDEX_1] = static_cast<int>(columnMargin.Unit());
-    unitsAndColumn[TABS_ARG_INDEX_2] = sm;
-    unitsAndColumn[TABS_ARG_INDEX_3] = md;
-    unitsAndColumn[TABS_ARG_INDEX_4] = lg;
+    ArkUI_Float32 values[SIZE_OF_VALUES] = { static_cast<ArkUI_Float32>(columnGutter.Value()),
+        static_cast<ArkUI_Float32>(columnMargin.Value()) };
+    int unitsAndColumn[SIZE_OF_FIVE] = { static_cast<int>(columnGutter.Unit()), static_cast<int>(columnMargin.Unit()),
+        sm, md, lg };
 
     GetArkUINodeModifiers()->getTabsModifier()->setBarGridAlign(
         nativeNode, values, SIZE_OF_VALUES, unitsAndColumn, SIZE_OF_FIVE);
+    GetArkUINodeModifiers()->getTabsModifier()->createBarGridAlignWithResourceObj(
+        nativeNode, AceType::RawPtr(columnGutterResObj), AceType::RawPtr(columnMarginResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -235,23 +287,31 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto tabTheme = themeManager->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
 
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
     if (isDividerStrokeWidthArgsInvalid ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj) ||
         LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
     Color colorObj;
-    if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         color = tabTheme->GetDividerColor().GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setDividerColorByUser(nativeNode, false);
     } else {
         color = colorObj.GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setDividerColorByUser(nativeNode, true);
     }
     if (isDividerStartMarginArgsInvalid ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj) ||
         LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
-    if (isDividerEndMarginArgsInvalid || !ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+    if (isDividerEndMarginArgsInvalid ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin, endMarginResObj) ||
         LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
@@ -265,6 +325,9 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     units[TABS_ARG_INDEX_1] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[TABS_ARG_INDEX_2] = static_cast<int32_t>(dividerEndMargin.Unit());
     GetArkUINodeModifiers()->getTabsModifier()->setDivider(nativeNode, color, values, units, size);
+    GetArkUINodeModifiers()->getTabsModifier()->createDividerWithResourceObj(nativeNode,
+        AceType::RawPtr(strokeWidthResObj), AceType::RawPtr(colorResObj), AceType::RawPtr(startMarginResObj),
+        AceType::RawPtr(endMarginResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -358,10 +421,14 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> backgroundColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundColor(nativeNode, color.GetValue());
+        auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+        GetArkUINodeModifiers()->getTabsModifier()->createBarBackgroundColorWithResourceObj(nativeNode, bgColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -391,14 +458,16 @@ bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &res
     return false;
 }
 
-void SetBarBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool& isValidColor,
-    Color& inactiveColor, ArkUI_Int32& policy, ArkUI_Int32& blurType)
+RefPtr<ResourceObject> SetBarBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool& isValidColor,
+    Color& inactiveColor, ArkUI_Int32& policy, ArkUI_Int32& blurType, ArkUINodeHandle nativeNode)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_6);
     Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_8);
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+    RefPtr<ResourceObject> inactiveColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj, nodeInfo)) {
         isValidColor = true;
     }
     ParseJsInt32(vm, policyArg, policy);
@@ -411,6 +480,7 @@ void SetBarBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI
         blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
     }
+    return inactiveColorResObj;
 }
 
 ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -428,7 +498,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInf
     BlurOption blurOption;
     ArkUITabBarBackgroundBlurStyle styleOption = { static_cast<int32_t>(BlurStyle::NO_MATERIAL),
         static_cast<int32_t>(ThemeColorMode::SYSTEM), static_cast<int32_t>(AdaptiveColor::DEFAULT),
-        1.0, blurOption.grayscale.data(), blurOption.grayscale.size(),
+        1.0, blurOption.grayscale.data(), static_cast<ArkUI_Int32>(blurOption.grayscale.size()),
         static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), Color::TRANSPARENT.GetValue(),
         false, static_cast<int32_t>(BlurType::WITHIN_WINDOW) };
     if (blurStyleArg->IsNumber()) {
@@ -455,10 +525,12 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInf
         }
     }
     Color inactiveColor = Color::TRANSPARENT;
-    SetBarBackgroundBlurStyleParam(runtimeCallInfo, styleOption.isValidColor, inactiveColor,
-        styleOption.policy, styleOption.blurType);
+    auto inactiveColorResObj = SetBarBackgroundBlurStyleParam(runtimeCallInfo, styleOption.isValidColor, inactiveColor,
+        styleOption.policy, styleOption.blurType, nativeNode);
     styleOption.inactiveColor = inactiveColor.GetValue();
     GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundBlurStyle(nativeNode, &styleOption);
+    GetArkUINodeModifiers()->getTabsModifier()->createBarBackgroundBlurStyleWithResourceObj(nativeNode,
+        AceType::RawPtr(inactiveColorResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -473,8 +545,8 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundBlurStyle(ArkUIRuntimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
-void SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32& policy, ArkUI_Int32& blurType,
-    Color& inactiveColor, ArkUI_Bool& isValidColor)
+RefPtr<ResourceObject> SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32& policy,
+    ArkUI_Int32& blurType, Color& inactiveColor, ArkUI_Bool& isValidColor, ArkUINodeHandle nativeNode)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
@@ -490,9 +562,12 @@ void SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_In
         blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
     }
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+    RefPtr<ResourceObject> inactiveColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj, nodeInfo)) {
         isValidColor = true;
     }
+    return inactiveColorResObj;
 }
 
 void SetAdaptiveColorAndBlurOptionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, AdaptiveColor& adaptiveColor,
@@ -520,6 +595,21 @@ void SetAdaptiveColorAndBlurOptionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, A
     }
 }
 
+void SetSaturationAndBrightnessEffectOptionParam(const EcmaVM* vm, const Local<JSValueRef>& saturationArg,
+    const Local<JSValueRef>& brightnessArg, ArkUITabBarBackgroundEffect& effectOption)
+{
+    if (saturationArg->IsNumber()) {
+        effectOption.saturation = saturationArg->ToNumber(vm)->Value();
+        effectOption.saturation = (effectOption.saturation > 0.0f || NearZero(effectOption.saturation)) ?
+                                    effectOption.saturation : 1.0f;
+    }
+    if (brightnessArg->IsNumber()) {
+        effectOption.brightness = brightnessArg->ToNumber(vm)->Value();
+        effectOption.brightness = (effectOption.brightness > 0.0f || NearZero(effectOption.brightness)) ?
+                                    effectOption.brightness : 1.0f;
+    }
+}
+
 ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -533,26 +623,20 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     BlurOption blurOption;
     ArkUITabBarBackgroundEffect effectOption = { 0.0f, 1.0f, 1.0f, Color::TRANSPARENT.GetValue(),
-        static_cast<int32_t>(AdaptiveColor::DEFAULT), blurOption.grayscale.data(), blurOption.grayscale.size(),
+        static_cast<int32_t>(AdaptiveColor::DEFAULT), blurOption.grayscale.data(),
+        static_cast<int32_t>(blurOption.grayscale.size()),
         static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), static_cast<int32_t>(BlurType::WITHIN_WINDOW),
-        Color::TRANSPARENT.GetValue(), false };
+        static_cast<ArkUI_Bool>(Color::TRANSPARENT.GetValue()), false };
     CalcDimension radius;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
     effectOption.radius = static_cast<ArkUI_Float32>(radius.Value());
-    if (saturationArg->IsNumber()) {
-        effectOption.saturation = saturationArg->ToNumber(vm)->Value();
-        effectOption.saturation = (effectOption.saturation > 0.0f || NearZero(effectOption.saturation)) ?
-                                    effectOption.saturation : 1.0f;
-    }
-    if (brightnessArg->IsNumber()) {
-        effectOption.brightness = brightnessArg->ToNumber(vm)->Value();
-        effectOption.brightness = (effectOption.brightness > 0.0f || NearZero(effectOption.brightness)) ?
-                                    effectOption.brightness : 1.0f;
-    }
+    SetSaturationAndBrightnessEffectOptionParam(vm, saturationArg, brightnessArg, effectOption);
+    RefPtr<ResourceObject> colorResObj;
     Color color = Color::TRANSPARENT;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj, nodeInfo)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
     effectOption.color = color.GetValue();
@@ -562,10 +646,12 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     effectOption.blurValues = blurOption.grayscale.data();
     effectOption.blurValuesSize = static_cast<ArkUI_Int32>(blurOption.grayscale.size());
     Color inactiveColor = Color::TRANSPARENT;
-    SetBarBackgroundEffectParam(runtimeCallInfo, effectOption.policy, effectOption.blurType,
-        inactiveColor, effectOption.isValidColor);
+    auto inactiveColorResObj = SetBarBackgroundEffectParam(runtimeCallInfo, effectOption.policy, effectOption.blurType,
+        inactiveColor, effectOption.isValidColor, nativeNode);
     effectOption.inactiveColor = inactiveColor.GetValue();
     GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundEffect(nativeNode, &effectOption);
+    GetArkUINodeModifiers()->getTabsModifier()->createBarBackgroundEffectWithResourceObj(nativeNode,
+        AceType::RawPtr(colorResObj), AceType::RawPtr(inactiveColorResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -724,6 +810,32 @@ ArkUINativeModuleValue TabsBridge::ResetTabsOptionsController(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetTabsOptionsBarModifier(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply;
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSTabs::SetBarModifierApply(runtimeCallInfo, onApply, info[1]);
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsBarModifier(
+        nativeNode, reinterpret_cast<void*>(&onApply));
+    return panda::JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsOptionsBarModifier(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsBarModifier(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TabsBridge::SetScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -766,13 +878,17 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
     CalcDimension width;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+    RefPtr<ResourceObject> widthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        widthResObj)) {
         GetArkUINodeModifiers()->getTabsModifier()->resetTabBarWidth(nativeNode);
         return undefinedRes;
     }
 
     GetArkUINodeModifiers()->getTabsModifier()->setTabBarWidth(
         nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    auto widthRawPtr = AceType::RawPtr(widthResObj);
+    GetArkUINodeModifiers()->getTabsModifier()->createTabBarWidthWithResourceObj(nativeNode, widthRawPtr);
     return undefinedRes;
 }
 
@@ -798,13 +914,17 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    RefPtr<ResourceObject> heightResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height,
+        heightResObj)) {
         GetArkUINodeModifiers()->getTabsModifier()->resetTabBarHeight(nativeNode);
         return undefinedRes;
     }
 
     GetArkUINodeModifiers()->getTabsModifier()->setTabBarHeight(
         nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    auto heightRawPtr = AceType::RawPtr(heightResObj);
+    GetArkUINodeModifiers()->getTabsModifier()->createTabBarHeightWithResourceObj(nativeNode, heightRawPtr);
     return undefinedRes;
 }
 
@@ -840,6 +960,66 @@ ArkUINativeModuleValue TabsBridge::ResetBarAdaptiveHeight(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetBarAdaptiveHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetAnimationCurve(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (valueArg->IsString(vm)) {
+        std::string curve = valueArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getTabsModifier()->setAnimationCurve(nativeNode,
+            ANIMATION_CURVE_TYPE_STR, curve.c_str(), nullptr);
+    } else if (valueArg->IsObject(vm)) {
+        ArkUI_Uint32 type = ANIMATION_CURVE_TYPE_DEFAULT;
+        std::string aniTimFunc;
+        std::function<float(float)> customCallBack = nullptr;
+        GetAnimationCurveInfo(runtimeCallInfo, type, aniTimFunc, customCallBack);
+        GetArkUINodeModifiers()->getTabsModifier()->setAnimationCurve(nativeNode,
+            type, aniTimFunc.c_str(), reinterpret_cast<void*>(&customCallBack));
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimationCurve(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetAnimationCurve(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetAnimationCurve(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetNoMinHeightLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool value = secondArg->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getTabsModifier()->setNoMinHeightLimit(nativeNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetNoMinHeightLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetNoMinHeightLimit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1449,17 +1629,16 @@ ArkUINativeModuleValue TabsBridge::SetTabsCustomContentTransition(ArkUIRuntimeCa
     JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (info.Length() != 2) { // 2: Array length
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentWillChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto transitionObj = JSRef<JSObject>::Cast(info[1]);
-    if (transitionObj->IsUndefined() || !info[1]->IsFunction()) {
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentWillChange(nativeNode);
+    if (!info[1]->IsFunction()) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsIsCustomAnimation(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    ParseCustomContentTransition(transitionObj, info);
+    auto transitionFunc = JSRef<JSFunc>::Cast(info[1]);
+    
+    ParseCustomContentTransition(transitionFunc, info);
 
     GetArkUINodeModifiers()->getTabsModifier()->setTabsIsCustomAnimation(nativeNode, true);
     return panda::JSValueRef::Undefined(vm);
@@ -1473,16 +1652,15 @@ ArkUINativeModuleValue TabsBridge::ResetTabsCustomContentTransition(ArkUIRuntime
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetTabsIsCustomAnimation(nativeNode);
-    TabsModel::GetInstance()->SetOnCustomAnimation(nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
 void TabsBridge::ParseCustomContentTransition(
-    const Framework::JSRef<Framework::JSObject>& transitionObj, const Framework::JsiCallbackInfo& info)
+    const Framework::JSRef<Framework::JSFunc>& transitionFunc, const Framework::JsiCallbackInfo& info)
 {
     using namespace OHOS::Ace::Framework;
     RefPtr<JsTabsFunction> jsCustomAnimationFunc =
-        AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transitionObj));
+        AceType::MakeRefPtr<JsTabsFunction>(transitionFunc);
     auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
                                  int32_t from, int32_t to) -> TabContentAnimatedTransition {
         TabContentAnimatedTransition transitionInfo;
@@ -1504,7 +1682,7 @@ void TabsBridge::ParseCustomContentTransition(
         JSRef<JSVal> transition = transitionObj->GetProperty("transition");
         if (transition->IsFunction()) {
             RefPtr<JsTabsFunction> jsOnTransition =
-                AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transition));
+                AceType::MakeRefPtr<JsTabsFunction>(transition);
             auto onTransition = [execCtx, func = std::move(jsOnTransition)](
                                     const RefPtr<TabContentTransitionProxy>& proxy) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

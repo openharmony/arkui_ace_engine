@@ -28,7 +28,8 @@ public:
     SvgImageObject(const ImageSourceInfo& src, const SizeF& imageSize) : ImageObject(src, imageSize, nullptr) {}
     ~SvgImageObject() override = default;
 
-    static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
+    static RefPtr<SvgImageObject> Create(
+        const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data);
     RefPtr<SvgDomBase> GetSVGDom() const override;
     std::string GetDumpInfo() override;
     RefPtr<ImageObject> Clone() override

@@ -113,6 +113,11 @@ public:
     void UnregisterComponentChangeEventCallback();
 
     /**
+     * @description: unregister the web unfocus event callback last register
+     */
+    void UnregisterWebUnfocusEventCallback();
+
+    /**
      * @description: report whole inspectorTree for SA
      */
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
@@ -136,6 +141,8 @@ public:
     void SendWebText(int32_t nodeId, std::string res) override;
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void ClearAshmem(sptr<Ashmem>& optMem);
+    void RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback);
+    void SendExeAppAIFunctionResult(uint32_t result) override;
 
 private:
     EventCallback clickEventCallback_;
@@ -149,6 +156,7 @@ private:
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
+    std::function<void(uint32_t)> exeAppAIFunctionCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

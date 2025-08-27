@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsTouchFunction : public virtual JsFunction {
-    DECLARE_ACE_TYPE(JsTouchFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsTouchFunction, JsFunction);
 
 public:
     explicit JsTouchFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
@@ -32,7 +32,7 @@ public:
     {}
     ~JsTouchFunction() override {};
 
-    void Execute() override
+    void Execute()
     {
         JsFunction::Execute();
     }

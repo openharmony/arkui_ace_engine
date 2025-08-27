@@ -64,9 +64,26 @@ public:
         return true;
     }
 
+    // For ArkTS1.2
+    void SetOnNodeDisposeCallback(std::function<void()>&& disposeCallback)
+    {
+        disposeCallback_ = std::move(disposeCallback);
+    }
+
+    void FireOnNodeDisposeCallback()
+    {
+        CHECK_NULL_VOID(disposeCallback_);
+        disposeCallback_();
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
+    }
+    
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
     }
 
     const RefPtr<PageInfo>& GetPageInfo() const
@@ -150,6 +167,9 @@ public:
     {
         return { 0 };
     }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     const SharedTransitionMap& GetSharedTransitionMap() const
     {
@@ -304,6 +324,9 @@ public:
     }
     void CheckIsNeedForceExitWindow(bool result);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType);
+    bool CheckEnableCustomNodeDel() const {
+        return false;
+    }
 
     bool IsNeedCallbackBackPressed();
 
@@ -366,6 +389,7 @@ protected:
     RefPtr<OverlayManager> overlayManager_;
 
     OnNewParamCallback onNewParam_;
+    std::function<void()> disposeCallback_;
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> onBackPressed_;

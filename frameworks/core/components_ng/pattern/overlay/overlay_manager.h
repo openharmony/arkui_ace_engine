@@ -128,7 +128,7 @@ class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
-    explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
+    explicit OverlayManager(const RefPtr<FrameNode>& rootNode);
     ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
@@ -146,6 +146,8 @@ public:
     PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
+    void HideAllPopupsWithoutAnimation();
+    void HideAllMenusWithoutAnimation(bool showInSubwindow = false);
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
@@ -193,6 +195,7 @@ public:
         return dismissDialogId_;
     }
 
+    void RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node);
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,
         const HideMenuType& reason = HideMenuType::NORMAL);
@@ -215,7 +218,7 @@ public:
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
+    void FireAutoSave(const RefPtr<FrameNode>& containerNode);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -254,11 +257,13 @@ public:
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
     void DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode);
 
-    void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
+    RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)> &&callback);
+    void UpdateCustomDialogWithNode(
+        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     std::optional<double> GetTopOrder();
     std::optional<double> GetBottomOrder();
 
@@ -283,6 +288,8 @@ public:
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialogWithContent(
+        const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
@@ -297,6 +304,7 @@ public:
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
     bool RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay);
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
@@ -363,6 +371,8 @@ public:
 
     RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
 
+    bool GetHasFilterWithCheck();
+
     bool GetHasFilter()
     {
         return hasFilter_;
@@ -414,6 +424,11 @@ public:
     void RemoveFilter();
     void RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode);
     void RemoveFilterAnimation();
+    void RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool hasAnimation = true);
+    void ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode);
+    void AddFilterOnDisappear(int32_t filterId);
+    void RemoveFilterOnDisappear(int32_t filterId);
+    bool IsFilterOnDisappear(int32_t filterId) const;
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
@@ -519,7 +534,7 @@ public:
         std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback,
         const RefPtr<FrameNode>& targetNode);
     void UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
-        NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
+        const NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
     void CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId);
     void SetDismissTarget(const DismissTarget& dismissTarget)
     {
@@ -552,7 +567,7 @@ public:
         std::optional<double> levelOrder = std::nullopt);
     void MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
-    void OnMainWindowSizeChange(int32_t instanceId);
+    void OnMainWindowSizeChange(int32_t instanceId, WindowSizeChangeReason reason);
 
     void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
 
@@ -585,7 +600,7 @@ public:
     void UpdateModalUIExtensionConfig(
         int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
     static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
-        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation, bool isModalRequestFocus);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -603,17 +618,22 @@ public:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
     void SetSheetHeight(float height)
     {
         sheetHeight_ = height;
+    }
+
+    float GetSheetHeight() const
+    {
+        return sheetHeight_;
     }
 
     const WeakPtr<UINode>& GetRootNode() const;
@@ -684,8 +704,10 @@ public:
         return overlayNode_;
     }
     bool CheckPageNeedAvoidKeyboard() const;
+    void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
-    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
+    void ExecuteFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -727,18 +749,28 @@ public:
         return overlayInfo_;
     }
 
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle);
+
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
-    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
+    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
+    static int32_t GetSubwindowKeyNodeId(const RefPtr<FrameNode>& frameNode);
+    static bool IsNeedAvoidFoldCrease(const RefPtr<FrameNode>& frameNode, bool checkSenboard, bool expandDisplay,
+        std::optional<bool> enableHoverMode);
+    static bool IsSceneBoardWindow();
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
+    bool IsTopOrder(std::optional<double> levelOrder);
+    std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void PopToast(int32_t targetId);
 
 private:
+    RefPtr<PipelineContext> GetPipelineContext() const;
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -761,12 +793,13 @@ private:
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
-    void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
+    void UpdateSheetRender(
+        const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
         std::function<void()>&& onAppear = nullptr, std::function<void()>&& onDisappear = nullptr,
         std::function<void()>&& shouldDismiss = nullptr, std::function<void(const int32_t)>&& onWillDismiss = nullptr,
-        std::function<void()>&& onWillDisappear = nullptr,
+        std::function<void()>&& onWillAppear = nullptr, std::function<void()>&& onWillDisappear = nullptr,
         std::function<void(const float)>&& onHeightDidChange = nullptr,
         std::function<void(const float)>&& onDetentsDidChange = nullptr,
         std::function<void(const float)>&& onWidthDidChange = nullptr,
@@ -774,7 +807,8 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
+    void UpdateSheetRenderProperty(
+        const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
@@ -786,7 +820,6 @@ private:
         }
     }
     void CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode);
-    void PopToast(int32_t targetId);
 
     // toast should contain id to avoid multiple delete.
     std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
@@ -810,6 +843,8 @@ private:
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
+    RefPtr<PipelineContext> GetMainPipelineContext(int32_t containerId);
+    RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& node);
 
     void SetPreviewFirstShow(const RefPtr<FrameNode>& menu);
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
@@ -819,9 +854,12 @@ private:
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
-    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
-    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+        bool isReadFirstNode = true);
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+        bool isReadFirstNode = true);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode);
     void SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,
         const RefPtr<FrameNode>& maskNode, const DialogProperties& dialogProps);
     void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
@@ -850,16 +888,14 @@ private:
     bool SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
-    std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PutLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
     void PopLevelOrder(int32_t nodeId);
-    RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
-    RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetNextNodeWithOrder(const std::optional<double>& levelOrder);
+    RefPtr<FrameNode> GetTopOrderNode();
     bool GetNodeFocusable(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetTopFocusableNode();
-    int32_t GetTopFocusableNodeId();
-    void FocusNextOrderNode(int32_t topNodeId);
-    bool IsTopOrder(std::optional<double> levelOrder);
+    void FocusNextOrderNode(const RefPtr<FrameNode>& topNode);
+    void SendAccessibilityEventToNextOrderNode(const RefPtr<FrameNode>& topNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();
@@ -885,6 +921,9 @@ private:
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
     void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
         int32_t instanceId);
+    void HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu);
+    bool CheckSelectSubWindowToClose(
+        const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay);
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
@@ -914,6 +953,8 @@ private:
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
     void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
         const RefPtr<FrameNode> dialog, bool showComponentContent);
+    RefPtr<FrameNode> UpdateCustomDialogInner(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        const std::function<void(int32_t)>& callback);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -933,11 +974,16 @@ private:
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
-    void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
+    void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline);
+    void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
+    void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
+    void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
+    void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
+    RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
@@ -962,6 +1008,7 @@ private:
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
+    WeakPtr<PipelineContext> context_;
     int32_t dialogCount_ = 0;
     DismissTarget dismissTarget_;
     int32_t dismissSheetId_ = 0;
@@ -983,6 +1030,7 @@ private:
 
     std::function<void()> onHideDialogCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;
+    CancelableCallback<void()> previewFilterTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;
@@ -1016,6 +1064,7 @@ private:
     std::set<int32_t> curSessionIds_;
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
+    std::unordered_set<int32_t> onDisappearFilterIds_;
 };
 } // namespace OHOS::Ace::NG
 

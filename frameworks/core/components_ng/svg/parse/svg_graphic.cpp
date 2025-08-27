@@ -87,6 +87,17 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     }
 }
 
+void SvgGraphic::DumpDrawPathInfo(const RSRecordingPath& path)
+{
+    auto svgContext = svgContext_.Upgrade();
+    if (!svgContext || svgContext->GetHasRecordedPath()) {
+        return;
+    }
+    std::string dumpInfo = "";
+    path.Dump(dumpInfo);
+    svgContext->SetSvgDrawPathInfoDump(std::move(dumpInfo));
+}
+
 PaintType SvgGraphic::GetFillType()
 {
     // fill="none" in this shape, return PaintType::None
@@ -327,7 +338,14 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         } else {
             fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
         }
-        fillBrush_.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
+        if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
+            auto p3Color = fillColor.BlendOpacity(curOpacity);
+            fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
+                                    p3Color.GetAlpha() / 255.0 },
+                RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+        } else {
+            fillBrush_.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
+        }
     }
     return true;
 }

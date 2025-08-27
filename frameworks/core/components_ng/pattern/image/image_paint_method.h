@@ -38,7 +38,7 @@ struct ImagePaintMethodConfig {
 };
 
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod);
 public:
     explicit ImagePaintMethod(
         const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig = {})

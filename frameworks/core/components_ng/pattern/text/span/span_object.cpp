@@ -104,6 +104,18 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.fontWeight.has_value()) {
         spanItem->fontStyle->UpdateFontWeight(font_.fontWeight.value());
     }
+
+    if (font_.strokeWidth.has_value()) {
+        spanItem->fontStyle->UpdateStrokeWidth(font_.strokeWidth.value());
+    }
+
+    if (font_.strokeColor.has_value()) {
+        spanItem->fontStyle->UpdateStrokeColor(font_.strokeColor.value());
+    }
+
+    if (font_.superscript.has_value()) {
+        spanItem->fontStyle->UpdateSuperscript(font_.superscript.value());
+    }
 }
 
 void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
@@ -113,6 +125,9 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetFontSize();
     spanItem->fontStyle->ResetItalicFontStyle();
     spanItem->fontStyle->ResetFontWeight();
+    spanItem->fontStyle->ResetStrokeWidth();
+    spanItem->fontStyle->ResetStrokeColor();
+    spanItem->fontStyle->ResetSuperscript();
 }
 
 Font FontSpan::GetFont() const
@@ -151,6 +166,15 @@ std::string FontSpan::ToString() const
     if (font_.fontWeight.has_value()) {
         ss << " FontWeight:" << static_cast<int32_t>(font_.fontWeight.value());
     }
+    if (font_.strokeWidth.has_value()) {
+        ss << " StrokeWidth:" << font_.strokeWidth.value().ToString();
+    }
+    if (font_.strokeColor.has_value()) {
+        ss << " StrokeColor:" << font_.strokeColor.value().ColorToString();
+    }
+    if (font_.superscript.has_value()) {
+        ss << " superscript:" << static_cast<int32_t>(font_.superscript.value());
+    }
     std::string output = ss.str();
     return output;
 }
@@ -166,19 +190,68 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 }
 
 // DecorationSpan
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style), options_(options)
+{}
+
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
+    int32_t start, int32_t end)
+    : SpanBase(start, end), types_(types), color_(color), style_(style), options_(options)
+{}
+
 DecorationSpan::DecorationSpan(
-    TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style)
-    : SpanBase(0, 0), type_(type), color_(color), style_(style)
+    const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+    std::optional<TextDecorationOptions> options)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style),
+    lineThicknessScale_(lineThicknessScale), options_(options)
 {}
 
-DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, int32_t start, int32_t end)
-    : SpanBase(start, end), type_(type), color_(color), style_(style)
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+    std::optional<TextDecorationOptions> options, int32_t start, int32_t end)
+    : SpanBase(start, end), types_(types), color_(color), style_(style),
+    lineThicknessScale_(lineThicknessScale), options_(options)
 {}
 
-TextDecoration DecorationSpan::GetTextDecorationType() const
+TextDecoration DecorationSpan::GetTextDecorationFirst() const
 {
-    return type_;
+    return types_.size() > 0 ? types_[0] : TextDecoration::NONE;
+}
+
+std::vector<TextDecoration> DecorationSpan::GetTextDecorationTypes() const
+{
+    return types_;
+}
+
+void DecorationSpan::SetTextDecorationTypes(const std::vector<TextDecoration>& types)
+{
+    types_ = types;
+}
+
+void DecorationSpan::RemoveTextDecorationType(TextDecoration type)
+{
+    if (!V2::HasTextDecoration(types_, type)) {
+        return;
+    }
+    auto iter = std::find(types_.begin(), types_.end(), type);
+    if (iter != types_.end()) {
+        types_.erase(iter);
+    }
+}
+
+void DecorationSpan::AddTextDecorationType(TextDecoration value)
+{
+    if (value == TextDecoration::NONE || V2::HasTextDecoration(types_, value)) {
+        return;
+    }
+    auto iter = std::find(types_.begin(), types_.end(), TextDecoration::NONE);
+    if (iter != types_.end()) {
+        types_.erase(iter);
+    }
+    types_.push_back(value);
 }
 
 std::optional<Color> DecorationSpan::GetColor() const
@@ -189,6 +262,21 @@ std::optional<Color> DecorationSpan::GetColor() const
 std::optional<TextDecorationStyle> DecorationSpan::GetTextDecorationStyle() const
 {
     return style_;
+}
+
+std::optional<float> DecorationSpan::GetTextDecorationLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
+std::optional<TextDecorationOptions> DecorationSpan::GetTextDecorationOptions() const
+{
+    return options_;
+}
+
+void DecorationSpan::SetTextDecorationOptions(const TextDecorationOptions& options)
+{
+    options_ = options;
 }
 
 void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
@@ -202,20 +290,32 @@ void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanO
     }
 }
 
+std::optional<float> DecorationSpan::GetLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
 RefPtr<SpanBase> DecorationSpan::GetSubSpan(int32_t start, int32_t end)
 {
-    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, style_, start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(
+        types_, color_, style_, lineThicknessScale_, options_, start, end);
     return spanBase;
 }
 
 void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
-    spanItem->fontStyle->UpdateTextDecoration(type_);
+    spanItem->fontStyle->UpdateTextDecoration(types_);
     if (color_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationColor(color_.value());
     }
     if (style_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationStyle(style_.value());
+    }
+    if (lineThicknessScale_.has_value()) {
+        spanItem->fontStyle->UpdateLineThicknessScale(lineThicknessScale_.value());
+    }
+    if (options_.has_value()) {
+        spanItem->fontStyle->UpdateTextDecorationOptions(options_.value());
     }
 }
 
@@ -224,11 +324,35 @@ void DecorationSpan::RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetTextDecoration();
     spanItem->fontStyle->ResetTextDecorationColor();
     spanItem->fontStyle->ResetTextDecorationStyle();
+    spanItem->fontStyle->ResetLineThicknessScale();
 }
 
 SpanType DecorationSpan::GetSpanType() const
 {
     return SpanType::Decoration;
+}
+
+std::string DecorationSpan::DecorationTypesToString() const
+{
+    std::string result = "";
+    for (TextDecoration type : types_) {
+        switch (type) {
+            case TextDecoration::UNDERLINE:
+                result += "UNDERLINE,";
+                break;
+            case TextDecoration::OVERLINE:
+                result += "OVERLINE,";
+                break;
+            case TextDecoration::LINE_THROUGH:
+                result += "LINE_THROUGH,";
+                break;
+            default:
+                result += "NONE,";
+                break;
+        }
+    }
+    result.pop_back();
+    return result;
 }
 
 std::string DecorationSpan::ToString() const
@@ -239,7 +363,7 @@ std::string DecorationSpan::ToString() const
     ss << ":";
     ss << GetEndIndex();
     ss << "]";
-    ss << " type:" << static_cast<int32_t>(type_) << " color:"
+    ss << " type:" << DecorationTypesToString() << " color:"
         << (color_.has_value() ? color_.value().ColorToString(): "None")
         << " style:" << (style_.has_value() ? static_cast<int32_t>(style_.value()): -1);
     std::string output = ss.str();
@@ -254,8 +378,11 @@ bool DecorationSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     }
     std::optional<Color> color = decorationSpan->GetColor();
     std::optional<TextDecorationStyle> style = decorationSpan->GetTextDecorationStyle();
-    TextDecoration type = decorationSpan->GetTextDecorationType();
-    return color == color_ && style == style_ && type == type_;
+    std::optional<float> lineThicknessScale = decorationSpan->GetTextDecorationLineThicknessScale();
+    std::optional<TextDecorationOptions> options = decorationSpan->GetTextDecorationOptions();
+    return color == color_ && style == style_ && lineThicknessScale_ == lineThicknessScale &&
+        V2::IsEqualTextDecorations(types_, decorationSpan->GetTextDecorationTypes()) &&
+        options_.value_or(TextDecorationOptions()) == options.value_or(TextDecorationOptions());
 }
 
 // BaselineOffsetSpan
@@ -467,22 +594,16 @@ void GestureSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOper
 
 void GestureSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
-    if (gestureInfo_.onClick.has_value()) {
-        spanItem->onClick = gestureInfo_.onClick.value();
-    } else {
-        spanItem->onClick = nullptr;
-    }
-
-    if (gestureInfo_.onLongPress.has_value()) {
-        spanItem->onLongPress = gestureInfo_.onLongPress.value();
-    } else {
-        spanItem->onLongPress = nullptr;
-    }
+    spanItem->onClick = gestureInfo_.onClick.value_or(nullptr);
+    spanItem->onLongPress = gestureInfo_.onLongPress.value_or(nullptr);
+    spanItem->onTouch = gestureInfo_.onTouch.value_or(nullptr);
 }
+
 void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
     spanItem->onClick = nullptr;
     spanItem->onLongPress = nullptr;
+    spanItem->onTouch = nullptr;
 }
 
 // TextShadowSpan
@@ -743,6 +864,10 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
         spanItem->textLineStyle->UpdateTextAlign(paragraphStyle_.align.value());
     }
 
+    if (paragraphStyle_.textVerticalAlign.has_value()) {
+        spanItem->textLineStyle->UpdateTextVerticalAlign(paragraphStyle_.textVerticalAlign.value());
+    }
+
     if (paragraphStyle_.maxLines.has_value()) {
         spanItem->textLineStyle->UpdateMaxLines(static_cast<uint32_t>(paragraphStyle_.maxLines.value()));
     }
@@ -771,6 +896,7 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
 void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->ResetTextAlign();
+    spanItem->textLineStyle->ResetTextVerticalAlign();
     spanItem->textLineStyle->ResetMaxLines();
     spanItem->textLineStyle->ResetTextOverflow();
     spanItem->textLineStyle->ResetLeadingMargin();
@@ -1086,16 +1212,19 @@ RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
 void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     auto address = urlAddress_;
+    spanItem->urlAddress = UtfUtils::Str8DebugToStr16(address);
     auto urlOnRelease = [address]() {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);
     };
     spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+    spanItem->urlAddress = std::u16string(address.begin(), address.end());
 }
 
 void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    spanItem->urlAddress = std::nullopt;
     spanItem->urlOnRelease = nullptr;
 }
 

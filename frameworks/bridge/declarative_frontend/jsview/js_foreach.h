@@ -44,7 +44,7 @@ public:
     static void CreateNewChildFinish(const JSCallbackInfo& info);
 
     static void OnMove(const JSCallbackInfo& info);
-    static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue);
+    static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj);
 };
 
 } // namespace OHOS::Ace::Framework

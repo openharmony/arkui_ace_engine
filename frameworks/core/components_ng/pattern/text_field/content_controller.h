@@ -46,6 +46,7 @@ public:
     void FilterValueType(std::u16string& value);
     std::string GetSelectedLimitValue(int32_t& index, int32_t& startIndex);
     void FilterTextInputStyle(bool& textChanged, std::u16string& result);
+    void FilterValue(std::u16string& value);
 
     std::string GetTextValue()
     {

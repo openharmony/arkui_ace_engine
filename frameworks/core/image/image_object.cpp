@@ -23,11 +23,6 @@
 #include "core/image/image_cache.h"
 #include "core/image/image_compressor.h"
 
-#ifdef APNG_IMAGE_SUPPORT
-#include "core/image/apng/apng_image_decoder.h"
-#include "core/image/apng/apng_image_object.h"
-#endif
-
 namespace OHOS::Ace {
 
 std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetImageSize)
@@ -67,22 +62,6 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         }
 #endif
     }
-
-    // if is png or apng check
-#ifdef APNG_IMAGE_SUPPORT
-    if (source.isPng()) {
-        auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(data);
-        if (apngDecoder && apngDecoder->isApng()) {
-            if (!apngDecoder->DecodeImage()) {
-                return nullptr;
-            }
-
-            Size imageSize = apngDecoder->GetImageSize();
-            uint32_t frameCount = apngDecoder->GetFrameCount();
-            return MakeRefPtr<ApngImageObject>(source, imageSize, frameCount, data, apngDecoder);
-        }
-    }
-#endif
 
     // build normal pixel image object.
     if (rsData == nullptr) {

@@ -17,10 +17,12 @@
 #include "interfaces/native/node/dialog_model.h"
 
 #include "base/error/error_code.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -57,6 +59,39 @@ namespace {
     constexpr int32_t DEFAULT_BORDER_STYLE = static_cast<int32_t>(OHOS::Ace::BorderStyle::SOLID);
     DialogProperties g_dialogProperties;
 } // namespace
+
+static void UnregisterOnWillDialogDismiss(FrameNode* dialogNode)
+{
+    CHECK_NULL_VOID(dialogNode);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWillDismiss(nullptr);
+    pattern->SetOnWillDismissByNDK(nullptr);
+    pattern->SetIsDialogDisposed(true);
+}
+
+static void CloseDialogHandle(void* dialogHandle)
+{
+    CHECK_NULL_VOID(dialogHandle);
+    auto* dialogNode = reinterpret_cast<FrameNode*>(dialogHandle);
+    CHECK_NULL_VOID(dialogNode);
+    UnregisterOnWillDialogDismiss(dialogNode);
+    CustomDialogControllerModelNG::SetCloseDialogForNDK(dialogNode);
+    if (dialogNode) {
+        dialogNode->DecRefCount();
+    }
+}
+
+static void CloseHistoryDialog(ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->historyDialogHandle.empty()) {
+        for (const auto& dialogHandle : controllerHandler->historyDialogHandle) {
+            CloseDialogHandle(dialogHandle);
+        }
+        controllerHandler->historyDialogHandle.clear();
+    }
+}
 
 ArkUIDialogHandle CreateDialog()
 {
@@ -116,16 +151,23 @@ ArkUIDialogHandle CreateDialog()
         .enableHoverMode = std::nullopt,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
+        .dialogState = nullptr,
     });
 }
 
+// DisposeDialog方法用于释放controller控制器，建议调用本方法前先调用CloseDialog方法关闭正在显示的Dialog
+// 如果没有调用CloseDialog方法直接调用DisposeDialog，则最新一次创建的Dialog不会被关闭，非最新一次的Dialog会被统一关闭
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
     auto* dialog = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     if (dialog) {
+        // 解绑Dialog节点的OnWillDismiss方法，防止回调时触发悬空指针，用户可通过侧滑等方式关闭Dialog
+        UnregisterOnWillDialogDismiss(dialog);
         dialog->DecRefCount();
     }
+    // 关闭非最新一次创建的Dialog
+    CloseHistoryDialog(controllerHandler);
     controllerHandler->dialogHandle = nullptr;
     auto* content = reinterpret_cast<FrameNode*>(controllerHandler->contentHandle);
     if (content) {
@@ -321,26 +363,28 @@ void ParseDialogBorderStyle(DialogProperties& dialogProperties, ArkUIDialogHandl
 void ParseDialogWidth(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!dialogProperties.width.has_value() && controllerHandler->widthValue.has_value()) {
-        auto unitEnum = controllerHandler->widthUnit;
-        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
-        } else {
-            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
-        }
+    if (!controllerHandler->widthValue) {
+        return;
+    }
+    auto unitEnum = controllerHandler->widthUnit;
+    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
+    } else {
+        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
     }
 }
 
 void ParseDialogHeight(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!dialogProperties.height.has_value() && controllerHandler->heightValue.has_value()) {
-        auto unitEnum = controllerHandler->heightUnit;
-        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
-        } else {
-            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
-        }
+    if (!controllerHandler->heightValue) {
+        return;
+    }
+    auto unitEnum = controllerHandler->heightUnit;
+    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
+    } else {
+        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
     }
 }
 
@@ -488,6 +532,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .onWillDisappear = dialogProps.onWillDisappear,
         .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
         .dialogCallback = dialogProps.dialogCallback,
+        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
         .levelOrder = dialogProps.levelOrder,
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
@@ -541,22 +586,24 @@ int32_t ConvertBlurStyle(int32_t originBlurStyle)
 void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
-    auto task = [callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+    auto dialogProperties = g_dialogProperties;
+    dialogProperties.customCNode = g_dialogProperties.customCNode;
+    auto task = [callback, dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
-            g_dialogProperties.isShowInSubWindow);
-        if (g_dialogProperties.isShowInSubWindow) {
-            SubwindowManager::GetInstance()->OpenCustomDialogNG(g_dialogProperties, std::move(callback));
-            if (g_dialogProperties.isModal) {
+            dialogProperties.isShowInSubWindow);
+        if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
+            if (dialogProperties.isModal) {
                 TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
             }
         } else {
-            overlayManager->OpenCustomDialog(g_dialogProperties, std::move(callback));
+            overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
         }
     };
-    if (g_dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
         NG::DialogManager::ShowInEmbeddedOverlay(
-            std::move(task), "ArkUIOverlayShowDialog", g_dialogProperties.dialogLevelUniqueId);
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
     } else {
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
     }
@@ -669,6 +716,7 @@ ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle controllerHandler, boo
     return ERROR_CODE_NO_ERROR;
 }
 
+// 基于传入的控制器可以多次显示Dialog，但需注意Close只会关闭最新一次创建的Dialog
 ArkUI_Int32 ShowDialog(ArkUIDialogHandle controllerHandler, bool showInSubWindow)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
@@ -682,6 +730,9 @@ ArkUI_Int32 ShowDialog(ArkUIDialogHandle controllerHandler, bool showInSubWindow
     if (dialogNode) {
         dialogNode->IncRefCount();
     }
+    if (controllerHandler->dialogHandle) {
+        controllerHandler->historyDialogHandle.push_back(controllerHandler->dialogHandle);
+    }
     controllerHandler->dialogHandle = AceType::RawPtr(dialogNode);
     return ERROR_CODE_NO_ERROR;
 }
@@ -692,6 +743,8 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
     auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
     CustomDialogControllerModelNG::SetCloseDialogForNDK(dialogNode);
+    // 关闭Dialog时同步解绑节点上的OnWillDismiss事件，防止悬空指针回调
+    UnregisterOnWillDialogDismiss(dialogNode);
     if (dialogNode) {
         dialogNode->DecRefCount();
     }
@@ -712,6 +765,15 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->onWillDismissCallByNDK  = callback;
     controllerHandler->userData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dialogState)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
+    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -791,6 +853,10 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
     CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    g_dialogProperties.maskRect = std::nullopt;
+    g_dialogProperties.borderRadius = std::nullopt;
+    g_dialogProperties.width = std::nullopt;
+    g_dialogProperties.height = std::nullopt;
     ParseDialogProperties(g_dialogProperties, handle);
     g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
     auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
@@ -832,6 +898,7 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
         if (promptDialogAttr.offset.has_value()) {
             g_dialogProperties.offset = promptDialogAttr.offset.value();
         }
+        g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
         auto node = g_dialogProperties.customCNode;
         auto nodePtr = node.Upgrade();
         CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
@@ -843,11 +910,11 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
-                overlayManager->UpdateCustomDialog(node, g_dialogProperties, std::move(callback));
+                overlayManager->UpdateCustomDialogWithNode(node, g_dialogProperties, std::move(callback));
             },
             TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(
+        SubwindowManager::GetInstance()->UpdateCustomDialogNGWithNode(
             g_dialogProperties.customCNode, promptDialogAttr, std::move(callback));
     }
     return ERROR_CODE_NO_ERROR;

@@ -24,7 +24,7 @@ class CanvasTaskPool;
 }
 namespace OHOS::Ace::Framework {
 class CanvasRenderingContext2DModelImpl : public OHOS::Ace::CanvasRenderingContext2DModel {
-    DECLARE_ACE_TYPE(CanvasRenderingContext2DModelImpl, CanvasRenderingContext2DModel)
+    DECLARE_ACE_TYPE(CanvasRenderingContext2DModelImpl, CanvasRenderingContext2DModel);
 
 public:
     CanvasRenderingContext2DModelImpl() = default;

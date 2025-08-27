@@ -37,6 +37,11 @@ public:
 private:
     static void ParseMenuItemOptionsResource(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuItemObj, MenuItemProperties& menuItemProps);
+    static void AddMenuItemOptionsResource(const RefPtr<ResourceObject>& contentStrObj,
+        const RefPtr<ResourceObject>& labelStrObj, const RefPtr<ResourceObject>& startIconObj,
+        const RefPtr<ResourceObject>& endIconObj, MenuItemProperties& menuItemProps);
+    static void ParseContentFontFamily(const JSRef<JSObject>& obj);
+    static void ParseLabelFontFamily(const JSRef<JSObject>& obj);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_ITEM_H

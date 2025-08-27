@@ -22,6 +22,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -101,6 +102,9 @@ TextClockPattern::TextClockPattern()
 
 void TextClockPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     InitTextClockController();
     InitUpdateTimeTextCallBack();
     auto* eventProxy = TimeEventProxy::GetInstance();
@@ -111,9 +115,24 @@ void TextClockPattern::OnAttachToFrameNode()
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+void TextClockPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void TextClockPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
@@ -891,5 +910,100 @@ void TextClockPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("is24H: ", is24H_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
+}
+
+void TextClockPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextClockTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(pops);
+    
+    if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
+        UpdateTextClockColor(theme->GetTextStyleClock().GetTextColor(), false);
+    }
+}
+
+void TextClockPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(textClockLayoutProperty);
+    auto optionJson = JsonUtil::Create(true);
+    optionJson->Put("hour",
+        TimeFormat::GetHourFormat(
+            static_cast<int32_t>(textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO)), is24H_)
+            .c_str());
+    json->PutExtAttr("dateTimeOptions", optionJson->ToString().c_str(), filter);
+}
+
+void TextClockPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextClockPattern::UpdateTextClockColor(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        layoutProperty->UpdateTextColor(color);
+        renderContext->UpdateForegroundColor(color);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+    }
+}
+
+void TextClockPattern::UpdateTextClockFontSize(const CalcDimension& fontSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFontSize(fontSize);
+}
+
+void TextClockPattern::UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies) 
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFontFamily(fontFamilies);
+} 
+
+void TextClockPattern::UpdateTextClockFormat(const std::string& format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFormat(format);
 }
 } // namespace OHOS::Ace::NG

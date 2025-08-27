@@ -43,11 +43,12 @@ namespace OHOS::Ace::Framework {
 void JSRow::Create(const JSCallbackInfo& info)
 {
     std::optional<CalcDimension> space;
+    RefPtr<ResourceObject> spaceResObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
         CalcDimension value;
-        if (ParseJsDimensionVp(spaceVal, value)) {
+        if (ParseJsDimensionVp(spaceVal, value, spaceResObj)) {
             space = value;
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             space = Dimension();
@@ -62,7 +63,11 @@ void JSRow::Create(const JSCallbackInfo& info)
         }
     }
 
-    RowModel::GetInstance()->Create(space, declaration, "");
+    if (SystemProperties::ConfigChangePerform() && spaceResObj) {
+        RowModel::GetInstance()->Create(spaceResObj, declaration, "");
+    } else {
+        RowModel::GetInstance()->Create(space, declaration, "");
+    }
 }
 
 void JSRow::CreateWithWrap(const JSCallbackInfo& info)
@@ -79,6 +84,7 @@ void JSRow::SetAlignItems(int32_t value)
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetAlignItems(FlexAlign::CENTER);
         // FIXME: we have a design issue here, setters return void, can not signal error to JS
+        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -92,6 +98,7 @@ void JSRow::SetJustifyContent(int32_t value)
         RowModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetJustifyContent(FlexAlign::FLEX_START);
+        LOGE("invalid value for justifyContent");
     }
 }
 

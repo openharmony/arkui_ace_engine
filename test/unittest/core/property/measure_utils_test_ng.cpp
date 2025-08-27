@@ -47,6 +47,8 @@ const Dimension HEIGHT { 100.0, DimensionUnit::PX };
 const Dimension CALC_TEST { 10.0, DimensionUnit::CALC };
 const Dimension BORDER_WIDTH_PX { 10.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_VP { 10.0, DimensionUnit::VP };
+const Dimension BORDER_WIDTH_PRECISION { 0.99999, DimensionUnit::PX };
+const Dimension BORDER_WIDTH_PRECISION_LOW { 0.00001, DimensionUnit::PX };
 const CalcSize TEST_CALC_SIZE { NG::CalcLength(WIDTH), NG::CalcLength(HEIGHT) };
 const CalcLength CALC_LENGTH_WIDTH_PX { 20.0, DimensionUnit::PX };
 const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
@@ -64,6 +66,8 @@ OptionalSizeF TEST_OPTIONAL_SIZE = { 10.0, 10.0 };
 const PaddingPropertyF TEST_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
 PaddingPropertyF PADDING_PROPERTY = { 0, 0, 0, 0 };
 PaddingPropertyF TEST_PADDING_PROPERTY = { 0, 0, 0, 0 };
+const BorderWidthPropertyF PRECISION_BORDER_WIDTH_PROPERTY { 1.0, 1.0, 1.0, 1.0 };
+const BorderWidthPropertyF PRECISION_LOW_BORDER_WIDTH_PROPERTY { 0.0, 0.0, 0.0, 0.0 };
 const BorderWidthPropertyF BORDER_WIDTH_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
 const Axis AXIS_HORIZONTAL = Axis::HORIZONTAL;
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
@@ -89,7 +93,7 @@ public:
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg001, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty.
@@ -110,7 +114,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg001, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg002, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty.
@@ -131,7 +135,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg002, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg003, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty.
@@ -158,7 +162,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg003, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg004, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testCalcSize.
@@ -187,7 +191,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg004, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg005, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty.
@@ -214,7 +218,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg005, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg006, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call ConstrainSize.
@@ -238,7 +242,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg006, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg007, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -275,7 +279,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg007, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg008, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -306,7 +310,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg008, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg009, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -346,7 +350,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg009, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg010, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -398,7 +402,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg010, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg011, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -435,7 +439,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg011, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg012, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create scaleProperty and testPadding.
@@ -466,7 +470,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg012, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg013, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call AddPaddingToSize and set input Padding is zero.
@@ -494,7 +498,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg013, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg014, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call MinusPaddingToSize and set input Padding is zero.
@@ -523,7 +527,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg014, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg015, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call AddPaddingToSize and set input Padding is zero.
@@ -551,7 +555,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg015, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg016, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call MinusPaddingToSize and set input Padding is zero.
@@ -580,7 +584,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg016, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg017, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call GetMainAxisOffset and set input Axis is HORIZONTAL.
@@ -602,7 +606,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg017, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg018, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call GetMainAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -624,7 +628,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg018, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg019, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg019, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call GetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -646,7 +650,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg019, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg020, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg020, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call SetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -670,7 +674,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg020, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg021, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg021, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call SetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -698,7 +702,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg021, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg022, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg022, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call GetMainAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -722,7 +726,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg022, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg023, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg023, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call GetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -744,7 +748,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg023, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg024, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg024, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call SetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
@@ -770,7 +774,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg024, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg025, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg025, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CreateIdealSize and set input usingMaxSize is USING_MAX_SIZE_TRUE.
@@ -796,7 +800,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg025, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg026, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg026, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create layoutConstraint.
@@ -825,7 +829,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg026, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg027, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg027, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create layoutConstraint.
@@ -893,7 +897,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg027, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg028, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg028, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testPadding.
@@ -924,7 +928,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg028, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg029, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg029, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testPadding.
@@ -975,7 +979,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg029, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg030, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg030, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testPadding and sizeF.
@@ -1002,7 +1006,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg030, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg031, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg031, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create OptionalSizeF,MeasureProperty and SizeF.
@@ -1056,7 +1060,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg031, TestSize.Level1)
  * @tc.desc: Test cast to MeasureUtilsTestNg.
  * @tc.type: FUNC
  */
-HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create OptionalSizeF and axis.
@@ -1129,5 +1133,82 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
     optionResult = CreateIdealSizeByPercentRef(layoutConstraint, axis, MEASURE_TYPE_MATCH_CONTENT, false);
     EXPECT_EQ(optionResult.Height(), std::nullopt);
     EXPECT_EQ(optionResult.Width(), std::nullopt);
+}
+
+/**
+ * @tc.name: MeasureUtilsTestNg033
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg033, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create scaleProperty and set testPropertyT DimensionUnit is PRECISION.
+     */
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
+    BorderWidthPropertyT<Dimension> testPropertyT;
+
+    testPropertyT.leftDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.rightDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.topDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.bottomDimen = BORDER_WIDTH_PRECISION;
+
+    /**
+     * @tc.steps: step2. call ConvertToBorderWidthPropertyF.
+     * @tc.expected: the return value is the same as PRECISION_BORDER_WIDTH_PROPERTY.
+     */
+    BorderWidthPropertyF retProperty = ConvertToBorderWidthPropertyF(testPropertyT, scaleProperty, PERCENT_REFERENCE);
+    EXPECT_EQ(retProperty, PRECISION_BORDER_WIDTH_PROPERTY);
+}
+
+/**
+ * @tc.name: MeasureUtilsTestNg034
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg034, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create scaleProperty and set testPropertyT DimensionUnit is PRECISION.
+     */
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
+    BorderWidthPropertyT<Dimension> testPropertyT;
+
+    testPropertyT.leftDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.rightDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.topDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.bottomDimen = BORDER_WIDTH_PRECISION_LOW;
+
+    /**
+     * @tc.steps: step2. call ConvertToBorderWidthPropertyF.
+     * @tc.expected: the return value is the same as PRECISION_BORDER_WIDTH_PROPERTY.
+     */
+    BorderWidthPropertyF retProperty = ConvertToBorderWidthPropertyF(testPropertyT, scaleProperty, PERCENT_REFERENCE);
+    EXPECT_EQ(retProperty, PRECISION_LOW_BORDER_WIDTH_PROPERTY);
+}
+
+/**
+ * @tc.name: AdjacentExpandToRectTest
+ * @tc.desc: Test cast to AdjacentExpandToRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, AdjacentExpandToRectTest, TestSize.Level0)
+{
+    RectF adjustingRect(20.0f, 10.0f, 60.0f, 100.0f);
+    RectF frameRect(10.0f, 10.0f, 100.0f, 100.0f);
+    PaddingPropertyF frameExpand = {
+        .left = 10.0f,
+        .right = 20.0f,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    PaddingPropertyF expectRes = {
+        .left = std::nullopt,
+        .right = std::nullopt,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    auto filteredExpand = AdjacentExpandToRect(adjustingRect, frameExpand, frameRect);
+    EXPECT_EQ(filteredExpand, expectRes);
 }
 } // namespace OHOS::Ace::NG

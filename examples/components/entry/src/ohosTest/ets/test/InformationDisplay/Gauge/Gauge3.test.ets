@@ -26,7 +26,6 @@ import {
   searchParentBlock
 } from '../../../utils';
 
-
 import { GaugeStart } from './Gauge';
 
 

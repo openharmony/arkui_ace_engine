@@ -556,6 +556,24 @@ HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OutOfEnd002
+ * @tc.desc: Test GridLayoutInfo::OutOfEnd with different precision
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, OutOfEnd002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+
+    info.childrenCount_ = 5;
+    info.endIndex_ = 4;
+    info.contentEndPadding_ = 0.0f;
+    info.currentOffset_ = -1.666626f;
+    info.totalHeightOfItemsInView_ = 401.666626f;
+    info.lastMainSize_ = 400.000000f;
+    EXPECT_FALSE(info.IsOutOfEnd(0.0f, false));
+}
+
+/**
  * @tc.name: FindStartLineInMatrix001
  * @tc.desc: Test GridLayoutInfo::FindStartLineInMatrix
  * @tc.type: FUNC
@@ -802,7 +820,7 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
     };
     info.lineHeightMap_ = { { 0, 400.f }, { 1, 400.f }, { 2, 400.f } };
     info.crossCount_ = 3;
-    info.childrenCount_ = 10;
+    info.childrenCount_ = 20;
     info.lastRegularMainSize_ = 0;
 
     GridLayoutOptions option;
@@ -817,8 +835,63 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
     info.SkipStartIndexByOffset(option, 0.f);
 
     EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 5400);
 }
 
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.lineHeightMap_ = {};
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+    info.lastRegularMainSize_ = 400;
+    info.lastIrregularMainSize_ = 200;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.f }, { 1, 400.f }, { 2, 400.f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
 
 HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
 {
@@ -968,5 +1041,88 @@ HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest004, TestSize.Level1
 
     // Assert startIndex is updated
     EXPECT_EQ(info.startIndex_, 12);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GridMatrixEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with empty gridMatrix_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GridMatrixEmpty_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstLineNotZero_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with gridMatrix_ not started from 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstLineNotZero_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[1] = {{0, 1}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstLineIsEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with first line empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstLineIsEmpty_ReturnsFalse, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FirstItemNotZero_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with first item not zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FirstItemNotZero_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 1}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::LastLineEmpty_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with last line empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, LastLineEmpty_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[1] = {};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::LineGapTooLarge_ReturnsFalse
+ * @tc.desc: test IsAllItemsMeasured with more than MAX_CUMULATIVE_LINES lines
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, LineGapTooLarge_ReturnsFalse, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[101] = {{0, 101}};
+    EXPECT_FALSE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::AllConditionsMet_ReturnsTrue
+ * @tc.desc: test IsAllItemsMeasured with alall conditions met
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, AllConditionsMet_ReturnsTrue, TestSize.Level1) {
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = {{0, 0}};
+    info.gridMatrix_[1] = {{0, 5}};
+    info.childrenCount_ = 6;
+    EXPECT_TRUE(info.IsAllItemsMeasured());
 }
 } // namespace OHOS::Ace::NG

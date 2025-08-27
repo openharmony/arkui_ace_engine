@@ -20,6 +20,7 @@
 #include "core/animation/keyframe_animation.h"
 #include "core/components/arc/render_arc.h"
 #include "core/components/indexer/render_indexer.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -94,7 +95,7 @@ protected:
     int32_t itemMaxCount_ = INDEXER_ITEM_MAX_COUNT; // the max count of the items while in expand mode
     int32_t currentCount_ = INDEXER_ITEM_MAX_COUNT; // current shown item nums exclude collapse item
     double arcHeadOffset_ = 0.0;    // the offset of the arc, item # to the original position, in radians
-    double arcMaxLen_ = M_PI * 2.0; // the max length of the arc, in radians
+    double arcMaxLen_ = ACE_PI * 2.0; // the max length of the arc, in radians
 
 private:
     void InitBubbleBox(const Size& size);
@@ -143,12 +144,12 @@ private:
     RefPtr<RenderArc> arc_;                      // reference of the arc render node
     RefPtr<RenderBox> indicatorBox_;             // reference of the indicator box render node
     double arcHeadPosition_ = INDEXER_ARC_BEGIN; // the begin position of the arc, in radians
-    double arcTailPosition_ = 2 * M_PI;          // the tail position of the arc, in radians
+    double arcTailPosition_ = 2 * ACE_PI;          // the tail position of the arc, in radians
     int32_t collapseItemCount_ = INDEXER_COLLAPSE_ITEM_COUNT; // the max count of the items while in collapse mode
     double collapseItemPosition_ = INDEXER_ARC_BEGIN;         // position of the collapse item, in radians
     double hotRgnSize_ = INDEXER_HOT_RGN_RADIUS;              // radius for item clicking
     double rotationStepValue_ = 0.0;
-    double perItemExtent_ = 2.0 * M_PI / itemMaxCount_;
+    double perItemExtent_ = 2.0 * ACE_PI / itemMaxCount_;
 
     bool touching_ = false; // whether the item is in touching
     bool itemColorEnabled_ = true;

@@ -34,7 +34,7 @@ class NavigationTransitionProxy;
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
 class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
-    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
+    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase);
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : NavDestinationNodeBase(tag, nodeId, pattern)
@@ -83,15 +83,9 @@ public:
 
     void SetNavDestinationMode(NavDestinationMode mode);
 
-    NavDestinationMode GetNavDestinationMode() const
-    {
-        return mode_;
-    }
+    NavDestinationMode GetNavDestinationMode() const;
 
-    void SetIndex(int32_t index)
-    {
-        index_ = index;
-    }
+    void SetIndex(int32_t index, bool updatePrimary = true);
 
     int32_t GetIndex() const
     {
@@ -118,15 +112,9 @@ public:
         return isAnimated_;
     }
 
-    void SetCanReused(bool canReused)
-    {
-        canReused_ = canReused;
-    }
+    void SetCanReused(bool canReused);
 
-    bool GetCanReused() const
-    {
-        return canReused_;
-    }
+    bool GetCanReused() const;
 
     void SetInCurrentStack(bool inStack)
     {
@@ -147,6 +135,11 @@ public:
     const std::string& GetNavDestinationPathInfo() const
     {
         return navDestinationPathInfo_;
+    }
+
+    const std::string& GetNavDestinationModuleName() const
+    {
+        return navDestinationModuleName_;
     }
     
     int32_t GetNavigationNodeId() const;
@@ -179,13 +172,19 @@ public:
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
-    void InitSystemTransitionPush(bool transitionIn);
-    void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
-    void InitSystemTransitionPop(bool isTransitionIn);
-    void StartSystemTransitionPop(bool transitionIn);
+    void SystemTransitionPushStart(bool transitionIn) override;
+    void SystemTransitionPushEnd(bool transitionIn) override;
+    void SystemTransitionPushFinish(bool transitionIn, int32_t animationId) override;
+
+    void SystemTransitionPopStart(bool transitionIn) override;
+    void SystemTransitionPopEnd(bool transitionIn) override;
+    bool SystemTransitionPopFinish(int32_t animationId = -1, bool isNeedCleanContent = true) override;
+
+    void InitSoftTransitionPush(bool transitionIn);
+    void StartSoftTransitionPush(bool transitionIn);
+    void InitSoftTransitionPop(bool isTransitionIn);
+    void StartSoftTransitionPop(bool transitionIn);
     bool CheckTransitionPop(const int32_t animationId);
-    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
@@ -249,6 +248,38 @@ public:
 
     RefPtr<UINode> GetNavigationNode() override;
 
+    void SetIsShowInPrimaryPartition(bool show)
+    {
+        isShowInPrimaryPartition_ = show;
+    }
+    bool IsShowInPrimaryPartition() const
+    {
+        return isShowInPrimaryPartition_;
+    }
+    RefPtr<NavDestinationGroupNode> GetOrCreateProxyNode();
+    void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
+    {
+        primaryNode_ = node;
+    }
+    RefPtr<NavDestinationGroupNode> GetPrimaryNode() const
+    {
+        return primaryNode_.Upgrade();
+    }
+
+    void SetTitleAnimationElapsedTime(int32_t elapsedTime)
+    {
+        titleAnimationElapsedTime_ = elapsedTime;
+    }
+
+    int32_t GetTitleAnimationElapsedTime() const
+    {
+        return titleAnimationElapsedTime_;
+    }
+
+    bool IsTitleConsumedElapsedTime() const
+    {
+        return isTitleConsumedElapsedTime_;
+    }
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -267,6 +298,12 @@ private:
     std::function<void()> BuildTransitionFinishCallback(
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
     std::function<void()> BuildEmptyFinishCallback();
+
+    bool IsNeedHandleElapsedTime() const
+    {
+        return !isTitleConsumedElapsedTime_ && systemTransitionType_ == NavigationSystemTransitionType::TITLE &&
+            titleAnimationElapsedTime_ > 0 && titleAnimationElapsedTime_ < 450;
+    }
 
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -289,6 +326,12 @@ private:
     float userSetOpacity_ = 1.0f;
 
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
+    bool isTitleConsumedElapsedTime_ = false;
+    int32_t titleAnimationElapsedTime_ = 0;
+
+    bool isShowInPrimaryPartition_ = false;
+    RefPtr<NavDestinationGroupNode> proxyNode_;
+    WeakPtr<NavDestinationGroupNode> primaryNode_;
 };
 
 } // namespace OHOS::Ace::NG

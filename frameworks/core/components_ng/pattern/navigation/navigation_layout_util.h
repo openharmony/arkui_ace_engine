@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navdestination_layout_property_base.h"
@@ -46,6 +47,10 @@ public:
         bool isNeedToCreatePaddingAndBorder);
     static void UpdateContentSafeAreaPadding(const RefPtr<NavDestinationNodeBase>& nodeBase, float titleBarHeight);
     static bool EnableToolBarAdaptation(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    static void UpdateConstraintWhenFixOrWrap(
+        const RefPtr<LayoutProperty>& layoutProperty, LayoutConstraintF& constraint, SizeF size);
+    static std::pair<bool, bool> CheckVerticalExtend(const RefPtr<NavDestinationLayoutPropertyBase>& layoutProperty,
+        const RefPtr<NavDestinationNodeBase>& hostNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
 };
 
 } // namespace OHOS::Ace::NG

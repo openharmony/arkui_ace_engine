@@ -124,8 +124,11 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->DeleteSelectOperation(&record);
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
     RectF rect(0, 0, 5, 5);
     richEditorPattern->CreateHandles();
@@ -134,7 +137,8 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
 
     EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
     bool ret = false;
-    ret = richEditorPattern->OnScrollCallback(10, 10);
+    int32_t SCROLL_FROM_START = 10;
+    ret = richEditorPattern->OnScrollCallback(10, SCROLL_FROM_START);
     EXPECT_TRUE(ret);
 }
 
@@ -430,11 +434,11 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern004
+ * @tc.name: InitScrollablePattern003
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -449,11 +453,11 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern005
+ * @tc.name: InitScrollablePattern004
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern005, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -481,7 +485,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AutoScrollParam param;
     param.showScrollbar = true;
@@ -524,7 +528,7 @@ HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     AutoScrollParam param;
     param.isFirstRun_ = true;
@@ -553,7 +557,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -581,7 +585,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -609,7 +613,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
@@ -637,7 +641,7 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto tmpHost = richEditorPattern->GetHost();
     ASSERT_NE(tmpHost, nullptr);
@@ -658,9 +662,8 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
  */
 HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll001, TestSize.Level1)
 {
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isRichEditorInit_ = true;
 
@@ -748,4 +751,48 @@ HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
 }
 
+/**
+ * @tc.name: UpdateScrollBarColor001
+ * @tc.desc: test richEditor UpdateScrollBarColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateLayoutProperty();
+    richEditorPattern->InitScrollablePattern();
+    auto color = Color::GREEN;
+    richEditorPattern->UpdateScrollBarColor(color, true);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto scrollBarColor = property->GetScrollBarColorValue(Color());
+    EXPECT_EQ(color, scrollBarColor);
+    richEditorPattern->UpdateScrollBarColor(std::nullopt, true);
+    property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    scrollBarColor = property->GetScrollBarColorValue(Color());
+    EXPECT_NE(color, scrollBarColor);
+}
+
+/**
+ * @tc.name: GetScrollBarColor001
+ * @tc.desc: test richEditor GetScrollBarColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateLayoutProperty();
+    richEditorPattern->InitScrollablePattern();
+    richEditorPattern->UpdateScrollBarColor(Color::GREEN, true);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto color = property->GetScrollBarColorValue(Color());
+    auto scrollBarColor = richEditorPattern->GetScrollBarColor();
+    EXPECT_EQ(color, scrollBarColor);
+}
 }

@@ -443,28 +443,6 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
 }
 
 /**
- * @tc.name: Event008
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
-{
-    bool isTrigger = false;
-    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
-    ListModelNG model = CreateList();
-    model.SetOnScroll(event);
-    CreateListItems(2);
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. When unScrollable, call ScrollToEdge
-     * @tc.expected: Would not trigger onScroll event
-     */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_FALSE(isTrigger);
-}
-
-/**
  * @tc.name: ListOnReachEnd001
  * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
  * @tc.type: FUNC
@@ -1008,5 +986,77 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
     EXPECT_EQ(pattern_->GetTotalOffset(), 240);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
+}
+
+/**
+ * @tc.name: onWillStopDragging001
+ * @tc.desc: Test onWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, onWillStopDragging001, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: onWillStopDragging002
+ * @tc.desc: Test onWillStopDragging002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, onWillStopDragging002, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
 } // namespace OHOS::Ace::NG

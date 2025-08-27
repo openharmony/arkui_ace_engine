@@ -25,13 +25,13 @@ namespace OHOS::Ace::Framework {
 
 thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> JsiContextModule::contexts_;
 std::unordered_map<int32_t, std::weak_ptr<JsValue>> JsiContextModule::weakptrContexts_;
+#ifdef PREVIEW
+bool JsiContextModule::normalPreview = false;
+#endif
 namespace {
 bool IsDynamicComponentUiContentType(int32_t instanceId)
 {
-    auto container = Container::GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
-    auto uIContentType = container->GetUIContentType();
-    return uIContentType == UIContentType::DYNAMIC_COMPONENT;
+    return false;
 }
 }
 
@@ -105,7 +105,11 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
 
 void JsiContextModule::InitContextModule(const std::shared_ptr<JsRuntime>& runtime, std::shared_ptr<JsValue> moduleObj)
 {
-#ifndef PREVIEW
+#ifdef PREVIEW
+    if (!normalPreview) {
+        moduleObj->SetProperty(runtime, "getContext", runtime->NewFunction(JsiContextModule::GetContext));
+    }
+#else
     moduleObj->SetProperty(runtime, "getContext", runtime->NewFunction(JsiContextModule::GetContext));
 #endif
 }
@@ -169,5 +173,12 @@ void JsiContextModule::RemoveContext(int32_t key)
         contexts_.erase(it);
     }
 }
+
+#ifdef PREVIEW
+void JsiContextModule::IsPreview()
+{
+    normalPreview = true;
+}
+#endif
 
 } // namespace OHOS::Ace::Framework

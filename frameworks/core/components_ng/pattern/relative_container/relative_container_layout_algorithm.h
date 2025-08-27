@@ -147,6 +147,17 @@ private:
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
     bool IsAnchorLegal(const std::string& anchorName);
     void MeasureChild(LayoutWrapper* layoutWrapper);
+    void DetermineSelf(LayoutWrapper* layoutWrapper);
+    bool MeasureWrapContent(const std::string& nodeName, LayoutConstraintF& childConstraint);
+    void InsertToVerticalReliedOnMap(const std::string& anchorName, const std::string& nodeName);
+    void InsertToHorizontalReliedOnMap(const std::string& anchorName, const std::string& nodeName);
+    bool IsUnionRelyOnContainer(LineDirection direction, const std::string& id);
+    void ResetCalculatedChain();
+    void PreCalcContainerSize(LayoutWrapper* layoutWrapper, RectF relativeContainerRect,
+        LayoutPolicyProperty layoutPolicy, const std::optional<LayoutConstraintF>& layoutConstraint);
+    bool PreCalcChildSize(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> childWrapper, const std::string& nodeName,
+        LayoutConstraintF& childConstraint);
+    bool IsRelyOnContainer(const std::string& id);
     void MeasureChainWeight(LayoutWrapper* layoutWrapper);
     void InitRemainingSpace(ChainParam& chainParam, LineDirection direction);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
@@ -160,6 +171,8 @@ private:
     bool isVerticalRelyOnContainer_ = false;
     bool isChainWeightMode_ = false;
     std::list<std::string> renderList_;
+    std::unordered_map<std::string, std::set<std::string>> horizontalRelyMap_;
+    std::unordered_map<std::string, std::set<std::string>> verticalRelyMap_;
     std::unordered_map<std::string, ChildMeasureWrapper> idNodeMap_;
     std::unordered_map<std::string, uint32_t> incomingDegreeMap_;
     std::unordered_map<std::string, std::set<std::string>> reliedOnMap_;

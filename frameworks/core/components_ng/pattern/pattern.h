@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -35,6 +36,9 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
 #include "core/common/container_consts.h"
+
+struct _ArkUINodeAdapter;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -84,6 +88,8 @@ public:
         return false;
     }
 
+    virtual void OnForegroundColorUpdate() {}
+
     virtual void ProcessSafeAreaPadding() {}
 
     virtual bool IsNeedPercent() const
@@ -113,6 +119,21 @@ public:
     }
 
     virtual bool DefaultSupportDrag()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableChildrenMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableFix()
     {
         return false;
     }
@@ -379,12 +400,20 @@ public:
         return frameNode->GetContext();
     }
 
+    RenderContext* GetRenderContext() const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetRenderContext().GetRawPtr();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -415,6 +444,13 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         return DynamicCast<T>(host->GetEventHub<T>());
+    }
+
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(flag);
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -502,12 +538,18 @@ public:
         return -1;
     }
 
+    virtual bool OnBackPressedCallback()
+    {
+        return false;
+    }
+
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
     virtual void HandleDragEvent(const DragPointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
+    virtual void OnColorModeChange(uint32_t colorMode);
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
@@ -516,6 +558,11 @@ public:
     virtual void OnForegroundColorUpdate(const Color& value) {}
 
     virtual bool ShouldDelayChildPressedState() const
+    {
+        return false;
+    }
+
+    virtual bool ShouldPreventChildPressedState() const
     {
         return false;
     }
@@ -587,6 +634,7 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -610,16 +658,15 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
+        // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
+        layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
-
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
 
     virtual uint32_t GetWindowPatternType() const
     {
@@ -658,6 +705,17 @@ public:
         return false;
     }
 
+    void AddResObj(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+
+    void RemoveResObj(const std::string& key);
+
+    void AddResCache(const std::string& key, const std::string& value);
+
+    std::string GetResCacheMapByKey(const std::string& key);
+
     int32_t GetThemeScopeId() const
     {
         auto host = GetHost();
@@ -681,33 +739,97 @@ public:
     virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
+    int32_t OnRecvCommand(const std::string& command);
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;
     };
 
-    int32_t OnRecvCommand(const std::string& command)
-    {
-        auto json = JsonUtil::ParseJsonString(command);
-        if (!json || !json->IsValid() || !json->IsObject()) {
-            return RET_FAILED;
-        }
-        auto event = json->GetString("cmd");
-        if (event != "click") {
-            return OnInjectionEvent(command);
-        }
-        return RET_FAILED;
-    }
-
     virtual bool BorderUnoccupied() const
     {
         return false;
     }
+
+    virtual void UnRegisterResource(const std::string& key);
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        auto&& propUpdateFunc = [weakptr = AceType::WeakClaim(this)](
+                                    const std::string& key, const RefPtr<PropertyValueBase>& valueBase) {
+            auto pattern = weakptr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePropertyImpl(key, valueBase);
+        };
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+    }
+
+    virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
+
+    virtual bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
+    {
+        return false;
+    }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+    virtual bool DetachHostNodeAdapter(const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperEnabled()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperCustomized()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelper(
+        LayoutWrapper* layoutWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+    {
+        return false;
+    }
+    virtual bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM)
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreEnabled()
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreCustomized()
+    {
+        return false;
+    }
+    virtual void PostponedTaskForIgnore() {}
+    virtual bool NeedCustomizeSafeAreaPadding()
+    {
+        return false;
+    }
+    virtual PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+    {
+        return safeAreaPadding;
+    }
+    virtual bool ChildTentativelyLayouted()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
     WeakPtr<FrameNode> frameNode_;
+    RefPtr<PatternResourceManager> resourceMgr_;
 
 private:
     bool onDetach_ = false;

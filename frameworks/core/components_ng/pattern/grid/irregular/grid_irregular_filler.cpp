@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,9 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
 {
+    if (startingLine < 0) {
+        startingLine = 0;
+    }
     if (targetIdx >= info_->GetChildrenCount()) {
         targetIdx = info_->GetChildrenCount() - 1;
     }
@@ -141,6 +144,8 @@ void GridIrregularFiller::FillOne(const int32_t idx)
 bool GridIrregularFiller::FindNextItem(int32_t target)
 {
     const auto& mat = info_->gridMatrix_;
+    // start from first cross everytime, for the current target might be before the previous target
+    posX_ = -1;
     while (AdvancePos()) {
         if (mat.at(posY_).at(posX_) == target) {
             return true;
@@ -217,7 +222,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-
+    
+    if (isCache) {
+        child->SetActive();
+    }
     child->Measure(constraint);
     SetItemInfo(child, itemIdx, row, col, itemSize);
 

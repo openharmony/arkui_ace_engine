@@ -66,6 +66,8 @@ struct DragPointerEvent final : public PointerEvent {
     int32_t windowY = 0;
     int32_t displayX = 0;
     int32_t displayY = 0;
+    double globalDisplayX = 0.0;
+    double globalDisplayY = 0.0;
     double size = 0.0;
     float force = 0.0f;
     int32_t deviceId = 0;
@@ -73,8 +75,8 @@ struct DragPointerEvent final : public PointerEvent {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
-    std::vector<KeyCode> pressedKeyCodes;
     PointerAction action = PointerAction::UNKNOWN;
+    std::vector<KeyCode> pressedKeyCodes;
     std::vector<DragPointerEvent> history;
     int32_t displayId = 0;
     int32_t sourceType = 0;
@@ -90,13 +92,23 @@ struct DragPointerEvent final : public PointerEvent {
     DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
+    DragPointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY, double globalDisplayX,
+        double globalDisplayY)
+        : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY), globalDisplayX(globalDisplayX),
+          globalDisplayY(globalDisplayY)
+    {}
+    DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY,
+        double globalDisplayX, double globalDisplayY)
+        : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY),
+          globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY)
+    {}
 
     Point GetPoint() const
     {
         if (!x && !y) {
-            return Point(windowX, windowY, displayX, displayY);
+            return Point(windowX, windowY, displayX, displayY, globalDisplayX, globalDisplayY);
         } else {
-            return Point(x, y, x, y);
+            return Point(x, y, x, y, globalDisplayX, globalDisplayY);
         }
     }
 
@@ -108,6 +120,21 @@ struct DragPointerEvent final : public PointerEvent {
     int32_t GetDisplayY() const
     {
         return displayY;
+    }
+
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY;
+    }
+
+    int32_t GetDisplayId() const
+    {
+        return displayId;
     }
 
     void UpdatePressedKeyCodes(std::vector<KeyCode> keyCodes)

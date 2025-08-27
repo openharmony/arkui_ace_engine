@@ -21,10 +21,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/gestures/drag_event.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,7 +37,7 @@ class ScrollablePattern;
 struct GatherNodeChildInfo;
 
 class DragEvent : public AceType {
-    DECLARE_ACE_TYPE(DragEvent, AceType)
+    DECLARE_ACE_TYPE(DragEvent, AceType);
 public:
     DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
         GestureEventNoParameter&& actionCancel)
@@ -96,7 +96,7 @@ private:
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator);
 public:
     DragEventActuator(
         const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);
@@ -146,6 +146,8 @@ public:
         std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
+    static void ExecutePreDragFunc(const RefPtr<FrameNode>& node, const PreDragStatus preDragStatus,
+        const PreDragStatus onPreDragStatus);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
@@ -224,6 +226,21 @@ public:
         return optionsAfterApplied_;
     }
 
+    void SetIsForDragDrop(bool isForDragDrop)
+    {
+        isForDragDrop_ = isForDragDrop;
+    }
+
+    void SetRestartDrag(bool isRestartDrag)
+    {
+        isRestartDrag_ = isRestartDrag;
+    }
+
+    bool GetRestartDrag() const
+    {
+        return isRestartDrag_;
+    }
+
     bool GetIsNewFwk() const
     {
         return isNewFwk_;
@@ -237,21 +254,6 @@ public:
     int32_t GetLastTouchFingerId()
     {
         return lastTouchFingerId_;
-    }
-    
-    void SetRestartDrag(bool isRestartDrag)
-    {
-        isRestartDrag_ = isRestartDrag;
-    }
-
-    bool GetRestartDrag() const
-    {
-        return isRestartDrag_;
-    }
-
-    void SetIsForDragDrop(bool isForDragDrop)
-    {
-        isForDragDrop_ = isForDragDrop;
     }
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
@@ -302,6 +304,8 @@ public:
     virtual void ResetPreScaledPixelMapForDragThroughTouch();
     virtual void NotifyDragStart() {};
     virtual void NotifyDragEnd() {};
+    virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
+
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
     {
@@ -326,6 +330,9 @@ public:
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
 
+    void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
+    void SetExecTimerCallback(bool isExecCallback);
+    void RemovePixelMap();
 protected:
     DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 
@@ -337,7 +344,6 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
-
 protected:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
@@ -380,9 +386,10 @@ private:
     float preScaleValue_ = 1.0f;
     bool isRedragStart_ = false;
     int32_t lastTouchFingerId_ = 0;
-    bool isNewFwk_ = false;
-    bool isRestartDrag_ = false;
     bool isForDragDrop_ = false;
+    bool isRestartDrag_ = false;
+    bool isNewFwk_ = false;
+    bool isExecCallback_ = false;
 };
 
 } // namespace OHOS::Ace::NG

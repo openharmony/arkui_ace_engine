@@ -441,6 +441,10 @@ public:
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
+    void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
+
+    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -465,6 +469,32 @@ public:
     {
         isRoundingMode_ = true;
     }
+
+    bool MeasureInNextFrame() const override
+    {
+        return measureInNextFrame_;
+    }
+
+    void SetPrevMeasureBreak(bool value)
+    {
+        prevMeasureBreak_ = value;
+    }
+
+    bool GetPrevMeasureBreak() const
+    {
+        return prevMeasureBreak_;
+    }
+
+    bool IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const;
+
+    void CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& layoutWrapper);
+
+    void SetDraggingIndex(int32_t index)
+    {
+        draggingIndex_ = index;
+    }
+
+    void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -507,7 +537,7 @@ protected:
     }
     void LayoutItem(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, const ListItemInfo& pos,
         int32_t& startIndex, float crossSize);
-    static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+    static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDirty = false);
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     bool CheckLayoutConstraintChanged(const RefPtr<LayoutWrapper>& layoutWrapper) const;
@@ -519,6 +549,7 @@ protected:
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    void UpdateNoLayoutedItems();
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -537,9 +568,6 @@ protected:
     virtual void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     virtual void FixPredictSnapPos();
     void FixPredictSnapOffsetAlignCenter();
-    bool LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index, bool forward, float &currPos, float crossSize);
-    virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
@@ -556,7 +584,6 @@ protected:
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline,
         ListMainSizeValues listMainSizeValues, bool show);
 
-    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
@@ -580,10 +607,16 @@ protected:
         index =  !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
         return layoutWrapper->GetChildByIndex(index, isCache);
     }
+    int32_t revertIndex(int32_t index) const
+    {
+        return !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+    }
     virtual float GetLayoutFixOffset()
     {
         return 0.0f;
     }
+
+    void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
 
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
     virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
@@ -602,6 +635,7 @@ protected:
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
     PositionMap cachedItemPosition_;
+    PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
@@ -615,8 +649,6 @@ protected:
     float contentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
-    bool canOverScrollStart_ = false;
-    bool canOverScrollEnd_ = false;
     bool isSpringEffect_ = false;
     bool expandSafeArea_ = false;
 
@@ -640,6 +672,7 @@ protected:
     bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
+    int32_t defCachedCount_ = 1;
 
 private:
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
@@ -652,9 +685,13 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
+    std::pair<int32_t, float> FindIndexAndDeltaInPosMap(float delta) const;
+    bool CanUseInfoInPosMap(int32_t index, float delta) const;
+
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+
+    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -662,20 +699,25 @@ private:
 
     float prevContentStartOffset_ = 0.0f;
     float prevContentEndOffset_ = 0.0f;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool canOverScroll_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
     bool isRoundingMode_ = false;
+    bool measureInNextFrame_ = false;
+    bool syncLoad_ = false;
+    bool prevMeasureBreak_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    bool isSnapCenter_ = false;
     float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
+    int32_t draggingIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

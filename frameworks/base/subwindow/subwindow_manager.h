@@ -42,11 +42,12 @@ struct SubwindowKey {
     FoldStatus foldStatus;
     SubwindowType windowType = SubwindowType::TYPE_DIALOG;
     int32_t subwindowType;
+    int32_t nodeId = -1;
 
     bool operator==(const SubwindowKey& other) const
     {
-        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus &&
-            other.windowType == windowType;
+        return other.instanceId == instanceId && other.displayId == displayId && other.windowType == windowType &&
+            other.foldStatus == foldStatus && other.nodeId == nodeId;
     }
 
     std::string ToString() const
@@ -55,6 +56,8 @@ struct SubwindowKey {
         json->Put("instanceId", instanceId);
         json->Put("displayId", (double)displayId);
         json->Put("windowType", subwindowType);
+        json->Put("foldStatus", static_cast<int32_t>(foldStatus));
+        json->Put("nodeId", nodeId);
         return json->ToString();
     }
 };
@@ -95,6 +98,11 @@ public:
     // Get the subwindow of subInstance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
 
+    void HideCurrentSubwindow();
+
+    void SetCurrentSubwindowName(const std::string& currentSubwindow);
+    std::string GetCurrentSubWindowName();
+
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
     const RefPtr<Subwindow> GetCurrentWindow();
@@ -111,22 +119,23 @@ public:
     ACE_FORCE_EXPORT void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
         bool isRedragStart = false, int32_t menuWrapperId = -1);
-    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void UpdatePreviewPosition();
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
-    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-        int32_t appearingTimeWithContinuousOperation);
+    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+        int32_t appearingTime, int32_t appearingTimeWithContinuousOperation);
     void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
+    void ClearAllMenuPopup(int32_t instanceId);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -137,6 +146,8 @@ public:
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
+        const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void UpdateCustomDialogNGWithNode(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
@@ -153,13 +164,13 @@ public:
 
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void CloseToast(
+        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void HideToastSubWindowNG();
     ToastWindowType GetToastWindowType(int32_t instanceId);
-    ACE_FORCE_EXPORT void CloseToast(
-        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
@@ -167,7 +178,7 @@ public:
         std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks);
     ACE_FORCE_EXPORT void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    void CloseDialog(int32_t instanceId);
+    void CloseDialog(int32_t parentInstanceId);
     ACE_FORCE_EXPORT void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
@@ -180,7 +191,6 @@ public:
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
-    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
@@ -214,23 +224,40 @@ public:
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
     bool GetIsExpandDisplay();
-    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
-    void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
+    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
+    void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow, int32_t nodeId = -1);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
+    void RemoveSubwindowByNodeId(const int32_t nodeId);
+    void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
 
+#if defined(ACE_STATIC)
+    ACE_FORCE_EXPORT void ShowDialogStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void OpenCustomDialogStatic(DialogProperties &dialogProps,
+        std::function<void(int32_t)> &&callback);
+#endif
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
+    RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);
+    RefPtr<Subwindow> GetOrCreateSubWindowByType(SubwindowType windowType, bool isModal = true);
+    RefPtr<Subwindow> GetSubwindowBySearchkey(int32_t instanceId, const SubwindowKey& searchKey);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
-    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType);
+    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
     void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
+    RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
+    RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
+    const std::vector<RefPtr<Subwindow>> RemoveSubwindowMapByInstanceId(const int32_t instanceId);
+    const std::vector<RefPtr<Subwindow>> GetAllSubWindow();
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 

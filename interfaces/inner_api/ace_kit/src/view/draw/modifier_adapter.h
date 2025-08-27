@@ -18,23 +18,19 @@
 
 #include <memory>
 
-#ifdef _USE_MATH_DEFINES
-#undef _USE_MATH_DEFINES
-#endif
-
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
+#include "render_service_client/core/modifier_ng/custom/rs_content_style_modifier.h"
 #include "ui/view/draw/content_modifier.h"
 
-using RSContentStyleModifier = OHOS::Rosen::RSContentStyleModifier;
+using RSDrawingContext = OHOS::Rosen::ModifierNG::RSDrawingContext;
+using RSContentStyleModifier = OHOS::Rosen::ModifierNG::RSContentStyleModifier;
 
 namespace OHOS::Ace::Kit {
-
 class ContentModifierAdapter : public RSContentStyleModifier {
 public:
     explicit ContentModifierAdapter(const RefPtr<ContentModifier>& modifier);
     ~ContentModifierAdapter() override;
 
-    void Draw(Rosen::RSDrawingContext& context) const override;
+    void Draw(RSDrawingContext& context) const override;
 
     void AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property);
 
@@ -43,7 +39,5 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
-
 } // namespace OHOS::Ace::Kit
-
 #endif

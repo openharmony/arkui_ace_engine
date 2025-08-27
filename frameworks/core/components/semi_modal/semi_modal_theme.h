@@ -34,11 +34,11 @@ public:
 
         RefPtr<SemiModalTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SemiModalTheme> theme = AceType::Claim(new SemiModalTheme());
+            RefPtr<SemiModalTheme> theme = AceType::MakeRefPtr<SemiModalTheme>();
             if (!themeConstants) {
                 return theme;
             }
-            theme->bgColor_ = themeConstants->GetColor(THEME_SEMI_MODAL_BACKGROUND_COLOR);
+            theme->bgColor_ = Color(0xfff7f7f7);
             ParsePattern(themeConstants, theme);
             return theme;
         }

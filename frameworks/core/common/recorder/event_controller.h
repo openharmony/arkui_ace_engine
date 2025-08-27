@@ -65,10 +65,11 @@ private:
     void ApplyExposureCfgInner(const std::shared_ptr<Config>& config, bool isExposureChanged) const;
     void CacheEventIfNeed(EventCategory category, int32_t eventType,
         const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams);
-    void NotifyCacheEventsIfNeed() const;
+    void NotifyCacheEventsIfNeed(const UIEventClient& client) const;
 
     std::shared_mutex mutable cacheLock_;
     std::vector<UIEventClient> clientList_;
+    std::shared_mutex mutable cacheEventLock_;
     std::vector<CacheEvent> cacheEvents_;
     bool hasCached_ = false;
 

@@ -95,6 +95,7 @@ const char CLEAR_TIMEOUT[] = "clearTimeout";
 const char CLEAR_INTERVAL[] = "clearInterval";
 const char SET_INTERVAL[] = "setInterval";
 const char CAN_IUSE[] = "canIUse";
+const char IS_API_VERSION_GREATER_OR_EQUAL[] = "isApiVersionGreaterOrEqual";
 
 // for app
 const char APP_GET_INFO[] = "getInfo";

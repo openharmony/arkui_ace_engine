@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/DatePickerTest",
+    "pages/TimePickerTest",
+    "pages/TextPickerTest",
+    "pages/CalendarPickerTest"
+  ]
+}

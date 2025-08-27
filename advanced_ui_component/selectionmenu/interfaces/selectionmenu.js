@@ -23,7 +23,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 
 const WITHOUT_BUILDER = -2;
 const MAX_FONT_STANDARD = 1.0;
-const MAX_FONT_SCALE = 2.0;
+const MAX_FONT_SCALE = 1.75;
 const SYMBOL_SIZE = 24;
 const defaultTheme = {
     imageSize: 24,
@@ -659,6 +659,24 @@ class SelectionMenuComponent extends ViewPU {
         return sizeResult;
     }
 
+    updateMenuItemVisibility() {
+        if (!this.controller) {
+            return;
+        }
+        let richEditorSelection = this.controller.getSelection();
+        let start = richEditorSelection.selection[0];
+        let end = richEditorSelection.selection[1];
+        if (start !== end) {
+            this.cutAndCopyEnable = true;
+        }
+        if (start === 0 && this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
+            this.visibilityValue = Visibility.None;
+        }
+        else {
+            this.visibilityValue = Visibility.Visible;
+        }
+    }
+
     IconPanel(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create({ wrap: FlexWrap.Wrap });
@@ -811,26 +829,15 @@ class SelectionMenuComponent extends ViewPU {
                         Menu.constraintSize({
                             minWidth: this.theme.defaultMenuWidth
                         });
+                        Menu.onVisibleAreaChange([0.0, 1.0], () => {
+                            this.updateMenuItemVisibility();
+                        });
                         Menu.onAreaChange((oldValue, newValue) => {
                             let newValueWidth = newValue.width;
                             this.customMenuWidth =
                                 this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ? newValueWidth :
                                     this.theme.defaultMenuWidth;
-                            if (!this.controller) {
-                                return;
-                            }
-                            let richEditorSelection = this.controller.getSelection();
-                            let start = richEditorSelection.selection[0];
-                            let end = richEditorSelection.selection[1];
-                            if (start !== end) {
-                                this.cutAndCopyEnable = true;
-                            }
-                            if (start === 0 &&
-                                this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
-                                this.visibilityValue = Visibility.None;
-                            } else {
-                                this.visibilityValue = Visibility.Visible;
-                            }
+                            this.updateMenuItemVisibility();
                         });
                     }, Menu);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {

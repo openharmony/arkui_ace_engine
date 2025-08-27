@@ -30,6 +30,7 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
@@ -85,6 +86,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
     Axis GetAxis() const override
     {
         return Axis::VERTICAL;
@@ -104,20 +107,49 @@ public:
         return !NearZero(scrollOffset_);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<FrameNode>& host);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     float CalculatePullDownRatio();
+    float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     float GetFollowRatio();
     void HandleCustomBuilderDragUpdateStage();
-    void SetAccessibilityAction();
-    void InitOnKeyEvent();
+    void SetAccessibilityAction(const RefPtr<FrameNode>& host);
+    void InitOnKeyEvent(const RefPtr<FrameNode>& host);
     bool OnKeyEvent(const KeyEvent& event);
     void QuickEndFresh();
     void QuickStartFresh();
@@ -130,34 +162,33 @@ private:
     void SpeedTriggerAnimation(float speed);
     void SpeedAnimationFinish();
     void SwitchToFinish();
-    void InitChildNode();
-    void InitProgressNode();
+    void InitChildNode(const RefPtr<FrameNode>& host);
+    void InitProgressNode(const RefPtr<FrameNode>& host);
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
     float GetLoadingVisibleHeight();
-    void UpdateScrollTransition(float scrollOffset);
+    void UpdateScrollTransition(const RefPtr<FrameNode>& host, float scrollOffset);
     RefreshAnimationState GetLoadingProgressStatus();
-    void RefreshStatusChangeEffect();
+    void RefreshStatusChangeEffect(bool refreshingProp);
     float GetTargetOffset();
     void ResetAnimation();
-    void FireStateChange(int32_t value);
-    void FireRefreshing();
-    void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
-    void UpdateCustomBuilderVisibility();
+    void FireOnStepOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
+    void BeginTrailingTrace();
+    void EndTrailingTrace();
     float GetLoadingProgressOpacity();
     float GetLoadingTextOpacity();
     Color GetLoadingProgressColor();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
-    float scrollOffset_;
-    float lastScrollOffset_;
+    float scrollOffset_ = 0.0f;
+    float lastScrollOffset_ = 0.0f;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
@@ -175,6 +206,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<float> ratio_;
+    bool hasBeginTrailingTrace_ = false;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();
@@ -198,6 +230,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
+    bool isHigherVersion_ = true;
 };
 } // namespace OHOS::Ace::NG
 

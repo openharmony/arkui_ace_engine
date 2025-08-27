@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/common/resource/resource_object.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
@@ -48,9 +49,19 @@ public:
 
     ~TextPickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -99,7 +110,7 @@ public:
 
     void SetDefaultPickerItemHeight();
 
-    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes();
+    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes() const;
 
     RefPtr<FrameNode> GetColumnNode();
 
@@ -291,6 +302,11 @@ public:
     void SetHasSelectAttr(bool value)
     {
         isHasSelectAttr_ = value;
+    }
+
+    bool GetHasSelectAttr()
+    {
+        return isHasSelectAttr_;
     }
 
     void SetResizePickerItemHeight(double resizePickerItemHeight)
@@ -527,6 +543,27 @@ public:
         isSingleRange_ = isSingleRange;
     }
 
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    void UpdateDefaultTextStyle(const PickerTextStyle& textStyle);
+
+    void UpdateMeasureOnColorModeChange()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+
+        if (pipelineContext->IsSystmColorChange() && host->GetRerenderable()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
+    void ParseCascadeRangeOptions(std::vector<NG::TextCascadePickerOptions>& options);
+    void GetAndUpdateRealSelectedArr(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+        const std::vector<RefPtr<ResourceObject>>& valueArrResObj);
+
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();
@@ -551,6 +588,7 @@ private:
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
+    float GetColumnWidthSumForFirstIndexColumns(int32_t index);
 
     void ClearFocus();
     void SetDefaultFocus();
@@ -563,6 +601,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    void CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme);
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
@@ -578,19 +617,32 @@ private:
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
-    void SetFocusCornerRadius(RoundRect& paintRect);
+    void SetFocusCornerRadius(RoundRect& paintRect, const BorderRadiusProperty& radius);
     void UpdateButtonMargin(
         const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code,
         uint32_t totalOptionCount, int32_t childSize);
-    RectF CalculatePaintRect(int32_t currentFocusIndex,
-        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    RectF CalculatePaintRect(int32_t currentFocusIndex, float centerX, float centerY, float paintRectWidth,
+        float paintRectHeight, float columnWidth);
     void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc,
+        std::function<void(const Dimension&)> updateMinFontSizeFunc,
+        std::function<void(const Dimension&)> updateMaxFontSizeFunc);
+
+    void ParseRangeResult(NG::TextCascadePickerOptions& option);
+    void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,
+        const std::vector<std::string>& valueArr, uint32_t depth, std::vector<uint32_t>& selectedArray);
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_ = 0.0;

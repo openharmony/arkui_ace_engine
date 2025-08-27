@@ -38,6 +38,8 @@ public:
     static void GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree);
 
     static void GetSimplifiedInspectorTreeAsync(const TreeParams& params, OnInspectorTreeResult&& callback);
+
+    static void ExecuteCommandAsync(const UICommandParams& params, UICommandResult&& callback);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_H

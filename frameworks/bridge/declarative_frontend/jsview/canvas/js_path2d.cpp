@@ -61,6 +61,7 @@ void JSPath2D::JSBind(BindingTarget globalObj)
     JSClass<JSPath2D>::CustomMethod("bezierCurveTo", &JSCanvasPath::JsPath2DBezierCurveTo);
     JSClass<JSPath2D>::CustomMethod("ellipse", &JSCanvasPath::JsPath2DEllipse);
     JSClass<JSPath2D>::CustomMethod("rect", &JSCanvasPath::JsPath2DRect);
+    JSClass<JSPath2D>::CustomMethod("roundRect", &JSCanvasPath::JsPath2DRoundRect);
     JSClass<JSPath2D>::CustomMethod("closePath", &JSCanvasPath::JsPath2DClosePath);
     JSClass<JSPath2D>::Bind(globalObj, JSPath2D::Constructor, JSPath2D::Destructor);
 }

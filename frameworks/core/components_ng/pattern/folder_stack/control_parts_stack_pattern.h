@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 namespace OHOS::Ace::NG {
 class  ControlPartsStackPattern : public StackPattern {
-    DECLARE_ACE_TYPE(ControlPartsStackPattern, StackPattern)
+    DECLARE_ACE_TYPE(ControlPartsStackPattern, StackPattern);
 public:
     ControlPartsStackPattern() = default;
     ~ControlPartsStackPattern() override = default;

@@ -55,7 +55,6 @@ const DOUBLE_LINE_NUM = 2;
 // 资源数值
 const RESOURCE_TYPE_SYMBOL = 40000;
 // 左边尺寸常量
-const LEFT_ICON_SIZE = '16vp';
 const LEFT_ICON_SIZE_NUMBER = 16;
 const LEFT_TEXT_NUMBER = 8;
 // 右边尺寸常量
@@ -383,8 +382,8 @@ export class SubHeaderV2 extends ViewV2 {
         this.appMaxFontScale = 3.2;
         this.subHeaderV2Theme = new SubHeaderTheme();
         this.subHeaderMargin = {
-            start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
-            end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
+            start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
+            end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
         };
         this.finalizeConstruction();
     }
@@ -440,9 +439,9 @@ export class SubHeaderV2 extends ViewV2 {
             Flex.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -485,9 +484,9 @@ export class SubHeaderV2 extends ViewV2 {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create($$.iconOptions);
                         Image.fillColor(this.subHeaderV2Theme.leftIconColor);
-                        Image.width(LEFT_ICON_SIZE);
-                        Image.height(LEFT_ICON_SIZE);
-                        Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                        Image.width(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.height(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
                         Image.draggable(false);
                         Image.flexShrink(0);
                     }, Image);
@@ -567,9 +566,9 @@ export class SubHeaderV2 extends ViewV2 {
             Column.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
@@ -588,12 +587,12 @@ export class SubHeaderV2 extends ViewV2 {
             Text.create($$.subContent);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
-                fontWeight: FontWeight.Regular,
+                fontWeight: getResourceValue('sys.float.subheader_subtitle_font_weight'),
                 alignment: Alignment.Start,
                 fontColor: this.subHeaderV2Theme.fontSecondaryColor,
             });
             Text.margin({
-                top: getResourceValue('sys.float.padding_level1'),
+                top: getResourceValue('sys.float.subheader_titles_space'),
             });
             Text.attributeModifier.bind(this)(this.title?.secondaryTitleModifier);
         }, Text);
@@ -614,9 +613,9 @@ export class SubHeaderV2 extends ViewV2 {
             Text.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Text);
         Text.pop();
@@ -635,9 +634,9 @@ export class SubHeaderV2 extends ViewV2 {
             Text.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Text);
         Text.pop();
@@ -1676,13 +1675,13 @@ export class SubHeaderV2 extends ViewV2 {
         if (!this.titleBuilder && ((this.title?.secondaryTitle && this.icon) ||
             (!this.title?.primaryTitle && this.title?.secondaryTitle))) {
             padding = {
-                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                start: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
             };
         } else if (this.select) {
             padding = {
-                top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                top: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
+                bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
             };
         }
         return padding;
@@ -1910,10 +1909,10 @@ class SymbolGlyphChild extends ViewV2 {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create(this.icon);
-            SymbolGlyph.fontSize(LEFT_ICON_SIZE);
+            SymbolGlyph.fontSize(getResourceValue('sys.float.subheader_left_icon_size'));
             SymbolGlyph.fontColor(this.fontColor);
             SymbolGlyph.attributeModifier.bind(this)(this.icon);
-            SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+            SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
             SymbolGlyph.flexShrink(0);
         }, SymbolGlyph);
         Column.pop();
@@ -2214,7 +2213,7 @@ class Util {
             let code = error.code;
             let message = error.message;
             hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-            return 0;
+            return defaultNumber;
         }
     }
 
@@ -2296,6 +2295,24 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceI
 RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
 // subheader_title_font_weight: 125834255 700
 RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
+// subheader_left_icon_size: 125835678, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_size', { resourceId: 125835678, defaultValue: 16 });
+// subheader_content_margin_start: 125835679, margin_left, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_start', { resourceId: 125835679, defaultValue: 16 });
+// subheader_content_margin_end: 125835680, margin_right, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_end', { resourceId: 125835680, defaultValue: 16 });
+// subheader_content_padding: 125835681, padding_level4, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_padding', { resourceId: 125835681, defaultValue: 8 });
+// subheader_single_subtitle_padding: 125835682, padding_level6, 12
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_padding', { resourceId: 125835682, defaultValue: 12 });
+// subheader_select_padding: 125835683, padding_level2, 4
+RESOURCE_CACHE_MAP.set('sys.float.subheader_select_padding', { resourceId: 125835683, defaultValue: 4 });
+// subheader_left_icon_end_margin: 125835684, padding_level4, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_end_margin', { resourceId: 125835684, defaultValue: 8 });
+// subheader_subtitle_font_weight: 125835685, regular , 400
+RESOURCE_CACHE_MAP.set('sys.float.subheader_subtitle_font_weight', { resourceId: 125835685, defaultValue: 400 });
+// subheader_titles_space: 125835686, padding_level1, 2
+RESOURCE_CACHE_MAP.set('sys.float.subheader_titles_space', { resourceId: 125835686, defaultValue: 2 });
 
 function getResourceValue(resourceName) {
     if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {

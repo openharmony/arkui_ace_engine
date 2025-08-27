@@ -25,7 +25,9 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -65,6 +67,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetTextStyleUid(frameNode->GetId() + 1);
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         textStyle.SetSymbolUid(frameNode->GetId() + 1);
+        textStyle.isSymbolGlyph_ = true;
     }
     if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
         return;
@@ -76,13 +79,17 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
-
     auto themeScopeId = frameNode->GetThemeScopeId();
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    if (textLayoutProperty->HasFontForegroudGradiantColor()) {
+        textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
+    } else {
+        textStyle.SetFontForegroudGradiantColor(textTheme->GetTextStyle().GetFontForegroudGradiantColor());
+    }
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -99,6 +106,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
+    auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
+    textStyle.SetLineThicknessScale(lineThicknessScale);
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
             SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode, textColor);
@@ -106,14 +115,93 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         }
         contentModifier->SetFontReady(false);
     }
+    UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
+    textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetParagraphVerticalAlign(
+        textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
-    textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
+    textStyle.SetTextDirection(ParagraphUtil::GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
+    const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle)
+{
+    if (layoutProperty->HasGradientShaderStyle()) {
+        auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto gradient = ToGradient(gradients);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+        textStyle.SetGradient(gradient);
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        std::optional<Color> colors = layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT);
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(colors);
+    } else {
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+
+std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(const NG::Gradient& gradient)
+{
+    OHOS::Ace::Gradient retGradient;
+    retGradient.SetType(static_cast<OHOS::Ace::GradientType>(gradient.GetType()));
+    if (retGradient.GetType() == OHOS::Ace::GradientType::LINEAR) {
+        CHECK_NULL_RETURN(gradient.GetLinearGradient(), std::nullopt);
+        auto angle = gradient.GetLinearGradient()->angle;
+        if (angle.has_value()) {
+            retGradient.GetLinearGradient().angle = ToAnimatableDimension(angle.value());
+        }
+        auto linearX = gradient.GetLinearGradient()->linearX;
+        if (linearX.has_value()) {
+            retGradient.GetLinearGradient().linearX = static_cast<OHOS::Ace::GradientDirection>(linearX.value());
+        }
+        auto linearY = gradient.GetLinearGradient()->linearY;
+        if (linearY.has_value()) {
+            retGradient.GetLinearGradient().linearY = static_cast<OHOS::Ace::GradientDirection>(linearY.value());
+        }
+    }
+    if (retGradient.GetType() == OHOS::Ace::GradientType::RADIAL) {
+        CHECK_NULL_RETURN(gradient.GetRadialGradient(), std::nullopt);
+        auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+        if (radialCenterX.has_value()) {
+            retGradient.GetRadialGradient().radialCenterX = ToAnimatableDimension(radialCenterX.value());
+        }
+        auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+        if (radialCenterY.has_value()) {
+            retGradient.GetRadialGradient().radialCenterY = ToAnimatableDimension(radialCenterY.value());
+        }
+        auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+        if (radialVerticalSize.has_value()) {
+            retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
+        }
+        auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
+        if (radialHorizontalSize.has_value()) {
+            retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
+        }
+    }
+    retGradient.SetRepeat(gradient.GetRepeat());
+    const auto& colorStops = gradient.GetColors();
+    for (const auto& item : colorStops) {
+        OHOS::Ace::GradientColor gradientColor;
+        gradientColor.SetColor(item.GetColor());
+        gradientColor.SetHasValue(item.GetHasValue());
+        gradientColor.SetDimension(item.GetDimension());
+        retGradient.AddColor(gradientColor);
+    }
+    return retGradient;
+}
+
+AnimatableDimension MultipleParagraphLayoutAlgorithm::ToAnimatableDimension(const Dimension& dimension)
+{
+    AnimatableDimension result(dimension);
+    return result;
 }
 
 void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& textStyle,
@@ -144,7 +232,6 @@ void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, b
     if (!isSymbol) {
         return;
     }
-    textStyle.isSymbolGlyph_ = true;
     textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
     textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
 }
@@ -153,6 +240,7 @@ void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    MeasureWidthLayoutCalPolicy(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -171,6 +259,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(paragraphManager_);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != V2::SYMBOL_ETS_TAG);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     std::vector<int32_t> placeholderIndex;
@@ -181,7 +270,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     size_t index = 0;
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     // children only contains the image span.
     for (const auto& child : children) {
         if (!child) {
@@ -229,47 +318,6 @@ void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<i
     }
 }
 
-void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
-    LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle)
-{
-    const auto& lineStyle = spanItem->textLineStyle;
-    CHECK_NULL_VOID(lineStyle);
-    if (lineStyle->HasTextAlign()) {
-        pStyle.align = lineStyle->GetTextAlignValue();
-    }
-    if (lineStyle->HasMaxLines()) {
-        pStyle.maxLines = std::min(lineStyle->GetMaxLinesValue(), pStyle.maxLines);
-    }
-    if (lineStyle->HasWordBreak()) {
-        pStyle.wordBreak = lineStyle->GetWordBreakValue();
-    }
-    if (lineStyle->HasEllipsisMode()) {
-        pStyle.ellipsisMode = lineStyle->GetEllipsisModeValue();
-    }
-    if (lineStyle->HasTextOverflow()) {
-        pStyle.textOverflow = lineStyle->GetTextOverflowValue();
-    }
-    if (lineStyle->HasTextIndent()) {
-        pStyle.indent = lineStyle->GetTextIndentValue();
-    }
-    if (lineStyle->HasLineBreakStrategy()) {
-        pStyle.lineBreakStrategy = lineStyle->GetLineBreakStrategyValue();
-    }
-    if (lineStyle->HasLeadingMargin()) {
-        pStyle.leadingMargin = lineStyle->GetLeadingMarginValue();
-    }
-    if (lineStyle->HasLineHeight()) {
-        pStyle.lineHeight = lineStyle->GetLineHeightValue();
-    }
-    if (lineStyle->HasHalfLeading()) {
-        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
-    }
-    if (lineStyle->HasParagraphSpacing()) {
-        pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
-    }
-    pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
-}
-
 void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
     const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
 {
@@ -312,7 +360,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
 void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
 {
-    // Determines whether a foreground color is set or inherited.
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
         if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
@@ -364,9 +411,10 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
     }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
-        modifier->SetTextDecoration(textDecoration.value());
+        auto value = textDecoration.value().size() > 0 ? textDecoration.value()[0] : TextDecoration::NONE;
+        modifier->SetTextDecoration(value, false);
     } else {
-        modifier->SetTextDecoration(textStyle.GetTextDecoration(), true);
+        modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), true);
     }
 }
 
@@ -460,72 +508,25 @@ void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
     textStyle.SetAdaptFontSizeStep(adaptFontSizeStep.value_or(Dimension(1.0, DimensionUnit::PX)));
 }
 
-ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle) const
-{
-    return { .direction = textStyle.GetTextDirection(),
-        .align = textStyle.GetTextAlign(),
-        .maxLines = static_cast<int32_t>(textStyle.GetMaxLines()) < 0 ? UINT32_MAX : textStyle.GetMaxLines(),
-        .fontLocale = textStyle.GetLocale(),
-        .wordBreak = textStyle.GetWordBreak(),
-        .ellipsisMode = textStyle.GetEllipsisMode(),
-        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
-        .textOverflow = textStyle.GetTextOverflow(),
-        .halfLeading = textStyle.GetHalfLeading(),
-        .indent = textStyle.GetTextIndent(),
-        .paragraphSpacing = textStyle.GetParagraphSpacing()
-        };
-}
-
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
-    const std::u16string& content, LayoutWrapper* layoutWrapper)
-{
-    if (!layoutWrapper) {
-        return GetTextDirectionByContent(content);
-    }
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-    return GetTextDirectionByContent(content);
-}
-
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::u16string& content)
-{
-    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    for (const auto& charOfShowingText : content) {
-        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
-            return TextDirection::LTR;
-        } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
-            return TextDirection::RTL;
-        } else if (TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
-            return TextDirection::RTL;
-        }
-    }
-    return textDirection;
-}
-
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
 {
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
-    auto maxWidth = paragraphManager_->GetMaxWidth();
-    auto indentWidth = paragraphManager_->GetTextWidthIncludeIndent();
-    float paragraphNewWidth = std::min(std::min(indentWidth, maxWidth), GetMaxMeasureSize(contentConstraint).Width());
+    float paragraphNewWidth =
+        std::min(std::min(paragraphManager_->GetTextWidthIncludeIndent(), paragraphManager_->GetMaxWidth()),
+            GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-    if (!contentConstraint.selfIdealSize.Width()) {
+    if (!contentConstraint.selfIdealSize.Width() || IsNeedParagraphReLayout()) {
         for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
-            if (SystemProperties::GetDebugEnabled()) {
+            if (SystemProperties::GetTextTraceEnabled()) {
                 ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
-                    paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
+                    paragraphNewWidth, paragraph->GetMaxWidth(), paragraphManager_->GetTextWidthIncludeIndent(),
+                    contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
                 int32_t id = -1;
@@ -557,17 +558,23 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
         }
         TextStyle spanTextStyle;
         needReCreateParagraph_ |= child->UpdateSpanTextStyle(inheritTextStyle_, frameNode);
-        ACE_TEXT_SCOPED_TRACE(
-            "ReLayoutParagraphBySpan[id: %d][needReCreateParagraph_:%d]", child->nodeId_, needReCreateParagraph_);
+        auto style = child->GetTextStyle();
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "ReLayoutParagraphBySpan[id:%d][needReCreateParagraph_:%d][textStyleBitmap:%s][textColor:%s]",
+                child->nodeId_, needReCreateParagraph_,
+                style.has_value() ? style->GetReLayoutTextStyleBitmap().to_string().c_str() : "Na",
+                style.has_value() ? style->GetTextColor().ColorToString().c_str() : "Na");
+        }
         CHECK_NULL_RETURN(!needReCreateParagraph_, false);
         if (child->GetTextStyle().has_value()) {
             spanTextStyle = child->GetTextStyle().value();
         }
         if (index == 0) {
-            auto direction = GetTextDirection(child->content, layoutWrapper);
+            auto direction = ParagraphUtil::GetTextDirection(child->content, layoutWrapper);
             spanTextStyle.SetTextDirection(direction);
             spanTextStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
-            paraStyle = GetParagraphStyle(spanTextStyle);
+            paraStyle = ParagraphUtil::GetParagraphStyle(spanTextStyle);
         }
         reLayout |= spanTextStyle.NeedReLayout();
         textStyles.emplace_back(spanTextStyle);
@@ -659,6 +666,7 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
 
 void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
+    CHECK_NULL_VOID(!spans_.empty());
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -666,7 +674,7 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
     auto placeHolderLayoutConstrain = layoutConstrain;
     placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
     placeHolderLayoutConstrain.percentReference.SetHeight(0);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     auto iterItems = children.begin();
     bool needReCreateParagraph = false;
     int32_t itemIndex = -1;
@@ -726,6 +734,11 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
     layoutProperty->OnPropertyChangeMeasure();
 }
 
+ChildrenListWithGuard MultipleParagraphLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)
+{
+    return layoutWrapper->GetAllChildrenWithBuild();
+}
+
 bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
 {
@@ -735,7 +748,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     InheritParentTextStyle(textStyle);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
     auto iterItems = children.begin();
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
@@ -758,7 +771,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         }
         RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
-            GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle);
+            ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -767,6 +780,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
                 paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
                 Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
                 std::next(groupIt) != spans_.end();
+            spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spans_.begin());
         }
         auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);
@@ -835,7 +849,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         if (!useParagraphCache_) {
             HandleEmptyParagraph(paragraph, group);
             paragraph->Build();
-            ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle, GetIndentMaxWidth(maxWidth));
             UpdateSymbolSpanEffect(frameNode, paragraph, group);
         }
         if (paraStyle.maxLines != UINT32_MAX) {
@@ -932,36 +946,6 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
         customSpanPlaceholder.onDraw = customSpanItem->onDraw.value();
     }
     customSpanPlaceholder.customSpanIndex = customSpanItem->placeholderIndex;
-}
-
-void MultipleParagraphLayoutAlgorithm::ApplyIndent(
-    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width, const TextStyle& textStyle)
-{
-    auto indentValue = paragraphStyle.indent;
-    CHECK_NULL_VOID(paragraph);
-    double value = 0.0;
-    if (GreatNotEqual(indentValue.Value(), 0.0)) {
-        // first line indent
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = indentValue.ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        } else {
-            value = static_cast<float>(width * indentValue.Value());
-            paragraphStyle.indent = Dimension(value);
-        }
-    }
-    auto indent = static_cast<float>(value);
-    auto leadingMarginValue = 0.0f;
-    std::vector<float> indents;
-    if (paragraphStyle.leadingMargin.has_value()) {
-        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    }
-    indents.emplace_back(indent + leadingMarginValue);
-    indents.emplace_back(leadingMarginValue);
-    paragraph->SetIndents(indents);
 }
 
 void MultipleParagraphLayoutAlgorithm::UpdateSymbolSpanEffect(

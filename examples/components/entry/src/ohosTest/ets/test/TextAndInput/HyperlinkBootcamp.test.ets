@@ -82,7 +82,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -98,7 +97,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -114,7 +112,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -129,7 +126,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -145,8 +141,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -162,7 +156,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'color',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -181,7 +174,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -197,7 +189,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -213,7 +204,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -228,7 +218,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -244,8 +233,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -261,7 +248,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'image',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -280,7 +266,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'address',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -295,7 +280,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'address',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -313,7 +297,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'content',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -328,7 +311,6 @@ export default function HyperlinkBootcampTest() {
           toggleClickObj: 'content',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();

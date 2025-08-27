@@ -105,7 +105,7 @@ bool NavDestinationNodeBase::CustomizeExpandSafeArea()
     auto angle = rotateAngle_.value();
     if (geometryNode) {
         backupParentAdjust = geometryNode->GetParentAdjust();
-        if (angle == ROTATION_90 || angle == ROTATION_270) {
+        if (angle == ROTATION_90 || angle == ROTATION_180 || angle == ROTATION_270) {
             RectF parentAdjust{ safeAreaInsets_.left_.end, safeAreaInsets_.top_.end, 0.0f, 0.0f };
             geometryNode->SetParentAdjust(parentAdjust);
         }
@@ -206,6 +206,10 @@ OffsetF NavDestinationNodeBase::CalcTranslateForTransitionPushEnd(const SizeF& f
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         width = frameSize.Height();
     }
+    if (SystemProperties::IsSoftPageTransition()) {
+        auto translate = OffsetF{ -width * HALF * HALF * isRTL, 0.0f };
+        return translate;
+    }
     auto translate = OffsetF{ -width * CONTENT_OFFSET_PERCENT * isRTL, 0.0f };
     return translate;
 }
@@ -220,6 +224,10 @@ OffsetF NavDestinationNodeBase::CalcTranslateForTransitionPopStart(const SizeF& 
     float width = frameSize.Width();
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         width = frameSize.Height();
+    }
+    if (SystemProperties::IsSoftPageTransition()) {
+        auto translate = OffsetF{ -width * HALF * HALF * isRTL, 0.0f };
+        return translate;
     }
     auto translate = OffsetF{ -width * CONTENT_OFFSET_PERCENT * isRTL, 0.0f };
     return translate;
@@ -345,32 +353,19 @@ void NavDestinationNodeBase::AdjustRenderContextIfNeeded()
 }
 
 OffsetF NavDestinationNodeBase::CalcTranslateForSlideTransition(
-    const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd)
+    const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd)
 {
     if ((isEnd && isEnter) || (!isEnd && !isEnter)) {
         return OffsetF{ 0.0f, 0.0f };
     }
     auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
-    float width = frameSize.Width();
-    float height = frameSize.Height();
+    float width = paintRect.Width();
+    float height = paintRect.Height();
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         std::swap(width, height);
     }
 
     auto translate = OffsetF{ isRight ? width : 0.0f, isRight ? 0.0f : height };
     return translate;
-}
-
-std::optional<Orientation> NavDestinationNodeBase::GetEffectiveOrientation()
-{
-    if (orientation_.has_value()) {
-        return orientation_;
-    }
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, std::nullopt);
-    auto mgr = context->GetNavigationManager();
-    CHECK_NULL_RETURN(mgr, std::nullopt);
-    auto ori = mgr->GetOrientationByWindowApi();
-    return ori;
 }
 } // namespace OHOS::Ace::NG

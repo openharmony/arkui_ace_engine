@@ -44,7 +44,7 @@ public:
 
         RefPtr<QrcodeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<QrcodeTheme> theme = AceType::Claim(new QrcodeTheme());
+            RefPtr<QrcodeTheme> theme = AceType::MakeRefPtr<QrcodeTheme>();
             if (!themeConstants) {
                 return theme;
             }

@@ -68,6 +68,24 @@ void RosenRenderParticle::updateEmitterPosition(
 
         std::shared_ptr<Rosen::EmitterUpdater> updater = std::make_shared<Rosen::EmitterUpdater>(
             prop.index, position, size, prop.emitRate ? prop.emitRate : std::nullopt);
+        std::shared_ptr<Rosen::AnnulusRegion> rsAnnulusRegion = nullptr;
+        if (prop.annulusRegion) {
+            auto annulusRegion = prop.annulusRegion;
+            auto center = annulusRegion->GetCenter();
+            auto rect = renderContext->GetPaintRectWithoutTransform();
+            auto rsCenter = OHOS::Rosen::Vector2f(center.first.ConvertToPxWithSize(rect.Width()),
+                center.second.ConvertToPxWithSize(rect.Height()));
+            auto innerRadius = annulusRegion->GetInnerRadius();
+            auto rsInnerRadius = (LessOrEqual(innerRadius.ConvertToPx(), 0.0)
+                || innerRadius.Unit() == DimensionUnit::PERCENT) ? 0.0 : innerRadius.ConvertToPx();
+            auto outerRadius = annulusRegion->GetOuterRadius();
+            auto rsOuterRadius = (LessOrEqual(outerRadius.ConvertToPx(), 0.0)
+                || outerRadius.Unit() == DimensionUnit::PERCENT) ? 0.0 : outerRadius.ConvertToPx();
+            rsAnnulusRegion =
+                std::make_shared<Rosen::AnnulusRegion>(rsCenter, rsInnerRadius,
+                rsOuterRadius, annulusRegion->GetStartAngle(), annulusRegion->GetEndAngle());
+        }
+        updater->SetShape(rsAnnulusRegion);
         emitUpdater.push_back(updater);
     }
     if (!emitUpdater.empty()) {

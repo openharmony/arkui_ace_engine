@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,8 +83,11 @@ void ParseChanges(
                 newSections.emplace_back(section);
             }
         }
-        waterFlowSections->ChangeData(changeObject->GetProperty("start")->ToNumber<int32_t>(),
-            changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
+        auto start = changeObject->GetProperty("start");
+        auto deleteCount = changeObject->GetProperty("deleteCount");
+        if (start->IsNumber() && deleteCount->IsNumber()) {
+            waterFlowSections->ChangeData(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections);
+        }
     }
 }
 
@@ -138,7 +141,8 @@ void UpdateSections(
     auto lengthFunc = sectionsObject->GetProperty("length");
     CHECK_NULL_VOID(lengthFunc->IsFunction());
     auto sectionLength = (JSRef<JSFunc>::Cast(lengthFunc))->Call(sectionsObject);
-    if (waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
+    if (sectionLength->IsNumber() &&
+        waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
         auto allSections = sectionsObject->GetProperty("sectionArray");
         CHECK_NULL_VOID(allSections->IsArray());
         ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
@@ -185,7 +189,7 @@ RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject
     return nullptr;
 }
 
-void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
+void JSWaterFlow::UpdateWaterFlowFooterContent(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
 {
     CHECK_NULL_VOID(args->IsObject());
     JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
@@ -285,6 +289,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
     JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
+    JSClass<JSWaterFlow>::StaticMethod("syncLoad", &JSWaterFlow::SetSyncLoad);
 
     JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
     JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
@@ -422,7 +427,13 @@ void JSWaterFlow::SetScrollEnabled(const JSCallbackInfo& args)
 void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
+            friction = -1.0;
+        }
+        WaterFlowModel::GetInstance()->ParseResObjFriction(resObj);
+    } else if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
         LOGW("Friction params invalid,can not convert to double");
         friction = -1.0;
     }
@@ -518,6 +529,18 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
+void JSWaterFlow::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = true;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    WaterFlowModel::GetInstance()->SetSyncLoad(syncLoad);
+}
+
 void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -580,9 +603,13 @@ void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(info);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarColor = JSScrollable::ParseBarColor(info, resObj);
     if (!scrollBarColor.empty()) {
         WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModel::GetInstance()->ParseResObjScrollBarColor(resObj);
     }
 }
 

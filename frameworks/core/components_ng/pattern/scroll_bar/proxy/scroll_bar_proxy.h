@@ -104,9 +104,8 @@ public:
 
     bool IsScrollSnapTrigger() const;
 
-    void ScrollPage(bool reverse, bool smooth);
-
     void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
+    void ScrollPage(bool reverse, bool smooth);
 
     void RegisterNestScrollableNode(const ScrollableNodeInfo& scrollableNode);
 
@@ -120,6 +119,16 @@ public:
     bool IsNestScroller() const;
 
     void MarkScrollBarDirty() const;
+
+    void SetIsScrollableNodeScrolling(bool isScrolling)
+    {
+        isScrollableNodeScrolling_ = isScrolling;
+    }
+
+    bool IsScrollableNodeScrolling() const
+    {
+        return isScrollableNodeScrolling_;
+    }
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.
@@ -131,6 +140,7 @@ private:
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
     float lastControlDistance_ = 0.f;
     float lastScrollableNodeOffset_ = 0.f;
+    bool isScrollableNodeScrolling_ = false;
 };
 
 } // namespace OHOS::Ace::NG

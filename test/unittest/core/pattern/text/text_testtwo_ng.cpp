@@ -34,7 +34,7 @@ public:
 
 /**
  * @tc.name: TextOverlayModifierTest001
- * @tc.desc: test text_overlay_modifier.cpp.
+ * @tc.desc: test text_overlay_modifier.cpp
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
@@ -113,7 +113,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest002, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
 
     /**
@@ -153,6 +153,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_U16CONTENT;
+
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
@@ -753,8 +754,9 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay004, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
     /**
      * @tc.steps: step2. call ShowSelectOverlay function
      * @tc.expected: the property of selectInfo is assigned.
@@ -919,7 +921,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
     EXPECT_EQ(spanTextStyle.GetFontSize(), Dimension(20.0));
 }
@@ -992,9 +994,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle1.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(spanTextStyle1.GetTextDecorationFirst(), TextDecoration::OVERLINE);
     EXPECT_EQ(spanTextStyle1.GetTextDecorationStyle(), TextDecorationStyle::WAVY);
-    EXPECT_EQ(spanTextStyle2.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle2.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle2.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
 
@@ -1018,6 +1020,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -1051,6 +1056,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue002, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -1114,6 +1122,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
     testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
     testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
+    testProperty.isOnlyBetweenLines = std::make_optional(true);
     /**
      * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
@@ -1162,13 +1171,14 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanTextStyle.GetTextColor(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontWeight(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanTextStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextCase(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanTextStyle.GetLetterSpacing(), LETTER_SPACING);
         EXPECT_EQ(spanTextStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontFamilies(), FONT_FAMILY_VALUE);
         EXPECT_EQ(spanTextStyle.GetLineSpacing(), LINE_SPACING_VALUE);
+        EXPECT_EQ(spanTextStyle.GetIsOnlyBetweenLines(), true);
     }
 }
 
@@ -1210,7 +1220,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty002, TestSize.Level1)
         EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
@@ -1467,7 +1477,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -1547,6 +1557,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     aiSpan2.end = AI_SPAN_END_II;
     aiSpan2.content = SPAN_URL;
     aiSpan2.type = TextDataDetectType::URL;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START] = aiSpan1;
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START_II] = aiSpan2;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();

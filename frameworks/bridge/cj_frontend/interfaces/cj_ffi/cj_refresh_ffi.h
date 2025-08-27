@@ -23,9 +23,9 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshCreate(
-    bool refreshing);
+    bool refreshing, double offsetValue, int32_t offsetUnit, int32_t friction);
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
-    bool refreshing, void (*callback)(bool isRefreshing));
+    bool refreshing, double offsetValue, int32_t offsetUnit, int32_t friction, void (*callback)(bool isRefreshing));
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshPop();
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshOnStateChange(void (*callback)(const int32_t value));
 CJ_EXPORT void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)());

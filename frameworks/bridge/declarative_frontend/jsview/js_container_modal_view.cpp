@@ -38,8 +38,18 @@ const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_custom_menu_width_change
 
 const int32_t EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT = 2;
 
-static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> g_nativeFuncMap;
 } // namespace
+
+const std::map<std::string, std::function<void(const JSCallbackInfo& info)>> JSContainerModal::nativeFuncMap_ = {
+    { EVENT_NAME_CUSTOM_MAX_CLICK, JSContainerModal::OnMaxBtnClick },
+    { EVENT_NAME_MIN_CLICK, JSContainerModal::OnMinBtnClick },
+    { EVENT_NAME_CLOSE_CLICK, JSContainerModal::OnCloseBtnClick },
+    { EVENT_NAME_LEFT_SPLIT_CLICK, JSContainerModal::OnLeftSplitClick },
+    { EVENT_NAME_RIGHT_SPLIT_CLICK, JSContainerModal::OnRightSplitClick },
+    { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
+    { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
+    { EVENT_NAME_MENU_WIDTH_CHANGE, JSContainerModal::CallMenuWidthChange },
+};
 
 void JSContainerModal::OnMaxBtnClick(const JSCallbackInfo& info)
 {
@@ -98,6 +108,7 @@ void JSContainerModal::AddButtonPointLightAnim(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_APPBAR, "AddButtonPointLightAnim");
     auto pattern = GetContainerModalPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->AddPointLight();
 }
 
 void JSContainerModal::CallButtonsRectChange(const JSCallbackInfo& info)
@@ -168,17 +179,6 @@ void JSContainerModal::CallWindowNative(const JSCallbackInfo& info)
 
 void JSContainerModal::CallNative(const JSCallbackInfo& info)
 {
-    g_nativeFuncMap = {
-        { EVENT_NAME_CUSTOM_MAX_CLICK, JSContainerModal::OnMaxBtnClick },
-        { EVENT_NAME_MIN_CLICK, JSContainerModal::OnMinBtnClick },
-        { EVENT_NAME_CLOSE_CLICK, JSContainerModal::OnCloseBtnClick },
-        { EVENT_NAME_LEFT_SPLIT_CLICK, JSContainerModal::OnLeftSplitClick },
-        { EVENT_NAME_RIGHT_SPLIT_CLICK, JSContainerModal::OnRightSplitClick },
-        { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM, JSContainerModal::AddButtonPointLightAnim },
-        { EVENT_NAME_BUTTON_RECT_CHANGE, JSContainerModal::CallButtonsRectChange },
-        { EVENT_NAME_MENU_WIDTH_CHANGE, JSContainerModal::CallMenuWidthChange },
-    };
-
     TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative");
     if (info.Length() < 1) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative param erro");
@@ -190,8 +190,8 @@ void JSContainerModal::CallNative(const JSCallbackInfo& info)
     }
     std::string eventName = info[0]->ToString();
     if (eventName.rfind("arkui", 0) == 0) {
-        auto it = g_nativeFuncMap.find(eventName);
-        if (it == g_nativeFuncMap.end()) {
+        auto it = nativeFuncMap_.find(eventName);
+        if (it == nativeFuncMap_.end()) {
             TAG_LOGI(AceLogTag::ACE_APPBAR, "Event not found: %{public}s", eventName.c_str());
             return;
         }

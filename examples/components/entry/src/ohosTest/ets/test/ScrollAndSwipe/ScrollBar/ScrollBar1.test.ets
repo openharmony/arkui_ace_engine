@@ -1,4 +1,4 @@
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, Component } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {

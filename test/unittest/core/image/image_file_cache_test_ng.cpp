@@ -113,8 +113,12 @@ HWTEST_F(ImageFileCacheTestNg, WriteCacheFileFunc001, TestSize.Level1)
         bool convertToAstc = accessCount == convertAstcThreshold;
         if (convertToAstc) {
             EXPECT_CALL(*mockImageSource, GetFrameCount()).WillOnce(Return(1));
-            EXPECT_CALL(*mockImageSource, CreatePixelMap(_, AIImageQuality::NONE, false, PixelFormat::UNKNOWN))
-                .WillOnce(Return(mockPixelMap));
+            uint32_t errorCode = 0;
+            PixelMapConfig pixelMapConfig;
+            pixelMapConfig.imageQuality = AIImageQuality::NONE;
+            pixelMapConfig.isHdrDecoderNeed = false;
+            pixelMapConfig.photoDecodeFormat = PixelFormat::UNKNOWN;
+            EXPECT_CALL(*mockImageSource, CreatePixelMap(_, errorCode, pixelMapConfig)).WillOnce(Return(mockPixelMap));
             EXPECT_CALL(*mockImagePacker, FinalizePacking(_))
                 .WillOnce(DoAll(SetArgReferee<0>(imageData.size()), Return(0)));
         }

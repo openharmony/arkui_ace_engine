@@ -129,6 +129,11 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
     ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NUMBER_DECIMAL");
     layoutProperty->UpdateMaxLines(1);
     ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.NUMBER_DECIMAL");
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE);
+    layoutProperty->UpdateMaxLines(2);
+    ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.ONE_TIME_CODE");
+    layoutProperty->UpdateMaxLines(1);
+    ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.ONE_TIME_CODE");
     layoutProperty->UpdateTextInputType(static_cast<TextInputType>(999));
     pattern_->isTextInput_ = false;
     ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NORMAL");
@@ -340,6 +345,11 @@ HWTEST_F(TextFieldPatternTestFive, UpdateContentScroller001, TestSize.Level0)
     offset = Offset(7, 0);
     pattern_->UpdateContentScroller(offset);
     ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 29.5639));
+
+    Offset localOffset;
+    pattern_->contentScroller_.beforeScrollingCallback = [&](const Offset& offset) { localOffset = offset; };
+    pattern_->UpdateContentScroller(offset, 0.0f, false);
+    EXPECT_EQ(localOffset, offset);
 }
 
 /**
@@ -1237,7 +1247,7 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest004, TestSize.Le
 
 /**
  * @tc.name: TextFieldSelectControllerTest005
- * @tc.desc: test textfield select controller function
+ * @tc.desc: test textfield select controller function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest005, TestSize.Level0)
@@ -1301,5 +1311,9 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Le
     controller->UpdateParagraph(nullptr);
     auto rect = controller->CalculateEmptyValueCaretRect();
     EXPECT_EQ(rect.Height(), 50);
+
+    controller->contentRect_.SetHeight(45);
+    rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 45);
 }
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -34,6 +35,12 @@ void QRCodeModelNG::Create(const std::string& value)
         V2::QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
+    auto pros = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    if (pros) {
+        pros->ResetQRCodeColorSetByUser();
+        pros->ResetQRBackgroundColorSetByUser();
+    }
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
@@ -51,12 +58,14 @@ void QRCodeModelNG::SetQRCodeColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, QRCodeColorSetByUser, true);
 }
 
 void QRCodeModelNG::SetQRBackgroundColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, QRBackgroundColorSetByUser, true);
 }
 
 void QRCodeModelNG::SetContentOpacity(const double opacity)
@@ -98,16 +107,128 @@ void QRCodeModelNG::SetQRCodeColor(FrameNode* frameNode, const Color& color)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, QRCodeColorSetByUser, true, frameNode);
 }
 
 void QRCodeModelNG::SetQRBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, QRBackgroundColorSetByUser, true, frameNode);
 }
 
 void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity, frameNode);
+}
+
+void HandleCreateResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
+{
+    std::string createKey = "qrcode.create";
+    auto&& updateCreateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                  const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        std::string value;
+        ResourceParseUtils::ParseResString(resObj, value);
+        pattern->UpdateQRCodeCreate(value);
+    };
+    pattern->AddResObj(createKey, resObj, std::move(updateCreateFunc));
+}
+
+void HandleColorResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
+{
+    std::string colorKey = "qrcode.color";
+    pattern->RemoveResObj(colorKey);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateColorFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                 const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+            CHECK_NULL_VOID(qrCodeTheme);
+            result = qrCodeTheme->GetQrcodeColor();
+        }
+        pattern->UpdateColor(result, isFristLoad);
+    };
+    pattern->AddResObj(colorKey, resObj, std::move(updateColorFunc));
+}
+
+void HandleBackgroundColorResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
+{
+    std::string backgroundColorKey = "qrcode.background_color";
+    pattern->RemoveResObj(backgroundColorKey);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateBackgroundColorFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                           const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+            CHECK_NULL_VOID(qrCodeTheme);
+            result = qrCodeTheme->GetBackgroundColor();
+        }
+        pattern->UpdateBackgroundColor(result, isFristLoad);
+    };
+    pattern->AddResObj(backgroundColorKey, resObj, std::move(updateBackgroundColorFunc));
+}
+
+void HandleContentOpacityResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
+{
+    std::string opacityKey = "qrcode.content_opacity";
+    pattern->RemoveResObj(opacityKey);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateOpacityFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                   const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double result = DEFAULT_OPACITY;
+        if (!ResourceParseUtils::ParseResDouble(resObj, result)) {
+            result = DEFAULT_OPACITY;
+        }
+        if (LessNotEqual(result, 0.0) || GreatNotEqual(result, 1.0)) {
+            result = DEFAULT_OPACITY;
+        }
+        pattern->UpdateContentOpacity(result, isFristLoad);
+    };
+    pattern->AddResObj(opacityKey, resObj, std::move(updateOpacityFunc));
+}
+
+void QRCodeModelNG::CreateWithResourceObj(QRCodeResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, resourceType, resObj);
+}
+
+void QRCodeModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, QRCodeResourceType resourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<QRCodePattern>();
+    CHECK_NULL_VOID(pattern);
+    switch (resourceType) {
+        case QRCodeResourceType::CREATE:
+            HandleCreateResource(pattern, resObj);
+            break;
+        case QRCodeResourceType::COLOR:
+            HandleColorResource(pattern, resObj);
+            break;
+        case QRCodeResourceType::BACKGROUND_COLOR:
+            HandleBackgroundColorResource(pattern, resObj);
+            break;
+        case QRCodeResourceType::CONTENT_OPACITY:
+            HandleContentOpacityResource(pattern, resObj);
+            break;
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

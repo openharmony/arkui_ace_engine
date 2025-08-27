@@ -24,7 +24,9 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_cited_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -219,6 +221,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     decorationObj->SetProperty<int32_t>("style", textStyleResult.decorationStyle);
+    decorationObj->SetProperty<float>("thicknessScale", textStyleResult.lineThicknessScale);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
 
     textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
@@ -282,6 +285,10 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     if (textStyleResult.paragraphSpacing.has_value()) {
         paragraphStyleObj->SetProperty<double>("paragraphSpacing",
             textStyleResult.paragraphSpacing.value().ConvertToFp());
+    }
+    if (textStyleResult.textVerticalAlign.has_value()) {
+        paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
+            textStyleResult.textVerticalAlign.value());
     }
     return paragraphStyleObj;
 }
@@ -369,6 +376,9 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     obj->SetPropertyObject("leadingMargin", lmObj);
     if (info.paragraphSpacing.has_value()) {
         obj->SetProperty<double>("paragraphSpacing", info.paragraphSpacing.value());
+    }
+    if (info.textVerticalAlign.has_value()) {
+        obj->SetProperty<int32_t>("textVerticalAlign", info.textVerticalAlign.value());
     }
     return obj;
 }
@@ -650,9 +660,10 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSRichEditor::SetOnShare(const JSCallbackInfo& info)
@@ -721,6 +732,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(textSpanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     decorationObj->SetProperty<int32_t>("style", static_cast<int32_t>(textSpanResult.GetTextDecorationStyle()));
+    decorationObj->SetProperty<float>("thicknessScale", static_cast<float>(textSpanResult.GetLineThicknessScale()));
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textSpanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
@@ -928,6 +940,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     SetChangeTextSpans(replacedSymbolSpans, changeValue.GetRichEditorReplacedSymbolSpans());
     OnWillChangeObj->SetPropertyObject("replacedSymbolSpans", replacedSymbolSpans);
 
+    OnWillChangeObj->SetProperty<int32_t>("changeReason", static_cast<int32_t>(changeValue.GetChangeReason()));
+
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 
@@ -944,6 +958,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     decorationObj->SetProperty<int32_t>("style", (int32_t)(spanResult.GetTextDecorationStyle()));
+    decorationObj->SetProperty<float>("thicknessScale", spanResult.GetLineThicknessScale());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(spanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
@@ -1010,7 +1025,7 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    auto copyOptions = CopyOptions::Distributed;
+    auto copyOptions = CopyOptions::Local;
     auto tmpInfo = info[0];
     if (tmpInfo->IsNumber()) {
         auto emunNumber = tmpInfo->ToNumber<int>();
@@ -1392,6 +1407,15 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetEnableAutoSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
 void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
 {
     bool isStopBackPress = true;
@@ -1399,6 +1423,27 @@ void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
         isStopBackPress = info[0]->ToBoolean();
     }
     RichEditorModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSRichEditor::SetUndoStyle(const JSCallbackInfo& info)
+{
+    bool enable = false;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        auto undoStyle = info[0]->ToNumber<int32_t>();
+        enable = (undoStyle == static_cast<int32_t>(UndoStyle::KEEP_STYLE));
+    }
+    RichEditorModel::GetInstance()->SetSupportStyledUndo(enable);
+}
+
+void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    std::optional<Color> scrollBarColor = std::nullopt;
+    if (Color color; JSContainerBase::ParseColorMetricsToColor(jsValue, color)) {
+        scrollBarColor = color;
+    }
+    RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
 }
 
 void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
@@ -1462,8 +1507,11 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("enableAutoSpacing", &JSRichEditor::SetEnableAutoSpacing);
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
+    JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
+    JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1490,7 +1538,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         imageStyle.size = imageSize;
     }
     JSRef<JSVal> verticalAlign = imageAttribute->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull()) {
+    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -1818,7 +1866,7 @@ bool JSRichEditorController::IsDrawable(const JSRef<JSVal>& jsValue)
     return (!func->IsNull() && func->IsFunction());
 }
 
-bool JSRichEditorController::IsPixelMap(const JSRef<JSVal>& jsValue)
+bool JSRichEditorBaseController::IsPixelMap(const JSRef<JSVal>& jsValue)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -1840,8 +1888,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::u16string spanValue;
-    if (auto tempArg = args[0]; tempArg->IsEmpty() || !tempArg->IsString() || tempArg->ToString() == "" ||
-        !JSContainerBase::ParseJsString(tempArg, spanValue)) {
+    if (auto tempArg = args[0]; tempArg->IsEmpty() || (!tempArg->IsString() && !tempArg->IsObject()) ||
+        !JSContainerBase::ParseJsString(tempArg, spanValue) || spanValue.empty()) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "args error");
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
@@ -2130,6 +2178,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
         "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
     JSClass<JSRichEditorController>::CustomMethod("getTypingStyle", &JSRichEditorController::GetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
+    JSClass<JSRichEditorController>::CustomMethod(
+        "setTypingParagraphStyle", &JSRichEditorController::SetTypingParagraphStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getPreviewText", &JSRichEditorController::GetPreviewTextInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
@@ -2179,7 +2229,7 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 }
 } // namespace
 
-void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto wordBreakObj = styleObject->GetProperty("wordBreak");
@@ -2193,7 +2243,7 @@ void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>&
     style.wordBreak = WORD_BREAK_TYPES[index];
 }
 
-void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
+void JSRichEditorBaseController::ParseLineBreakStrategyParagraphStyle(
     const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     auto breakStrategyObj = styleObject->GetProperty("lineBreakStrategy");
@@ -2206,7 +2256,7 @@ void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
     }
 }
 
-void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto textAlignObj = styleObject->GetProperty("textAlign");
@@ -2219,7 +2269,7 @@ void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>&
     }
 }
 
-void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleObject,
+void JSRichEditorBaseController::ParseParagraphSpacing(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
 {
     auto paragraphSpacing = styleObject->GetProperty("paragraphSpacing");
@@ -2230,7 +2280,22 @@ void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleO
     }
 }
 
-bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+void JSRichEditorBaseController::ParseTextVerticalAlign(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto textVerticalAlignObj = styleObject->GetProperty("textVerticalAlign");
+    if (textVerticalAlignObj->IsNull() || !textVerticalAlignObj->IsNumber()) {
+        return;
+    }
+
+    auto textVerticalAlign = static_cast<TextVerticalAlign>(textVerticalAlignObj->ToNumber<int32_t>());
+    if (textVerticalAlign < TextVerticalAlign::BASELINE || textVerticalAlign > TextVerticalAlign::TOP) {
+        textVerticalAlign = TextVerticalAlign::BASELINE;
+    }
+    style.textVerticalAlign = textVerticalAlign;
+}
+
+bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (styleObject->IsUndefined()) {
@@ -2242,7 +2307,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         ParseWordBreakParagraphStyle(styleObject, style);
     }
     ParseParagraphSpacing(styleObject, style);
-
+    ParseTextVerticalAlign(styleObject, style);
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]
@@ -2468,6 +2533,25 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     controller->SetTypingStyle(typingStyle_, textStyle);
 }
 
+
+void JSRichEditorBaseController::SetTypingParagraphStyle(const JSCallbackInfo& info)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+
+    do {
+        CHECK_NULL_BREAK(info[0]->IsObject());
+        JSRef<JSObject> paraStyleObj = JSRef<JSObject>::Cast(info[0]);
+        CHECK_NULL_BREAK(!paraStyleObj->IsUndefined());
+        struct UpdateParagraphStyle style;
+        CHECK_NULL_BREAK(ParseParagraphStyle(paraStyleObj, style));
+        controller->SetTypingParagraphStyle(style);
+        return;
+    } while (0);
+    controller->SetTypingParagraphStyle(std::nullopt);
+}
+
 bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -2543,7 +2627,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
-    } else if (!lineHeight->IsUndefined() &&
+    } else if (!lineHeight->IsUndefined() && lineHeight->IsString() &&
                !std::all_of(lineHeight->ToString().begin(), lineHeight->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2563,7 +2647,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         letters = theme->GetTextStyle().GetLetterSpacing();
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
-    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() &&
+    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() && letterSpacing->IsString() &&
                !std::all_of(letterSpacing->ToString().begin(), letterSpacing->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2610,7 +2694,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     auto decorationObject = JSObjectCast(styleObject->GetProperty("decoration"));
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
-        if (!type->IsNull() && !type->IsUndefined()) {
+        if (!type->IsNull() && !type->IsUndefined() && type->IsNumber()) {
             updateSpanStyle.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
@@ -2622,10 +2706,20 @@ void JSRichEditorBaseController::ParseTextDecoration(
             updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
-        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
+        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined() && textDecorationStyle->IsNumber()) {
             updateSpanStyle.updateTextDecorationStyle =
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
+        }
+        JSRef<JSVal> thicknessScale = decorationObject->GetProperty("thicknessScale");
+        if (!thicknessScale->IsNull() && !thicknessScale->IsUndefined() && thicknessScale->IsNumber()) {
+            float numberValue = thicknessScale->ToNumber<float>();
+            float thickness = LessNotEqual(numberValue, 0) ? 1.0f : numberValue;
+            updateSpanStyle.updateLineThicknessScale = thickness;
+            style.SetLineThicknessScale(thickness);
+        } else if (thicknessScale->IsUndefined()) {
+            updateSpanStyle.updateLineThicknessScale = 1.0f;
+            style.SetLineThicknessScale(1.0f);
         }
         updateSpanStyle.isInitDecoration = true;
     }
@@ -2698,7 +2792,7 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         tyingStyleObj->SetPropertyObject("decoration", CreateJsDecorationObj(typingStyle));
     }
     if (typingStyle.updateTextShadows.has_value()) {
-        tyingStyleObj->SetPropertyObject("textShadows",
+        tyingStyleObj->SetPropertyObject("textShadow",
             JSRichEditor::CreateJsTextShadowObjectArray(typingStyle.updateTextShadows.value()));
     }
     if (typingStyle.updateLineHeight.has_value()) {
@@ -3038,6 +3132,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "getTypingStyle", &JSRichEditorStyledStringController::GetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "setTypingStyle", &JSRichEditorStyledStringController::SetTypingStyle);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "setTypingParagraphStyle", &JSRichEditorStyledStringController::SetTypingParagraphStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

@@ -171,7 +171,7 @@ int32_t FocusEventHandler::GetKeyProcessingMode()
     auto context = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     auto focusManager = context->GetOrCreateFocusManager();
-    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    CHECK_NULL_RETURN(focusManager, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
     return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
@@ -288,7 +288,8 @@ bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent
             GetFrameName().c_str(), GetFrameId());
         return info.IsStopPropagation();
     } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
-               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
+               GetFrameName() == V2::DYNAMIC_COMPONENT_ETS_TAG) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d try to process OnKeyEventInternal",
             GetFrameName().c_str(), GetFrameId());
         return ProcessOnKeyEventInternal(keyEvent);
@@ -312,19 +313,24 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
         info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
+        info.SetInputEventType(InputEventType::KEYBOARD);
         auto node = GetFrameNode();
         CHECK_NULL_RETURN(node, false);
         auto pipelineContext = node->GetContextRefPtr();
         if (pipelineContext) {
             auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
+            auto globalWindowOffset = pipelineContext->GetGlobalDisplayWindowRect().GetOffset() + centerToWindow;
             info.SetScreenLocation(windowOffset);
+            info.SetGlobalDisplayLocation(globalWindowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
+        info.SetPatternName(node->GetTag().c_str());
         auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));
         }
+        info.SetTargetDisplayId(event.targetDisplayId);
         onClickCallback(info);
         return true;
     }
@@ -342,16 +348,15 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     if (isNodeNeedKey_) {
         retInternal =  ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
-            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
         return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d"
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
             "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);

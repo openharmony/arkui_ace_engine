@@ -34,6 +34,7 @@
 #include "core/image/image_provider.h"
 #include "core/image/image_cache.h"
 #endif
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -122,8 +123,6 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
 CustomPaintPaintMethod::CustomPaintPaintMethod()
 {
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    // The default value of the font size in canvas is 14px.
-    SetMeasureFontSize(DEFAULT_FONT_SIZE);
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -136,16 +135,16 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
         case FilterType::OPACITY:
         case FilterType::BRIGHTNESS:
         case FilterType::CONTRAST: {
-            std::regex contrastRegexExpression(R"((-?0)|(\d+(\.\d+)?%?)|(^$))");
-            return std::regex_match(filterParam, contrastRegexExpression);
+            static const std::regex contrastRegexExpression(R"((?:-?0)|(?:\d+(?:\.\d+)?%?))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem))|(^$))");
-            return std::regex_match(filterParam, blurRegexExpression);
+            static const std::regex blurRegexExpression(R"((?:-?0)|(?:\d+(?:\.\d+)?(?:px|vp|rem)))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
-            std::regex hueRotateRegexExpression(R"((-?0)|(-?\d+(\.\d+)?(deg|grad|rad|turn))|(^$))");
-            return std::regex_match(filterParam, hueRotateRegexExpression);
+            static const std::regex hueRotateRegexExpression(R"((?:-?0)|(?:-?\d+(?:\.\d+)?(?:deg|grad|rad|turn)))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, hueRotateRegexExpression);
         }
         default:
             return false;
@@ -213,7 +212,8 @@ void CustomPaintPaintMethod::UpdateFontFamilies()
     }
 }
 
-std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const Ace::Gradient& gradient)
+std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
+    const Ace::Gradient& gradient, const std::shared_ptr<RSColorSpace>& colorSpace)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
@@ -228,18 +228,18 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const 
         std::stable_sort(gradientColors.begin(), gradientColors.end(),
             [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
         uint32_t colorsSize = gradientColors.size();
-        std::vector<RSColorQuad> colors(gradientColors.size(), 0);
-        std::vector<RSScalar> pos(gradientColors.size(), 0);
-        double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
+        std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
+        std::vector<RSScalar> pos(colorsSize, 0);
+        double angle = gradient.GetConicGradient().startAngle->Value() / ACE_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
         matrix.PreRotate(startAngle, centerX, centerY);
         for (uint32_t i = 0; i < colorsSize; ++i) {
             const auto& gradientColor = gradientColors[i];
-            colors.at(i) = gradientColor.GetColor().GetValue();
+            colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
             pos.at(i) = gradientColor.GetDimension().Value();
         }
         auto mode = RSTileMode::CLAMP;
-        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, pos, mode,
+        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, colorSpace, pos, mode,
             static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
     }
     return shaderEffect;
@@ -249,35 +249,44 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
 {
     RSPoint beginPoint = RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX()),
         static_cast<RSScalar>(gradient.GetBeginOffset().GetY()));
-    RSPoint endPoint = RSPoint(static_cast<RSScalar>(gradient.GetEndOffset().GetX()),
-        static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
+    RSPoint endPoint = RSPoint(
+        static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
     std::vector<RSPoint> pts = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
     std::stable_sort(gradientColors.begin(), gradientColors.end(),
         [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
-    std::vector<RSColorQuad> colors(gradientColors.size(), 0);
-    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
+    std::vector<RSScalar> pos(colorsSize, 0);
     for (uint32_t i = 0; i < colorsSize; ++i) {
         const auto& gradientColor = gradientColors[i];
-        colors.at(i) = gradientColor.GetColor().GetValue();
+        colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
         pos.at(i) = gradientColor.GetDimension().Value();
     }
 
     auto mode = RSTileMode::CLAMP;
 
+    std::shared_ptr<RSColorSpace> colorSpace = RSColorSpace::CreateSRGB();
+    ColorSpace colorSpaceType = ColorSpace::SRGB;
+    if (colorsSize > 0) {
+        colorSpaceType = gradientColors.back().GetColor().GetColorSpace();
+    }
+    if (ColorSpace::DISPLAY_P3 == colorSpaceType) {
+        colorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
+    }
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
-        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, mode);
+        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, colorSpace, pos, mode);
     } else if (gradient.GetType() == Ace::GradientType::CONIC) {
-        shaderEffect = MakeConicGradient(gradient);
+        shaderEffect = MakeConicGradient(gradient, colorSpace);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
-            shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
+            shaderEffect = RSShaderEffect::CreateRadialGradient(
+                endPoint, gradient.GetOuterRadius(), colors, colorSpace, pos, mode);
         } else {
             RSMatrix matrix;
             shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
-                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
+                gradient.GetOuterRadius(), colors, colorSpace, pos, mode, &matrix);
         }
     }
     if (pen != nullptr) {
@@ -883,8 +892,8 @@ void CustomPaintPaintMethod::Arc(const ArcParam& param)
     double top = param.y - param.radius;
     double right = param.x + param.radius;
     double bottom = param.y + param.radius;
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -931,15 +940,30 @@ void CustomPaintPaintMethod::AddRect(const Rect& rect)
     isPathChanged_ = true;
 }
 
+void CustomPaintPaintMethod::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    if (radii.size() != 4) { // 4: four corners.
+        return;
+    }
+    RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+    std::vector<RSPoint> radiusXY = {
+        RSPoint(radii[0], radii[0]), RSPoint(radii[1], radii[1]),   // 0: top-left, 1: top-right.
+        RSPoint(radii[2], radii[2]), RSPoint(radii[3], radii[3])    // 2: bottom-right, 3: bottom-left.
+    };
+    RSRoundRect rsRoundRect(rsRect, radiusXY);
+    rsPath_.AddRoundRect(rsRoundRect, RSPathDirection::CCW_DIRECTION);
+    isPathChanged_ = true;
+}
+
 void CustomPaintPaintMethod::Ellipse(const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
-    double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = param.rotation * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -1039,6 +1063,9 @@ void CustomPaintPaintMethod::ParsePath2D(const RefPtr<CanvasPath2D>& path)
             case PathCmd::RECT:
                 Path2DRect(args);
                 break;
+            case PathCmd::ROUND_RECT:
+                Path2DRoundRect(args);
+                break;
             case PathCmd::CLOSE_PATH:
                 Path2DClosePath();
                 break;
@@ -1079,8 +1106,8 @@ void CustomPaintPaintMethod::Path2DArc(const PathArgs& args)
 {
     RSPoint point1(args.para1 - args.para3, args.para2 - args.para3);
     RSPoint point2(args.para1 + args.para3, args.para2 + args.para3);
-    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
         sweepAngle =
@@ -1123,9 +1150,9 @@ void CustomPaintPaintMethod::Path2DEllipse(const PathArgs& args)
         return; // Just return when startAngle is same as endAngle.
     }
 
-    double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / ACE_PI;
     bool anticlockwise = NearZero(args.para8) ? false : true;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
@@ -1223,7 +1250,7 @@ void CustomPaintPaintMethod::Scale(double x, double y)
 void CustomPaintPaintMethod::Rotate(double angle)
 {
     CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->Rotate(angle * 180 / M_PI);
+    rsCanvas_->Rotate(angle * 180 / ACE_PI);
 }
 
 void CustomPaintPaintMethod::ResetTransform()
@@ -1288,8 +1315,10 @@ void CustomPaintPaintMethod::PaintText(
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
-    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->SaveLayer(slo);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->SaveLayer(slo);
+        }
     }
     if (isStroke && shadowParagraph_ != nullptr && HasShadow()) {
         PaintStrokeTextShadow(width, dx, dy, scale, &slo);
@@ -1305,8 +1334,10 @@ void CustomPaintPaintMethod::PaintText(
     } else {
         paragraph_->Paint(rsCanvas_.get(), dx, dy);
     }
-    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->Restore();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->Restore();
+        }
     }
 }
 
@@ -1315,8 +1346,10 @@ void CustomPaintPaintMethod::PaintStrokeTextShadow(
 {
     CHECK_NULL_VOID(rsCanvas_);
     CHECK_NULL_VOID(shadowParagraph_);
-    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->SaveLayer(*slo);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->SaveLayer(*slo);
+        }
     }
     double finalDx = dx;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
@@ -1339,8 +1372,10 @@ void CustomPaintPaintMethod::PaintStrokeTextShadow(
     }
     shadowParagraph_->Paint(rsCanvas_.get(), finalDx + shadowOffsetX, dy + shadowOffsetY);
     rsCanvas_->Restore();
-    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->Restore();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->Restore();
+        }
     }
 }
 
@@ -1625,11 +1660,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     if (index != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
-        rad = rad / HALF_CIRCLE_ANGLE * M_PI;
+        rad = rad / HALF_CIRCLE_ANGLE * ACE_PI;
     } else if ((index = percent.find("turn")) != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
-        rad = rad * 2 * M_PI;
+        rad = rad * 2 * ACE_PI;
     } else if ((index = percent.find("rad")) != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
@@ -1928,7 +1963,6 @@ void CustomPaintPaintMethod::SaveProperties()
 {
     matrixStates_.push_back(matrix_);
     lineDashStates_.push_back(lineDash_);
-    measureTextStates_.push_back(measureTextState_);
 }
 
 void CustomPaintPaintMethod::RestoreProperties()
@@ -1940,10 +1974,6 @@ void CustomPaintPaintMethod::RestoreProperties()
     if (!lineDashStates_.empty()) {
         lineDash_ = lineDashStates_.back();
         lineDashStates_.pop_back();
-    }
-    if (!measureTextStates_.empty()) {
-        measureTextState_ = measureTextStates_.back();
-        measureTextStates_.pop_back();
     }
 }
 
@@ -1958,18 +1988,10 @@ void CustomPaintPaintMethod::ResetLineDash()
     lineDash_.dashOffset = 0.0;
 }
 
-void CustomPaintPaintMethod::ResetMeasureTextState()
-{
-    std::vector<PaintState>().swap(measureTextStates_);
-    measureTextState_ = PaintState();
-    // The default value of the font size in canvas is 14px.
-    SetMeasureFontSize(DEFAULT_FONT_SIZE);
-}
-
 void CustomPaintPaintMethod::RotateMatrix(double angle)
 {
     RSMatrix matrix;
-    matrix.Rotate(angle * HALF_CIRCLE_ANGLE / M_PI, 0, 0);
+    matrix.Rotate(angle * HALF_CIRCLE_ANGLE / ACE_PI, 0, 0);
     matrix_.PreConcat(matrix);
 }
 
@@ -2077,6 +2099,18 @@ void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
     rsPath2d_.AddRect(RSRect(args.para1, args.para2, args.para3 + args.para1, args.para4 + args.para2));
 }
 
+void CustomPaintPaintMethod::Path2DRoundRect(const PathArgs& args)
+{
+    RSRect rsRect(args.para1, args.para2, args.para3 + args.para1, args.para4 + args.para2);
+    std::vector<RSPoint> radiusXY = {
+        RSPoint(args.para5, args.para5), RSPoint(args.para6, args.para6),
+        RSPoint(args.para7, args.para7), RSPoint(args.para8, args.para8)
+    };
+    RSRoundRect rsRoundRect(rsRect, radiusXY);
+    rsPath2d_.AddRoundRect(rsRoundRect, RSPathDirection::CCW_DIRECTION);
+    isPath2dChanged_ = true;
+}
+
 void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 {
     CHECK_NULL_VOID(rsCanvas_);
@@ -2089,17 +2123,15 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
 #ifndef ACE_UNITTEST
-    PaintState paintState =
-        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) ? measureTextState_ : state;
     TextMetrics textMetrics;
     RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(paintState.GetTextAlign());
+    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
     RSTextStyle txtStyle;
-    ConvertTxtStyle(paintState.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = paintState.GetTextStyle().GetFontSize().Value();
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
 
@@ -2114,8 +2146,8 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
     auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
     auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
     auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
-    auto textAlign = paintState.GetTextAlign();
-    auto textBaseLine = paintState.GetTextStyle().GetTextBaseline();
+    auto textAlign = state.GetTextAlign();
+    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
     const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
     const double baseLineX = GetFontAlign(textAlign, paragraph);
 
@@ -2161,20 +2193,48 @@ bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateFontFamilies();
-    txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
     txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
     ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
-    RSBrush brush;
-    RSSamplingOptions options;
-    GetFillPaint(brush, options);
-    InitPaintBlend(brush);
-    txtStyle.foregroundBrush = brush;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        RSBrush brush;
+        RSSamplingOptions options;
+        GetFillPaint(brush, options);
+        InitPaintBlend(brush);
+        txtStyle.foregroundBrush = brush;
+    } else {
+        UpdateFillTxtStyle(txtStyle);
+    }
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->CreateTypography();
     return true;
 #else
     return false;
+#endif
+}
+
+void CustomPaintPaintMethod::UpdateFillTxtStyle(RSTextStyle& txtStyle)
+{
+#ifndef ACE_UNITTEST
+    txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
+    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
+        txtStyle.foregroundBrush = brush;
+    }
+    if (state_.globalState.HasGlobalAlpha()) {
+        if (txtStyle.foregroundBrush.has_value()) {
+            txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
+            txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+        } else {
+            brush.SetColor(state_.fillState.GetColor().GetValue());
+            brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+            InitPaintBlend(brush);
+            txtStyle.foregroundBrush = brush;
+        }
+    }
 #endif
 }
 
@@ -2196,7 +2256,9 @@ bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
-    InitPaintBlend(pen);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        InitPaintBlend(pen);
+    }
     ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
     txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
     txtStyle.foregroundPen = pen;
@@ -2238,7 +2300,9 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
         RSBlurType::NORMAL, RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
     shadowPen.SetFilter(filter);
-    InitPaintBlend(shadowPen);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        InitPaintBlend(shadowPen);
+    }
     shadowStyle.foregroundPen = shadowPen;
     std::unique_ptr<RSParagraphBuilder> shadowBuilder = RSParagraphBuilder::Create(style, fontCollection);
     CHECK_NULL_VOID(shadowBuilder);

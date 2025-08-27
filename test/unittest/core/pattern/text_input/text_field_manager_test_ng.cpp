@@ -16,7 +16,6 @@
 #include <memory>
 #include <utility>
 
-#include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_input_base.h"
@@ -125,6 +124,26 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_RemoveTextFieldInfo003, Test
     auto afterMap = text_field_manager.textFieldInfoMap_;
     auto afterInnerMap = afterMap.find(autoFillContainerNodeId)->second;
     EXPECT_EQ(afterInnerMap.find(nodeId), afterInnerMap.end());
+}
+
+/**
+ * @tc.name: TextFieldManagerNG_SetAttachInput001
+ * @tc.desc: test SetAttachInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_SetAttachInput001, TestSize.Level1)
+{
+    TextFieldManagerNG text_field_manager;
+    EXPECT_EQ(text_field_manager.GetAttachInputId(), -1);
+    text_field_manager.SetAttachInputId(100);
+    EXPECT_EQ(text_field_manager.GetAttachInputId(), 100);
+
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CheckAttachInput();
 }
 
 /**
@@ -306,6 +325,7 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPositio
     refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
     SelectOverlayHolder selectOverlayHolder;
     auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    EXPECT_NE(frameNode, nullptr);
     auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
     WeakPtr<UINode> parent = mockUINode;
     frameNode->parent_ = parent;
@@ -704,5 +724,187 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_OnHandleLevelModeChanged
     EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
     pattern->selectOverlay_->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
     EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
+ * @tc.name: ParseFillContentJsonValue001
+ * @tc.desc: test testInput text ParseFillContentJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseFillContentJsonValue001, TestSize.Level0)
+{
+    auto allFillContents = JsonUtil::CreateArray(true);
+    auto fillContentOne = JsonUtil::Create(true);
+    fillContentOne->Put("id", 10);
+    fillContentOne->Put("fillContent", "{\"userName\":\"test1\"}");
+    allFillContents->Put(fillContentOne);
+    auto fillContentTwo = JsonUtil::Create(true);
+    fillContentTwo->Put("id", 11);
+    fillContentTwo->Put("fillContent", "{\"userName\":\"test2\"}");
+    allFillContents->Put(fillContentTwo);
+
+    TextFieldManagerNG text_field_manager;
+    auto result = text_field_manager.ParseFillContentJsonValue(allFillContents);
+    EXPECT_EQ(result, true);
+    auto map = text_field_manager.textFieldFillContentMaps_;
+    EXPECT_EQ(map.size(), 2);
+}
+
+/**
+ * @tc.name: ParseFillContentJsonValue002
+ * @tc.desc: test testInput text ParseFillContentJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseFillContentJsonValue002, TestSize.Level0)
+{
+    auto jsonObject = JsonUtil::Create(true);
+    jsonObject->Put("id", 10);
+    jsonObject->Put("userName", "test1");
+
+    TextFieldManagerNG text_field_manager;
+    auto result = text_field_manager.ParseFillContentJsonValue(jsonObject);
+    EXPECT_EQ(result, false);
+    auto map = text_field_manager.textFieldFillContentMaps_;
+    EXPECT_EQ(map.size(), 0);
+}
+
+/**
+ * @tc.name: ParseFillContentJsonValue003
+ * @tc.desc: test testInput text ParseFillContentJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseFillContentJsonValue003, TestSize.Level0)
+{
+    auto allFillContents = JsonUtil::CreateArray(true);
+    auto fillContentOne = JsonUtil::Create(true);
+    fillContentOne->Put("id", 10);
+    fillContentOne->Put("fillContent", "{\"userName\":\"test1\"}");
+    allFillContents->Put(fillContentOne);
+    auto fillContentTwo = JsonUtil::Create(true);
+    fillContentTwo->Put("id", 11);
+    fillContentTwo->Put("fillContent", "{\"userName\":\"test2\"}");
+    allFillContents->Put(fillContentTwo);
+    auto fillContentThree = JsonUtil::Create(true);
+    fillContentThree->Put("id", 12);
+    fillContentThree->Put("fillContent", "");
+    allFillContents->Put(fillContentThree);
+    auto fillContentFour = JsonUtil::Create(true);
+    fillContentFour->Put("id", 13);
+    allFillContents->Put(fillContentFour);
+
+    TextFieldManagerNG text_field_manager;
+    auto result = text_field_manager.ParseFillContentJsonValue(allFillContents);
+    EXPECT_EQ(result, true);
+    auto map = text_field_manager.textFieldFillContentMaps_;
+    EXPECT_EQ(map.size(), 2);
+}
+
+/**
+ * @tc.name: GenerateFillContentMap001
+ * @tc.desc: test testInput text GenerateFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GenerateFillContentMap001, TestSize.Level0)
+{
+    auto fillContent = "{\"userName\":\"test\"}";
+    FillContentMap fillContentMap;
+    TextFieldManagerNG text_field_manager;
+    text_field_manager.GenerateFillContentMap(fillContent, fillContentMap);
+    EXPECT_EQ(fillContentMap.size(), 1);
+}
+
+/**
+ * @tc.name: GenerateFillContentMap002
+ * @tc.desc: test testInput text GenerateFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GenerateFillContentMap002, TestSize.Level0)
+{
+    auto fillContent = "{\"\":\"test\"}";
+    FillContentMap fillContentMap;
+    TextFieldManagerNG text_field_manager;
+    text_field_manager.GenerateFillContentMap(fillContent, fillContentMap);
+    EXPECT_EQ(fillContentMap.size(), 0);
+}
+
+/**
+ * @tc.name: GenerateFillContentMap003
+ * @tc.desc: test testInput text GenerateFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GenerateFillContentMap003, TestSize.Level0)
+{
+    auto fillContent = "{\"userName\":\"test\",\"newPassword\":\"A1xACoSOjza4Q8PF\",\"hasAccount\":\"0\",\"userName1\":"
+                       "\"test\",\"userName2\":\"test\",\"userName3\":\"test\"}";
+    FillContentMap fillContentMap;
+    TextFieldManagerNG text_field_manager;
+    text_field_manager.GenerateFillContentMap(fillContent, fillContentMap);
+    EXPECT_EQ(fillContentMap.size(), 5);
+}
+
+/**
+ * @tc.name: GenerateFillContentMap004
+ * @tc.desc: test testInput text GenerateFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GenerateFillContentMap004, TestSize.Level0)
+{
+    auto fillContent = "[{\"userName\":\"test\"}]";
+    FillContentMap fillContentMap;
+    TextFieldManagerNG text_field_manager;
+    text_field_manager.GenerateFillContentMap(fillContent, fillContentMap);
+    EXPECT_EQ(fillContentMap.size(), 0);
+}
+
+/**
+ * @tc.name: GetFillContentMap001
+ * @tc.desc: test testInput text GetFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GetFillContentMap001, TestSize.Level0)
+{
+    auto allFillContents = JsonUtil::CreateArray(true);
+    auto fillContentOne = JsonUtil::Create(true);
+    fillContentOne->Put("id", 10);
+    fillContentOne->Put("fillContent", "{\"userName\":\"test1\"}");
+    allFillContents->Put(fillContentOne);
+    auto fillContentTwo = JsonUtil::Create(true);
+    fillContentTwo->Put("id", 11);
+    fillContentTwo->Put("fillContent", "{\"userName\":\"test2\"}");
+    allFillContents->Put(fillContentTwo);
+
+    TextFieldManagerNG text_field_manager;
+    auto result = text_field_manager.ParseFillContentJsonValue(allFillContents);
+    EXPECT_EQ(result, true);
+    auto map = text_field_manager.textFieldFillContentMaps_;
+    EXPECT_EQ(map.size(), 2);
+    auto fillContentMap = text_field_manager.GetFillContentMap(10);
+    EXPECT_EQ(fillContentMap.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFillContentMap001
+ * @tc.desc: test testInput text RemoveFillContentMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, RemoveFillContentMap001, TestSize.Level0)
+{
+    auto allFillContents = JsonUtil::CreateArray(true);
+    auto fillContentOne = JsonUtil::Create(true);
+    fillContentOne->Put("id", 10);
+    fillContentOne->Put("fillContent", "{\"userName\":\"test1\"}");
+    allFillContents->Put(fillContentOne);
+    auto fillContentTwo = JsonUtil::Create(true);
+    fillContentTwo->Put("id", 11);
+    fillContentTwo->Put("fillContent", "{\"userName\":\"test2\"}");
+    allFillContents->Put(fillContentTwo);
+
+    TextFieldManagerNG text_field_manager;
+    auto result = text_field_manager.ParseFillContentJsonValue(allFillContents);
+    EXPECT_EQ(result, true);
+    auto& map = text_field_manager.textFieldFillContentMaps_;
+    EXPECT_EQ(map.size(), 2);
+    text_field_manager.RemoveFillContentMap(10);
+    EXPECT_EQ(map.size(), 1);
 }
 } // namespace OHOS::Ace::NG

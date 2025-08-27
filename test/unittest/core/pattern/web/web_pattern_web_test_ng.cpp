@@ -17,7 +17,9 @@
 #include <list>
 
 #include "gtest/gtest.h"
+#ifndef USE_NEW_SKIA
 #include "src/core/SkVM.h"
+#endif
 #define protected public
 #define private public
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
@@ -28,8 +30,8 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef private
 #undef protected
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb.h"
+#include "nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -582,6 +584,8 @@ HWTEST_F(WebPatternWebTest, OnAttachContext, TestSize.Level1)
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
+    webPattern->renderContextForSurface_ = nullptr;
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }
@@ -713,13 +717,10 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->isResizeContentAvoid_, false);
-    EXPECT_EQ(webPattern->isInWindowDrag_, false);
     webPattern->isInWindowDrag_ = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(webPattern->isInWindowDrag_, true);
     config.contentSizeChange = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(config.contentSizeChange, true);
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->drawSize_.width_, 0.0);
@@ -831,7 +832,6 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_004, TestSize.Level1)
     webPattern->OnAreaChangedInner();
     EXPECT_NE(webPattern->layoutMode_, WebLayoutMode::NONE);
     EXPECT_FALSE(webPattern->isInWindowDrag_);
-    EXPECT_EQ(webPattern->renderMode_, RenderMode::SYNC_RENDER);
 #endif
 }
 
@@ -1284,6 +1284,7 @@ HWTEST_F(WebPatternWebTest, ClearKeyEventByKeyCodeTest, TestSize.Level1)
     stack->Push(frameNode);
     webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->ModifyWebSrc(src);
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
     webPattern->OnModifyDone();

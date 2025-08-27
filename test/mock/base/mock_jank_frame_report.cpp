@@ -54,6 +54,8 @@ void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 
 void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank, const std::string& windowName) {}
 
+void PerfMonitor::SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration) {}
+
 void PerfMonitor::ReportJankFrameApp(double jank) {}
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
@@ -76,4 +78,6 @@ void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::strin
                                     const std::string& pageName) {}
 void PerfMonitor::NotifyAppJankStatsBegin() {}
 void PerfMonitor::NotifyAppJankStatsEnd() {}
+void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid) {}
 } // namespace OHOS::Ace

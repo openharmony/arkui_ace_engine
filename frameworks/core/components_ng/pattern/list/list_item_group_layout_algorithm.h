@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,8 +67,11 @@ public:
 
     static const int32_t LAST_ITEM = -1;
 
-    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
-        :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
+    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex,
+        int32_t footerCount = 0)
+        : headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex),
+          footerCount_(footerCount)
+    {}
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -132,6 +135,11 @@ public:
         return lanes_;
     }
 
+    void SetLanes(int32_t lanes)
+    {
+        lanes_ = lanes;
+    }
+
     float GetLaneGutter() const
     {
         return laneGutter_;
@@ -160,6 +168,11 @@ public:
         forwardLayout_ = forwardLayout;
         refPos_ = referencePos;
         prevContentMainSize_ = prevContentSize;
+    }
+
+    float GetListContentSize() const
+    {
+        return endPos_ - startPos_;
     }
 
     void ModifyReferencePos(int32_t index, float pos);
@@ -269,6 +282,11 @@ public:
     {
         return totalItemCount_;
     }
+    
+    int32_t GetFooterIndex() const
+    {
+        return footerIndex_;
+    }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
 
@@ -355,6 +373,26 @@ public:
         isNeedMeasureFormLastItem_ = needMeasureFormLastItem;
     }
 
+    void SetNeedSyncLoad(bool value)
+    {
+        isNeedSyncLoad_ = value;
+    }
+
+    void SetPrevMeasureBreak(bool value)
+    {
+        prevMeasureBreak_ = value;
+    }
+
+    bool GroupMeasureInNextFrame() const
+    {
+        return measureInNextFrame_;
+    }
+
+    bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
+    {
+        return !itemPosition_.empty() && !isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
+    }
+
     ListItemGroupLayoutInfo GetLayoutInfo() const;
 
     float GetAdjustReferenceDelta() const
@@ -403,8 +441,11 @@ public:
 
     void ReverseLayoutedItemInfo(int32_t totalItemCount, float mainSize);
 
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    void UpdateRecycledItems();
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
@@ -473,6 +514,7 @@ private:
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
+    int32_t footerCount_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
@@ -518,6 +560,10 @@ private:
     bool needAdjustRefPos_ = false;
     bool isNeedCheckOffset_ = false;
     bool isNeedMeasureFormLastItem_ = false;
+    bool isNeedSyncLoad_ = false;
+    bool measureInNextFrame_ = false;
+    bool prevMeasureBreak_ = false;
+    int32_t pauseMeasureCacheItem_ = -1;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
@@ -525,6 +571,7 @@ private:
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
     PositionMap cachedItemPosition_;
+    PositionMap recycledItemPosition_;
 
     bool isStackFromEnd_ = false;
     bool isLayouted_ = true;

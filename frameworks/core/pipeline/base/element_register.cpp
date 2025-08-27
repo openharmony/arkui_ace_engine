@@ -15,10 +15,13 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_v2/common/element_proxy.h"
+#include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::atomic<ElementIdType> ElementRegister::nextUniqueElementId_ = 0;
 std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
@@ -30,6 +33,11 @@ ElementRegister* ElementRegister::GetInstance()
         }
     }
     return (ElementRegister::instance_);
+}
+
+ElementIdType ElementRegister::MakeUniqueId()
+{
+    return ElementRegister::nextUniqueElementId_++;
 }
 
 RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
@@ -132,6 +140,7 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
+    FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
         return false;
     }
@@ -272,5 +281,47 @@ void ElementRegister::RemoveFrameNodeByInspectorId(const std::string& key, int32
     if (it->second.empty()) {
         inspectorIdMap_.erase(it);
     }
+}
+
+void ElementRegister::RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    surfaceIdEmbedNodeMap_[surfaceId] = node;
+    auto nodeRef = node.Upgrade();
+    CHECK_NULL_VOID(nodeRef);
+    embedNodeSurfaceIdMap_[AceType::RawPtr(nodeRef)] = surfaceId;
+}
+
+void ElementRegister::UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node)
+{
+    surfaceIdEmbedNodeMap_.erase(surfaceId);
+    auto nodeRef = node.Upgrade();
+    CHECK_NULL_VOID(nodeRef);
+    NG::FrameNode* nodePtr = AceType::RawPtr(nodeRef);
+    embedNodeSurfaceIdMap_.erase(nodePtr);
+}
+
+WeakPtr<NG::FrameNode> ElementRegister::GetEmbedNodeBySurfaceId(const uint64_t surfaceId)
+{
+    auto it = surfaceIdEmbedNodeMap_.find(surfaceId);
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("[GetEmbedNodeBySurfaceId] surfaceId: %{public}" PRId64 ", result: %{public}s", surfaceId,
+            (it == surfaceIdEmbedNodeMap_.end()) ? "false" : "true");
+    }
+    return (it == surfaceIdEmbedNodeMap_.end()) ? nullptr : it->second;
+}
+
+bool ElementRegister::IsEmbedNode(NG::FrameNode* node)
+{
+    return (embedNodeSurfaceIdMap_.find(node) != embedNodeSurfaceIdMap_.end());
+}
+
+uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
+{
+    auto it = embedNodeSurfaceIdMap_.find(node);
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("[GetSurfaceIdByEmbedNode] frameNodeId: %{public}d, surfaceId: %{public}" PRId64 "",
+            (node == nullptr ? -1 : node->GetId()), (it == embedNodeSurfaceIdMap_.end()) ? 0U : (it->second));
+    }
+    return (it == embedNodeSurfaceIdMap_.end()) ? 0U : it->second;
 }
 } // namespace OHOS::Ace

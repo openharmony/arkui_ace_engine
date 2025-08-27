@@ -18,11 +18,14 @@
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef USE_NEW_SKIA
+#include "include/codec/SkCodecAnimation.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,7 +55,8 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        auto src = ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
+        uint32_t errorCode = 0;
+        auto src = ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
         CHECK_NULL_RETURN(src, nullptr);
         return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
     }
@@ -292,11 +296,14 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
         intrSizeInitial_ = false;
     }
     RefPtr<PixelMap> frame;
+    uint32_t errorCode = 0;
+    PixelMapConfig pixelMapConfig;
+    pixelMapConfig.imageQuality = size_.imageQuality;
     if (size_.forceResize) {
-        frame = src_->CreatePixelMap(idx, { size_.width, size_.height }, size_.imageQuality);
+        frame = src_->CreatePixelMap(idx, { size_.width, size_.height }, errorCode, pixelMapConfig);
     } else {
         // decode to intrinsic size
-        frame = src_->CreatePixelMap(idx, { -1, -1 }, size_.imageQuality);
+        frame = src_->CreatePixelMap(idx, { -1, -1 }, errorCode, pixelMapConfig);
     }
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = frame;

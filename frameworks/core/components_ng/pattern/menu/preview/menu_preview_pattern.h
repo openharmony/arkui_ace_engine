@@ -82,46 +82,6 @@ public:
         return hoverImageAfterScaleHeight_;
     }
 
-    void SetClipStartWidth(float width)
-    {
-        clipStartWidth_ = width;
-    }
-
-    float GetClipStartWidth() const
-    {
-        return clipStartWidth_;
-    }
-
-    void SetClipStartHeight(float height)
-    {
-        clipStartHeight_ = height;
-    }
-
-    float GetClipStartHeight() const
-    {
-        return clipStartHeight_;
-    }
-
-    void SetClipStartValue(float value)
-    {
-        clipStartVal_ = value;
-    }
-
-    float GetClipStartValue() const
-    {
-        return clipStartVal_;
-    }
-
-    void SetClipEndValue(float value)
-    {
-        clipEndVal_ = value;
-    }
-
-    float GetClipEndValue() const
-    {
-        return clipEndVal_;
-    }
-
     void SetHoverImageAfterScaleOffset(const OffsetF& offset)
     {
         hoverImageAfterScaleOffset_ = offset;
@@ -172,16 +132,6 @@ public:
         return stackAfterScaleActualHeight_;
     }
 
-    void SetIsWidthDistLarger(bool widthDistLarger)
-    {
-        isWidthDistLarge_ = widthDistLarger;
-    }
-
-    bool GetIsWidthDistLarger() const
-    {
-        return isWidthDistLarge_;
-    }
-
     void SetHoverImageScaleFrom(float scaleFrom)
     {
         hoverImageScaleFrom_ = scaleFrom;
@@ -202,6 +152,16 @@ public:
         return hoverImageScaleTo_;
     }
 
+    void SetHoverTargetOriginScale(VectorF scale)
+    {
+        hoverTargetOriginScale_ = scale;
+    }
+
+    VectorF GetHoverTargetOriginScale() const
+    {
+        return hoverTargetOriginScale_;
+    }
+
     void SetCustomPreviewScaleTo(float scaleTo)
     {
         customPreviewScaleTo_ = scaleTo;
@@ -212,6 +172,7 @@ public:
         return customPreviewScaleTo_;
     }
     RefPtr<FrameNode> GetMenuWrapper() const;
+    bool GetHoverScaleInterruption() const;
 
     void SetIsHoverImageScalePlaying(bool isPlay)
     {
@@ -238,22 +199,18 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    void ShowBorderRadiusAndShadowAnimation(const MenuParam& menuParam);
     void UpdateShowScale(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
         const RefPtr<MenuPattern>& menuPattern);
     bool isFirstShow_ = false;
     bool hasPreviewTransitionEffect_ = false;
 
     bool isShowHoverImage_ = false;
-    bool isWidthDistLarge_ = false;
     bool isHoverImageScalePlaying_ = false;
     bool isHoverImagePreviewScalePlaying_ = false;
     OffsetF hoverImageAfterScaleOffset_;
     float hoverImageAfterScaleWidth_ = 0.0f;
     float hoverImageAfterScaleHeight_ = 0.0f;
-    float clipStartWidth_ = 0.0f;
-    float clipStartHeight_ = 0.0f;
-    float clipStartVal_ = 0.0f;
-    float clipEndVal_ = 0.0f;
     float customPreviewWidth_ = 0.0f;
     float customPreviewHeight_ = 0.0f;
     float stackAfterScaleActualWidth_ = 0.0f;
@@ -261,6 +218,7 @@ private:
     float hoverImageScaleFrom_ = 1.0f;
     float hoverImageScaleTo_ = 1.0f;
     float customPreviewScaleTo_ = 1.0f;
+    VectorF hoverTargetOriginScale_ = { 1.0f, 1.0f };
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewPattern);
 };
 } // namespace OHOS::Ace::NG

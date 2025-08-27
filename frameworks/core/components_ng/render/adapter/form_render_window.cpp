@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 #include "transaction/rs_interfaces.h"
 #endif
 
@@ -45,6 +46,9 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
+    if (container != nullptr) {
+        uiContentType_ = container->GetUIContentType();
+    }
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
@@ -63,20 +67,34 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     {
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        rsUIDirector_->Init(); // Func Init Thread unsafe.
+        if (SystemProperties::GetMultiInstanceEnabled()) {
+            rsUIDirector_->Init(true, true); // Func Init Thread unsafe.
+        } else {
+            rsUIDirector_->Init(); // Func Init Thread unsafe.
+        }
     }
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
-    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
-
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
-    }, id);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
+        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
+            }, 0, true);
+    } else {
+        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
+            }, id);
+    }
 #else
     taskExecutor_ = nullptr;
     id_ = 0;
@@ -87,7 +105,21 @@ void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (receiver_ != nullptr) {
+        if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            CHECK_NULL_VOID(!isRequestVsync_);
+            isRequestVsync_ = true;
+        }
         receiver_->RequestNextVSync(frameCallback_);
+    }
+#endif
+}
+
+void FormRenderWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        CHECK_NULL_VOID(rsUIDirector_);
+        rsUIDirector_->SetTimeStamp(timeStamp, name);
     }
 #endif
 }
@@ -98,6 +130,7 @@ void FormRenderWindow::Destroy()
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
+    rsSurfaceNode_ = nullptr;
     if (rsUIDirector_) {
         rsUIDirector_->Destroy();
         rsUIDirector_.reset();
@@ -119,7 +152,8 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
         CHECK_NULL_VOID(rsUIDirector_);
-        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rosenRenderContext->GetRSNode()));
     }
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
@@ -142,11 +176,15 @@ void FormRenderWindow::OnHide()
 #endif
 }
 
-void FormRenderWindow::FlushTasks()
+void FormRenderWindow::FlushTasks(std::function<void()> callback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->SendMessages();
+    if (!callback) {
+        rsUIDirector_->SendMessages();
+    } else {
+        rsUIDirector_->SendMessages(callback);
+    }
 #endif
 }
 
@@ -158,6 +196,18 @@ void FormRenderWindow::Unlock()
 {
 }
 
+int64_t FormRenderWindow::GetVSyncPeriod() const
+{
+    int64_t vSyncPeriod = 0;
+#if defined(ENABLE_ROSEN_BACKEND) && defined(__OHOS__)
+    if (receiver_) {
+        receiver_->GetVSyncPeriod(vSyncPeriod);
+    }
+#endif
+
+    return vSyncPeriod;
+}
+
 void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -167,7 +217,9 @@ void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFram
     decltype(frameRateData_) frameRateData{rate, animatorExpectedFrameRate, rateType};
     if (frameRateData_ != frameRateData) {
         frameRateData_ = frameRateData;
-        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate);
+        auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType},
+            animatorExpectedFrameRate, rsUIContext);
     }
 #endif
 }

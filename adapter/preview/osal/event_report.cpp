@@ -49,7 +49,7 @@ void EventReport::SendFormException(FormExcepType type) {}
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr) {}
 
 void EventReport::JsErrReport(const std::string& packageName,
-    const std::string& reason, const std::string& summary, const std::string& uniqueId) {}
+    const std::string& reason, const std::string& summary) {}
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
                                const std::string& processName, const std::string& msg) {}
@@ -61,16 +61,6 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
                                   const std::string& pageUrl, uint32_t jankStatusVersion) {}
 
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
-
-void EventReport::ReportEventComplete(DataBase& data) {}
-
-void EventReport::ReportEventJankFrame(DataBase& data) {}
-
-void EventReport::ReportJankFrameApp(JankInfo& info) {}
-
-void EventReport::ReportJankFrameFiltered(JankInfo& info) {}
-
-void EventReport::ReportJankFrameUnFiltered(JankInfo& info) {}
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
 
@@ -84,9 +74,6 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
 
 void EventReport::ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
                                           int32_t appRotation, int32_t windowMode) {}
-
-void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
-                                    const std::string& pageName) {}
 
 void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)
@@ -118,7 +105,14 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
 
 void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
 {}
- 
-void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+
+void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
+{}
+
+void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
+{}
+
+void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
+    const std::string &formName)
 {}
 } // namespace OHOS::Ace

@@ -40,12 +40,38 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     return node;
 }
 
+void LazyForEachNode::OnDelete()
+{
+    if (builder_ && isRegisterListener_) {
+        builder_->UnregisterDataChangeListener(this);
+        isRegisterListener_ = false;
+    }
+
+    UINode::OnDelete();
+}
+
+LazyForEachNode::~LazyForEachNode()
+{
+    CHECK_NULL_VOID(builder_);
+    if (isRegisterListener_) {
+        builder_->UnregisterDataChangeListener(this);
+        isRegisterListener_ = false;
+    }
+    builder_->ClearAllOffscreenNode();
+}
+
 RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
 {
     auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
+}
+
+void LazyForEachNode::NotifyColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(builder_);
+    builder_->NotifyColorModeChange(colorMode, GetRerenderable());
 }
 
 void LazyForEachNode::AdjustLayoutWrapperTree(
@@ -170,6 +196,14 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
+        auto pipeline = GetContext();
+        if (pipeline && !pipeline->GetOnShow()) {
+            pipeline->AddAfterLayoutTask(
+                [node = std::move(node)]() mutable {
+                    node = nullptr;
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -292,13 +326,23 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                AddDisappearingChild(node.second);
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
             builder_->ProcessOffscreenNode(node.second, true);
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
+        auto pipeline = GetContext();
+        bool isShow = pipeline ? pipeline->GetOnShow() : true;
+        if (pipeline && !isShow) {
+            pipeline->AddAfterLayoutTask(
+                [nodes = std::move(nodeList)]() mutable {
+                    nodes.clear();
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -472,9 +516,19 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
-    return children_;
+    if (needCacheNode) {
+        std::vector<UINode*> childList;
+        builder_->GetAllItems(childList);
+        childrenWithCache_.clear();
+        for (const auto& uiNode : childList) {
+            childrenWithCache_.emplace_back(Claim(uiNode));
+        }
+        return childrenWithCache_;
+    } else {
+        return children_;
+    }
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -636,6 +690,13 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
                 }
                 break;
         }
+    }
+}
+
+void LazyForEachNode::EnablePreBuild(bool enable)
+{
+    if (builder_) {
+        builder_->EnablePreBuild(enable);
     }
 }
 } // namespace OHOS::Ace::NG

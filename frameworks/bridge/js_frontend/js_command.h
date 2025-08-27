@@ -347,7 +347,7 @@ private:
 };
 
 class ACE_EXPORT AnimationBridgeTask : public AceType {
-    DECLARE_ACE_TYPE(AnimationBridgeTask, AceType)
+    DECLARE_ACE_TYPE(AnimationBridgeTask, AceType);
 
 public:
     AnimationBridgeTask() = default;
@@ -368,7 +368,7 @@ private:
 };
 
 class ACE_EXPORT AnimatorBridgeTask : public AceType {
-    DECLARE_ACE_TYPE(AnimatorBridgeTask, AceType)
+    DECLARE_ACE_TYPE(AnimatorBridgeTask, AceType);
 
 public:
     AnimatorBridgeTask() = default;

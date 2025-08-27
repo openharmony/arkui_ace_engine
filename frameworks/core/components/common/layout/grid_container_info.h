@@ -34,7 +34,7 @@ public:
     public:
         Builder()
         {
-            containerInfo_ = AceType::Claim(new GridContainerInfo());
+            containerInfo_ = AceType::MakeRefPtr<GridContainerInfo>();
         }
         void SetColumns(int32_t columns)
         {

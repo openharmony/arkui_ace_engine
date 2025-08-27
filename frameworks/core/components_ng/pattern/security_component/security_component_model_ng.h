@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -31,8 +32,10 @@ struct SecurityComponentElementStyle {
     uint32_t symbolIcon;
 };
 
-class ACE_EXPORT SecurityComponentModelNG {
+class ACE_FORCE_EXPORT SecurityComponentModelNG {
 public:
+    typedef bool (*GetIconResourceFuncType) (int32_t iconStyle, InternalResource::ResourceId& id);
+    typedef bool (*GetTextResourceFuncType) (int32_t textStyle, std::string& text);
     virtual ~SecurityComponentModelNG() = default;
     virtual void Create(int32_t text, int32_t icon,
         int32_t backgroundType, bool isArkuiComponent) = 0;
@@ -43,27 +46,54 @@ public:
         SecurityComponentElementStyle& style,
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
+    static void SetIconSize(const NG::CalcSize& value);
     static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
+    static void SetIconBorderRadius(const Dimension& value);
+    static void SetIconBorderRadius(const std::optional<Dimension>& topLeft,
+        const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+        const std::optional<Dimension>& bottomRight);
+    static void SetIcon(const ImageSourceInfo& value);
+    static void SetText(const std::string& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(const Ace::FontStyle& value);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetFontWeight(const FontWeight& value);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
+    static void SetStateEffect(const bool& value);
+    static void SetTipPosition(const TipPosition& value);
     static void SetFontColor(const Color& value);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetBackgroundBorderWidth(const Dimension& value);
+    static void SetBackgroundBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBackgroundBorderColor(const Color& value);
+    static void SetBackgroundBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
+    static void SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
         const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
         const std::optional<Dimension>& bottomRight);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
+    static void SetBackgroundPadding(FrameNode* frameNode,
+        const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);
+    static void SetTextIconSpace(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
+    static void SetTextIconLayoutDirection(FrameNode* frameNode,
+        const std::optional<SecurityComponentLayoutDirection>& value);
     static void SetAlign(const Alignment alignment);
     static void SetMaxFontScale(const float value);
     static void SetMinFontScale(const float value);
@@ -99,6 +129,11 @@ public:
 
 protected:
     static RefPtr<SecurityComponentTheme> GetTheme();
+    static void InitChildNode(FrameNode* frameNode, const SecurityComponentElementStyle& style,
+    GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);
+    static bool InitSecurityComponent(FrameNode* frameNode,
+        const SecurityComponentElementStyle& style, bool isArkuiComponent,
+        GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);
 
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
@@ -107,7 +142,9 @@ private:
         bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
+    static bool IsBackgroundVisible(FrameNode* frameNode);
     static bool IsArkuiComponent();
+    static bool IsArkuiComponent(FrameNode* frameNode);
     static void NotifyFontColorSet();
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);

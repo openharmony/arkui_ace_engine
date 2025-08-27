@@ -99,7 +99,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "%{public}s lifecycle chang to onHidden state. navdestinationId:%{public}d, navigationId:%{public}d",
+        "%{public}s lifecycle change to onHidden state. navdestinationId:%{public}d, navigationId:%{public}d",
         name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
@@ -145,6 +145,10 @@ void NavDestinationEventHub::FireOnAppear()
     // if navdestination is created from recovery, it need trigger onAppear immediately
     if (navDestination && navDestination->NeedAppearFromRecovery()) {
         navDestination->SetNeedAppearFromRecovery(false);
+        onAppearAction();
+        return;
+    }
+    if (navDestination && navDestination->IsHomeDestination()) {
         onAppearAction();
         return;
     }

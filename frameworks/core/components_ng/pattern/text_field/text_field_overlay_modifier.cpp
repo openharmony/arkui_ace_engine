@@ -202,13 +202,22 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
     auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    Point leftPoint, rightPoint;
+    Point leftPoint;
+    Point rightPoint;
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto isGreatAPI18 = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    auto isNeedToAddPadding = isGreatAPI18 && textFieldPattern->IsUnderlineAndButtonMode();
     if (isRTL) {
-        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
+        auto contentLeft = isNeedToAddPadding ? contentRect.Left() - textFieldPattern->GetPaddingLeft() :
+            contentRect.Left();
+        leftPoint.SetX(hasResponseArea ? 0.0 : contentLeft);
         rightPoint.SetX(contentRect.Right());
     } else {
+        auto contentRight = isNeedToAddPadding ? contentRect.Right() + textFieldPattern->GetPaddingRight() :
+            contentRect.Right();
         leftPoint.SetX(contentRect.Left());
-        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRight);
     }
 
     leftPoint.SetY(textFrameRect.Height());
@@ -379,6 +388,9 @@ void TextFieldOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaret
     option.SetDuration(LAND_DURATION);
     option.SetCurve(LAND_CURVE);
     caretLanding_ = true;
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
     AnimationUtils::Animate(
         option,
         [weak = WeakClaim(this), originCaretOffset]() {
@@ -396,7 +408,8 @@ void TextFieldOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaret
             auto textFieldHost = textField->GetHost();
             CHECK_NULL_VOID(textFieldHost);
             textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        });
+        },
+        nullptr, contextPtr);
 }
 
 void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)

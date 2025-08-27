@@ -35,14 +35,23 @@ public:
 
     void RecordPropChange(const WeakPtr<AnimatableProperty<T>>& ptr, T targetValue)
     {
-        auto& prop = props_[ptr];
-        if (!MockAnimationManager::GetInstance().IsAnimationOpen()) {
-            prop = { targetValue, targetValue };
+        auto& impl = props_[ptr];
+        using Manager = MockAnimationManager;
+        if (!Manager::GetInstance().IsAnimationOpen()) {
+            impl = { targetValue, targetValue };
+
+            if (Manager::Version() > Manager::Version::V0) {
+                const auto prop = ptr.Upgrade();
+                CHECK_NULL_VOID(prop);
+                if (auto cb = prop->GetUpdateCallback()) {
+                    cb(targetValue); // call update callback immediately if not within animation scope
+                }
+            }
             return;
         }
 
-        prop.endValue_ = targetValue;
-        MockAnimationManager::GetInstance().AddActiveProp(ptr);
+        impl.endValue_ = targetValue;
+        Manager::GetInstance().AddActiveProp(ptr);
     }
 
     T GetEndValue(const WeakPtr<AnimatableProperty<T>>& ptr)
@@ -54,24 +63,24 @@ public:
         return it->second.endValue_;
     }
 
-    T GetStagingValue(const WeakPtr<AnimatableProperty<T>>& ptr)
+    T GetValue(const WeakPtr<AnimatableProperty<T>>& ptr)
     {
         auto it = props_.find(ptr);
         if (it == props_.end()) {
             return {};
         }
-        return it->second.stagingValue_;
+        return it->second.value_;
     }
 
-    /* move staging value by one frame */
+    /* move value by one frame */
     void Next(const WeakPtr<AnimatableProperty<T>>& ptr, int32_t remainingTicks)
     {
         auto it = props_.find(ptr);
         if (it == props_.end() || remainingTicks == 0) {
             return;
         }
-        T delta = (it->second.endValue_ - it->second.stagingValue_) / remainingTicks;
-        it->second.stagingValue_ += delta;
+        T delta = (it->second.endValue_ - it->second.value_) / remainingTicks;
+        it->second.value_ += delta;
     }
 
     void ForceUpdate(const WeakPtr<AnimatableProperty<T>>& ptr, T delta)
@@ -80,12 +89,12 @@ public:
         if (it == props_.end()) {
             return;
         }
-        it->second.stagingValue_ += delta;
+        it->second.value_ += delta;
     }
 
 private:
     struct PropertyImpl {
-        T stagingValue_;
+        T value_;
         T endValue_;
     };
     std::map<WeakPtr<AnimatableProperty<T>>, PropertyImpl> props_;

@@ -30,7 +30,13 @@ InputMethodManager* InputMethodManager::GetInstance()
     return instance_.get();
 }
 
-void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason) {}
+void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason)
+{
+    isLastFocusUIExtension_ = false;
+}
+
+void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason,
+    bool saveKeyboard) {}
 
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode) {}
 
@@ -43,7 +49,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return false;
 }
 
-void InputMethodManager::CloseKeyboard() {}
+void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard) {}
 
 void InputMethodManager::CloseKeyboardInProcess() {}
 

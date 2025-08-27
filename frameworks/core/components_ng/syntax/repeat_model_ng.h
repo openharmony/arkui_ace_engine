@@ -36,7 +36,6 @@ public:
     void FinishRender(std::list<int32_t>& removedElmtId) override;
 
     void MoveChild(uint32_t fromIndex) override;
-
     void CreateNewChildStart(const std::string& key) override;
     void CreateNewChildFinish(const std::string& key) override;
     void AfterAddChild() override;

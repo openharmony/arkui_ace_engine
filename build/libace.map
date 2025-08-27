@@ -39,6 +39,7 @@
       GetArkUIAnyFullNodeAPI;
       GetCJUIFullNodeAPI;
       GetArkUIFullNodeAPI;
+      GetArkUIAniModifiers;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -94,12 +95,15 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
+      OHOS::Ace::NG::Reporter::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;
       "OHOS::Ace::AnimatableColor::AnimatableColor()";
       "OHOS::Ace::AnimatableColor::~AnimatableColor()";
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
+      OHOS::Ace::NG::Modifier::*;
+      OHOS::Ace::NG::ModifierAdapter::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -222,6 +226,7 @@
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
+      "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::StageManager::*;
@@ -236,6 +241,7 @@
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::FocusNode::*;
+      OHOS::Ace::NG::FocusHub::*;
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::NG::Matrix2D::*;
@@ -267,6 +273,9 @@
       OHOS::Ace::PipelineBase::GetSystemFontList*;
       OHOS::Ace::PipelineBase::GetSystemFont*;
       OHOS::Ace::PipelineBase::GetUIFontConfig*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::PipelineBase::ConvertPxToVp*;
+      OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -278,6 +287,10 @@
       OHOS::Ace::NG::RichEditorAbstractSpanResult::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
+      OHOS::Ace::NG::LocationButtonModelNG::*;
+      OHOS::Ace::NG::SecurityComponentModelNG::*;
+      OHOS::Ace::NG::PasteButtonModelNG::*;
+      OHOS::Ace::NG::SaveButtonModelNG::*;
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
@@ -315,6 +328,7 @@
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
+      OHOS::Ace::NG::UIExtensionAdapter::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -341,6 +355,7 @@
       vtable?for?OHOS::Ace::ComponentGroupElement;
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::StackElement;
+      vtable?for?OHOS::Ace::CanvasPath2D;
       vtable?for?OHOS::Ace::ComposedComponent;
       vtable?for?OHOS::Ace::BoxComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
@@ -358,6 +373,11 @@
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
+      vtable?for?OHOS::Ace::NG::LocationButtonModelNG;
+      vtable?for?OHOS::Ace::NG::SaveButtonModelNG;
+      vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
+      vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
+      vtable?for?OHOS::Ace::NG::Pattern;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -370,6 +390,7 @@
       VTT?for?OHOS::Ace::StackElement;
       VTT?for?OHOS::Ace::ComponentGroupElement;
       VTT?for?OHOS::Ace::NG::PagePattern;
+      VTT?for?OHOS::Ace::CanvasPath2D;
       VTT?for?OHOS::Ace::ComposedComponent;
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::PageTransitionComponent;
@@ -386,6 +407,7 @@
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
+      VTT?for?OHOS::Ace::NG::Pattern;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -405,6 +427,9 @@
       OHOS::Ace::V2::COLUMN_ETS_TAG;
       OHOS::Ace::V2::IMAGE_ETS_TAG;
       OHOS::Ace::V2::MOVING_PHOTO_ETS_TAG;
+      OHOS::Ace::V2::ROOT_ETS_TAG;
+      OHOS::Ace::V2::STAGE_ETS_TAG;
+      OHOS::Ace::V2::PAGE_ETS_TAG;
       OHOS::Ace::NG::AccessibilityProperty::*;
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::EventHub::*;
@@ -441,6 +466,7 @@
       OHOS::Ace::Kit::OverlayManager::*;
       OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
+      OHOS::Ace::TokenColors::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;
@@ -456,11 +482,18 @@
       OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::Kit::Tabs::*;
+      OHOS::Ace::Kit::FrameNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
+      OHOS::Ace::NG::AtomicServicePattern::*;
+      OHOS::Ace::NG::SetRegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::NG::BuildMenuBarRow*;
+      OHOS::Ace::RegistAppBarNodeBuilder*;
+      OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::Kit::FrameNode::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -471,6 +504,7 @@
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
+      "OHOS::Ace::ElementRegister::GetUINodeById(int)";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;
@@ -537,6 +571,14 @@
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
       OHOS::Ace::NG::PanRecognizer::GetDistance*;
+      OHOS::Ace::NG::NodeRenderStatusMonitor::*;
+      "OHOS::Ace::RoundToMaxPrecision(double)";
+      OHOS::Ace::NG::SwiperPattern::IsAtStart*;
+      OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
+      "OHOS::Ace::ACE_PI";
+      "OHOS::Ace::ACE_E";
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;

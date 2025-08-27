@@ -17,14 +17,17 @@
 
 #include <string>
 
+#include "base/utils/multi_thread.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
-#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/event/event_hub.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,7 +46,7 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({
@@ -60,7 +63,7 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_RETURN(pattern, frameNode);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({
@@ -102,6 +105,27 @@ void RefreshModelNG::SetFriction(int32_t friction)
 void RefreshModelNG::SetLoadingText(const std::string& loadingText)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
+}
+
+void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("refresh.promptText");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(resObj, result)) {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, AceType::RawPtr(node));
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
+        }
+    };
+    pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }
 
 void RefreshModelNG::ResetLoadingText()
@@ -154,6 +178,24 @@ void RefreshModelNG::ResetOnOffsetChange()
     eventHub->ResetOnOffsetChange();
 }
 
+void RefreshModelNG::SetMaxPullDownDistance(const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance);
+    }
+}
+
+void RefreshModelNG::SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, frameNode);
+    }
+}
+
 void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
 {
     if (pullDownRatio.has_value()) {
@@ -188,6 +230,8 @@ void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
 
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
 {
+    // call SetCustomBuilderMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetCustomBuilder, frameNode, customBuilder);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
@@ -248,6 +292,14 @@ void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
 }
 
+float RefreshModelNG::GetMaxPullDownDistance(FrameNode* frameNode)
+{
+    float value = std::numeric_limits<float>::infinity();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, MaxPullDownDistance,
+        value, frameNode, value);
+    return value;
+}
+
 float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
 {
     float value = 1.0;
@@ -275,5 +327,13 @@ void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& c
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStepOffsetChange(std::move(dragOffset));
 }
 } // namespace OHOS::Ace::NG

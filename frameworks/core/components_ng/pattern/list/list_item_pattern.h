@@ -57,6 +57,8 @@ public:
     {}
     ~ListItemPattern() override = default;
 
+    void OnRecycle() override;
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -215,7 +217,7 @@ public:
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
 
-    void FireOnFinshEvent() const
+    void FireOnFinishEvent() const
     {
         if (onFinishEvent_) {
             onFinishEvent_();
@@ -243,6 +245,23 @@ public:
 
     SwipeActionState GetSwipeActionState();
 
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 protected:
     void OnModifyDone() override;
     virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
@@ -264,6 +283,9 @@ private:
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
@@ -274,6 +296,8 @@ private:
     void FireSwipeActionStateChange(ListItemSwipeIndex newSwiperIndex);
     void UpdateClickJudgeCallback();
     bool ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset);
+    void InitOnFocusEvent();
+    void HandleFocusEvent();
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;

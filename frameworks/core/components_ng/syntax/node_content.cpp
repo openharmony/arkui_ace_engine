@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/node_content.h"
 
+#include "core/common/builder_util.h"
+
 namespace OHOS::Ace::NG {
 
 void NodeContent::AttachToNode(UINode* node)
@@ -24,9 +26,12 @@ void NodeContent::AttachToNode(UINode* node)
         DetachFromNode();
     }
     nodeSlot_ = WeakClaim(node);
+    std::list<RefPtr<NG::UINode>> nodes;
     for (const auto& child : children_) {
         node->AddChild(child);
+        BuilderUtils::GetBuilderNodes(child, nodes);
     }
+    BuilderUtils::AddBuilderToParent(Claim(node), nodes);
     node->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     if (node->IsOnMainTree()) {
         OnAttachToMainTree();
@@ -40,6 +45,11 @@ void NodeContent::DetachFromNode()
     if (slot) {
         children_ = slot->GetChildren();
         slot->Clean();
+        std::list<RefPtr<NG::UINode>> nodes;
+        for (const auto& child : children_) {
+            BuilderUtils::GetBuilderNodes(child, nodes);
+        }
+        BuilderUtils::RemoveBuilderFromParent(slot, nodes);
         if (slot->IsOnMainTree()) {
             OnDetachFromMainTree();
         }
@@ -52,6 +62,7 @@ void NodeContent::AddNode(UINode* node, int32_t position)
     auto child = Claim(node);
     if (slot) {
         slot->AddChild(child, position);
+        BuilderUtils::AddBuilderToParent(slot, child);
         slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -70,6 +81,7 @@ void NodeContent::RemoveNode(UINode* node)
     auto slot = nodeSlot_.Upgrade();
     if (slot) {
         slot->RemoveChild(nodeRef);
+        BuilderUtils::RemoveBuilderFromParent(slot, nodeRef);
         slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     auto it = std::find(children_.begin(), children_.end(), nodeRef);

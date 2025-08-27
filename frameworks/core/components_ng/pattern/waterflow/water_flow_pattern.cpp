@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -25,8 +26,10 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -70,6 +73,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
     }
     delta = -FireOnWillScroll(-delta);
+    delta = -FireObserverOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
@@ -255,9 +259,8 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     CHECK_NULL_VOID(eventHub);
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
-    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", delta,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     FireObserverOnDidScroll(delta);
+    FireObserverOnScrollerAreaChange(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -329,7 +332,11 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
-    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    int32_t endIndex = layoutInfo_->endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+    }
+    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -338,7 +345,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
-    TriggerPostLayoutEvents();
+    if (!layoutInfo_->measureInNextFrame_) {
+        TriggerPostLayoutEvents();
+    }
 
     if (targetIndex_.has_value()) {
         ScrollToTargetIndex(targetIndex_.value());
@@ -353,7 +362,20 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     CheckScrollable();
 
-    isInitialized_ = true;
+    if (layoutInfo_->measureInNextFrame_) {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, false);
+        context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+            auto waterFlow = weak.Upgrade();
+            if (waterFlow) {
+                waterFlow->MarkDirtyNodeSelf();
+                waterFlow->layoutInfo_->measureInNextFrame_ = false;
+            }
+        });
+    } else {
+        isInitialized_ = true;
+    }
 
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
@@ -364,6 +386,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_->isDataValid_ = true;
 
+    ChangeAnimateOverScroll();
+    ChangeCanStayOverScroll();
     return NeedRender();
 }
 
@@ -540,6 +564,9 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    if (!sections_) {
+        return;
+    }
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
         layoutInfo_->InitSegmentsForKeepPositionMode(
             sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);
@@ -881,8 +908,8 @@ void WaterFlowPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
 }
 
 void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -895,7 +922,7 @@ void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 void WaterFlowPattern::DumpInfoAddSections()
@@ -930,5 +957,19 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
         return {estimatedHeight, viewSize.Height()};
     }
     return {};
+}
+
+void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

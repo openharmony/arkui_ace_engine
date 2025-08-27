@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class SideBarContainerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SideBarContainerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SideBarContainerPaintMethod, NodePaintMethod);
 
 public:
     SideBarContainerPaintMethod() = default;

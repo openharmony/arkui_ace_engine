@@ -79,6 +79,7 @@ struct UpdateSpanStyle {
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
         updateTextDecorationStyle.reset();
+        updateLineThicknessScale.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
@@ -111,6 +112,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
+    std::optional<float> updateLineThicknessScale = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
@@ -167,6 +169,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecoration);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateTextDecorationColor);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecorationStyle);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateLineThicknessScale);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolRenderingStrategy);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolEffectStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateImageWidth);
@@ -189,12 +192,14 @@ struct UpdateParagraphStyle {
         wordBreak.reset();
         lineBreakStrategy.reset();
         paragraphSpacing.reset();
+        textVerticalAlign.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
     std::optional<LineBreakStrategy> lineBreakStrategy;
     std::optional<Dimension> paragraphSpacing;
+    std::optional<TextVerticalAlign> textVerticalAlign;
 
     std::string ToString() const
     {
@@ -204,6 +209,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textVerticalAlign);
         return jsonValue->ToString();
     }
 };
@@ -249,6 +255,7 @@ struct SymbolSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     uint32_t symbolId;
     std::optional<TextStyle> style;
+    std::optional<UpdateParagraphStyle> paraStyle;
     RefPtr<ResourceObject> resourceObject;
 
     std::string ToString() const
@@ -257,8 +264,14 @@ struct SymbolSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
         JSON_STRING_PUT_INT(jsonValue, symbolId);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, style);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
         return jsonValue->ToString();
     }
+};
+
+struct BuilderSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    RefPtr<NG::UINode> customNode;
 };
 
 struct PlaceholderOptions {
@@ -294,6 +307,8 @@ struct PreviewTextInfo {
     }
 };
 
+enum class UndoStyle { CLEAR_STYLE = 0, KEEP_STYLE = 1 };
+
 class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
 
@@ -303,12 +318,18 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle) = 0;
     virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
+#if defined(ACE_STATIC)
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
+#else
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
+#endif
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
     virtual ColorMode GetColorMode() = 0;
@@ -379,8 +400,9 @@ public:
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
     virtual void SetBarState(DisplayMode mode) {}
@@ -389,8 +411,11 @@ public:
     virtual void SetMaxLength(std::optional<int32_t> value) {}
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetEnableAutoSpacing(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
+    virtual void SetSupportStyledUndo(bool enabled) {};
+    virtual void SetScrollBarColor(std::optional<Color> value) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

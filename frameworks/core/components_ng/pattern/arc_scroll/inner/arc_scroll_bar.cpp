@@ -45,18 +45,20 @@ bool ArcScrollBar::InBarRectRegion(const Point& point) const
     return arcAarRect_.IsInRegion(point, static_cast<float>(MIN_HOTREGION.ConvertToPx()));
 }
 
-void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
+void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context)
 {
     double normalWidth = GetNormalWidthToPx();
     Point centerPoint(size.Width() * HALF, size.Height() * HALF);
-    double startAngle = GetNormalStartAngle();
-    double sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetNormaMaxOffsetAngle() : GetNormaMaxOffsetAngle();
-    double width = NormalizeToPx(GetNormalBackgroundWidth());
+    double startAngle = GetArcNormalStartAngle();
+    double sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetArcNormalMaxOffsetAngle() :
+        GetArcNormalMaxOffsetAngle();
+    double width = NormalizeToPx(GetArcNormalBackgroundWidth());
     centerDeviation_ = width * FACTOR_HALF;
     if (normalWidth == NormalizeToPx(GetActiveWidth())) {
-        startAngle = GetActiveStartAngle();
-        sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetActiveMaxOffsetAngle() : GetActiveMaxOffsetAngle();
-        width = NormalizeToPx(GetActiveBackgroundWidth());
+        startAngle = GetArcActiveStartAngle();
+        sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetArcActiveMaxOffsetAngle() :
+            GetArcActiveMaxOffsetAngle();
+        width = NormalizeToPx(GetArcActiveBackgroundWidth());
         centerDeviation_ = width * FACTOR_HALF;
     }
     double radius = size.Width() * FACTOR_HALF - centerDeviation_;
@@ -67,13 +69,13 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
     double activeMainOffset, double normalWidth, const Size& size)
 {
     if (!NearEqual(estimatedHeight, size.Height())) {
-        width_ = NormalizeToPx(GetNormalScrollBarWidth());
-        centerDeviation_ = NormalizeToPx(GetNormalBackgroundWidth()) * FACTOR_HALF;
-        double maxAngle = GetNormaMaxOffsetAngle();
+        width_ = NormalizeToPx(GetArcNormalScrollBarWidth());
+        centerDeviation_ = NormalizeToPx(GetArcNormalBackgroundWidth()) * FACTOR_HALF;
+        double maxAngle = GetArcNormalMaxOffsetAngle();
         if (normalWidth == NormalizeToPx(GetActiveWidth())) {
-            width_ = NormalizeToPx(GetActiveScrollBarWidth());
-            centerDeviation_ = NormalizeToPx(GetActiveBackgroundWidth()) * FACTOR_HALF;
-            maxAngle = GetActiveMaxOffsetAngle();
+            width_ = NormalizeToPx(GetArcActiveScrollBarWidth());
+            centerDeviation_ = NormalizeToPx(GetArcActiveBackgroundWidth()) * FACTOR_HALF;
+            maxAngle = GetArcActiveMaxOffsetAngle();
         }
 
         double trickStartAngle = 0;
@@ -99,7 +101,7 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
 
         Point centerPoint(size.Width() * HALF, size.Height() * HALF);
         arcHotZoneRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_,
-            NormalizeToPx(GetActiveBackgroundWidth()));
+            NormalizeToPx(GetArcActiveBackgroundWidth()));
         arcHotZoneRect_.SetPositionMode(GetPositionMode());
         arcActiveRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_, width_);
         arcHoverRegion_ = arcActiveRect_;
@@ -125,7 +127,7 @@ void ArcScrollBar::SetRoundTrickRegion(
     } else {
         activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary() * HALF;
     }
-    auto minHeight = GetMinAngle() * barRegionSize / GetNormaMaxOffsetAngle();
+    auto minHeight = GetMinAngle() * barRegionSize / GetArcNormalMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
         activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary() * HALF),
             NormalizeToPx(GetMinDynamicHeight()));
@@ -163,7 +165,7 @@ float ArcScrollBar::CalcPatternOffset(float scrollBarOffset) const
     return offset;
 }
 
-void ArcScrollBar::CalcReservedHeight()
+void ArcScrollBar::CalcReservedHeight(const RefPtr<PipelineContext>& context)
 {
     SetStartReservedHeight(Dimension(0.0, DimensionUnit::PX));
     SetEndReservedHeight(Dimension(0.0, DimensionUnit::PX));

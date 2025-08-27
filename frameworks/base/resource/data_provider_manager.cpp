@@ -21,7 +21,8 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(const std::string& uriStr)
+std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(
+    const std::string& uriStr, ImageErrorInfo& errorInfo)
 {
     if (platformImpl_) {
         return platformImpl_(uriStr);
@@ -39,7 +40,8 @@ void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std:
     return helper_->QueryThumbnailResFromDataAbility(uriStr);
 }
 
-std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderResFromUri(const std::string& uriStr)
+std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderResFromUri(
+    const std::string& uriStr, ImageErrorInfo& errorInfo)
 {
     InitHelper();
     std::shared_lock lock(helperMutex_);
@@ -49,6 +51,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     auto fd = helper_->OpenFile(uriStr, "r");
     if (fd == -1) {
         LOGW("open file %{public}s fail.", uriStr.c_str());
+        errorInfo = { ImageErrorCode::GET_IMAGE_DATA_PROVIDER_OPEN_FAILED, "open file failed." };
         return nullptr;
     }
 
@@ -58,6 +61,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     if (statRes != 0) {
         LOGW("get file %{public}s stat fail.", uriStr.c_str());
         close(fd);
+        errorInfo = { ImageErrorCode::GET_IMAGE_DATA_PROVIDER_GET_FAILED, "get file stat failed." };
         return nullptr;
     }
     auto size = statBuf.st_size;
@@ -68,6 +72,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     close(fd);
     if (readRes == -1) {
         LOGW("read file %{public}s fail.", uriStr.c_str());
+        errorInfo = { ImageErrorCode::GET_IMAGE_DATA_PROVIDER_READ_FAILED, "read file failed." };
         return nullptr;
     }
 

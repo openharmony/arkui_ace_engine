@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSRenderingContextBase : public virtual AceType {
-    DECLARE_ACE_TYPE(JSRenderingContextBase, AceType)
+    DECLARE_ACE_TYPE(JSRenderingContextBase, AceType);
 public:
     JSRenderingContextBase() = default;
     virtual ~JSRenderingContextBase() = default;

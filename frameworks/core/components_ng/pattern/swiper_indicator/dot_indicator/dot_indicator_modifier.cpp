@@ -61,9 +61,6 @@ const auto LONG_POINT_STEP_TWO_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(
 const auto LONG_POINT_STEP_THREE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18);
 const auto LONG_POINT_STEP_FOUR_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 20);
 const auto LONG_POINT_STEP_FIVE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 148, 28);
-constexpr float SMALLEST_POINT_RATIO = 1.0f / 3.0f;
-constexpr float SECOND_SMALLEST_POINT_RATIO = 2.0f / 3.0f;
-constexpr int32_t OVERLONG_SMALL_COUNT = 2;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -107,8 +104,7 @@ void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentPr
     }
 }
 
-void DotIndicatorModifier::PaintBackground(
-    DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount, bool isBindIndicator)
+void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentProperty& contentProperty)
 {
     CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
@@ -121,12 +117,6 @@ void DotIndicatorModifier::PaintBackground(
         allPointDiameterSum = itemWidth * static_cast<float>(pointNumber - 1) + selectedItemWidth;
     }
     float allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (pointNumber - 1);
-
-    if (maxDisplayCount > 0) {
-        allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (maxDisplayCount - 1);
-        allPointDiameterSum = itemWidth * (maxDisplayCount - OVERLONG_SMALL_COUNT - 1) + selectedItemWidth +
-                              itemWidth * SECOND_SMALLEST_POINT_RATIO + itemWidth * SMALLEST_POINT_RATIO;
-    }
 
     // Background necessary property
     float rectWidth =
@@ -141,6 +131,20 @@ void DotIndicatorModifier::PaintBackground(
 
     auto [rectLeft, rectRight, rectTop, rectBottom] =
         CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    if (Positive(pointNumber)) {
+        auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
+        leftCenterX = std::min(leftCenterX, contentProperty.vectorBlackPointCenterX[0]);
+        rightCenterX = std::max(rightCenterX,
+            contentProperty.vectorBlackPointCenterX[static_cast<int32_t>(pointNumber) - 1]);
+        auto rectPadding = contentProperty.indicatorPadding + itemWidth / 2;
+        if (axis_ == Axis::VERTICAL) {
+            rectTop = std::min(rectTop, leftCenterX - rectPadding);
+            rectBottom = std::max(rectBottom, rightCenterX + rectPadding);
+        } else {
+            rectLeft = std::min(rectLeft, leftCenterX - rectPadding);
+            rectRight = std::max(rectRight, rightCenterX + rectPadding);
+        }
+    }
     // Paint background
     RSCanvas& canvas = context.canvas;
     RSBrush brush;
@@ -170,6 +174,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
 
     if (axis_ == Axis::HORIZONTAL) {
+        boundsRectF_.SetWidth(rectRight - rectLeft + widthChangeValue * TWO_FLOAT);
+        boundsRectF_.SetHeight(rectBottom - rectTop);
         if (touchBottomType_ == TouchBottomType::START) {
             rectLeft -= widthChangeValue;
         }
@@ -180,6 +186,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
         rectBottom = rectBottom - heightChangeValue * 0.5f;
         rectHeight -= heightChangeValue;
     } else {
+        boundsRectF_.SetWidth(rectRight - rectLeft);
+        boundsRectF_.SetHeight(rectBottom - rectTop + heightChangeValue * TWO_FLOAT);
         if (touchBottomType_ == TouchBottomType::START) {
             rectTop -= heightChangeValue;
         }
@@ -190,7 +198,8 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalcAndAdjustIndica
         rectRight = rectRight - widthChangeValue * 0.5f;
         rectWidth -= widthChangeValue;
     }
-
+    boundsRectF_.SetLeft(rectLeft);
+    boundsRectF_.SetTop(rectTop);
     return { rectLeft, rectRight, rectTop, rectBottom };
 }
 

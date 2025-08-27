@@ -374,20 +374,33 @@ public:
 
     uint32_t GetSymbolByName(const char *name) const
     {
-        CHECK_NULL_RETURN(resourceAdapter_, 0);
-        return resourceAdapter_->GetSymbolByName(name);
+        if (SystemProperties::GetResourceDecoupling()) {
+            CHECK_NULL_RETURN(resourceAdapter_, 0);
+            return resourceAdapter_->GetSymbolByName(name);
+        }
+        CHECK_NULL_RETURN(themeConstants_, 0);
+        return themeConstants_->GetSymbolByName(name);
     }
 
     uint32_t GetSymbolById(uint32_t resId) const
     {
-        CHECK_NULL_RETURN(resourceAdapter_, 0);
-        return resourceAdapter_->GetSymbolById(resId);
+        if (SystemProperties::GetResourceDecoupling()) {
+            CHECK_NULL_RETURN(resourceAdapter_, 0);
+            return resourceAdapter_->GetSymbolById(resId);
+        }
+        CHECK_NULL_RETURN(themeConstants_, 0);
+        return themeConstants_->GetSymbolById(resId);
     }
 
     void UpdateColorMode(ColorMode colorMode)
     {
         CHECK_NULL_VOID(resourceAdapter_);
         resourceAdapter_->UpdateColorMode(colorMode);
+    }
+
+    const RefPtr<ResourceAdapter>& GetResourceAdapter() const
+    {
+        return resourceAdapter_;
     }
 
 private:

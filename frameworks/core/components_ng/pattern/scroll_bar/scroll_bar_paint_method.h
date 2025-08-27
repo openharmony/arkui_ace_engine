@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 class ScrollBarPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ScrollBarPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ScrollBarPaintMethod, NodePaintMethod);
 
 public:
     explicit ScrollBarPaintMethod(bool hasChild) : hasChild_(hasChild) {};

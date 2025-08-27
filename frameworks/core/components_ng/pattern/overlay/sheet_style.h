@@ -23,7 +23,16 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/common/resource/resource_object.h"
+
+#define ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(name)                                   \
+public:                                                                             \
+    void Set##name##ResObj(RefPtr<ResourceObject>& obj) { prop##name##Obj_ = obj; }       \
+    const RefPtr<ResourceObject>& Get##name##ResObj() const { return prop##name##Obj_; }  \
+private:                                                                            \
+    RefPtr<ResourceObject> prop##name##Obj_
 
 namespace OHOS::Ace::NG {
 constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;
@@ -45,6 +54,8 @@ enum SheetType {
     SHEET_BOTTOM,
     SHEET_CENTER,
     SHEET_POPUP,
+    SHEET_SIDE = 3,
+    SHEET_CONTENT_COVER = 4,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
     SHEET_BOTTOM_OFFSET,
@@ -107,6 +118,21 @@ struct SheetPopupInfo {
     SheetArrowPosition arrowPosition = SheetArrowPosition::NONE;
     float sheetOffsetX = 0.f;
     float sheetOffsetY = 0.f;
+    bool keyboardShow = false;
+
+    void Reset()
+    {
+        finalPlacement = Placement::NONE;
+        placementOnTarget = true;
+        placementRechecked = false;
+        showArrow = true;
+        arrowOffsetX = 0.f;
+        arrowOffsetY = 0.f;
+        arrowPosition = SheetArrowPosition::NONE;
+        sheetOffsetX = 0.f;
+        sheetOffsetY = 0.f;
+        keyboardShow = false;
+    }
 };
 
 struct SheetKeyHash {
@@ -146,11 +172,13 @@ enum class SheetKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE,
     RESIZE_ONLY,
     TRANSLATE_AND_SCROLL,
+    POPUP_SHEET,
 };
 
 struct SheetStyle {
     SheetHeight sheetHeight;
     std::optional<bool> showDragBar;
+    std::optional<bool> enableFloatingDragBar;
     std::optional<bool> showCloseIcon;
     std::optional<bool> isTitleBuilder;
     std::optional<SheetType> sheetType;
@@ -179,10 +207,12 @@ struct SheetStyle {
     std::optional<Placement> placement;
     std::optional<bool> placementOnTarget;
     std::optional<bool> showInSubWindow;
+    std::optional<ModalTransition> modalTransition;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
         return (sheetHeight == sheetStyle.sheetHeight &&
+                enableFloatingDragBar == sheetStyle.enableFloatingDragBar &&
                 showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
@@ -197,7 +227,7 @@ struct SheetStyle {
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
-                showInSubWindow == sheetStyle.showInSubWindow);
+                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -213,6 +243,8 @@ struct SheetStyle {
                 sheetStyle.sheetHeight.sheetMode : sheetHeight.sheetMode;
         }
         showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
+        enableFloatingDragBar = sheetStyle.enableFloatingDragBar.has_value() ?
+            sheetStyle.enableFloatingDragBar : enableFloatingDragBar;
         showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
         isTitleBuilder = sheetStyle.isTitleBuilder.has_value() ? sheetStyle.isTitleBuilder : isTitleBuilder;
         sheetType = sheetStyle.sheetType.has_value() ? sheetStyle.sheetType : sheetType;
@@ -241,7 +273,31 @@ struct SheetStyle {
         placement = sheetStyle.placement.has_value() ? sheetStyle.placement : placement;
         placementOnTarget = sheetStyle.placementOnTarget.has_value() ?
             sheetStyle.placementOnTarget : placementOnTarget;
+        modalTransition = sheetStyle.modalTransition.has_value() ? sheetStyle.modalTransition : modalTransition;
     }
+
+    // Register the set/get method of the resource.
+    void SetDetentsResObjs(std::vector<RefPtr<ResourceObject>>&& resObjs)
+    {
+        detentsObj_ = std::move(resObjs);
+    }
+
+    const std::vector<RefPtr<ResourceObject>>& GetDetentsResObjs() const
+    {
+        return detentsObj_;
+    }
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(SheetHeight);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(DetentSelection);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(SheetWidth);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(ShowClose);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(MaskColor);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(MainTitle);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(SubTitle);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BorderWidth);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BorderColor);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(Radius);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BackgroundColor);
+    std::vector<RefPtr<ResourceObject>> detentsObj_;
 };
 } // namespace OHOS::Ace::NG
 

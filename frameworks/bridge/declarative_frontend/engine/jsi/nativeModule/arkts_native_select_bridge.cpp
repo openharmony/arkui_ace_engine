@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "core/components_ng/base/frame_node.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -158,8 +159,10 @@ ArkUINativeModuleValue SelectBridge::SetValue(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string value;
-    ArkTSUtils::ParseJsString(vm, secondArg, value);
-    GetArkUINodeModifiers()->getSelectModifier()->setValue(nativeNode, value.c_str());
+    RefPtr<ResourceObject> valueResObj;
+    ArkTSUtils::ParseJsString(vm, secondArg, value, valueResObj);
+    auto valueRawPtr = AceType::RawPtr(valueResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setValuePtr(nativeNode, value.c_str(), valueRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -171,8 +174,10 @@ ArkUINativeModuleValue SelectBridge::SetSelected(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t value = 0;
-    if (ArkTSUtils::ParseJsIntegerWithResource(vm, secondArg, value)) {
-        GetArkUINodeModifiers()->getSelectModifier()->setSelected(nativeNode, value);
+    RefPtr<ResourceObject> valueResObj;
+    if (ArkTSUtils::ParseJsIntegerWithResource(vm, secondArg, value, valueResObj)) {
+        auto valueRawPtr = AceType::RawPtr(valueResObj);
+        GetArkUINodeModifiers()->getSelectModifier()->setSelectedPtr(nativeNode, value, valueRawPtr);
     } else {
         GetArkUINodeModifiers()->getSelectModifier()->resetSelected(nativeNode);
     }
@@ -188,10 +193,14 @@ ArkUINativeModuleValue SelectBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color fontColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, fontColor)) {
+    RefPtr<ResourceObject> fontColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, fontColor, fontColorResObj, nodeInfo)) {
         return ResetFontColor(runtimeCallInfo);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setSelectFontColor(nativeNode, fontColor.GetValue());
+    auto fontColorRawPtr = AceType::RawPtr(fontColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setSelectFontColorPtr(
+        nativeNode, fontColor.GetValue(), fontColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -204,12 +213,14 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionBgColor(ArkUIRuntimeCallIn
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color selectedOptionBgColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedOptionBgColor)) {
+    RefPtr<ResourceObject> optionBgColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedOptionBgColor, optionBgColorResObj, nodeInfo)) {
         return ResetSelectedOptionBgColor(runtimeCallInfo);
     }
-
-    GetArkUINodeModifiers()->getSelectModifier()->setSelectedOptionBgColor(
-        nativeNode, selectedOptionBgColor.GetValue());
+    auto optionBgColorRawPtr = AceType::RawPtr(optionBgColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setSelectedOptionBgColorPtr(
+        nativeNode, selectedOptionBgColor.GetValue(), optionBgColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -222,10 +233,14 @@ ArkUINativeModuleValue SelectBridge::SetOptionBgColor(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color optionBgColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor)) {
+    RefPtr<ResourceObject> optionBgColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor, optionBgColorResObj, nodeInfo)) {
         return ResetOptionBgColor(runtimeCallInfo);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setOptionBgColor(nativeNode, optionBgColor.GetValue());
+    auto optionBgColorRawPtr = AceType::RawPtr(optionBgColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setOptionBgColorPtr(
+        nativeNode, optionBgColor.GetValue(), optionBgColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -238,10 +253,14 @@ ArkUINativeModuleValue SelectBridge::SetOptionFontColor(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color optionFontColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor)) {
+    RefPtr<ResourceObject> optionFontColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, optionFontColorResObj, nodeInfo)) {
         return ResetOptionFontColor(runtimeCallInfo);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setOptionFontColor(nativeNode, optionFontColor.GetValue());
+    auto optionFontColorRawPtr = AceType::RawPtr(optionFontColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setOptionFontColorPtr(
+        nativeNode, optionFontColor.GetValue(), optionFontColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -253,10 +272,14 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFontColor(ArkUIRuntimeCall
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color optionFontColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor)) {
+    RefPtr<ResourceObject> selectOptionFontColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, selectOptionFontColorResObj, nodeInfo)) {
         return ResetSelectedOptionFontColor(runtimeCallInfo);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setSelectedOptionFontColor(nativeNode, optionFontColor.GetValue());
+    auto selectOptionFontColorRawPtr = AceType::RawPtr(selectOptionFontColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setSelectedOptionFontColorPtr(
+        nativeNode, optionFontColor.GetValue(), selectOptionFontColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -856,10 +879,14 @@ ArkUINativeModuleValue SelectBridge::SetMenuBackgroundColor(ArkUIRuntimeCallInfo
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> menuBackgroundColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, menuBackgroundColorResObj, nodeInfo)) {
         return ResetMenuBackgroundColor(runtimeCallInfo);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setMenuBgColor(nativeNode, color.GetValue());
+    auto menuBackgroundColorRawPtr = AceType::RawPtr(menuBackgroundColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuBgColorPtr(
+        nativeNode, color.GetValue(), menuBackgroundColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1119,6 +1146,33 @@ ArkUINativeModuleValue SelectBridge::ResetSelectDirection(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SelectBridge::SetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!modeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    int32_t mode = 0;
+    if (modeArg->IsNumber()) {
+        mode = modeArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getSelectModifier()->setAvoidance(nativeNode, mode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetAvoidance(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
 {
     options.push_back(static_cast<uint32_t>(valueColor.has_value()));
@@ -1190,30 +1244,50 @@ ArkUINativeModuleValue SelectBridge::ResetMenuOutline(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue SelectBridge::SetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(!modeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    int32_t mode = 0;
-    if (modeArg->IsNumber()) {
-        mode = modeArg->Int32Value(vm);
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    using namespace OHOS::Ace::Framework;
+    if (!info[NUM_1]->IsFunction()) {
+        return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getSelectModifier()->setAvoidance(nativeNode, mode);
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[NUM_1]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        int32_t index, const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Select.onSelect");
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSVal> params[NUM_2];
+        params[NUM_0] = JSRef<JSVal>::Make(ToJSValue(index));
+        params[NUM_1] = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(NUM_2, params);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
+    };
+    SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
+    info.ReturnSelf();
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue SelectBridge::ResetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue SelectBridge::ResetOnSelect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getSelectModifier()->resetAvoidance(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto callback = [](ArkUINodeHandle node, int32_t index, ArkUI_CharPtr text) {};
+    nodeModifiers->getSelectModifier()->setOnSelect(nativeNode, callback);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

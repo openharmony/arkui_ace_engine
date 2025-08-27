@@ -55,9 +55,7 @@ void EventReport::SendFormException(FormExcepType type) {}
 
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr) {}
 
-void EventReport::JsErrReport(
-    const std::string& packageName, const std::string& reason, const std::string& summary, const std::string& uniqueId)
-{}
+void EventReport::JsErrReport(const std::string& packageName, const std::string& reason, const std::string& summary) {}
 
 void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
     const std::string& processName, const std::string& msg)
@@ -113,7 +111,14 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
 
 void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
 {}
- 
-void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+
+void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
+{}
+
+void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
+{}
+
+void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
+    const std::string &formName)
 {}
 } // namespace OHOS::Ace

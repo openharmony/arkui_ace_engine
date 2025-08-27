@@ -16,9 +16,10 @@
 import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics } from '@ohos.arkui.node'
+import { LengthMetrics } from '@ohos.arkui.node';
 import componentUtils from '@ohos.arkui.componentUtils';
 import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
+import { systemDateTime } from '@kit.BasicServicesKit';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -260,6 +261,7 @@ function isValidResource(context: Context | undefined, value: Resource) {
 export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
+  private applycontentKey: string = 'applyContent' + systemDateTime.getTime(false);
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop maxWidth?: Dimension;
   @Prop messageMaxWidth?: number = 0;
@@ -393,14 +395,10 @@ export struct PopupComponent {
 
   private getMessagePadding(): LocalizedPadding {
     let padding: LocalizedPadding
-    if (this.title.text !== '' && this.title.text !== void (0)) {
-      padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) }
-    } else {
       padding = {
         start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
         end: LengthMetrics.vp(this.theme.closeButton.margin.end.value)
       }
-    }
     return padding
   }
 
@@ -526,13 +524,13 @@ export struct PopupComponent {
   }
 
   aboutToAppear() {
-    this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+    this.listener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
       this.currentScreenStatus = mediaQueryResult.matches
     })
   }
 
   aboutToDisappear() {
-    this.listener.off("change")
+    this.listener.off('change')
   }
 
   getScrollMaxHeight(): number | undefined {
@@ -542,7 +540,7 @@ export struct PopupComponent {
       this.beforeScreenStatus = this.currentScreenStatus
       return scrollMaxHeight;
     }
-    scrollMaxHeight = px2vp(componentUtils.getRectangleById('applyContent').size?.height)
+    scrollMaxHeight = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height)
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
     scrollMaxHeight -= this.theme.windows.padding.top.value
@@ -753,7 +751,7 @@ export struct PopupComponent {
             }
           }
           .direction(this.popupDirection)
-          .width("100%")
+          .width('100%')
           .margin(this.getTitleMargin())
           .onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
@@ -771,7 +769,7 @@ export struct PopupComponent {
               })
           }
           .direction(this.popupDirection)
-          .width("100%")
+          .width('100%')
           .align(Alignment.TopStart)
           .padding(this.getMessagePadding())
           .scrollBar(BarState.Auto)
@@ -1002,7 +1000,7 @@ export struct PopupComponent {
     .padding(this.getWindowsPadding())
     .constraintSize(this.applySizeOptions)
     .constraintSize(this.getApplyMaxSize())
-    .key('applyContent')
+    .key(this.applycontentKey)
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })

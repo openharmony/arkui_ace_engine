@@ -31,7 +31,7 @@ enum class ListItemDragState {
     DRAGGING,
 };
 class ListItemDragManager : public AceType {
-    DECLARE_ACE_TYPE(ListItemDragManager, AceType)
+    DECLARE_ACE_TYPE(ListItemDragManager, AceType);
 
 public:
     struct ScaleResult {
@@ -53,7 +53,7 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
-    void SetDragState(ListItemDragState dragState);
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation);
 
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
@@ -61,6 +61,9 @@ private:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
+    void HandleZIndexAndPosition();
+    void HandleBackShadow();
+    void HandleTransformScale();
     void HandleDragEndAnimation();
     void HandleScrollCallback();
     void HandleSwapAnimation(int32_t from, int32_t to);
@@ -73,9 +76,11 @@ private:
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
     int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
     int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
+    int32_t CalcDiagonalIndex(const int32_t mainNearIndex, const OffsetF& delta);
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
+    bool IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta);
     RefPtr<FrameNode> GetListFrameNode() const;
     OffsetF GetParentPaddingOffset();
     
@@ -90,7 +95,9 @@ private:
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
     bool isStackFromEnd_ = false;
+    bool isRtl_ = false;
     bool scrolling_ = false;
+    bool isDragAnimationStopped_ = true;
     OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;

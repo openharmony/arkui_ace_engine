@@ -108,12 +108,13 @@ std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
     }
 }
 
-void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
+void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter, bool isHdr = false)
 {
     if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
     } else if (config.colorFilter_.colorFilterDrawing_) {
         auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
             config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
@@ -123,7 +124,22 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
+    }
+}
+
+OrientationFit CalculateFlip(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::LEFT_MIRRORED:
+        case ImageRotateOrientation::RIGHT_MIRRORED:
+        case ImageRotateOrientation::UP_MIRRORED:
+            return OrientationFit::HORIZONTAL_FLIP;
+        case ImageRotateOrientation::DOWN_MIRRORED:
+            return OrientationFit::VERTICAL_FLIP;
+        default:
+            return OrientationFit::NONE;
     }
 }
 
@@ -131,8 +147,10 @@ int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
     switch (orientation) {
         case ImageRotateOrientation::LEFT:
+        case ImageRotateOrientation::LEFT_MIRRORED:
             return -DEGREE_NINETY;
         case ImageRotateOrientation::RIGHT:
+        case ImageRotateOrientation::RIGHT_MIRRORED:
             return DEGREE_NINETY;
         case ImageRotateOrientation::DOWN:
             return DEGREE_HUNDRED_EIGHTY;
@@ -183,6 +201,7 @@ bool PixelMapImage::StretchImageWithLattice(
         static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
     CHECK_NULL_RETURN((latticeSptrAddr && (*latticeSptrAddr)), false);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -195,7 +214,7 @@ bool PixelMapImage::StretchImageWithLattice(
     }
 
     auto filter = brush.GetFilter();
-    UpdateRSFilter(config, filter);
+    UpdateRSFilter(config, filter, pixmap->IsHdr());
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
@@ -233,6 +252,7 @@ bool PixelMapImage::StretchImageWithSlice(
     RectF centerRect;
     CHECK_NULL_RETURN(ConvertSlice(config, centerRect, pixmap->GetWidth(), pixmap->GetHeight()), false);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -245,7 +265,7 @@ bool PixelMapImage::StretchImageWithSlice(
     }
 
     auto filter = brush.GetFilter();
-    UpdateRSFilter(config, filter);
+    UpdateRSFilter(config, filter, pixmap->IsHdr());
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
@@ -311,17 +331,20 @@ void PixelMapImage::DrawToRSCanvas(
     auto pixmap = GetPixelMap();
     auto dfxConfig = GetImageDfxConfig();
     if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.imageSrc_.c_str(),
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.GetImageSrc().c_str(),
             dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
     if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
+    ACE_SCOPED_TRACE("DrawToRSCanvas %s-%f-%f-%d-%d", dfxConfig.ToStringWithSrc().c_str(),
+        dfxConfig.GetFrameSizeWidth(), dfxConfig.GetFrameSizeHeight(), pixmap->GetWidth(), pixmap->GetHeight());
     const auto& config = GetPaintConfig();
     RSBrush brush;
+    brush.SetAntiAlias(true);
     RSSamplingOptions options;
-    ImagePainterUtils::AddFilter(brush, options, config);
+    ImagePainterUtils::AddFilter(brush, options, config, pixmap->IsHdr());
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
@@ -341,11 +364,12 @@ void PixelMapImage::DrawToRSCanvas(
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     rsImageInfo.fitMatrix = ToDrawingMatrix(config.imageMatrix_);
     rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
+    rsImageInfo.orientationNum = static_cast<int32_t>(CalculateFlip(config.orientation_));
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s]",
             dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
-            dfxConfig.borderRadiusValue_.c_str(), GetDynamicModeString(config.dynamicMode).c_str());
+            GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
     NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);

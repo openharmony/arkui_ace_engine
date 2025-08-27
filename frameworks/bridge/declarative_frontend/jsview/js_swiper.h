@@ -65,7 +65,9 @@ protected:
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
-    static std::optional<Dimension> ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize);
+    static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value, RefPtr<ResourceObject>& resObj);
+    static std::optional<Dimension> ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize,
+        RefPtr<ResourceObject>& resObj);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
     static void SetNestedScroll(const JSCallbackInfo& info);
@@ -75,9 +77,13 @@ protected:
     static void SetPageFlipMode(const JSCallbackInfo& info);
     static void SetOnSelected(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObj);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
+    static void ResetSwiperNode(const JSCallbackInfo& info);
+    static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
+    static void SetOnScrollStateChanged(const JSCallbackInfo& info);
 
     private:
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);

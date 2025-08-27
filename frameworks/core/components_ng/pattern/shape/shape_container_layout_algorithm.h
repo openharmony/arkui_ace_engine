@@ -17,6 +17,7 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapeContainerLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -26,8 +27,13 @@ public:
     ShapeContainerLayoutAlgorithm() = default;
     ~ShapeContainerLayoutAlgorithm() override = default;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void MeasureLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        RefPtr<ShapeContainerPaintProperty> paintProperty, SizeF& size);
 
 private:
     SizeF GetChildrenSize(LayoutWrapper* layoutWrapper, SizeF maxSize);

@@ -26,7 +26,7 @@ class ViewAdvancedRegister : public AceType {
 public:
     ACE_FORCE_EXPORT static ViewAdvancedRegister* GetInstance();
 
-    RefPtr<PagePattern> CreatePagePattern(const RefPtr<PageInfo>& pageInfo);
+    ACE_FORCE_EXPORT RefPtr<PagePattern> CreatePagePattern(const RefPtr<PageInfo>& pageInfo);
 
     RefPtr<Pattern> GeneratePattern(const std::string& patternName);
 

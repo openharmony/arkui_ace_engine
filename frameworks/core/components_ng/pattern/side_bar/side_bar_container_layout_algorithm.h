@@ -54,6 +54,7 @@ public:
     void SetRealSideBarWidth(Dimension realSideBarWidth)
     {
         realSideBarWidthDimension_ = realSideBarWidth;
+        realSideBarWidth_ = realSideBarWidth.ConvertToPx();
     }
 
     Dimension GetRealSideBarWidth() const
@@ -195,6 +196,8 @@ private:
     void MeasureTypeUpdateWidth();
     void MeasureRealPropertyValue(bool setMinSideBarWidth, bool setMaxSideBarWidth, bool setSideBarWidth,
         bool setMinContentWidth, float paretWidth);
+    void AddChildToIgnoreLayoutSafeBundle(LayoutWrapper* layoutWrapper);
+    void AdjustChildOffset(const RefPtr<LayoutWrapper>& layoutWrapper, OffsetF& offset);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = -1.0f;

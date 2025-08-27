@@ -31,6 +31,9 @@ namespace OHOS::Ace::NG {
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
 // single view move from its old position to its new position, thus visual focus guidance is completed.
+namespace {
+    constexpr char OCCLUSION_SCENE[] = "_occlusion";
+}
 GeometryTransition::GeometryTransition(
     const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition) : id_(id),
     followWithoutTransition_(followWithoutTransition), doRegisterSharedTransition_(doRegisterSharedTransition) {}
@@ -167,8 +170,9 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
     CHECK_NULL_VOID(inNode && outNode && (inNode != outNode));
+    auto pipeline = inNode->GetContextRefPtr();
 
-    bool isImplicitAnimationOpen = AnimationUtils::IsImplicitAnimationOpen();
+    bool isImplicitAnimationOpen = AnimationUtils::IsImplicitAnimationOpen(pipeline);
     bool follow = false;
     if (hasOutAnim_) {
         if (!hasInAnim_) {
@@ -321,6 +325,17 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     }
 }
 
+void GeometryTransition::HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetInspectorId().value_or("").find(OCCLUSION_SCENE) == std::string::npos) {
+        return;
+    }
+    ACE_SCOPED_TRACE("occlusion contentNode id: %d, name: %s setSuccess",
+        node->GetId(), node->GetInspectorId().value_or("").c_str());
+    node->AddToOcclusionMap(flag);
+}
+
 void GeometryTransition::SyncGeometry(bool isNodeIn)
 {
     auto [self, target] = GetMatchedPair(isNodeIn);
@@ -387,7 +402,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(nodeId) + " animation";
         AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
     };
-    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self))]() {
+    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self)), weak = WeakClaim(this)]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
@@ -396,26 +411,30 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(node->GetId()) + " animation";
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
+        auto occlusion = weak.Upgrade();
+        CHECK_NULL_VOID(occlusion);
+        occlusion->HandleOcclusionScene(node, false);
     };
+    HandleOcclusionScene(self, true);
     if (!isNodeIn && inNodeAbsRect_) {
-        AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback);
+        AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback, nullptr, pipeline);
         inNodeAbsRect_.reset();
         animationOption_ = AnimationOption();
     } else {
-        AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false);
+        AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false, pipeline);
     }
 
     ACE_SCOPED_TRACE("ACE_GEOMETRY_TRANSITION, node: %d, parent: %s, target: %s, "
         "active frame: %s, identity frame: %s, option: %d",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.ToString().c_str(),
         isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
-        AnimationUtils::IsImplicitAnimationOpen());
+        AnimationUtils::IsImplicitAnimationOpen(pipeline));
 
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s, option: %{public}d",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.ToString().c_str(),
         isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
-        AnimationUtils::IsImplicitAnimationOpen());
+        AnimationUtils::IsImplicitAnimationOpen(pipeline));
 }
 
 RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
@@ -542,6 +561,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
     CHECK_NULL_VOID(inNode);
     auto inRenderContext = inNode->GetRenderContext();
     CHECK_NULL_VOID(inRenderContext);
+    auto pipeline = inNode->GetContextRefPtr();
     AnimationUtils::Animate(option, [&]() {
         if (inRenderContext->HasSandBox()) {
             auto parent = inNode->GetAncestorNodeOfFrame(false);
@@ -561,7 +581,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
             renderContext->SetSandBox(std::nullopt);
         }
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
-    });
+    }, nullptr, pipeline);
 }
 
 // during outNode animation is running target inNode's frame is changed, outNode needs to change as well to

@@ -18,6 +18,8 @@
 #define private public
 #define protected public
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "test/mock/adapter/mock_uisession_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -36,6 +38,7 @@
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
+
 #undef private
 #undef protected
 
@@ -115,6 +118,7 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
      */
     PageEventHub pageEventHub;
     auto groupManager = pageEventHub.GetGroupManager();
+    ASSERT_NE(groupManager, nullptr);
     groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
 
     /**
@@ -582,7 +586,7 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
 
     /**
-     * @tc.steps: step4. Call StartTransition.
+     * @tc.steps: step4. Call StartTransition,with route type NONE..
      * @tc.expected: Start Successful.
      */
     stageManager.SetSrcPage(outPageNode);
@@ -590,6 +594,22 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
     EXPECT_EQ(stageManager.destPageNode_, inPageNode);
+
+    /**
+     * @tc.steps: step5. Call StartTransition with route type POP.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPopPage".
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPopPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::POP);
+
+    /**
+     * @tc.steps: step6. Call StartTransition with route type PUSH.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPushPage".
+     */
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPushPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::PUSH);
 }
 
 /**
@@ -1613,8 +1633,8 @@ HWTEST_F(StageTestNg, GetTopPagesWithTransition001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPages = stageManager->GetTopPagesWithTransition();
@@ -1664,13 +1684,49 @@ HWTEST_F(StageTestNg, GetTopPagePaths001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPagePaths = stageManager->GetTopPagePaths();
     ASSERT_EQ(topPagePaths.size(), 1);
     ASSERT_EQ(topPagePaths[0], TEST_PATH);
     ASSERT_EQ(pageUrl, "myUrl");
+}
+
+/**
+ * @tc.name: MovePageToFront
+ * @tc.desc: test animationPage equal srcPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, MovePageToFront, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+    stageManager.PushPage(firstNode);
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    stageManager.srcPageNode_ = thirdNode;
+
+    stageManager.MovePageToFront(firstNode);
+    EXPECT_EQ(stageManager.animationSrcPage_, stageManager.srcPageNode_);
 }
 } // namespace OHOS::Ace::NG

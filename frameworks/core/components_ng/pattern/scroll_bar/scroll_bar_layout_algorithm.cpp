@@ -40,6 +40,24 @@ void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& par
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        const auto& layoutConstraint = layoutProperty->GetLayoutConstraint().value();
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isCrossWrap = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        auto isCrossFix = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        auto layoutPolicySize =
+            ConstrainIdealSizeByLayoutPolicy(layoutConstraint, widthLayoutPolicy, heightLayoutPolicy, axis);
+        idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+        if (isCrossWrap) {
+            idealSize.SetCrossSize(std::min(childSize.CrossSize(axis), layoutConstraint.maxSize.CrossSize(axis)), axis);
+        } else if (isCrossFix) {
+            idealSize.SetCrossSize(childSize.CrossSize(axis), axis);
+        }
+    }
     if (axis == Axis::HORIZONTAL) {
         if (!idealSize.Height()) {
             if (childSize.Height()) {
@@ -74,8 +92,8 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
-    auto parentSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT);
+    auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
+    auto parentSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_PARENT);
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
     MinusPaddingToSize(padding, parentSize);

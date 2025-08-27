@@ -16,12 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_PATTERN_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPaint.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "frameworks/core/components/svg/render_svg_pattern.h"
 #include "frameworks/core/pipeline/base/rosen_render_context.h"
@@ -33,18 +28,10 @@ class RosenRenderSvgPattern : public RenderSvgPattern {
 
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
-#ifndef USE_ROSEN_DRAWING
-    bool OnAsPaint(const Offset& offset, const Rect& paintRect, SkPaint& skPaint);
-#else
     bool OnAsPaint(const Offset& offset, const Rect& paintRect, RSPen* rsPen, RSBrush* rsBrush);
-#endif
 
 protected:
-#ifndef USE_ROSEN_DRAWING
-    bool FitAttribute(const Rect& paintRect, Rect& tileRect, SkMatrix& skMatrix4);
-#else
     bool FitAttribute(const Rect& paintRect, Rect& tileRect, RSMatrix& matrix4);
-#endif
     void FitRenderContext(RosenRenderContext& context, const Rect& patternRect);
 
 private:

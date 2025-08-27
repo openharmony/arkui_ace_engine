@@ -43,7 +43,7 @@ public:
 
         RefPtr<SearchTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SearchTheme> theme = AceType::Claim(new SearchTheme());
+            RefPtr<SearchTheme> theme = AceType::MakeRefPtr<SearchTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -231,7 +231,6 @@ public:
         return searchButtonSpace_;
     }
 
-
     const Dimension& GetIconHeight() const
     {
         return iconHeight_;
@@ -270,6 +269,12 @@ public:
     TextStyle GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    TextDecoration GetTextDecoration() const
+    {
+        return textStyle_.GetTextDecoration().size() > 0 ?
+            textStyle_.GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     uint32_t GetSearchSymbolId() const

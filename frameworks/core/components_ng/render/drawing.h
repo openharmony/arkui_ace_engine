@@ -47,11 +47,13 @@
 
 #include "pipeline/rs_recording_canvas.h"
 #include "rosen_text/font_collection.h"
+#include "rosen_text/text_effect.h"
+#include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_types.h"
-#include "rosen_text/text_style.h"
 #include "utils/camera3d.h"
+#include "utils/canvas_utils.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
 #include "utils/picture_recorder.h"
@@ -82,6 +84,7 @@ using RSAlphaType = Rosen::Drawing::AlphaType;
 using RSScalar = Rosen::Drawing::scalar;
 using RSClipOp = Rosen::Drawing::ClipOp;
 using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
+using RSCanvasUtils = Rosen::Drawing::CanvasUtils;
 using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
@@ -89,6 +92,7 @@ using RSBlurType = Rosen::Drawing::BlurType;
 using RSPathFillType = Rosen::Drawing::PathFillType;
 using RSSkPath = Rosen::Drawing::SkiaPath;
 using RSColorQuad = Rosen::Drawing::ColorQuad;
+using RSColor4f = Rosen::Drawing::Color4f;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
 using RSFont = Rosen::Drawing::Font;
@@ -133,6 +137,8 @@ using RSTextDirection = Rosen::TextDirection;
 using RSTextAlign = Rosen::TextAlign;
 using RSWordBreakType = Rosen::WordBreakType;
 using RSTextBaseline = Rosen::TextBaseline;
+using RSTextEffect = Rosen::TextEffect;
+using RSTextEffectFactoryCreator = Rosen::TextEffectFactoryCreator;
 using RSTextStyle = Rosen::TextStyle;
 using RSTextDecoration = Rosen::TextDecoration;
 using RSTextDecorationStyle = Rosen::TextDecorationStyle;
@@ -152,6 +158,9 @@ using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
 using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
+using RSCMSTransferFuncType = Rosen::Drawing::CMSTransferFuncType;
+using RSCMSMatrixType = Rosen::Drawing::CMSMatrixType;
+using RSClamp = Rosen::Drawing::Clamp;
 struct RSDataWrapper {
     std::shared_ptr<RSData> data;
 };

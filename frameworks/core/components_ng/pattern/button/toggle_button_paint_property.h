@@ -17,16 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_TOGGLE_BUTTON_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 class ToggleButtonPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty);
 
 public:
     ToggleButtonPaintProperty() = default;
@@ -38,6 +38,7 @@ public:
         value->propIsOn_ = CloneIsOn();
         value->propSelectedColor_ = CloneSelectedColor();
         value->propBackgroundColor_ = CloneBackgroundColor();
+        value->propSelectedColorSetByUser_ = CloneSelectedColorSetByUser();
         return value;
     }
 
@@ -47,6 +48,7 @@ public:
         ResetIsOn();
         ResetSelectedColor();
         ResetBackgroundColor();
+        ResetSelectedColorSetByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -70,6 +72,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPaintProperty);
 };
 } // namespace OHOS::Ace::NG

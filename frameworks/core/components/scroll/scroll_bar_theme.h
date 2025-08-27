@@ -22,6 +22,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+
 namespace {
 inline constexpr double NORMAL_START_ANGLE = -30;
 inline constexpr double ACTIVE_START_ANGLE = -60;
@@ -46,7 +47,7 @@ public:
 
         RefPtr<ScrollBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ScrollBarTheme> theme = AceType::Claim(new ScrollBarTheme());
+            RefPtr<ScrollBarTheme> theme = AceType::MakeRefPtr<ScrollBarTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -63,20 +64,23 @@ public:
                 return;
             }
             parseNormalThemeStyle(pattern, theme);
-            theme->normalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width", 4.0_vp);
-            theme->activeBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_background_width", 24.0_vp);
-            theme->normalStartAngle_ = pattern->GetAttr<double>("scroll_bar_normal_start_angle", NORMAL_START_ANGLE);
-            theme->activeStartAngle_ = pattern->GetAttr<double>("scroll_bar_active_start_angle", ACTIVE_START_ANGLE);
-            theme->normaMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_normal_max_offset_angle",
+            theme->arcNormalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width",
+                4.0_vp);
+            theme->arcActiveBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_background_width",
+                24.0_vp);
+            theme->arcNormalStartAngle_ = pattern->GetAttr<double>("scroll_bar_normal_start_angle", NORMAL_START_ANGLE);
+            theme->arcActiveStartAngle_ = pattern->GetAttr<double>("scroll_bar_active_start_angle", ACTIVE_START_ANGLE);
+            theme->arcNormalMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_normal_max_offset_angle",
                 NORMAL_MAX_OFFSET_ANGLE);
-            theme->activeMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_active_max_offset_angle",
+            theme->arcActiveMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_active_max_offset_angle",
                 ACTIVE_MAX_OFFSET_ANGLE);
-            theme->normalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
-            theme->activeScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width", 22.0_vp);
-            auto blendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
-                ARC_SCROLL_BAR_FOREGROUND_OPACITY);
+            theme->arcNormalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
+            theme->arcActiveScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width",
+                22.0_vp);
+            auto arcBlendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
+            ARC_SCROLL_BAR_FOREGROUND_OPACITY);
             theme->arcForegroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+                Color::TRANSPARENT).BlendOpacity(arcBlendOpacity);
             theme->arcBackgroundColor_ = pattern->GetAttr<Color>("arc_scroll_bar_background_color",
                 Color(ARC_SCROLL_BAR_BACKGROUND_COLOR));
         }
@@ -184,37 +188,37 @@ public:
         return defaultHeight_;
     }
 
-    const Dimension& GetNormalBackgroundWidth() const
+    const Dimension& GetArcNormalBackgroundWidth() const
     {
-        return normalBackgroundWidth_;
+        return arcNormalBackgroundWidth_;
     }
-    const Dimension& GetActiveBackgroundWidth() const
+    const Dimension& GetArcActiveBackgroundWidth() const
     {
-        return activeBackgroundWidth_;
+        return arcActiveBackgroundWidth_;
     }
-    double GetNormalStartAngle() const
+    double GetArcNormalStartAngle() const
     {
-        return normalStartAngle_;
+        return arcNormalStartAngle_;
     }
-    double GetActiveStartAngle() const
+    double GetArcActiveStartAngle() const
     {
-        return activeStartAngle_;
+        return arcActiveStartAngle_;
     }
-    double GetNormaMaxOffsetAngle() const
+    double GetArcNormalMaxOffsetAngle() const
     {
-        return normaMaxOffsetAngle_;
+        return arcNormalMaxOffsetAngle_;
     }
-    double GetActiveMaxOffsetAngle() const
+    double GetArcActiveMaxOffsetAngle() const
     {
-        return activeMaxOffsetAngle_;
+        return arcActiveMaxOffsetAngle_;
     }
-    const Dimension& GetNormalScrollBarWidth() const
+    const Dimension& GetArcNormalScrollBarWidth() const
     {
-        return normalScrollBarWidth_;
+        return arcNormalScrollBarWidth_;
     }
-    const Dimension& GetActiveScrollBarWidth() const
+    const Dimension& GetArcActiveScrollBarWidth() const
     {
-        return activeScrollBarWidth_;
+        return arcActiveScrollBarWidth_;
     }
     const Color& GetArcBackgroundColor() const
     {
@@ -244,14 +248,14 @@ private:
     Color foregroundHoverBlendColor_;
     Color foregroundPressedBlendColor_;
     Edge padding_;
-    Dimension normalBackgroundWidth_;
-    Dimension activeBackgroundWidth_;
-    double normalStartAngle_ = 0.0;
-    double activeStartAngle_ = 0.0;
-    double normaMaxOffsetAngle_ = 0.0;
-    double activeMaxOffsetAngle_ = 0.0;
-    Dimension normalScrollBarWidth_;
-    Dimension activeScrollBarWidth_;
+    Dimension arcNormalBackgroundWidth_;
+    Dimension arcActiveBackgroundWidth_;
+    double arcNormalStartAngle_ = 0.0;
+    double arcActiveStartAngle_ = 0.0;
+    double arcNormalMaxOffsetAngle_ = 0.0;
+    double arcActiveMaxOffsetAngle_ = 0.0;
+    Dimension arcNormalScrollBarWidth_;
+    Dimension arcActiveScrollBarWidth_;
     Color arcForegroundColor_;
     Color arcBackgroundColor_;
 };

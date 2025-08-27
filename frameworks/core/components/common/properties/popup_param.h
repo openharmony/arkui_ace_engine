@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -28,6 +29,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
@@ -50,7 +52,7 @@ struct PopupGradientColor {
 };
 
 struct PopupLinearGradientProperties {
-    GradientDirection popupDirection;
+    GradientDirection popupDirection = GradientDirection::BOTTOM;
     std::vector<PopupGradientColor> gradientColors;
 };
 
@@ -59,10 +61,15 @@ enum class PopupKeyboardAvoidMode {
     NONE
 };
 
+enum class TipsAnchorType {
+    TARGET = 0, // anchor to target node
+    CURSOR = 1  // anchor to cursor position
+};
+
 using StateChangeFunc = std::function<void(const std::string&)>;
 using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
-    DECLARE_ACE_TYPE(PopupParam, AceType)
+    DECLARE_ACE_TYPE(PopupParam, AceType);
 
 public:
     PopupParam() = default;
@@ -86,6 +93,16 @@ public:
     bool HasAction() const
     {
         return hasAction_;
+    }
+
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
     }
 
     void SetPlacement(const Placement& placement)
@@ -250,9 +267,14 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool HasEnableHoverMode() const
+    {
+        return enableHoverMode_.has_value();
+    }
+
     bool EnableHoverMode() const
     {
-        return enableHoverMode_;
+        return enableHoverMode_.value_or(false);
     }
 
     void SetEnableHoverMode(bool enableHoverMode)
@@ -519,6 +541,7 @@ public:
     {
         return onWillDismiss_;
     }
+
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
@@ -549,14 +572,14 @@ public:
         return isCaretMode_;
     }
 
-    void SetKeyBoardAvoidMode (PopupKeyboardAvoidMode keyboardAvoidMode)
+    void SetFollowTransformOfTarget (bool followTransformOfTarget)
     {
-        keyboardAvoidMode_ = keyboardAvoidMode;
+        followTransformOfTarget_ = followTransformOfTarget;
     }
 
-    PopupKeyboardAvoidMode GetKeyBoardAvoidMode() const
+    bool IsFollowTransformOfTarget() const
     {
-        return keyboardAvoidMode_;
+        return followTransformOfTarget_;
     }
 
     StateChangeFunc GetDoubleBindCallback()
@@ -569,14 +592,24 @@ public:
         doubleBindCallback_ = callback;
     }
 
-    void SetFollowTransformOfTarget (bool followTransformOfTarget)
+    void SetKeyBoardAvoidMode (PopupKeyboardAvoidMode keyboardAvoidMode)
     {
-        followTransformOfTarget_ = followTransformOfTarget;
+        keyboardAvoidMode_ = keyboardAvoidMode;
     }
 
-    bool IsFollowTransformOfTarget() const
+    PopupKeyboardAvoidMode GetKeyBoardAvoidMode() const
     {
-        return followTransformOfTarget_;
+        return keyboardAvoidMode_;
+    }
+
+    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+
+    std::optional<AvoidanceMode> GetAvoidTarget() const
+    {
+        return avoidTarget_;
     }
 
     std::optional<bool> GetIsPartialUpdate() const
@@ -598,6 +631,7 @@ public:
     {
         return isTips_;
     }
+
     void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
     {
         outlineLinearGradient_ = outlineLinearGradient;
@@ -638,9 +672,130 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetAnchorType(TipsAnchorType anchorType)
+    {
+        anchorType_ = anchorType;
+    }
+
+    TipsAnchorType GetAnchorType() const
+    {
+        return anchorType_;
+    }
+
+    void SetTextColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceTextColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetTextColorResourceObject()
+    {
+        return resourceTextColorObj_;
+    }
+
+    void SetPopupColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourcePopupColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetPopupColorResourceObject()
+    {
+        return resourcePopupColorObj_;
+    }
+
+    void SetMaskColorResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceMaskColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetMaskColorResourceObject()
+    {
+        return resourceMaskColorObj_;
+    }
+
+    void SetMaskResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceMaskObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetMaskResourceObject()
+    {
+        return resourceMaskObj_;
+    }
+
+    void SetWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetWidthResourceObject()
+    {
+        return resourceWidthObj_;
+    }
+
+    void SetArrowWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetArrowWidthResourceObject()
+    {
+        return resourceArrowWidthObj_;
+    }
+
+    void SetArrowHeightResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowHeightObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetArrowHeightResourceObject()
+    {
+        return resourceArrowHeightObj_;
+    }
+
+    void SetRadiusResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceRadiusObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetRadiusResourceObject()
+    {
+        return resourceRadiusObj_;
+    }
+
+    void SetOutlineWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceOutlineWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetOutlineWidthResourceObject()
+    {
+        return resourceOutlineWidthObj_;
+    }
+
+    void SetBorderWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceBorderWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetBorderWidthResourceObject()
+    {
+        return resourceBorderWidthObj_;
+    }
+
+    void SetIsWithTheme(bool isWithTheme)
+    {
+        isWithTheme_ = isWithTheme;
+    }
+
+    bool GetIsWithTheme()
+    {
+        return isWithTheme_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
+    bool hasPlacement_ = false;
     bool enableArrow_ = true;
     bool isMaskColorSetted_ = false;
     bool isBackgroundColorSetted_ = false;
@@ -653,9 +808,11 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
-    bool enableHoverMode_ = false;
+    std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
+    bool isWithTheme_ = false;
+    TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;
     int32_t appearingTimeWithContinuousOperation_ = 300;
@@ -695,10 +852,21 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
+    std::optional<AvoidanceMode> avoidTarget_ = AvoidanceMode::COVER_TARGET;
     std::optional<Dimension> outlineWidth_;
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
     PopupLinearGradientProperties innerBorderLinearGradient_;
+    RefPtr<ResourceObject> resourceTextColorObj_;
+    RefPtr<ResourceObject> resourcePopupColorObj_;
+    RefPtr<ResourceObject> resourceMaskColorObj_;
+    RefPtr<ResourceObject> resourceMaskObj_;
+    RefPtr<ResourceObject> resourceWidthObj_;
+    RefPtr<ResourceObject> resourceArrowWidthObj_;
+    RefPtr<ResourceObject> resourceArrowHeightObj_;
+    RefPtr<ResourceObject> resourceRadiusObj_;
+    RefPtr<ResourceObject> resourceOutlineWidthObj_;
+    RefPtr<ResourceObject> resourceBorderWidthObj_;
 };
 
 } // namespace OHOS::Ace

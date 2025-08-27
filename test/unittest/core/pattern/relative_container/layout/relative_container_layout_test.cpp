@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../relative_container_base_test_ng.h"
+#include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 
 namespace OHOS::Ace::NG {
@@ -41,7 +41,7 @@ public:
     dependence: recordOffsetMap_
     output: MarginFrameOffset of each childnode
  */
-HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2, row3;

@@ -15,9 +15,11 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
+#include "base/geometry/ng/rect_t.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
+#include "ui/properties/ng/measure_property.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 #include "ui/view/ui_context.h"
@@ -26,9 +28,20 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
+RefPtr<FrameNode> FrameNode::GetFrameNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto kitNode = frameNode->GetKitNode();
+    if (!kitNode) {
+        kitNode = MakeRefPtr<FrameNodeImpl>(Claim(frameNode));
+    }
+    return kitNode;
+}
 
 FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern)
     : frameNode_(AceType::RawPtr(node)), pattern_(pattern)
@@ -248,11 +261,58 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
+void FrameNodeImpl::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->SetAICallerHelper(aiCallerHelper);
+}
+
+void FrameNodeImpl::SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& measureCallback)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto onMeasureCallback = [weakNode = WeakClaim(frameNode_), measureCallback](int32_t nodeId) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<FrameNode> node = frameNode->GetKitNode();
+        if (!node) {
+            node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
+        }
+        measureCallback(node);
+    };
+    frameNode_->SetMeasureCallback(std::move(onMeasureCallback));
+}
+
+int32_t FrameNodeImpl::GetMeasureWidth()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Width();
+}
+
+int32_t FrameNodeImpl::GetMeasureHeight()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Height();
+}
+
+NodeHandle FrameNodeImpl::GetParentHandle()
+{
+    CHECK_NULL_RETURN(frameNode_, nullptr);
+    auto* frameNode = reinterpret_cast<AceNode*>(frameNode_);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parent = frameNode->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<NG::FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    return reinterpret_cast<NodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
+}
+
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
-    auto frameNode = frameNode_;
-    auto onDestroyCallback = [frameNode, destroyCallback](int32_t nodeId) {
+    auto onDestroyCallback = [weakNode = WeakClaim(frameNode_), destroyCallback](int32_t nodeId) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         RefPtr<FrameNode> node = frameNode->GetKitNode();
         if (!node) {
             node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
@@ -286,4 +346,107 @@ void FrameNodeImpl::SetClipEdge(bool isClip)
     NG::ViewAbstract::SetClipEdge(frameNode_, isClip);
 }
 
+void FrameNodeImpl::SetPadding(const NG::PaddingPropertyT<NG::CalcLength>& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::SetSafeAreaPadding(const NG::CalcLength& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetSafeAreaPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::ResetSafeAreaPadding()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::ResetSafeAreaPadding();
+}
+
+void FrameNodeImpl::SetLinearGradient(const NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradient(frameNode_, gradient);
+}
+
+void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradientBlur(frameNode_, blurPara);
+}
+
+void FrameNodeImpl::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, compositingFilter);
+}
+
+void FrameNodeImpl::ResetCompositingFilter()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, nullptr);
+}
+
+bool FrameNodeImpl::NeedAvoidContainerModal()
+{
+    CHECK_NULL_RETURN(frameNode_, false);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    return avoidInfoMgr->NeedAvoidContainerModal();
+}
+
+int32_t FrameNodeImpl::GetContainerModalTitleHeight()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, 0);
+    return avoidInfoMgr->GetContainerModalTitleHeight();
+}
+
+NG::OffsetF FrameNodeImpl::GetContainerModalButtonsOffset()
+{
+    NG::OffsetF offset = NG::OffsetF(0.0, 0.0);
+    CHECK_NULL_RETURN(frameNode_, offset);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, offset);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, offset);
+    Ace::NG::RectF containerModal;
+    Ace::NG::RectF buttonsRect;
+    auto isSuccess = avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    if (!isSuccess) {
+        return offset;
+    }
+    return buttonsRect.GetOffset();
+}
+
+NG::SizeF FrameNodeImpl::GetContainerModalButtonsSize()
+{
+    NG::SizeF buttonsSize = NG::SizeF(0.0, 0.0);
+    CHECK_NULL_RETURN(frameNode_, buttonsSize);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, buttonsSize);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, buttonsSize);
+    Ace::NG::RectF containerModal;
+    Ace::NG::RectF buttonsRect;
+    auto isSuccess = avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    if (!isSuccess) {
+        return buttonsSize;
+    }
+    return NG::SizeF(buttonsRect.Width(), buttonsRect.Height());
+}
+
+NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()
+{
+    NG::OffsetF offset {};
+    CHECK_NULL_RETURN(frameNode_, offset);
+    offset = frameNode_->GetParentGlobalOffsetDuringLayout();
+    return offset;
+}
 } // namespace OHOS::Ace::Kit

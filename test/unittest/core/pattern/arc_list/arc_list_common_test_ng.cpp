@@ -51,7 +51,7 @@ AssertionResult ArcListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_
     std::vector<RefPtr<FrameNode>> listItems = GetALLItem();
     RefPtr<FocusHub> currentFocusNode = listItems[currentIndex]->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
-    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
+    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNodeInList(step, currentFocusNode).Upgrade();
     if (expectNextIndex != NULL_VALUE && nextFocusNode == nullptr) {
         return AssertionFailure() << "Next FocusNode is null.";
     }
@@ -93,7 +93,7 @@ AssertionResult ArcListCommonTestNg::VerifyLazyForEachItemsOrder(std::list<std::
 
 /**
  * @tc.name: FocusStep001
- * @tc.desc: Test GetNextFocusNode func
+ * @tc.desc: Test GetNextFocusNodeInList func
  * @tc.type: FUNC
  */
 HWTEST_F(ArcListCommonTestNg, FocusStep001, TestSize.Level1)
@@ -103,7 +103,7 @@ HWTEST_F(ArcListCommonTestNg, FocusStep001, TestSize.Level1)
     CreateDone();
 
     /**
-     * @tc.steps: step1. GetNextFocusNode from first item
+     * @tc.steps: step1. GetNextFocusNodeInList from first item
      */
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
@@ -117,7 +117,7 @@ HWTEST_F(ArcListCommonTestNg, FocusStep001, TestSize.Level1)
 
 /**
  * @tc.name: FocusStep006
- * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.desc: Test GetNextFocusNodeInList other condition
  * @tc.type: FUNC
  */
 HWTEST_F(ArcListCommonTestNg, FocusStep006, TestSize.Level1)
@@ -131,7 +131,7 @@ HWTEST_F(ArcListCommonTestNg, FocusStep006, TestSize.Level1)
 
 /**
  * @tc.name: FocusStep007
- * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.desc: Test GetNextFocusNodeInList other condition
  * @tc.type: FUNC
  */
 HWTEST_F(ArcListCommonTestNg, FocusStep007, TestSize.Level1)

@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -28,6 +29,8 @@
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 
 namespace OHOS::Ace::NG {
+constexpr float DEFAULT_RADIO_IMAGE_SCALE = 0.7F;
+
 class RadioPattern : public Pattern {
     DECLARE_ACE_TYPE(RadioPattern, Pattern);
 
@@ -158,7 +161,6 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            customNode_ = nullptr;
             OnModifyDone();
             return;
         }
@@ -178,20 +180,50 @@ public:
         isUserSetUncheckBorderColor_ = isUserSet;
     }
 
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
+
     void DumpInfo() override;
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
+    void OnColorConfigurationUpdate() override;
+    void SetUncheckedBorderColorByJSRadioTheme(bool flag)
+    {
+        borderColorByJSRadioTheme_ = flag;
+    }
+    void SetIndicatorColorByJSRadioTheme(bool flag)
+    {
+        indicatorColorByJSRadioTheme_ = flag;
+    }
+    bool GetUncheckedBorderColorByJSRadioTheme()
+    {
+        return borderColorByJSRadioTheme_;
+    }
+    bool GetIndicatorColorByJSRadioTheme()
+    {
+        return indicatorColorByJSRadioTheme_;
+    }
 
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
     void OnClick();
-    CalcSize GetChildContentSize();
-    void InitializeParam(
-        Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding);
+    CalcSize GetChildContentSize(const RefPtr<RadioTheme>& radioTheme);
     void LoadBuilder();
     void SetBuilderState();
     void UpdateIndicatorType();
@@ -213,6 +245,7 @@ private:
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
     bool OnKeyEvent(const KeyEvent& event);
+    void UpdateGroupStatus(FrameNode* frameNode);
 
     void ImageNodeCreate();
     void startEnterAnimation();
@@ -223,9 +256,11 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
-    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
+    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator, const RefPtr<RadioTheme>& radioTheme);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
     RefPtr<FrameNode> BuildContentModifierNode();
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -259,12 +294,16 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isUserSetMargin_ = false;
     std::optional<RadioMakeCallback> makeFunc_;
+
     RefPtr<RadioModifier> radioModifier_;
     bool focusEventInitialized_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
     bool isUserSetUncheckBorderColor_ = false;
+    bool borderColorByJSRadioTheme_ = true;
+    bool indicatorColorByJSRadioTheme_ = true;
 };
 } // namespace OHOS::Ace::NG
 

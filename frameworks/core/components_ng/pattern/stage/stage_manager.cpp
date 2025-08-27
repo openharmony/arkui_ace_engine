@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -98,6 +99,18 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     }
     if (destPage) {
         destPage->SetNodeFreeze(false);
+        auto pagePattern = destPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        auto pagePath = pageInfo->GetFullPath();
+        std::string routeType("routerPageChange");
+        if (type == RouteType::PUSH) {
+            routeType = "routerPushPage";
+        } else if (type == RouteType::POP) {
+            routeType = "routerPopPage";
+        }
+        UiSessionManager::GetInstance()->OnRouterChange(pagePath, routeType);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -129,13 +142,31 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsSceneBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
-            InputMethodManager::GetInstance()->CloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard(false);
         }
     }
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+void StageManager::UpdateColorModeForPage(const RefPtr<FrameNode>& page)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(page);
+        auto pipelineContext = page->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+
+        auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
+        if (page->CheckIsDarkMode() == colorMode) {
+            return;
+        }
+        pipelineContext->SetIsSystemColorChange(false);
+        page->SetRerenderable(true);
+        page->NotifyColorModeChange(colorMode);
+    }
+}
+
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition,
+    const std::function<bool()>&& pushIntentPageCallback)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -168,7 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        
+
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -177,11 +208,16 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     node->MountToParent(stageNode_);
     // then build the total child. Build will trigger page create and onAboutToAppear
     node->Build(nullptr);
+    // after new page aboutToAppear, jump to intentPage
+    if (pushIntentPageCallback && pushIntentPageCallback()) {
+        return true;
+    }
     // fire new lifecycle
     if (hidePageNode && needHideLast && isNewLifecycle) {
         FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
     stageNode_->RebuildRenderContextTree();
+    UpdateColorModeForPage(node);
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     auto pagePattern = node->GetPattern<PagePattern>();
@@ -298,7 +334,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     FireAutoSave(outPageNode, inPageNode);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
-
+    UpdateColorModeForPage(inPageNode);
     // close keyboard
     PageChangeCloseKeyboard();
 
@@ -336,11 +372,12 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -360,6 +397,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
         pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     }
+    UpdateColorModeForPage(inPageNode);
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
 
@@ -423,7 +461,8 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if (children.empty()) {
         return false;
     }
-    const auto& lastPage = children.back();
+    // srcPageNode_ is last page in pageRouterStack.
+    const auto& lastPage = srcPageNode_.Upgrade();
     if (lastPage == node) {
         return true;
     }
@@ -438,6 +477,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if  (pattern) {
         pattern->ResetPageTransitionEffect();
     }
+    UpdateColorModeForPage(node);
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
@@ -573,6 +613,7 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
         return nullptr;
     }
     auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    CHECK_NULL_RETURN(lastChildFrame, nullptr);
     auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
     if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
@@ -588,7 +629,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }
@@ -620,7 +661,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
-    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
+    ResSchedReport::GetInstance().HandlePageTransition(srcFullPath, destFullPath, "Router");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -755,4 +796,18 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     return info->GetPagePath();
 }
 
+void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
+{
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s, "
+        "ignoreOrientation: %{public}d", isForceSplit, homePage.c_str(), ignoreOrientation);
+    //app support split mode, whether force split is enable or disable, the homepage will be recognized
+    isDetectPrimaryPage_ = true;
+    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage && ignoreOrientation_ == ignoreOrientation) {
+        return;
+    }
+    isForceSplit_ = isForceSplit;
+    homePageConfig_ = homePage;
+    ignoreOrientation_ = ignoreOrientation;
+    OnForceSplitConfigUpdate();
+}
 } // namespace OHOS::Ace::NG

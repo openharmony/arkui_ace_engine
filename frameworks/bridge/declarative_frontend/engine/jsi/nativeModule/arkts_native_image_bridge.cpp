@@ -84,24 +84,26 @@ void ParseOuterBorderRadius(
 const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 
 void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
-    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+    std::vector<std::optional<CalcDimension>>& results, std::vector<RefPtr<ResourceObject>>& imageResizableResObjs)
 {
     auto end = offset + count;
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
     if (end > argsNumber) {
         return;
     }
-    CalcDimension defaultDimension(defValue);
+    CalcDimension defaultDimension(CalcDimension(0.0));
     EcmaVM* vm = runtimeCallInfo->GetVM();
     for (uint32_t index = offset; index < end; index++) {
         auto arg = runtimeCallInfo->GetCallArgRef(index);
         std::optional<CalcDimension> optCalcDimension;
-        CalcDimension dimension(defValue);
-        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
+        CalcDimension dimension(CalcDimension(0.0));
+        RefPtr<ResourceObject> resObj;
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, resObj, false)) {
             optCalcDimension = dimension;
         } else {
             optCalcDimension = defaultDimension;
         }
+        imageResizableResObjs.push_back(resObj);
         results.push_back(optCalcDimension);
     }
 }
@@ -122,9 +124,9 @@ void PushDimensionsToVector(
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(unit), nullptr });
     }
 }
 
@@ -163,7 +165,8 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
             resId = tmp->ToNumber<int32_t>();
         }
     }
-    bool srcValid = ArkTSUtils::ParseJsMedia(vm, secondArg, src);
+    RefPtr<ResourceObject> srcResObj;
+    bool srcValid = ArkTSUtils::ParseJsMedia(vm, secondArg, src, srcResObj);
     if (isCard && secondArg->IsString(vm)) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -171,6 +174,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
             src.clear();
         }
     }
+    auto srcRawPtr = AceType::RawPtr(srcResObj);
     std::string bundleName;
     std::string moduleName;
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
@@ -187,8 +191,8 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     if (pixmap) {
         ImageModelNG::SetInitialPixelMap(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
     } else {
-        nodeModifiers->getImageModifier()->setImageShowSrc(
-            nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1));
+        nodeModifiers->getImageModifier()->setImageShowSrcRes(
+            nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1), srcRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -352,12 +356,14 @@ ArkUINativeModuleValue ImageBridge::SetResizable(ArkUIRuntimeCallInfo* runtimeCa
 
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> sliceDimensions;
-    ParseResizableCalcDimensions(runtimeCallInfo, INDEX_1, INDEX_4, sliceDimensions, CalcDimension(0.0));
+    std::vector<RefPtr<ResourceObject>> imageResizableResObjs;
+    ParseResizableCalcDimensions(runtimeCallInfo, INDEX_1, INDEX_4, sliceDimensions, imageResizableResObjs);
     PushDimensionsToVector(options, sliceDimensions);
 
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getImageModifier()->setResizable(nativeNode, options.data());
+    nodeModifiers->getImageModifier()->setResizablePtr(
+        nativeNode, options.data(), static_cast<void*>(&imageResizableResObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -744,8 +750,12 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     Color color;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        nodeModifiers->getImageModifier()->setFillColor(nativeNode, color.GetValue());
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        nodeModifiers->getImageModifier()->setFillColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
         nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {
@@ -776,7 +786,8 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string src;
-    if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src)) {
+    RefPtr<ResourceObject> srcResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src, srcResObj)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
@@ -784,11 +795,12 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     }
     std::string bundleName;
     std::string moduleName;
+    auto srcRawPtr = AceType::RawPtr(srcResObj);
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getImageModifier()->setAlt(
-        nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str());
+    nodeModifiers->getImageModifier()->setAltRes(
+        nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1230,10 +1242,15 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "componentWidth", "componentHeight", "message" };
+        const char* errKeys[] = { "code", "message" };
+        Local<JSValueRef> errValues[] = { panda::NumberRef::New(
+            vm, static_cast<int32_t>(event.GetErrorInfo().errorCode)),
+            panda::StringRef::NewFromUtf8(vm, event.GetErrorInfo().errorMessage.c_str()) };
+        auto errObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(errKeys), errKeys, errValues);
+        const char* keys[] = { "componentWidth", "componentHeight", "message", "error" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()),
-            panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()) };
+            panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()), errObject };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));

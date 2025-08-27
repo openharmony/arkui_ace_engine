@@ -40,6 +40,21 @@ public:
     {
         return false;
     }
+    
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -100,6 +115,8 @@ public:
         needInitRealSideBarWidth_ = value;
     }
 
+    void OnColorConfigurationUpdate() override;
+
     void SetControlButtonClick(bool value)
     {
         isControlButtonClick_ = value;
@@ -159,6 +176,22 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+            UpdateSideBarStatus();
+            UpdateSideBarColorToToolbarManager();
+        }
+    }
+
+    RefPtr<ToolbarManager> GetToolBarManager()
+    {
+        return toolbarManager_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -208,19 +241,10 @@ private:
     void SetAccessibilityEvent();
     void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
     void SetMouseStyle(MouseFormat format);
-    void UpdateSideBarToolBarManager(bool isShowDivider, float width);
-    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
-    void UpdateSideBarDividerToolBarManager(float dividerWidth);
     void UpdateSideBarStatus();
-
-    void InitToolBarManager()
-    {
-        if (!toolbarManager_) {
-            auto pipeline = GetHost()->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            toolbarManager_ = pipeline->GetToolbarManager();
-        }
-    }
+    void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
+    void SideBarModifyDoneToolBarManager();
+    void UpdateSideBarColorToToolbarManager();
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

@@ -21,6 +21,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/manager/focus/focus_view.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -89,6 +90,8 @@ private:
     void PostCheckContextTransparentTask();
     void PostFaultInjectTask();
     void SetWindowScenePosition();
+    void InsertSurfaceNodeId(uint64_t nodeId);
+    void ClearSurfaceNodeId(uint64_t nodeId);
 
     int32_t instanceId_ = Container::CurrentId();
 

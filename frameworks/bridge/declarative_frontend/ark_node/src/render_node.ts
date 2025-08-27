@@ -133,38 +133,39 @@ interface CommandPath {
 class LengthMetrics {
   public unit: LengthUnit;
   public value: number;
-  constructor(value: number, unit?: LengthUnit) {
-      if (unit in LengthUnit) {
-          this.unit = unit;
-          this.value = value;
-      } else {
-          this.unit = LengthUnit.VP;
-          this.value = unit === undefined? value : 0;
-      }
+  public res: Resource;
+  constructor(value: number, unit?: LengthUnit, res?: Resource) {
+    if (unit in LengthUnit) {
+        this.unit = unit;
+        this.value = value;
+    } else {
+        this.unit = LengthUnit.VP;
+        this.value = unit === undefined ? value : 0;
+    }
+    this.res = res === undefined ? undefined : res;
   }
   static px(value: number) {
-      return new LengthMetrics(value, LengthUnit.PX);
+    return new LengthMetrics(value, LengthUnit.PX);
   }
   static vp(value: number) {
-      return new LengthMetrics(value, LengthUnit.VP);
+    return new LengthMetrics(value, LengthUnit.VP);
   }
   static fp(value: number) {
-      return new LengthMetrics(value, LengthUnit.FP);
+    return new LengthMetrics(value, LengthUnit.FP);
   }
   static percent(value: number) {
-      return new LengthMetrics(value, LengthUnit.PERCENT);
+    return new LengthMetrics(value, LengthUnit.PERCENT);
   }
   static lpx(value: number) {
-      return new LengthMetrics(value, LengthUnit.LPX);
+    return new LengthMetrics(value, LengthUnit.LPX);
   }
   static resource(res: Resource) {
     let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
-    return new LengthMetrics(length[0], length[1]);
+    return new LengthMetrics(length[0], length[1], res);
   }
 }
 
 declare interface Resource {}
-declare type BusinessError = any
 
 declare enum Color {
   White,
@@ -181,6 +182,11 @@ declare enum Color {
   Transparent,
 }
 
+declare enum ColorSpace {
+  SRGB = 0,
+  DISPLAY_P3 = 1,
+}
+
 declare type ResourceColor = Color | number | string | Resource;
 
 const MAX_CHANNEL_VALUE = 0xFF;
@@ -194,14 +200,17 @@ class ColorMetrics {
   private blue_: number;
   private alpha_: number;
   private resourceId_: number;
+  private colorSpace_: ColorSpace;
+  private res_: Resource | undefined;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
-  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
+    this.res_ = res === undefined ? undefined : res;
   }
   private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
@@ -218,6 +227,15 @@ class ColorMetrics {
   }
   static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+  }
+  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
+    let redInt = Math.round(red * MAX_CHANNEL_VALUE);
+    let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
+    let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
+    let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
+    const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
+    colorMetrics.setColorSpace(colorSpace);
+    return colorMetrics;
   }
 
   private static rgbOrRGBA(format: string): ColorMetrics {
@@ -259,7 +277,7 @@ class ColorMetrics {
       const blue = chanels[2];
       const alpha = chanels[3];
       const resourceId = chanels[4];
-      const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+      const colorMetrics = new ColorMetrics(red, green, blue, alpha, color);
       colorMetrics.setResourceId(resourceId);
       return colorMetrics;
     } else if (typeof color === 'number') {
@@ -345,6 +363,14 @@ class ColorMetrics {
   getResourceId(): number {
     return this.resourceId_;
   }
+  setColorSpace(colorSpace: ColorSpace): void {
+    if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
+      this.colorSpace_ = colorSpace;
+    }
+  }
+  getColorSpace(): ColorSpace {
+    return this.colorSpace_;
+  }
 }
 
 class BaseShape {
@@ -398,7 +424,7 @@ class ShapeMask extends BaseShape {
   public strokeWidth: number = 0;
 }
 
-class RenderNode {
+class RenderNode extends Disposable {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
   private parentRenderNode: WeakRef<RenderNode> | null;
@@ -431,6 +457,7 @@ class RenderNode {
   private apiTargetVersion: number;
 
   constructor(type: string) {
+    super();
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
@@ -661,7 +688,7 @@ class RenderNode {
   get translation(): Vector2 {
     return this.translationValue;
   }
-  get lengthMetricsUnit() {
+  get lengthMetricsUnit(): LengthMetricsUnit {
     return this.lengthMetricsUnitValue;
   }
   get markNodeGroup() {
@@ -684,6 +711,7 @@ class RenderNode {
     this.childrenList.push(node);
     node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null) {
     if (child === undefined || child === null) {
@@ -705,6 +733,7 @@ class RenderNode {
       this.childrenList.splice(indexOfSibling + 1, 0, child);
       getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
   removeChild(node: RenderNode) {
     if (node === undefined || node === null) {
@@ -717,9 +746,11 @@ class RenderNode {
     const child = this.childrenList[index];
     child.parentRenderNode = null;
     this.childrenList.splice(index, 1);
+    getUINativeModule().renderNode.removeBuilderNode(this.nodePtr, node.nodePtr);
     getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
   }
   clearChildren() {
+    getUINativeModule().renderNode.clearBuilderNode(this.nodePtr);
     this.childrenList = new Array<RenderNode>();
     getUINativeModule().renderNode.clearChildren(this.nodePtr);
   }
@@ -781,12 +812,23 @@ class RenderNode {
     this.nodePtr = null;
     this._nativeRef = null;
   }
+  getNodeType(): string {
+    return getUINativeModule().renderNode.getNodeType(this.nodePtr);
+  }
   dispose() {
+    super.dispose();
+    if (this.nodePtr) {
+      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+          'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+    }
     this._nativeRef?.dispose();
     this.baseNode_?.disposeNode();
     this._frameNode?.deref()?.resetNodePtr();
     this._nativeRef = null;
     this.nodePtr = null;
+  }
+  isDisposed(): boolean {
+    return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
   }
   getNodePtr(): NodePtr {
     return this.nodePtr;

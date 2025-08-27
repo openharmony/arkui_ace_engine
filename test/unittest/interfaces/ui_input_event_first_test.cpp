@@ -55,10 +55,12 @@ HWTEST_F(UIInputEventTest, UIInputEventGetType001, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_UIInputEvent_GetType(inputEvent);
     EXPECT_NE(sourceType, UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 
     inputEvent = nullptr;
     sourceType = OH_ArkUI_UIInputEvent_GetType(inputEvent);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -79,10 +81,12 @@ HWTEST_F(UIInputEventTest, UIInputEventGetAction001, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(sourceType, ARKUI_EVENT_NULL);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     inputEvent = nullptr;
     sourceType = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(sourceType, ARKUI_EVENT_NULL);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -105,6 +109,7 @@ HWTEST_F(UIInputEventTest, UIInputEventGetAction002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(sourceType, ARKUI_EVENT_ACTION);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -125,6 +130,7 @@ HWTEST_F(UIInputEventTest, UIInputEventGetAction003, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(sourceType, ARKUI_EVENT_NULL);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -147,6 +153,7 @@ HWTEST_F(UIInputEventTest, UIInputEventGetAction004, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(sourceType, ARKUI_MOUSE_ACTION);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -172,6 +179,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId001, TestSize.Level1)
     event.touchEvent.touchPointes = points;
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(uiInputEvent.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -191,6 +199,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId002, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -210,6 +219,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId003, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -229,6 +239,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId004, TestSize.Level1)
     event->inputEvent = nullptr;
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -248,6 +259,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId005, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -268,6 +280,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId006, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -288,6 +301,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId007, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -302,6 +316,31 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId008, TestSize.Level1)
      */
     auto sourceType = OH_ArkUI_PointerEvent_GetPointerId(nullptr, 0);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name:PointerEventGetPointerId009
+ * @tc.desc: Test the UIInputEvent property functions touch event case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetPointerId009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_UIInputEvent.
+     */
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(event, nullptr);
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    auto touchPoint = std::make_unique<ArkUITouchPoint>();
+    touchEvent->touchPointSize = 1;
+    touchEvent->touchPointes = touchPoint.get();
+    event->inputEvent = touchEvent.get();
+    uint32_t pointerIndex = 0;
+
+    OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -316,6 +355,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex001, TestSize.Level1)
      */
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(nullptr, 0);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -336,6 +376,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex002, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -361,6 +402,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex003, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -382,6 +424,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex004, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -407,6 +450,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex005, TestSize.Level1)
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -428,6 +472,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex006, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -449,6 +494,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex007, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -474,6 +520,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex008, TestSize.Level1)
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -495,6 +542,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetXByIndex009, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -517,6 +565,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex001, TestSize.Level1)
     uint32_t pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -542,6 +591,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -563,6 +613,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex003, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -588,6 +639,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex004, TestSize.Level1)
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -609,6 +661,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex005, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -630,6 +683,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex006, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -655,6 +709,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex007, TestSize.Level1)
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -676,6 +731,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex008, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -698,6 +754,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex001, TestSize.Level1)
     uint32_t pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -723,6 +780,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -744,6 +802,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex003, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -769,6 +828,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex004, TestSize.Level1)
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -790,6 +850,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex005, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -811,6 +872,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex006, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -830,12 +892,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex007, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto axisEvent = std::make_unique<ArkUIAxisEvent>();
     event->inputEvent = static_cast<void*>(axisEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -857,6 +921,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowXByIndex008, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -879,6 +944,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex001, TestSize.Level1)
     uint32_t pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -904,6 +970,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -925,6 +992,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex003, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -944,12 +1012,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex004, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -971,6 +1041,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex005, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -992,6 +1063,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex006, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1011,12 +1083,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex007, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto axisEvent = std::make_unique<ArkUIAxisEvent>();
     event->inputEvent = static_cast<void*>(axisEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1038,6 +1112,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetWindowYByIndex008, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetWindowYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1052,6 +1127,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex001, TestSize.Level1)
      */
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(nullptr, 0);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto event = std::make_unique<ArkUI_UIInputEvent>();
     EXPECT_NE(event, nullptr);
@@ -1060,6 +1136,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex001, TestSize.Level1)
     uint32_t pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1085,6 +1162,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1106,6 +1184,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex003, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1125,12 +1204,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex004, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1152,6 +1233,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex005, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1173,6 +1255,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex006, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1192,12 +1275,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex007, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto axisEvent = std::make_unique<ArkUIAxisEvent>();
     event->inputEvent = static_cast<void*>(axisEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1219,6 +1304,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayXByIndex008, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayXByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1233,6 +1319,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex001, TestSize.Level1)
      */
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(nullptr, 0);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto event = std::make_unique<ArkUI_UIInputEvent>();
     EXPECT_NE(event, nullptr);
@@ -1241,6 +1328,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex001, TestSize.Level1)
     uint32_t pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1266,6 +1354,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex002, TestSize.Level1)
 
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1287,6 +1376,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex003, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1306,12 +1396,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex004, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1333,6 +1425,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex005, TestSize.Level1)
     event->inputEvent = static_cast<void*>(mouseEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1354,6 +1447,7 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex006, TestSize.Level1)
     uint32_t pointerIndex = 1;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1373,12 +1467,14 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex007, TestSize.Level1)
     uint32_t pointerIndex = 0;
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto axisEvent = std::make_unique<ArkUIAxisEvent>();
     event->inputEvent = static_cast<void*>(axisEvent.get());
     pointerIndex = 1;
     sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1400,5 +1496,6 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex008, TestSize.Level1)
     event->inputEvent = static_cast<void*>(axisEvent.get());
     auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 } // namespace OHOS::Ace

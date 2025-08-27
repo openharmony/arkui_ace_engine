@@ -18,14 +18,11 @@
 #include <functional>
 #include <memory>
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
-
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-
-class BorderImageModifier : public Rosen::RSForegroundStyleModifier {
+class BorderImageModifier : public RSForegroundStyleModifier {
 public:
     BorderImageModifier() = default;
     ~BorderImageModifier() override = default;

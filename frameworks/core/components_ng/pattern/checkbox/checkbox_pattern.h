@@ -23,6 +23,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
@@ -154,6 +155,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
 
@@ -165,13 +167,23 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void DumpInfo() override;
-    static int32_t ParseCommand(const std::string& command, bool& selectStatus);
-    void ReportChangeEvent(bool selectStatus);
-    int32_t OnInjectionEvent(const std::string& command) override;
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
@@ -186,6 +198,7 @@ private:
     void HandleBlurEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void RegisterVisibleAreaChange();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
@@ -195,6 +208,7 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
+    void UpdateGroupStatus(FrameNode* frameNode);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
@@ -216,6 +230,10 @@ private:
         const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
     void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
+    void SetNeedAnimation(bool needAnimation);
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
+    void UpdateNavIdAndState(const RefPtr<FrameNode>& host);
 
     CheckboxSettingData checkboxSettingData_;
 
@@ -236,6 +254,8 @@ private:
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
+    bool visible_ = true;
+    bool isUserSetMargin_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

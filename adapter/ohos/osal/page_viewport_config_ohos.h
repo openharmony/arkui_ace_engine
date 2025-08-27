@@ -31,7 +31,7 @@ namespace OHOS::Ace {
 using AvoidAreaInfo = std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>;
 
 class PageViewportConfigOhos : public PageViewportConfig {
-    DECLARE_ACE_TYPE(PageViewportConfigOhos, PageViewportConfig)
+    DECLARE_ACE_TYPE(PageViewportConfigOhos, PageViewportConfig);
 public:
     PageViewportConfigOhos() = default;
     ~PageViewportConfigOhos() = default;
@@ -67,8 +67,8 @@ public:
 
 private:
     struct BackupInfo {
-        int32_t rootWidth = -1;
-        int32_t rootHeight = -1;
+        uint32_t rootWidth = 0;
+        uint32_t rootHeight = 0;
         std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> safeAreas;
     };
     std::stack<BackupInfo> backupInfos_;

@@ -45,19 +45,23 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 }
 
+namespace OHOS::Rosen {
+class RSSyncTransactionController;
+class RSSyncTransactionHandler;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace {
+struct StorageWrapper {
+    std::optional<napi_value> napiStorage_;
+    std::optional<ani_object> aniStorage_;
+};
+
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
-    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
-    ~UIContentImpl()
-    {
-        UnSubscribeEventsPassThroughMode();
-        ProcessDestructCallbacks();
-        DestroyUIDirector();
-        DestroyCallback();
-    }
+    ~UIContentImpl();
 
     // UI content lifeCycles
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
@@ -82,8 +86,10 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // restore
-    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type) override;
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, ani_object storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) override;
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
@@ -105,22 +111,26 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr) override;
     void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {},
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info = nullptr);
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
-    void RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline);
+    void RegisterGetCurrentPageName();
+    void SaveGetCurrentInstanceId();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
+    void RegisterExeAppAIFunction();
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 
@@ -155,6 +165,7 @@ public:
 
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
     void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
@@ -244,6 +255,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
 
     napi_value GetUINapiContext() override;
+    ani_object GetUIAniContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
 
     void UpdateResource() override;
@@ -365,7 +377,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
+        bool isRouter = true, bool ignoreOrientation = false) override;
+    void SetForceSplitConfig(const std::string& configJsonStr) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -397,39 +411,68 @@ public:
         const std::function<void(bool)>& callback) override;
 
     bool ConfigCustomWindowMask(bool enable) override;
+
+    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height);
+
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
-    void SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline);
-    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
-    void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
+    void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
     void AddKeyFrameCanvasNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
+
     void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
     void ExecKeyFrameCachedAnimateAction();
+
     void KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context);
-    bool KeyFrameActionPolicy(const ViewportConfig& config,
-        OHOS::Rosen::WindowSizeChangeReason reason,
+    bool KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
 
+    // intent framework
+    void SetIntentParam(const std::string& intentInfoSerialized,
+        const std::function<void()>&& loadPageCallback, bool isColdStart) override;
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
+    void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& url, ani_object storage, uint32_t focusWindowID) override;
+
+    UIContentErrorCode InitializeWithAniStorage(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage) override;
+
+    UIContentErrorCode InitializeWithAniStorage(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage,
+        const std::string& contentName) override;
+
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
+
 private:
+    void RunIntentPageIfNeeded();
+    void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
     UIContentErrorCode InitializeInner(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper StorageWrapper);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void ProcessDestructCallbacks();
@@ -437,8 +480,6 @@ private:
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
     void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
-
-    void InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container);
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
@@ -461,15 +502,23 @@ private:
     void SetDeviceProperties();
     RefPtr<Platform::AceContainer> CreateContainer(
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe);
+    void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
+        const RefPtr<NG::PipelineContext>& context);
+    void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
     std::string startUrl_;
     int32_t instanceId_ = -1;
+    int32_t lastRotation = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IDisplayIdChangeListener> displayIdChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
@@ -524,6 +573,12 @@ private:
     std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_ = nullptr;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
     std::shared_mutex destructMutex_;
+
+    std::function<void()> loadPageCallback_;
+    std::string intentInfoSerialized_;
+    std::string restoreNavDestinationInfo_;
+
+    VMType vmType_ = VMType::NORMAL;
 };
 
 } // namespace OHOS::Ace

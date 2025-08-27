@@ -160,5 +160,91 @@ HWTEST_F(ViewTest, ViewTest004, TestSize.Level1)
     EXPECT_EQ(resHeight, 30);
 }
 
+/**
+ * @tc.name: LinearGradientBlurViewTest001
+ * @tc.desc: Test SetWidth of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewTest, LinearGradientBlurViewTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: initialize View.
+     * @tc.expected: All pointer is non-null.
+     */
+    View view;
+    auto node =
+        AbstractViewFactory::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<MockAceKitPattern>());
+    EXPECT_NE(node, nullptr);
+    view.node_ = node;
+
+    /**
+     * @tc.steps: Initialize linearGradientBlurPara parameters.
+     */
+    std::vector<std::pair<float, float>> fractionStops;
+    fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    CalcDimension dimensionRadius(0.0);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, NG::GradientDirection::LEFT);
+
+    /**
+     * @tc.steps: Test SetLinearGradientBlur.
+     */
+    view.SetLinearGradientBlur(blurPara);
+    auto frameNode = reinterpret_cast<AceNode*>(node->GetHandle());
+    ASSERT_NE(frameNode, nullptr);
+    const auto& target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    auto graphicsProperty = target->CloneGraphics();
+    ASSERT_NE(graphicsProperty, nullptr);
+    EXPECT_EQ(graphicsProperty->CheckLinearGradientBlur(blurPara), true);
+    EXPECT_EQ(graphicsProperty->GetLinearGradientBlurValue(), blurPara);
+}
+
+/**
+ * @tc.name: LinearGradientBlurViewTest002
+ * @tc.desc: Test SetWidth of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewTest, LinearGradientBlurViewTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Build a object viewAbstract and set visual state.
+     */
+    NG::ViewStackProcessor viewStackProcessor;
+    int32_t index = 1;
+    auto state = static_cast<VisualState>(index);
+    viewStackProcessor.GetInstance()->SetVisualState(state);
+    bool result = NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: initialize View.
+     */
+    View view;
+    auto node =
+        AbstractViewFactory::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<MockAceKitPattern>());
+    EXPECT_NE(node, nullptr);
+    view.node_ = node;
+
+    /**
+     * @tc.steps: Initialize linearGradientBlurPara parameters.
+     */
+    std::vector<std::pair<float, float>> fractionStops;
+    fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    CalcDimension dimensionRadius(60.0);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, NG::GradientDirection::BOTTOM);
+
+    /**
+     * @tc.steps: Test "SetLinearGradientBlur", when "IsCurrentVisualStateProcess" return false.
+     */
+    view.SetLinearGradientBlur(blurPara);
+    auto frameNode = reinterpret_cast<AceNode*>(node->GetHandle());
+    ASSERT_NE(frameNode, nullptr);
+    const auto& renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto graphicsProperty = renderContext->CloneGraphics();
+    ASSERT_NE(graphicsProperty, nullptr);
+    EXPECT_EQ(graphicsProperty->CheckLinearGradientBlur(blurPara), true);
+    EXPECT_EQ(graphicsProperty->GetLinearGradientBlurValue(), blurPara);
+}
 }
 

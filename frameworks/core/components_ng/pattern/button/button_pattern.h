@@ -69,7 +69,6 @@ public:
     void SetClickedColor(const Color& color)
     {
         clickedColor_ = color;
-        isSetClickedColor_ = true;
     }
 
     void SetBlendColor(const std::optional<Color>& blendClickColor, const std::optional<Color>& blendHoverColor)
@@ -113,6 +112,21 @@ public:
     bool GetIsInHover() const
     {
         return isInHover_;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
     }
 
     RefPtr<InputEvent>& GetHoverListener()
@@ -195,16 +209,30 @@ public:
 
     void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
 
+    void HandleBackgroundColor();
+
+    void UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType);
+
+    void UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType);
+
+    void UpdateComponentDimension(const CalcDimension value, const ButtonDimensionType buttonDimensionType);
+
+    void UpdateComponentDouble(const double value, const ButtonDoubleType buttonDoubleType);
+
+    void UpdateComponentFamilies(const std::vector<std::string>& value, const ButtonStringType buttonStringType);
+
+    std::string VectorToString(const std::vector<std::string>& vec, const std::string& delimiter = " ");
+
+    std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
-    void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();
     void HandlePressedStyle();
     void HandleNormalStyle();
     void HandleHoverEvent(bool isHover);
-    void HandleBackgroundColor();
     void UpdateTexOverflow(bool isMarqueeStart);
     void HandleEnabled();
     void InitButtonLabel();
@@ -212,7 +240,7 @@ protected:
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
-    Color clickedColor_;
+    std::optional<Color> clickedColor_ = std::nullopt;
 
 private:
     static void UpdateTextLayoutProperty(
@@ -224,11 +252,11 @@ private:
     static void UpdateTextFontScale(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void OnFontScaleConfigurationUpdate() override;
+    void InitButtonAlphaOffscreen();
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
-    bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -244,6 +272,7 @@ private:
     bool isPress_ = false;
     bool isApplyShadow_ = true;
     bool isLayoutUpdate_ = false;
+    bool isInitButtonAlphaOffscreen_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;

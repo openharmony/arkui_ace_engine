@@ -85,8 +85,8 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class FontWeightModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textFontWeight');
@@ -384,15 +384,15 @@ class TextMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextLetterSpacingModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetLetterSpacing(node);
-    } else if (!isNumber(this.value) && !isString(this.value)) {
+    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetLetterSpacing(node);
     } else {
       getUINativeModule().text.setLetterSpacing(node, this.value!);
@@ -403,8 +403,8 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
-  constructor(value: LengthMetrics) {
+class TextLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
+  constructor(value: ArkLineSpacing) {
     super(value);
   }
   static identity: Symbol = Symbol('textLineSpacing');
@@ -414,10 +414,28 @@ class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
     } else if (!isObject(this.value)) {
       getUINativeModule().text.resetLineSpacing(node);
     } else {
-      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+      getUINativeModule().text.setLineSpacing(node, this.value.value.value, this.value.value.unit,
+        this.value.onlyBetweenLines);
     }
   }
+ 
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
+class TextOptimizeTrailingSpaceModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOptimizeTrailingSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOptimizeTrailingSpace(node);
+    } else {
+      getUINativeModule().text.setOptimizeTrailingSpace(node, this.value!);
+    }
+  }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -440,15 +458,15 @@ class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow 
   }
 }
 
-class TextBaselineOffsetModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextBaselineOffsetModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: symbol = Symbol('textBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetBaselineOffset(node);
-    } else if (!isNumber(this.value) && !isString(this.value)) {
+    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetBaselineOffset(node);
     } else {
       getUINativeModule().text.setBaselineOffset(node, this.value!);
@@ -556,9 +574,7 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
@@ -583,14 +599,10 @@ class TextFontModifier extends ModifierWithKey<Font> {
     if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-      isResourceEqual(this.stageValue.size, this.value.size)) ||
-      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size)) &&
-      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-        isResourceEqual(this.stageValue.family, this.value.family)) ||
-        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-          this.stageValue.family === this.value.family))) {
+    if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+      this.stageValue.size === this.value.size) &&
+      (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+        this.stageValue.family === this.value.family)) {
       return false;
     } else {
       return true;
@@ -859,6 +871,82 @@ class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeSt
   }
 }
 
+class TextEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().text.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextShaderStyleModifier extends ModifierWithKey<{
+  center: Array<any>;
+  radius: number | string;
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<[ ResourceColor, number ]>;
+  repeating?: boolean;
+  color: ResourceColor;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+    color: ResourceColor;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textShaderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetShaderStyle(node, this.value);
+    }
+    else {
+      if (this.value.options) {
+        getUINativeModule().text.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextVerticalAlignModifier extends ModifierWithKey<TextVerticalAlign> {
+  constructor(value: TextVerticalAlign) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textVerticalAlignIdentity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextVerticalAlign(node);
+    }
+    else {
+      getUINativeModule().text.setTextVerticalAlign(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -914,12 +1002,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextAttribute {
     let fontWeightStr: string = '400';
     if (isNumber(value)) {
       fontWeightStr = value.toString();
     } else if (isString(value)) {
       fontWeightStr = String(value);
+    } else if (isResource(value)) {
+        modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, value);
+        return this;
     }
     modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, fontWeightStr);
     return this;
@@ -948,19 +1039,26 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }
-  letterSpacing(value: number | string): TextAttribute {
+  letterSpacing(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
-  lineSpacing(value: LengthMetrics): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
+  lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute {
+    let arkLineSpacing = new ArkLineSpacing();
+    arkLineSpacing.value = value;
+    arkLineSpacing.onlyBetweenLines = options.onlyBetweenLines;
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
+    return this;
+  }
+  optimizeTrailingSpace(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextCaseModifier.identity, TextTextCaseModifier, value);
     return this;
   }
-  baselineOffset(value: number | string): TextAttribute {
+  baselineOffset(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextBaselineOffsetModifier.identity, TextBaselineOffsetModifier, value);
     return this;
   }
@@ -1039,7 +1137,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
-  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
     return this;
@@ -1066,6 +1164,25 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
     modifierWithKey(
       this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
+    return this;
+  }
+  enableAutoSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextEnableAutoSpacingModifier.identity, TextEnableAutoSpacingModifier, value);
+    return this;
+  }
+  shaderStyle(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+  }): this {
+    modifierWithKey(this._modifiersWithKeys, TextShaderStyleModifier.identity, TextShaderStyleModifier, value);
+    return this;
+  }
+  textVerticalAlign(value: TextVerticalAlign): this {
+    modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
     return this;
   }
 }

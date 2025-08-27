@@ -42,7 +42,8 @@ public:
 };
 
 void AnimationUtils::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+    const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& wrapFinishCallback, const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().OpenAnimation();
@@ -52,7 +53,7 @@ void AnimationUtils::OpenImplicitAnimation(
     }
 }
 
-bool AnimationUtils::CloseImplicitAnimation()
+bool AnimationUtils::CloseImplicitAnimation(const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
@@ -60,7 +61,7 @@ bool AnimationUtils::CloseImplicitAnimation()
     return false;
 }
 
-bool AnimationUtils::CloseImplicitCancelAnimation()
+bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
@@ -68,13 +69,21 @@ bool AnimationUtils::CloseImplicitCancelAnimation()
     return true;
 }
 
-bool AnimationUtils::IsImplicitAnimationOpen()
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+    return CancelAnimationStatus::SUCCESS;
+}
+
+bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     return false;
 }
 
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
-    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
+    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback, const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
@@ -102,13 +111,15 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     }
 }
 
-void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
+    const PropertyCallback& callback, const RefPtr<PipelineBase>& context)
 {
     if (callback) {
         callback();
     }
 }
-void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback,
+    const RefPtr<PipelineBase>& context)
 {
     if (callback) {
         callback();
@@ -116,12 +127,24 @@ void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callbac
 }
 
 void AnimationUtils::AnimateWithCurrentOptions(
-    const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)
+    const PropertyCallback& callback, const FinishCallback& finishCallback,
+    bool timingSensitive, const RefPtr<PipelineBase>& context)
 {}
-void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback) {}
+
+void AnimationUtils::AnimateWithCurrentCallback(
+    const AnimationOption& option, const PropertyCallback& callback,
+    const RefPtr<PipelineBase>& context)
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().OpenAnimation();
+    callback();
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+}
 
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
-    const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
+    const PropertyCallback& callback, const FinishCallback& finishCallback,
+    const RepeatCallback& repeatCallback, const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
@@ -183,7 +206,8 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
 #endif
 }
 
-void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback,
+    const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     if (AnimManager::GetInstance().IsAnimationOpen()) {

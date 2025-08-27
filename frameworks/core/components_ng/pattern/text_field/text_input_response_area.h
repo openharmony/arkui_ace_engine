@@ -56,14 +56,14 @@ public:
     void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
         float hoverRectHeight, bool isFocus);
 
+    virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
+
     virtual float GetHoverIconPadding() const
     {
         return 0.0f;
     }
 
     void SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight);
-
-    virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
 
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
@@ -80,10 +80,7 @@ class PasswordResponseArea : public TextInputResponseArea {
 public:
     PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
         : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
-    ~PasswordResponseArea()
-    {
-        ClearArea();
-    }
+    ~PasswordResponseArea() = default;
 
     void InitResponseArea() override;
 
@@ -115,12 +112,12 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
+
     float GetHoverIconPadding() const override
     {
         return hoverIconPadding_;
     }
-
-    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
 
 private:
     void LoadImageSourceInfo();
@@ -148,7 +145,7 @@ private:
     std::optional<ImageSourceInfo> hideIcon_;
     RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
-    Color symbolColor_;
+    Color symbolColor_ = Color();
     float passwordHoverSize_ = 0.0f;
     float hoverIconPadding_ = 0.0f;
 };
@@ -159,10 +156,7 @@ class UnitResponseArea : public TextInputResponseArea {
 public:
     UnitResponseArea(const WeakPtr<Pattern>& hostPattern, const RefPtr<NG::UINode>& unitNode)
         : TextInputResponseArea(hostPattern), unitNode_(std::move(unitNode)) {}
-    ~UnitResponseArea()
-    {
-        ClearArea();
-    }
+    ~UnitResponseArea() = default;
 
     void InitResponseArea() override;
 
@@ -214,12 +208,12 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
+
     float GetHoverIconPadding() const override
     {
         return hoverIconPadding_;
     }
-
-    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
 
 private:
     bool IsShowClean() const;

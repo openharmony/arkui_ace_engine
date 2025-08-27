@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
@@ -85,7 +86,6 @@ void ListLayoutTestNg::PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t e
     auto modifier = paintMethod->GetContentModifier(nullptr);
     auto listContentModifier = AceType::DynamicCast<ListContentModifier>(modifier);
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(isClip ? 1 : 0);
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -106,6 +106,33 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+}
+
+/**
+ * @tc.name: GetListDriection001
+ * @tc.desc: Test GetListDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetListDriection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list, default direction is vertical.
+     */
+    CreateList();
+    CreateDone();
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+
+    /**
+     * @tc.steps: step2. Set direction to horizontal.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::HORIZONTAL));
+
+    /**
+     * @tc.steps: step3. Set direction to vertical.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::VERTICAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
 }
 
 /**
@@ -325,6 +352,53 @@ HWTEST_F(ListLayoutTestNg, ContentEndOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListReMeasureTest001
+ * @tc.desc: Test List noLayoutItems_ performance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list
+     * @tc.expected: List index range is 0-3
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+
+    /**
+     * @tc.steps: step2. call measure of List for first time
+     * @tc.expected: List itemPosition_ index range is 0-3, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(layoutAlgorithm->GetStartIndex(), 0); // 0: start index
+    EXPECT_EQ(layoutAlgorithm->GetEndIndex(), 3); // 3: end index
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    /**
+     * @tc.steps: step3. change list mainSize to half and call measure of List for second time
+     * @tc.expected: check item 2 and item 3 in noLayoutedItems
+     */
+    EXPECT_TRUE(layoutAlgorithm);
+    EXPECT_TRUE(layoutAlgorithm->noLayoutedItems_.empty());
+    std::optional<float> width = 240.f; // 240.f: origin width
+    std::optional<float> height = 200.f; // 200.f: half of origin contentMainSize
+    OptionalSizeF selfIdealSizeTemp(width, height);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = selfIdealSizeTemp;
+    layoutProperty_->layoutConstraint_ = contentConstraint;
+    layoutProperty_->contentConstraint_ = contentConstraint;
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->noLayoutedItems_.empty());
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 2); // 2: start index
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.rbegin()->first, 3); // 3: end index
+}
+
+/**
  * @tc.name: ContentOffset001
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
@@ -503,13 +577,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     auto group1 = GetChildFrameNode(frameNode_, 1);
     auto groupRect = group1->GetGeometryNode()->GetFrameRect();
     float groupPos = groupRect.Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group1, 3);
+    auto item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -518,7 +592,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     group1 = GetChildFrameNode(frameNode_, 1);
     groupRect = group1->GetGeometryNode()->GetFrameRect();
     groupPos = groupRect.Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -526,7 +600,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group1, 3);
+    item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 }
 
@@ -562,9 +636,9 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(header0Rect.Top(), contentStartOffset - groupPos);
 
     auto group1 = GetChildFrameNode(frameNode_, 1);
-    groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto footer1Rect = GetChildRect(group1, 1);
-    EXPECT_EQ(footer1Rect.Bottom(), 100.f);
+    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footer1Rect = GetChildRect(group1, footerIndex);
+    EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
 
     /**
      * @tc.steps: step3. Scroll To ListItem in group.
@@ -573,13 +647,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     JumpToItemInGroup(1, 0, false, ScrollAlign::START);
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group2, 3);
+    auto item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -587,7 +661,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -595,7 +669,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group2, 3);
+    item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 }
 
@@ -970,6 +1044,78 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
             EXPECT_EQ(child.second.length, WIDTH);
         }
     }
+}
+
+/**
+ * @tc.name: PaintMethod006
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+{
+    auto itemDivider = ITEM_DIVIDER;
+    ListModelNG model = CreateList();
+    model.SetDivider(itemDivider);
+    model.SetLanes(2);
+    model.SetStackFromEnd(true);
+    model.SetCachedCount(2);
+    model.SetInitialIndex(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_EQ(pattern_->laneIdx4Divider_, 0);
+}
+
+/**
+ * @tc.name: PaintMethod007
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    model.SetCachedCount(2, true);
+    model.SetInitialIndex(2);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    ScrollTo(50.0f);
+
+    /**
+     * @tc.steps: step1. Set clip to false
+     * @tc.expected: the bounds rect of list content modifier equals to list real layout size.
+     */
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdateClipEdge(false);
+    FlushUITasks();
+
+    auto paintMethod = UpdateContentModifier();
+    auto mainSize =
+        paintMethod->itemPosition_.rbegin()->second.endPos - paintMethod->itemPosition_.begin()->second.startPos;
+    auto boundsRect = pattern_->listContentModifier_->GetBoundsRect().value_or(RectF());
+    EXPECT_EQ(boundsRect.GetX(), 0.0f);
+    EXPECT_EQ(boundsRect.GetY(), std::min(0.0f, paintMethod->itemPosition_.begin()->second.startPos));
+    EXPECT_EQ(boundsRect.Width(), frameNode_->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(boundsRect.Height(), std::max(frameNode_->GetGeometryNode()->GetFrameSize().Height(), mainSize));
+
+    /**
+     * @tc.steps: step2. Set clip to true
+     * @tc.expected: the bounds rect of list content modifier equals to list size.
+     */
+    renderContext->UpdateClipEdge(true);
+    FlushUITasks();
+
+    boundsRect = pattern_->listContentModifier_->GetBoundsRect().value_or(RectF());
+    EXPECT_EQ(boundsRect.GetX(), 0.0f);
+    EXPECT_EQ(boundsRect.GetY(), 0.0f);
+    EXPECT_EQ(boundsRect.Width(), frameNode_->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(boundsRect.Height(), frameNode_->GetGeometryNode()->GetFrameSize().Height());
 }
 
 /**
@@ -1725,8 +1871,8 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(1)
-        .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
@@ -1752,6 +1898,34 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(WIDTH, HEIGHT)));
+}
+
+/**
+ * @tc.name: ListLayout_SafeArea003
+ * @tc.desc: Test list layout with expandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    model.SetScrollBar(DisplayMode::ON);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    FlushUITasks();
+    EXPECT_EQ(pattern_->contentEndOffset_, 100);
+
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier();
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar->GetEstimatedHeigh(), 2000);
 }
 
 /**
@@ -1836,6 +2010,41 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostListItemPressStyleTask003
+ * @tc.desc: Test list layout with PostListItemPressStyleTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
+    auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
+    stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED | UI_STATE_SELECTED);
+    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
+    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto& child : groupPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+}
+
+/**
  * @tc.name: ChildrenMainSize005
  * @tc.desc: Test childrenMainSize layout
  * @tc.type: FUNC
@@ -1910,6 +2119,44 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
     EXPECT_TRUE(Position(-450.f));
     ScrollToIndex(9, false, ScrollAlign::END);
     EXPECT_TRUE(Position(-650.f));
+}
+
+/**
+ * @tc.name: ListIsAtBottom001
+ * @tc.desc: test func IsAtBottom when List is at bottom and chain animation opened
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init List then slide List by Scroller to bottom.
+       @tc.expected: List is at bottom and startIndex_ is 1.
+     */
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetInitialIndex(0);
+    CreateListItems(TOTAL_ITEM_NUMBER / 2); // 2: half of the total
+    CreateDone();
+    pattern_->ScrollToIndex(LAST_ITEM);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step2. slide List over bottom.
+     * @tc.expected: isAtBottom also return true and startIndex_ maintain 1.
+     */
+    UpdateCurrentOffset(-100.f);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step3. simulate chain animation and item 1 out of screen for chain delta.
+     * @tc.expected: startIndex_ change to 2 and isAtBottom also return true.
+     */
+    pattern_->itemPosition_.erase(1);
+    pattern_->startMainPos_ = pattern_->itemPosition_[2].startPos - pattern_->spaceWidth_;
+    EXPECT_TRUE(pattern_->IsAtBottom());
 }
 
 /**
@@ -2089,6 +2336,158 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount004
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: Not force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [ &sizeChanged ](const RectF& oldRect, const RectF& rect){ sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
+    EXPECT_NE(cachedItem->oldGeometryNode_, nullptr);
+    FlushUITasks(frameNode_);
+    EXPECT_FALSE(sizeChanged);
+    EXPECT_NE(cachedItem->oldGeometryNode_, nullptr);
+
+    /**
+     * @tc.steps: step3. FlushIdleTask
+     * @tc.expected: call onSizeChanged.
+     */
+    FlushIdleTask(listPattern);
+    EXPECT_TRUE(sizeChanged);
+    EXPECT_EQ(cachedItem->oldGeometryNode_, nullptr);
+}
+
+/**
+ * @tc.name: ListRepeatCacheCount005
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetCachedCount(2, true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), true);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [&sizeChanged](const RectF& oldRect, const RectF& rect) { sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 550);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 600);
+}
+
+/**
+ * @tc.name: ListRepeatCacheCount006
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step3. Flush UI Task
+     * @tc.expected: After ListItem 4 is marked as dirty， ListItem 5 and 6 still remains cached.
+     */
+    cachedItem->SetLayoutDirtyMarked(true);
+    FlushUITasks();
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+}
+
+/**
  * @tc.name: GetRepeatCountInfo001
  * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
  * @tc.type: FUNC
@@ -2250,7 +2649,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
     UpdateCurrentOffset(-250);
     FlushIdleTask(listPattern);
     childrenCount = repeat->GetChildren().size();
-    EXPECT_EQ(childrenCount, 5);
+    EXPECT_EQ(childrenCount, 6);
 
     /**
      * @tc.steps: step3. Flush Idle Task
@@ -2266,6 +2665,67 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
     EXPECT_EQ(cachedItem->IsActive(), false);
     EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
     EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
+}
+
+/**
+ * @tc.name: ListCacheCount002
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+
+    /**
+     * @tc.steps: step2. ResetCacheRange
+     * @tc.expected: 2 ListItem cached.
+     */
+    ListModelNG::ResetCacheRange(AceType::RawPtr(frameNode_));
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 2);
+
+    /**
+     * @tc.steps: step3. SetCachedCount 4
+     * @tc.expected: 4 ListItem cached.
+     */
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 4);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 4);
+
+    /**
+     * @tc.steps: step4. SetCacheRange
+     * @tc.expected: 3 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+
+    /**
+     * @tc.steps: step5. UpdateCurrentOffset
+     * @tc.expected: 5 ListItem cached.
+     */
+    UpdateCurrentOffset(-250);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(0), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(1), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(7), 1);
 }
 
 /**
@@ -2812,6 +3272,39 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListAddDelChildTest004
+ * @tc.desc: Test list delete item with List size change and layout backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(2); /* 2: item count */
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(300)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. update offset.
+     * @tc.expected: offset is 80.
+     */
+    UpdateCurrentOffset(-80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 80.f);
+
+    /**
+     * @tc.steps: step3. Remove child and List size change and scroll backward.
+     * @tc.expected: offset is 0.
+     */
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(WIDTH), CalcLength(50.f)));
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    UpdateCurrentOffset(80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
  * @tc.name: FadingEdge001
  * @tc.desc: Test FadingEdge property
  * @tc.type: FUNC
@@ -2885,5 +3378,452 @@ HWTEST_F(ListLayoutTestNg, FadingEdge002, TestSize.Level1)
     paintMethod = UpdateContentModifier();
     EXPECT_TRUE(paintMethod->isFadingTop_);
     EXPECT_FALSE(paintMethod->isFadingBottom_);
+}
+
+/**
+ * @tc.name: FadingEdge003
+ * @tc.desc: Test FadingEdge property with safe area
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 400.f);
+
+    /**
+     * @tc.steps: step2. Update Safe Area
+     * @tc.expected: overlay frame size expand safe area.
+     */
+    frameNode_->GetGeometryNode()->SetSelfAdjust(RectF(0, 0, 0, 10.f));
+    FlushUITasks(frameNode_);
+    geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
+ * @tc.name: FadingEdge004
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom and both top and bottom have gradient
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both and both top and bottom have gradient
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top and both top and bottom have gradient
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+}
+
+/**
+ * @tc.name: FadingEdge005
+ * @tc.desc: Test fadingEdge change from user
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is src_over
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    EXPECT_TRUE(paintMethod);
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step2. user close fadingEdge
+     * @tc.expected: blend mode none is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::NONE);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 0); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step3. user re-open fadingEdge
+     * @tc.expected: blend mode src_over is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+}
+
+/**
+ * @tc.name: FadingEdge006
+ * @tc.desc: Test fadingEdge change from user
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List without fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is null
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_FALSE(blendMode);
+
+    /**
+     * @tc.steps: step2. user open fadingEdge
+     * @tc.expected: blend mode src_over is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+
+    /**
+     * @tc.steps: step3. user re-close fadingEdge
+     * @tc.expected: blend mode none is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::NONE);
+}
+
+/**
+ * @tc.name: FadingEdge007
+ * @tc.desc: Test fadingEdge change from itemTotalSize less than contentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is src_over
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+
+    /**
+     * @tc.steps: step2. change itemTotalSize less than contentSize
+     * @tc.expected: blend mode maintain SRC_OVER and gradient color size is 4
+     */
+    pattern_->contentMainSize_ = FLT_MAX;
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    pattern_->UpdateFadingEdge(paintMethod);
+    paintMethod->UpdateFadingGradient(renderContext);
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+}
+
+/**
+ * @tc.name: InitialIndex001
+ * @tc.desc: Test the initialIndex and scrollToIndex priority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, InitialIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    pattern_->ScrollToIndex(2);
+    int32_t settingApiVersion = 13;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Get the first ListItem index.
+     * @tc.expected: api version less than 14, initialIndex first.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 1));
+}
+
+/**
+ * @tc.name: InitialIndex002
+ * @tc.desc: Test the initialIndex and scrollToIndex priority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, InitialIndex002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    pattern_->ScrollToIndex(2);
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Get the first ListItem index.
+     * @tc.expected: api version reach 14, scrollToIndex first.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 2));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = list->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent and padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ViewAbstract::SetPadding(AceType::RawPtr(list), CalcLength(10.f));
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's height is 280.
+    auto listPattern = list->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto height = listPattern->contentMainSize_;
+    EXPECT_EQ(height, 280.0f);
+}
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    list->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = list->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 10.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTestWithIgnore002
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    cachedItem->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = cachedItem->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(240.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 440.0f));
 }
 } // namespace OHOS::Ace::NG

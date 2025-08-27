@@ -50,12 +50,24 @@ public:
     {
         return MakeRefPtr<BadgeAccessibilityProperty>();
     }
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateBadgeValue(const std::string& badgeValue, bool isFirstLoad = false);
+    void UpdateColor(const Color& color, bool isFirstLoad = false);
+    void UpdateBadgeColor(const Color& badgeColor, bool isFirstLoad = false);
+    void UpdateBorderColor(const Color& borderColor, bool isFirstLoad = false);
+    void UpdateFontWeight(FontWeight fontWeight, bool isFirstLoad = false);
+    void UpdateFontSize(const CalcDimension& fontSize, bool isDefaultFontSize, bool isFirstLoad = false);
+    void UpdateBadgeCircleSize(const CalcDimension& badgeCircleSize, bool isDefaultBadgeSize, bool isFirstLoad = false);
+    void UpdateBadgePositionX(const CalcDimension& positionX, bool isFirstLoad = false);
+    void UpdateBadgePositionY(const CalcDimension& positionY, bool isFirstLoad = false);
+    void UpdateBorderWidth(const CalcDimension& borderWidth, bool isFirstLoad = false);
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     int32_t textNodeId_ = -2;
 };
 } // namespace OHOS::Ace::NG

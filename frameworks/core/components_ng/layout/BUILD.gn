@@ -17,6 +17,7 @@ import(
 build_component_ng("layout_ng") {
   sources = [
     "box_layout_algorithm.cpp",
+    "drawing_layout_utils.cpp",
     "layout_algorithm.cpp",
     "layout_property.cpp",
     "layout_wrapper.cpp",

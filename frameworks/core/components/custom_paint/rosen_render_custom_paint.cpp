@@ -35,7 +35,11 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 #include "include/utils/SkParsePath.h"
 
 #include "base/geometry/dimension.h"
@@ -55,6 +59,7 @@
 #endif
 #include "core/image/image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -392,7 +397,11 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
         return UNSUPPORTED;
     }
     SkString info(len);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(result->data(), result->size(), info.data());
+#else
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
@@ -979,8 +988,8 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
     double top = param.y - param.radius + offset.GetY();
     double right = param.x + param.radius + offset.GetX();
     double bottom = param.y + param.radius + offset.GetY();
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -1042,14 +1051,14 @@ void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param
 void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(param.startAngle, ACE_PI * 2.0);
+    double endAngle = std::fmod(param.endAngle, ACE_PI * 2.0);
+    startAngle = (startAngle < 0.0 ? startAngle + ACE_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + ACE_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
-    double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = param.rotation * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -1425,8 +1434,8 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     RSPoint point1(x - r + offset.GetX(), y - r + offset.GetY());
     RSPoint point2(x + r + offset.GetX(), y + r + offset.GetY());
 #endif
-    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
         sweepAngle =
@@ -1512,12 +1521,12 @@ void RosenRenderCustomPaint::Path2DEllipse(const Offset& offset, const PathArgs&
     double y = args.para2;
     double rx = args.para3;
     double ry = args.para4;
-    double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double rotation = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double startAngle = std::fmod(args.para6, ACE_PI * 2.0);
+    double endAngle = std::fmod(args.para7, ACE_PI * 2.0);
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    startAngle = (startAngle < 0.0 ? startAngle + ACE_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + ACE_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -2021,9 +2030,9 @@ void RosenRenderCustomPaint::UpdatePaintShader(
 void RosenRenderCustomPaint::Rotate(double angle)
 {
 #ifndef USE_ROSEN_DRAWING
-    skCanvas_->rotate(angle * 180 / M_PI);
+    skCanvas_->rotate(angle * 180 / ACE_PI);
 #else
-    drawingCanvas_->Rotate(angle * 180 / M_PI);
+    drawingCanvas_->Rotate(angle * 180 / ACE_PI);
 #endif
 }
 

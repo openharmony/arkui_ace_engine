@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -33,6 +34,7 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/icon_theme.h"
@@ -937,5 +939,126 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogLayoutAlgorithmTest001, Test
     layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapperNode));
     EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Width(), 0.f);
     EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Height(), 0.f);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Text OnColorConfigurationUpdate function when ConfigChangePerform is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(node->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(node));
+    ASSERT_NE(dialogNode, nullptr);
+    auto layoutWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto swiperNode = dialogPattern->GetSwiperFrameNode();
+    ASSERT_NE(swiperNode, nullptr);
+    const auto& swiperNodeLayoutProperty = swiperNode->GetLayoutProperty();
+    ASSERT_NE(swiperNodeLayoutProperty, nullptr);
+    swiperNodeLayoutProperty->CleanDirty();
+
+    /**
+     * @tc.steps: step3. Call OnColorConfigurationUpdate function.
+     */
+    dialogPattern->OnColorConfigurationUpdate();
+    auto layoutFlag = swiperNodeLayoutProperty->GetPropertyChangeFlag();
+    EXPECT_EQ(layoutFlag, PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test CalendarPickerPattern OnColorConfigurationUpdate function when ConfigChangePerform is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step3. Call OnColorConfigurationUpdate function.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    Color color = layoutProperty->GetColor().value();
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    Color expectColor = calendarTheme->GetEntryFontColor();
+    EXPECT_EQ(color, expectColor);
+}
+
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate001
+ * @tc.desc: Test CalendarPickerPattern OnFontScaleConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create CalendarPicker.
+    * @tc.expected: step1. Create success.
+    */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    pipelineContext->fontScale_ = AgingAdapationDialogUtil::GetDialogMaxFontSizeScale();
+
+    /**
+    * @tc.steps: step2. Call OnFontScaleConfigurationUpdate function.
+    */
+    pickerPattern->OnFontScaleConfigurationUpdate();
+    auto monthFrameNode = FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(monthFrameNode, nullptr);
+    auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(monthPattern, nullptr);
+    EXPECT_TRUE(monthPattern->IsLargeSize(calendarTheme));
 }
 } // namespace OHOS::Ace::NG

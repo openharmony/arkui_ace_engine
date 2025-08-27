@@ -87,11 +87,17 @@ void ResetImageSpanObjectFit(ArkUINodeHandle node)
 }
 
 void SetImageSpanTextBackgroundStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length,
+    void* style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && style) {
+        auto textBackgroundStyle = reinterpret_cast<TextBackgroundStyle*>(style);
+        ImageSpanView::SetPlaceHolderStyle(frameNode, *textBackgroundStyle);
         return;
     }
     TextBackgroundStyle font;
@@ -193,24 +199,6 @@ void ResetImageSpanOnError(ArkUINodeHandle node)
     ImageSpanView::SetOnError(frameNode, nullptr);
 }
 
-void SetImageSpanColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
-{
-    CHECK_NULL_VOID(array);
-    if (length != COLOR_FILTER_MATRIX_SIZE) {
-        return;
-    }
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
-}
-
-void ResetImageSpanColorFilter(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
-}
-
 /**
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
@@ -242,6 +230,32 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::ResetBorderRadius(frameNode);
 }
+
+void SetImageSpanColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
+{
+    CHECK_NULL_VOID(array);
+    if (length != COLOR_FILTER_MATRIX_SIZE) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
+}
+
+void ResetImageSpanColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+}
+
+void SetImageSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+    ArkUI_Bool isUriPureNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetSrc(frameNode, src, bundleName, moduleName, isUriPureNumber);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -264,11 +278,12 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .resetImageSpanOnComplete = ResetImageSpanOnComplete,
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
-        .setImageSpanColorFilter = SetImageSpanColorFilter,
-        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
         .setImageSpanBorderRadius = SetImageSpanBorderRadius,
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
+        .setImageSpanColorFilter = SetImageSpanColorFilter,
+        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
+        .setImageSpanSrc = SetImageSpanSrc,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -293,6 +308,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         .resetImageSpanOnComplete = ResetImageSpanOnComplete,
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
+        .setImageSpanSrc = SetImageSpanSrc,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

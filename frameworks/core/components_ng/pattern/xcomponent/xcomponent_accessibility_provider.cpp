@@ -24,15 +24,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SEND_EVENT_FAILED = -1;
 
-std::shared_ptr<ArkUI_AccessibilityProvider> GetAccessbilityProvider(
+ArkUI_AccessibilityProvider* GetAccessbilityProvider(
     const WeakPtr<XComponentPattern>& weakPattern)
 {
     auto pattern = weakPattern.Upgrade();
     CHECK_NULL_RETURN(pattern, nullptr);
-    auto pair = pattern->GetNativeXComponent();
-    auto nativeXComponentImpl = pair.first;
-    CHECK_NULL_RETURN(nativeXComponentImpl, nullptr);
-    return nativeXComponentImpl->GetAccessbilityProvider();
+    return pattern->GetNativeProvider();
 }
 }
 int32_t XComponentAccessibilityProvider::FindAccessibilityNodeInfosById(

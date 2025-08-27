@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"
@@ -209,12 +210,15 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         CheckBoxGroupModel::GetInstance()->ResetSelectedColor();
-        return;
+    } else {
+        CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-
-    CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxGroupModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxGroupColorType::SELECTED_COLOR);
+    }
 }
 
 void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
@@ -223,12 +227,16 @@ void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    if (!ParseJsColor(info[0], unSelectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], unSelectedColor, resObj)) {
         CheckBoxGroupModel::GetInstance()->ResetUnSelectedColor();
-        return;
+    } else {
+        CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
     }
-
-    CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxGroupModel::GetInstance()->CreateWithColorResourceObj(
+            resObj, CheckBoxGroupColorType::UN_SELECTED_COLOR);
+    }
 }
 
 void JSCheckboxGroup::Mark(const JSCallbackInfo& info)

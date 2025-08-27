@@ -29,6 +29,7 @@
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -48,6 +49,13 @@ public:
     }
 
     virtual void NotifyUIEvent(int32_t eventType, const std::unordered_map<std::string, std::string>& eventParams)
+    {
+        LOGI("NotifyUIEvent eventType %{public}d", eventType);
+        eventType_ = eventType;
+    }
+
+    virtual void NotifyUIEvent(
+        int32_t eventType, const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
     {
         LOGI("NotifyUIEvent eventType %{public}d", eventType);
         eventType_ = eventType;
@@ -197,6 +205,12 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
     exposureCfg = { "", 0.0, 0 };
     Recorder::NodeDataCache::Get().GetExposureCfg("pages/ScrollPage", "scroll_item_2", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
+    auto eventParams = std::make_shared<std::unordered_map<std::string, std::string>>();
+    eventParams->emplace("id", "abc");
+    observer->NotifyUIEvent(1, eventParams);
+    EXPECT_EQ(observer->GetEventType(), 1);
+    observer->NotifyUIEvent(2, *eventParams);
+    EXPECT_EQ(observer->GetEventType(), 2);
 }
 
 /**
@@ -1384,6 +1398,11 @@ HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
     pageNode->AddChild(pageNode2, 1, false);
     builder.SetHost(pageNode);
     EXPECT_EQ(builder.params_->empty(), false);
+
+    auto pageNode3 = CreatePageNode("pages/Index3");
+    pageNode3->UpdateInspectorId("abc");
+    builder.SetHost(pageNode3);
+    EXPECT_EQ(builder.params_->empty(), false);
 }
 
 /**
@@ -1416,5 +1435,35 @@ HWTEST_F(EventRecorderTest, AddApiTest002, TestSize.Level1)
     EventRecorder::Get().globalSwitch_[7] = true;
     Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params2);
     EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: EventRecorderTest016
+ * @tc.desc: Test builder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, EventRecorderTest016, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder;
+    string value = "";
+    builder.params_->emplace(KEY_TEXT, value);
+    auto pageNode = CreatePageNode("pages/Index");
+    builder.eventType_ = Recorder::EventType::CLICK;
+    builder.SetHost(pageNode);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: SimplifiedInspectorTest01
+ * @tc.desc: Test GetInspector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SimplifiedInspectorTest01, TestSize.Level1)
+{
+    TreeParams params;
+    params.infoType = InspectorInfoType::WEB_LANG;
+    auto inspector = std::make_shared<NG::SimplifiedInspector>(0, params);
+    auto tree = inspector->GetInspector();
+    EXPECT_TRUE(tree.empty());
 }
 } // namespace OHOS::Ace

@@ -350,8 +350,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         }
 
         if (!node4Index) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> key '%{public}s' not in caches and failed to build.",
-                static_cast<int32_t>(index), key->c_str());
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> node not in caches and failed to build.",
+                static_cast<int32_t>(index));
             return nullptr;
         }
     }
@@ -433,13 +433,15 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     std::map<int32_t, RefPtr<UINode>> children;
     caches_.ForEachL1IndexUINode(children);
     for (const auto& [index, child] : children) {
-        const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
+        if (child) {
+            const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
+        }
         children_.emplace_back(child);
     }
     return children_;
 }
 
-const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector(bool needCacheNode) const
 {
     return children_;
 }
@@ -481,11 +483,6 @@ void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 
     offscreenItems_.from = from;
     offscreenItems_.to = to;
-    for (auto i = from; i < to; i++) {
-        if (i >= startIndex_ && i < startIndex_ + static_cast<int32_t>(totalCount_)) {
-            caches_.RecycleItemsByIndex(i - startIndex_);
-        }
-    }
 }
 
 void RepeatVirtualScrollNode::SetNodeIndexOffset(int32_t start, int32_t /*count*/)

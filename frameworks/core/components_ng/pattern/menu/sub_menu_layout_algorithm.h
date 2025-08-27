@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SubMenuLayoutAlgorithm : public MenuLayoutAlgorithm {
-    DECLARE_ACE_TYPE(SubMenuLayoutAlgorithm, MenuLayoutAlgorithm)
+    DECLARE_ACE_TYPE(SubMenuLayoutAlgorithm, MenuLayoutAlgorithm);
 public:
     SubMenuLayoutAlgorithm() = default;
     ~SubMenuLayoutAlgorithm() override = default;
@@ -28,20 +28,27 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, bool stacked);
-    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
+    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, SubMenuExpandingMode expandingMode);
+    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
+        const RefPtr<FrameNode>& parentMenuItem, bool stacked, LayoutWrapper* layoutWrapper);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize,
         LayoutWrapper* layoutWrapper = nullptr);
-    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked,
-        LayoutWrapper* layoutWrapper = nullptr);
-    float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize);
+    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
+        SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
+    float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize,
+        const RefPtr<FrameNode>& parentMenuItem, bool stacked, LayoutWrapper* layoutWrapper);
     OffsetF GetSubMenuLayoutOffset(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& parentMenuItem,
-        const SizeF& size, bool stacked);
+        const SizeF& size, SubMenuExpandingMode expandingMode);
     void ModifySubMenuWrapper(LayoutWrapper* layoutWrapper);
     void CheckMenuPadding(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void UpdateHoverRegion(RefPtr<FrameNode>& parentMenuItem, const OffsetF& postion, const SizeF& size);
+    float CalcStackSubMenuPositionYHalfScreenWithPreview(const SizeF& size, const RefPtr<FrameNode>& parentMenu,
+        LayoutWrapper* layoutWrapper);
+    float CalcStackSubMenuPositionYHalfScreen(const SizeF& size, const RefPtr<FrameNode>& parentMenu,
+        const RefPtr<FrameNode>& parentMenuItem);
+    float NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY, float positionY);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;

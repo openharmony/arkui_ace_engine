@@ -40,6 +40,18 @@ SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::Op
     return cutoutArea;
 }
 
+bool SafeAreaManager::IsModeResize()
+{
+    return (
+        keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET);
+}
+
+bool SafeAreaManager::IsModeOffset()
+{
+    return (
+        keyboardAvoidMode_ == KeyBoardAvoidMode::OFFSET || keyboardAvoidMode_ == KeyBoardAvoidMode::OFFSET_WITH_CARET);
+}
+
 bool SafeAreaManager::CheckCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
     return cutoutSafeArea_ != GenerateCutOutAreaWithRoot(safeArea, rootSize);
@@ -51,8 +63,7 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::O
     if (cutoutSafeArea_ == safeAreaWithRoot) {
         return false;
     }
-    ACE_SCOPED_TRACE("SafeAreaManager::UpdateCutoutSafeArea %s, safeAreaWithRoot %s", safeArea.ToString().c_str(),
-        safeAreaWithRoot.ToString().c_str());
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateCutoutSafeArea %s", safeAreaWithRoot.ToString().c_str());
     cutoutSafeArea_ = safeAreaWithRoot;
     return true;
 }
@@ -103,6 +114,25 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
     }
     keyboardInset_ = inset;
     ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardSafeArea %s", inset.ToString().c_str());
+    return true;
+}
+
+bool SafeAreaManager::UpdateKeyboardWebSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
+{
+    uint32_t bottom;
+    auto container = Container::Current();
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        bottom = systemSafeArea_.bottom_.start;
+        ACE_SCOPED_TRACE("calc keyboardWebRect use systemSafeArea_.bottom_");
+    } else {
+        bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
+    }
+    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardWebInset_) {
+        return false;
+    }
+    keyboardWebInset_ = inset;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardWebSafeArea %s", inset.ToString().c_str());
     return true;
 }
 
@@ -174,7 +204,7 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
         return false;
     }
     isFullScreen_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsFullScreen %{public}d", isFullScreen_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsFullScreen %{public}d", isFullScreen_);
     return true;
 }
 
@@ -184,7 +214,7 @@ bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
         return false;
     }
     isNeedAvoidWindow_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
     return true;
 }
 
@@ -194,7 +224,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
     return true;
 }
 
@@ -209,7 +239,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
     keyboardAvoidMode_ = value;
     keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
         || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
-    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
     return true;
 }
 
@@ -224,7 +254,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetIsAtomicService %{public}d", isAtomicService_);
+    TAG_LOGI(ACE_SAFE_AREA, "SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 
@@ -296,7 +326,7 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
     return scbSafeArea;
 }
 
-PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
+PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutSafeAreaType ignoreType)
 {
     if (!withoutProcess) {
 #ifdef PREVIEW
@@ -309,8 +339,27 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
         }
 #endif
     }
+    SafeAreaInsets combinedSafeArea;
     auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+
+    bool includeSystem = ignoreType & LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    bool includeKeyboard = ignoreType & LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+    if (includeSystem) {
+        combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+    }
+    if (includeKeyboard) {
+        if (IsModeResize()) {
+            combinedSafeArea.bottom_ = combinedSafeArea.bottom_.Combine(keyboardInset_);
+        } else if (IsModeOffset()) {
+            auto keyboardHeight = keyboardInset_.Length();
+            auto bottomLength = GetSafeArea().bottom_.Length();
+            auto distance = bottomLength - GetKeyboardOffset(withoutProcess);
+            if (GreatNotEqual(keyboardHeight, 0.0f) && distance <= keyboardHeight) {
+                combinedSafeArea.bottom_ = GetSafeArea().bottom_;
+            }
+        }
+    }
+
     PaddingPropertyF result;
     if (combinedSafeArea.left_.IsValid()) {
         result.left = combinedSafeArea.left_.Length();
@@ -394,13 +443,16 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
 
 void SafeAreaManager::SetKeyboardInfo(float height)
 {
-    SetRawKeyboardHeight(height);
     keyboardOrientation_ = -1;
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
+    auto keyboardOrientation = static_cast<int32_t>(displayInfo->GetRotation());
+    ACE_LAYOUT_SCOPED_TRACE("SetKeyboardInfo keyboardOrientation %d, rawKeyboardHeight %f",
+        keyboardOrientation, height);
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = keyboardOrientation;
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

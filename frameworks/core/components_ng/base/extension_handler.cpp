@@ -114,7 +114,11 @@ void ExtensionHandler::OnLayout(int32_t width, int32_t height, int32_t positionX
 
 void ExtensionHandler::OnForegroundDraw(DrawingContext& context)
 {
-    InnerForegroundDraw(context);
+    if (drawModifier_ && drawModifier_->drawForegroundFunc) {
+        drawModifier_->drawForegroundFunc(context);
+    } else {
+        InnerForegroundDraw(context);
+    }
 }
 
 void ExtensionHandler::OnDraw(DrawingContext& context)

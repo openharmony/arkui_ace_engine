@@ -41,6 +41,7 @@ public:
     static void SetSelectedDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetMode(const RefPtr<FrameNode>& frameNode, const DatePickerMode& mode);
     static void SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar = false);
+    static void SetCanLoop(const RefPtr<FrameNode>& frameNode, bool isLoop = true);
     static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
@@ -60,8 +61,7 @@ public:
         const RefPtr<FrameNode>& datePickerNode, DialogEvent& acceptEvent, const std::vector<ButtonInfo>& buttonInfos);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos);
-    static RefPtr<FrameNode> CreateDateNode(int32_t dateNodeId, std::map<std::string, PickerDate> datePickerProperty,
-        const PickerTextProperties& properties, bool isLunar, bool hasTime);
+    static RefPtr<FrameNode> CreateDateNode(int32_t dateNodeId, const DatePickerSettingData& settingData, bool hasTime);
     static RefPtr<FrameNode> CreateColumnNode(int32_t nodeId, uint32_t showCount, bool isDate = true);
     static void CreateNormalDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);
     static void CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);

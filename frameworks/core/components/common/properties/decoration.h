@@ -102,6 +102,12 @@ enum class HapticFeedbackMode {
     AUTO,
 };
 
+enum class ModalMode {
+    AUTO = 0,
+    NONE = 1,
+    TARGET_WINDOW = 2,
+};
+
 struct SysOptions {
     bool disableSystemAdaptation = true;
     bool operator==(const SysOptions& other) const
@@ -1110,6 +1116,7 @@ enum class PathCmd {
     BEZIER_CURVE_TO,
     ELLIPSE,
     RECT,
+    ROUND_RECT,
     CLOSE_PATH,
 };
 
@@ -1126,7 +1133,7 @@ struct PathArgs {
 };
 
 class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
-    DECLARE_ACE_TYPE(CanvasPath2D, AceType)
+    DECLARE_ACE_TYPE(CanvasPath2D, AceType);
 public:
     CanvasPath2D() = default;
     ~CanvasPath2D() = default;
@@ -1143,6 +1150,7 @@ public:
     void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
         double endAngle, double ccw);
     void Rect(double x, double y, double width, double height);
+    void RoundRect(const class Rect& rect, const std::vector<double>& radii);
     void ClosePath();
     const std::vector<std::pair<PathCmd, PathArgs>>& GetCaches() const;
     std::string ToString() const;

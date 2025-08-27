@@ -254,7 +254,10 @@ void FillSubComponentProperty(
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
     info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        info->SetPropertyObject("constraint", GenConstraint(layoutProperty->GetLayoutConstraint()));
+    }
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }
@@ -575,7 +578,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
 
@@ -613,7 +617,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
     return panda::JSValueRef::Undefined(vm);

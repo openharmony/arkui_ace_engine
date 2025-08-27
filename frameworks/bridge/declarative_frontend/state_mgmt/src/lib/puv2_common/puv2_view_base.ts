@@ -35,6 +35,9 @@ enum PrebuildPhase {
   PrebuildDone = 3,
 }
 
+//API Version 18
+const API_VERSION_ISOLATION_FOR_5_1: number = 18;
+
 // NativeView
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
@@ -63,9 +66,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   // Set of elmtIds retaken by IF that need re-render
   protected dirtRetakenElementIds_: Set<number> = new Set<number>();
-
-  // Map elmtId -> Repeat instance in this ViewPU
-  protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
 
   protected parent_: IView | undefined = undefined;
 
@@ -189,8 +189,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.resetRecycleCustomNode();
   }
  
-  public queryNavDestinationInfo(): object {
-    return this.nativeViewPartialUpdate.queryNavDestinationInfo();
+  public queryNavDestinationInfo(isInner: boolean | undefined): object {
+    return this.nativeViewPartialUpdate.queryNavDestinationInfo(isInner);
   }
  
   public queryNavigationInfo(): object {
@@ -202,6 +202,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
  
   public getUIContext(): object {
+    if (typeof globalThis.__getUIContext__ === 'function') {
+      return globalThis.__getUIContext__(this.nativeViewPartialUpdate.getMainInstanceId());
+    }
     return this.nativeViewPartialUpdate.getUIContext();
   }
  
@@ -310,7 +313,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // When the child node supports the Component freezing, the root node will definitely recurse to the child node. 
     // From API16, to prevent child node mistakenly activated by the parent node, reference counting is used to control node status.
     // active + 1 means count +1， inactive -1 means count -1, Expect no more than 1 
-    if (Utils.isApiVersionEQAbove(18)) {
+    if (Utils.isApiVersionEQAbove(API_VERSION_ISOLATION_FOR_5_1)) {
       this.activeCount_ += active ? 1 : -1;
     }
     else {
@@ -397,6 +400,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // forceCompleteRerender() might have been called externally,
     // ensure all pending book keeping is finished to prevent unwanted element updates
     ObserveV2.getObserve()?.runIdleTasks();
+    // to avoid to run the update func twice
+    // it is not necessary to save dirty nodes, because it wll update all the element soon
+    this.dirtDescendantElementIds_.clear();
 
     Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 
@@ -424,6 +430,26 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
+  }
+
+  // clear all cached node
+  public __ClearAllRecyle__PUV2ViewBase__Internal(): void {
+    if (this instanceof ViewPU) {
+      this.hasRecycleManager() && this.getRecycleManager().purgeAllCachedRecycleNode();
+    } else if (this instanceof ViewV2) {
+      this.hasRecyclePool() && this.getRecyclePool().purgeAllCachedRecycleElmtIds();
+    } else {
+      stateMgmtConsole.error(`clearAllRecycle: this no instanceof ViewPU or ViewV2, error!`);
+      return;
+    }
+    for (const child of (this as PUV2ViewBase).childrenWeakrefMap_.values()) {
+      const childView: IView | undefined = child.deref();
+      if (!childView) {
+        continue;
+      } else {
+        childView.__ClearAllRecyle__PUV2ViewBase__Internal();
+      }
+    }
   }
 
   /**
@@ -847,7 +873,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
   }
 
-  protected isNeedBuildPrebuildCmd(): boolean {
+  public static isNeedBuildPrebuildCmd(): boolean {
     const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd;
     return needBuild;
   }

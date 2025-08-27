@@ -981,6 +981,8 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade001, TestSize.
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -1094,9 +1096,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
     EXPECT_EQ(displayIndicatorCount, 3);
 
@@ -1114,7 +1114,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, indicatorIndex);
     EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1132,9 +1131,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
     EXPECT_EQ(displayIndicatorCount, 3);
 
@@ -1152,7 +1149,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, 0);
     EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1209,11 +1205,49 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, Tes
     paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+}
+
+/**
+ * @tc.name: AdjustPointCenterXForTouchBottomNew
+ * @tc.desc: Test AdjustPointCenterXForTouchBottomNew
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottomNew001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    DotIndicatorPaintMethod::StarAndEndPointCenter pointCenter;
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+
+    int32_t endCurrentIndex = totalCount - 1;
+    float selectedItemWidth = 0.0f;
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->touchBottomPageRate_ = 0;
+    EXPECT_TRUE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
+
+    paintMethod->touchBottomPageRate_ = 0.2;
+    EXPECT_FALSE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
 }
 
 /**
@@ -1470,6 +1504,37 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade004, TestSize.
     frameSize.SetHeight(testnumber);
     swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
     EXPECT_EQ(swiperPaintMethod1.mainDelta_, -3000.0f);
+}
+
+/**
+ * @tc.name: SwiperPaintMethodPaintFade005
+ * @tc.desc: PaintFade
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade005, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(1);
+    paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+
+    /**
+     * @tc.steps: step2. call PaintFade to count the number of calling ClipRect.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintMethod1.needPaintFade_ = true;
+    swiperPaintMethod1.mainDelta_ = 1.0f;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
 }
 
 /**
@@ -1946,6 +2011,55 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1
     dotIndicatorModifier.headCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(0.1f, 0.1f, 0.1f, 0.1f);
     auto result = dotIndicatorModifier.GetLoopOpacityDuration();
     EXPECT_EQ(result, defaultOpacityAnimationDuration);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier013
+ * @tc.desc: Test PaintBackground and GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    LinearVector<float> vectorBlackPointCenterX;
+    for (float i = 0.0f; i <= 300.0f ; i += 10.0f) {
+        vectorBlackPointCenterX.emplace_back(i);
+    }
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.225f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.8f);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(canvas));
+    /**
+     * @tc.steps: step2.Call PaintBackground
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    /**
+     * @tc.steps: step3.Call vectorBlackPointCenterX.size is 0
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    vectorBlackPointCenterX.clear();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
 }
 
 /**

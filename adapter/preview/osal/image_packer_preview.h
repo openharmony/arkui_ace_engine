@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class ImagePackerPreview : public ImagePacker {
-    DECLARE_ACE_TYPE(ImagePackerPreview, ImagePacker)
+    DECLARE_ACE_TYPE(ImagePackerPreview, ImagePacker);
 public:
     uint32_t StartPacking(uint8_t* data, uint32_t maxSize, const PackOption& option) override;
     uint32_t StartPacking(const std::string& filePath, const PackOption& option) override;

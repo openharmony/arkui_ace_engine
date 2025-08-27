@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   buttonClick,
   JsonType,
@@ -28,6 +28,7 @@ import { TabsStart } from './Tabs';
 import { Driver, ON } from '@kit.TestKit';
 
 const driver = Driver.create();
+
 export default function Tabs7() {
   describe('Tabs7', () => {
     /**

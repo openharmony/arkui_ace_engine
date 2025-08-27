@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockAnimationManager::Enable(true);
@@ -65,15 +67,24 @@ void ListTestNg::SetUpTestSuite()
 void ListTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
 
 void ListTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
+    itemGroupPatters_.clear();
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
@@ -107,6 +118,18 @@ ListModelNG ListTestNg::CreateList()
     model.SetScroller(scrollController, proxy);
     GetList();
     return model;
+}
+
+RefPtr<FrameNode> ListTestNg::CreateList(const std::function<void(ListModelNG)>& callback)
+{
+    ListModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
 }
 
 void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
@@ -156,6 +179,11 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     groupModel.Create(listItemGroupStyle);
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
     listItemGroup->SetParent(weakList);
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);
+    auto groupPattern_ = listItemGroupFrameNode->GetPattern<ListItemGroupPattern>();
+    if (groupPattern_) {
+        itemGroupPatters_.emplace_back(groupPattern_);
+    }
     return groupModel;
 }
 
@@ -307,20 +335,6 @@ void ListTestNg::CreateItemsInLazyForEach(
     lazyForEachModelNG.OnMove(std::move(onMove));
 }
 
-RefPtr<ListItemMockLazy> ListTestNg::CreateItemsInLazyForEachWithHandle(
-    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
-{
-    RefPtr<ListItemMockLazy> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
-    RefPtr<LazyForEachActuator> mockActuator = mockLazy;
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(mockActuator);
-    lazyForEachModelNG.OnMove(std::move(onMove));
-    ViewStackProcessor::GetInstance()->Pop();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    return mockLazy;
-}
-
 LazyForEachModelNG ListTestNg::CreateItemsInForLazyEachForItemDragEvent(int32_t itemNumber, float itemMainSize)
 {
     RefPtr<LazyForEachActuator> mockForEach = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
@@ -355,6 +369,20 @@ ForEachModelNG ListTestNg::CreateForEachListForItemDragEvent(int32_t itemNumber,
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
     }
     return forEachModelNG;
+}
+
+RefPtr<ListItemMockLazy> ListTestNg::CreateItemsInLazyForEachWithHandle(
+    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
+{
+    RefPtr<ListItemMockLazy> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
+    RefPtr<LazyForEachActuator> mockActuator = mockLazy;
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockActuator);
+    lazyForEachModelNG.OnMove(std::move(onMove));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    return mockLazy;
 }
 
 void ListTestNg::CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove)

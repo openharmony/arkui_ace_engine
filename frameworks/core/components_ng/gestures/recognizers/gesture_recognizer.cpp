@@ -16,6 +16,9 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -55,6 +58,24 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::IsPreventBegin() const
+{
+    return preventBegin_;
+}
+
+void NGGestureRecognizer::SetPreventBegin(bool preventBegin)
+{
+    preventBegin_ = preventBegin;
+}
+
+bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId) const
+{
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+    auto downFingerIds = eventManager->GetDownFingerIds();
+    return downFingerIds.find(fingerId) != downFingerIds.end();
+}
+
 bool NGGestureRecognizer::IsAllowedType(SourceTool type)
 {
     // allow all types by default
@@ -91,6 +112,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
+    if (IsPreventBegin()) {
+        return true;
+    }
     auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
     if (multiFingerRecognizer) {
         multiFingerRecognizer->ResetTouchPointsForSucceedBlock();
@@ -122,6 +146,7 @@ bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(GetSysTimestamp());
     deviceId_ = point.deviceId;
     deviceType_ = point.sourceType;
     deviceTool_ = point.sourceTool;
@@ -136,6 +161,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchUpEvent(point);
@@ -146,6 +172,7 @@ void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchCancelEvent(point);
@@ -163,6 +190,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         return true;
     }
     if (!ShouldResponse() || bridgeMode_) {
+        return true;
+    }
+    if (IsPreventBegin()) {
         return true;
     }
     switch (event.action) {
@@ -301,16 +331,16 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+std::vector<Matrix4> NGGestureRecognizer::GetTransformMatrix(const WeakPtr<FrameNode>& node, bool isRealTime,
     bool isPostEventResult, int32_t postEventNodeId)
 {
+    std::vector<Matrix4> vTrans {};
     if (node.Invalid()) {
-        return;
+        return vTrans;
     }
 
-    std::vector<Matrix4> vTrans {};
     auto host = node.Upgrade();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, vTrans);
 
     std::function<Matrix4()> getLocalMatrix;
     if (isRealTime) {
@@ -328,7 +358,6 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
-        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:"
                 SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
@@ -341,9 +370,43 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
         }
         host = host->GetAncestorNodeOfFrame(false);
     }
+    return vTrans;
+}
 
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
+{
+    if (node.Invalid()) {
+        return;
+    }
+
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    auto vTrans = GetTransformMatrix(node, isRealTime, isPostEventResult, postEventNodeId);
     Point temp(localPointF.GetX(), localPointF.GetY());
     for (auto iter = vTrans.rbegin(); iter != vTrans.rend(); iter++) {
+        temp = *iter * temp;
+    }
+    localPointF.SetX(temp.GetX());
+    localPointF.SetY(temp.GetY());
+}
+
+void NGGestureRecognizer::TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
+{
+    if (node.Invalid()) {
+        return;
+    }
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    if (localMatrix_.empty() || isPostEventResult) {
+        NGGestureRecognizer::Transform(localPointF, node, isRealTime, isPostEventResult, postEventNodeId);
+        return;
+    }
+    Point temp(localPointF.GetX(), localPointF.GetY());
+    for (auto iter = localMatrix_.rbegin(); iter != localMatrix_.rend(); iter++) {
         temp = *iter * temp;
     }
     localPointF.SetX(temp.GetX());
@@ -457,6 +520,22 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
         TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
+void NGGestureRecognizer::AddGestureProcedure(const AxisEvent& event,
+    const RefPtr<NGGestureRecognizer>& recognizer) const
+{
+    if (!recognizer) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        event, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
+}
+
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
 {
     if (!gestureGroup_.Invalid() && !gestureGroup.Invalid()) {
@@ -496,11 +575,11 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
 
     PointF localPoint(event.x, event.y);
     if (isRealTime) {
-        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
-            isPostEventResult_, event.postEventNodeId);
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_ && !event.passThrough,
+            isPostEventResult_ || event.passThrough, event.postEventNodeId);
     } else {
-        NGGestureRecognizer::Transform(localPoint, frameNode, false,
-            isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(
+            localPoint, frameNode, false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -597,6 +676,74 @@ void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEven
             AceType::InstanceOf<ClickRecognizer>(this)) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
+    }
+}
+
+std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onAction_) {
+        return "onAction";
+    }
+    if (callback == onActionStart_) {
+        return "onActionStart";
+    }
+    if (callback == onActionUpdate_) {
+        return "onActionUpdate";
+    }
+    if (callback == onActionEnd_) {
+        return "onActionEnd";
+    }
+    if (callback == onActionCancel_) {
+        return "onActionCancel";
+    }
+    return "";
+}
+
+void NGGestureRecognizer::ResetResponseLinkRecognizer()
+{
+    responseLinkRecognizer_.clear();
+}
+
+void NGGestureRecognizer::HandleGestureAccept(
+    const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType)
+{
+    CHECK_EQUAL_VOID(GetRecognizerType(), GestureTypeName::CLICK);
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    if (listenerType == GestureListenerType::UNKNOWN) {
+        return;
+    }
+    GestureActionPhase phase = GetActionPhase(type, listenerType);
+    if (phase == GestureActionPhase::UNKNOWN) {
+        return;
+    }
+    UIObserverHandler::GetInstance().NotifyGestureStateChange(listenerType, info, Claim(this), node, phase);
+}
+
+GestureActionPhase NGGestureRecognizer::GetActionPhase(
+    GestureCallbackType callbackType, GestureListenerType listenerType) const
+{
+    static const std::unordered_set<GestureListenerType> startSupportedGestures = { GestureListenerType::PAN,
+        GestureListenerType::PINCH, GestureListenerType::ROTATION,
+        // LONG_PRESS_GESTURE when onAction, callbackType is START
+        GestureListenerType::LONG_PRESS };
+
+    switch (callbackType) {
+        case GestureCallbackType::START:
+            return (startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_START
+                                                                : GestureActionPhase::UNKNOWN;
+
+        case GestureCallbackType::END:
+            return (startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_END
+                                                                : GestureActionPhase::UNKNOWN;
+
+        case GestureCallbackType::ACTION:
+            // ACTION will only be mapped to WILL_START if the START gesture is not supported
+            return (!startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_START
+                                                                 : GestureActionPhase::UNKNOWN;
+
+        default:
+            return GestureActionPhase::UNKNOWN;
     }
 }
 } // namespace OHOS::Ace::NG

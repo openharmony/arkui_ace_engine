@@ -39,6 +39,9 @@ struct IndexPage {
     new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
     new TextList(6, 'AlphabetIndexer', 'pages/alphabetIndexer/AlphabetIndexerMainPage'),
     new TextList(7, 'Refresh', 'pages/refresh/RefreshMainPage'),
+    new TextList(8, 'GridMainPage', 'pages/grid/GridMainPage'),
+    new TextList(9, 'Scroll', 'pages/Scroll/ScrollMainPage'),
+    new TextList(10, 'LazyVGridLayout', 'pages/LazyVGridLayout/LazyVGridLayoutMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

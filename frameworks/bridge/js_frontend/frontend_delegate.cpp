@@ -121,7 +121,7 @@ void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& r
 
 void FrontendDelegate::ResetFocus()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Lost focus to view root scope by user");
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "user lost focus to view root scope");
     NG::FocusHub::LostFocusToViewRoot();
 }
 
@@ -156,6 +156,14 @@ bool FrontendDelegate::Activate(bool isActive, bool autoInactive)
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, autoInactive);
+}
+
+bool FrontendDelegate::GetFocusActive()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool ret = pipeline->GetIsFocusActive();
+    return ret;
 }
 
 void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)

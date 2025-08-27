@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/base/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {
@@ -1730,5 +1732,217 @@ HWTEST_F(TabsAttrTestNg, CachedMaxCount003, TestSize.Level1)
     EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(3) == swiperPattern_->itemsNeedClean_.end());
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+}
+
+/**
+ * @tc.name: CachedMaxCount004
+ * @tc.desc: test tabContent property change flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, CachedMaxCount004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    bool deepRenderCalled = false;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto deepRenderFunc = [&deepRenderCalled]() { deepRenderCalled = true; };
+        TabContentModelNG tabContentModel = CreateTabContentWithDeepRender(std::move(deepRenderFunc));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+    EXPECT_TRUE(deepRenderCalled);
+
+    /**
+     * @tc.steps: step2. first time layout, test property change flag.
+     */
+    auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 1);
+    auto tabContentLayoutProperty = tabContentPattern->GetLayoutProperty<TabContentLayoutProperty>();
+    deepRenderCalled = false;
+    EXPECT_TRUE(tabContentPattern->firstTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF), 0);
+    tabContentPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(deepRenderCalled);
+    EXPECT_FALSE(tabContentPattern->firstTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF), 0);
+
+    /**
+     * @tc.steps: step3. second time layout, test property change flag.
+     */
+    deepRenderCalled = false;
+    tabContentPattern->secondTimeLayout_ = true;
+    tabContentPattern->shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+    tabContentPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(deepRenderCalled);
+    EXPECT_FALSE(tabContentPattern->secondTimeLayout_);
+    EXPECT_EQ((tabContentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF),
+        PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
+ * @tc.name: AnimationCurve001
+ * @tc.desc: test animationCurve attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, AnimationCurve001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    ASSERT_NE(Curves::FRICTION, nullptr);
+    ASSERT_NE(Curves::LINEAR, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step1. test SetAnimationCurve(const RefPtr<Curve>&) function.
+     */
+    model.SetAnimationCurve(Curves::FRICTION);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->animationCurve_));
+
+    model.SetAnimationCurve(nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    model.SetAnimationCurve(Curves::LINEAR);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->animationCurve_));
+
+    model.SetAnimationCurve(nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetAnimationCurve(FrameNode*, const RefPtr<Curve>&) function.
+     */
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::FRICTION);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->animationCurve_));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::LINEAR);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->animationCurve_));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+}
+
+/**
+ * @tc.name: GetAnimationCurve001
+ * @tc.desc: test GetAnimationCurve function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, GetAnimationCurve001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    ASSERT_NE(Curves::FRICTION, nullptr);
+    ASSERT_NE(Curves::LINEAR, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step1. test GetAnimationCurve(const RefPtr<Curve>&) function.
+     */
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = Curves::LINEAR;
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = nullptr;
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = Curves::LINEAR;
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    ASSERT_NE(frameNode_, nullptr);
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_TRUE(TabBarPhysicalCurve->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::LINEAR);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_TRUE(TabBarPhysicalCurve->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::FRICTION);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(frameNode_->GetAnimationCurve(TabBarPhysicalCurve)));
+}
+
+/**
+ * @tc.name: TabContentSetIndicatorColorByUser001
+ * @tc.desc: test SetIndicatorColorByUser of TabContentModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentSetIndicatorColorByUser001, TestSize.Level1)
+{
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    auto tabContentLayoutProperty = tabContentPattern->GetLayoutProperty<TabContentLayoutProperty>();
+    ASSERT_NE(tabContentLayoutProperty, nullptr);
+    tabContentModel.SetIndicatorColorByUser(false);
+    EXPECT_FALSE(tabContentLayoutProperty->GetIndicatorColorSetByUserValue());
+    tabContentModel.SetIndicatorColorByUser(true);
+    EXPECT_TRUE(tabContentLayoutProperty->GetIndicatorColorSetByUserValue());
+    tabContentModel.Pop();
+}
+
+/**
+ * @tc.name: TabContentCreateWithResourceObj001
+ * @tc.desc: test CreateWithResourceObj of TabContentModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentCreateWithResourceObj001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+
+    LabelStyle labelStyle;
+    labelStyle.selectedColor = Color::FromString("#FF0000");
+    labelStyle.unselectedColor = Color::FromString("#00FF00");
+    labelStyle.fontSize = Dimension(16.0, DimensionUnit::VP);
+    tabContentPattern->SetLabelStyle(labelStyle);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, Color::FromString("#FF0000"));
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, Color::FromString("#00FF00"));
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().fontSize, Dimension(16.0, DimensionUnit::VP));
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "#FFE4B5";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithStringColor = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    tabContentModel.CreateWithResourceObj(TabContentJsType::LABEL_SELECT_COLOR, resObjWithStringColor);
+    tabContentModel.CreateWithResourceObj(TabContentJsType::LABEL_UNSELECT_COLOR, resObjWithStringColor);
+    tabContentPattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(tabContentPattern->GetLabelStyle().selectedColor.has_value());
+    EXPECT_FALSE(tabContentPattern->GetLabelStyle().unselectedColor.has_value());
+
+    ResourceObjectParams paramSize;
+    paramSize.type = ResourceObjectParamType::STRING;
+    paramSize.value = "20";
+    std::vector<ResourceObjectParams> paramsSize;
+    paramsSize.push_back(paramSize);
+    auto resObjWithStringSize = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), paramsSize, "", "", Container::CurrentIdSafely());
+    tabContentModel.CreateWithResourceObj(TabContentJsType::FONT_SIZE, resObjWithStringSize);
+    tabContentPattern->resourceMgr_->ReloadResources();
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().fontSize->Value(), 0.0);
+    tabContentModel.Pop();
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

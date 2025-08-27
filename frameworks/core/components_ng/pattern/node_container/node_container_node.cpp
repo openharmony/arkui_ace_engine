@@ -29,6 +29,15 @@ RefPtr<FrameNode> NodeContainerNode::GetOrCreateNodeContainerNode(int32_t nodeId
     return frameNode;
 }
 
+NodeContainerNode::~NodeContainerNode()
+{
+    std::list<RefPtr<NG::UINode>> nodes;
+    for (const auto& child : GetChildren()) {
+        BuilderUtils::GetBuilderNodes(child, nodes);
+    }
+    BuilderUtils::ClearChildInBuilderContainer(GetId(), nodes);
+}
+
 void NodeContainerNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {

@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 class Session;
 }
+
 namespace OHOS::MMI {
 class KeyEvent;
 class PointerEvent;

@@ -656,6 +656,16 @@ void PluginFrontend::OnDrawCompleted(const std::string& componentId)
     CHECK_NULL_VOID(delegate_);
 }
 
+void PluginFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    CHECK_NULL_VOID(delegate_);
+}
+
+bool PluginFrontend::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    return false;
+}
+
 void PluginFrontend::DumpFrontend() const
 {
     CHECK_NULL_VOID(delegate_);

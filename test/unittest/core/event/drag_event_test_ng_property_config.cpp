@@ -931,12 +931,15 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest008, TestSize.Leve
     ASSERT_NE(gestureEventHub, nullptr);
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    framenode->previewOption_.defaultAnimationBeforeLifting = true;
+    auto dragPreviewOption = framenode->GetDragPreviewOption();
+    dragPreviewOption.defaultAnimationBeforeLifting = true;
+    framenode->SetDragPreviewOptions(dragPreviewOption);
     ASSERT_NE(dragEventActuator, nullptr);
     DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
     framenode->layoutProperty_ = nullptr;
     DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
-    EXPECT_EQ(framenode->previewOption_.defaultAnimationBeforeLifting, true);
+    dragPreviewOption = framenode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.defaultAnimationBeforeLifting, true);
 }
 
 /**
@@ -1710,7 +1713,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest026, TestSize.Leve
     ASSERT_NE(gestureEventHub, nullptr);
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    framenode->previewOption_.defaultAnimationBeforeLifting = true;
+    auto dragPreviewOption = framenode->GetDragPreviewOption();
+    dragPreviewOption.defaultAnimationBeforeLifting = true;
+    framenode->SetDragPreviewOptions(dragPreviewOption);
     ASSERT_NE(dragEventActuator, nullptr);
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     mockRenderContext->UpdateOpacity(1.1f);

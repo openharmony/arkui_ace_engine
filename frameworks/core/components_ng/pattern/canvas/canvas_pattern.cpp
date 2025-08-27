@@ -35,7 +35,7 @@ CanvasPattern::~CanvasPattern()
 
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", GetId());
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", frameNode->GetId());
     DetachRenderContext();
 }
 
@@ -86,14 +86,16 @@ void CanvasPattern::FireOnContext2DDetach()
 
 void CanvasPattern::OnAttachToFrameNode()
 {
-    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", GetId());
-#ifndef ACE_UNITTEST
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    id_ = host->GetId();
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", id_);
+#ifndef ACE_UNITTEST
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
     renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
+    renderCtx->SetNeedUseCmdlistDrawRegion(true);
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
@@ -175,6 +177,7 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
     };
@@ -305,6 +308,14 @@ void CanvasPattern::AddRect(const Rect& rect)
 {
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.AddRect(rect);
+    };
+    paintMethod_->PushTask(task);
+}
+
+void CanvasPattern::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    auto task = [rect, radii](CanvasPaintMethod& paintMethod) {
+        paintMethod.AddRoundRect(rect, radii);
     };
     paintMethod_->PushTask(task);
 }
@@ -514,6 +525,7 @@ void CanvasPattern::UpdateShadowBlur(double blur)
 
 void CanvasPattern::UpdateShadowColor(const Color& color)
 {
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
     };
@@ -542,7 +554,6 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
         paintMethod.SetTextAlign(align);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureTextAlign(align);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
@@ -551,7 +562,6 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
         paintMethod.SetTextBaseline(baseline);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
@@ -585,7 +595,6 @@ void CanvasPattern::UpdateFontWeight(FontWeight weight)
         paintMethod.SetFontWeight(weight);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureFontWeight(weight);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
@@ -594,7 +603,6 @@ void CanvasPattern::UpdateFontStyle(FontStyle style)
         paintMethod.SetFontStyle(style);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureFontStyle(style);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
@@ -603,7 +611,6 @@ void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
         paintMethod.SetFontFamilies(families);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureFontFamilies(families);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
@@ -612,7 +619,6 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
         paintMethod.SetFontSize(size);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureFontSize(size);
 }
 
 void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
@@ -621,7 +627,6 @@ void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
         paintMethod.SetLetterSpacing(letterSpacing);
     };
     paintMethod_->PushTask(task);
-    paintMethod_->SetMeasureLetterSpacing(letterSpacing);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
@@ -800,6 +805,7 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [direction](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextDirection(direction);
     };
@@ -910,14 +916,15 @@ void CanvasPattern::CreateAnalyzerOverlay()
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
     if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
     }
 }
 
 void CanvasPattern::UpdateAnalyzerOverlay()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
@@ -953,7 +960,6 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask(task);
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
-    paintMethod_->ResetMeasureTextState();
     SetTextDirection(TextDirection::INHERIT);
 }
 
@@ -991,9 +997,7 @@ void CanvasPattern::SetDensity(double density)
 
 int32_t CanvasPattern::GetId()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1);
-    return host->GetId();
+    return id_;
 }
 
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1004,7 +1008,7 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 
-void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(paintMethod_);
     auto jsonMethod = JsonUtil::Create();

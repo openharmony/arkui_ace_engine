@@ -28,8 +28,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const RefPtr<DrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
+    void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
@@ -76,10 +76,10 @@ public:
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
     void SetImageAnalyzerConfig(void* config) override;
     void SetImageAIOptions(void* options) override;
-    void SetResizableSlice(const ImageResizableSlice& slice) override;
+    void SetResizableSlice(ImageResizableSlice& slice) override;
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
-    static void SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan = false);
+    void SetImageFillSetByUser(bool value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -123,14 +123,23 @@ public:
         FrameNode* frameNode, std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
+    static ImageRotateOrientation GetOrientation(FrameNode* frameNode);
+    static std::pair<CalcDimension, CalcDimension> GetImageSourceSize(FrameNode* frameNode);
+    static float GetHdrBrightness(FrameNode* frameNode);
+    static DynamicRangeMode GetDynamicRangeMode(FrameNode* frameNode);
+    static bool GetEnableAnalyzer(FrameNode* frameNode);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static bool GetMatchTextDirection(FrameNode* frameNode);
+    static Matrix4 GetImageMatrix(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
     static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
     static std::vector<float> GetColorFilter(FrameNode* frameNode);
     static bool GetAutoResize(FrameNode* frameNode);
+    static bool GetSyncLoad(FrameNode* frameNode);
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
-    static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
+    static void SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void ResetResizableLattice(FrameNode* frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
@@ -149,6 +158,8 @@ public:
     static void ResetImageAlt(FrameNode* frameNode);
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
 
 private:
     ImagePattern* GetImagePattern();

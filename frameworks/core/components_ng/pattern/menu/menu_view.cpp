@@ -17,9 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -42,6 +43,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
+#include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,6 +68,24 @@ constexpr float MIN_HOVER_SCALE_DIFF = 0.0001f;
 constexpr int32_t HALF_NUMBER = 2;
 constexpr int32_t HALF_NUMBER_NEGATIVE = -2;
 constexpr int32_t MENU_ANIMATION_DURATION = 300;
+
+static RefPtr<MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NG::MenuTheme>();
+}
+
+static RefPtr<FrameNode> GetMenuTargetNode(const RefPtr<MenuWrapperPattern>& wrapperPattern)
+{
+    CHECK_NULL_RETURN(wrapperPattern, nullptr);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    return FrameNode::GetFrameNodeOnly(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+}
 
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
 {
@@ -141,7 +161,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId, targetTag));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
@@ -242,7 +262,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 }
 
 void MountScrollToMenu(
-    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, RefPtr<FrameNode> menuNode)
 {
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
@@ -319,7 +339,12 @@ void ShowBorderRadiusAndShadowAnimation(
     imageContext->UpdateBorderRadius(imageContext->GetBorderRadius().value_or(BorderRadiusProperty()));
     auto pipelineContext = imageNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddAfterLayoutTask([option, imageContext, previewBorderRadius, shadow, isShowHoverImage]() {
+    pipelineContext->AddAfterLayoutTask([option, weakImage = AceType::WeakClaim(AceType::RawPtr(imageNode)),
+                                            previewBorderRadius, shadow, isShowHoverImage]() {
+        auto imageNode = weakImage.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
         AnimationUtils::Animate(
             option,
             [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
@@ -332,7 +357,7 @@ void ShowBorderRadiusAndShadowAnimation(
                 CHECK_NULL_VOID(!isShowHoverImage);
                 imageContext->UpdateBorderRadius(previewBorderRadius);
             },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, imageNode->GetContextRefPtr());
     });
 }
 
@@ -348,14 +373,14 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
     CHECK_NULL_VOID(previewNode);
     auto previewContext = previewNode->GetRenderContext();
     CHECK_NULL_VOID(previewContext);
-    
+
     imageContext->UpdateOpacity(1.0);
     previewContext->UpdateOpacity(0.0);
     AnimationUtils::Animate(
         option, [previewContext]() {
             CHECK_NULL_VOID(previewContext);
             previewContext->UpdateOpacity(1.0);
-        });
+        }, nullptr, nullptr, previewNode->GetContextRefPtr());
 }
 
 RadiusF GetPreviewBorderRadiusFromPattern(
@@ -470,15 +495,16 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
 
     AnimationUtils::Animate(
         scaleOption,
-        [stackContext, scaleTo, clipRect, clipRadius, animateProperty]() {
+        [stackContext, scaleTo, clipRect, clipRadius, animateProperty, previewPattern]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
             stackContext->ClipWithRRect(clipRect, clipRadius);
+            MenuView::UpdateHoverImagePreivewPosition(previewPattern);
 
             CHECK_NULL_VOID(animateProperty);
             animateProperty->Set(1.0);
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, hoverImageStackNode->GetContextRefPtr());
 }
 
 void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
@@ -494,6 +520,10 @@ void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, cons
     // if the animation is interrupted during the image hover phase, the next dynamic effects are not processed.
     CHECK_NULL_VOID(!wrapperPattern->IsStopHoverImageAnimation());
 
+    if (!MenuView::CheckHoverImageFinishForInterruption(wrapperPattern, previewPattern, hoverImageStackNode)) {
+        return;
+    }
+
     UpdateOpacityInFinishEvent(previewNode, imageContext, menuTheme);
 
     UpdateHoverImagePreviewScale(hoverImageStackNode, previewPattern, menuTheme);
@@ -503,6 +533,11 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     const RefPtr<RenderContext>& imageContext, const RefPtr<MenuWrapperPattern>& wrapperPattern)
 {
     CHECK_NULL_VOID(wrapperPattern && wrapperPattern->GetIsShowHoverImage());
+    if (wrapperPattern->GetHoverScaleInterruption()) {
+        MenuView::ShowHoverImageForInterruption(hoverImageStackNode, previewNode, imageContext, wrapperPattern);
+        return;
+    }
+
     CHECK_NULL_VOID(hoverImageStackNode && previewNode);
     auto stackContext = hoverImageStackNode->GetRenderContext();
     CHECK_NULL_VOID(stackContext);
@@ -523,7 +558,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     auto scaleAfter = previewPattern->GetHoverImageScaleTo();
     auto scaleTo =
         LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-    
+
     previewPattern->SetIsHoverImageScalePlaying(true);
     // when the scaling start and end sizes are the same, the end callback method should not be relied on
     AnimationOption scaleOption = AnimationOption();
@@ -539,7 +574,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, hoverImageStackNode->GetContextRefPtr());
 }
 
 void ShowPixelMapScaleAnimationProc(
@@ -553,6 +588,7 @@ void ShowPixelMapScaleAnimationProc(
     auto previewAfterAnimationScale =
         LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
+    CHECK_NULL_VOID(imageNode);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
@@ -564,7 +600,6 @@ void ShowPixelMapScaleAnimationProc(
         previewBeforeAnimationScale *= imageRawSize.Width() / geometrySize.Width();
     }
 
-    CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
@@ -582,7 +617,7 @@ void ShowPixelMapScaleAnimationProc(
             CHECK_NULL_VOID(imageContext);
             imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, imageNode->GetContextRefPtr());
 }
 
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
@@ -594,7 +629,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu(HideMenuType::VIEW_DRAG_END);
 }
 
@@ -647,11 +681,9 @@ float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_
     if (LessOrEqual(previewWidth / width, previewHeight / height)) {
         CHECK_EQUAL_RETURN(previewWidth, 0, scaleRet);
         scaleRet = width / previewWidth;
-        previewPattern->SetIsWidthDistLarger(false);
     } else {
         CHECK_EQUAL_RETURN(previewHeight, 0, scaleRet);
         scaleRet = height / previewHeight;
-        previewPattern->SetIsWidthDistLarger(true);
     }
     return scaleRet;
 }
@@ -678,42 +710,10 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
     previewPattern->SetHoverImageAfterScaleWidth(width / baseScale);
     previewPattern->SetHoverImageAfterScaleHeight(height  / baseScale);
 
-    // stack attr will not changed by the scale animation, but a start cooradinate is required to calc the clip diff
-    previewPattern->SetClipStartWidth(previewPattern->GetStackAfterScaleActualWidth() * hoverImageScaleToNew);
-    previewPattern->SetClipStartHeight(previewPattern->GetStackAfterScaleActualHeight() * hoverImageScaleToNew);
-    previewPattern->SetClipStartValue(previewPattern->GetIsWidthDistLarger() ? previewPattern->GetClipStartWidth() :
-        previewPattern->GetClipStartHeight());
-    previewPattern->SetClipEndValue(previewPattern->GetIsWidthDistLarger() ?
-        previewPattern->GetStackAfterScaleActualWidth() : previewPattern->GetStackAfterScaleActualHeight());
-
     previewPattern->SetHoverImageAfterScaleOffset(OffsetF((previewPattern->GetStackAfterScaleActualWidth() -
         previewPattern->GetHoverImageAfterScaleWidth()) / HALF_DIVIDE,
         (previewPattern->GetStackAfterScaleActualHeight() -
         previewPattern->GetHoverImageAfterScaleHeight()) / HALF_DIVIDE));
-}
-
-void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
-{
-    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(targetProps);
-    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
-        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
-        if (!focus) {
-            auto targetNode = targetWK.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            auto context = targetNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto pixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(pixelMap);
-            auto imageNode = imageWK.Upgrade();
-            CHECK_NULL_VOID(imageNode);
-            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(props);
-            props->UpdateAutoResize(false);
-            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-            imageNode->MarkModifyDone();
-        }
-    });
 }
 
 BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
@@ -761,12 +761,14 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
-    SetAccessibilityPixelMap(target, imageNode);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
@@ -805,14 +807,46 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     geometryNode->SetFrameOffset(imageOffset);
 }
 
-void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+static RefPtr<FrameNode> CreateFilterColumnNode()
 {
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_RETURN(columnNode, nullptr);
+    auto layoutProperty = columnNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
+    }
+
+    return columnNode;
+}
+
+static RefPtr<UINode> GetFilterParentNode(
+    const RefPtr<UINode>& targetNode, const RefPtr<OverlayManager>& manager, bool isShowInSubWindow)
+{
+    CHECK_NULL_RETURN((targetNode && manager), nullptr);
+    RefPtr<UINode> parent = nullptr;
+    if (isShowInSubWindow) {
+        parent = targetNode->GetParent();
+        CHECK_NULL_RETURN(parent, nullptr);
+        while (parent->GetDepth() != 1) {
+            parent = parent->GetParent();
+            CHECK_NULL_RETURN(parent, nullptr);
+        }
+    } else {
+        auto rootNodeWeak = manager->GetRootNode();
+        parent = rootNodeWeak.Upgrade();
+    }
+    return parent;
+}
+
+static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(targetNode && menuWrapperNode);
     auto parent = targetNode->GetParent();
     CHECK_NULL_VOID(parent);
-    while (parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
     auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
@@ -820,43 +854,55 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     ContainerScope scope(containerId);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = menuWrapperNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
+    if (!manager->GetHasFilterWithCheck() && !manager->GetIsOnAnimation()) {
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
+        CHECK_NULL_VOID((menuWrapperPattern->GetMenuMaskEnable() || isBindOverlayValue) && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty) {
-            accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
-        }
+        auto columnNode = CreateFilterColumnNode();
+        CHECK_NULL_VOID(columnNode);
         // set filter
+        menuWrapperPattern->SetFilterColumnNode(columnNode);
+        auto isShowInSubWindow =
+            menuWrapperPattern->GetMenuParam().isShowInSubWindow || menuWrapperPattern->IsContextMenu();
         if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
-            manager->ShowFilterAnimation(columnNode);
-        } else if (container->IsUIExtensionWindow()) {
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
+        } else if (container->IsUIExtensionWindow() && isShowInSubWindow) {
             // mount filter node on subwindow to ensure filter node's size equals to host window's size
-            CHECK_NULL_VOID(menuWrapperNode);
-            auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
-            menuWrapperPattern->SetFilterColumnNode(columnNode);
+            menuWrapperPattern->SetIsFilterInSubwindow(true);
         } else {
+            auto parent = GetFilterParentNode(targetNode, manager, isShowInSubWindow);
+            CHECK_NULL_VOID(parent);
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
             manager->SetFilterActive(true);
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            manager->ShowFilterAnimation(columnNode);
+            manager->ShowFilterAnimation(columnNode, menuWrapperNode);
         }
+    }
+}
+
+void SetFilterToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const MenuParam& menuParam, bool isLongPressDrag)
+{
+    if (menuParam.maskEnable.has_value()) {
+        if (menuParam.maskEnable.value()) {
+            SetFilter(targetNode, wrapperNode);
+        }
+    } else if (menuParam.previewMode != MenuPreviewMode::NONE || isLongPressDrag) {
+        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+        SetFilter(targetNode, wrapperNode);
     }
 }
 
@@ -876,19 +922,13 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE ||
-        (isAllowedDrag && !isLiftingDisabled)) {
-        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
-        SetFilter(targetNode, wrapperNode);
-    }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE ||
-        (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE &&
-            menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled) ||
-        menuParam.isShowHoverImage) {
+    auto isLongPressDrag = menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled;
+    SetFilterToMenu(targetNode, wrapperNode, menuParam, isLongPressDrag);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
+        (menuParam.previewMode == MenuPreviewMode::NONE && isLongPressDrag) || menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE && isAllowedDrag &&
-        !isLiftingDisabled) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag && !isLiftingDisabled) {
         CHECK_NULL_VOID(wrapperNode);
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);
@@ -902,11 +942,13 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         // if filter set in subwindow, need to adjust zOrder to show in back.
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
-        auto columnNode = menuWrapperPattern->GetFilterColumnNode();
-        CHECK_NULL_VOID(columnNode);
-        auto columnRenderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(columnRenderContext);
-        columnRenderContext->UpdateZIndex(-1);
+        if (menuWrapperPattern->GetIsFilterInSubwindow()) {
+            auto columnNode = menuWrapperPattern->GetFilterColumnNode();
+            CHECK_NULL_VOID(columnNode);
+            auto columnRenderContext = columnNode->GetRenderContext();
+            CHECK_NULL_VOID(columnRenderContext);
+            columnRenderContext->UpdateZIndex(-1);
+        }
     }
 }
 
@@ -926,7 +968,7 @@ void SetHasCustomRadius(
         auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuProperty);
         menuWrapperPattern->SetHasCustomRadius(false);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = menuWrapperNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
@@ -1033,7 +1075,164 @@ void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const Me
         SetBackgroundEffect(menuNode, backgroundEffectOption);
     }
 }
+
+void UpdateMenuMaskType(const RefPtr<FrameNode>& wrapperNode)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
+    if (maskEnable) {
+        menuWrapperPattern->UpdateFilterMaskType();
+    }
+}
 } // namespace
+
+thread_local std::unordered_map<int32_t, MenuHoverScaleStatus> menuHoverStatus_;
+
+void MenuView::SetMenuHoverScaleStatus(int32_t targetId, MenuHoverScaleStatus status)
+{
+    menuHoverStatus_[targetId] = status;
+}
+
+void MenuView::RemoveMenuHoverScaleStatus(int32_t targetId)
+{
+    menuHoverStatus_.erase(targetId);
+}
+
+MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
+{
+    auto result = menuHoverStatus_.find(targetId);
+    return result != menuHoverStatus_.end() ? result->second : MenuHoverScaleStatus::NONE;
+}
+
+void MenuView::ShowMenuTargetScaleToOrigin(
+    const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern)
+{
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menuParam = wrapperPattern->GetMenuParam();
+    auto scaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
+
+    CHECK_NULL_VOID(previewPattern);
+    auto scale = previewPattern->GetHoverTargetOriginScale() * scaleFrom;
+
+    auto targetNode = GetMenuTargetNode(wrapperPattern);
+    CHECK_NULL_VOID(targetNode);
+    auto targetRenderContext = targetNode->GetRenderContext();
+    CHECK_NULL_VOID(targetRenderContext);
+
+    auto menuTheme = GetMenuTheme(wrapperPattern->GetHost());
+    CHECK_NULL_VOID(menuTheme);
+    AnimationOption option = AnimationOption(Curves::SHARP, menuTheme->GetHoverImageDelayDuration(true));
+    AnimationUtils::Animate(option, [targetRenderContext, scale]() {
+        CHECK_NULL_VOID(targetRenderContext);
+        targetRenderContext->UpdateTransformScale(scale);
+    }, nullptr, nullptr, targetNode->GetContextRefPtr());
+}
+
+void MenuView::UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern)
+{
+    CHECK_NULL_VOID(previewPattern);
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexRenderContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexRenderContext);
+
+    auto previewGeometryNode = flexNode->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewPosition = previewGeometryNode->GetFrameOffset();
+
+    flexRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+}
+
+void MenuView::ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImageStackNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
+    const RefPtr<MenuWrapperPattern>& wrapperPattern)
+{
+    CHECK_NULL_VOID(wrapperPattern);
+    auto stackContext = hoverImageStackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackContext);
+
+    CHECK_NULL_VOID(previewNode);
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto menuTheme = GetMenuTheme(previewNode);
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuParam = wrapperPattern->GetMenuParam();
+    auto scaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
+    auto scaleTo = menuParam.hoverImageAnimationOptions.scaleTo;
+
+    scaleFrom = LessOrEqual(scaleFrom, 0.0) ? PREVIEW_ORIGIN_SCALE : scaleFrom;
+    scaleTo = LessOrEqual(scaleTo, 0.0) ? PREVIEW_ORIGIN_SCALE : scaleTo;
+    scaleTo += NearEqual(scaleFrom, scaleTo) ? MIN_HOVER_SCALE_DIFF : 0.f;
+
+    auto targetNode = GetMenuTargetNode(wrapperPattern);
+    CHECK_NULL_VOID(targetNode);
+    auto targetRenderContext = targetNode->GetRenderContext();
+    CHECK_NULL_VOID(targetRenderContext);
+    auto targetScale = targetRenderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    previewPattern->SetHoverTargetOriginScale(targetScale);
+
+    stackContext->UpdateClipEdge(true);
+    stackContext->UpdateOpacity(0.0);
+    targetRenderContext->UpdateTransformScale(targetScale * scaleFrom);
+
+    previewPattern->SetIsHoverImageScalePlaying(true);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+
+    AnimationOption option = AnimationOption(Curves::SHARP, menuTheme->GetHoverImageDelayDuration(true));
+    option.SetOnFinishEvent([hoverImageStackNode, previewNode, imageContext, menuTheme, wrapperPattern]() {
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+        SetHoverImageFinishEvent(hoverImageStackNode, previewNode, imageContext, menuTheme, wrapperPattern);
+    });
+    AnimationUtils::Animate(
+        option,
+        [targetRenderContext, scale = targetScale * scaleTo]() {
+            CHECK_NULL_VOID(targetRenderContext);
+            targetRenderContext->UpdateTransformScale(scale);
+        },
+        option.GetOnFinishEvent(), nullptr, targetNode->GetContextRefPtr());
+}
+
+bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPattern>& wrapperPattern,
+    const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<FrameNode>& hoverImageStackNode)
+{
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    if (!wrapperPattern->GetHoverScaleInterruption()) {
+        return true;
+    }
+
+    MenuView::ShowMenuTargetScaleToOrigin(wrapperPattern, previewPattern);
+    auto targetId = wrapperPattern->GetTargetId();
+    auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+    TAG_LOGI(AceLogTag::ACE_MENU, "menu hoverScale animation finish, hoverStatus: %{public}d", hoverStatus);
+    if (hoverStatus != MenuHoverScaleStatus::MENU_SHOW) {
+        auto menu = wrapperPattern->GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuRenderContext = menu->GetRenderContext();
+        CHECK_NULL_RETURN(menuRenderContext, false);
+        menuRenderContext->UpdateOpacity(0.0);
+        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+        SubwindowManager::GetInstance()->HideMenuNG(wrapperPattern->GetHost(), targetId);
+        return false;
+    }
+
+    CHECK_NULL_RETURN(hoverImageStackNode, false);
+    auto stackContext = hoverImageStackNode->GetRenderContext();
+    CHECK_NULL_RETURN(stackContext, false);
+    stackContext->UpdateOpacity(1.0);
+
+    wrapperPattern->CallMenuAboutToAppearCallback();
+    wrapperPattern->CheckAndShowAnimation();
+    return true;
+}
 
 void MenuView::SetHasCustomOutline(
     const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
@@ -1145,6 +1344,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
+    ReloadMenuParam(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1160,19 +1360,22 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value()) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+            }
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1180,6 +1383,12 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();
+
+    if (menuParam.maskEnable.value_or(false)) {
+        menuWrapperPattern->SetMenuParam(menuParam);
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
+    }
     return wrapperNode;
 }
 
@@ -1196,7 +1405,7 @@ void SetPreviewScaleAndHoverImageScale(const RefPtr<FrameNode>& menuNode, const 
 {
     auto pattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+    pattern->SetPreviewMode(menuParam.previewMode);
     pattern->SetPreviewBeforeAnimationScale(menuParam.previewAnimationOptions.scaleFrom);
     pattern->SetPreviewAfterAnimationScale(menuParam.previewAnimationOptions.scaleTo);
     pattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
@@ -1247,15 +1456,17 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         menuWrapperPattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
+        menuWrapperPattern->SetHoverScaleInterruption(menuParam.hoverScaleInterruption);
         auto previewRenderContext = previewNode->GetRenderContext();
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdateOpacity(0.0);
     }
-    
+
     if (menuNode) {
         SetPreviewInfoToMenu(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
+
+    if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
         previewNode->MountToParent(menuParam.isShowHoverImage ? hoverImageStackNode : wrapperNode);
         previewNode->MarkModifyDone();
     }
@@ -1274,6 +1485,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CHECK_NULL_RETURN(previewNode, nullptr);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    ReloadMenuParam(menuNode, menuParam);
     menuWrapperPattern->SetMenuParam(menuParam);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
@@ -1288,7 +1500,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
-    MountScrollToMenu(customNode, scroll, type, menuNode);
+    MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
@@ -1300,8 +1512,48 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         MountTextNode(wrapperNode, previewCustomNode);
+    } else if (type == MenuType::MENU && menuParam.maskEnable.value_or(false)) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
+}
+
+void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto pipeline = menuNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode();
+    auto isCurDarkMode = colorMode == ColorMode::DARK;
+    MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    if (SystemProperties::ConfigChangePerform() && menuParam.isDarkMode != isCurDarkMode && !menuParam.isWithTheme) {
+        //Because the Menu is created outside the light/dark mode switching process,
+        //it is necessary to manually set the reloading state to trigger the color inversion process.
+        bool isReloading = ResourceParseUtils::IsReloading();
+        ResourceParseUtils::SetIsReloading(true);
+        menuParamValue.ReloadResources();
+        if (menuParamValue.borderRadius) {
+            menuParamValue.borderRadius->ReloadResources();
+            if (!menuParamValue.borderRadius->radiusTopLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusTopRight.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomRight.has_value()) {
+                menuParamValue.borderRadius = std::nullopt;
+            }
+        }
+        if (menuParamValue.previewBorderRadius) {
+            menuParamValue.previewBorderRadius->ReloadResources();
+        }
+        if (menuParamValue.outlineColor) {
+            menuParamValue.outlineColor->ReloadResources();
+        }
+        if (menuParamValue.outlineWidth) {
+            menuParamValue.outlineWidth->ReloadResources();
+        }
+        menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
+        ResourceParseUtils::SetIsReloading(isReloading);
+    }
 }
 
 void MenuView::UpdateMenuParam(
@@ -1315,6 +1567,7 @@ void MenuView::UpdateMenuParam(
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    UpdateMenuMaskType(wrapperNode);
 }
 
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
@@ -1322,14 +1575,10 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
+        UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
     }
     menuNode->MarkModifyDone();
 
@@ -1337,24 +1586,18 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value()) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value());
+            }
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-}
-
-void MenuView::UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam)
-{
-    auto eventHub = targetNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub);
-    if (isAllowedDrag && !menuParam.previewMode.has_value()) {
-        menuParam.previewMode = MenuPreviewMode::IMAGE;
-    }
 }
 
 void MenuView::UpdateMenuPaintProperty(
@@ -1596,7 +1839,8 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
         auto iconNode = CreateSymbol(params[index].symbol, row, nullptr, params[index].symbolUserDefinedIdealFontSize);
         pattern->SetIconNode(iconNode);
     }
-    auto textNode = CreateText(params[index].value, row);
+    auto textNode = CreateText(params[index].value, row, false,
+        params[index].isAIMenuOption || params[index].isAskCeliaOption);
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
@@ -1607,17 +1851,17 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     eventHub->SetMenuOnClick(params[index].action);
 }
 
-void MenuView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+void MenuView::CreateOption(const OptionValueInfo& value, const std::string& icon,
     const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
 {
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
-    if (optionsHasIcon) {
+    if (value.optionsHasIcon) {
         auto iconNode = CreateIcon(icon, row);
         pattern->SetIconNode(iconNode);
         pattern->SetIcon(icon);
     }
-    auto textNode = CreateText(value, row);
+    auto textNode = CreateText(value.content, row, false, value.isAIMenuOption);
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
@@ -1635,12 +1879,20 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    if (params[index].value == theme->GetPasteText()) {
+    std::string buttonPasteText = "Paste";
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        if (theme) {
+            buttonPasteText = theme->GetPasteText();
+        }
+    }
+    if (params[index].value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
     }
@@ -1650,7 +1902,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
     return option;
 }
 
-RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
+RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
     const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
@@ -1659,17 +1911,28 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    if (value.value == theme->GetPasteText()) {
-        CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
+    std::string buttonPasteText = "Paste";
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        if (theme) {
+            buttonPasteText = theme->GetPasteText();
+        }
+    }
+    if (value.content == buttonPasteText) {
+        CreatePasteButton(value.optionsHasIcon, option, row, onClickFunc, icon);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
-        CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
+        CreateOption({ .optionsHasIcon = value.optionsHasIcon,
+                       .content = value.content, .isAIMenuOption = value.isAIMenuOption },
+                     icon, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
+    CreateOption({ .optionsHasIcon = value.optionsHasIcon,
+        .content = value.content, .isAIMenuOption = value.isAIMenuOption }, icon, row, option, onClickFunc);
 #endif
     return option;
 }
@@ -1686,7 +1949,10 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
             optionNode = CreateMenuOption(optionsHasSymbol, params, i);
         } else {
             optionNode = CreateMenuOption(
-                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+                { .optionsHasIcon = optionsHasIcon, .content = params[i].value,
+                  .isPasteOption = params[i].isPasteOption,
+                  .isAIMenuOption = (params[i].isAIMenuOption || params[i].isAskCeliaOption) },
+                params[i].action, i, params[i].icon);
             if (optionNode) {
                 auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
                 optionPattern->SetBlockClick(params[i].disableSystemClick);
@@ -1728,11 +1994,14 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
     pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-        optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) :
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
-        static_cast<int32_t>(ButtonType::NORMAL), true);
+        static_cast<int32_t>(ButtonType::NORMAL),
+        true,
+        optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1779,7 +2048,8 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -1804,7 +2074,8 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     return iconNode;
 }
 
-RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag)
+RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
+                                       bool autoWrapFlag, bool isAIMenuOption)
 {
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1814,11 +2085,11 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-
     TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
     if (!autoWrapFlag) {
         textProperty->UpdateMaxLines(1);
@@ -1843,6 +2114,18 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
     auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
     textProperty->UpdateAlignment(convertValue);
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    if (isAIMenuOption && textOverlayTheme) {
+        auto textStyle = theme->GetOptionTextStyle();
+        auto textSize = MeasureUtil::MeasureTextSize(textStyle, value);
+        FontForegroudGradiantColor colorInfo;
+        colorInfo.points = { NG::PointF(0, 0),
+            NG::PointF(static_cast<float>(textSize.Width()), static_cast<float>(textSize.Height())) };
+        colorInfo.colors = textOverlayTheme->GetAiMenuFontGradientColors();
+        colorInfo.scalars = textOverlayTheme->GetAiMenuFontGradientScalars();
+        textProperty->UpdateFontForegroudGradiantColor(colorInfo);
+    }
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
@@ -1856,7 +2139,7 @@ RefPtr<FrameNode> MenuView::CreateIcon(const std::string& icon, const RefPtr<Fra
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -1901,8 +2184,9 @@ RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t
     return option;
 }
 
-void MenuView::ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data)
+void MenuView::ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data)
 {
+    auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
     RefPtr<Curve> menuOpacityCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
     RefPtr<Curve> menuScaleCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.4f, 0.0f, 1.0f, 1.0f);
@@ -1918,9 +2202,10 @@ void MenuView::ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, c
     menuNodeRenderContext->UpdateTransformScale({ 0.95f, 0.95f });
     AnimationUtils::Animate(
         optionOpacity, [menuNodeRenderContext]() { menuNodeRenderContext->UpdateOpacity(0.0f); },
-        optionOpacity.GetOnFinishEvent());
+        optionOpacity.GetOnFinishEvent(), nullptr, menuNode->GetContextRefPtr());
     AnimationUtils::Animate(
-        optionScale, [menuNode, data]() { UpdateMenuNodeByAnimation(menuNode, data); }, optionScale.GetOnFinishEvent());
+        optionScale, [menuNode, data]() { UpdateMenuNodeByAnimation(menuNode, data); }, optionScale.GetOnFinishEvent(),
+        nullptr, menuNode->GetContextRefPtr());
 }
 
 // update the alignment rules according to the positional relationship between the menu and the menu preview.
@@ -1933,6 +2218,14 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
     stackNode->UpdateInspectorId("__stack__");
     auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
+    auto scrollNode = data.scrollNode;
+    CHECK_NULL_VOID(scrollNode);
+    auto menuUINode = scrollNode->GetParent();
+    CHECK_NULL_VOID(menuUINode);
+    menuUINode->RemoveChild(scrollNode);
+    menuUINode->RebuildRenderContextTree();
+    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    menuNode->AddChild(scrollNode);
     auto menuNodeLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuNodeLayoutProperty);
     auto biasMenuLeft = (data.menuPositionLeft - data.menuPositionRight) / HALF_NUMBER;
@@ -1945,6 +2238,11 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
         { "start", { .anchor = "__stack__", .horizontal = HorizontalAlign::START } },
         { "middle", { .anchor = "__stack__", .horizontal = HorizontalAlign::CENTER } },
         { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
+    auto layoutDirection = menuNodeLayoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        alignMap["start"] = { .anchor = "__stack__", .horizontal = HorizontalAlign::END };
+        alignMap["end"] = { .anchor = "__stack__", .horizontal = HorizontalAlign::START };
+    }
     if (data.menuPosition == Placement::TOP_LEFT || data.menuPosition == Placement::BOTTOM_LEFT ||
         data.menuPosition == Placement::TOP || data.menuPosition == Placement::BOTTOM ||
         data.menuPosition == Placement::TOP_RIGHT || data.menuPosition == Placement::BOTTOM_RIGHT) {
@@ -1974,7 +2272,7 @@ RefPtr<FrameNode> MenuView::Create(int32_t index)
     // set border radius
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -2147,5 +2445,91 @@ void MenuView::UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, cons
     }
     menuNodeRenderContext->UpdateTransformCenter(DimensionOffset(Offset(x, y)));
     menuNodeRenderContext->UpdateTransformScale({ 0.4f, 0.4f });
+}
+
+void MenuView::UpdateMenuOutlineWithArrow(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuWrapperPattern->GetHasCustomOutlineWidth()) {
+        return;
+    }
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty outerWidthProp;
+    outerWidthProp.SetBorderWidth(Dimension(0));
+    renderContext->SetOuterBorderWidth(outerWidthProp);
+    BorderColorProperty outerColorProp;
+    outerColorProp.SetColor(Color::TRANSPARENT);
+    renderContext->SetOuterBorderColor(outerColorProp);
+    menuWrapperPattern->SetMenuParam(menuParam);
+}
+
+void MenuView::TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
+{
+    CHECK_NULL_VOID(actionNode);
+    event.id = actionNode->GetId();
+    event.originalId = actionNode->GetId();
+    auto childOffset = actionNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = actionNode->GetRectWithRender();
+    event.x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    event.y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
+    event.postEventNodeId = actionNode->GetId();
+    event.isInterpolated = true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    event.time = time;
+}
+
+void MenuView::TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
+{
+    CHECK_NULL_VOID(actionNode);
+    auto childOffset = actionNode->GetPaintRectOffset(false, true);
+    auto rectWithRender = actionNode->GetRectWithRender();
+    auto globalOffset = actionNode->GetPaintRectGlobalOffsetWithTranslate();
+    point.id = actionNode->GetId();
+    point.originalId = actionNode->GetId();
+    point.x = globalOffset.first.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.y = globalOffset.first.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
+    point.screenX = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.screenY = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    point.downTime = time;
+}
+
+void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetNotifyChildAction(
+        [weak = WeakPtr<FrameNode>(menuNode)] (const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
+            auto result = AccessibilityActionResult::ACTION_ERROR;
+            CHECK_NULL_RETURN(node, result);
+            auto menu = weak.Upgrade();
+            CHECK_NULL_RETURN(menu, result);
+            auto eventHub = menu->GetEventHub<NG::EventHub>();
+            CHECK_NULL_RETURN(eventHub, result);
+            auto gesture = eventHub->GetGestureEventHub();
+            CHECK_NULL_RETURN(gesture, result);
+            TouchEvent event;
+            event.type = TouchType::DOWN;
+            MenuView::TouchEventGenerator(node, event);
+            TouchPoint eventPoint;
+            MenuView::TouchPointGenerator(node, eventPoint);
+            event.pointers.push_back(eventPoint);
+            auto actionResult = gesture->TriggerTouchEvent(event);
+            event.type = TouchType::UP;
+            result = gesture->TriggerTouchEvent(event) && actionResult ?
+                AccessibilityActionResult::ACTION_RISE : AccessibilityActionResult::ACTION_ERROR;
+            return result;
+    });
 }
 } // namespace OHOS::Ace::NG

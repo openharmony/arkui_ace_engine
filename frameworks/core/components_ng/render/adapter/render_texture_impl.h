@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class RenderTextureImpl : public RenderSurface {
-    DECLARE_ACE_TYPE(RenderTextureImpl, NG::RenderSurface)
+    DECLARE_ACE_TYPE(RenderTextureImpl, NG::RenderSurface);
 public:
     RenderTextureImpl() = default;
     ~RenderTextureImpl() override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,6 +299,7 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    JSViewAbstract::JsHeight(info);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
@@ -392,7 +393,9 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
+    JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
+    JSClass<JSGrid>::StaticMethod("syncLoad", &JSGrid::SetSyncLoad);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -413,9 +416,13 @@ void JSGrid::SetScrollBar(const JSCallbackInfo& info)
 
 void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(info);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarColor = JSScrollable::ParseBarColor(info, resObj);
     if (!scrollBarColor.empty()) {
         GridModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
     }
 }
 
@@ -662,10 +669,25 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
 void JSGrid::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
-    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction, resObj)) {
         friction = -1.0;
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModel::GetInstance()->CreateWithResourceObjFriction(resObj);
+    }
     GridModel::GetInstance()->SetFriction(friction);
+}
+
+void JSGrid::SetFocusWrapMode(const JSCallbackInfo& args)
+{
+    auto focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    if (!JSViewAbstract::ParseJsInt32(args[0], focusWrapMode) ||
+        focusWrapMode < static_cast<int32_t>(FocusWrapMode::DEFAULT) ||
+        focusWrapMode > static_cast<int32_t>(FocusWrapMode::WRAP_WITH_ARROW)) {
+        focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    }
+    GridModel::GetInstance()->SetFocusWrapMode(static_cast<FocusWrapMode>(focusWrapMode));
 }
 
 void JSGrid::SetAlignItems(const JSCallbackInfo& info)
@@ -684,6 +706,18 @@ void JSGrid::SetAlignItems(const JSCallbackInfo& info)
     } else {
         GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
     }
+}
+
+void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = true;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    GridModel::GetInstance()->SetSyncLoad(syncLoad);
 }
 
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)

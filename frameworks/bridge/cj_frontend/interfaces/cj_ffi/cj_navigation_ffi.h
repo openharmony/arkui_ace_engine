@@ -17,10 +17,13 @@
 #define OHOS_ACE_FRAMEWORK_CJ_NAVIGATION_FFI_H
 
 #include <cstdint>
-
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model.h"
+
 
 using VectorNavigationItemHandle = void*;
+using VectorInt32Ptr = void*;
 
 extern "C" {
 struct CJNavigationTitleOptions {
@@ -79,7 +82,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithOptions(
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetToolBarWithBuilderWithOptions(
     void (*builder)(), bool withOptions, CJNavigationToolbarOptions options);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide, bool animated);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide, bool animated);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarWidth(double width, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetNavBarPosition(int32_t position);
@@ -94,6 +99,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetSystemBarStyle(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavBarStateChange(void (*callback)(bool));
 CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetOnNavigationModeChange(void (*callback)(int32_t));
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetRecoverable(bool recoverable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimation(bool isEnable);
+CJ_EXPORT void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_NAVIGATION_FFI_H

@@ -27,7 +27,7 @@ class PanRecognizer;
 class LongPressRecognizer;
 
 class ACE_EXPORT DragDropEventActuator : public DragEventActuator {
-    DECLARE_ACE_TYPE(DragDropEventActuator, DragEventActuator)
+    DECLARE_ACE_TYPE(DragDropEventActuator, DragEventActuator);
 public:
     DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~DragDropEventActuator() override = default;
@@ -48,10 +48,12 @@ public:
     void NotifyTransDragWindowToFwk() override;
     void NotifyMenuShow(bool isMenuShow) override;
     void NotifyDragEnd() override;
+    void NotifyPreDragStatus(const PreDragStatus preDragStatus) override;
 
 private:
     void InitPanAction();
     void InitLongPressAction();
+    const GestureEventFunc GetSequenceOnActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

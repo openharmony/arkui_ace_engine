@@ -32,18 +32,48 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFing
     isLimitFingerCount_ = isLimitFingerCount;
 }
 
+namespace {
+bool CheckRefereeState(RefereeState refereeState)
+{
+    return refereeState != RefereeState::PENDING &&
+        refereeState != RefereeState::PENDING_BLOCKED &&
+        refereeState != RefereeState::SUCCEED_BLOCKED;
+}
+} // namespace
+
+bool MultiFingersRecognizer::CheckFingerListInDownFingers(int32_t pointId) const
+{
+    if (inputEventType_ == InputEventType::AXIS) {
+        return false;
+    }
+    if (!CheckRefereeState(lastRefereeState_) ||
+        !CheckRefereeState(refereeState_)) {
+        return false;
+    }
+    if (isPostEventResult_) {
+        return false;
+    }
+    if (CheckoutDownFingers(pointId)) {
+        return false;
+    }
+    return true;
+}
+
 void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
+        if (CheckFingerListInDownFingers(point.second.id)) {
+            continue;
+        }
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(
+        TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
-        FingerInfo fingerInfo = { point.second.originalId, point.second.operatingHand, point.second.GetOffset(),
-            Offset(localPoint.GetX(), localPoint.GetY()),
-            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool };
+        FingerInfo fingerInfo = { point.second.GetOriginalReCovertId(), point.second.operatingHand,
+            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
+            point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && point.second.pointers.size() >= touchPoints_.size()) {
@@ -95,6 +125,7 @@ void MultiFingersRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::FAIL ||
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
@@ -108,6 +139,8 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].y = event.y;
     touchPoints_[event.id].screenX = event.screenX;
     touchPoints_[event.id].screenY = event.screenY;
+    touchPoints_[event.id].globalDisplayX = event.globalDisplayX;
+    touchPoints_[event.id].globalDisplayY = event.globalDisplayY;
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
     touchPoints_[event.id].originalId = event.originalId;
@@ -117,10 +150,13 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     point.y = event.y;
     point.screenX = event.screenX;
     point.screenY = event.screenY;
+    point.globalDisplayX = event.globalDisplayX;
+    point.globalDisplayY = event.globalDisplayY;
     point.sourceTool = event.sourceTool;
     point.originalId = event.originalId;
     touchPoints_[event.id].pointers = { point };
     touchPoints_[event.id].pointerEvent = event.pointerEvent;
+    touchPoints_[event.id].targetDisplayId = event.targetDisplayId;
 }
 
 std::string MultiFingersRecognizer::DumpGestureInfo() const

@@ -57,7 +57,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo);
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
     ~RichEditorInsertValue() override = default;
@@ -126,6 +126,8 @@ public:
     const std::string& GetColor() const;
     void SetTextDecorationStyle(TextDecorationStyle textDecorationStyle);
     TextDecorationStyle GetTextDecorationStyle() const;
+    void SetLineThicknessScale(float thicknessScale);
+    float GetLineThicknessScale() const;
     void SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap);
     const RefPtr<PixelMap>& GetValuePixelMap() const;
     void SetValueResourceStr(const std::string valueResourceStr);
@@ -189,6 +191,7 @@ private:
     TextDecoration textDecoration_;
     std::string color_;
     TextDecorationStyle textDecorationStyle_;
+    float lineThicknessScale_ = 1.0f;
     RefPtr<PixelMap> valuePixelMap_;
     std::string valueResourceStr_;
     int32_t width_ = 0;
@@ -205,7 +208,7 @@ private:
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
 
 class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo);
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
     ~RichEditorDeleteValue() = default;
@@ -227,9 +230,18 @@ private:
 };
 
 class ACE_FORCE_EXPORT RichEditorChangeValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo);
+#ifndef ACE_UNITTEST
+private:
+#else
 public:
+#endif
     RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}
+public:
+    RichEditorChangeValue(TextChangeReason reason) : RichEditorChangeValue()
+    {
+        changeReason_ = reason;
+    }
     ~RichEditorChangeValue() = default;
 
     void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
@@ -250,6 +262,8 @@ public:
     void SetRangeAfter(const TextRange& rangeAfter);
     TextRange GetRangeAfter() const;
 
+    TextChangeReason GetChangeReason() const;
+
     void reset()
     {
         originalSpans_.clear();
@@ -258,6 +272,7 @@ public:
         replacedSymbolSpans_.clear();
         rangeBefore_ = TextRange();
         rangeAfter_ = TextRange();
+        changeReason_ = TextChangeReason::UNKNOWN;
     }
 
 private:
@@ -267,10 +282,11 @@ private:
     std::vector<RichEditorAbstractSpanResult> replacedSymbolSpans_;
     TextRange rangeBefore_;
     TextRange rangeAfter_;
+    TextChangeReason changeReason_ = TextChangeReason::UNKNOWN;
 };
 
 class StyledStringChangeValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(StyledStringChangeValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(StyledStringChangeValue, BaseEventInfo);
 public:
     StyledStringChangeValue() : BaseEventInfo("StyledStringChangeValue") {}
     ~StyledStringChangeValue() = default;
@@ -295,7 +311,7 @@ private:
 };
 
 class RichEditorEventHub : public EventHub {
-    DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
+    DECLARE_ACE_TYPE(RichEditorEventHub, EventHub);
 
 public:
     RichEditorEventHub() = default;

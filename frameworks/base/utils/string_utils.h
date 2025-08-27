@@ -41,7 +41,7 @@ constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
 constexpr double DEGREES_VALUE = 360.0; // one turn means 360 deg
 constexpr double GRADIANS_VALUE = 400.0; // one turn means 400 grad
-constexpr double RADIANS_VALUE = 2 * M_PI; // one turn means 2*pi rad
+const extern double RADIANS_VALUE; // one turn means 2*pi rad
 const char ELLIPSIS[] = "...";
 
 inline std::u16string Str8ToStr16(const std::string& str)
@@ -144,6 +144,24 @@ inline bool IsNumber(const std::string& value)
     return std::all_of(value.begin(), value.end(), [](char i) { return isdigit(i); });
 }
 
+inline bool IsFloat(const std::string& s)
+{
+    if (s.empty()) {
+        return false;
+    }
+    int dot_count = 0;
+    bool all_valid = std::all_of(s.begin(), s.end(), [&](char c) {
+        if (c == '.') {
+            dot_count++;
+            return true;
+        }
+        return std::isdigit(static_cast<unsigned char>(c)) != 0;
+    });
+    if (!all_valid || dot_count > 1) {
+        return false;
+    }
+    return s != "." && s != ".." && std::any_of(s.begin(), s.end(), ::isdigit);
+}
 inline void ReplaceSpace(std::string& data)
 {
     bool isFirstSpace = true;

@@ -27,7 +27,9 @@ TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPoin
 
 void ConvertToMouseEvent(MouseEvent& mouseEvent, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
 {
-    Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, Container::Current()->IsSceneBoardWindow());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, container->IsSceneBoardWindow());
 }
 
 void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
@@ -43,5 +45,20 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
 void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
 {
     Platform::SetPostPointerEvent(pointerEvent, touchEvent);
+}
+
+TouchType GetTouchEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetTouchTypeFromPointerEvent(pointerEvent);
+}
+
+AxisAction GetAxisEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetAxisActionFromPointerEvent(pointerEvent);
+}
+
+MouseAction GetMouseEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return Platform::GetMouseActionFromPointerEvent(pointerEvent);
 }
 }

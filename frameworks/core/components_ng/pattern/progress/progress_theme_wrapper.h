@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new ProgressThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<ProgressThemeWrapper>();
             ParsePattern(themeConstants, AceType::DynamicCast<ProgressTheme>(wrapper));
             return wrapper;
         }

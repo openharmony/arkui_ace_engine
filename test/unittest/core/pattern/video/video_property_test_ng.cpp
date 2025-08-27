@@ -89,6 +89,7 @@ const std::string VIDEO_START_EVENT = R"({"start":""})";
 const std::string VIDEO_PAUSE_EVENT = R"({"pause":""})";
 const std::string VIDEO_FINISH_EVENT = R"({"finish":""})";
 const std::string VIDEO_ERROR_EVENT = R"({"error":""})";
+const std::string VIDEO_ERROR_EVENT_WITH_PARAM = R"({"code":1,"name":"BusinessError","message":"message"})";
 const std::string VIDEO_PREPARED_EVENT = R"({"duration":0})";
 const std::string VIDEO_SEEKING_EVENT = R"({"time":0})";
 const std::string VIDEO_SEEKED_EVENT = R"({"time":0})";
@@ -96,6 +97,8 @@ const std::string VIDEO_UPDATE_EVENT = R"({"time":0})";
 const std::string VIDEO_FULLSCREEN_EVENT = R"({"fullscreen":true})";
 const std::string EXTRA_INFO_KEY = "extraInfo";
 const std::string VIDEO_ERROR_ID = "";
+const int32_t VIDEO_CODE = 1;
+const std::string VIDEO_MESSAGE = "message";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
 const std::string VIDEO_STOP_EVENT = R"({"stop":""})";
 constexpr float MAX_WIDTH = 400.0f;
@@ -297,6 +300,8 @@ HWTEST_F(VideoPropertyTestNg, VideoEventTest003, TestSize.Level1)
     EXPECT_EQ(unknownVideoEvent, VIDEO_FINISH_EVENT);
     videoEventHub->FireErrorEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_ERROR_EVENT);
+    videoEventHub->FireErrorEvent(VIDEO_CODE, VIDEO_MESSAGE);
+    EXPECT_EQ(unknownVideoEvent, VIDEO_ERROR_EVENT_WITH_PARAM);
     videoEventHub->FirePreparedEvent(0.0);
     EXPECT_EQ(unknownVideoEvent, VIDEO_PREPARED_EVENT);
     videoEventHub->FireSeekingEvent(0.0);
@@ -792,8 +797,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest018, TestSize.Level1)
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::FITHEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL * 4);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
 }
 
 /**
@@ -1010,6 +1015,24 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest023, TestSize.Level1)
     videoPattern->mediaPlayer_ = nullptr;
     videoPattern->OnCurrentTimeChange(2);
     EXPECT_EQ(videoPattern->duration_, 0);
+
+    /**
+     * @tc.steps: step4. Call OnCurrentTimeChange while isPrepared_ is true.
+     * @tc.expected: isInitialState_ is false.
+     */
+    videoPattern->isInitialState_ = true;
+    videoPattern->isPrepared_ = true;
+    videoPattern->OnCurrentTimeChange(2);
+    EXPECT_EQ(videoPattern->isInitialState_, false);
+
+    /**
+     * @tc.steps: step5. Call OnCurrentTimeChange while isPrepared_ is false.
+     * @tc.expected: isInitialState_ is true.
+     */
+    videoPattern->isInitialState_ = true;
+    videoPattern->isPrepared_ = false;
+    videoPattern->OnCurrentTimeChange(2);
+    EXPECT_EQ(videoPattern->isInitialState_, true);
 }
 
 /**
@@ -1366,5 +1389,30 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest031, TestSize.Level1)
     KeyEvent keyEvent6 { KeyCode::KEY_SPACE, KeyAction::DOWN };
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
     videoPattern->OnKeyEvent(keyEvent6);
+}
+
+/**
+ * @tc.name: VideoPatternTest032
+ * @tc.desc: IsEnableMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(videoPattern->IsEnableMatchParent());
 }
 } // namespace OHOS::Ace::NG

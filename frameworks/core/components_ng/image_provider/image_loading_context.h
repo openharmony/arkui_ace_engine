@@ -39,7 +39,7 @@ class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
     ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false,
-        const ImageDfxConfig& imageDfxConfig = {});
+        bool isSceneBoardWindow = false, const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
     // return true if calling MakeCanvasImage is necessary
@@ -56,6 +56,7 @@ public:
     /* interfaces to get properties */
     SizeF GetImageSize() const;
     SizeF GetOriginImageSize() const;
+    std::string GetImageSizeInfo() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
@@ -91,7 +92,7 @@ public:
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
-    void FailCallback(const std::string& errorMsg);
+    void FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo = {});
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
     bool Downloadable();
@@ -133,7 +134,7 @@ public:
         return photoDecodeFormat_;
     }
 
-    void FinishMearuse()
+    void FinishMeasure()
     {
         measureFinish_ = true;
     }
@@ -208,6 +209,7 @@ private:
     PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool isSceneBoardWindow_ = false;
 
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
@@ -226,6 +228,7 @@ private:
     std::function<void()> updateParamsCallback_ = nullptr;
 
     std::string errorMsg_;
+    ImageErrorInfo errorInfo_;
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
 

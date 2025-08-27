@@ -46,4 +46,4 @@ double AdjustSpeed(double speed, ComparationResult compare)
 
 } // namespace OHOS::Ace::NG
 
-#endif // TEST_UNITTEST_CORE_GESTURES_PAN_RECOGNIZER_TEST_UTILS_H
+#endif // TEST_UNITTEST_CORE_GESTURES_SWIPE_RECOGNIZER_TEST_UTILS_H

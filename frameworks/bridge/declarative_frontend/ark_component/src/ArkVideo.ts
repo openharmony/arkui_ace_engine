@@ -160,6 +160,181 @@ class VideoEnableShortcutKeyModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class VideoOnStartModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnStart(node);
+    } else {
+      getUINativeModule().video.setVideoOnStart(node, this.value);
+    }
+  }
+}
+
+class VideoOnPauseModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnPause');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnPause(node);
+    } else {
+      getUINativeModule().video.setVideoOnPause(node, this.value);
+    }
+  }
+}
+
+class VideoOnFinishModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnFinish');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnFinish(node);
+    } else {
+      getUINativeModule().video.setVideoOnFinish(node, this.value);
+    }
+  }
+}
+
+class VideoOnFullscreenChangeModifier extends ModifierWithKey<Callback<FullscreenInfo>> {
+  constructor(value: Callback<FullscreenInfo>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnFullscreenChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnFullscreenChange(node);
+    } else {
+      getUINativeModule().video.setVideoOnFullscreenChange(node, this.value);
+    }
+  }
+}
+
+class VideoOnPreparedModifier extends ModifierWithKey<Callback<PreparedInfo>> {
+  constructor(value: Callback<PreparedInfo>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnPrepared');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnPrepared(node);
+    } else {
+      getUINativeModule().video.setVideoOnPrepared(node, this.value);
+    }
+  }
+}
+
+class VideoOnSeekingModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
+  constructor(value: Callback<PlaybackInfo>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnSeeking');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnSeeking(node);
+    } else {
+      getUINativeModule().video.setVideoOnSeeking(node, this.value);
+    }
+  }
+}
+
+class VideoOnSeekedModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
+  constructor(value: Callback<PlaybackInfo>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnSeeked');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnSeeked(node);
+    } else {
+      getUINativeModule().video.setVideoOnSeeked(node, this.value);
+    }
+  }
+}
+
+class VideoOnUpdateModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
+  constructor(value: Callback<PlaybackInfo>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnUpdate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnUpdate(node);
+    } else {
+      getUINativeModule().video.setVideoOnUpdate(node, this.value);
+    }
+  }
+}
+
+class VideoOnErrorModifier extends ModifierWithKey<VoidCallback | ErrorCallback> {
+  constructor(value: VoidCallback | ErrorCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnError');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnError(node);
+    } else {
+      getUINativeModule().video.setVideoOnError(node, this.value);
+    }
+  }
+}
+
+class VideoOnStopModifier extends ModifierWithKey<Callback<void>> {
+  constructor(value: Callback<void>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOnStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoOnStop(node);
+    } else {
+      getUINativeModule().video.setVideoOnStop(node, this.value);
+    }
+  }
+}
+
+class VideoEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoEnableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoEnableAnalyzer(node);
+    } else {
+      getUINativeModule().video.setVideoEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class VideoAnalyzerConfigModifier extends ModifierWithKey<ImageAnalyzerConfig> {
+  constructor(value: ImageAnalyzerConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoAnalyzerConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoAnalyzerConfig(node);
+    } else {
+      getUINativeModule().video.setVideoAnalyzerConfig(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -199,35 +374,65 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
       VideoEnableShortcutKeyModifier, value);
     return this;
   }
-  onStart(callback: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onStart(event: VoidCallback): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnStartModifier.identity,
+      VideoOnStartModifier, event);
+    return this;
   }
-  onPause(callback: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onPause(event: VoidCallback): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnPauseModifier.identity,
+      VideoOnPauseModifier, event);
+    return this;
   }
-  onFinish(event: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onFinish(event: VoidCallback): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnFinishModifier.identity,
+      VideoOnFinishModifier, event);
+    return this;
   }
-  onFullscreenChange(callback: (event: { fullscreen: boolean }) => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onFullscreenChange(callback: Callback<FullscreenInfo>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnFullscreenChangeModifier.identity,
+      VideoOnFullscreenChangeModifier, callback);
+    return this;
   }
-  onPrepared(callback: (event: { duration: number }) => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onPrepared(callback: (callback: Callback<PreparedInfo>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnPreparedModifier.identity,
+      VideoOnPreparedModifier, callback);
+    return this;
   }
-  onSeeking(callback: (event: { time: number }) => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onSeeking(callback: Callback<PlaybackInfo>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekingModifier.identity,
+      VideoOnSeekingModifier, callback);
+    return this;
   }
-  onSeeked(callback: (event: { time: number }) => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onSeeked(callback: Callback<PlaybackInfo>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekedModifier.identity,
+      VideoOnSeekedModifier, callback);
+    return this;
   }
-  onUpdate(callback: (event: { time: number }) => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onUpdate(callback: Callback<PlaybackInfo>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnUpdateModifier.identity,
+      VideoOnUpdateModifier, callback);
+    return this;
   }
-  onError(callback: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onError(event: VoidCallback | ErrorCallback): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnErrorModifier.identity,
+      VideoOnErrorModifier, event);
+    return this;
   }
-  onStop(callback: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
+  onStop(event: Callback<void>): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoOnStopModifier.identity,
+      VideoOnStopModifier, event);
+    return this;
+  }
+  enableAnalyzer(enable: boolean): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableAnalyzerModifier.identity,
+      VideoEnableAnalyzerModifier, enable);
+    return this;
+  }
+  analyzerConfig(config: ImageAnalyzerConfig): VideoAttribute {
+    modifierWithKey(this._modifiersWithKeys, VideoAnalyzerConfigModifier.identity,
+      VideoAnalyzerConfigModifier, config);
+    return this;
   }
 }
 // @ts-ignore

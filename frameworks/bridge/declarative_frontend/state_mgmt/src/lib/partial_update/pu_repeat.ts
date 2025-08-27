@@ -27,6 +27,9 @@ interface __IRepeatItemInternal<T> {
     // - on child reuse. reuse children to render newItemValue. index of
     //   newItemValue is a new one
     updateIndex: (newIndexValue: number) => void;
+
+    // un-register all repeat sub-components
+    aboutToBeDeleted?: () => void;
 }
 
 interface __RepeatItemFactoryReturn<T> extends RepeatItem<T>, __IRepeatItemInternal<T> { }
@@ -65,6 +68,11 @@ class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
         if (this._observedIndex?.getUnmonitored() !== newIndex) {
             this._observedIndex?.set(newIndex);
         }
+    }
+
+    public aboutToBeDeleted(): void {
+        this._observedItem.aboutToBeDeleted();
+        this._observedIndex?.aboutToBeDeleted();
     }
 }
 
@@ -156,8 +164,6 @@ interface __RepeatConfig<T> {
 
 // should be empty string, don't change it
 const RepeatEachFuncTtype: string = '';
-// API Version 18
-const VERSION_EIGHTEEN: number = 18;
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
@@ -271,15 +277,9 @@ class __Repeat<T> implements RepeatAPI<T> {
             this.impl.render(this.config, isInitialRender);
             return;
         }
-        if (!Utils.isApiVersionEQAbove(VERSION_EIGHTEEN)) {
-            // RepeatVirtualScroll
-            this.impl ??= new __RepeatVirtualScrollImpl<T>();
-            this.impl.render(this.config, isInitialRender);
-        } else {
-            // RepeatVirtualScroll v2
-            this.impl ??= new __RepeatVirtualScroll2Impl<T>();
-            this.impl.render(this.config, isInitialRender);
-        }
+        // RepeatVirtualScroll v2
+        this.impl ??= new __RepeatVirtualScroll2Impl<T>();
+        this.impl.render(this.config, isInitialRender);
     }
 
     // drag and drop API
@@ -287,6 +287,17 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.onMoveHandler = handler;
         this.config.itemDragEventHandler = eventHandler;
         return this;
+    }
+
+    // un-register all repeat sub-components
+    public aboutToBeDeleted(): void {
+        if (this.impl instanceof __RepeatImpl) {
+            this.impl.getKey2Item().forEach((itemInfo: __RepeatItemInfo<T>) => {
+                if (itemInfo.repeatItem && itemInfo.repeatItem instanceof __RepeatItemPU) {
+                    itemInfo.repeatItem.aboutToBeDeleted();
+                }
+            });
+        }
     }
 
     // normalize template options

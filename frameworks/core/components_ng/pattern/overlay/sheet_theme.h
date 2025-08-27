@@ -73,7 +73,7 @@ public:
 
         RefPtr<SheetTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SheetTheme> theme = AceType::Claim(new SheetTheme());
+            RefPtr<SheetTheme> theme = AceType::MakeRefPtr<SheetTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -92,6 +92,7 @@ public:
             }
 
             theme->sheetRadius_ = sheetPattern->GetAttr<Dimension>("sheet_radius", 32.0_vp);
+            theme->sheetSideRadius_ = sheetPattern->GetAttr<Dimension>("corner_radius_none", 0.0_vp);
             theme->titleTextFontSize_ = sheetPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp);
             theme->titleTextMargin_ = sheetPattern->GetAttr<Dimension>("title_text_margin", 16.0_vp);
             theme->subtitleTextFontSize_ = sheetPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp);
@@ -156,6 +157,10 @@ public:
             theme->closeIconButtonStyle_ =
                 sheetPattern->GetAttr<int>("sheet_close_icon_button_style", SHEET_CLOSE_ICON_BUTTON_STYLE);
             theme->sheetClose_ = sheetPattern->GetAttr<std::string>("sheet_close", "");
+            theme->operationAreaHeightDouble_ =
+                sheetPattern->GetAttr<Dimension>("operation_area_height_double", SHEET_OPERATION_AREA_HEIGHT_DOUBLE);
+            theme->bigWindowMinHeight_ =
+                sheetPattern->GetAttr<Dimension>("big_window_min_height", SHEET_BIG_WINDOW_MIN_HEIGHT);
         }
     };
     ~SheetTheme() override = default;
@@ -163,6 +168,11 @@ public:
     const Dimension& GetSheetRadius() const
     {
         return sheetRadius_;
+    }
+
+    const Dimension& GetSheetSideRadius() const
+    {
+        return sheetSideRadius_;
     }
 
     const Dimension& GetTitleTextFontSize() const
@@ -233,6 +243,11 @@ public:
     const std::string& GetSheetType() const
     {
         return sheetType_;
+    }
+
+    const std::string& GetSheetBottomType() const
+    {
+        return sheetBottom_;
     }
 
     const int& GetSheetBackgroundBlurStyle() const
@@ -386,11 +401,22 @@ public:
     {
         return sheetClose_;
     }
+
+    const Dimension& GetOperationAreaHeightDouble() const
+    {
+        return operationAreaHeightDouble_;
+    }
+
+    const Dimension& GetBigWindowMinHeight() const
+    {
+        return bigWindowMinHeight_;
+    }
 protected:
     SheetTheme() = default;
 
 private:
     Dimension sheetRadius_;
+    Dimension sheetSideRadius_;
     Dimension titleTextFontSize_;
     Dimension titleTextMargin_;
     Dimension subtitleTextFontSize_;
@@ -434,6 +460,9 @@ private:
     double mediumPercent_ = 0.6; // 0.6 is default value
     bool heightApplyFullScreen_ = false;
     bool showCloseIcon_ = true;
+
+    Dimension operationAreaHeightDouble_ = SHEET_OPERATION_AREA_HEIGHT_DOUBLE;
+    Dimension bigWindowMinHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT;
 };
 } // namespace OHOS::Ace::NG
 

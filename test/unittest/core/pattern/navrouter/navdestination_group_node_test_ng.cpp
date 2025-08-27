@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -36,6 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t INVALID_ANIMATION_ID = -1;
 constexpr int32_t TRANSITION_COMBINATIONS = 6;
+const std::string TITLE_BAR_NODE_MENU = "menu";
 
 RefPtr<NavigationGroupNode> CreateNavigationNode(const RefPtr<MockNavigationStack>& stack)
 {
@@ -79,6 +81,193 @@ void NavDestinationGroupNodeTestNg::TearDownTestCase()
 }
 
 /**
+ * @tc.name: SetIndex001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY && updatePrimary) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PROXY;
+
+    destNode->SetIndex(1, true);
+    EXPECT_EQ(destNode->index_, 1);
+    EXPECT_EQ(primaryNode->index_, 1);
+}
+
+/**
+ * @tc.name: SetIndex002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY && updatePrimary) { => false
+ *                   } else if (proxyNode_) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->proxyNode_ = nullptr;
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetIndex(2, true);
+    EXPECT_EQ(destNode->index_, 2);
+}
+
+/**
+ * @tc.name: SetIndex003
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY && updatePrimary) { => false
+ *                   } else if (proxyNode_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex003, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    auto proxyNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(proxyNode, nullptr);
+    destNode->proxyNode_ = proxyNode;
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetIndex(1, true);
+    EXPECT_EQ(destNode->index_, 1);
+    EXPECT_EQ(proxyNode->index_, 1);
+}
+
+/**
+ * @tc.name: SetCanReused001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCanReused001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    ASSERT_TRUE(destNode->canReused_);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    ASSERT_TRUE(primaryNode->canReused_);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PROXY;
+
+    destNode->SetCanReused(false);
+    EXPECT_FALSE(destNode->canReused_);
+    EXPECT_FALSE(primaryNode->canReused_);
+}
+
+/**
+ * @tc.name: SetCanReused002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCanReused002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    ASSERT_TRUE(destNode->canReused_);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    ASSERT_TRUE(primaryNode->canReused_);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetCanReused(false);
+    EXPECT_FALSE(destNode->canReused_);
+    EXPECT_TRUE(primaryNode->canReused_);
+}
+
+/**
+ * @tc.name: GetCanReused001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetCanReused001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->canReused_ = true;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->canReused_ = false;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PROXY;
+    EXPECT_FALSE(destNode->GetCanReused());
+}
+
+/**
+ * @tc.name: GetCanReused002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetCanReused002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->canReused_ = true;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->canReused_ = false;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+    EXPECT_TRUE(destNode->GetCanReused());
+}
+
+/**
+ * @tc.name: GetNavDestinationMode001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetNavDestinationMode001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->mode_ = NavDestinationMode::STANDARD;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->mode_ = NavDestinationMode::DIALOG;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PROXY;
+    EXPECT_EQ(destNode->GetNavDestinationMode(), NavDestinationMode::DIALOG);
+}
+
+/**
+ * @tc.name: GetNavDestinationMode002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PROXY) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetNavDestinationMode002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->mode_ = NavDestinationMode::STANDARD;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->mode_ = NavDestinationMode::DIALOG;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+    EXPECT_EQ(destNode->GetNavDestinationMode(), NavDestinationMode::STANDARD);
+}
+
+/**
  * @tc.name: SetSystemTransitionTest001
  * @tc.desc: Branch: if navDestinationTransitionDelegate_ == nullptr
  *           Expect: reset navDestinationTransitionDelegate_ to nullptr
@@ -100,6 +289,331 @@ HWTEST_F(NavDestinationGroupNodeTestNg, SetSystemTransitionTest001, TestSize.Lev
     ASSERT_NE(navDestination->navDestinationTransitionDelegate_, nullptr);
     navdestinationModel.SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
     ASSERT_EQ(navDestination->navDestinationTransitionDelegate_, nullptr);
+}
+
+/**
+ * @tc.name: CreateEmpty
+ * @tc.desc: cover CreateEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CreateEmpty001, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.CreateEmpty();
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    navdestinationModel.SetHideTitleBar(frameNode, false, false);
+    navdestinationModel.SetHideBackButton(frameNode, false);
+    navdestinationModel.SetBackgroundColor(Color::RED, false, nullptr);
+    navdestinationModel.SetBackgroundColor(Color::RED, true, nullptr);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, false, nullptr);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, true, nullptr);
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = true;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+
+    param.hasSubTitle = false;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+
+    param.hasMainTitle = false;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_TRUE(!param.hasSubTitle && !param.hasMainTitle);
+}
+
+/**
+ * @tc.name: ParseCommonTitle001
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               hasMainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is false and !hasSubTitle is false
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = false;
+    EXPECT_FALSE(!param.hasSubTitle);
+    EXPECT_FALSE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return false
+    EXPECT_FALSE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    ASSERT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+}
+
+/**
+ * @tc.name: ParseCommonTitle002
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return false
+ *               hasMainTitle is true
+ *               mainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle002, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto subTitle = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->subtitle_ = subTitle;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is false
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = true;
+    EXPECT_FALSE(!param.hasSubTitle);
+    EXPECT_TRUE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return false
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    EXPECT_FALSE(titleBarLayoutProperty->HasTitleHeight());
+    // Make sure mainTitle is false
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+    // subTitle is true
+    auto subTitleTest = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+}
+
+/**
+ * @tc.name: ParseCommonTitle003
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return true
+ *               hasMainTitle is true
+ *               mainTitle is true
+ *               !hasSubTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle003, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    // Make HasTitleHeight return true
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    titleBarLayoutProperty->propTitleHeight_ = NG::DOUBLE_LINE_TITLEBAR_HEIGHT;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is true
+    NavigationTitleInfo param;
+    param.hasSubTitle = false;
+    param.hasMainTitle = true;
+    EXPECT_TRUE(!param.hasSubTitle);
+    EXPECT_TRUE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return true
+    auto titleBarLayoutPropertyTest = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    EXPECT_TRUE(titleBarLayoutPropertyTest->HasTitleHeight());
+    // Make sure mainTitle is true
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+}
+
+/**
+ * @tc.name: SetMenuItems001
+ * @tc.desc: Test SetMenuItems function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetMenuItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+
+    NG::BarItem bar;
+    std::vector<NG::BarItem> barItems;
+    barItems.push_back(bar);
+
+    /**
+     * @tc.steps: step2. Call SetMenuItems when UpdatePrevMenuIsCustom is true.
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    /**
+     * @tc.steps: step3. Call SetMenuItems when UpdatePrevMenuIsCustom is false.
+     * and navDestinationGroupNode has no menu
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+
+    /**
+     * @tc.steps: step4. Call SetMenuItems when UpdatePrevMenuIsCustom is false
+     * and navDestinationGroupNode has menu
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    navDestinationGroupNode->SetMenu(menuNode);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+}
+
+/**
+ * @tc.name: SetCustomTitle001
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               currentTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    EXPECT_NE(customNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return false
+    EXPECT_FALSE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is false
+    EXPECT_EQ(titleBarNode->GetTitle(), nullptr);
+    navDestinationModel.SetCustomTitle(frameNode, customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle002
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is not GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle002, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    EXPECT_NE(customNode, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    EXPECT_NE(currentTitle, nullptr);
+    // Make sure GetId is not GetId
+    EXPECT_NE(currentTitle->GetId(), customNode->GetId());
+    navDestinationModel.SetCustomTitle(frameNode, customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle003
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle003, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    EXPECT_NE(currentTitle, nullptr);
+    // Make sure GetId is GetId
+    EXPECT_EQ(currentTitle->GetId(), title->GetId());
+    navDestinationModel.SetCustomTitle(frameNode, title);
 }
 
 /**
@@ -379,7 +893,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
     ASSERT_NE(navDestinationRenderContext, nullptr);
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
     navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_RIGHT;
-    navDestinationNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 100.0f));
+    navDestinationNode->GetRenderContext()->UpdatePaintRect(RectF{0.0f, 0.0f, 200.0f, 100.0f});
 
     navDestinationNode->DoSystemSlideTransition(NavigationOperation::POP, false);
     EXPECT_FALSE(eventHub->enabled_);
@@ -1067,5 +1581,229 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
     int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
     EXPECT_EQ(ret, 1);
     NavDestinationGroupNodeTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest001
+ * @tc.desc: Branch 1: if has set elapsedTime from modifier
+ *           Expect 1: navDestination got correct elapsed time value
+ *           Branch 2: if has NOT set elapsedTime from modifier
+ *           Expect 2: navDestination got default elapsed time value, which is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest001, TestSize.Level1)
+{
+    NavDestinationGroupNodeTestNg::SetUpTestCase();
+    /**
+     * @tc.steps: step1. create navDestination and set elpased time.
+     */
+    const int32_t elapsedTime = 150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    ASSERT_NE(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), 0);
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    model.SetTitleAnimationElapsedTime(navDestination, elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest002
+ * @tc.desc: Branch 1: if (elapsed time < 0 && transitionType_ != TransitionType::TITLE)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT minus elapsed time delay
+ *           Branch 2: if (elapsed time > 450 && transitionType_ != TransitionType::TITLE)
+ *           Expect 2: run SetTitleAnimationElapsedTime will NOT minus elapsed time delay
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t invalidElapsedTimeA = -150;
+    const int32_t invalidElapsedTimeB = 1150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, invalidElapsedTimeA);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), invalidElapsedTimeA);
+    ASSERT_EQ(option.GetDelay(), 0);
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), 0);
+    navDestination->titleAnimationElapsedTime_ = invalidElapsedTimeB;
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), 0);
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest003
+ * @tc.desc: Branch 1: if (elapsed time < 0 && transitionType_ == TransitionType::TITLE)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT minus elapsed time delay
+ *           Branch 2: if (elapsed time > 450 && transitionType_ == TransitionType::TITLE)
+ *           Expect 2: run SetTitleAnimationElapsedTime will NOT minus elapsed time delay
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t invalidElapsedTimeA = -150;
+    const int32_t invalidElapsedTimeB = 1150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, invalidElapsedTimeA);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), invalidElapsedTimeA);
+    ASSERT_EQ(option.GetDelay(), 0);
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::TITLE);
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), 0);
+    navDestination->titleAnimationElapsedTime_ = invalidElapsedTimeB;
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), 0);
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest004
+ * @tc.desc: Branch 1: if (elapsed time > 0 && elapsed time < 450 && transitionType_ != TransitionType::TITLE)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT minus elapsed time delay
+ *           Branch 2: if (elapsed time > 0 && elapsed time < 450 && transitionType_ == TransitionType::TITLE)
+ *           Expect 2: run SetTitleAnimationElapsedTime will minus elapsed time delay SUCCESSFULLY
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t elapsedTime = 150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+    ASSERT_EQ(option.GetDelay(), 0);
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+    /**
+     * @tc.steps: step2. call SetTitleAnimationElapsedTime several times and check option delay value.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), 0);
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+    ASSERT_TRUE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_NE(option.GetDelay(), 0);
+    ASSERT_EQ(option.GetDelay(), -1 * elapsedTime);
+    /**
+     * @tc.steps: step3. call SetTitleAnimationElapsedTime again and check option delay value.
+     */
+    navDestination->isTitleConsumedElapsedTime_ = true;
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_EQ(option.GetDelay(), -1 * elapsedTime);
+}
+
+/**
+ * @tc.name: test MeasureContentChild
+ * @tc.desc: branch if (contentLayoutProperty->IsIgnoreOptsValid()) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, MeasureContentChild, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create navDestination node
+     */
+    auto navNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navNode->AddChild(navDestinationContentNode);
+    navNode->SetContentNode(navDestinationContentNode);
+    auto pattern = navNode->GetPattern<NavDestinationPattern>();
+    auto algorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    auto layoutWrapper = navNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto contentWrapper = navDestinationContentNode->CreateLayoutWrapper();
+    layoutWrapper->AppendChild(contentWrapper);
+    auto layoutProperty = navNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto temp = LayoutConstraintF();
+    temp.selfIdealSize = OptionalSizeF(200.0f, 200.0f);
+    layoutProperty->layoutConstraint_ = temp;
+    layoutProperty->contentConstraint_ = temp;
+    layoutWrapper->layoutProperty_ = layoutProperty;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    navDestinationContentNode->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(temp.selfIdealSize.Height(), 200.0f);
+}
+
+/**
+ * @tc.name: IsNeedHandleElapsedTimeTest001
+ * @tc.desc: Branch 1: if (isTitleConsumedElapsedTime_ == true)
+ *           Expect 1: IsNeedHandleElapsedTime() return false
+ *           Branch 2: if (isTitleConsumedElapsedTime_ == false && systemTransitionType_ != TITLE)
+ *           Expect 2: IsNeedHandleElapsedTime() return false
+ *           Branch 3: if (isTitleConsumedElapsedTime_ == false && systemTransitionType_ == TITLE &&
+ *                         titleAnimationElapsedTime_ < 0)
+ *           Expect 3: IsNeedHandleElapsedTime() return false
+ *           Branch 4: if (isTitleConsumedElapsedTime_ == false && systemTransitionType_ == TITLE &&
+ *                         titleAnimationElapsedTime_ > 450)
+ *           Expect 4: IsNeedHandleElapsedTime() return false
+ *           Branch 5: if (isTitleConsumedElapsedTime_ == false && systemTransitionType_ == TITLE &&
+ *                         titleAnimationElapsedTime_ < 450 && titleAnimationElapsedTime_ > 0)
+ *           Expect 5: IsNeedHandleElapsedTime() return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, IsNeedHandleElapsedTimeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    navDestination->isTitleConsumedElapsedTime_ = true;
+    ASSERT_FALSE(navDestination->IsNeedHandleElapsedTime());
+    navDestination->isTitleConsumedElapsedTime_ = false;
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
+    ASSERT_FALSE(navDestination->IsNeedHandleElapsedTime());
+    /**
+     * @tc.steps: step2. mock elapsed time and do assert again.
+     */
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+    navDestination->titleAnimationElapsedTime_ = -1;
+    ASSERT_FALSE(navDestination->IsNeedHandleElapsedTime());
+    navDestination->titleAnimationElapsedTime_ = 1000;
+    ASSERT_FALSE(navDestination->IsNeedHandleElapsedTime());
+    navDestination->titleAnimationElapsedTime_ = 150;
+    ASSERT_TRUE(navDestination->IsNeedHandleElapsedTime());
 }
 } // namespace OHOS::Ace::NG

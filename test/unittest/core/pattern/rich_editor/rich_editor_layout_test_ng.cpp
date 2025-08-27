@@ -16,14 +16,24 @@
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
+namespace {
+    const Dimension MIN_WIDTH = 100.0_px;
+    const Dimension MIN_HEIGHT = 50.0_px;
+    const Dimension MAX_WIDTH = 200.0_px;
+    const Dimension MAX_HEIGHT = 150.0_px;
+} // namespace
 class RichEditorLayoutTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
@@ -59,7 +69,6 @@ void RichEditorLayoutTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
 }
-
 
 /**
  * @tc.name: OnDirtyLayoutWrapper001
@@ -164,7 +173,8 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
  */
 HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper003, TestSize.Level1)
 {
-    auto richEditorPattern = GetRichEditorPattern();
+    CHECK_NULL_VOID(richEditorNode_);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto rendenContext = richEditorNode_->GetRenderContext();
     ASSERT_NE(rendenContext, nullptr);
@@ -237,6 +247,9 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
+
+    AddSpan(EMPTY_STRING);
+    AddSpan(INIT_VALUE_1);
     auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
@@ -250,17 +263,23 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
-    AddSpan(INIT_VALUE_1);
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
 
-    layoutAlgorithm->spans_.clear();
-    auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size1.value().Width(), 1.0f);
-
-    richEditorPattern->presetParagraph_ = paragraph;
-    auto size2 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size2.value().Width(), 1.0f);
+    ASSERT_NE(layoutAlgorithm->spans_.size(), 0);
+    for (const auto& group : layoutAlgorithm->spans_) {
+        for (const auto& child : group) {
+            if (!child) {
+                continue;
+            }
+            child->ResetReLayout();
+            child->MarkReCreateParagraph();
+        }
+    }
+    auto size = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(size.value().Width(), 1.0f);
 }
 
 /**
@@ -311,24 +330,439 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorLayoutAlgorithm004
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy001
+ * @tc.desc: test LayoutPolicy MATCH_PARENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+
+    auto frameSize = CONTAINER_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, CONTAINER_SIZE);
+
+    layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(MIN_WIDTH), CalcLength(MIN_HEIGHT) };
+    layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(MAX_WIDTH), CalcLength(MAX_HEIGHT) };
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, CONTAINER_SIZE);
+}
+
+/**
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy002
+ * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    auto contentSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    layoutWrapper->GetGeometryNode()->SetContentSize(contentSize);
+
+    auto frameSize = CONTAINER_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+
+    frameSize = CONTAINER_SIZE;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+
+    layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(MIN_WIDTH), CalcLength(MIN_HEIGHT) };
+    layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(MAX_WIDTH), CalcLength(MAX_HEIGHT) };
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize.Width(), static_cast<float>(MAX_WIDTH.ConvertToPx()));
+    EXPECT_EQ(frameSize.Height(), static_cast<float>(MAX_HEIGHT.ConvertToPx()));
+
+    frameSize = CONTAINER_SIZE;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(MIN_WIDTH), CalcLength(MIN_HEIGHT) };
+    layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(MAX_WIDTH), CalcLength(MAX_HEIGHT) };
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize.Width(), static_cast<float>(MAX_WIDTH.ConvertToPx()));
+    EXPECT_EQ(frameSize.Height(), static_cast<float>(MAX_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy003
+ * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE with calcLayoutConstraint is nullPtr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = nullptr;
+    auto contentSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    layoutWrapper->GetGeometryNode()->SetContentSize(contentSize);
+
+    auto frameSize = CONTAINER_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+
+    frameSize = CONTAINER_SIZE;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+}
+
+/**
+ * @tc.name: UpdateConstraintByLayoutPolicy
+ * @tc.desc: test UpdateConstraintByLayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    auto contentSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
+        AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(parentLayoutConstraint.maxSize.Height(), CONTAINER_SIZE.Height());
+
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
+        AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
+
+    CalcSize maxSize{ CalcLength(1.0), CalcLength(1.0) };
+    MeasureProperty constraint;
+    constraint.maxSize = maxSize;
+    layoutProperty->UpdateCalcLayoutProperty(constraint);
+    layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
+        AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
+}
+
+/**
+ * @tc.name: UpdateMaxSizeByLayoutPolicy
+ * @tc.desc: test UpdateMaxSizeByLayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    auto maxSize = parentLayoutConstraint.maxSize;
+    layoutAlgorithm->UpdateMaxSizeByLayoutPolicy(parentLayoutConstraint, AceType::RawPtr(layoutWrapper), maxSize);
+    EXPECT_EQ(maxSize.Width(), CONTAINER_WIDTH);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateMaxSizeByLayoutPolicy(parentLayoutConstraint, AceType::RawPtr(layoutWrapper), maxSize);
+    EXPECT_EQ(maxSize.Width(), CONTAINER_WIDTH);
+
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    maxSize = parentLayoutConstraint.maxSize;
+    layoutAlgorithm->UpdateMaxSizeByLayoutPolicy(parentLayoutConstraint, AceType::RawPtr(layoutWrapper), maxSize);
+    EXPECT_EQ(maxSize.Width(), std::numeric_limits<float>::max());
+}
+
+/**
+ * @tc.name: HandleAISpanTest001
+ * @tc.desc: test HandleAISpanTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    std::list<RefPtr<SpanItem>> spans;
+    auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem1->rangeStart = 0;
+    spanItem1->position = 5;
+
+    auto spanItem2 = AceType::MakeRefPtr<SpanItem>();
+    spanItem2->rangeStart = 5;
+    spanItem2->position = 10;
+
+    auto spanItem3 = AceType::MakeRefPtr<SpanItem>();
+    spanItem3->rangeStart = 10;
+    spanItem3->position = 15;
+
+    spans.push_back(spanItem1);
+    spans.push_back(spanItem2);
+    spans.push_back(spanItem3);
+
+    std::map<int32_t, AISpan> aiSpanMap = { { 8, { 8, 12 } } };
+    AISpanLayoutInfo aiSpanLayoutInfo{ aiSpanMap, true };
+    // span:[0-5][5-10][10-15]
+    layoutAlgorithm->HandleAISpan(spans, aiSpanLayoutInfo);
+    EXPECT_EQ(spanItem1->aiSpanResultCount, 0);
+    EXPECT_EQ(spanItem2->aiSpanResultCount, 1);
+    EXPECT_EQ(spanItem3->aiSpanResultCount, 1);
+
+    EXPECT_EQ(spanItem1->needReLayout, false);
+    EXPECT_EQ(spanItem2->needReLayout, true);
+    EXPECT_EQ(spanItem3->needReLayout, true);
+}
+
+/**
+ * @tc.name: UpdateTextFieldManager001
+ * @tc.desc: test RichEditorPattern UpdateTextFieldManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager001, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->ShowHandles(true);
+    richEditorPattern->ShowHandles(false);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+
+    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    RichEditorTheme richEditorTheme;
+    EXPECT_EQ(richEditorPattern->GetPreviewTextDecorationColor(), richEditorTheme.GetPreviewUnderLineColor());
+
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->SetHeight(20);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+
+    Offset Offset = { 1, 4 };
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), true);
+}
+
+/**
+ * @tc.name: UpdateTextFieldManager002
+ * @tc.desc: test UpdateTextFieldManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->SetHeight(20);
+    context->SetTextFieldManager(textFieldManager);
+
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    Offset Offset = { 1, 4 };
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_NE(textFieldManager->GetOnFocusTextField().Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rendenContext = richEditorNode_->GetRenderContext();
+    ASSERT_NE(rendenContext, nullptr);
+    rendenContext->ResetClipEdge();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    DirtySwapConfig config;
+    richEditorPattern->isModifyingContent_ = true;
+    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest001
  * @tc.desc: test RichEditorLayoutAlgorithm
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Level1)
 {
-    std::list<RefPtr<SpanItem>> spans;
-    auto paragraphManager = AceType::MakeRefPtr<RichEditorParagraphManager>();
-    auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
 
-    std::u16string str = u"\n";
-    spanItem->content = str;
-    spans.emplace_back(spanItem);
-    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
-        std::nullopt, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
-    EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
+
+    std::list<RefPtr<SpanItem>> spanList1;
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash1 = layoutAlgorithm->Hash(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash2 = layoutAlgorithm->Hash(spanList2);
+
+    EXPECT_NE(hash1, hash2);
 }
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest002
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    SizeF textSize;
+    ASSERT_EQ(textSize.Width(), 0.0f);
+    layoutAlgorithm->allSpans_.clear();
+    layoutAlgorithm->HandleTextSizeWhenEmpty(AceType::RawPtr(layoutWrapper), textSize);
+    EXPECT_NE(textSize.Width(), 0.0f);
+}
+
 } // namespace OHOS::Ace::NG

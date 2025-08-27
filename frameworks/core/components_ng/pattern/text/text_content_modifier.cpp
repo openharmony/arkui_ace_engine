@@ -19,7 +19,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -30,8 +29,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
-#ifdef ACE_ENABLE_VK
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
 #include "2d_graphics/include/recording/draw_cmd_list.h"
 #endif
 
@@ -51,6 +50,8 @@ constexpr float OBSCURED_ALPHA = 0.2f;
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
     : pattern_(pattern)
 {
+    contentChange_ = MakeRefPtr<PropertyInt>(0);
+    AttachProperty(contentChange_);
     auto patternUpgrade = pattern_.Upgrade();
     CHECK_NULL_VOID(patternUpgrade);
     auto textPattern = DynamicCast<TextPattern>(patternUpgrade);
@@ -59,9 +60,6 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
-    contentChange_ = MakeRefPtr<PropertyInt>(0);
-    AttachProperty(contentChange_);
 
     auto contentRect = geometryNode->GetContentRect();
     contentOffset_ = MakeRefPtr<PropertyOffsetF>(contentRect.GetOffset());
@@ -216,7 +214,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
 
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
-    textDecoration_ = textStyle.GetTextDecoration();
+    textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     auto alpha = textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(alpha);
@@ -413,79 +411,108 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
-#ifdef ACE_ENABLE_VK
-    SetHybridRenderTypeIfNeeded(drawingContext, pManager, host);
-#endif
+    SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
     }
     if (!ifPaintObscuration_) {
-        auto& canvas = drawingContext.canvas;
-        CHECK_NULL_VOID(contentSize_);
-        CHECK_NULL_VOID(contentOffset_);
-        auto contentSize = contentSize_->Get();
-        auto contentOffset = contentOffset_->Get();
-        canvas.Save();
-        if (clip_ && clip_->Get() &&
-            (!fontSize_.has_value() || !fontSizeFloat_ ||
-                NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-            RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-            canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        }
-        if (!marqueeSet_) {
-            auto paintOffsetY = paintOffset_.GetY();
-            auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
-                auto paragraph = info.paragraph;
-                CHECK_NULL_VOID(paragraph);
-                ChangeParagraphColor(paragraph);
-                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
-                paintOffsetY += paragraph->GetHeight();
-            }
-        } else {
-            // Racing
-            DrawTextRacing(drawingContext, fadeoutInfo, pManager);
-        }
-        canvas.Restore();
+        DrawActualText(drawingContext, textPattern, pManager, fadeoutInfo);
     } else {
         DrawObscuration(drawingContext);
     }
     PaintCustomSpan(drawingContext);
 }
 
-#ifdef ACE_ENABLE_VK
-void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
-    const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
+void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
+    const RefPtr<ParagraphManager>& pManager, const FadeoutInfo& fadeoutInfo)
 {
+    auto& canvas = drawingContext.canvas;
+    CHECK_NULL_VOID(contentSize_);
+    CHECK_NULL_VOID(contentOffset_);
+    auto contentSize = contentSize_->Get();
+    auto contentOffset = contentOffset_->Get();
+    canvas.Save();
+    if (clip_ && clip_->Get() &&
+        (!fontSize_.has_value() || !fontSizeFloat_ ||
+            NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    }
+    if (!marqueeSet_) {
+        auto textEffect = textPattern->GetTextEffect();
+        if (!textEffect) {
+            DrawText(canvas, pManager, textPattern);
+        } else {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE("TextContentModifier::DrawContent StartEffect");
+            }
+            textEffect->StartEffect(canvas, paintOffset_.GetX(), paintOffset_.GetY());
+        }
+    } else {
+        // Racing
+        DrawTextRacing(drawingContext, fadeoutInfo, pManager);
+    }
+    canvas.Restore();
+}
+
+void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
+    const RefPtr<TextPattern>& textPattern, const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
+{
+#ifdef ENABLE_ROSEN_BACKEND
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
     if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
         if (host->IsAtomicNode()) {
-            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
+            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
                 recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
             }
         } else {
-            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) != 0 &&
+            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) &&
                 static_cast<uint32_t>(pManager->GetLineCount()) >=
-                Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
-                    recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
+                Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
+                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
+                auto baselineOffset = LessOrEqual(textPattern->GetBaselineOffset(), 0.0) ?
+                    std::fabs(textPattern->GetBaselineOffset()) : 0.0;
+                const RectF& contentRect = textPattern->GetTextRect();
+                RectF boundsRect;
+                pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
+                recordingCanvas->ResetHybridRenderSize(
+                    std::max(boundsRect.Width(), pManager->GetLongestLineWithIndent()),
+                    std::max(boundsRect.Height(), pManager->GetHeight()));
             }
         }
     }
-}
 #endif
+}
 
-void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
+void TextContentModifier::DrawText(
+    RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
     auto paintOffsetY = paintOffset_.GetY();
     auto paragraphs = pManager->GetParagraphs();
+    std::u16string paragraphContent;
     for (auto&& info : paragraphs) {
         auto paragraph = info.paragraph;
         CHECK_NULL_VOID(paragraph);
         ChangeParagraphColor(paragraph);
         paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
         paintOffsetY += paragraph->GetHeight();
+        paragraphContent += paragraph->GetParagraphText();
+    }
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(paragraphContent.length() == 1 && host->GetHostTag() == V2::TEXT_ETS_TAG);
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
+    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
+        recordingCanvas->GetDrawCmdList()->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "TextContentModifier::DrawText GetDrawCmdList empty! id:%{public}d LongestLineWithIndent:%{public}f "
+            "MaxIntrinsicWidth:%{public}f MaxWidth:%{public}f height:%{public}f lineCount:%{public}d paragraphs "
+            "size:%{public}d",
+            host->GetId(), pManager->GetLongestLineWithIndent(), pManager->GetMaxIntrinsicWidth(),
+            pManager->GetMaxWidth(), pManager->GetHeight(), static_cast<int32_t>(pManager->GetLineCount()),
+            static_cast<int32_t>(paragraphs.size()));
     }
 }
 
@@ -511,6 +538,10 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
 {
     CHECK_NULL_VOID(paragraph);
     if (onlyTextColorAnimation_ && animatableTextColor_) {
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+        }
         auto length = paragraph->GetParagraphText().length();
         paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
     }
@@ -707,6 +738,11 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
     if (fontSize_.has_value() && fontSizeFloat_ &&
         CheckNeedMeasure(fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateFontSizeMeasureFlag[fontSize:%f][lastFontSize:%f][fontSizeFloat:%f]",
+                fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get());
+        }
         lastFontSize_ = fontSizeFloat_->Get();
     }
 }
@@ -716,6 +752,11 @@ void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& 
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
         CheckNeedMeasure(adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag[adaptMinFontSize:%f]["
+                                  "lastMinFontSize:%f][adaptMinFontSizeFloat:%f]",
+                adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get());
+        }
         lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
     }
 }
@@ -725,6 +766,11 @@ void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& 
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
         CheckNeedMeasure(adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag[adaptMaxFontSize:%f]["
+                                  "lastMaxFontSize:%f][adaptMaxFontSizeFloat:%f]",
+                adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get());
+        }
         lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
     }
 }
@@ -735,6 +781,11 @@ void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(
             static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateFontWeightMeasureFlag[fontWeight:%f][lastFontWeight:%f]["
+                                  "fontWeightFloat:%f]",
+                static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get());
+        }
         lastFontWeight_ = fontWeightFloat_->Get();
     }
 }
@@ -745,6 +796,12 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
         (textColor_->GetValue() != animatableTextColor_->Get().GetValue() ||
             lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
+                                  "animatableTextColor:%s]",
+                textColor_->ColorToString().c_str(), lastTextColor_.ColorToString().c_str(),
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+        }
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
 }
@@ -768,6 +825,10 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
         (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateSymbolColorMeasureFlag");
+        }
         lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
@@ -782,6 +843,10 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
         if (shadow.shadow != compareShadow || shadow.lastShadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE(
+                    "TextContentModifier::UpdateTextShadowMeasureFlag");
+            }
             shadow.lastShadow = compareShadow;
             return;
         }
@@ -795,9 +860,13 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
         if (textDecoration_.value() == TextDecoration::UNDERLINE &&
             (alpha != textDecorationColor_.value().GetAlpha() ||
                 !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_))) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextDecorationMeasureFlag UNDERLINE");
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE &&
                    (alpha != 0.0 || !NearZero(lastTextDecorationColorAlpha_))) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextDecorationMeasureFlag NONE");
             flag |= PROPERTY_UPDATE_MEASURE;
         }
         lastTextDecorationColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -809,6 +878,11 @@ void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& fl
     if (baselineOffset_.has_value() && baselineOffsetFloat_ &&
         CheckNeedMeasure(baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateBaselineOffsetMeasureFlag[baselineOffset:%f]["
+                                  "lastBaselineOffsetFloat:%f][baselineOffsetFloat:%f]",
+                baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get());
+        }
         lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
     }
 }
@@ -818,6 +892,11 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     if (lineHeight_.has_value() && lineHeightFloat_ &&
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateLineHeightMeasureFlag[lineHeight:%f][lastLineHeight:%f]["
+                                  "lineHeightFloat:%f]",
+                lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get());
+        }
         lastLineHeight_ = lineHeightFloat_->Get();
     }
 }
@@ -952,6 +1031,7 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isR
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
     if (oldTextDecoration == type) {
+        UpdateTextDecorationColorAlpha();
         return;
     }
 
@@ -962,8 +1042,12 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isR
     } else {
         textDecoration_ = std::nullopt;
     }
-    CHECK_NULL_VOID(textDecorationColorAlpha_);
+    UpdateTextDecorationColorAlpha();
+}
 
+void TextContentModifier::UpdateTextDecorationColorAlpha()
+{
+    CHECK_NULL_VOID(textDecorationColorAlpha_);
     if (textDecoration_.has_value() && textDecoration_.value() == TextDecoration::NONE) {
         textDecorationColorAlpha_->Set(0.0f);
     } else if (textDecorationColor_.has_value()) {

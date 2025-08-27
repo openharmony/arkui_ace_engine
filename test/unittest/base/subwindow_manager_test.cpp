@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-    // SUB_WINDOW_MANAGER = 
+    const int32_t CONATINERID = 100000;
 } // namespace
 
 class SubwindowManagerTest : public testing::Test {
@@ -71,5 +71,38 @@ HWTEST_F(SubwindowManagerTest, HidePreviewNG001, TestSize.Level1)
      * @tc.expected: HidePreviewNG return void.
      */
     manager->HidePreviewNG();
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_CloseDialog001
+ * @tc.desc: Test frame node method CloseDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, CloseDialog001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager, and CloseDialog.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    manager->CloseDialog(CONATINERID);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_ShowDialogNG001
+ * @tc.desc: Test frame node method ShowDialogNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ShowDialogNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager, and ShowDialogNG.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    DialogProperties dialogProps;
+    std::function<void()> buildFunc = nullptr;
+    auto dialogNode = manager->ShowDialogNG(dialogProps, std::move(buildFunc));
+    ASSERT_EQ(dialogNode, nullptr);
 }
 }

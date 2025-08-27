@@ -18,6 +18,8 @@
 
 #include "rosen_text/typography_types.h"
 #include "SkColor.h"
+#include "symbol_constants.h"
+#include "symbol_gradient.h"
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"
@@ -68,13 +70,15 @@ OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
+Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign);
+
 OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
 
 OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
 
 OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
-OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(std::vector<TextDecoration>& textDecoration);
 
 OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
@@ -91,8 +95,11 @@ OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(Placeholde
 void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
 
 SkColor ConvertSkColor(Color color);
-
+void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle);
 float GetVariableFontWeight(FontWeight fontWeight);
+std::vector<Rosen::Drawing::ColorQuad> ConvertColors(const std::vector<Color>& colors);
+std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad);
+std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow);
 } // namespace Constants
 
 } // namespace OHOS::Ace

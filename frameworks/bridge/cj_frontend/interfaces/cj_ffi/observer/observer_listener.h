@@ -35,7 +35,7 @@ public:
     void RemoveCallback(const std::string& type, int64_t callbackObject);
 
     void OnScrollEventStateChange(
-        const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset);
+        const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset, Ace::Axis axis);
     void OnTabContentUpdateStateChange(const Ace::NG::TabContentInfo& tabContentInfo);
 
 private:

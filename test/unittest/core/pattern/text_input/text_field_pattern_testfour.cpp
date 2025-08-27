@@ -406,6 +406,7 @@ HWTEST_F(TextFieldPatternTestFour, PerformAction001, TestSize.Level0)
     ASSERT_NE(eventHub, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    pattern->GetFocusHub()->currentFocus_ = true;
     pattern->focusIndex_ = FocuseIndex::TEXT;
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().eventSwitch_[index] = true;
@@ -544,5 +545,59 @@ HWTEST_F(TextFieldPatternTestFour, CursorMoveToParagraphEndTest001, TestSize.Lev
     EXPECT_TRUE(ret);
     EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
         << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());
+}
+
+/**
+ * @tc.name: StrokeTest001
+ * @tc.desc: Test attrs about stroke
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, StrokeTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetType(TextInputType::TEXT);
+        model.SetFontSize(DEFAULT_FONT_SIZE);
+        model.SetTextColor(DEFAULT_TEXT_COLOR);
+        model.SetStrokeWidth(Dimension(5, DimensionUnit::VP));
+        model.SetStrokeColor(DEFAULT_TEXT_COLOR);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("strokeWidth"), "5.00vp");
+    EXPECT_EQ(json->GetString("strokeColor"), "#FF000000");
+}
+
+/**
+ * @tc.name: TextAreaMinLinesTest001
+ * @tc.desc: Test attrs about stroke
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, TextAreaMinLinesTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetType(TextInputType::TEXT);
+        model.SetFontSize(DEFAULT_FONT_SIZE);
+        model.SetTextColor(DEFAULT_TEXT_COLOR);
+        model.SetMinLines(1);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("minLines"), "1");
 }
 }

@@ -18,8 +18,10 @@
 
 #include <mutex>
 
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_v2/indexer/indexer_component.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -29,6 +31,29 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT, NG::AlignStyle::START,
     NG::AlignStyle::END };
 }; // namespace
+
+enum class IndexerJsResourceType : int32_t {
+    COLOR,
+    SELECTED_COLOR,
+    POPUP_COLOR,
+    SELECTED_BACKGROUND_COLOR,
+    POPUP_BACKGROUND,
+    SELECTED_FONT_SIZE,
+    SELECTED_FONT_FAMILY,
+    POPUP_FONT_SIZE,
+    POPUP_FONT_FAMILY,
+    FONT_SIZE,
+    FONT_FAMILY,
+    ALIGN_OFFSET,
+    POPUP_POSITION_X,
+    POPUP_POSITION_Y,
+    POPUP_SELECTED_COLOR,
+    POPUP_UNSELECTED_COLOR,
+    POPUP_ITEM_FONT_SIZE,
+    POPUP_ITEM_BACKGROUND_COLOR,
+    POPUP_TITLE_BACKGROUND,
+};
+
 class ACE_FORCE_EXPORT IndexerModel {
 public:
     static IndexerModel* GetInstance();
@@ -36,10 +61,15 @@ public:
 
     virtual void Create(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc = false) = 0;
     virtual void SetSelectedColor(const std::optional<Color>& color) = 0;
+    virtual void SetSelectedColorByUser(bool isByUser) {};
     virtual void SetColor(const std::optional<Color>& color) = 0;
+    virtual void SetColorByUser(bool isByUser) {};
     virtual void SetPopupColor(const std::optional<Color>& color) = 0;
+    virtual void SetPopupColorByUser(bool isByUser) {};
     virtual void SetSelectedBackgroundColor(const std::optional<Color>& color) = 0;
+    virtual void SetSelectedBGColorByUser(bool isByUser) {};
     virtual void SetPopupBackground(const std::optional<Color>& color) = 0;
+    virtual void SetPopupBackgroundColorByUser(bool isByUser) {};
     virtual void SetUsingPopup(bool state) = 0;
     virtual void SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
         std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) = 0;
@@ -52,8 +82,11 @@ public:
     virtual void SetAlignStyle(int32_t value) = 0;
     virtual void SetSelected(int32_t selected) {};
     virtual void SetPopupItemBackground(const std::optional<Color>& color) {};
+    virtual void SetPopupItemBackgroundColorByUser(bool isByUser) {};
     virtual void SetPopupSelectedColor(const std::optional<Color>& color) {};
+    virtual void SetPopupSelectedColorByUser(bool isByUser) {};
     virtual void SetPopupUnselectedColor(const std::optional<Color>& color) {};
+    virtual void SetPopupUnselectedColorByUser(bool isByUser) {};
     virtual void SetFontSize(const Dimension& fontSize) {};
     virtual void SetFontWeight(const FontWeight weight) {};
     virtual void SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt) {};
@@ -71,8 +104,10 @@ public:
     virtual void SetIndexerBorderRadius(const Dimension& radius) {};
     virtual void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) {};
     virtual void SetPopupTitleBackground(const std::optional<Color>& color) {};
+    virtual void SetPopupTitleBackgroundByUser(bool isByUser) {};
     virtual void SetAdaptiveWidth(bool state) {};
     virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<IndexerModel> instance_;

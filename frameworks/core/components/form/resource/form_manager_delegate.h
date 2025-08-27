@@ -36,6 +36,9 @@
 #include "core/components/form/resource/form_utils.h"
 #endif
 
+namespace OHOS::Rosen {
+    class RSUIContext;
+}
 namespace OHOS::Ace {
 class FormCallbackClient;
 class FormSurfaceCallbackClient;
@@ -68,6 +71,7 @@ public:
     using SnapshotCallback = std::function<void(const uint32_t&)>;
     using EnableFormCallback = std::function<void(const bool enable)>;
     using LockFormCallback = std::function<void(const bool lock)>;
+    using UpdateFormDoneCallback = std::function<void(const int64_t formId)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -118,6 +122,7 @@ public:
     void AddSnapshotCallback(SnapshotCallback&& callback);
     void AddEnableFormCallback(EnableFormCallback&& callback);
     void AddLockFormCallback(LockFormCallback&& callback);
+    void AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -128,6 +133,7 @@ public:
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
+    void OnFormUpdateDone(const int64_t formId);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
@@ -137,6 +143,8 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
     void NotifyFormDump(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext);
+    void SetMultiInstanceFlag(bool isMultiInstanceEnable);
     bool IsFormBundleExempt(int64_t formId);
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -144,7 +152,7 @@ public:
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
-    void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
+    int32_t OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
     void OnFormSurfaceChange(float width, float height, float borderWidth = 0.0);
     void OnFormSurfaceDetach();
@@ -198,6 +206,7 @@ private:
     SnapshotCallback snapshotCallback_;
     EnableFormCallback enableFormCallback_;
     LockFormCallback lockFormCallback_;
+    UpdateFormDoneCallback updateFormDoneCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
@@ -207,6 +216,8 @@ private:
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
     NotifySurfaceChangeFailedRecord notifySurfaceChangeFailedRecord_;
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
+    bool isMultiInstanceEnable_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     void OnRouterActionEvent(const std::string& action);
     void OnCallActionEvent(const std::string& action);

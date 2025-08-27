@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   JsonType,
@@ -202,8 +202,8 @@ export default function GridItem1() {
       await Search('参数列表', 'selectable')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'selectable'
+        toggleClick: {
+          toggleClickObj: 'selectable'
         },
         id: 'GridItem',
         arr: [
@@ -224,7 +224,7 @@ export default function GridItem1() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'selectable'
+          toggleClickObj: 'selectable'
         },
         id: 'GridItem',
         arr: [
@@ -243,8 +243,8 @@ export default function GridItem1() {
       await Search('参数列表', 'selected')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'selected'
+        toggleClick: {
+          toggleClickObj: 'selected'
         },
         id: 'GridItem',
         arr: [
@@ -265,7 +265,7 @@ export default function GridItem1() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'selected'
+          toggleClickObj: 'selected'
         },
         id: 'GridItem',
         arr: [
@@ -286,7 +286,7 @@ export default function GridItem1() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'flexBasis'
+          toggleClickObj: 'flexBasis'
         },
         id: 'GridItem',
         arr: [
@@ -299,7 +299,7 @@ export default function GridItem1() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'flexBasis'
+          toggleClickObj: 'flexBasis'
         },
         id: 'GridItem',
         arr: [
@@ -318,8 +318,8 @@ export default function GridItem1() {
       await Search('参数列表', 'direction')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'direction'
+        toggleClick: {
+          toggleClickObj: 'direction'
         },
         id: 'GridItem',
         arr: [
@@ -338,8 +338,8 @@ export default function GridItem1() {
       await Search('参数列表', 'direction')
       await radioClick({
         radioClickObj: 1,
-        toggleClick:{
-          toggleClickObj:'direction'
+        toggleClick: {
+          toggleClickObj: 'direction'
         },
         id: 'GridItem',
         arr: [
@@ -361,7 +361,7 @@ export default function GridItem1() {
         radioClickObj: 2,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'direction'
+          toggleClickObj: 'direction'
         },
         id: 'GridItem',
         arr: [

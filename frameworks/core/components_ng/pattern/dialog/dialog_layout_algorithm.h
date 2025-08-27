@@ -43,6 +43,7 @@ class ACE_EXPORT DialogLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     DialogLayoutAlgorithm() = default;
+    DialogLayoutAlgorithm(WeakPtr<PipelineContext> context) : context_(context) {}
     ~DialogLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -59,16 +60,20 @@ private:
     void UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog);
     LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
-    void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
+    void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, bool isTitleCenter);
+    void AnalysisLayoutOfTitleColumn(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& title, bool isTitleCenter);
+    void AnalysisLayoutOfTitle(const RefPtr<LayoutWrapper>& title);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
     void AvoidScreen(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& prop, SizeF childSize);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
-    bool IsGetExpandDisplayValidHeight();
-    RefPtr<PipelineContext> GetCurrentPipelineContext();
+    bool IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp);
+    RefPtr<PipelineContext> GetPipelineContext() const;
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
+
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
@@ -95,11 +100,10 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
-    void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
     void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
+    void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
 
@@ -137,6 +141,8 @@ private:
     bool alignBottomScreen_ = false;
     Rect foldCreaseRect = Rect(0.0, 0.0, 0.0, 0.0);
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    OffsetF wrapperOffset_ = OffsetF(0.0, 0.0);
+    SizeF wrapperSize_ = SizeF(0.0, 0.0);
 
     KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
     std::optional<Dimension> keyboardAvoidDistance_;
@@ -146,6 +152,9 @@ private:
     float embeddedDialogOffsetY_ = 0.0f;
     float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
+    float floatButtonsHeight_ = 0.0f;
+
+    WeakPtr<PipelineContext> context_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

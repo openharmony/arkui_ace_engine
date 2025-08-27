@@ -32,12 +32,18 @@ public:
     RectF GetCaretRect() override;
     bool SetCaretOffset(int32_t caretPosition) override;
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle) override;
+    void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle) override;
     std::optional<struct UpdateSpanStyle> GetTypingStyle() override;
     void CloseSelectionMenu() override;
     bool IsEditing() override;
     void StopEditing() override;
+#if defined(ACE_STATIC)
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
+#else
+    void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) override;
+#endif
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
     const PreviewTextInfo GetPreviewTextInfo() const override;
     ColorMode GetColorMode() override;

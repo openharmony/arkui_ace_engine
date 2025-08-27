@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components/svg/parse/svg_g.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/pathops/SkPathOps.h"
-#endif
-
 #include "frameworks/core/components/svg/render_svg_g.h"
 
 namespace OHOS::Ace {
@@ -42,6 +38,82 @@ void SvgG::AppendChild(const RefPtr<SvgNode>& child)
 {
     children_.emplace_back(child);
     component_->AppendChild(child->GetComponent());
+}
+
+bool SvgG::ProcessIteratively(const LayoutParam& layoutParam, std::stack<SvgCreateRenderInfo>& createRenderTaskSt,
+    SvgCreateRenderInfo& svgCreateRenderInfo)
+{
+    auto svgNode = svgCreateRenderInfo.svgNode_;
+    auto childIdx = svgCreateRenderInfo.childIndex_;
+    if (childIdx == static_cast<int32_t>(svgNode->GetChildren().size())) {
+        AfterChildrenProcessed(layoutParam, svgCreateRenderInfo);
+        auto childRenderNode = svgCreateRenderInfo.renderNode_;
+        auto parentRenderNode = svgCreateRenderInfo.parentRenderNode_;
+        if (parentRenderNode && childRenderNode) {
+            parentRenderNode->AddChild(childRenderNode, static_cast<int32_t>(parentRenderNode->GetChildren().size()));
+            svgNode->Update(childRenderNode);
+        }
+        return true;
+    }
+    ++svgCreateRenderInfo.childIndex_;
+    auto childNode = svgNode->GetChildren()[childIdx];
+    // If the child node does not use recursion for CreateRender
+    if (!childNode->IsCreateRenderRecursive()) {
+        auto childRender =
+            childNode->CreateRender(layoutParam, component_->GetDeclaration(), svgCreateRenderInfo.useBox_);
+        auto renderNode = svgCreateRenderInfo.renderNode_;
+        if (childRender && renderNode) {
+            renderNode->AddChild(childRender, renderNode->GetChildren().size());
+        }
+    } else {
+        createRenderTaskSt.emplace(
+            childNode, component_->GetDeclaration(), svgCreateRenderInfo.useBox_, svgCreateRenderInfo.renderNode_);
+    }
+    return false;
+}
+
+bool SvgG::BeforeChildrenProcessed(SvgCreateRenderInfo& svgCreateRenderInfo)
+{
+    component_->Inherit(svgCreateRenderInfo.svgBaseDeclaration_);
+    auto& declaration = component_->GetDeclaration();
+    auto href = declaration->GetFillState().GetHref();
+    if (!href.empty()) {
+        auto gradient = GetGradient(href);
+        if (gradient) {
+            declaration->SetGradient(gradient.value());
+        }
+    }
+    auto renderNode = AceType::DynamicCast<RenderSvgG>(component_->CreateRenderNode());
+    if (!renderNode) {
+        LOGE("create renderNode failed");
+        return false;
+    }
+    renderNode->Attach(context_);
+    renderNode->Update(component_);
+    svgCreateRenderInfo.renderNode_ = renderNode;
+    return true;
+}
+
+void SvgG::AfterChildrenProcessed(const LayoutParam& layoutParam, SvgCreateRenderInfo& svgCreateRenderInfo)
+{
+    auto renderNode = svgCreateRenderInfo.renderNode_;
+    if (!renderNode) {
+        return;
+    }
+    renderNode->Layout(layoutParam);
+    auto& declaration = component_->GetDeclaration();
+    if (!svgCreateRenderInfo.useBox_ || declaration->GetClipPathHref().empty()) {
+        LOGW("g tag skip box create");
+        return;
+    }
+
+    auto boxComponent = CreateBoxComponent(layoutParam, declaration->GetClipPathHref());
+    auto renderBox = boxComponent->CreateRenderNode();
+    renderBox->Attach(context_);
+    renderBox->Update(boxComponent);
+    renderBox->AddChild(renderNode);
+
+    svgCreateRenderInfo.renderNode_ = renderBox;
 }
 
 RefPtr<RenderNode> SvgG::CreateRender(
@@ -83,17 +155,6 @@ RefPtr<RenderNode> SvgG::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgG::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    for (auto child : children_) {
-        const SkPath childPath = child->AsPath(viewPort);
-        Op(path, childPath, kUnion_SkPathOp, &path);
-    }
-    return path;
-}
-#else
 RSPath SvgG::AsPath(const Size& viewPort) const
 {
     RSPath path;
@@ -103,6 +164,5 @@ RSPath SvgG::AsPath(const Size& viewPort) const
     }
     return path;
 }
-#endif
 
 } // namespace OHOS::Ace

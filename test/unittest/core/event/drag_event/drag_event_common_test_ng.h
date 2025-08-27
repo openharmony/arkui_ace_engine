@@ -53,6 +53,10 @@ constexpr int32_t FINGERS_NUMBER = 1;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
+const TouchRestrict DRAG_TOUCH_RESTRICT_MOUSE = {
+    .forbiddenType = TouchRestrict::CLICK,
+    .sourceType = SourceType::MOUSE
+};
 } // namespace
 
 struct DragInfo {

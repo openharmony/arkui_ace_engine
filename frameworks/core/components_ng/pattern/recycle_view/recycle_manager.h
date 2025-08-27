@@ -57,9 +57,11 @@ public:
     static void Pop(int32_t elmtId);
     static void Erase(int32_t elmtId);
     static void Notify(const ConfigurationChange& config);
+    static void ClearAll();
 
 private:
     void PushNode(int32_t elmtId, WeakPtr<CustomNodeBase>&& node);
+    void ClearAllNodes();
     void PopNode(int32_t elmtId);
     void EraseNode(int32_t elmtId);
     void NotifyConfigurationChange(const ConfigurationChange& config);

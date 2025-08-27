@@ -70,9 +70,16 @@ void JSLine::SetStart(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsArray()) {
         return;
     }
+    UnRegisterResource("LineStartPoint");
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint startPoint;
-    SetPoint(pointArray, startPoint);
+    RefPtr<ResourceObject> pointResObjFirst;
+    RefPtr<ResourceObject> pointResObjSecond;
+    SetPoint(pointArray, startPoint, pointResObjFirst, pointResObjSecond);
+    if (SystemProperties::ConfigChangePerform() && (pointResObjFirst || pointResObjSecond)) {
+        std::vector<RefPtr<ResourceObject>> resObjArray = { pointResObjFirst, pointResObjSecond };
+        LineModel::GetInstance()->StartPoint(startPoint, resObjArray);
+    }
     LineModel::GetInstance()->StartPoint(startPoint);
 }
 
@@ -81,19 +88,27 @@ void JSLine::SetEnd(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsArray()) {
         return;
     }
+    UnRegisterResource("LineEndPoint");
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
     ShapePoint endPoint;
-    SetPoint(pointArray, endPoint);
+    RefPtr<ResourceObject> pointResObjFirst;
+    RefPtr<ResourceObject> pointResObjSecond;
+    SetPoint(pointArray, endPoint, pointResObjFirst, pointResObjSecond);
+    if (SystemProperties::ConfigChangePerform() && (pointResObjFirst || pointResObjSecond)) {
+        std::vector<RefPtr<ResourceObject>> resObjArray = { pointResObjFirst, pointResObjSecond };
+        LineModel::GetInstance()->EndPoint(endPoint, resObjArray);
+    }
     LineModel::GetInstance()->EndPoint(endPoint);
 }
 
-void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
+void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point, RefPtr<ResourceObject>& pointResObjFirst,
+    RefPtr<ResourceObject>& pointResObjSecond)
 {
     if (array->Length() < 1) {
         return;
     }
 
-    auto parseJsDimension = [](const JSRef<JSVal>& jsValue, Dimension &val) {
+    auto parseJsDimension = [](const JSRef<JSVal>& jsValue, Dimension &val, RefPtr<ResourceObject>& resObj) {
         if (jsValue->IsNumber()) {
             val = Dimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
         } else if (jsValue->IsString()) {
@@ -105,7 +120,7 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
             }
         } else if (jsValue->IsObject()) {
             CalcDimension value;
-            ParseJsDimensionVpNG(jsValue, value);
+            ParseJsDimensionVpNG(jsValue, value, resObj);
             if (!StringUtils::StringToDimensionWithUnitNG(value.ToString(), val, DimensionUnit::VP, 0.0)) {
                 // unit is invalid, use default value(0.0vp) instead.
                 val = 0.0_vp;
@@ -113,8 +128,8 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
         }
     };
 
-    parseJsDimension(array->GetValueAt(0), point.first);
-    parseJsDimension(array->GetValueAt(1), point.second);
+    parseJsDimension(array->GetValueAt(0), point.first, pointResObjFirst);
+    parseJsDimension(array->GetValueAt(1), point.second, pointResObjSecond);
 }
 
 } // namespace OHOS::Ace::Framework

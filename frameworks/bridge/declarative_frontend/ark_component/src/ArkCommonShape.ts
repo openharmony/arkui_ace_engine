@@ -14,14 +14,19 @@
  */
 
 /// <reference path='./import.ts' />
+interface CommonShapeOptionsParam {
+  width?: Length;
+  height?: Length;
+}
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   viewPort(value: {
-    x?: string | number | undefined;
-    y?: string | number | undefined; width?: string | number | undefined;
-    height?: string | number | undefined;
+    x?: Length | undefined;
+    y?: Length | undefined;
+    width?: Length | undefined;
+    height?: Length | undefined;
   }): this {
     throw new Error('Method not implemented.');
   }
@@ -33,7 +38,7 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
     modifierWithKey(this._modifiersWithKeys, FillModifier.identity, FillModifier, value);
     return this;
   }
-  strokeDashOffset(value: string | number): this {
+  strokeDashOffset(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StrokeDashOffsetModifier.identity,
       StrokeDashOffsetModifier, value);
     return this;
@@ -46,7 +51,7 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
     modifierWithKey(this._modifiersWithKeys, StrokeLineJoinModifier.identity, StrokeLineJoinModifier, value);
     return this;
   }
-  strokeMiterLimit(value: string | number): this {
+  strokeMiterLimit(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StrokeMiterLimitModifier.identity,
       StrokeMiterLimitModifier, value);
     return this;
@@ -59,7 +64,7 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
     modifierWithKey(this._modifiersWithKeys, FillOpacityModifier.identity, FillOpacityModifier, value);
     return this;
   }
-  strokeWidth(value: string | number): this {
+  strokeWidth(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StrokeWidthModifier.identity, StrokeWidthModifier, value);
     return this;
   }
@@ -85,6 +90,34 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
   foregroundColor(value: string | number | Resource | Color): this {
     modifierWithKey(
       this._modifiersWithKeys, CommonShapeForegroundColorModifier.identity, CommonShapeForegroundColorModifier, value);
+    return this;
+  }
+  resetCommonShapeOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+  }
+  initialize(value: Object[]): this {
+    if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetCommonShapeOptions();
+      return this;
+    }
+    const value_casted = value[0] as CommonShapeOptionsParam;
+    if (!isUndefined(value_casted.width) && !isNull(value_casted.width)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value_casted.width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (!isUndefined(value_casted.height) && !isNull(value_casted.height)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value_casted.height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
     return this;
   }
 }
@@ -143,8 +176,8 @@ class FillModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class StrokeDashOffsetModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class StrokeDashOffsetModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
     super(value);
   }
   static identity: Symbol = Symbol('strokeDashOffset');
@@ -189,8 +222,8 @@ class StrokeLineJoinModifier extends ModifierWithKey<number> {
   }
 }
 
-class StrokeMiterLimitModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class StrokeMiterLimitModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
     super(value);
   }
   static identity: Symbol = Symbol('strokeMiterLimit');
@@ -237,8 +270,8 @@ class StrokeOpacityModifier extends ModifierWithKey<number | string | Resource> 
   }
 }
 
-class StrokeWidthModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class StrokeWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
     super(value);
   }
   static identity: Symbol = Symbol('strokeWidth');

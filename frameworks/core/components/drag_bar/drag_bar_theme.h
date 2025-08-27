@@ -34,7 +34,7 @@ public:
 
         RefPtr<DragBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<DragBarTheme> theme = AceType::Claim(new DragBarTheme());
+            RefPtr<DragBarTheme> theme = AceType::MakeRefPtr<DragBarTheme>();
             if (!themeConstants) {
                 return theme;
             }

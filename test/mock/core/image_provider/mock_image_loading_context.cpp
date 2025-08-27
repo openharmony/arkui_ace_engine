@@ -20,9 +20,10 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(
-    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
-    : src_(src), notifiers_(loadNotifier), syncLoad_(syncLoad), imageDfxConfig_(imageDfxConfig)
+ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
+    bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
+    : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad), isSceneBoardWindow_(isSceneBoardWindow),
+      imageDfxConfig_(imageDfxConfig)
 {}
 
 ImageLoadingContext::~ImageLoadingContext() = default;
@@ -63,10 +64,10 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& image)
     }
 }
 
-void ImageLoadingContext::FailCallback(const std::string& errorMsg)
+void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo)
 {
     if (notifiers_.onLoadFail_) {
-        notifiers_.onLoadFail_(src_, errorMsg);
+        notifiers_.onLoadFail_(src_, errorMsg, errorInfo);
     }
 }
 
@@ -171,5 +172,10 @@ int32_t ImageLoadingContext::GetFrameCount() const
 bool ImageLoadingContext::Downloadable()
 {
     return true;
+}
+
+std::string ImageLoadingContext::GetImageSizeInfo() const
+{
+    return "";
 }
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,8 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/select/select_model.h"
 namespace OHOS::Ace::NG {
 enum class ArrowOfTargetOffset {
     START,
@@ -51,6 +53,18 @@ struct BubbleDumpInfo {
     std::string originPlacement;
     std::string finalPlacement = "NONE";
 };
+struct PopupCanPlacement {
+    bool bottom = false;
+    bool top = false;
+    bool left = false;
+    bool right = false;
+};
+struct PopupMaxAreaInfo {
+    Placement placement = Placement::BOTTOM;
+    OffsetF position;
+    SizeF size;
+    OffsetF arrowPosition;
+};
 
 // BubbleLayoutAlgorithm uses for Popup Node.
 class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
@@ -59,7 +73,7 @@ class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
 public:
     BubbleLayoutAlgorithm() = default;
     BubbleLayoutAlgorithm(int32_t id, const std::string& tag, const std::optional<OffsetF>& targetOffset = std::nullopt,
-        const std::optional<SizeF>& targetSize = std::nullopt);
+        const std::optional<SizeF>& targetSize = std::nullopt, const std::optional<Offset>& mouseOffset = std::nullopt);
     ~BubbleLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -115,10 +129,12 @@ public:
     {
         return arrowPlacement_;
     }
+
     std::vector<float>& GetArrowOffsetByClips()
     {
         return arrowOffsetByClips_;
     }
+
     std::string GetClipPath() const
     {
         return clipPath_;
@@ -167,7 +183,16 @@ private:
         TOP_LEFT_ERROR,
         BOTTOM_RIGHT_ERROR,
     };
-    bool CheckPosition(const OffsetF& position, const SizeF& childSize, size_t step, size_t& i);
+    bool CheckPositionBottom(
+        const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition);
+    bool CheckPositionTop(
+        const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition);
+    bool CheckPositionRight(
+        const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition);
+    bool CheckPositionLeft(
+        const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition);
+    bool CheckPosition(
+        const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition);
     OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&, OffsetF&);
     OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&, OffsetF&);
     OffsetF GetPositionWithPlacementTopRight(const SizeF&, const OffsetF&, const OffsetF&, OffsetF&);
@@ -198,18 +223,20 @@ private:
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
-    OffsetF GetChildPositionNew(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp);
+    OffsetF GetChildPositionNew(
+        const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp, const RefPtr<LayoutWrapper> child);
     OffsetF FitToScreenNew(
         const OffsetF& position, size_t step, size_t& i, const SizeF& childSize, bool didNeedArrow = false);
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
-    void InitWrapperRect(LayoutWrapper* layoutWrapper);
+    void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<BubbleLayoutProperty>& layoutProp);
     void UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void UpdateClipOffset(const RefPtr<FrameNode>& frameNode);
+    void UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     std::string ClipBubbleWithPath();
     float GetArrowOffset(const Placement& placement);
@@ -237,6 +264,13 @@ private:
     void SetBubbleRadius();
     void UpdateHostWindowRect();
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void FitMouseOffset(LayoutWrapper* layoutWrapper);
+
+    void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
+    void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
+    void MeasureTipsFollowTarget(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
+    Placement CalculateTipsDirections(SizeF& newSize);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -244,10 +278,36 @@ private:
         OffsetF& bottomPosition, const SizeF& childSize);
     void GetPositionWithPlacement(
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
+    void UpdateContentPositionRange(float& xMin, float& xMax, float& yMin, float& yMax);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode);
     void UpdateDumpInfo();
+    OffsetF CoverParent(const SizeF& childSize, Placement originPlacement);
+    OffsetF AvoidOrCoverParent(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp,
+        const RefPtr<LayoutWrapper> child, Placement originPlacement, OffsetF& arrowOffset);
+    bool AvoidToTargetPlacement(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    bool AvoidToTargetBottom(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    bool AvoidToTargetTop(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    bool AvoidToTargetTopMid(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    bool AvoidToTargetRight(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    bool AvoidToTargetLeft(
+        const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    void RecordMaxSpace(const float maxAreaSpace, const OffsetF& position, const float maxWidth, const float maxHeight,
+        const OffsetF& arrowPosition);
+    void BottomAndTopPosition(OffsetF& bottomPosition, OffsetF& topPosition, const SizeF& childSize);
+    Rect GetBottomRect(const Dimension& targetSpace);
+    Rect GetTopRect(const Dimension& targetSpace);
+    Rect GetRightRect(const Dimension& targetSpace);
+    Rect GetLeftRect(const Dimension& targetSpace);
+    OffsetF AvoidToTopOrBottomByWidth(const SizeF& childSize, OffsetF& arrowPosition, SizeF& resultSize);
+    OffsetF AdjustAvoidPosition(const OffsetF& position, float width, float height, OffsetF& arrowPosition);
+
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
 
@@ -256,6 +316,9 @@ private:
     bool bCaretMode_ = false;
     bool useCustom_ = false;
     bool isTips_ = false;
+    bool followCursor_ = false;
+    bool resetTipsSize_ = false;
+    Placement tipsPlacement_ = Placement::BOTTOM_LEFT;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;
@@ -265,6 +328,8 @@ private:
     OffsetF childOffset_;
     // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;
     SizeF selfSize_;
@@ -272,8 +337,7 @@ private:
     Rect hostWindowRect_;
     SizeF buttonRowSize_;
     OffsetF buttonRowOffset_;
-    // top right bottom left
-    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+
     Edge padding_;
     Edge margin_;
     Border border_;
@@ -290,6 +354,7 @@ private:
     bool isCaretMode_ = true;
     bool followTransformOfTarget_ = false;
     bool enableFoldedArea_ = false;
+    bool needRemoveArrow_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
     float realArrowWidth_ = 20.0f;
@@ -306,6 +371,14 @@ private:
     bool bVertical_ = false;
     std::unordered_set<Placement> setHorizontal_;
     std::unordered_set<Placement> setVertical_;
+    bool hasPlacement_ = false;
+    bool hasWidth_ = false;
+    
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
+    PopupCanPlacement canPlacement_;
+    float maxAreaSpace_ = 0.0f;
+    OffsetF checkArrowPosition_; // transfer arrowPosition to CheckPosition
+    PopupMaxAreaInfo maxAreaInfo_;
     float targetSecurity_ = 0.0f;
     using PlacementFunc = OffsetF (BubbleLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&, OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
@@ -319,9 +392,11 @@ private:
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     bool isGreatWrapperWidth_ = false;
-    float foldCreaseTop_ = 0.0f;
-    float foldCreaseBottom_ = 0.0f;
+    double foldCreaseTop_ = 0.0f;
+    double foldCreaseBottom_ = 0.0f;
     bool isHalfFoldHover_ = false;
+    bool doubleBorderEnable_ = false;
+    bool expandDisplay_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

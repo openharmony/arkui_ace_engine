@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan001, TestSize.Level1
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(containerGeometryNode == nullptr);
     containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
@@ -101,8 +103,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan001, TestSize.Level1
         V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto index = richEditorController->AddPlaceholderSpan(builderNode, {});
     EXPECT_EQ(index, 0);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
+    auto builderSpanChildren = contentNode->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
     auto builderSpan = builderSpanChildren.begin();
     auto builderSpanChild = AceType::DynamicCast<FrameNode>(*builderSpan);
@@ -137,6 +139,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan002, TestSize.Level1
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
@@ -147,8 +151,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan002, TestSize.Level1
         V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
     EXPECT_EQ(index1, 1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 2);
+    auto builderSpanChildren = contentNode->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
     auto builderSpanChild = builderSpanChildren.begin();
     EXPECT_EQ((*builderSpanChild)->GetTag(), "Span");
@@ -169,6 +173,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan003, TestSize.Level1
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(containerGeometryNode == nullptr);
@@ -197,8 +203,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan003, TestSize.Level1
 
     auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
     EXPECT_EQ(index1, 1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+    auto builderSpanChildren = contentNode->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
     auto eventHub = builderNode1->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
@@ -225,6 +231,33 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan004, TestSize.Level1
     richEditorPattern->spans_.emplace_back(spanItem);
     auto ret = richEditorPattern->AddPlaceholderSpan(builderNode, {});
     EXPECT_NE(ret, host->GetChildren().size());
+}
+
+/**
+ * @tc.name: AddPlaceholderSpan005
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    RefPtr<FrameNode> builderNode1 = nullptr;
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
+    ClearSpan();
 }
 
 /**
@@ -441,4 +474,5 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, 0);
 }
+
 }

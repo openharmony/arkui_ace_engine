@@ -267,6 +267,7 @@ bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
     }
     if (point.action != AxisAction::NONE) {
         curRecognizer->HandleEvent(point);
+        AddGestureProcedure(point, curRecognizer);
     }
 
     if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING) &&

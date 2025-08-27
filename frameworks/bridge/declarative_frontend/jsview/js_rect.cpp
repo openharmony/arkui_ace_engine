@@ -83,8 +83,14 @@ void JSRect::Create(const JSCallbackInfo& info)
             JSRef<JSVal> radius = obj->GetProperty("radius");
             if (radius->IsNumber() || radius->IsString()) {
                 SetRadiusWithJsVal(nullptr, radius);
-            } else if (radius->IsArray()) {
-                SetRadiusWithArrayValue(nullptr, radius);
+            } else if (radius->IsObject()) {
+                auto radiusObj = JSRef<JSObject>::Cast(radius);
+                auto resType = radiusObj->GetPropertyValue("type", -1); //-1 means unkown resource type
+                if (resType == -1) {
+                    SetRadiusWithArrayValue(nullptr, radius);
+                } else {
+                    SetRadiusWithJsVal(nullptr, radius);
+                }
             }
         }
         info.SetReturnValue(info.This());
@@ -110,12 +116,17 @@ void JSRect::JsRadiusHeight(const JSCallbackInfo& info)
 void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
+    RefPtr<ResourceObject> radiusWidthResObj;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ParseJsDimensionVp(jsVal, value);
+        ParseJsDimensionVp(jsVal, value, radiusWidthResObj);
     } else {
-        if (!ParseJsDimensionVpNG(jsVal, value)) {
+        if (!ParseJsDimensionVpNG(jsVal, value, radiusWidthResObj)) {
             value.SetValue(0.0f);
         }
+    }
+    UnRegisterResource("RectRadiusWidth");
+    if (SystemProperties::ConfigChangePerform() && radiusWidthResObj) {
+        RegisterResource<CalcDimension>("RectRadiusWidth", radiusWidthResObj, value);
     }
     RectModel::GetInstance()->SetRadiusWidth(value);
 }
@@ -123,12 +134,17 @@ void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
 void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
+    RefPtr<ResourceObject> radiusHeightResObj;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ParseJsDimensionVp(jsVal, value);
+        ParseJsDimensionVp(jsVal, value, radiusHeightResObj);
     } else {
-        if (!ParseJsDimensionVpNG(jsVal, value)) {
+        if (!ParseJsDimensionVpNG(jsVal, value, radiusHeightResObj)) {
             value.SetValue(0.0f);
         }
+    }
+    UnRegisterResource("RectRadiusHeight");
+    if (SystemProperties::ConfigChangePerform() && radiusHeightResObj) {
+        RegisterResource<CalcDimension>("RectRadiusHeight", radiusHeightResObj, value);
     }
     RectModel::GetInstance()->SetRadiusHeight(value);
 }
@@ -155,10 +171,11 @@ void JSRect::SetRadius(const JSCallbackInfo& info)
 void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
+    RefPtr<ResourceObject> radiusResObj;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ParseJsDimensionVp(jsVal, value);
+        ParseJsDimensionVp(jsVal, value, radiusResObj);
     } else {
-        if (!ParseJsDimensionVpNG(jsVal, value)) {
+        if (!ParseJsDimensionVpNG(jsVal, value, radiusResObj)) {
             value.SetValue(0.0f);
         }
     }
@@ -168,12 +185,17 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
         shapeRect->SetRadiusHeight(value, option);
         return;
     }
+    UnRegisterResource("RectRadius");
+    if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+        RegisterResource<CalcDimension>("RectRadius", radiusResObj, value);
+    }
     RectModel::GetInstance()->SetRadiusWidth(value);
     RectModel::GetInstance()->SetRadiusHeight(value);
 }
 
 void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
+    static std::vector<std::string> RADIUS_TYPES = { "TopLeft", "TopRight", "BottomRight", "BottomLeft" };
     if (!jsVal->IsArray()) {
         return;
     }
@@ -196,17 +218,24 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const J
         JSRef<JSVal> radiusY = radiusArray->GetValueAt(1);
         CalcDimension radiusXValue(0.0f);
         CalcDimension radiusYValue(0.0f);
+        RefPtr<ResourceObject> radiusXResObj;
+        RefPtr<ResourceObject> radiusYResObj;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (ParseJsDimensionVp(radiusX, radiusXValue)) {
                 ParseJsDimensionVp(radiusY, radiusYValue);
             }
         } else {
-            if (!ParseJsDimensionVpNG(radiusX, radiusXValue)) {
+            if (!ParseJsDimensionVpNG(radiusX, radiusXValue, radiusXResObj)) {
                 radiusXValue.SetValue(0.0f);
             }
-            if (!ParseJsDimensionVpNG(radiusY, radiusYValue)) {
+            if (!ParseJsDimensionVpNG(radiusY, radiusYValue, radiusYResObj)) {
                 radiusYValue.SetValue(0.0f);
             }
+        }
+        std::string key = std::string("RectRadius") + RADIUS_TYPES[i];
+        UnRegisterResource(key);
+        if (SystemProperties::ConfigChangePerform() && (radiusXResObj || radiusYResObj)) {
+            RectModel::GetInstance()->SetRadiusValue(radiusXValue, radiusYValue, radiusXResObj, radiusYResObj, i);
         }
         SetRadiusValue(shapeRect, radiusXValue, radiusYValue, i);
     }

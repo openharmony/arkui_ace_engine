@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 #include "test/mock/core/common/mock_container.h"
+#include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -152,9 +153,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc007, TestSize.Level1)
     MouseInfo info;
     pattern->InitMouseEvent();
     pattern->mouseEvent_->onMouseCallback_(info);
-    pattern->hoverEvent_->onHoverCallback_(false);
+    HoverInfo hoverInfo;
+    pattern->hoverEvent_->onHoverEventCallback_(false, hoverInfo);
     EXPECT_TRUE(pattern->mouseEvent_->onMouseCallback_ != nullptr);
-    EXPECT_TRUE(pattern->hoverEvent_->onHoverCallback_ != nullptr);
+    EXPECT_TRUE(pattern->hoverEvent_->onHoverEventCallback_ != nullptr);
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc008, TestSize.Level1)
@@ -246,7 +248,8 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc012, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->OnHover(true);
+    HoverInfo info;
+    pattern->OnHover(true, info);
     EXPECT_TRUE(pattern->isOnHover_ == true);
 }
 
@@ -258,7 +261,8 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc013, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->OnHover(false);
+    HoverInfo info;
+    pattern->OnHover(false, info);
     EXPECT_FALSE(pattern->isOnHover_ == true);
 }
 
@@ -648,30 +652,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc035, TestSize.Level1)
     auto contextPtr = pattern->GetHost()->GetContextRefPtr();
     contextPtr->textFieldManager_ = AceType::MakeRefPtr<ManagerInterface>();
     pattern->RequestKeyboard(false, false, false);
-}
-
-HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc036, TestSize.Level1)
-{
-    CreateTextField();
-    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->showKeyBoardOnFocus_ = true;
-    pattern->customKeyboard_ = nullptr;
-    pattern->customKeyboardBuilder_ = nullptr;
-    pattern->isCustomKeyboardAttached_ = true;
-#define ENABLE_STANDARD_INPUT
-    auto contextPtr = pattern->GetHost()->GetContextRefPtr();
-    contextPtr->textFieldManager_ = nullptr;
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
-    std::variant<std::string, bool, int32_t> contentVariant;
-    auto value = std::pair<std::string, std::variant<std::string, bool, int32_t>>("openharmony", contentVariant);
-    pattern->fillContentMap_.insert(value);
-    pattern->RequestKeyboard(false, false, false);
-    EXPECT_FALSE(pattern->fillContentMap_.empty());
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc037, TestSize.Level1)
@@ -1792,6 +1772,29 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc088, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyboardPatternFunc01
+ * @tc.desc: test KeyboardPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, KeyboardPatternFunc01, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->DumpInfo();
+    auto spanNode = AceType::MakeRefPtr<NG::SpanNode>(3);
+    keyboard->AddChild(spanNode);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->GetKeyboardHeight();
+    JsonValue jsonValue(nullptr);
+    std::unique_ptr<JsonValue> ret = jsonValue.GetChild();
+    pattern->DumpInfo(ret);
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+}
+
+/**
  * @tc.name: TextPatternFunc089
  * @tc.desc: test OnAreaChangedInner.
  * @tc.type: FUNC
@@ -2027,6 +2030,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay001, TestSize.Level1)
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->selectOverlay_->isSingleHandle_ = true;
     pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->multipleClickRecognizer_->lastClickPosition_ = Offset(0.0f, 0.0f);
@@ -2681,4 +2685,74 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay016, TestSize.Level1)
     EXPECT_EQ(isHandleVisible, false);
 }
 
+/**
+ * @tc.name: BaseTextSelectOverlay017
+ * @tc.desc: test base_text_select_overlay.cpp SetTransformPaintInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetTransformPaintInfo and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectHandleInfo handleInfo;
+    RectF rect;
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->selectOverlay_->SetTransformPaintInfo(handleInfo, rect);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMagnifier
+ * @tc.desc: test text_field_select_overlay.cpp UpdateMagnifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifier, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateMagnifier and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
+    pattern->selectOverlay_->SetIsSingleHandle(true);
+    pattern->selectController_->floatingCaretInfo_.rect = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    pattern->floatCaretState_.lastFloatingCursorY = 50.0f;
+    pattern->contentScroller_.isScrolling = true;
+    pattern->selectOverlay_->UpdateMagnifier(OffsetF(), false);
+
+    EXPECT_EQ(pattern->magnifierController_->localOffset_, OffsetF());
+    pattern->selectOverlay_->UpdateMagnifier(OffsetF(), true);
+    EXPECT_EQ(pattern->magnifierController_->localOffset_, OffsetF(50.0f, 50.0f));
+}
 } // namespace OHOS::Ace

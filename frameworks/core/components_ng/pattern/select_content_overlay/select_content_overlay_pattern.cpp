@@ -35,7 +35,11 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
         DeleteHotAreas();
     }
     info_->menuInfo.menuIsShow = menuIsShow;
-    selectOverlayNode->UpdateToolBar(false, noAnimation);
+    if (info_->menuInfo.menuIsShow && info_->menuInfo.isShowAIMenuOptionChanged) {
+        selectOverlayNode->UpdateToolBar(true, noAnimation);
+    } else {
+        selectOverlayNode->UpdateToolBar(false, noAnimation);
+    }
     UpdateMenuAccessibility(menuIsShow);
 }
 
@@ -50,7 +54,7 @@ void SelectContentOverlayPattern::UpdateMenuInfo(const SelectMenuInfo& info)
 
 void SelectContentOverlayPattern::UpdateIsShowHandleLine(bool isHandleLineShow)
 {
-    if (info_->isHandleLineShow == isHandleLineShow) {
+    if (info_->isHandleLineShow == isHandleLineShow || IsDraggingSingleHandle()) {
         return;
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -72,6 +76,9 @@ void SelectContentOverlayPattern::UpdateIsSingleHandle(bool isSingleHandle)
 
 void SelectContentOverlayPattern::RestartHiddenHandleTask(bool isDelay)
 {
+    if (IsDraggingSingleHandle()) {
+        return;
+    }
     CancelHiddenHandleTask();
     StartHiddenHandleTask(isDelay);
 }
@@ -139,11 +146,28 @@ void SelectContentOverlayPattern::UpdateHandleHotZone()
     if (!CheckIfNeedHandle()) {
         return;
     }
+    if (info_->isUsingMouse) {
+        UpdateMouseHotZone();
+        return;
+    }
     if (info_->handleLevelMode == HandleLevelMode::OVERLAY &&
         (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints)) {
         UpdateHandleHotZoneWithPoint();
     } else {
         SelectOverlayPattern::UpdateHandleHotZone();
+    }
+}
+
+void SelectContentOverlayPattern::UpdateMouseHotZone()
+{
+    if (IsCustomMenu() && !info_->isSingleHandle) {
+        std::vector<DimensionRect> responseRegion;
+        AddMenuResponseRegion(responseRegion);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gestureEventHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetResponseRegion(responseRegion);
     }
 }
 
@@ -290,5 +314,10 @@ void SelectContentOverlayPattern::UpdateMenuAccessibility(bool menuIsShow)
     } else {
         contentOverlayManager->NotifyAccessibilityOwner();
     }
+}
+
+bool SelectContentOverlayPattern::IsDraggingSingleHandle()
+{
+    return info_->isSingleHandle && (IsDraggingHandle(true) || IsDraggingHandle(false));
 }
 } // namespace OHOS::Ace::NG

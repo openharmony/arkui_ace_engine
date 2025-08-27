@@ -46,6 +46,8 @@ namespace {
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string TAG = "CHECKBOX_TAG";
+constexpr float SIZE_WIDTH_NEW = 50.0f;
+constexpr float SIZE_HEIGHT = 460.0f;
 } // namespace
 
 class CheckBoxPatternSubTestNG : public testing::Test {
@@ -718,54 +720,33 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest063, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnInjectionEvent001
- * @tc.desc: test OnInjectionEvent
+ * @tc.name: SetModifierBoundsRect001
+ * @tc.desc: test SetModifierBoundsRect
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPatternSubTestNG, OnInjectionEvent001, TestSize.Level1)
+HWTEST_F(CheckBoxPatternSubTestNG, SetModifierBoundsRect001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Init CheckBox node
-     */
-    CheckBoxModelNG checkBoxModelNG;
-    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
-    std::string jsonCommandFalse = R"({"cmd":"selectCheckBox","selectStatus": false})";
-    int32_t resultfalse = pattern->OnInjectionEvent(jsonCommandFalse);
-    EXPECT_EQ(resultfalse, RET_SUCCESS);
-    auto checkBoxPaintPropertyfalse = pattern->GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkBoxPaintPropertyfalse);
-    bool status = checkBoxPaintPropertyfalse->GetCheckBoxSelect().value_or(false);
-    EXPECT_EQ(status, false);
-
-    std::string jsonCommandtrue = R"({"cmd":"selectCheckBox","selectStatus": true})";
-    int32_t result = pattern->OnInjectionEvent(jsonCommandtrue);
-    EXPECT_EQ(result, RET_SUCCESS);
-    auto checkBoxPaintPropertytrue = pattern->GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkBoxPaintPropertytrue);
-    status = checkBoxPaintPropertytrue->GetCheckBoxSelect().value_or(false);
-    EXPECT_EQ(status, true);
-
-    std::string jsonCommandUndifine = R"({"cmd":"selectCheckBox","selectStatus": undifine})";
-    int32_t resultUndifine = pattern->OnInjectionEvent(jsonCommandUndifine);
-    EXPECT_EQ(resultUndifine, RET_FAILED);
-    auto checkBoxPaintPropertyUndifine = pattern->GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkBoxPaintPropertyUndifine);
-    status = checkBoxPaintPropertyUndifine->GetCheckBoxSelect().value_or(false);
-    EXPECT_EQ(status, true);
-
-    std::string jsonCommandGroup = R"({"cmd":"selectCheckBoxGroup","selectStatus": "undifine"})";
-    result = pattern->OnInjectionEvent(jsonCommandGroup);
-    EXPECT_EQ(result, RET_FAILED);
-    auto checkBoxPaintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkBoxPaintProperty);
-    status = checkBoxPaintProperty->GetCheckBoxSelect().value_or(false);
-    EXPECT_EQ(status, true);
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = AceType::MakeRefPtr<CheckBoxModifier>(true, Color::BLACK, Color::BLUE,
+        Color::GRAY, Color::TRANSPARENT, SizeF(20.0f, 20.0f), OffsetF(0.0f, 0.0f), 2.0f, 1.0f);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
+    checkBoxTheme->hotZoneHorizontalPadding_ = Dimension(0.0f);
+    checkBoxTheme->hotZoneVerticalPadding_ = Dimension(0.0f);
+    checkBoxPaintMethod.checkboxModifier_->rect_->x_ = 0.0f;
+    checkBoxPaintMethod.checkboxModifier_->rect_->y_ = 0.0f;
+    checkBoxPaintMethod.checkboxModifier_->rect_->width_ = SIZE_WIDTH_NEW;
+    checkBoxPaintMethod.checkboxModifier_->rect_->height_ = 0.0f;
+    SizeF size(SIZE_WIDTH_NEW, SIZE_HEIGHT);
+    OffsetF offset(0.0f, 0.0f);
+    RefPtr<CheckBoxPaintProperty> paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    checkBoxPaintMethod.SetModifierBoundsRect(checkBoxTheme, size, offset, paintWrapper);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->rect_->height_, SIZE_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

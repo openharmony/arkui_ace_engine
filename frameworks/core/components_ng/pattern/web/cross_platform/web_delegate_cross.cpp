@@ -17,6 +17,10 @@
 
 #include "bridge/js_frontend/frontend_delegate_impl.h"
 
+#ifdef IOS_PLATFORM
+#include <dispatch/dispatch.h>
+#endif
+
 namespace OHOS::Ace {
 namespace {
 constexpr char WEB_METHOD_RELOAD[] = "reload";
@@ -74,6 +78,7 @@ constexpr char WEB_EVENT_PAGESTART[] = "onPageStarted";
 constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_DOWNLOADSTART[] = "onDownloadStart";
 constexpr char WEB_EVENT_LOADINTERCEPT[] = "onLoadIntercept";
+constexpr char WEB_EVENT_ONINTERCEPTREQUEST[] = "onInterceptRequest";
 constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
 constexpr char WEB_EVENT_SCROLL[] = "onScroll";
 constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
@@ -169,6 +174,11 @@ constexpr int FONT_MAX_SIZE = 72;
 constexpr int RESOURCESID_ONE = 1;
 constexpr int RESOURCESID_TWO = 2;
 constexpr int RESOURCESID_THREE = 3;
+
+constexpr int TIMEOUT_DURATION_MS = 15000;
+constexpr int POLLING_INTERVAL_MS = 50;
+constexpr int HTTP_STATUS_GATEWAY_TIMEOUT = 504;
+constexpr int TIMEOUT_SEMAPHORE_S = 20;
 
 const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
@@ -846,6 +856,7 @@ void WebDelegateCross::RegisterWebEvent()
         auto delegate = weak.Upgrade();
         if (delegate) {
             delegate->OnPageStarted(param);
+            delegate->RunJsProxyCallback();
         }
     });
     resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH), [weak = WeakClaim(this)](const std::string& param) {
@@ -928,6 +939,15 @@ void WebDelegateCross::RegisterWebObjectEvent()
                 return delegate->OnLoadIntercept(object);
             }
             return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(
+        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> RefPtr<WebResponse> {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnInterceptRequest(object);
+            }
+            return nullptr;
         });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
@@ -1424,6 +1444,111 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
     return result;
 }
 
+auto WaitForReady(std::function<bool()> checkFunc, int timeoutMs) -> bool
+{
+    const auto start = std::chrono::steady_clock::now();
+    const auto timeout = std::chrono::milliseconds(timeoutMs);
+
+    while (!checkFunc()) {
+        if (std::chrono::steady_clock::now() - start >= timeout) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(POLLING_INTERVAL_MS));
+    }
+    return true;
+}
+
+RefPtr<WebResponse> TimeoutResponse()
+{
+    TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequest request has timed out.");
+    auto timeoutResponse = AceType::MakeRefPtr<WebResponse>();
+    std::string errorHtml = "<html><body><h1>Response Timeout</h1><p>The request has timed out.</p></body></html>";
+    std::string mimeType = "text/html";
+    std::string encoding = "utf-8";
+    std::string reason = "Response timed out";
+    timeoutResponse->SetData(errorHtml);
+    timeoutResponse->SetMimeType(mimeType);
+    timeoutResponse->SetEncoding(encoding);
+    timeoutResponse->SetStatusCode(HTTP_STATUS_GATEWAY_TIMEOUT);
+    timeoutResponse->SetReason(reason);
+    CHECK_NULL_RETURN(timeoutResponse, nullptr);
+    return timeoutResponse;
+}
+
+#ifdef IOS_PLATFORM
+RefPtr<WebResponse> WaitForResponse(const RefPtr<WebResponse>& result)
+{
+    __block auto realResult = result;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        bool ready = WaitForReady([&] { return result->GetResponseStatus(); }, TIMEOUT_DURATION_MS);
+        if (!ready) {
+            realResult = TimeoutResponse();
+        }
+        dispatch_semaphore_signal(semaphore);
+        dispatch_release(semaphore);
+    });
+    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(TIMEOUT_SEMAPHORE_S * NSEC_PER_SEC));
+    if (dispatch_semaphore_wait(semaphore, timeout) != 0) {
+        dispatch_semaphore_signal(semaphore);
+        dispatch_release(semaphore);
+    }
+    return realResult;
+}
+#endif
+
+RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, nullptr);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    RefPtr<WebResponse> result = nullptr;
+    auto webResourceRequest = AceType::MakeRefPtr<WebResourceRequsetImpl>(object);
+    CHECK_NULL_RETURN(webResourceRequest, nullptr);
+    auto requestHeader = webResourceRequest->GetRequestHeader();
+    auto method = webResourceRequest->GetMethod();
+    auto url = webResourceRequest->GetRequestUrl();
+    auto hasGesture = webResourceRequest->IsRequestGesture();
+    auto isMainFrame = webResourceRequest->IsMainFrame();
+    auto isRedirect = webResourceRequest->IsRedirect();
+    auto request = AceType::MakeRefPtr<WebRequest>(requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
+
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), request, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
+                CHECK_NULL_VOID(propOnInterceptRequestEvent);
+                auto param = std::make_shared<OnInterceptRequestEvent>(request);
+                result = propOnInterceptRequestEvent(param);
+            }
+        },
+        "ArkUIWebInterceptRequest");
+    if (!result) {
+        return nullptr;
+    }
+    auto isReady = result->GetResponseStatus();
+    if (!isReady) {
+#ifdef ANDROID_PLATFORM
+        isReady = WaitForReady([&] { return result->GetResponseStatus(); }, TIMEOUT_DURATION_MS);
+        if (!isReady) {
+            result = TimeoutResponse();
+        }
+#endif
+#ifdef IOS_PLATFORM
+        result = WaitForResponse(result);
+#endif
+    }
+    return result;
+}
+
 void WebDelegateCross::OnPageVisible(const std::string& param)
 {
     ContainerScope scope(instanceId_);
@@ -1860,6 +1985,9 @@ void WebDelegateCross::UpdateAudioResumeInterval(const int32_t& resumeInterval)
 void WebDelegateCross::UpdateAudioExclusive(const bool& audioExclusive)
 {}
 
+void WebDelegateCross::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType)
+{}
+
 void WebDelegateCross::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {}
 
@@ -2029,5 +2157,12 @@ void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 void WebDelegateCross::MaximizeResize()
 {
     // cross platform is not support now;
+}
+
+void WebDelegateCross::RunJsProxyCallback()
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->CallJsProxyCallback();
 }
 }

@@ -101,6 +101,9 @@ struct EventTreeRecord {
     void AddGestureProcedure(uint64_t id, const TouchEvent& point, const std::string& extraInfo,
         const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
+    void AddGestureProcedure(uint64_t id, const AxisEvent& event, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp = 0);
+
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
     void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;

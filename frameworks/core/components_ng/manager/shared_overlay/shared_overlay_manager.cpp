@@ -91,6 +91,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
             controller->SetFillMode(FillMode::FORWARDS);
             controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
+            controller->SetAnimationType(AnimationInterface::SHARED_TRANSITION);
             controller->Forward();
         }
     }
@@ -103,6 +104,7 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
     CHECK_NULL_VOID(patternDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
     CHECK_NULL_VOID(patternSrc);
+    pageOffset_ = pageDest->GetRenderContext()->GetPaintRectWithoutTransform().GetOffset();
     const auto& srcMap = patternSrc->GetSharedTransitionMap();
     const auto& destMap = patternDest->GetSharedTransitionMap();
     std::list<RefPtr<SharedTransitionEffect>> effects;
@@ -219,8 +221,9 @@ bool SharedOverlayManager::CheckIn(const RefPtr<SharedTransitionEffect>& effect)
 void SharedOverlayManager::PassengerAboard(
     const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger)
 {
+    auto ticket = passenger->GetPaintRectOffsetToPage();
     // Get offset relative to stage(or overlay), for safeArea
-    auto ticket = passenger->GetPaintRectOffsetToStage();
+    ticket += pageOffset_;
     TAG_LOGD(AceLogTag::ACE_ANIMATION, "Transition passenger offset is %{public}s, id = %{public}s",
         ticket.ToString().c_str(), effect->GetShareId().c_str());
     auto initialPosition = passenger->GetRenderContext()->GetPosition();

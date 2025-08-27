@@ -1,0 +1,18 @@
+{
+  "name": "@koalaui/ui-plugins",
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "files": [
+    "./lib/**/*"
+  ],
+  "dependencies": {},
+  "scripts": {
+    "clean": "rimraf build",
+    "compile": "rollup -c ./rollup.config.mjs",
+    "compile:libarkts": "npm run compile --prefix ../libarkts",
+    "check": "npm run compile && rm -rf ../../arkoala-arkts/trivial/user/build && npm run build:user:pure-ets:m3 --prefix ../../arkoala-arkts/trivial/user",
+    "check:run": "npm run check && npm run run:user:pure-ets:node:m3  --prefix ../../arkoala-arkts/trivial/user"
+
+  }
+}

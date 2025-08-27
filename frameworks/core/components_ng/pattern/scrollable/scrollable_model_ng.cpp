@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
@@ -238,14 +240,14 @@ void ScrollableModelNG::SetEdgeEffect(
 
 void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        ScrollablePaintProperty, ScrollBarMode, static_cast<DisplayMode>(displayNumber), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
+        static_cast<DisplayMode>(displayNumber), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
+        StringUtils::StringToDimensionWithUnit(value), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -278,6 +280,14 @@ int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
     return pattern->GetAlwaysEnabled();
 }
 
+EffectEdge ScrollableModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, EffectEdge::ALL);
+    return pattern->GetEffectEdge();
+}
+
 void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
@@ -299,7 +309,8 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
-    return static_cast<float>(pattern->GetMaxFlingVelocity() / PipelineBase::GetCurrentDensity());
+    const double density = PipelineBase::GetCurrentDensity();
+    return static_cast<float>(pattern->GetMaxFlingVelocity() / density);
 }
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
@@ -392,6 +403,8 @@ void ScrollableModelNG::ResetBackToTop()
 
 void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
 {
+    // call SetBackToTopMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetBackToTop, frameNode, backToTop);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
@@ -414,5 +427,77 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetBackToTop();
+}
+
+void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetScrollBarMargin(frameNode, scrollBarMargin);
+}
+
+void ScrollableModelNG::SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, scrollBarMargin, frameNode);
+}
+
+void ScrollableModelNG::ResetScrollBarMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, frameNode);
+}
+
+void ScrollableModelNG::GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin& scrollBarMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    scrollBarMargin = paintProperty->GetScrollBarMargin().value_or(ScrollBarMargin());
+}
+
+void ScrollableModelNG::SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopDragging)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
+
+void ScrollableModelNG::SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
+
+void ScrollableModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "ScrollBarColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(theme);
+        Color color(theme->GetForegroundColor());
+        ResourceParseUtils::ParseResColor(resObj, color);
+        auto scrollBarColor = color.ColorToString();
+        ScrollableModelNG::SetScrollBarColor(AceType::RawPtr(frameNode), scrollBarColor);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(color);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

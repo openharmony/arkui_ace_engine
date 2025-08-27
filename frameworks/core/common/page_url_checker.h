@@ -22,7 +22,7 @@ namespace OHOS::Ace {
 extern const char BUNDLE_TAG[];
 
 class ACE_EXPORT PageUrlChecker : public AceType {
-    DECLARE_ACE_TYPE(PageUrlChecker, AceType)
+    DECLARE_ACE_TYPE(PageUrlChecker, AceType);
 
 public:
     virtual void LoadPageUrl(const std::string& url, const std::function<void()>& callback,

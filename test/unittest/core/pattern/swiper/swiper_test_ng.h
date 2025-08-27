@@ -65,6 +65,7 @@ public:
     SwiperModelNG CreateSwiper();
     SwiperModelNG CreateArcSwiper();
     void CreateSwiperItems(int32_t itemNumber = ITEM_NUMBER);
+    RefPtr<FrameNode> CreateSwiper(const std::function<void(SwiperModelNG)>& callback);
     void CreateItemWithSize(float width, float height);
     void CreateWithArrow();
     void InitCaptureTest();

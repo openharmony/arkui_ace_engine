@@ -15,7 +15,9 @@
 
 #include "tabs_test_ng.h"
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -72,6 +74,8 @@ void TabsTestNg::SetUpTestSuite()
 void TabsTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void TabsTestNg::SetUp() {}
@@ -99,6 +103,8 @@ void TabsTestNg::TearDown()
     dividerRenderProperty_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void TabsTestNg::GetTabs()
@@ -487,7 +493,8 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
     json = JsonUtil::Create(true);
     frameNode_->ToJsonValue(json, filter);
     EXPECT_TRUE(filter.IsFastFilter());
-    EXPECT_EQ(json->ToString(), "{\"id\":\"\"}");
+    EXPECT_EQ(json->ToString(), "{\"id\":\"\",\"isLayoutDirtyMarked\":false,\"isRenderDirtyMarked\":false,"
+    "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false}");
 }
 
 /**
@@ -809,71 +816,89 @@ HWTEST_F(TabsTestNg, DragSwiper003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnInjectionEventTest001
- * @tc.desc: test OnInjectionEvent
+ * @tc.name: OnColorModeChangeTest001
+ * @tc.desc: Test Tabs OnColorModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, OnInjectionEventTest001, TestSize.Level1)
+HWTEST_F(TabsTestNg, OnColorModeChangeTest001, TestSize.Level1)
 {
+    g_isConfigChangePerform = true;
+
     /**
      * @tc.steps: step1. create tabs and set parameters.
      */
-    int32_t currentIndex = 0;
-    auto event = [&currentIndex](const BaseEventInfo* info) {
-        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (tabInfo != nullptr) {
-            currentIndex = tabInfo->GetIndex();
-        }
-    };
-    MockAnimationManager::Enable(true);
-    MockAnimationManager::GetInstance().SetTicks(1);
     TabsModelNG model = CreateTabs();
-    model.SetOnChange(std::move(event));
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(pattern);
-    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 2);
-    command = R"({"cmd":"changeIndex","params":{"index":100}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 0);
-    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 0);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(dividerRenderProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. reset data.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    layoutProperty_->ResetDividerColorSetByUser();
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(dividerRenderProperty_->HasDividerColor());
+
+    layoutProperty_->UpdateDividerColorSetByUser(false);
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(dividerRenderProperty_->HasDividerColor());
+
+    layoutProperty_->UpdateDividerColorSetByUser(true);
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_FALSE(dividerRenderProperty_->HasDividerColor());
+
+    g_isConfigChangePerform = false;
 }
 
 /**
- * @tc.name: SetOnTabBarClickTest001
- * @tc.desc: Test Tabs SetOnTabBarClick
+ * @tc.name: TabContentCreatePaddingWithResourceObj001
+ * @tc.desc: test CreatePaddingWithResourceObj of TabContentModelNG
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, SetOnTabBarClickTest001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentCreatePaddingWithResourceObj001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create tabs and set parameters.
-     */
-    int32_t currentIndex = 0;
-    auto event = [&currentIndex](const BaseEventInfo* info) {
-        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-        if (tabInfo != nullptr) {
-            currentIndex = tabInfo->GetIndex();
-        }
-    };
-    TabsModelNG model = CreateTabs();
-    model.SetOnTabBarClick(std::move(event));
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
+    CreateTabContent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
 
-    /**
-     * @tc.steps: step2. Test SetOnTabBarClick function.
-     * @tc.expected:pattern_->onTabBarClickEvent_ not null.
-     */
-    EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
-    HandleClick(1);
-    EXPECT_EQ(currentIndex, 1);
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateTextContentWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIconWithResourceObjWithKey(frameNode, "", nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorColorWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorHeightWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorWidthWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(frameNode, nullptr));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(frameNode, nullptr));
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjLeft = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjRight = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjTop = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    RefPtr<ResourceObject> resObjBottom = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingLeftWithResourceObj(frameNode, resObjLeft));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingRightWithResourceObj(frameNode, resObjRight));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingTopWithResourceObj(frameNode, resObjTop));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingBottomWithResourceObj(frameNode, resObjBottom));
+    EXPECT_TRUE(TabContentModelNG::CreatePaddingWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateTextContentWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIconWithResourceObjWithKey(frameNode, "", resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorColorWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorHeightWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorWidthWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(frameNode, resObj));
+    EXPECT_TRUE(TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(frameNode, resObj));
 }
 } // namespace OHOS::Ace::NG

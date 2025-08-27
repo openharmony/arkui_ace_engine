@@ -149,9 +149,13 @@ private:
     static bool NeedAdaptForAging();
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
+    static void SetTextNormalProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const PickerTextProperties& properties);
     static void SetDefaultTextStyle(const NG::PickerTextStyle& value);
     static std::string GetDialogAgingButtonText(bool isNext);
     static std::string GetDialogNormalButtonText(bool isConfirm);
+    static void SetSelectedBackgroundStyle(const RefPtr<PickerTheme>& pickerTheme,
+        const PickerBackgroundStyle& pickerBgStyle);
 
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;

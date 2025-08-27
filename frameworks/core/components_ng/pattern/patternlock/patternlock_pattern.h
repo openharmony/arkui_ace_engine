@@ -64,7 +64,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!patternLockModifier_) {
-            patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+            patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(WeakClaim(this));
         }
         if (!isInitVirtualNode_ && AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             isInitVirtualNode_ = InitVirtualNode();
@@ -109,6 +109,18 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    void UpdateSelectedColor(const Color& color, bool isFristLoad = false);
+    void UpdatePathColor(const Color& color, bool isFristLoad = false);
+    void UpdateActiveColor(const Color& color, bool isFristLoad = false);
+    void UpdateRegularColor(const Color& color, bool isFristLoad = false);
+    void UpdateCircleRadius(const CalcDimension& radius, bool isFristLoad = false);
+    void UpdateSideLength(const CalcDimension& sideLength, bool isFristLoad = false);
+    void UpdateActiveCircleColor(const Color& color, bool isFristLoad = false);
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -162,7 +174,7 @@ private:
     void CalculateCellCenter();
     OffsetF GetTouchOffsetToNode();
     void InitSkipUnselectedPoint();
-
+    void OnColorConfigurationUpdate() override;
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
     RefPtr<TouchEventImpl> touchUpListener_;

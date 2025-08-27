@@ -318,7 +318,7 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
         pts.at(1) = RSPoint(static_cast<RSScalar>(offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp)),
             static_cast<RSScalar>(offset.GetY()));
     }
-    std::vector<RSColorQuad> colors;
+    std::vector<RSColorQuad> colors = std::vector<RSColorQuad>(GRADIENT_COLOR_SIZE);
     for (uint32_t i = 0; i < gradientColors.size(); ++i) {
         const auto& gradientColor = gradientColors[i];
         colors.at(i) = gradientColor.GetColor().GetValue();

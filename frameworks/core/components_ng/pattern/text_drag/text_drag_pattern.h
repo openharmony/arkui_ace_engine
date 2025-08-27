@@ -86,7 +86,9 @@ class TextDragPattern : public Pattern {
 public:
     TextDragPattern() = default;
     ~TextDragPattern() override = default;
+
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+
     void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
@@ -215,7 +217,23 @@ public:
         info_ = info;
     }
 
+    void OnDetachFromMainTree() override;
     Color GetDragBackgroundColor();
+
+    bool IsAnimating()
+    {
+        return overlayModifier_ && overlayModifier_->IsAnimating();
+    }
+
+    void UpdateAnimatingParagraph()
+    {
+        animatingParagraph_ = paragraph_.Upgrade();
+    }
+
+    void ResetAnimatingParagraph()
+    {
+        animatingParagraph_.Reset();
+    }
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
     virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
@@ -235,20 +253,27 @@ protected:
         lastLineHeight_ = lineHeight;
     }
 
+    void SetOnDetachFromMainTree(std::function<void()>&& callback)
+    {
+        onDetachFromMainTree_ = std::move(callback);
+    }
+
 protected:
     RefPtr<TextDragOverlayModifier> overlayModifier_;
-    TextDragData textDragData_;
 
+    TextDragData textDragData_;
 private:
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;
     WeakPtr<Paragraph> paragraph_;
+    RefPtr<Paragraph> animatingParagraph_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
     std::shared_ptr<RSPath> selBackGroundPath_;
     std::list<RefPtr<FrameNode>> imageChildren_;
     std::vector<RectF> rectsForPlaceholders_;
     TextDragInfo info_;
+    std::function<void()> onDetachFromMainTree_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

@@ -1188,7 +1188,7 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest006, TestSize.Level1)
 
     columnPattern->OnAttachToFrameNode();
     EXPECT_TRUE(columnPattern->animationCreated_);
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     /**
      * test actionScrollForwardImpl_ callback
@@ -1229,7 +1229,7 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest007, TestSize.Level1)
     EXPECT_EQ(columnPattern->GetCurrentIndex(), 1);
     columnPattern->OnAttachToFrameNode();
     EXPECT_TRUE(columnPattern->animationCreated_);
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     /**
      * test actionScrollBackwardImpl_ callback
@@ -1639,13 +1639,11 @@ HWTEST_F(DatePickerTestThree, DatePickerTest017, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
     ASSERT_NE(datePickerNode, nullptr);
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
-        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -1706,23 +1704,21 @@ HWTEST_F(DatePickerTestThree, PerformActionTest001, TestSize.Level1)
     columnPattern->SetAccessibilityAction();
 
     /**
-     * @tc.steps: step3. Get datePickerColumn accessibilityProperty to call callback function.
+     * @tc.steps: step3. Get accessibilityProperty of blendNode to call callback function.
      * @tc.expected: Related function is called.
      */
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
     /**
-     * @tc.steps: step4. When datePickerColumn can not move, call the callback function in datePickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step4. When datePickerColumn can not move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 
     /**
-     * @tc.steps: step5. When datePickerColumn can move, call the callback function in datePickerColumn
-     *                   accessibilityProperty.
+     * @tc.steps: step5. When datePickerColumn can move, call the callback function in accessibilityProperty.
      * @tc.expected: Related function is called.
      */
     options[columnNode].clear();

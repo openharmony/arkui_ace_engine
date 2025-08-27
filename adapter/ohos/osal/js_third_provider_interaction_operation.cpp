@@ -144,6 +144,19 @@ bool CheckEventIgnoreHostOffset(
     }
     return ignoreHostOffset;
 }
+
+void RemoveKeysForClickAction(
+    int32_t action,
+    std::map<std::string, std::string>& args)
+{
+    auto aceAction = static_cast<ActionType>(action);
+    if (aceAction != ActionType::ACCESSIBILITY_ACTION_CLICK) {
+        return;
+    }
+
+    args.erase(ACTION_ARGU_CLICK_ENHANCE_DATA);
+    args.erase(ACTION_ARGU_CLICK_TIMESTAMP);
+}
 } // namespace
 
 JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
@@ -241,6 +254,15 @@ void JsThirdProviderInteractionOperation::SetSearchElementInfoByAccessibilityIdR
             jsAccessibilityManager->UpdateElementInfosTreeId(infos);
             callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
         }, TaskExecutor::TaskType::BACKGROUND, "SearchElementInfoByAccessibilityId");
+}
+
+void JsThirdProviderInteractionOperation::SearchElementInfoBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
 }
 
 void JsThirdProviderInteractionOperation::SearchElementInfosByText(
@@ -493,10 +515,13 @@ bool JsThirdProviderInteractionOperation::ExecuteActionFromProvider(
     int64_t elementId, const int32_t action,
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId)
 {
+    auto actionFilteredArguments = actionArguments;
+    RemoveKeysForClickAction(action, actionFilteredArguments);
+
     auto provider = accessibilityProvider_.Upgrade();
     CHECK_NULL_RETURN(provider, false);
     int32_t code = provider->ExecuteAccessibilityAction(
-        elementId, action, requestId, actionArguments);
+        elementId, action, requestId, actionFilteredArguments);
     if (code != 0) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
             "ExecuteActionFromProvider failed: %{public}d", code);
@@ -645,7 +670,7 @@ void JsThirdProviderInteractionOperation::SetChildTreeIdAndWinId(
 
 void JsThirdProviderInteractionOperation::SetBelongTreeId(const int32_t treeId)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
     belongTreeId_ = treeId;
 }
 

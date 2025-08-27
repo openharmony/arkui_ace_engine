@@ -27,13 +27,13 @@
 
 namespace OHOS::Ace::Framework {
 class JsPasteButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsPasteButtonClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsPasteButtonClickFunction, JsFunction);
 public:
     explicit JsPasteButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsPasteButtonClickFunction() override {};
-    void Execute() override
+    void Execute()
     {
         JsFunction::ExecuteJS();
     };

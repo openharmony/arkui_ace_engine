@@ -16,12 +16,14 @@
 #include "ui_observer.h"
 
 #include "bridge/common/utils/engine_helper.h"
-
+#include "core/components_ng/base/node_render_status_monitor.h"
 
 namespace OHOS::Ace::Napi {
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedCNavigationListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedUniqueIdNavigationListeners_;
 
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::scrollEventListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
@@ -81,7 +83,18 @@ std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::afterPanEndInfos_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::PanGestureInfos_;
 
-// UIObserver.on(type: "navDestinationUpdate", callback)
+std::unordered_map<NG::FrameNode*, std::shared_ptr<UIObserver::NodeRenderListener>>
+    UIObserver::specifiedNodeRenderStateListeners_;
+
+template<typename ListenerList, typename... Args>
+void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
+{
+    ListenerList listenersCopy = listeners;
+    for (const auto& listener : listenersCopy) {
+        (listener.get()->*callback)(std::forward<Args>(args)...);
+    }
+}
+
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -101,6 +114,24 @@ void UIObserver::RegisterNavigationCallback(
     if (iter == specifiedCNavigationListeners_.end()) {
         specifiedCNavigationListeners_.emplace(
             navigationId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.on(type: "navDestinationUpdate", navigationUniqueId, callback)
+// register a listener on a specified Navigation
+void UIObserver::RegisterNavigationCallback(
+    int32_t navigationUniqueId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedUniqueIdNavigationListeners_.find(navigationUniqueId);
+    if (iter == specifiedUniqueIdNavigationListeners_.end()) {
+        specifiedUniqueIdNavigationListeners_.emplace(
+            navigationUniqueId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
         return;
     }
     auto& holder = iter->second;
@@ -154,6 +185,30 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
     );
 }
 
+// UIObserver.off(type: "navDestinationUpdate", navigationUniqueId, callback)
+void UIObserver::UnRegisterNavigationCallback(int32_t navigationUniqueId, napi_value cb)
+{
+    auto iter = specifiedUniqueIdNavigationListeners_.find(navigationUniqueId);
+    if (iter == specifiedUniqueIdNavigationListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (cb == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }
+        ),
+        holder.end()
+    );
+}
+
 void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
 {
     auto unspecifiedHolder = unspecifiedNavigationListeners_;
@@ -161,14 +216,21 @@ void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
         listener->OnNavigationStateChange(info);
     }
     auto iter = specifiedCNavigationListeners_.find(info.navigationId);
-    if (iter == specifiedCNavigationListeners_.end()) {
-        return;
+    if (iter != specifiedCNavigationListeners_.end()) {
+        auto holder = iter->second;
+
+        for (const auto& listener : holder) {
+            listener->OnNavigationStateChange(info);
+        }
     }
 
-    auto holder = iter->second;
+    auto navigationdUniqueIdIter = specifiedUniqueIdNavigationListeners_.find(info.navigationUniqueId);
+    if (navigationdUniqueIdIter != specifiedUniqueIdNavigationListeners_.end()) {
+        auto holder = navigationdUniqueIdIter->second;
 
-    for (const auto& listener : holder) {
-        listener->OnNavigationStateChange(info);
+        for (const auto& listener : holder) {
+            listener->OnNavigationStateChange(info);
+        }
     }
 }
 
@@ -243,10 +305,12 @@ void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value
 }
 
 void UIObserver::HandleScrollEventStateChange(const std::string& id, int32_t uniqueId,
-    NG::ScrollEventType eventType, float offset)
+    NG::ScrollEventType eventType, float offset, Ace::Axis axis)
 {
-    for (const auto& listener : scrollEventListeners_) {
-        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset);
+    // copy value to avoid developer call off while execute callback of on
+    auto scrollEventListeners = scrollEventListeners_;
+    for (const auto& listener : scrollEventListeners) {
+        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
     }
 
     auto iter = specifiedScrollEventListeners_.find(id);
@@ -254,10 +318,11 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, int32_t uni
         return;
     }
 
-    auto& holder = iter->second;
+    // copy value to avoid developer call off while execute callback of on
+    auto holder = iter->second;
 
     for (const auto& listener : holder) {
-        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset);
+        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
     }
 }
 
@@ -541,10 +606,7 @@ void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double densit
     if (iter == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
-    for (const auto& listener : holder) {
-        listener->OnDensityChange(density);
-    }
+    SafeIterateListeners(iter->second, &UIObserverListener::OnDensityChange, density);
 }
 
 void UIObserver::HandDrawCommandSendChange()
@@ -553,10 +615,7 @@ void UIObserver::HandDrawCommandSendChange()
     if (specifiedDrawListeners_.find(currentId) == specifiedDrawListeners_.end()) {
         return;
     }
-    auto& holder = specifiedDrawListeners_[currentId];
-    for (const auto& listener : holder) {
-        listener->OnDrawOrLayout();
-    }
+    SafeIterateListeners(specifiedDrawListeners_[currentId], &UIObserverListener::OnDrawOrLayout);
 }
 
 void UIObserver::HandLayoutDoneChange()
@@ -565,10 +624,7 @@ void UIObserver::HandLayoutDoneChange()
     if (specifiedLayoutListeners_.find(currentId) == specifiedLayoutListeners_.end()) {
         return;
     }
-    auto& holder = specifiedLayoutListeners_[currentId];
-    for (const auto& listener : holder) {
-        listener->OnDrawOrLayout();
-    }
+    SafeIterateListeners(specifiedLayoutListeners_[currentId], &UIObserverListener::OnDrawOrLayout);
 }
 
 /**
@@ -1602,6 +1658,81 @@ UIObserver::PanGestureListenersPair UIObserver::GetPanGestureListeners(const NG:
         return { abilityContextAfterPanEndListeners_, specifiedAfterPanEndListeners_ };
     } else {
         return { emptyListeners, emptySpecifiedListeners };
+    }
+}
+
+void UIObserver::RegisterNodeRenderStateChangeCallback(RefPtr<NG::FrameNode> frameNode,
+    const std::shared_ptr<UIObserverListener>& listener, const RefPtr<NG::NodeRenderStatusMonitor>& monitor)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(monitor);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+
+    auto iter = specifiedNodeRenderStateListeners_.find(frameNodePtr);
+    if (iter == specifiedNodeRenderStateListeners_.end()) {
+        auto nodeRenderStatusHandleFunc = [](NG::FrameNode* frameNode, NG::NodeRenderState state,
+                                              NG::RenderMonitorReason reason) {
+            CHECK_NULL_VOID(frameNode);
+            auto iter = specifiedNodeRenderStateListeners_.find(frameNode);
+            if (iter == specifiedNodeRenderStateListeners_.end()) {
+                return;
+            }
+            CHECK_NULL_VOID(iter->second);
+            for (const auto& listener : iter->second->listeners) {
+                listener->OnNodeRenderStateChange(frameNode, state);
+            }
+            if (reason == NG::RenderMonitorReason::NODE_RELEASE) {
+                specifiedNodeRenderStateListeners_.erase(frameNode);
+            }
+        };
+        auto result = monitor->RegisterNodeRenderStatusListener(
+            frameNodePtr, std::move(nodeRenderStatusHandleFunc), NG::MonitorSourceType::OBSERVER);
+        if (result.id != NG::MONITOR_INVALID_ID) {
+            specifiedNodeRenderStateListeners_.emplace(
+                frameNodePtr, std::make_shared<NodeRenderListener>(
+                                    result.id, std::list<std::shared_ptr<UIObserverListener>>({ listener })));
+        }
+        listener->OnNodeRenderStateChange(frameNodePtr, result.state);
+        return;
+    }
+    CHECK_NULL_VOID(iter->second);
+    auto& holder = iter->second->listeners;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+    listener->OnNodeRenderStateChange(frameNodePtr, monitor->GetNodeCurrentRenderState(frameNodePtr));
+}
+
+void UIObserver::UnRegisterNodeRenderStateChangeCallback(
+    RefPtr<NG::FrameNode> frameNode, napi_value callback, const RefPtr<NG::NodeRenderStatusMonitor>& monitor)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(monitor);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+    auto iter = specifiedNodeRenderStateListeners_.find(frameNodePtr);
+    if (iter == specifiedNodeRenderStateListeners_.end()) {
+        return;
+    }
+    CHECK_NULL_VOID(iter->second);
+    auto& holder = iter->second->listeners;
+    if (callback == nullptr) {
+        holder.clear();
+        specifiedNodeRenderStateListeners_.erase(AceType::RawPtr(frameNode));
+        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, iter->second->id);
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+    if (holder.empty()) {
+        specifiedNodeRenderStateListeners_.erase(AceType::RawPtr(frameNode));
+        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, iter->second->id);
     }
 }
 

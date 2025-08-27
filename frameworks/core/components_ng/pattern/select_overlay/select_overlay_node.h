@@ -53,7 +53,7 @@ enum class FrameNodeTrigger {
 };
 
 class ACE_EXPORT SelectOverlayNode : public FrameNode {
-    DECLARE_ACE_TYPE(SelectOverlayNode, FrameNode)
+    DECLARE_ACE_TYPE(SelectOverlayNode, FrameNode);
 public:
     explicit SelectOverlayNode(const RefPtr<Pattern>& pattern);
     ~SelectOverlayNode() override = default;
@@ -114,12 +114,13 @@ private:
     void SelectMenuAndInnerInitProperty();
     void AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     static const std::vector<MenuItemParam> GetSystemMenuItemParams(const std::shared_ptr<SelectOverlayInfo>& info);
-    static const MenuItemParam GetSystemMenuItemParam(const std::string& menuId, const std::string& menuButton);
+    static void AddMenuItemParamIf(
+        bool condition, const std::string& menuId, const std::string& menuButton, std::vector<MenuItemParam>& items);
     int32_t AddCreateMenuItems(const std::vector<NG::MenuOptionsParam>& menuItems,
         const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
-    void LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, bool isDefaultOverMaxWidth,
-        float maxWidth, float allocatedSize, int32_t& extensionOptionStartIndex);
+    void LandscapeMenuAddMenuOptions(bool isDefaultOverMaxWidth, float maxWidth, float allocatedSize,
+        int32_t& extensionOptionStartIndex, const std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCut(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     void ShowCopy(
@@ -137,6 +138,8 @@ private:
     void ShowCamera(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     void ShowAIWrite(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowAIMenuOptions(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     bool IsShowOnTargetAPIVersion();
     bool IsShowTranslateOnTargetAPIVersion();
@@ -194,8 +197,10 @@ private:
     static std::pair<std::vector<MenuOptionsParam>, bool> HandleCollaborationMenuItem(
         const std::vector<MenuOptionsParam>& params);
 
-    void NotifyUpdateToolBar(bool itemChanged);
+    void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation);
     void SetSelectMenuInnerSize();
+    void ShowAskCelia(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
@@ -240,7 +245,7 @@ private:
     bool isExtensionMenu_ = false;
 
     // Label whether the menu default button needs to appear within the extended menu
-    bool isShowInDefaultMenu_[9] = { false };
+    bool isShowInDefaultMenu_[11] = { false }; // OPTION_INDEX_ASK_CELIA + 1
 
     bool isDefaultBtnOverMaxWidth_ = false;
 

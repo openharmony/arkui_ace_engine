@@ -1,0 +1,2 @@
+
+type ESObject = any

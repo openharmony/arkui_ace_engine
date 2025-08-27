@@ -30,6 +30,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT FormRenderWindow : public Window {
@@ -46,7 +47,7 @@ public:
     void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
 #ifdef ENABLE_ROSEN_BACKEND
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
     }
@@ -101,14 +102,17 @@ public:
 
     void OnShow() override;
     void OnHide() override;
-    void FlushTasks() override;
+    void FlushTasks(std::function<void()> callback = nullptr) override;
 
     void Lock() override;
     void Unlock() override;
+    int64_t GetVSyncPeriod() const override;
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
+    UIContentType uiContentType_ = UIContentType::UNDEFINED;
 #ifdef ENABLE_ROSEN_BACKEND
     void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;

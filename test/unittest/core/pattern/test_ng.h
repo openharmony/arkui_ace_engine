@@ -26,8 +26,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -36,7 +38,6 @@ constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr int32_t NULL_VALUE = -1;
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr double NEW_DEFAULT_FRICTION = 0.7;
-constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_VELOCITY = 200.f;
 
 class TestNG : public testing::Test {
@@ -57,12 +58,29 @@ public:
     RefPtr<FrameNode> CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback);
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
+    RefPtr<FrameNode> CreateStack(const std::function<void(StackModelNG)>& callback);
     void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
     AssertionResult IsExist(const RefPtr<FrameNode>& frameNode, int32_t index);
     AssertionResult IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index);
     AssertionResult IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index);
 
     AssertionResult IsEqual(const double& actual, const double& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+    
+    AssertionResult IsEqual(const float& actual, const double& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+
+    AssertionResult IsEqual(const double& actual, const float& expected)
     {
         if (NearEqual(actual, expected)) {
             return AssertionSuccess();

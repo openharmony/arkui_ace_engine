@@ -84,7 +84,7 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call the relevant Functions to update the property of selectOverlayInfo
      * @tc.expected: step2. no fatal failures occour, some logs will be print
-     *                      they are defined in "mock_select_overlay_pattern.cpp"
+     *                      they are defined in "mock_select_overlay_pattern.cpp".
      */
     // call UpdateFirstSelectHandleInfo
     SelectHandleInfo selectHandleInfo;

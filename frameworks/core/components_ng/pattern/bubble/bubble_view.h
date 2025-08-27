@@ -40,11 +40,11 @@ public:
         const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param);
     static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom);
     static RefPtr<FrameNode> CreateCombinedChild(
-        const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bobbleNode);
+        const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bubbleNode);
     static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
     static RefPtr<FrameNode> CreateButton(
         ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param,
-         const std::string& buttonName = "primaryButton");
+         const int32_t buttonNumber = 1);
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
     static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom = true);
@@ -58,7 +58,7 @@ public:
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
 private:
-    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow);
+    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
 };
 } // namespace OHOS::Ace::NG
 

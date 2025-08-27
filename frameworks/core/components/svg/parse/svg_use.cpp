@@ -53,6 +53,11 @@ RefPtr<RenderNode> SvgUse::CreateRender(
         LOGE("href is empty");
         return nullptr;
     }
+    if (isCreateRenderRunning_) {
+        LOGW("Render creation already in progress, skipping current operation to avoid infinite loop.");
+        return nullptr;
+    }
+    isCreateRenderRunning_ = true;
     auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
@@ -79,6 +84,7 @@ RefPtr<RenderNode> SvgUse::CreateRender(
     renderNode->Update(component_);
     renderNode->AddChild(refRenderNode, 0);
     renderNode->Layout(layoutParam);
+    isCreateRenderRunning_ = false;
     if (!useBox || declaration->GetClipPathHref().empty()) {
         LOGW("use of svg tag skip box create");
         return renderNode;
@@ -92,38 +98,22 @@ RefPtr<RenderNode> SvgUse::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgUse::AsPath(const Size& viewPort) const
-#else
 RSPath SvgUse::AsPath(const Size& viewPort) const
-#endif
 {
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
         LOGE("asPath failed, svgContext is null");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     auto& declaration = component_->GetDeclaration();
     if (declaration->GetHref().empty()) {
         LOGE("href is empty");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     refSvgNode->Inherit(declaration);
     return refSvgNode->AsPath(viewPort);

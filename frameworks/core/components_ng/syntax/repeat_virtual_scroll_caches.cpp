@@ -194,9 +194,9 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
     if (!node4Key.value().isValid) {
         // impossible situation: TS onKeyIndex shoul;d have updated repeatItem.index already!
         TAG_LOGW(AceLogTag::ACE_REPEAT,
-            "index %{public}d -> %{public}s, templateId %{public}s, "
+            "index %{public}d, templateId %{public}s, "
             "found UINode %{public}s marked inValid. Internal error!",
-            static_cast<int32_t>(index), key.value().c_str(), ttype.value().c_str(), DumpUINode(uiNode).c_str());
+            static_cast<int32_t>(index), ttype.value().c_str(), DumpUINode(uiNode).c_str());
         UpdateSameKeyItem(key.value(), index);
         node4key_[key.value()].isValid = true;
     }
@@ -233,6 +233,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
 void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index,
     bool shouldTriggerRecycle)
 {
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(key, index);
     AddKeyToL1(key, shouldTriggerRecycle);
 }
@@ -350,6 +351,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
         static_cast<int32_t>(forIndex), oldKey.value().c_str());
 
     // call TS to do the RepeatItem update
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(oldKey.value(), forIndex);
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -362,6 +364,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
 void RepeatVirtualScrollCaches::UpdateSameKeyItem(const std::string& key, uint32_t index)
 {
     // call TS to do the RepeatItem update
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(key, index);
 }
 
@@ -377,7 +380,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     }
     const auto& forKey = iter->second;
 
-    ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::CreateNewNode index[%d] -> key[%s]",
+    ACE_SYNTAX_SCOPED_TRACE("RepeatVirtualScrollCaches::CreateNewNode index[%d] -> key[%s]",
         static_cast<int32_t>(forIndex), forKey.c_str());
 
     // see if node already created, just for safety
@@ -409,9 +412,9 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
 
     if (!node4Index) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
-            "New Node create: For index %{public}d -> key %{public}s -> ttype %{public}s "
+            "New Node create: For index %{public}d -> ttype %{public}s "
             "item builder FAILED to gen FrameNode. ERROR",
-            forIndex, forKey.c_str(), ttype.c_str());
+            forIndex, ttype.c_str());
         return nullptr;
     }
 
@@ -439,32 +442,10 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(std::map<int32_t, RefPtr<UI
         const auto& cacheItem = node4key_[key];
         const auto& indexIter = index4Key_.find(key);
         if (indexIter == index4Key_.end()) {
-            TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
             continue;
         }
         children.emplace(indexIter->second, cacheItem.item);
-    }
-}
-
-void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
-{
-    if (!reusable_) {
-        return;
-    }
-    auto keyIter = key4index_.find(index);
-    if (keyIter != key4index_.end()) {
-        // STATE_MGMT_NOTE
-        // can not just remove from L1, also need to detach from tree!
-        // how to fix cause a call to RepeatVirtualScrollNode::DropFromL1 in
-        TAG_LOGD(
-            AceLogTag::ACE_REPEAT, "remove index %{public}d -> key %{public}s from L1", index, keyIter->second.c_str());
-
-        ACE_SCOPED_TRACE(
-            "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
-
-        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
-        RemoveKeyFromL1(keyIter->second, false);
-        isModified_ = true;
     }
 }
 
@@ -670,7 +651,7 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetL1KeyToUpdate(const std
 RefPtr<UINode> RepeatVirtualScrollCaches::UINodeHasBeenUpdated(
     const std::string& ttype, const std::string& fromKey, const std::string& forKey)
 {
-    ACE_SCOPED_TRACE(
+    ACE_SYNTAX_SCOPED_TRACE(
         "RepeatVirtualScrollCaches::UINodeHasBeenUpdated ttype[%s] fromKey[%s] -> forKey[%s]",
         ttype.c_str(), fromKey.c_str(), forKey.c_str());
 
@@ -698,7 +679,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UINodeHasBeenUpdated(
         node4key_.emplace(forKey, cachedItem);
         return cachedItem.item;
     }
-    TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
         fromKey.c_str(), forKey.c_str());
     return nullptr;
 }

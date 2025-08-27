@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -95,7 +96,8 @@ struct LayoutConstraintT {
         return NearEqual(first, second);
     }
 
-    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen = false);
+    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize,
+        const std::optional<NG::LayoutPolicyProperty>& layoutPolicy = std::nullopt, bool greaterThanApiTen = false);
 
     void ApplyAspectRatioToParentIdealSize(bool useWidth, float ratio);
 
@@ -186,6 +188,27 @@ struct LayoutConstraintT {
             return false;
         }
         return parentIdealSize.UpdateIllegalSizeWithCheck(size);
+    }
+
+    bool UpdateParentIdealSizeByLayoutPolicy(const SizeT<T>& size, bool isMax, NG::LayoutPolicyProperty layoutPolicy)
+    {
+        bool widthUpdated = false;
+        bool heightUpdated = false;
+        if (layoutPolicy.IsWidthMatch()) {
+            if (isMax) {
+                widthUpdated = parentIdealSize.UpdateWidthWhenSmaller(size);
+            } else {
+                widthUpdated = parentIdealSize.UpdateWidthWhenLarger(size);
+            }
+        }
+        if (layoutPolicy.IsHeightMatch()) {
+            if (isMax) {
+                heightUpdated = parentIdealSize.UpdateHeightWhenSmaller(size);
+            } else {
+                heightUpdated = parentIdealSize.UpdateHeightWhenLarger(size);
+            }
+        }
+        return widthUpdated || heightUpdated;
     }
 
     bool UpdateMaxSizeWithCheck(const SizeT<T>& size)

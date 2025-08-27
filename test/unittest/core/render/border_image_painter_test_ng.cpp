@@ -193,7 +193,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter003, TestSize.Level1)
     auto testBorderImage = MakeBorderImage();
     testBorderImage->needFillCenter_ = true;
 
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
     borderImageProperty.propBorderImageSource = ImageSourceInfo(SRC_IMAGES);
     borderImageProperty.propHasBorderImageSlice = true;
 
@@ -237,7 +237,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter004, TestSize.Level1)
      */
     auto testBorderImage = MakeBorderImage();
 
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
     borderImageProperty.propBorderImageSource = ImageSourceInfo(SRC_IMAGES);
     borderImageProperty.propHasBorderImageWidth = true;
 
@@ -282,7 +282,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter005, TestSize.Level1)
      */
     auto testBorderImage = MakeBorderImage();
 
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
     borderImageProperty.propBorderImageSource = ImageSourceInfo(SRC_IMAGES);
     borderImageProperty.propHasBorderImageOutset = true;
 
@@ -412,7 +412,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter008, TestSize.Level1)
     for (int32_t id = 0; id < 5; id++) {
         auto state = static_cast<BorderImageRepeat>(id);
         testBorderImage->repeatMode_ = state;
-        borderImageProperty.propBorderImage = std::move(testBorderImage);
+        borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
         borderImagePainter.borderImageProperty_ = std::move(borderImageProperty);
         borderImagePainter.PaintBorderImage(OFFSET_F, canvas);
 
@@ -452,7 +452,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter009, TestSize.Level1)
      * @tc.steps: step2. push borderCenterWidth_ is FIVE, imageCenterWidth_ is ONE.
      */
     auto testBorderImage = MakeBorderImage();
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
 
     borderImagePainter.borderImageProperty_ = std::move(borderImageProperty);
     borderImagePainter.borderCenterWidth_ = FIVE;
@@ -495,7 +495,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter010, TestSize.Level1)
      * @tc.steps: step2. push borderCenterWidth_ is TWO, imageCenterWidth_ is FIVE.
      */
     auto testBorderImage = MakeBorderImage();
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
 
     borderImagePainter.borderImageProperty_ = std::move(borderImageProperty);
     borderImagePainter.borderCenterWidth_ = TWO;
@@ -537,7 +537,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter011, TestSize.Level1)
      */
     double minus = -1.0;
     auto testBorderImage = MakeBorderImage();
-    borderImageProperty.propBorderImage = std::move(testBorderImage);
+    borderImageProperty.propBorderImage = AceType::Claim(testBorderImage);
 
     borderImagePainter.borderImageProperty_ = std::move(borderImageProperty);
     borderImagePainter.borderCenterWidth_ = minus;

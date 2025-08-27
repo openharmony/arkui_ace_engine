@@ -59,7 +59,7 @@ public:
         return uiExtensionType_;
     }
 
-    void Initialize(const NG::UIExtensionConfig& config);
+    virtual void Initialize(const NG::UIExtensionConfig& config);
     void UnregisterResources();
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -82,6 +82,8 @@ public:
     void OnUeaAccessibilityEventAsync();
     void OnExtensionDetachToDisplay();
 
+    void OnAttachContext(PipelineContext *context) override;
+    void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -102,16 +104,16 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
-    void FireOnRemoteReadyCallback();
-    void FireBindModalCallback();
-    void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
-    void FireOnReceiveCallback(const AAFwk::WantParams& params);
-    void SetSyncCallbacks(
+    virtual void FireOnRemoteReadyCallback();
+    virtual void FireBindModalCallback();
+    virtual void FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap);
+    virtual void FireOnReceiveCallback(const AAFwk::WantParams& params);
+    virtual void SetSyncCallbacks(
         const std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>>&& callbackList);
-    void FireSyncCallbacks();
-    void SetAsyncCallbacks(
+    virtual void FireSyncCallbacks();
+    virtual void SetAsyncCallbacks(
         const std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>>&& callbackList);
-    void FireAsyncCallbacks();
+    virtual void FireAsyncCallbacks();
 
     // Dpi
     void SetDensityDpi(bool densityDpi);
@@ -121,7 +123,7 @@ public:
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
     void OnAccessibilityChildTreeDeregister() const override;
-    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) override;
     void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
     
@@ -140,7 +142,8 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
-private:
+protected:
+    void UpdateSessionInstanceId(int32_t instanceId);
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
@@ -176,6 +179,12 @@ private:
     bool isVisible_ = true;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
+
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool hasAttachContext_ = false;
+    bool needReNotifyForeground_ = false;
+
     int32_t callbackId_ = 0;
     RectF displayArea_;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;

@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void()>;
 
 class MarqueeEventHub : public EventHub {
-    DECLARE_ACE_TYPE(MarqueeEventHub, EventHub)
+    DECLARE_ACE_TYPE(MarqueeEventHub, EventHub);
 
 public:
     MarqueeEventHub() = default;

@@ -14,6 +14,7 @@
  */
 
 #include "html_to_span.h"
+#include <sstream>
 
 #include "core/text/html_utils.h"
 
@@ -58,7 +59,7 @@ std::vector<std::string> ParseFontFamily(const std::string& fontFamily)
     return fonts;
 }
 
-VerticalAlign StringToTextVerticalAlign(const std::string& align)
+VerticalAlign StringToVerticalAlign(const std::string& align)
 {
     if (align == "bottom") {
         return VerticalAlign::BOTTOM;
@@ -75,6 +76,18 @@ VerticalAlign StringToTextVerticalAlign(const std::string& align)
 FontStyle StringToFontStyle(const std::string& fontStyle)
 {
     return fontStyle == "italic" ? FontStyle::ITALIC : FontStyle::NORMAL;
+}
+
+SuperscriptStyle StringToSuperscriptStyle(const std::string& superscriptStyle)
+{
+    if (superscriptStyle == "superscript") {
+        return SuperscriptStyle::SUPERSCRIPT;
+    } else if (superscriptStyle == "subscript") {
+        return SuperscriptStyle::SUBSCRIPT;
+    } else if (superscriptStyle == "normal") {
+        return SuperscriptStyle::NORMAL;
+    }
+    return SuperscriptStyle::NONE;
 }
 
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
@@ -99,25 +112,33 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
     return TextDecorationStyle::SOLID;
 }
 
-TextDecoration StringToTextDecoration(const std::string& textDecoration)
+std::vector<TextDecoration> StringToTextDecoration(const std::string& textDecoration)
 {
-    std::string value = StringUtils::TrimStr(textDecoration);
-    if (value == "inherit") {
-        return TextDecoration::INHERIT;
+    std::istringstream ss(textDecoration);
+    std::string tmp;
+    std::vector<std::string> decorations;
+    while (std::getline(ss, tmp, ' ')) {
+        decorations.emplace_back(tmp);
     }
-    if (value == "line-through") {
-        return TextDecoration::LINE_THROUGH;
+    std::vector<TextDecoration> result;
+    for (const auto &its : decorations) {
+        std::string value = StringUtils::TrimStr(its);
+        TextDecoration decoration;
+        if (value == "inherit") {
+            decoration = TextDecoration::INHERIT;
+        }
+        if (value == "line-through") {
+            decoration = TextDecoration::LINE_THROUGH;
+        }
+        if (value == "overline") {
+            decoration = TextDecoration::OVERLINE;
+        }
+        if (value == "underline") {
+            decoration = TextDecoration::UNDERLINE;
+        }
+        result.push_back(decoration);
     }
-    if (value == "none") {
-        return TextDecoration::NONE;
-    }
-    if (value == "overline") {
-        return TextDecoration::OVERLINE;
-    }
-    if (value == "underline") {
-        return TextDecoration::UNDERLINE;
-    }
-    return TextDecoration::NONE;
+    return result;
 }
 
 ImageFit ConvertStrToFit(const std::string& fit)
@@ -248,15 +269,68 @@ void HtmlToSpan::InitFont(
     } else if (key == "font-family") {
         font->fontFamilies = ParseFontFamily(value);
     } else if (key == "font-variant") { // not support
+    } else if (key == "stroke-width") {
+        font->strokeWidth = FromString(value);
+    } else if (key == "stroke-color") {
+        font->strokeColor = ToSpanColor(value);
+    } else if (key == "font-superscript") {
+        font->superscript = StringToSuperscriptStyle(value);
     }
 }
 
 bool HtmlToSpan::IsFontAttr(const std::string& key)
 {
-    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" || key == "color") {
+    if (key == "font-size" || key == "font-weight" || key == "font-style" || key == "font-family" ||
+        key == "color" || key == "stroke-width" || key == "stroke-color" || key == "font-superscript") {
         return true;
     }
     return false;
+}
+
+bool HtmlToSpan::IsBackgroundColorAttr(const std::string& key) const
+{
+    return key == "background-color";
+}
+
+bool HtmlToSpan::IsForegroundColorAttr(const std::string& key) const
+{
+    return key == "foreground-color";
+}
+
+void HtmlToSpan::InitBackgroundColor(
+    const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
+{
+    auto [ret, styleValue] = GetStyleValue<TextBackgroundStyle>(index, values);
+    if (!ret) {
+        return;
+    }
+
+    TextBackgroundStyle* style = Get<TextBackgroundStyle>(styleValue);
+    if (style == nullptr) {
+        return;
+    }
+
+    if (key == "background-color") {
+        style->backgroundColor = ToSpanColor(value);
+    }
+}
+
+void HtmlToSpan::InitForegroundColor(
+    const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
+{
+    auto [ret, styleValue] = GetStyleValue<Font>(index, values);
+    if (!ret) {
+        return;
+    }
+
+    Font* font = Get<Font>(styleValue);
+    if (font == nullptr) {
+        return;
+    }
+
+    if (key == "foreground-color") {
+        font->fontColor = ToSpanColor(value);
+    }
 }
 
 void HtmlToSpan::InitParagraph(
@@ -274,6 +348,8 @@ void HtmlToSpan::InitParagraph(
 
     if (key == "text-align") {
         style->align = StringToTextAlign(value);
+    } else if (key == "vertical-align") {
+        style->textVerticalAlign = StringToTextVerticalAlign(value);
     } else if (key == "word-break") {
         style->wordBreak = StringToWordBreak(value);
     } else if (key == "text-overflow") {
@@ -327,7 +403,7 @@ void HtmlToSpan::InitDecoration(
         decoration->decorationSytle = StringToTextDecorationStyle(value);
     } else if (key == "text-decoration-color") {
         decoration->color = ToSpanColor(value);
-    } else if (key == "text-decoration-thickness") { // not support
+    } else if (key == "text-decoration-thickness") { // not supported: html has unit while lineThicknessScale is float
     } else if (key == "text-decoration") {
         std::istringstream ss1(value);
         std::string word;
@@ -398,7 +474,7 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    auto regStr = "#[0-9A-Fa-f]{6,8}";
+    auto regStr = "#[0-9A-Fa-f]{7,8}";
     constexpr auto tmpLeastLength = 3;
     if (std::regex_match(tmp, matches, std::regex(regStr)) && tmp.length() >= tmpLeastLength) {
         auto rgb = tmp.substr(1);
@@ -669,7 +745,7 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
         } else if (key == "object-fit") {
             options.imageAttribute->objectFit = ConvertStrToFit(trimVal);
         } else if (key == "vertical-align") {
-            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
+            options.imageAttribute->verticalAlign = StringToVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
             HandleImageSize(key, trimVal, options);
         } else if (key == "sync-load") {
@@ -744,6 +820,23 @@ TextAlign HtmlToSpan::StringToTextAlign(const std::string& value)
         return TextAlign::JUSTIFY;
     }
     return TextAlign::LEFT;
+}
+
+TextVerticalAlign HtmlToSpan::StringToTextVerticalAlign(const std::string& value)
+{
+    if (value == "baseline") {
+        return TextVerticalAlign::BASELINE;
+    }
+    if (value == "bottom") {
+        return TextVerticalAlign::BOTTOM;
+    }
+    if (value == "middle") {
+        return TextVerticalAlign::CENTER;
+    }
+    if (value == "top") {
+        return TextVerticalAlign::TOP;
+    }
+    return TextVerticalAlign::BASELINE;
 }
 
 WordBreak HtmlToSpan::StringToWordBreak(const std::string& value)
@@ -850,6 +943,8 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
         auto trimVal = StringUtils::TrimStr(value);
         if (IsFontAttr(key)) {
             InitFont(key, trimVal, "font", styleValues);
+        } else if (IsForegroundColorAttr(key)) {
+            InitForegroundColor(key, trimVal, "font", styleValues);
         } else if (IsDecorationAttr(key)) {
             InitDecoration(key, trimVal, "decoration", styleValues);
         } else if (IsLetterSpacingAttr(key)) {
@@ -860,6 +955,8 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
             InitLineHeight(key, trimVal, styleValues);
         } else if (IsParagraphAttr(key)) {
             InitParagraph(key, trimVal, "paragrap", styleValues);
+        } else if (IsBackgroundColorAttr(key)) {
+            InitBackgroundColor(key, trimVal, "backgroundColor", styleValues);
         }
     }
 
@@ -869,8 +966,18 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
 void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
 {
     std::map<std::string, StyleValue> styles;
-    if (element == "strong") {
+    if (element == "strong" || element == "b") {
         InitFont("font-weight", "bold", "font", styles);
+    } else if (element == "sup") {
+        InitFont("font-superscript", "superscript", "font", styles);
+    } else if (element == "sub") {
+        InitFont("font-superscript", "subscript", "font", styles);
+    } else if (element == "del" || element == "s") {
+        InitDecoration("text-decoration-line", "line-through", "decoration", styles);
+    } else if (element == "u") {
+        InitDecoration("text-decoration-line", "underline", "decoration", styles);
+    } else if (element == "i" || element == "em") {
+        InitFont("font-style", "italic", "font", styles);
     }
 
     for (auto [key, value] : styles) {
@@ -897,6 +1004,33 @@ void HtmlToSpan::ToTextSpan(
     }
     if (info.values.empty()) {
         return;
+    }
+    spanInfos.emplace_back(std::move(info));
+}
+
+void HtmlToSpan::ToAnchorSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+{
+    SpanInfo info;
+    info.type = HtmlType::ANCHOR;
+    info.start = pos;
+    info.end = pos + len;
+    xmlAttrPtr curNode = node->properties;
+    for (; curNode; curNode = curNode->next) {
+        std::string attrName = reinterpret_cast<const char*>(curNode->name);
+        if (attrName == "href") {
+            auto attrContent = xmlGetProp(curNode->parent, curNode->name);
+            if (attrContent != nullptr) {
+                std::string hrefValue = reinterpret_cast<const char*>(attrContent);
+                xmlFree(attrContent);
+                info.values.emplace_back(hrefValue);
+            }
+        }
+        if (attrName == "style") {
+            auto styles = ToTextSpanStyle(curNode);
+            for (auto [key, value] : styles) {
+                info.values.emplace_back(value);
+            }
+        }
     }
     spanInfos.emplace_back(std::move(info));
 }
@@ -961,6 +1095,11 @@ void HtmlToSpan::ToSpan(
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
+        } else if (htmlTag == "a") {
+            ToAnchorSpan(curNode, childPos - pos, pos, spanInfos);
+        } else if (htmlTag == "br") {
+            allContent += "\n";
+            childPos++;
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
@@ -1036,6 +1175,14 @@ RefPtr<SpanBase> HtmlToSpan::CreateSpan(size_t index, const SpanInfo& info, Styl
         return MakeSpan<SpanParagraphStyle, ParagraphStyleSpan>(info, value);
     }
 
+    if (index == static_cast<uint32_t>(StyleIndex::STYLE_BACKGROUND_COLOR)) {
+        return MakeSpan<TextBackgroundStyle, BackgroundColorSpan>(info, value);
+    }
+
+    if (index == static_cast<uint32_t>(StyleIndex::STYLE_URL)) {
+        return MakeSpan<std::string, UrlSpan>(info, value);
+    }
+
     return nullptr;
 }
 
@@ -1064,9 +1211,13 @@ RefPtr<SpanBase> HtmlToSpan::MakeDimensionSpan(const SpanInfo& info, StyleValue&
 RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue& value)
 {
     auto style = Get<DecorationSpanParam>(&value);
+    std::optional<TextDecorationOptions> options = TextDecorationOptions();
     if (style != nullptr) {
+        // Enable multi-decoration line support by default
+        options->enableMultiType = true;
         return AceType::MakeRefPtr<DecorationSpan>(
-            style->decorationType, style->color, style->decorationSytle, info.start, info.end);
+            std::vector<TextDecoration>({style->decorationType}), style->color,
+            style->decorationSytle, 1.0f, options, info.start, info.end);
     }
 
     return nullptr;
@@ -1081,7 +1232,7 @@ void HtmlToSpan::AddSpans(const SpanInfo& info, RefPtr<MutableSpanString> mutabl
             span = CreateSpan(index, info, value);
         }
         if (span != nullptr) {
-            mutableSpan->AddSpan(span);
+            mutableSpan->AddSpan(span, true, true, false);
         }
     }
 }
@@ -1102,17 +1253,23 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     const std::string& allContent, const std::vector<SpanInfo>& spanInfos)
 {
     auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(UtfUtils::Str8DebugToStr16(allContent));
-    RefPtr<MutableSpanString> span;
-    for (auto& info : spanInfos) {
+    if (spanInfos.empty()) {
+        return mutableSpan;
+    }
+    for (int32_t i = 0; i < static_cast<int32_t>(spanInfos.size()); ++i) {
+        auto info = spanInfos[i];
+        if (info.type == HtmlType::IMAGE) {
+            AddImageSpans(info, mutableSpan);
+        }
+    }
+    for (int32_t i = static_cast<int32_t>(spanInfos.size()) - 1; i >= 0; --i) {
+        auto info = spanInfos[i];
         if (info.type == HtmlType::PARAGRAPH) {
             AddSpans(info, mutableSpan);
-        } else if (info.type == HtmlType::IMAGE) {
-            AddImageSpans(info, mutableSpan);
-        } else {
+        } else if (info.type != HtmlType::IMAGE) {
             AddSpans(info, mutableSpan);
         }
     }
-
     return mutableSpan;
 }
 

@@ -212,6 +212,9 @@ RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::u16string& createVal
     if (testProperty.lineSpacingValue.has_value()) {
         textModel.SetLineSpacing(testProperty.lineSpacingValue.value());
     }
+    if (testProperty.isOnlyBetweenLines.has_value()) {
+        textModel.SetIsOnlyBetweenLines(testProperty.isOnlyBetweenLines.value());
+    }
     if (testProperty.textDecorationValue.has_value()) {
         textModel.SetTextDecoration(testProperty.textDecorationValue.value());
     }
@@ -306,7 +309,7 @@ void TextBases::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutPr
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
     textLayoutProperty->UpdateWordBreak(TEXT_WORD_BREAK);
     textLayoutProperty->UpdateLineBreakStrategy(TEXT_LINE_BREAK_STRATEGY);

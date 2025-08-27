@@ -210,13 +210,19 @@ void RosenRenderContext::Restore()
 
 void RosenRenderContext::UpdateChildren(const std::shared_ptr<RSNode>& rsNode)
 {
-    std::vector<OHOS::Rosen::NodeId> childNodeIds;
+    std::vector<OHOS::Rosen::RSNode::SharedPtr> nowChildNode;
     for (auto& child : childNodes_) {
         if (auto childNode = child.lock()) {
-            childNodeIds.emplace_back(childNode->GetId());
+            nowChildNode.emplace_back(childNode);
         }
     }
-    if (childNodeIds != rsNode->GetChildren()) {
+    std::vector<OHOS::Rosen::RSNode::SharedPtr> preChildNodes;
+    for (auto& child : rsNode->GetChildren()) {
+        if (auto childNode = child.lock()) {
+            preChildNodes.emplace_back(childNode);
+        }
+    }
+    if (nowChildNode != preChildNodes) {
         rsNode->ClearChildren();
         for (auto& child : childNodes_) {
             rsNode->AddChild(child.lock());

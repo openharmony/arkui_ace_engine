@@ -16,18 +16,6 @@
 #ifndef FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_WRAPPER_H
 #define FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_WRAPPER_H
 
-#include "base/memory/ace_type.h"
-#include "core/components/theme/theme.h"
-#include "core/components_ng/token_theme/token_theme.h"
+#include "ui/view/theme/token_theme_wrapper.h"
 
-namespace OHOS::Ace::NG {
-class ACE_EXPORT TokenThemeWrapper : virtual public Theme {
-    DECLARE_ACE_TYPE(TokenThemeWrapper, Theme)
-public:
-    TokenThemeWrapper() = default;
-    virtual ~TokenThemeWrapper() = default;
-
-    virtual void ApplyTokenTheme(const TokenTheme& theme) = 0;
-};
-} // namespace
 #endif // FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_WRAPPER_H

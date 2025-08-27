@@ -38,6 +38,15 @@ if (globalThis.WithTheme !== undefined) {
     }
     // @ts-ignore
     globalThis.WithTheme.pop = function () {
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc: PrebuildFunc = () => {
+                ArkThemeScopeManager.getInstance().setIsFirstRender(true);
+                globalThis.WithTheme.pop();
+            };
+            PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         ArkThemeScopeManager.getInstance().onScopeExit();
         getUINativeModule().theme.pop();
     }

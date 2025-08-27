@@ -19,6 +19,7 @@
 #endif
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -29,10 +30,11 @@ using OHOS::Ace::NG::LocationButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
     LocationButtonLocationDescription& text, LocationButtonIconStyle& icon, int32_t& bg)
 {
-    if (!info[0]->IsObject()) {
+    if ((info.Length() < 1) || (!info[0]->IsObject())) {
         return false;
     }
 
@@ -100,10 +102,15 @@ void JsLocationButtonClickFunction::Execute(GestureEvent& info)
     JSRef<JSObject> clickEventParam = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
     clickEventParam->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
     clickEventParam->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
     clickEventParam->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     clickEventParam->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    clickEventParam->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    clickEventParam->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     clickEventParam->SetProperty<double>("timestamp",
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
@@ -138,7 +145,7 @@ void JsLocationButtonClickFunction::Execute(GestureEvent& info)
 
 void JSLocationButton::JsOnClick(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if ((info.Length() < 1) || (!info[0]->IsFunction())) {
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsLocationButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));

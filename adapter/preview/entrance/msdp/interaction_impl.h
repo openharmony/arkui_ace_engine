@@ -26,12 +26,15 @@ DECLARE_ACE_TYPE(InteractionImpl, InteractionInterface);
 public:
     int32_t UpdateShadowPic(const ShadowInfoCore& shadowInfo) override;
 
-    int32_t SetDragWindowVisible(bool visible) override;
+    int32_t SetDragWindowVisible(bool visible,
+        const std::shared_ptr<Rosen::RSTransaction>& rSTransaction = nullptr) override;
 
     int32_t SetMouseDragMonitorState(bool state) override;
 
     int32_t StartDrag(const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback) override;
+    
+    int32_t GetDragBundleInfo(DragBundleInfo& dragBundleInfo) override;
 
     int32_t UpdateDragStyle(DragCursorStyleCore style, const int32_t eventId = -1) override;
 
@@ -48,7 +51,9 @@ public:
 
     int32_t GetDragState(DragState& dragState) const override;
 
-    int32_t GetDragSummary(std::map<std::string, int64_t>& summary) override;
+    int32_t GetDragSummary(std::map<std::string, int64_t>& summary,
+        std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+        int32_t& version, int64_t& totalSize) override;
 
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
 
@@ -65,6 +70,10 @@ public:
     int32_t GetAppDragSwitchState(bool& state) override;
 
     void SetDraggableStateAsync(bool state, int64_t downTime) override;
+
+    int32_t EnableInternalDropAnimation(const std::string& animationInfo) override;
+
+    bool IsDragStart() const override;
 };
 
 } // namespace OHOS::Ace

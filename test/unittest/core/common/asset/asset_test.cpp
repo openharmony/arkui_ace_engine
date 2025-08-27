@@ -20,7 +20,6 @@
 #define protected public
 
 #include "core/common/asset_manager_impl.h"
-
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 
 using namespace testing;

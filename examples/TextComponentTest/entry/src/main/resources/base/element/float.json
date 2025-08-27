@@ -3,6 +3,78 @@
     {
       "name": "page_text_font_size",
       "value": "50fp"
+    },
+    {
+      "name": "TextWith",
+      "value": "50"
+    },
+    {
+      "name": "TextHeight",
+      "value": "50"
+    },
+    {
+      "name": "TextFontSize",
+      "value": "16"
+    },
+    {
+      "name": "TextMinFontScale",
+      "value": "0"
+    },
+    {
+      "name": "TextMaxFontScale",
+      "value": "3.2"
+    },
+    {
+      "name": "TextShadowRadius",
+      "value": "10"
+    },
+    {
+      "name": "TextShadowOffsetX",
+      "value": "50"
+    },
+    {
+      "name": "TextShadowOffsetY",
+      "value": "0"
+    },
+    {
+      "name": "TextIndent",
+      "value": "10"
+    },
+    {
+      "name": "TextLineHeight",
+      "value": "20"
+    },
+    {
+      "name": "TextLineSpacing",
+      "value": "5"
+    },
+    {
+      "name": "TextMinFontSize",
+      "value": "16"
+    },
+    {
+      "name": "TextMaxFontSize",
+      "value": "16"
+    },
+    {
+      "name": "TextLetterSpacing",
+      "value": "5"
+    },
+    {
+      "name": "TextBaselineOffset",
+      "value": "5"
+    },
+    {
+      "name": "ModeNumber5_20",
+      "value": "5"
+    },
+    {
+      "name": "ModeNumber20_50",
+      "value": "20"
+    },
+    {
+      "name": "ModeWeight400_900",
+      "value": "400"
     }
   ]
 }

@@ -15,6 +15,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 
 #include "base/image/pixel_map.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -78,24 +79,22 @@ void DragControllerFuncWrapper::CreatePreviewNode(RefPtr<FrameNode>& imageNode, 
 
     UpdatePreviewPositionAndScale(imageNode, frameOffset, 1.0f);
     UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
-    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    imageNode->MarkModifyDone();
-    imageNode->SetLayoutDirtyMarked(true);
-    imageNode->SetActive(true);
-    auto context = imageNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(imageNode);
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushSyncGeometryNodeTasks();
 }
 
 OffsetF DragControllerFuncWrapper::GetOriginNodeOffset(
     PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData)
 {
     CHECK_NULL_RETURN(data.pixelMap, OffsetF());
-    auto pointPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(asyncCtxData.dragPointerEvent.GetPoint());
+    OffsetF pointPosition(static_cast<float>(asyncCtxData.dragPointerEvent.displayX),
+        static_cast<float>(asyncCtxData.dragPointerEvent.displayY));
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        asyncCtxData.containerId >= MIN_SUBCONTAINER_ID
+            ? SubwindowManager::GetInstance()->GetParentContainerId(asyncCtxData.containerId)
+            : asyncCtxData.containerId,
+        SubwindowType::TYPE_MENU);
+    CHECK_NULL_RETURN(subwindow, OffsetF());
+    auto subwindowOffset = subwindow->GetWindowRect().GetOffset();
+    pointPosition -= subwindowOffset;
     auto pixelMapScaledOffset = GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     auto offsetX = pixelMapScaledOffset.GetX() +
         (data.pixelMap->GetWidth() * data.previewScale) / 2.0f -data.pixelMap->GetWidth() / 2.0f;
@@ -114,6 +113,21 @@ OffsetF DragControllerFuncWrapper::GetPixelMapScaledOffset(const OffsetF& pointP
     auto touchPointOffset = GetTouchPointOffset(data, asyncCtxData);
     auto frameOffset = OffsetF(globalX - touchPointOffset.GetX(), globalY - touchPointOffset.GetY());
     return frameOffset;
+}
+
+std::shared_ptr<ScaleDataInfo> DragControllerFuncWrapper::GetScaleInfo(int32_t containerId, float width, float height)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, nullptr);
+    auto scaleData = dragDropManager->GetScaleInfo(width, height, false);
+    CHECK_NULL_RETURN(scaleData, nullptr);
+    return scaleData;
 }
 
 OffsetF DragControllerFuncWrapper::GetTouchPointOffset(
@@ -272,6 +286,7 @@ bool DragControllerFuncWrapper::TryDoDragStartAnimation(const RefPtr<Subwindow>&
     }
     pipelineContext->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
+    dragDropManager->SetIsShowBadgeAnimation(true);
     DragAnimationHelper::ShowBadgeAnimation(textNode);
 
     DoDragStartAnimation(subWindowOverlayManager, data, asyncCtxData);
@@ -414,6 +429,13 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto width = data.pixelMap->GetWidth();
     auto height = data.pixelMap->GetHeight();
 
+    auto container = AceEngine::Get().GetContainer(asyncCtxData.containerId);
+    CHECK_NULL_VOID(container);
+    auto windowScale = container->GetWindowScale();
+    if (NearZero(windowScale)) {
+        windowScale = 1.0f;
+    }
+
     auto originNodeOffset = GetOriginNodeOffset(data, asyncCtxData);
     originNodeOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(textNode->GetContextRefPtr());
     RefPtr<FrameNode> parentNode = textNode->GetAncestorNodeOfFrame(true);
@@ -423,9 +445,10 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto offset = previewOffset.NonOffset() ? originNodeOffset : previewOffset;
     
     auto badgeLength = std::to_string(data.badgeNumber).size();
-    double textOffsetX = offset.GetX() + width * (data.previewScale + 1) / 2 -
-        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY = offset.GetY() - height * (data.previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    double textOffsetX = offset.GetX() + width * (data.previewScale / windowScale + 1) / 2 -
+                         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY =
+        offset.GetY() - height * (data.previewScale / windowScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
@@ -461,8 +484,8 @@ void DragControllerFuncWrapper::TransDragWindowToDragFwk(int32_t containerId)
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     dragDropManager->SetDragFwkShow(true);
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId >= MIN_SUBCONTAINER_ID ?
-        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId, SubwindowType::TYPE_MENU);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -518,6 +541,11 @@ void DragControllerFuncWrapper::DoDragStartAnimation(
     dragDropManager->SetDragFwkShow(false);
     dragDropManager->ResetPullMoveReceivedForCurrentDrag();
 
+    auto dragAnimationPointerEvent =
+        DragPointerEvent(asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY,
+            asyncCtxData.dragPointerEvent.displayX, asyncCtxData.dragPointerEvent.displayY,
+            asyncCtxData.dragPointerEvent.globalDisplayX, asyncCtxData.dragPointerEvent.globalDisplayY);
+    dragDropManager->SetDragAnimationPointerEvent(dragAnimationPointerEvent, nullptr);
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(dragDropManager->GetDragPreviewInfo().imageNode);
 
     Point point = { asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY };
@@ -545,19 +573,20 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     DragDropManager::DragPreviewInfo dragPreviewInfo;
     auto imageNode = overlayManager->GetDragPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
-    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
+    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
+    auto height = imageNode->GetGeometryNode()->GetFrameRect().Height();
+    auto scaleData = dragDropManager->GetScaleInfo(width, height, false);
+    CHECK_NULL_RETURN(scaleData, false);
     auto previewOption = imageNode->GetDragPreviewOption();
-    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
-        dragPreviewInfo.scale = maxWidth / width;
+    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && scaleData->isNeedScale &&
+        previewOption.isScaleEnabled) {
+        dragPreviewInfo.scale = scaleData->scale;
     } else {
         dragPreviewInfo.scale = 1.0f;
     }
@@ -566,7 +595,7 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
     // set menu preview scale only for no scale menu preview.
-    if (dragDropManager->IsDragWithContextMenu() && (!previewOption.isScaleEnabled || width < maxWidth)) {
+    if (dragDropManager->IsDragWithContextMenu() && (!previewOption.isScaleEnabled || !scaleData->isNeedScale)) {
         auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
         if (imageGestureEventHub) {
             auto menuPreviewScale = imageGestureEventHub->GetMenuPreviewScale();
@@ -576,10 +605,10 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     dragPreviewInfo.width = static_cast<double>(width);
-    dragPreviewInfo.maxWidth = maxWidth;
     dragPreviewInfo.imageNode = imageNode;
     dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
     dragPreviewInfo.originScale = imageNode->GetTransformScale();
+    dragPreviewInfo.isDragController = true;
     dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
     return true;
 }

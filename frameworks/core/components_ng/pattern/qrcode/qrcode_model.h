@@ -18,10 +18,17 @@
 
 #include <mutex>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
+enum class QRCodeResourceType {
+    CREATE,
+    COLOR,
+    BACKGROUND_COLOR,
+    CONTENT_OPACITY,
+};
 class ACE_FORCE_EXPORT QRCodeModel {
 public:
     static QRCodeModel* GetInstance();
@@ -30,6 +37,7 @@ public:
     virtual void SetQRCodeColor(const Color& color) = 0;
     virtual void SetQRBackgroundColor(const Color& color) = 0;
     virtual void SetContentOpacity(const double opacity) = 0;
+    virtual void CreateWithResourceObj(QRCodeResourceType resourceType, const RefPtr<ResourceObject>& resObj) = 0;
 
 private:
     static std::unique_ptr<QRCodeModel> instance_;

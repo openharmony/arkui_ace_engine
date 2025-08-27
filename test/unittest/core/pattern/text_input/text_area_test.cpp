@@ -420,7 +420,7 @@ HWTEST_F(TextFieldUXTest, TextAreaTextDecoration001, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
 
-    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
 }
@@ -1596,6 +1596,45 @@ HWTEST_F(TextFieldUXTest, TextAreaLineSpacing001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaLineSpacing002
+ * @tc.desc: test TextArea lineSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineSpacing002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsOnlyBetweenLines(true);
+        model.SetLineSpacing(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLineSpacing(), 2.0_fp);
+    EXPECT_EQ(layoutProperty_->GetIsOnlyBetweenLines(), true);
+}
+
+/**
  * @tc.name: TextAreaLineBreakStrategy001
  * @tc.desc: test testArea text lineBreakStrategy
  * @tc.type: FUNC
@@ -1732,5 +1771,74 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxFontScale001, TestSize.Level1)
     pattern_->PerformAction(textInputAction, false);
 
     EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
+}
+
+/**
+ * @tc.name: TextFieldEnableAutoSpacing
+ * @tc.desc: Test the enable or disable the EnableAutoSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFieldEnableAutoSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoSpacing(true);
+    });
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(layoutProperty_->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(TextFieldModelNG::GetEnableAutoSpacing(AceType::RawPtr(frameNode_)), true);
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    TextFieldModelNG::SetEnableAutoSpacing(AceType::RawPtr(frameNode_), false);
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(layoutProperty_->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(TextFieldModelNG::GetEnableAutoSpacing(AceType::RawPtr(frameNode_)), false);
+}
+
+/**
+ * @tc.name: TextAreaMaxLines001
+ * @tc.desc: Test the enable or disable the TextAreaMaxLines attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLines(3);
+    });
+    /**
+     * @tc.expected: Get TextAreaMaxLines Value
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxLines(), 3);
+    EXPECT_EQ(TextFieldModelNG::GetMaxLines(AceType::RawPtr(frameNode_)), 3);
+}
+
+/**
+ * @tc.name: TextAreaMaxLines002
+ * @tc.desc: Test max of the TextAreaMaxLines attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxLines002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLines(999);
+    });
+    /**
+     * @tc.expected: Get TextAreaMaxLines Value
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxLines(), 999);
+    EXPECT_EQ(TextFieldModelNG::GetMaxLines(AceType::RawPtr(frameNode_)), 999);
 }
 } // namespace OHOS::Ace::NG

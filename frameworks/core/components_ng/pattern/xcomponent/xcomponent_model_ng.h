@@ -53,11 +53,11 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
-    void EnableAnalyzer(bool enable) override;
-    void SetImageAIOptions(void* options) override;
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
     void SetRenderFit(RenderFit renderFit) override;
     void EnableSecure(bool isSecure) override;
     void HdrBrightness(float hdrBrightness) override;
@@ -97,6 +97,13 @@ public:
         float& surfaceWidth, float& surfaceHeight);
     static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
     static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
+    static int32_t SetExpectedRateRange(FrameNode* frameNode, int32_t min, int32_t max, int32_t expected);
+    static int32_t SetOnFrameCallback(FrameNode* frameNode,
+        void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode);
+    static int32_t UnregisterOnFrameCallback(FrameNode* frameNode);
+    static int32_t SetNeedSoftKeyboard(FrameNode* frameNode, bool needSoftKeyboard);
+    static void* CreateAccessibilityProvider(FrameNode* frameNode);
+    static void DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

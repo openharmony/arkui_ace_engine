@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 
 class MultiModalScene final : public AceType {
-    DECLARE_ACE_TYPE(MultiModalScene, AceType)
+    DECLARE_ACE_TYPE(MultiModalScene, AceType);
 
 public:
     MultiModalScene(int32_t pageId, const RefPtr<MultimodalSubscriber>& subscriber)

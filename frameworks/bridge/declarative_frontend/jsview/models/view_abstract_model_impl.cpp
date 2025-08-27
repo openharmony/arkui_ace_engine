@@ -294,7 +294,7 @@ void ViewAbstractModelImpl::SetBackgroundImageRepeat(const ImageRepeat& imageRep
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+void ViewAbstractModelImpl::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -305,7 +305,7 @@ void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bg
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+void ViewAbstractModelImpl::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -674,6 +674,8 @@ void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, fl
     option.SetAllowRunningAsynchronously(false);
     transform->Rotate(x, y, z, angle, option);
 }
+
+void ViewAbstractModelImpl::SetRotateAngle(float x, float y, float z, float perspective) {}
 
 void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
 {
@@ -1049,6 +1051,39 @@ void ViewAbstractModelImpl::SetOnClick(
     }
 }
 
+void ViewAbstractModelImpl::SetOnClick(
+    GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, Dimension distanceThreshold)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(1, 1, distanceThreshold.ConvertToPx());
+    tapGesture->SetOnActionId([func = std::move(tapEventFunc), impl](GestureEvent& info) {
+        if (impl) {
+            impl->UpdateEventInfo(info);
+        }
+        func(info);
+    });
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    click->SetOnClick(tapGesture);
+
+    auto onClickId = EventMarker([func = std::move(clickEventFunc), impl](const BaseEventInfo* info) {
+        const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        if (!clickInfo) {
+            return;
+        }
+        auto newInfo = *clickInfo;
+        if (impl) {
+            impl->UpdateEventInfo(newInfo);
+        }
+        func(clickInfo);
+    });
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetOnClickId(onClickId);
+    }
+}
+
 void ViewAbstractModelImpl::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -1192,6 +1227,12 @@ void ViewAbstractModelImpl::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
     box->SetOnDragEndId(onDragEnd);
 }
 
+void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) {}
+
+void ViewAbstractModelImpl::SetOnDragSpringLoadingConfiguration(
+    const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
+{}
+
 void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -1211,7 +1252,7 @@ void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 }
 
 void ViewAbstractModelImpl::SetOnVisibleChange(
-    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios)
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios, bool isOutOfBoundsAllowed)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);
@@ -1695,5 +1736,8 @@ void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 
 void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
     NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{}
+
+void ViewAbstractModelImpl::SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc)
 {}
 } // namespace OHOS::Ace::Framework

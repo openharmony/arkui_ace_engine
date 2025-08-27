@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using DialogOnCancelEvent = std::function<void()>;
 
 class DialogEventHub : public EventHub {
-    DECLARE_ACE_TYPE(DialogEventHub, EventHub)
+    DECLARE_ACE_TYPE(DialogEventHub, EventHub);
 
 public:
     DialogEventHub() = default;
@@ -43,7 +43,7 @@ public:
         onSuccess_ = event;
     }
 
-    void FireSuccessEvent(int32_t buttonIdx);
+    void FireSuccessEvent(int32_t buttonIdx, const RefPtr<FrameNode>& frameNode);
 
 private:
     DialogOnCancelEvent onCancel_;

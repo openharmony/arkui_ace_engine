@@ -83,14 +83,24 @@ declare class ViewStackProcessor {
 
   // move deleted elmtIds from ElementRegistery in C++ to the caller
   public static moveDeletedElmtIds(elmtIds : Array<number>);
-  
+
+  /**
+   * Orders frame and registers for update on next vsync.
+   * PipelineContext passes the containerId in the callback.
+  */
+  public static scheduleUpdateOnNextVSync(cbFunc: ((containerId: number) => boolean) | null, containerId?: number): void;
+
   // get Api version
   public static getApiVersion(): number;
-
-  // get send state info to profiler
-  public static sendStateInfo(stateInfo: string): void;
 
   public static PushPrebuildCompCmd(): void;
 
   public static CheckIsPrebuildTimeout(): boolean;
+
+  // get send state info to profiler
+  public static sendStateInfo(stateInfo: string): void;
+  
+  public static push(pointer: number): void;
+
+  public static pop(): void;
 }

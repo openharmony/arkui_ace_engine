@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 enum class PointAnimationStage { STATE_SHRINKT_TO_BLACK_POINT, STATE_EXPAND_TO_LONG_POINT };
 
 class ACE_EXPORT DotIndicatorPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(DotIndicatorPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(DotIndicatorPaintMethod, NodePaintMethod);
 public:
     explicit DotIndicatorPaintMethod(const RefPtr<DotIndicatorModifier>& dotIndicatorModifier)
         : dotIndicatorModifier_(dotIndicatorModifier)
@@ -67,6 +67,11 @@ public:
     void SetItemCount(int32_t itemCount)
     {
         itemCount_ = itemCount;
+    }
+
+    void SetIsAutoLinear(bool isAutoLinear)
+    {
+        isAutoLinear_ = isAutoLinear;
     }
 
     void SetTotalItemCount(int32_t totalItemCount)
@@ -184,6 +189,11 @@ public:
         firstIndex_ = index;
     }
 
+    void SetTargetIndex(const std::optional<int32_t>& targetIndex)
+    {
+        targetIndex_ = targetIndex;
+    }
+
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -228,6 +238,7 @@ protected:
     PointF hoverPoint_;
     std::optional<int32_t> hoverIndex_ = std::nullopt;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
+    std::optional<int32_t> targetIndex_ = std::nullopt;
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;
@@ -236,6 +247,7 @@ protected:
     int32_t itemCount_ = 0;
     int32_t totalItemCount_ = 0;
     int32_t displayCount_ = 1;
+    bool isAutoLinear_ = false;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;

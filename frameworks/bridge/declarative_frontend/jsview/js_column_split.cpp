@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_split.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -35,14 +36,19 @@ void JSColumnSplit::JsResizable(bool resizable)
 
 void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
 {
+    LinearSplitModel::GetInstance()->ResetResObj("columnSplit.divider");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    NG::ItemDivider divider;
-    ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
-    ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+    NG::ColumnSplitDivider divider;
+    RefPtr<ResourceObject> startResObj;
+    RefPtr<ResourceObject> endResObj;
+    ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin, startResObj);
+    ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin, endResObj);
+    NG::LinearSplitModelNG::RegisterResObj(startResObj, divider, "columnSplit.divider.startMargin");
+    NG::LinearSplitModelNG::RegisterResObj(endResObj, divider, "columnSplit.divider.endMargin");
     LinearSplitModel::GetInstance()->SetDivider(NG::SplitType::COLUMN_SPLIT, divider);
 
     args.ReturnSelf();

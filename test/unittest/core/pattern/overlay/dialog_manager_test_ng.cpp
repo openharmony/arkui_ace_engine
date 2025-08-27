@@ -22,6 +22,8 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -66,6 +68,7 @@ void DialogManagerTestNg::TearDownTestCase()
  */
 HWTEST_F(DialogManagerTestNg, DialogManagerTest001, TestSize.Level1)
 {
+    DialogManagerTestNg::SetUpTestCase();
     auto dialogPattern = AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr);
     auto dialogNode = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 101, dialogPattern);
     auto dialogNodeOnTree = FrameNodeOnTree::CreateFrameNode(V2::DIALOG_ETS_TAG, 102, dialogPattern);
@@ -76,6 +79,7 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest001, TestSize.Level1)
     EXPECT_EQ(ret, nullptr);
     ret = dialogManager.FindPageNodeOverlay(dialogNodeOnTree);
     EXPECT_EQ(ret, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
 }
 
 /**
@@ -85,6 +89,7 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest001, TestSize.Level1)
  */
 HWTEST_F(DialogManagerTestNg, DialogManagerTest002, TestSize.Level1)
 {
+    DialogManagerTestNg::SetUpTestCase();
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();
@@ -102,6 +107,7 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest002, TestSize.Level1)
     EXPECT_EQ(ret, nullptr);
     ret = dialogManager.GetEmbeddedOverlay(-1, context);
     EXPECT_EQ(ret, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
 }
 
 /**
@@ -111,6 +117,7 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest002, TestSize.Level1)
  */
 HWTEST_F(DialogManagerTestNg, DialogManagerTest003, TestSize.Level1)
 {
+    DialogManagerTestNg::SetUpTestCase();
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 201, AceType::MakeRefPtr<RootPattern>());
     auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 301, AceType::MakeRefPtr<StagePattern>());
     auto pageNode = FrameNode::CreateFrameNode(
@@ -135,5 +142,51 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest003, TestSize.Level1)
     ret = dialogManager.GetEmbeddedOverlayWithNode(navDialogNode);
     EXPECT_EQ(ret, nullptr);
     dialogManager.GetDialogNodeByContentNode(columnNode);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest004
+ * @tc.desc: Test GetMainPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> framenode = nullptr;
+    auto context = DialogManager::GetMainPipelineContext(framenode);
+    EXPECT_EQ(context, nullptr);
+
+    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    node->context_ = AceType::RawPtr(pipelineContext);
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+    node->instanceId_ = 999;
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+    
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipelineContext;
+    node->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_NE(context, nullptr);
+
+    container->isSubContainer_ = true;
+    EXPECT_EQ(container->IsSubContainer(), true);
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+
+    SubwindowManager::GetInstance()->AddParentContainerId(container->GetInstanceId(), container->GetInstanceId());
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_NE(context, nullptr);
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+    container->isSubContainer_ = false;
 }
 } // namespace OHOS::Ace::NG

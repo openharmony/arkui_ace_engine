@@ -339,6 +339,46 @@ HWTEST_F(TextPickerColumnTestOneNg, CreateItemTouchEventListener003, TestSize.Le
 }
 
 /**
+ * @tc.name: CreateItemTouchEventListener004
+ * @tc.desc: Test TextPickerColumnPattern CreateItemTouchEventListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, CreateItemTouchEventListener004, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->stopHaptic_ = false;
+    auto testImpl = columnPattern->CreateItemTouchEventListener();
+    ASSERT_NE(testImpl, nullptr);
+    TouchEventInfo info("touch");
+    info.SetSourceTool(SourceTool::MOUSE);
+    TouchLocationInfo touchLocationInfoUp(1);
+    touchLocationInfoUp.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfoUp));
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_TRUE(columnPattern->stopHaptic_);
+    info.SetSourceTool(SourceTool::FINGER);
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_FALSE(columnPattern->stopHaptic_);
+}
+
+/**
  * @tc.name: CreateMouseHoverEventListener001
  * @tc.desc: Test TextPickerColumnPattern CreateMouseHoverEventListener.
  * @tc.type: FUNC

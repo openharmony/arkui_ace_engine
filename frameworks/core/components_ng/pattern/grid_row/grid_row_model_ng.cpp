@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,12 @@
 namespace OHOS::Ace::NG {
 void GridRowModelNG::Create()
 {
-    auto col = Referenced::MakeRefPtr<V2::GridContainerSize>();
+    RefPtr<V2::GridContainerSize> col;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        col = Referenced::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
+    } else {
+        col = Referenced::MakeRefPtr<V2::GridContainerSize>();
+    }
     auto gutter = Referenced::MakeRefPtr<V2::Gutter>();
     auto breakpoints = Referenced::MakeRefPtr<V2::BreakPoints>();
     auto direction = V2::GridRowDirection::Row;
@@ -37,6 +42,19 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
         V2::GRID_ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridRowLayoutPattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col);
+    auto gridRowpattern = frameNode->GetPattern<GridRowLayoutPattern>();
+    CHECK_NULL_VOID(gridRowpattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [gutter, weak = AceType::WeakClaim(
+        AceType::RawPtr(frameNode))](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<V2::Gutter> &value = const_cast<RefPtr<V2::Gutter> &>(gutter);
+        value->ReloadResources(value);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *value, frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    gridRowpattern->AddResObj("gridrow.gutter", resObj, std::move(updateFunc));
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
@@ -68,63 +86,38 @@ void GridRowModelNG::SetAlignItems(FlexAlign alignItem)
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem);
 }
 
-void GridRowModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& alignItem)
+void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
 {
     CHECK_NULL_VOID(frameNode);
-    if (alignItem.has_value()) {
-        auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateAlignItems(alignItem.value());
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, frameNode);
-    }
+    auto layoutPriority = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutPriority);
+    layoutPriority->UpdateAlignItems(alignItem);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem, frameNode);
 }
 
 void GridRowModelNG::SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (gutter) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
 }
 
 void GridRowModelNG::SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (col) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col, frameNode);
 }
 
 void GridRowModelNG::SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (breakpoints) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints, frameNode);
 }
 
-void GridRowModelNG::SetDirection(FrameNode* frameNode, const std::optional<V2::GridRowDirection>& direction)
+void GridRowModelNG::SetDirection(FrameNode* frameNode, V2::GridRowDirection direction)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (direction.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction, frameNode);
 }
 
 void GridRowModelNG::SetOnBreakPointChange(FrameNode* frameNode,
     std::function<void(const std::string)>&& onBreakPointChange)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBreakpointChange(std::move(onBreakPointChange));

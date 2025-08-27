@@ -452,12 +452,12 @@ HWTEST_F(TextInputUpdateTestNg, MeasureDecorator001, TestSize.Level1)
 
     /**
      * @tc.step: step2. call AddCounterNode and MeasureDecorator
-     * @tc.expected: counterTextNode_ is created and align properties is correct
+     * @tc.expected: counterTextNode_ is created and align properties is correct.
      */
     pattern_->AddCounterNode();
     auto counter = pattern_->GetCounterDecorator();
+    ASSERT_NE(counter, nullptr);
     counter->MeasureDecorator(Infinity<float>(), u"9/10", false);
-    EXPECT_TRUE(counter);
     auto property = frameNode_->GetLayoutProperty();
     EXPECT_TRUE(property);
     auto layoutDirection = property->GetLayoutDirection();
@@ -2346,6 +2346,12 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest035, TestSize.Level1)
     };
     eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
 
+    bool fireOnWillInsert = false;
+    auto onWillInsert = [&fireOnWillInsert](const InsertValueInfo& info) {
+        fireOnWillInsert = true;
+        return true;
+    };
+    eventHub_->SetOnWillInsertValueEvent(std::move(onWillInsert));
     /**
      * @tc.steps: step2. change text with ExecuteInsertValueCommand
      * @tc.expected: return value is valid
@@ -2544,5 +2550,28 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest039, TestSize.Level1)
     EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"hhh");
     EXPECT_EQ(changeValueInfo.previewText.offset, 11);
     EXPECT_EQ(changeValueInfo.previewText.value, u"ah");
+}
+
+/**
+ * @tc.name: GetAccessibilityText001
+ * @tc.desc: test CounterDecorator GetAccessibilityText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. call AddCounterNode
+     */
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->AddCounterNode();
+    auto counter = pattern_->GetCounterDecorator();
+    ASSERT_NE(counter, nullptr);
+    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(10, 20);
+    EXPECT_EQ(result, "");
 }
 } // namespace OHOS::Ace::NG

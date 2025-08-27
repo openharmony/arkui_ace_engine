@@ -17,6 +17,7 @@
 
 #include "securec.h"
 
+#include "base/error/error_code.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
@@ -483,7 +484,7 @@ void CJPageRouterNG::LoadPage(int32_t pageId, const RouterPageInfo& target, cons
     }
 
     auto entryPageInfo = AceType::MakeRefPtr<NG::EntryPageInfo>(pageId, target.url, target.path, params);
-    auto pagePattern = AceType::MakeRefPtr<NG::PagePattern>(entryPageInfo);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     auto pageNode = NG::FrameNode::CreateFrameNode("page", ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
 
@@ -814,7 +815,7 @@ std::vector<CJPageRouterAbstract::RouterState> CJPageRouterNG::GetStateByUrl(con
         if (name == url) {
             path = pageInfo->GetPagePath();
             params = GetParams();
-            ret.push_back({ index + 1, CopyStr(name), CopyStr(path), CopyStr(params) });
+            ret.push_back({ static_cast<int32_t>(index + 1), CopyStr(name), CopyStr(path), CopyStr(params) });
         }
         index++;
     }

@@ -29,7 +29,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetFont(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
@@ -44,6 +44,13 @@ public:
     static void SetAccessibilityText(const JSCallbackInfo& info);
     static void SetAccessibilityDescription(const JSCallbackInfo& info);
     static void SetAccessibilityLevel(const JSCallbackInfo& info);
+    static void SetOnHover(const JSCallbackInfo& info);
+
+    static void RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font);
+    static void RegisterDecorationColorResource(JSRef<JSVal>& colorValue);
+    template<typename T>
+    static void RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    static void UnregisterSpanResource(const std::string& key);
 };
 
 } // namespace OHOS::Ace::Framework

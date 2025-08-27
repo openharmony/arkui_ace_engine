@@ -75,12 +75,20 @@ public:
     void ResetFontColor() override {};
     void BackgroundColor(const Color& color) override {};
     void ResetBackgroundColor() override {};
-    void SetMenuOutline(const NG::MenuParam& menuParam) override;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override {};
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override {};
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override {};
     void SetSelectedOptionTextModifier(
         const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override {};
+    void SetShowInSubWindow(bool isShowInSubWindow) override {};
+    void ResetShowInSubWindow() override {};
+    void SetShowDefaultSelectedIcon(bool show) override {};
+    void ResetShowDefaultSelectedIcon() override {};
+    void SetMenuOutline(const NG::MenuParam& menuParam) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override {};
+    void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override {};
+    void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

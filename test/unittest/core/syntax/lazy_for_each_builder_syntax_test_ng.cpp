@@ -277,6 +277,40 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest001, TestSize.Le
 }
 
 /**
+ * @tc.name: LazyForEachOnDatasetChangeTest002
+ * @tc.desc: Test OnDatasetChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create delete operation and Invoke OnDatasetChange function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "delete", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
  * @tc.name: LazyForEachGetFrameChildByIndexTest001
  * @tc.desc: Create LazyForEach, update its Items and invoke :GetFrameChildByIndex function.
  * @tc.type: FUNC
@@ -715,6 +749,37 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecycleItemsOutOfBoundaryTest001, T
     EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), LAZY_FOR_EACH_ITEMS.size());
     lazyForEachBuilder->RecycleItemsOutOfBoundary();
     EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachOnDataDeletedTest001
+ * @tc.desc: Test OnDataDeleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataDeletedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDataDeleted function.
+     * @tc.expected: Create delete operation and Invoke OnDataDeleted function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    lazyForEachNode->OnDataDeleted(INDEX_0);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
 }
 
 /**
@@ -2048,6 +2113,60 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange001, Test
 }
 
 /**
+ * @tc.name: LazyForEachBuilderSetActiveChildRange002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CreateLazyForEachBuilder
+     * @tc.expected: Create CreateLazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[2].first,
+        LazyForEachCacheChild(-1, lazyForEachBuilder->cachedItems_[2].second));
+    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[3].first,
+        LazyForEachCacheChild(-1, std::move(lazyForEachBuilder->cachedItems_[3].second)));
+
+    /**
+     * @tc.steps: step2. Invoke SetActiveChildRange function.
+     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
+     */
+    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 1);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 5);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderSetActiveChildRange003
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CreateLazyForEachBuilder
+     * @tc.expected: Create CreateLazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+    }
+
+    /**
+     * @tc.steps: step2. Invoke SetActiveChildRange function.
+     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
+     */
+    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 0);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: LazyForEachBuilderGetChildIndex001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -2475,5 +2594,58 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder36, TestSize.Level1)
      */
     lazyForEachBuilder->PaintDebugBoundaryTreeAll(true);
     EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder37
+ * @tc.desc: Test the NotifyColorModeChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke lazyForEach Create function.
+     * @tc.expected: Create lazyForEachBuilder.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    /**
+     * @tc.steps: step2. Create node and lazyForEach expiringItem_ and cachedItems_.
+     */
+    auto node = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    std::string str0 = "0";
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild(str0, nullptr);
+    std::string str1 = "1";
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild(str1, nullptr);
+    std::string str2 = "2";
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild(str2, nullptr);
+    lazyForEachBuilder->expiringItem_["1"] = LazyForEachCacheChild(-1, nullptr);
+    lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(5, nullptr);
+    lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(7, node);
+    /**
+     * @tc.steps: step3. Invoke the PaintDebugBoundaryTreeAll function.
+     * @tc.expected:  Set condition to true.
+     */
+    node->shouldRerender_ = false;
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+    EXPECT_TRUE(node->measureAnyWay_);
+    EXPECT_TRUE(node->shouldRerender_);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder38
+ * @tc.desc: Test the NotifyColorModeChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder38, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    auto uiNode = AceType::MakeRefPtr<NG::CustomNode>(666, "node");
+    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
+    uiNode->children_ = { childNode };
+    uiNode->SetDarkMode(true);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("0", uiNode);
+    EXPECT_FALSE(childNode->CheckIsDarkMode());
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+    EXPECT_TRUE(childNode->CheckIsDarkMode());
 }
 } // namespace OHOS::Ace::NG

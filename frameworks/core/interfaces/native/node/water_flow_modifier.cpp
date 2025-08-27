@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,11 +219,17 @@ void ResetWaterFlowNestedScroll(ArkUINodeHandle node)
     WaterFlowModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
+void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* friction = reinterpret_cast<ResourceObject*>(frictionRawPtr);
+        auto frictionResObj = AceType::Claim(friction);
+        WaterFlowModelNG::ParseResObjFriction(frameNode, frictionResObj);
+    }
 }
 
 void ResetWaterFlowFriction(ArkUINodeHandle node)
@@ -231,6 +237,9 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModelNG::ParseResObjFriction(frameNode, nullptr);
+    }
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -361,6 +370,27 @@ ArkUI_Bool GetShowCached(ArkUINodeHandle node)
     return WaterFlowModelNG::GetShowCached(frameNode);
 }
 
+void SetWaterFlowSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoad)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSyncLoad(frameNode, syncLoad);
+}
+
+void ResetWaterFlowSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetWaterFlowSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetSyncLoad(frameNode);
+}
+
 void SetWaterFlowScrollBar(ArkUINodeHandle node, ArkUI_Int32 barState)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -404,6 +434,16 @@ ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarWidth(frameNode);
 }
 
+void CreateWaterFlowScrollBarColorWithResourceObj(ArkUINodeHandle node, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+    auto colorResObj = AceType::Claim(colorPtr);
+    WaterFlowModelNG::ParseResObjScrollBarColor(frameNode, colorResObj);
+}
+
 void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     CHECK_NULL_VOID(value);
@@ -417,6 +457,8 @@ void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::ResetScrollBarColor(frameNode);
+
+    CreateWaterFlowScrollBarColorWithResourceObj(node, nullptr);
 }
 
 ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
@@ -426,7 +468,17 @@ ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarColor(frameNode);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -490,7 +542,9 @@ ArkUI_WaterFlowSectionOption GetWaterFlowSectionOptions(ArkUINodeHandle node)
     ArkUI_WaterFlowSectionOption option;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, option);
-    auto newSection = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode)->GetSectionInfo();
+    auto sections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+    CHECK_NULL_RETURN(sections, option);
+    auto newSection = sections->GetSectionInfo();
     auto sectionsCount = newSection.size();
     option.sections.resize(sectionsCount);
     for (size_t i = 0; i < sectionsCount; ++i) {
@@ -702,6 +756,9 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .setShowCached = SetShowCached,
         .resetShowCached = ResetShowCached,
         .getShowCached = GetShowCached,
+        .setSyncLoad = SetWaterFlowSyncLoad,
+        .resetSyncLoad = ResetWaterFlowSyncLoad,
+        .getSyncLoad = GetWaterFlowSyncLoad,
         .setEdgeEffect = SetEdgeEffect,
         .resetEdgeEffect = ResetEdgeEffect,
         .setWaterFlowScrollBar = SetWaterFlowScrollBar,
@@ -736,6 +793,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .resetWaterFlowFadingEdge = ResetWaterFlowFadingEdge,
         .setOnWaterFlowScrollIndexCallBack = SetOnWaterFlowScrollIndexCallBack,
         .resetOnWaterFlowScrollIndex = ResetOnWaterFlowScrollIndex,
+        .createWaterFlowScrollBarColorWithResourceObj = CreateWaterFlowScrollBarColorWithResourceObj,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -792,7 +850,7 @@ const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier()
         .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
         .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
         .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,
-        .getEdgeEffect = GetEdgeEffect,
+        .getEdgeEffect = GetEdgeEffectCJ,
         .setSectionOption = SetWaterFlowSectionOptions,
         .resetSectionOption = ResetWaterFlowSectionOptions,
         .getSectionOption = GetWaterFlowSectionOptions,
@@ -940,6 +998,18 @@ void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam)
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 
+void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
+    } else {
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
+    }
+}
+
 void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -952,18 +1022,6 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
-}
-
-void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
-        WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
-    } else {
-        WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
-    }
 }
 
 void ResetOnWillScroll(ArkUINodeHandle node)

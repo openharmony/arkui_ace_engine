@@ -14,6 +14,7 @@
  */
 
 #include "grid_row_base_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void GridRowBaseTestNG::SetUpTestSuite()
@@ -26,7 +27,11 @@ void GridRowBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void GridRowBaseTestNG::SetUp() {}
+void GridRowBaseTestNG::SetUp() 
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
 void GridRowBaseTestNG::TearDown() {}
 
 RefPtr<FrameNode> GridRowBaseTestNG::CreateGridRow(const std::function<void(GridRowModelNG)>& callback)

@@ -119,6 +119,7 @@ export struct DatePickerDialogBootcamp {
   @State datePickerMode: DatePickerMode = DatePickerMode.DATE;
   @State enableMode: boolean = false;
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }

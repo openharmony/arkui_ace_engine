@@ -110,13 +110,20 @@ public:
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
     virtual void SetTextIndent(const Dimension& value) {};
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
+    virtual void SetStrokeWidth(const Dimension& value) {};
+    virtual void SetStrokeColor(const Color& value) {};
+    virtual void ResetStrokeColor() {};
+    virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func);
+    virtual void SetUserMargin() {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

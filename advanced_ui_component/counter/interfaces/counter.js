@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
@@ -20,8 +19,8 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const accessibility = requireNapi('accessibility');
 const intl = requireNapi('intl');
-const i18n = requireNapi('i18n'); 
-
+const i18n = requireNapi('i18n');
+const systemDateTime = requireNapi('systemDateTime');
 export var CounterType;
 (function (CounterType) {
   CounterType[(CounterType['LIST'] = 0)] = 'LIST';
@@ -360,8 +359,8 @@ export class CounterComponent extends ViewPU {
     this.controller2 = new TextInputController();
     this.controller3 = new TextInputController();
     this.initFlag = true;
-    this.increaseStr = getContext().resourceManager.getStringSync(125834852);
-    this.reduceStr = getContext().resourceManager.getStringSync(125834853);
+    this.increaseStrCache = undefined;
+    this.reduceStrCache = undefined;
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.finalizeConstruction();
@@ -547,11 +546,11 @@ export class CounterComponent extends ViewPU {
     if (params.initFlag !== undefined) {
       this.initFlag = params.initFlag;
     }
-    if (params.increaseStr !== undefined) {
-      this.increaseStr = params.increaseStr;
+    if (params.increaseStrCache !== undefined) {
+      this.increaseStrCache = params.increaseStrCache;
     }
-    if (params.reduceStr !== undefined) {
-      this.reduceStr = params.reduceStr;
+    if (params.reduceStrCache !== undefined) {
+      this.reduceStrCache = params.reduceStrCache;
     }
   }
   updateStateVars(params) {
@@ -885,7 +884,18 @@ export class CounterComponent extends ViewPU {
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
-    let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
+    let dateFormatYear;
+    try {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, {
+        year: 'numeric',
+        timeZone: systemDateTime.getTimezoneSync(),
+      });
+    } catch (error) {
+      console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatYear) {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, { year: 'numeric' });
+    }
     let formattedDateYear = dateFormatYear.format(date);
     return this.getDate(formattedDateYear);
   }
@@ -894,45 +904,61 @@ export class CounterComponent extends ViewPU {
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
-    let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
+    let dateFormatMonth;
+    try {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, {
+        month: 'long',
+        timeZone: systemDateTime.getTimezoneSync(),
+      });
+    } catch (error) {
+      console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatMonth) {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long' });
+    }
     let formattedDateMonth = dateFormatMonth.format(date);
     return this.getDate(formattedDateMonth);
   }
   getDateDay(value) {
-    let dateDayMap = new Map([
-      [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
-      [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
-      [3, getContext().resourceManager.getStringByNameSync('Third_counter_accessibility_text')],
-      [4, getContext().resourceManager.getStringByNameSync('Fourth_counter_accessibility_text')],
-      [5, getContext().resourceManager.getStringByNameSync('Fifth_counter_accessibility_text')],
-      [6, getContext().resourceManager.getStringByNameSync('Sixth_counter_accessibility_text')],
-      [7, getContext().resourceManager.getStringByNameSync('Seventh_counter_accessibility_text')],
-      [8, getContext().resourceManager.getStringByNameSync('Eighth_counter_accessibility_text')],
-      [9, getContext().resourceManager.getStringByNameSync('Ninth_counter_accessibility_text')],
-      [10, getContext().resourceManager.getStringByNameSync('Tenth_counter_accessibility_text')],
-      [11, getContext().resourceManager.getStringByNameSync('Eleventh_counter_accessibility_text')],
-      [12, getContext().resourceManager.getStringByNameSync('Twelfth_counter_accessibility_text')],
-      [13, getContext().resourceManager.getStringByNameSync('Thirteenth_counter_accessibility_text')],
-      [14, getContext().resourceManager.getStringByNameSync('Fourteenth_counter_accessibility_text')],
-      [15, getContext().resourceManager.getStringByNameSync('Fifteenth_counter_accessibility_text')],
-      [16, getContext().resourceManager.getStringByNameSync('Sixteenth_counter_accessibility_text')],
-      [17, getContext().resourceManager.getStringByNameSync('Seventeenth_counter_accessibility_text')],
-      [18, getContext().resourceManager.getStringByNameSync('Eighteenth_counter_accessibility_text')],
-      [19, getContext().resourceManager.getStringByNameSync('Nineteenth_counter_accessibility_text')],
-      [20, getContext().resourceManager.getStringByNameSync('Twentieth_counter_accessibility_text')],
-      [21, getContext().resourceManager.getStringByNameSync('TwentyFirst_counter_accessibility_text')],
-      [22, getContext().resourceManager.getStringByNameSync('TwentySecond_counter_accessibility_text')],
-      [23, getContext().resourceManager.getStringByNameSync('TwentyThird_counter_accessibility_text')],
-      [24, getContext().resourceManager.getStringByNameSync('TwentyFourth_counter_accessibility_text')],
-      [25, getContext().resourceManager.getStringByNameSync('TwentyFifth_counter_accessibility_text')],
-      [26, getContext().resourceManager.getStringByNameSync('TwentySixth_counter_accessibility_text')],
-      [27, getContext().resourceManager.getStringByNameSync('TwentySeventh_counter_accessibility_text')],
-      [28, getContext().resourceManager.getStringByNameSync('TwentyEighth_counter_accessibility_text')],
-      [29, getContext().resourceManager.getStringByNameSync('TwentyNinth_counter_accessibility_text')],
-      [30, getContext().resourceManager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
-      [31, getContext().resourceManager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
-    ]);
-    return this.getDate(dateDayMap.get(this.day));
+    try {
+      let dateDayMap = new Map([
+        [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
+        [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
+        [3, getContext().resourceManager.getStringByNameSync('Third_counter_accessibility_text')],
+        [4, getContext().resourceManager.getStringByNameSync('Fourth_counter_accessibility_text')],
+        [5, getContext().resourceManager.getStringByNameSync('Fifth_counter_accessibility_text')],
+        [6, getContext().resourceManager.getStringByNameSync('Sixth_counter_accessibility_text')],
+        [7, getContext().resourceManager.getStringByNameSync('Seventh_counter_accessibility_text')],
+        [8, getContext().resourceManager.getStringByNameSync('Eighth_counter_accessibility_text')],
+        [9, getContext().resourceManager.getStringByNameSync('Ninth_counter_accessibility_text')],
+        [10, getContext().resourceManager.getStringByNameSync('Tenth_counter_accessibility_text')],
+        [11, getContext().resourceManager.getStringByNameSync('Eleventh_counter_accessibility_text')],
+        [12, getContext().resourceManager.getStringByNameSync('Twelfth_counter_accessibility_text')],
+        [13, getContext().resourceManager.getStringByNameSync('Thirteenth_counter_accessibility_text')],
+        [14, getContext().resourceManager.getStringByNameSync('Fourteenth_counter_accessibility_text')],
+        [15, getContext().resourceManager.getStringByNameSync('Fifteenth_counter_accessibility_text')],
+        [16, getContext().resourceManager.getStringByNameSync('Sixteenth_counter_accessibility_text')],
+        [17, getContext().resourceManager.getStringByNameSync('Seventeenth_counter_accessibility_text')],
+        [18, getContext().resourceManager.getStringByNameSync('Eighteenth_counter_accessibility_text')],
+        [19, getContext().resourceManager.getStringByNameSync('Nineteenth_counter_accessibility_text')],
+        [20, getContext().resourceManager.getStringByNameSync('Twentieth_counter_accessibility_text')],
+        [21, getContext().resourceManager.getStringByNameSync('TwentyFirst_counter_accessibility_text')],
+        [22, getContext().resourceManager.getStringByNameSync('TwentySecond_counter_accessibility_text')],
+        [23, getContext().resourceManager.getStringByNameSync('TwentyThird_counter_accessibility_text')],
+        [24, getContext().resourceManager.getStringByNameSync('TwentyFourth_counter_accessibility_text')],
+        [25, getContext().resourceManager.getStringByNameSync('TwentyFifth_counter_accessibility_text')],
+        [26, getContext().resourceManager.getStringByNameSync('TwentySixth_counter_accessibility_text')],
+        [27, getContext().resourceManager.getStringByNameSync('TwentySeventh_counter_accessibility_text')],
+        [28, getContext().resourceManager.getStringByNameSync('TwentyEighth_counter_accessibility_text')],
+        [29, getContext().resourceManager.getStringByNameSync('TwentyNinth_counter_accessibility_text')],
+        [30, getContext().resourceManager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
+        [31, getContext().resourceManager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
+      ]);
+      return this.getDate(dateDayMap.get(this.day));
+    } catch (error) {
+      console.log(`Accessility getDate fail. message: ${error.message}, code: ${error.code}`);
+      return '';
+    }
   }
   convertNumberToString(value) {
     if (value >= 0 && value < CounterConstant.COUNTER_TEN_NUMBER) {
@@ -1816,6 +1842,18 @@ export class CounterComponent extends ViewPU {
       return this.counterDirection;
     }
   }
+  getIncreaseStr() {
+    if (this.increaseStrCache === undefined) {
+      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    }
+    return this.increaseStrCache;
+  }
+  getReduceStr() {
+    if (this.reduceStrCache === undefined) {
+      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    }
+    return this.reduceStrCache;
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -1888,7 +1926,8 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2072,7 +2111,8 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2225,7 +2265,8 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2407,7 +2448,8 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2920,7 +2962,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Button.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
@@ -3038,7 +3080,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Button.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);

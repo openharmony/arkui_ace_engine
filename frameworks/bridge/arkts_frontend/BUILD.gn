@@ -1,0 +1,146 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("./link_abc.gni")
+
+group("arkts_frontend_native_package") {
+  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
+}
+
+link_abc_files("arkoala_abc") {
+  targets = [
+    "koala_projects/incremental/common:common_abc",
+    "koala_projects/incremental/compat:compat_abc",
+    "koala_projects/incremental/runtime:runtime_abc",
+    "koala_projects/interop:interop-arkts_abc",
+    "koala_projects/arkoala-arkts:components_abc"
+  ]
+
+  output_name = "arkoala"
+}
+
+ohos_prebuilt_etc("arkoala_abc_prebuild") {
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":arkoala_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+template("arkts_frontend") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+    defines += invoker.defines
+    configs = [ "$ace_root:ace_config" ]
+    if (!build_ohos_sdk) {
+      deps = [ ":ArkoalaNative_ark" ]
+    }
+
+    sources = [
+      "ani_graphics_module.cpp",
+      "arkts_ani_utils.cpp",
+      "arkts_frontend.cpp",
+      "arkts_plugin_frontend.cpp",
+      "entry/arkts_entry_loader.cpp",
+    ]
+    external_deps = [
+      "hilog:libhilog",
+      "runtime_core:ani",
+    ]
+    #if (current_os == "ohos") {
+      #external_deps += [ "graphic_2d:drawing_ani" ]
+    #}
+  }
+}
+
+foreach(item, ace_platforms) {
+  arkts_frontend("arkts_frontend_" + item.name) {
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
+}
+
+config("arkoala_native_config") {
+  include_dirs = [
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/interop/src",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ets",
+    "koala_projects/interop/src/cpp/types",
+    "koala_projects/interop/src/cpp/ohos",
+  ]
+}
+
+ohos_shared_library("ArkoalaNative_ark") {
+  defines = [
+    "KOALA_OHOS",
+    "__MUSL__",
+    "KOALA_ETS_NAPI",
+    "KOALA_USE_PANDA_VM",
+  ]
+
+  sources = [
+    "koala_projects/arkoala/framework/native/src/events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala/framework/native/src/vsync.cc",
+  ]
+
+  # interop source
+  sources += [
+    "koala_projects/interop/src/cpp/callback-resource.cc",
+    "koala_projects/interop/src/cpp/common-interop.cc",
+    "koala_projects/interop/src/cpp/ets/convertors-ets.cc",
+    "koala_projects/interop/src/cpp/interop-logging.cc",
+    "koala_projects/interop/src/cpp/types/signatures.cc",
+  ]
+
+  deps = [
+    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani",
+  ]
+
+  configs = [ ":arkoala_native_config" ]
+
+  external_deps = [
+    "hilog:hilog_ndk",
+    "hilog:libhilog",
+  ]
+
+
+  if (is_arkui_x) {
+    deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps += [ "bounds_checking_function:libsec_static" ]
+  }
+
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

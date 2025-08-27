@@ -30,7 +30,7 @@ public:
  * @tc.desc: Test image autoResize.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestAutoResize001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestAutoResize001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -58,7 +58,7 @@ HWTEST_F(ImageTestTwoNg, TestAutoResize001, TestSize.Level1)
  * @tc.desc: Test image fitOriginalSize.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestFitOriginalSize001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestFitOriginalSize001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -86,7 +86,7 @@ HWTEST_F(ImageTestTwoNg, TestFitOriginalSize001, TestSize.Level1)
  * @tc.desc: Test image matchTextDirection.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestMatchTextDirection001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestMatchTextDirection001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -119,7 +119,7 @@ HWTEST_F(ImageTestTwoNg, TestMatchTextDirection001, TestSize.Level1)
  * @tc.desc: Test image renderMode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestRenderMode001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestRenderMode001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -152,7 +152,7 @@ HWTEST_F(ImageTestTwoNg, TestRenderMode001, TestSize.Level1)
  * @tc.desc: Test image interpolation.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestInterpolation001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestInterpolation001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -195,11 +195,30 @@ HWTEST_F(ImageTestTwoNg, TestInterpolation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageModelSetDraggable001
+ * @tc.desc: Set the draggable attribute of ImageModelNG object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImageModelSetDraggable001, TestSize.Level0)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetDraggable(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode->draggable_);
+}
+
+/**
  * @tc.name: TestObjectRepeat001
  * @tc.desc: Test image objectRepeat.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestObjectRepeat001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestObjectRepeat001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -254,7 +273,7 @@ HWTEST_F(ImageTestTwoNg, TestObjectRepeat001, TestSize.Level1)
  * @tc.desc: Test image objectFit.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestObjectFit001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestObjectFit001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -346,7 +365,7 @@ HWTEST_F(ImageTestTwoNg, TestObjectFit001, TestSize.Level1)
  * @tc.desc: Test image dynamicRangeMode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestDynamicRangeMode001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestDynamicRangeMode001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -386,7 +405,7 @@ HWTEST_F(ImageTestTwoNg, TestDynamicRangeMode001, TestSize.Level1)
  * @tc.desc: Test image EnhancedImageQuality.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestEnhancedImageQuality001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestEnhancedImageQuality001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -423,7 +442,7 @@ HWTEST_F(ImageTestTwoNg, TestEnhancedImageQuality001, TestSize.Level1)
  * @tc.desc: Set the draggable attribute of ImageModelNG object.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImageSetDraggable0001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageSetDraggable0001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -437,7 +456,7 @@ HWTEST_F(ImageTestTwoNg, ImageSetDraggable0001, TestSize.Level1)
     EXPECT_TRUE(frameNode->draggable_);
 }
 
-HWTEST_F(ImageTestTwoNg, ImageSetDraggable0002, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageSetDraggable0002, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -486,7 +505,7 @@ HWTEST_F(ImageTestTwoNg, ImageDumpAdvanceInfo0001, TestSize.Level1)
  * @tc.desc: Output more information of ImageModelNG object when the color configuration is updated.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImageOnColorConfigurationUpdate0001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageOnColorConfigurationUpdate0001, TestSize.Level0)
 {
     auto frameNode = ImageTestTwoNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -503,7 +522,7 @@ HWTEST_F(ImageTestTwoNg, ImageOnColorConfigurationUpdate0001, TestSize.Level1)
  * @tc.desc: Set the configuration of the image analyzer.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageSetImageAnalyzerConfig0001, TestSize.Level0)
 {
     auto frameNode = ImageTestTwoNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -518,7 +537,7 @@ HWTEST_F(ImageTestTwoNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. images size is 0.
@@ -581,7 +600,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level1)
  * @tc.desc: Test image privacySensitive.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0001, TestSize.Level0)
 {
     auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -597,7 +616,7 @@ HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0001, TestSize.Level1)
  * @tc.desc: Test image OnSensitiveStyleChange.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0002, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -632,7 +651,7 @@ HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0002, TestSize.Level1)
  * @tc.desc: Test initial value
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -719,7 +738,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level1)
  * @tc.desc: Test SetDuration
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0003, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -769,7 +788,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0003, TestSize.Level1)
  * @tc.desc: Test Iteration
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0004, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -821,7 +840,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0004, TestSize.Level1)
  * @tc.desc: Test GetIsAnimation()
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -869,7 +888,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level1)
  * @tc.desc: Test GetImageType()
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -917,7 +936,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level1)
  * @tc.desc: Test status
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0007, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -958,7 +977,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0007, TestSize.Level1)
  * @tc.desc: Test durationTotal
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0008, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -1008,7 +1027,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0008, TestSize.Level1)
  * @tc.desc: Test GetDuration
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0009, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -1059,7 +1078,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0009, TestSize.Level1)
  * @tc.desc: Test SetSrcUndefined
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0010, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Test framenode tag
@@ -1093,7 +1112,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0010, TestSize.Level1)
  * @tc.desc: Test frameNode before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1147,7 +1166,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level1)
  * @tc.desc: Test Duration before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1199,7 +1218,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level1)
  * @tc.desc: Test Iteration before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1251,7 +1270,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level1)
  * @tc.desc: Test images size before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1303,7 +1322,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level1)
  * @tc.desc: Test isAnimation before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1355,7 +1374,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level1)
  * @tc.desc: Test status before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1407,7 +1426,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
  * @tc.desc: Test durationTotal before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1459,7 +1478,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level1)
  * @tc.desc: Test nowImageIndex before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1511,7 +1530,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level1)
  * @tc.desc: Test isSrcUndefined before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1563,7 +1582,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level1)
  * @tc.desc: Test ImageType before and after type switching, pixelMap list to resource
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -1615,7 +1634,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
  * @tc.desc: Test frameNode before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1669,7 +1688,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level1)
  * @tc.desc: Test Duration before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1721,7 +1740,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level1)
  * @tc.desc: Test Iteration before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1773,7 +1792,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level1)
  * @tc.desc: Test image Create.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
+HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level0)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     ImageModelNG image;
@@ -1790,5 +1809,192 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
     EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
+}
+
+/**
+ * @tc.name: TestSetResizableSlice001
+ * @tc.desc: test ImageModelNG::SetResizableSlice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestSetResizableSlice001, TestSize.Level0)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    ImageResizableSlice imageResizableSlice {
+        .left = Dimension(1),
+    };
+    image.SetResizableSlice(imageResizableSlice);
+    EXPECT_EQ(renderProperty->GetImageResizableSlice().value(), imageResizableSlice);
+}
+
+/**
+ * @tc.name: TestUpdateImageSourceinfo001
+ * @tc.desc: Test ImagePattern::UpdateImageSourceinfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageSourceinfo001, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo sourceInfo("test_source");
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->isSystemColorChange_ = true;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    imagePattern->UpdateImageSourceinfo(sourceInfo);
+    sourceInfo.src_ = "test_source2";
+    EXPECT_NE(imageLayoutProperty->GetImageSourceInfo(), sourceInfo);
+}
+
+/**
+ * @tc.name: TestUpdateImageFill001
+ * @tc.desc: Test ImagePattern::UpdateImageFill function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageFill001, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    Color testColor(Color::RED);
+    imagePattern->UpdateImageFill(testColor);
+
+    auto renderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    EXPECT_EQ(renderProperty->GetSvgFillColor(), testColor);
+
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColor(), testColor);
+}
+
+/**
+ * @tc.name: TestUpdateImageAlt001
+ * @tc.desc: Test ImagePattern::UpdateImageAlt function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageAlt001, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo sourceInfo("test_alt_source");
+    auto host = imagePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->isSystemColorChange_ = true;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    imagePattern->UpdateImageAlt(sourceInfo);
+    sourceInfo.src_ = "test_alt_source2";
+    EXPECT_NE(imageLayoutProperty->GetAlt(), sourceInfo);
+}
+
+/**
+ * @tc.name: TestUpdateImageFill002
+ * @tc.desc: Test ImagePattern::UpdateImageFill function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageFill002, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    Color testColor(Color::BLUE);
+    imagePattern->UpdateImageFill(testColor);
+
+    auto renderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    EXPECT_EQ(renderProperty->GetSvgFillColor(), testColor);
+}
+
+/**
+ * @tc.name: TesSetBorderRadius001
+ * @tc.desc: Test SetBorderRadius function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TesSetBorderRadius001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    g_isConfigChangePerform = false;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(RADIUS_DEFAULT);
+    image.SetBorderRadius(borderRadius);
+    g_isConfigChangePerform = true;
+    image.SetBorderRadius(borderRadius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
+}
+
+/**
+ * @tc.name: HandleBorderRadiusResource001
+ * @tc.desc: Test HandleBorderRadiusResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObjWithDimensionId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObj);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
 }
 } // namespace OHOS::Ace::NG

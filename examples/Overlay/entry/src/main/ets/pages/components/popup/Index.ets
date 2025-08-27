@@ -26,16 +26,34 @@ export struct PopupIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'Popup', path: 'Popup' },
+    { name: 'popupPositionTest', path: 'popupPositionTest' },
+    { name: 'PopupStyleBuilder', path: 'PopupStyleBuilder' },
+    { name: 'PopupDismissTest', path: 'PopupDismissTest' },
+    { name: 'PopupAdvancedTest', path: 'PopupAdvancedTest' },
+    { name: 'PopupAnimateTest', path: 'PopupAnimateTest' },
+    { name: 'PopupTipTest', path: 'PopupTipTest' },
+    { name: 'PopupDragTest', path: 'PopupDragTest' },
+    { name: 'PopupMessageTest', path: 'PopupMessageTest' },
+    { name: 'PopupComplexTest', path: 'PopupComplexTest' },
+    { name: 'openPopupTest', path: 'openPopupTest' },
+    { name: 'popupBlurTest', path: 'popupBlurTest' },
+    { name: 'popupMutiTest', path: 'popupMutiTest' },
+    { name: 'popupBuilderTest', path: 'popupBuilderTest' },
+    { name: 'PopupKeyboardTest', path: 'PopupKeyboardTest' },
+    { name: 'UIContextPopupTest', path: 'UIContextPopupTest' },
+    { name: 'PopupBigTest', path: 'PopupBigTest' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath( { name: item.path } )
+          }
+        })
+      }
     }
     .title('Popup')
     .onBackPressed(() => {

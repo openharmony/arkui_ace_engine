@@ -24,19 +24,44 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
 struct NavigationInfo {
-    std::string navigationId;
+    int32_t nodeId = -1;
+    std::string navigationId; // inspectorId
     WeakPtr<NavigationStack> pathStack;
-
+    WeakPtr<FrameNode> navigationNode;
+    int32_t uniqueId = -1;
+    
     NavigationInfo() = default;
     NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
         : navigationId(std::move(id)), pathStack(navigationStack)
     {}
+    NavigationInfo(int32_t nodeId, const std::string& navigationId, WeakPtr<FrameNode> navigationNode)
+        : nodeId(nodeId), navigationId(std::move(navigationId)), navigationNode(navigationNode)
+    {}
+    NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack, int32_t navigationUniqueId)
+        : navigationId(std::move(id)), pathStack(navigationStack), uniqueId(std::move(navigationUniqueId))
+    {}
 };
 
+struct NavigationIntentInfo {
+    std::string navigationInspectorId;
+    std::string navDestinationName;
+    std::string param;
+    bool isColdStart;
+
+    std::string ToString()
+    {
+        return "-------- Navigation info below --------\n"
+               "navigationId:   " + navigationInspectorId + "\n"
+               "navDestName:    " + navDestinationName + "\n"
+               "isColdStart:    " + (isColdStart? "yes" : "no") + "\n"
+               "---------------------------------------\n";
+    }
+};
 struct NavdestinationRecoveryInfo {
     std::string name;
     std::string param;
@@ -46,6 +71,10 @@ struct NavdestinationRecoveryInfo {
     NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode)
         : name(std::move(name)), param(std::move(param)), mode(mode) {}
 };
+
+using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
+
+const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
 
 class NavigationManager : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationManager, AceType);
@@ -67,7 +96,7 @@ public:
         pipeline_ = pipeline;
     }
 
-    void AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback);
+    void AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback);
     void RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth);
 
     void OnDumpInfo();
@@ -156,9 +185,9 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
-    void AddNavigation(int32_t pageId, int32_t navigationId);
+    void AddNavigation(int32_t parentNodeId, const RefPtr<FrameNode>& navigationNode);
 
-    void RemoveNavigation(int32_t pageId);
+    void RemoveNavigation(int32_t navigationNodeId);
 
     std::vector<int32_t> FindNavigationInTargetParent(int32_t targetId);
 
@@ -170,38 +199,106 @@ public:
 
     void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    // set by developer in window.d.ts
-    void SetOrientationByWindowApi(Orientation ori)
-    {
-        orientationByWindowApi_ = ori;
-    }
-    Orientation GetOrientationByWindowApi() const
-    {
-        return orientationByWindowApi_;
-    }
-    void SetStatusBarConfigByWindowApi(std::pair<bool, bool> config)
-    {
-        statusBarConfigByWindowApi_ = config;
-    }
-    const std::pair<bool, bool>& GetStatusBarConfigByWindowApi() const
-    {
-        return statusBarConfigByWindowApi_;
-    }
-    void SetNavigationIndicatorConfigByWindowApi(bool config)
-    {
-        navigationIndicatorConfigByWindowApi_ = config;
-    }
-    bool GetNavigationIndicatorConfigByWindowApi() const
-    {
-        return navigationIndicatorConfigByWindowApi_;
-    }
-    void SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config);
-    void SetNavigationIndicatorConfig(std::optional<bool> config);
-
     // for non-animation
     void AddBeforeOrientationChangeTask(const std::function<void()>&& task);
     void ClearBeforeOrientationChangeTask();
     void OnOrientationChanged();
+    // for intent framework
+    bool FireNavigationIntentActively(int32_t pageId, bool needTransition);
+    void SetNavigationIntentInfo(const std::string& intentInfoSerialized, bool isColdStart);
+
+    std::optional<NavigationIntentInfo> GetNavigationIntentInfo() const
+    {
+        return navigationIntentInfo_;
+    }
+
+    void ResetNavigationIntentInfo()
+    {
+        navigationIntentInfo_.reset();
+    }
+
+    void SetGetSystemColorCallback(GetSystemColorCallback&& callback)
+    {
+        getSystemColorCallback_ = std::move(callback);
+    }
+    bool GetSystemColor(const std::string& name, Color& color)
+    {
+        if (getSystemColorCallback_) {
+            return getSystemColorCallback_(name, color);
+        }
+        return false;
+    }
+    bool IsForceSplitSupported() const
+    {
+        return isForceSplitSupported_;
+    }
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation = false);
+    bool IsForceSplitEnable() const
+    {
+        return isForceSplitEnable_;
+    }
+    const std::string& GetHomePageName() const
+    {
+        return homePageName_;
+    }
+    bool GetIgnoreOrientation() const;
+
+    void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
+    void RemoveForceSplitListener(int32_t nodeId);
+    bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
+
+    std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
+    void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart);
+
+    //-------force split begin-------
+    void IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode);
+    void SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode);
+    void RemoveForceSplitNavStateIfNeed(int32_t nodeId);
+    void SetExistForceSplitNav(bool isTargetForceSplitNav, int32_t id)
+    {
+        existForceSplitNav_ = {isTargetForceSplitNav, id};
+    }
+    std::pair<bool, int32_t> GetExistForceSplitNav() const
+    {
+        return existForceSplitNav_;
+    }
+    bool TargetIdOrDepthExists() const
+    {
+        return forceSplitNavigationId_.has_value() || forceSplitNavigationDepth_.has_value();
+    }
+    void SetForceSplitNavigationId(std::optional<std::string> forceSplitNavigationId)
+    {
+        forceSplitNavigationId_ = forceSplitNavigationId;
+    }
+    void SetForceSplitNavigationDepth(std::optional<int32_t> forceSplitNavigationDepth)
+    {
+        forceSplitNavigationDepth_ = forceSplitNavigationDepth;
+    }
+    std::optional<std::string> GetTargetNavigationId() const
+    {
+        return forceSplitNavigationId_;
+    }
+    std::optional<int32_t> GetTargetNavigationDepth() const
+    {
+        return forceSplitNavigationDepth_;
+    }
+    void SetPlaceholderDisabled(bool disable)
+    {
+        disablePlaceholder_ = disable;
+    }
+    bool IsPlaceholderDisabled() const
+    {
+        return disablePlaceholder_;
+    }
+    void SetDividerDisabled(bool disable)
+    {
+        disableDivider_ = disable;
+    }
+    bool IsDividerDisabled() const
+    {
+        return disableDivider_;
+    }
+    //-------force split end-------
 
 private:
     struct DumpMapKey {
@@ -209,6 +306,10 @@ private:
         int32_t depth;
 
         DumpMapKey(int32_t n, int32_t d) : nodeId(n), depth(d) {}
+        bool operator== (const DumpMapKey& o) const
+        {
+            return nodeId == o.nodeId && depth == o.depth;
+        }
         bool operator< (const DumpMapKey& o) const
         {
             if (depth != o.depth) {
@@ -218,19 +319,21 @@ private:
         }
     };
 
+    RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
-
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
+    NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
-    std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;
+    // record all the navigation in current UI-Context. The key is the page/model id where the navigation is located.
+    std::unordered_map<int32_t, std::vector<NavigationInfo>> navigationMap_;
     std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
 
-    RefPtr<FrameNode> curNavNode_;
-    RefPtr<FrameNode> preNavNode_;
+    WeakPtr<FrameNode> curNavNode_;
+    WeakPtr<FrameNode> preNavNode_;
     bool currentNodeNeverSet_ = true;
     bool curNodeAnimationCached_ = false;
     bool preNodeNeverSet_ = true;
@@ -241,13 +344,24 @@ private:
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;
-
-    // set by developer in window.d.ts setPreferredOrientation
-    Orientation orientationByWindowApi_ = Orientation::UNSPECIFIED;
     std::vector<std::function<void()>> beforeOrientationChangeTasks_;
-    // set by developer in window.d.ts setSpecificSystemBarEnabled
-    std::pair<bool, bool> statusBarConfigByWindowApi_;
-    bool navigationIndicatorConfigByWindowApi_ = true;
+    std::optional<NavigationIntentInfo> navigationIntentInfo_ = std::nullopt;
+
+    GetSystemColorCallback getSystemColorCallback_;
+    bool isForceSplitSupported_ = false;
+    bool isForceSplitEnable_ = false;
+    std::string homePageName_;
+    std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
+    bool ignoreOrientation_ = false;
+
+    //-------force split begin-------
+    int32_t currNestedDepth_ = 0;
+    std::pair<bool, int32_t> existForceSplitNav_ = DEFAULT_EXIST_FORCESPLIT_NAV_VALUE;
+    std::optional<std::string> forceSplitNavigationId_;
+    std::optional<int32_t> forceSplitNavigationDepth_;
+    bool disablePlaceholder_ = false;
+    bool disableDivider_ = false;
+    //-------force split end-------
 };
 } // namespace OHOS::Ace::NG
 

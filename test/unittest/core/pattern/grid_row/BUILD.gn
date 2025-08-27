@@ -15,6 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("grid_row_test_ng") {
   type = "new"
+  module_name = "Component-layout"
+  module_output = ""
   sources = [
     "grid_row_base_test_ng.cpp",
     "grid_row_layout_test_ng.cpp",

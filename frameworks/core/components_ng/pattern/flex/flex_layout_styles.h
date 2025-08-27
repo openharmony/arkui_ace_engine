@@ -26,8 +26,6 @@ struct FlexLayoutAttribute {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAxisAlign, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Space, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IsReverse, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(WidthLayoutPolicy, uint8_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightLayoutPolicy, uint8_t);
 };
 
 struct WrapLayoutAttribute {

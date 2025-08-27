@@ -14,7 +14,11 @@
  */
 #include "core/interfaces/native/node/tabs_modifier.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +31,8 @@ constexpr int DEFAULT_LENGTH = 3;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN = 5;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN_VALUES = 2;
 constexpr int DEFAULT_ANIMATION_DURATION = 300;
+constexpr int ANIMATION_CURVE_TYPE_STR = 1;
+constexpr int ANIMATION_CURVE_TYPE_FUNC = 2;
 
 void SetTabBarMode(ArkUINodeHandle node, ArkUI_Int32 tabsBarMode)
 {
@@ -51,6 +57,17 @@ void SetScrollableBarModeOptions(ArkUINodeHandle node, const ArkUI_Float32 value
     }
     TabsModelNG::SetScrollableBarModeOptions(frameNode, option);
 }
+
+void CreateScrollableBarModeOptionsWithResourceObj(ArkUINodeHandle node, void* marginRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* marginPtr = reinterpret_cast<ResourceObject*>(marginRawPtr);
+    auto marginResObj = AceType::Claim(marginPtr);
+    TabsModelNG::HandleScrollableBarMargin(frameNode, marginResObj, true);
+}
+
 void SetBarGridAlign(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
     const ArkUI_Int32* units, ArkUI_Int32 unitsLength)
 {
@@ -69,6 +86,20 @@ void SetBarGridAlign(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_In
 
     TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
+
+void CreateBarGridAlignWithResourceObj(ArkUINodeHandle node, void* columnGutterRawPtr, void* columnMarginRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* columnGutterPtr = reinterpret_cast<ResourceObject*>(columnGutterRawPtr);
+    auto columnGutterResObj = AceType::Claim(columnGutterPtr);
+    auto* columnMarginPtr = reinterpret_cast<ResourceObject*>(columnMarginRawPtr);
+    auto columnMarginResObj = AceType::Claim(columnMarginPtr);
+    TabsModelNG::HandleBarGridGutter(frameNode, columnGutterResObj, true);
+    TabsModelNG::HandleBarGridMargin(frameNode, columnMarginResObj, true);
+}
+
 void SetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units,
     ArkUI_Int32 length)
 {
@@ -86,6 +117,34 @@ void SetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* v
 
     TabsModelNG::SetDivider(frameNode, divider);
 }
+
+void SetDividerColorByUser(ArkUINodeHandle node, ArkUI_Bool isByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetDividerColorByUser(frameNode, isByUser);
+}
+
+void CreateDividerWithResourceObj(ArkUINodeHandle node,
+    void* strokeWidthRawPtr, void* colorRawPtr, void* startMarginRawPtr, void* endMarginRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* strokeWidthPtr = reinterpret_cast<ResourceObject*>(strokeWidthRawPtr);
+    auto strokeWidthResObj = AceType::Claim(strokeWidthPtr);
+    TabsModelNG::HandleDividerStrokeWidth(frameNode, strokeWidthResObj, true);
+    auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+    auto colorResObj = AceType::Claim(colorPtr);
+    TabsModelNG::HandleDividerColor(frameNode, colorResObj, true);
+    auto* startMarginPtr = reinterpret_cast<ResourceObject*>(startMarginRawPtr);
+    auto startMarginResObj = AceType::Claim(startMarginPtr);
+    TabsModelNG::HandleDividerStartMargin(frameNode, startMarginResObj, true);
+    auto* endMarginPtr = reinterpret_cast<ResourceObject*>(endMarginRawPtr);
+    auto endMarginResObj = AceType::Claim(endMarginPtr);
+    TabsModelNG::HandleDividerEndMargin(frameNode, endMarginResObj, true);
+}
+
 void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -108,7 +167,19 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, true);
 }
+
+void CreateBarBackgroundColorWithResourceObj(ArkUINodeHandle node, void* bgColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* bgColorPtr = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+    auto bgColorResObj = AceType::Claim(bgColorPtr);
+    TabsModelNG::HandleBarBackgroundColor(frameNode, bgColorResObj, true);
+}
+
 void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -148,6 +219,17 @@ void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurSt
     bgBlurStyle.inactiveColor = inactiveColor;
     TabsModelNG::SetBarBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
+
+void CreateBarBackgroundBlurStyleWithResourceObj(ArkUINodeHandle node, void* inactiveColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* inactiveColorPtr = reinterpret_cast<ResourceObject*>(inactiveColorRawPtr);
+    auto inactiveColorResObj = AceType::Claim(inactiveColorPtr);
+    TabsModelNG::HandleBackgroundBlurStyleInactiveColor(frameNode, inactiveColorResObj, true);
+}
+
 void SetBarOverlap(ArkUINodeHandle node, ArkUI_Bool barOverlap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -170,7 +252,7 @@ void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetTabBarIndex(frameNode, indexVal);
+    TabsModelNG::SetTabBarIndex(frameNode, indexVal < 0 ? 0 : indexVal);
 }
 void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
 {
@@ -178,6 +260,17 @@ void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsControll
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabsController(frameNode,
         AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(tabsController)));
+}
+void SetTabsOptionsBarModifier(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onApply = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(callback);
+        TabsModelNG::SetBarModifier(frameNode, std::move(*onApply));
+    } else {
+        TabsModelNG::SetBarModifier(frameNode, nullptr);
+    }
 }
 void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
@@ -191,6 +284,12 @@ void SetBarAdaptiveHeight(ArkUINodeHandle node, ArkUI_Bool value)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, value);
 }
+void SetNoMinHeightLimit(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNoMinHeightLimit(frameNode, value);
+}
 void SetTabBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -198,12 +297,47 @@ void SetTabBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
     CalcDimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     TabsModelNG::SetTabBarWidth(frameNode, width);
 }
+
+void CreateTabBarWidthWithResourceObj(ArkUINodeHandle node, void* widthRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* widthPtr = reinterpret_cast<ResourceObject*>(widthRawPtr);
+    auto widthResObj = AceType::Claim(widthPtr);
+    TabsModelNG::HandleBarWidth(frameNode, widthResObj, true);
+}
+
 void SetTabBarHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     TabsModelNG::SetTabBarHeight(frameNode, width);
+}
+
+void CreateTabBarHeightWithResourceObj(ArkUINodeHandle node, void* heightRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* heightPtr = reinterpret_cast<ResourceObject*>(heightRawPtr);
+    auto heightResObj = AceType::Claim(heightPtr);
+    TabsModelNG::HandleBarHeight(frameNode, heightResObj, true);
+}
+
+void SetAnimationCurve(ArkUINodeHandle node, ArkUI_Uint32 type, ArkUI_CharPtr curveChar, void* curveCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<Curve> curve;
+    if (type == ANIMATION_CURVE_TYPE_STR && curveChar != nullptr) {
+        curve = Framework::CreateCurve(curveChar, false);
+    } else if (type == ANIMATION_CURVE_TYPE_FUNC && curveCallback != nullptr) {
+        auto callback = reinterpret_cast<std::function<float(float)>*>(curveCallback);
+        curve = Framework::CreateCurve(*callback);
+    }
+    TabsModelNG::SetAnimationCurve(frameNode, curve);
 }
 
 void SetAnimationDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
@@ -236,6 +370,8 @@ void ResetScrollableBarModeOptions(ArkUINodeHandle node)
     defaultOption.margin = margin;
     defaultOption.nonScrollableLayoutStyle = std::nullopt;
     TabsModelNG::SetScrollableBarModeOptions(frameNode, defaultOption);
+
+    CreateScrollableBarModeOptionsWithResourceObj(node, nullptr);
 }
 void ResetBarGridAlign(ArkUINodeHandle node)
 {
@@ -243,6 +379,8 @@ void ResetBarGridAlign(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     BarGridColumnOptions columnOption;
     TabsModelNG::SetBarGridAlign(frameNode, columnOption);
+
+    CreateBarGridAlignWithResourceObj(node, nullptr, nullptr);
 }
 void ResetDivider(ArkUINodeHandle node)
 {
@@ -253,6 +391,9 @@ void ResetDivider(ArkUINodeHandle node)
     divider.isNull = true;
 
     TabsModelNG::SetDivider(frameNode, divider);
+    TabsModelNG::SetDividerColorByUser(frameNode, false);
+
+    CreateDividerWithResourceObj(node, nullptr, nullptr, nullptr, nullptr);
 }
 void ResetFadingEdge(ArkUINodeHandle node)
 {
@@ -271,6 +412,9 @@ void ResetBarBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, false);
+
+    CreateBarBackgroundColorWithResourceObj(node, nullptr);
 }
 void ResetBarBackgroundBlurStyle(ArkUINodeHandle node)
 {
@@ -278,6 +422,8 @@ void ResetBarBackgroundBlurStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
     TabsModelNG::SetBarBackgroundBlurStyle(frameNode, bgBlurStyle);
+
+    CreateBarBackgroundBlurStyleWithResourceObj(node, nullptr);
 }
 void ResetBarOverlap(ArkUINodeHandle node)
 {
@@ -306,6 +452,13 @@ void ResetTabsOptionsIndex(ArkUINodeHandle node)
     TabsModelNG::SetTabBarIndex(frameNode, 0);
 }
 
+void ResetTabsOptionsBarModifier(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarModifier(frameNode, nullptr);
+}
+
 void ResetScrollable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -318,6 +471,8 @@ void ResetTabBarWidth(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
     TabsModelNG::SetTabBarWidth(frameNode, width);
+
+    CreateTabBarWidthWithResourceObj(node, nullptr);
 }
 void ResetTabBarHeight(ArkUINodeHandle node)
 {
@@ -325,6 +480,16 @@ void ResetTabBarHeight(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
     TabsModelNG::SetTabBarHeight(frameNode, width);
+
+    CreateTabBarHeightWithResourceObj(node, nullptr);
+}
+
+void ResetAnimationCurve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<Curve> curve;
+    TabsModelNG::SetAnimationCurve(frameNode, curve);
 }
 
 void ResetAnimationDuration(ArkUINodeHandle node)
@@ -339,6 +504,13 @@ void ResetBarAdaptiveHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, false);
+}
+
+void ResetNoMinHeightLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNoMinHeightLimit(frameNode, false);
 }
 
 void SetTabClip(ArkUINodeHandle node, ArkUI_Bool clipEdge)
@@ -456,6 +628,19 @@ void SetBarBackgroundEffect(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* e
     TabsModelNG::SetBarBackgroundEffect(frameNode, option);
 }
 
+void CreateBarBackgroundEffectWithResourceObj(ArkUINodeHandle node, void* colorRawPtr, void* inactiveColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+    auto colorResObj = AceType::Claim(colorPtr);
+    TabsModelNG::HandleBackgroundEffectColor(frameNode, colorResObj, true);
+    auto* inactiveColorPtr = reinterpret_cast<ResourceObject*>(inactiveColorRawPtr);
+    auto inactiveColorResObj = AceType::Claim(inactiveColorPtr);
+    TabsModelNG::HandleBackgroundEffectInactiveColor(frameNode, inactiveColorResObj, true);
+}
+
 void ResetBarBackgroundEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -470,6 +655,8 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     BlurOption blurOption;
     EffectOption effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
+
+    CreateBarBackgroundEffectWithResourceObj(node, nullptr, nullptr);
 }
 
 void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
@@ -647,6 +834,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
+        .setDividerColorByUser = SetDividerColorByUser,
         .setFadingEdge = SetFadingEdge,
         .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,
@@ -656,10 +844,13 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
         .setBarAdaptiveHeight = SetBarAdaptiveHeight,
+        .setAnimationCurve = SetAnimationCurve,
+        .setNoMinHeightLimit = SetNoMinHeightLimit,
         .setAnimationDuration = SetAnimationDuration,
         .resetTabBarMode = ResetTabBarMode,
         .resetScrollableBarModeOptions = ResetScrollableBarModeOptions,
@@ -673,10 +864,13 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,
         .resetBarAdaptiveHeight = ResetBarAdaptiveHeight,
+        .resetAnimationCurve = ResetAnimationCurve,
+        .resetNoMinHeightLimit = ResetNoMinHeightLimit,
         .resetAnimationDuration = ResetAnimationDuration,
         .setTabClip = SetTabClip,
         .resetTabClip = ResetTabClip,
@@ -710,6 +904,14 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetTabsOnContentWillChange = ResetTabsOnContentWillChange,
         .setTabsIsCustomAnimation = SetTabsIsCustomAnimation,
         .resetTabsIsCustomAnimation = ResetTabsIsCustomAnimation,
+        .createScrollableBarModeOptionsWithResourceObj = CreateScrollableBarModeOptionsWithResourceObj,
+        .createBarGridAlignWithResourceObj = CreateBarGridAlignWithResourceObj,
+        .createDividerWithResourceObj = CreateDividerWithResourceObj,
+        .createBarBackgroundColorWithResourceObj = CreateBarBackgroundColorWithResourceObj,
+        .createBarBackgroundBlurStyleWithResourceObj = CreateBarBackgroundBlurStyleWithResourceObj,
+        .createTabBarWidthWithResourceObj = CreateTabBarWidthWithResourceObj,
+        .createTabBarHeightWithResourceObj = CreateTabBarHeightWithResourceObj,
+        .createBarBackgroundEffectWithResourceObj = CreateBarBackgroundEffectWithResourceObj,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -732,6 +934,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -748,6 +951,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,

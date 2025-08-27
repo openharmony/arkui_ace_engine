@@ -50,7 +50,7 @@ public:
 
         RefPtr<PopupTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<PopupTheme> theme = AceType::Claim(new PopupTheme());
+            RefPtr<PopupTheme> theme = AceType::MakeRefPtr<PopupTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -134,7 +134,6 @@ public:
             theme->bubbleMiniMumHeight_ =
                 pattern->GetAttr<Dimension>("bubble_min_mum_height", theme->bubbleMiniMumHeight_);
             theme->buttonHeight_ = pattern->GetAttr<Dimension>("popup_button_height", 40.0_vp);
-            theme->popupButtonFlexGrow_ = pattern->GetAttr<int>("popup_button_flex_grow", 0);
             theme->buttonType_ = pattern->GetAttr<int>("popup_button_type", static_cast<int>(ButtonType::CAPSULE));
             theme->buttonTextFontWeight_ = pattern->GetAttr<int>(
                 "popup_button_text_font_weight", static_cast<int>(FontWeight::REGULAR));
@@ -145,28 +144,10 @@ public:
             theme->primaryButtonFontColor_ = pattern->GetAttr<Color>("popup_primary_button_font_color", Color::WHITE);
             theme->secondaryButtonFontColor_ =
                 pattern->GetAttr<Color>("popup_secondary_button_font_color", Color::WHITE);
-            theme->secondaryButtonShadowColor_ =
-                pattern->GetAttr<Color>("popup_secondary_button_shadow_color", Color::TRANSPARENT);
-            theme->secondaryButtonShadowRadius_ =
-                pattern->GetAttr<double>("popup_secondary_button_shadow_radius", 0.0f);
-            theme->secondaryButtonShadowOffsetX_ =
-                pattern->GetAttr<double>("popup_secondary_button_shadow_offset_X", 0.0f);
-            theme->secondaryButtonShadowOffsetY_ =
-                pattern->GetAttr<double>("popup_secondary_button_shadow_offset_Y", 0.0f);
-            theme->buttonBorderWidth_ = pattern->GetAttr<Dimension>("popup_button_border_width", 0.0_vp);
             theme->buttonSpacingNewVersion_ = pattern->GetAttr<Dimension>("popup_button_space", 0.0_vp);
-            theme->secondaryButtonBeginGredientColor_ =
-                pattern->GetAttr<Color>("popup_secondary_button_begin_gredient_color", Color::TRANSPARENT);
-            theme->secondaryButtonEndGredientColor_ =
-                pattern->GetAttr<Color>("popup_secondary_button_end_gredient_color", Color::TRANSPARENT);
             theme->buttonLeftMargin_ = pattern->GetAttr<Dimension>("popup_button_left_margin", 0.0_vp);
-            theme->buttonRightMargin_ = pattern->GetAttr<Dimension>("popup_button_right_margin", 4.0_vp);
             theme->buttonTopMargin_ = pattern->GetAttr<Dimension>("popup_button_top_margin", 0.0_vp);
             theme->buttonBottomMargin_ = pattern->GetAttr<Dimension>("popup_button_bottom_margin", 4.0_vp);
-            theme->innerBorderBeginGredientColor_ =
-                pattern->GetAttr<Color>("popup_inner_border_begin_gredient_color", Color::TRANSPARENT);
-            theme->innerBorderEndGredientColor_ =
-                pattern->GetAttr<Color>("popup_inner_border_end_gredient_color", Color::TRANSPARENT);
             theme->popupDoubleButtonIsSameStyle_ = pattern->GetAttr<int>("popup_double_button_is_same_style", 1);
         }
     };
@@ -491,33 +472,9 @@ public:
     {
         return secondaryButtonFontColor_;
     }
-    Shadow GetSecondaryButtonShadow()
-    {
-        secondaryButtonShadow_.SetColor(secondaryButtonShadowColor_);
-        secondaryButtonShadow_.SetBlurRadius(secondaryButtonShadowRadius_);
-        secondaryButtonShadow_.SetOffsetX(secondaryButtonShadowOffsetX_);
-        secondaryButtonShadow_.SetOffsetY(secondaryButtonShadowOffsetY_);
-        return secondaryButtonShadow_;
-    }
-    const Dimension& GetButtonBorderWidth() const
-    {
-        return buttonBorderWidth_;
-    }
-    const Color& GetSecondaryButtonBeginGredientColor() const
-    {
-        return secondaryButtonBeginGredientColor_;
-    }
-    const Color& GetSecondaryButtonEndGredientColor() const
-    {
-        return secondaryButtonEndGredientColor_;
-    }
     const Dimension& GetButtonLeftMargin() const
     {
         return buttonLeftMargin_;
-    }
-    const Dimension& GetButtonRightMargin() const
-    {
-        return buttonRightMargin_;
     }
     const Dimension& GetButtonTopMargin() const
     {
@@ -534,18 +491,6 @@ public:
     int GetButtonTextFontWeight() const
     {
         return buttonTextFontWeight_;
-    }
-    const Color& GetInnerBorderBeginGredientColor() const
-    {
-        return innerBorderBeginGredientColor_;
-    }
-    const Color& GetInnerBorderEndGredientColor() const
-    {
-        return innerBorderEndGredientColor_;
-    }
-    int GetPopupButtonFlexGrow() const
-    {
-        return popupButtonFlexGrow_;
     }
     const Dimension& GetButtonSpacingNewVersion() const
     {
@@ -626,23 +571,11 @@ private:
     Color secondaryButtonBackgroundColor_ = Color::TRANSPARENT;
     Color primaryButtonFontColor_ = Color::WHITE;
     Color secondaryButtonFontColor_ = Color::WHITE;
-    Shadow secondaryButtonShadow_;
-    Color secondaryButtonShadowColor_ = Color::TRANSPARENT;
-    double secondaryButtonShadowRadius_ = 0.0f;
-    double secondaryButtonShadowOffsetX_ = 0.0f;
-    double secondaryButtonShadowOffsetY_ = 0.0f;
-    Dimension buttonBorderWidth_ = 0.0_vp;
-    Color secondaryButtonBeginGredientColor_ = Color::TRANSPARENT;
-    Color secondaryButtonEndGredientColor_ = Color::TRANSPARENT;
     Dimension buttonLeftMargin_ = 0.0_vp;
-    Dimension buttonRightMargin_ = 4.0_vp;
     Dimension buttonTopMargin_ = 0.0_vp;
     Dimension buttonBottomMargin_ = 4.0_vp;
     Dimension buttonHeight_ = 40.0_vp;
     int buttonTextFontWeight_ = static_cast<int>(FontWeight::REGULAR);
-    Color innerBorderBeginGredientColor_ = Color::TRANSPARENT;
-    Color innerBorderEndGredientColor_ = Color::TRANSPARENT;
-    int popupButtonFlexGrow_ = 0;
     Dimension buttonSpacingNewVersion_ = 0.0_vp;
     int popupDoubleButtonIsSameStyle_ = 1;
 };

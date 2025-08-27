@@ -14,8 +14,10 @@
  */
 #include "form_renderer_delegate_stub.h"
 
-#include "form_renderer_hilog.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "appexecfwk_errors.h"
+#include "form_mgr_errors.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -44,6 +46,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnGetRectRelativeToWindow;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_CHECK_MANAGER_DELEGATE)] =
         &FormRendererDelegateStub::HandleOnCheckManagerDelegate;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_UPDATE_FORM_DONE)] =
+        &FormRendererDelegateStub::HandleOnUpdateFormDone;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -78,7 +82,7 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     {
         std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
@@ -88,13 +92,13 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
@@ -116,20 +120,20 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel& data, Mess
     }
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode:%{public}s is nullptr", std::to_string(id).c_str());
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND;
     }
 
     HILOG_INFO("Stub reuse surfaceNode:%{public}s", std::to_string(id).c_str());
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
@@ -212,6 +216,11 @@ int32_t FormRendererDelegateStub::HandleOnGetRectRelativeToWindow(MessageParcel&
     reply.WriteInt32(parentRectInfo.left);
     reply.WriteFloat(parentRectInfo.scaleX);
     reply.WriteFloat(parentRectInfo.scaleY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.centerX);
+    reply.WriteInt32(parentRectInfo.rotateTransform.centerY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.innerCenterX);
+    reply.WriteInt32(parentRectInfo.rotateTransform.innerCenterY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.rotateDegree);
     return ERR_OK;
 }
 
@@ -221,6 +230,14 @@ int32_t FormRendererDelegateStub::HandleOnCheckManagerDelegate(MessageParcel& da
     int32_t errCode = OnCheckManagerDelegate(checkFlag);
     reply.WriteInt32(errCode);
     reply.WriteBool(checkFlag);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnUpdateFormDone(MessageParcel& data, MessageParcel& reply)
+{
+    int64_t formId = data.ReadInt64();
+    int32_t errCode = OnUpdateFormDone(formId);
+    reply.WriteInt32(errCode);
     return ERR_OK;
 }
 } // namespace Ace

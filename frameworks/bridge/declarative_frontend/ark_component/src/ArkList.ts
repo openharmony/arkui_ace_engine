@@ -251,6 +251,20 @@ class ListMaintainVisibleContentPositionModifier extends ModifierWithKey<boolean
   }
 }
 
+class ListSyncLoadModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListSyncLoad(node);
+    } else {
+      getUINativeModule().list.setListSyncLoad(node, this.value);
+    }
+  }
+}
+
 class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   constructor(value: NestedScrollOptions) {
     super(value);
@@ -639,6 +653,19 @@ class ListInitialScrollerModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
+  constructor(value: FocusWrapMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listFocusWrapMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetFocusWrapMode(node);
+    } else {
+      getUINativeModule().list.setFocusWrapMode(node, this.value);
+    }
+  }
+}
 interface ListParam {
   initialIndex?: number;
   space?: number | string;
@@ -763,6 +790,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
       ListMaintainVisibleContentPositionModifier, value);
     return this;
   }
+  syncLoad(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, ListSyncLoadModifier.identity, ListSyncLoadModifier, value);
+    return this;
+  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
     return this;
@@ -838,6 +869,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
     return this;
   }
+  focusWrapMode(value: FocusWrapMode): this {
+    modifierWithKey(this._modifiersWithKeys, ListFocusWrapModeModifier.identity, ListFocusWrapModeModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
@@ -847,4 +882,9 @@ globalThis.List.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.ListModifier(nativePtr, classType);
   });
+};
+
+globalThis.List.onWillStopDragging = function (value: (velocity: number) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };

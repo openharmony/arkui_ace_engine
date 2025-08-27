@@ -111,6 +111,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("customKeyboard", &JSTextField::SetCustomKeyboard);
     JSClass<JSTextInput>::StaticMethod("passwordRules", &JSTextField::SetPasswordRules);
     JSClass<JSTextInput>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
+    JSClass<JSTextInput>::StaticMethod("enableAutoFillAnimation", &JSTextField::SetEnableAutoFillAnimation);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
@@ -137,6 +138,10 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("autoCapitalizationMode", &JSTextField::SetCapitalizationMode);
     JSClass<JSTextInput>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
     JSClass<JSTextInput>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
+    JSClass<JSTextInput>::StaticMethod("strokeWidth", &JSTextField::SetStrokeWidth);
+    JSClass<JSTextInput>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
+    JSClass<JSTextInput>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
+    JSClass<JSTextInput>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

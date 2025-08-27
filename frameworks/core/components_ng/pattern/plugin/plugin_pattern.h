@@ -82,11 +82,12 @@ private:
     bool ISAllowUpdate() const;
 
     void SplitString(const std::string& str, char tag, std::vector<std::string>& strList) const;
+    std::string GetPackageCodeLanguage(const RequestPluginInfo& info) const;
     std::string GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     void GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
-    std::string GerPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
+    std::string GetPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
         const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const;
 
     RefPtr<PluginSubContainer> pluginSubContainer_;

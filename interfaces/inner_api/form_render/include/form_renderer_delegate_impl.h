@@ -66,7 +66,9 @@ public:
 
     int32_t OnCheckManagerDelegate(bool &checkFlag) override;
 
-    void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+    int32_t OnUpdateFormDone(const int64_t formId) override;
+
+    void SetSurfaceCreateEventHandler(std::function<int32_t(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
@@ -75,8 +77,9 @@ public:
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
     void SetGetRectRelativeToWindowHandler(std::function<void(AccessibilityParentRectInfo& parentRectInfo)>&& listener);
     void SetCheckManagerDelegate(std::function<void(bool&)>&& listener);
+    void SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener);
 private:
-    std::function<void(
+    std::function<int32_t(
         const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
         surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;
@@ -86,6 +89,7 @@ private:
     std::function<void(const std::vector<std::string>&)> formLinkInfoUpdateHandler_;
     std::function<void(AccessibilityParentRectInfo& parentRectInfo)> getRectRelativeToWindowHandler_;
     std::function<void(bool&)> checkManagerDelegate_;
+    std::function<void(const int64_t)> updateFormEventHandler_;
 };
 } // namespace Ace
 } // namespace OHOS

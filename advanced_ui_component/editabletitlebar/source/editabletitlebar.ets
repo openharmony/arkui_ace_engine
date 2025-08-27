@@ -186,8 +186,8 @@ export struct EditableTitleBar {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
   }
@@ -464,8 +464,8 @@ struct ImageMenuItem {
     try {
       this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
       hilog.error(0x3900, 'Ace',
         `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
     }
@@ -484,8 +484,8 @@ struct ImageMenuItem {
           this.maxFontScale, config.fontSizeScale ?? 1);
         this.buttonGestureModifier.fontSize = this.fontSize;
       } catch (paramError) {
-        let code = (paramError as BusinessError).code;
-        let message = (paramError as BusinessError).message;
+        let code = (paramError as BusinessError)?.code;
+        let message = (paramError as BusinessError)?.message;
         hilog.error(0x3900, 'Ace',
           `EditableTitleBar environmentCallback error: ${code}, ${message}`);
       }
@@ -503,8 +503,8 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale, this.maxFontScale);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -624,6 +624,18 @@ struct ImageMenuItem {
     }
   }
 
+  getStringByNameSync(contextName: string): string {
+    let uiContext: string = '';
+    try {
+      uiContext = getContext()?.resourceManager?.getStringByNameSync(contextName);
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
+    return uiContext;
+  }
+
   private toStringFormat(resource: ResourceStr | undefined): string | undefined {
     if (typeof resource === 'string' || typeof resource === 'undefined') {
       return resource;
@@ -646,15 +658,15 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_OK) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_save');
+      return this.getStringByNameSync('icon_save');
     } else if (this.item.value === PUBLIC_CANCEL) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_cancel');
+      return this.getStringByNameSync('icon_cancel');
     } else if (this.item.value === PUBLIC_BACK) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      return this.getStringByNameSync('icon_back');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -668,7 +680,7 @@ struct ImageMenuItem {
 
   private getAccessibilityDescription(): string | undefined {
     if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
-      return this.toStringFormat(this.item.accessibilityDescription);
+      return this.item.accessibilityDescription as string;
     }
     return '';
   }
@@ -882,8 +894,15 @@ struct EditableTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+    } catch (error) {
+      let code: number = (error as BusinessError)?.code;
+      let message: string = (error as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `EditableTitleBar getMainWindowStage error, code: ${code},message:${message}`);
+      return 0;
+    }
     let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
     let rect = properties.windowRect;
     if (px2vp(rect.height) > this.screenWidth) {

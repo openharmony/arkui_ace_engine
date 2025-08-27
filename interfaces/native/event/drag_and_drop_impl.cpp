@@ -22,6 +22,7 @@
 #include "pixelmap_native_impl.h"
 #include "securec.h"
 #include "udmf_async_client.h"
+#include "udmf_client.h"
 #include "unified_types.h"
 
 #ifdef __cplusplus
@@ -32,6 +33,16 @@ namespace {
 constexpr int32_t MAX_POINTID = 9;
 constexpr int32_t MIN_POINTID = 0;
 } // namespace
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDisplayId(ArkUI_DragEvent* event, int32_t* displayId)
+{
+    if (!event || !displayId) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    *displayId = dragEvent->displayId;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
 
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys)
 {
@@ -50,7 +61,36 @@ int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data)
     if (!event || !data || !dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    dragEvent->useDataLoadParams = false;
     dragEvent->unifiedData = data;
+
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* bundleName, int32_t length)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+
+    if (!event || !bundleName || !dragEvent ||
+        static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);
+    if (err != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemote)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+
+    if (!event || !isRemote || !dragEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *isRemote = dragEvent->isRemoteDev;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -218,6 +258,7 @@ int32_t OH_ArkUI_DragAction_SetData(ArkUI_DragAction* dragAction, OH_UdmfData* d
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    dragActions->useDataLoadParams = false;
     dragActions->unifiedData = data;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -233,6 +274,22 @@ int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, A
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     dragActions->dragPreviewOption = *options;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
+    ArkUI_DragAction* dragAction, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!dragAction || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->useDataLoadParams = true;
+    dragActions->dataLoadParams = dataLoadParams;
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -475,7 +532,6 @@ int32_t OH_ArkUI_SetNodeDragPreview(ArkUI_NodeHandle node, OH_PixelmapNative* pr
     impl->getDragAdapterAPI()->setDragPreview(node->uiNodeHandle, &pixelMap);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
-
 int32_t OH_ArkUI_SetNodeAllowedDropDataTypes(ArkUI_NodeHandle node, const char* typesArray[], int32_t count)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -653,6 +709,26 @@ float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event)
     return result;
 }
 
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayX);
+    return result;
+}
+
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayY);
+    return result;
+}
+
 float OH_ArkUI_DragEvent_GetVelocityX(ArkUI_DragEvent* event)
 {
     if (!event) {
@@ -712,6 +788,21 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
     if (status != 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!event || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!dragEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragEvent->useDataLoadParams = true;
+    dragEvent->dataLoadParams = dataLoadParams;
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -783,6 +874,17 @@ int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled)
+{
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl || !uiContext) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getDragAdapterAPI()->enableDropDisallowedBadge(enabled);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

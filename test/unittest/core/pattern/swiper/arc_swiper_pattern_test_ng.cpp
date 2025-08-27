@@ -2034,4 +2034,24 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalEntryAnimation, TestSize.Level1)
     pattern->PlayVerticalEntryAnimation(offset, nullptr, rollBack);
     EXPECT_EQ(pattern->animationVector_.size(), 0);
 }
+
+/**
+ * @tc.name: GetAndResetDisableFlushFocus
+ * @tc.desc: Test for method of GetAndResetDisableFlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, GetAndResetDisableFlushFocus, TestSize.Level1)
+{
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool ret = pattern->GetAndResetDisableFlushFocus();
+    EXPECT_EQ(ret, false);
+}
 } // namespace OHOS::Ace::NG

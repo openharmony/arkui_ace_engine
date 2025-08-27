@@ -646,7 +646,7 @@ export class ChipComponent extends ViewPU {
     this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
     this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
     this.isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
-    this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
+    this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
     this.onClose = undefined;
     this.onClicked = undefined;
     this.__chipNodeInFocus = new ObservedPropertySimplePU(false, this, 'chipNodeInFocus');
@@ -993,12 +993,12 @@ export class ChipComponent extends ViewPU {
     this.mdListener.off('change');
     this.lgListener.off('change');
     if (this.environmentCallbackID) {
-      this.getUIContext().getHostContext()?.getApplicationContext().off('environment', this.environmentCallbackID);
+      this.getUIContext()?.getHostContext()?.getApplicationContext().off('environment', this.environmentCallbackID);
       this.environmentCallbackID = void 0;
     }
   }
   isSetActiveChipBgColor() {
-    if (this.chipNodeActivatedBackgroundColor) {
+    if (!this.chipNodeActivatedBackgroundColor) {
       return false;
     }
     try {
@@ -1012,7 +1012,7 @@ export class ChipComponent extends ViewPU {
     }
   }
   isSetNormalChipBgColor() {
-    if (this.chipNodeBackgroundColor) {
+    if (!this.chipNodeBackgroundColor) {
       return false;
     }
     try {
@@ -1542,7 +1542,7 @@ export class ChipComponent extends ViewPU {
       this.label.localizedLabelMargin.end.value >= 0
     ) {
       localizedLabelMargin.end = this.label.localizedLabelMargin.end;
-    } else if (this.hasSuffix()) {
+    } else if (this.hasSuffix() || this.isNeedShowCloseIconMargin()) {
       localizedLabelMargin.end = defaultLocalizedMargin.end;
     }
     if (typeof this.label?.localizedLabelMargin === 'object') {
@@ -1707,31 +1707,35 @@ export class ChipComponent extends ViewPU {
   isChipActivated() {
     return this.chipActivated ?? false;
   }
-  resourceToNumber(resource, defaultValue) {
-    if (!resource || !resource.type) {
-      console.error('[Chip] failed: resource get fail');
-      return defaultValue;
-    }
+  getResourceNumber(resource) {
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
     if (!resourceManager) {
       console.error('[Chip] failed to get resourceManager');
-      return defaultValue;
+      return null;
     }
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
         try {
           if (resource.id !== -1) {
-            return resourceManager.getNumber(resource);
+            return resourceManager.getNumber(resource.id);
           }
           return resourceManager.getNumberByName(resource.params[0].split('.')[2]);
         } catch (error) {
-          console.error(`[Chip] get resource error, return defaultValue`);
-          return defaultValue;
+          console.error(`[Chip] get resource error`);
+          return null;
         }
       default:
-        return defaultValue;
+        return null;
     }
+  }
+  resourceToNumber(resource, defaultValue) {
+    if (!resource || !resource.type) {
+      console.error('[Chip] failed: resource get fail');
+      return defaultValue;
+    }
+    const result = this.getResourceNumber(resource);
+    return result !== null ? result : defaultValue;
   }
   isValidLength(length) {
     if (typeof length === 'number') {
@@ -1740,20 +1744,16 @@ export class ChipComponent extends ViewPU {
       return this.isValidLengthString(length);
     } else if (typeof length === 'object') {
       const resource = length;
-      const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-      if (!resourceManager) {
-        console.error('[Chip] failed to get resourceManager.');
-        return false;
-      }
-      switch (resource.type) {
-        case RESOURCE_TYPE_FLOAT:
-        case RESOURCE_TYPE_INTEGER:
-          return resourceManager.getNumber(resource) >= 0;
-        case RESOURCE_TYPE_STRING:
-          return this.isValidLengthString(resourceManager.getStringSync(resource));
-        default:
+      if (resource.type === RESOURCE_TYPE_STRING) {
+        const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+        if (!resourceManager) {
+          console.error('[Chip] failed to get resourceManager.');
           return false;
+        }
+        return this.isValidLengthString(resourceManager.getStringSync(resource));
       }
+      const result = this.getResourceNumber(resource);
+      return result !== null && result >= 0;
     }
     return false;
   }
@@ -1763,6 +1763,25 @@ export class ChipComponent extends ViewPU {
       return false;
     }
     return Number.parseInt(matches[1], 10) >= 0;
+  }
+  chipZoomOut() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: 1,
+        y: 1,
+      };
+    }
+  }
+  chipZoomIn() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+      };
+    }
+  }
+  isNeedShowCloseIconMargin() {
+    return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1776,22 +1795,6 @@ export class ChipComponent extends ViewPU {
       }
     }, If);
     If.pop();
-  }
-  chipZoomOut() {
-   if (this.isSuffixIconFocusStyleCustomized) {
-    this.chipScale = {
-     x: 1,
-     y: 1,
-    };
-   }
-  }
-  chipZoomIn() {
-   if (this.isSuffixIconFocusStyleCustomized) {
-     this.chipScale = {
-      x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-      y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-     };
-    }
   }
   rerender() {
     this.updateDirtyElements();

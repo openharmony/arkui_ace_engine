@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -211,7 +211,6 @@ struct ButtonInfo {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     bool isPrimary = false;
     bool isAcceptButton = false;
-
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
     {
@@ -221,6 +220,7 @@ struct ButtonInfo {
 
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
+    bool isAlertDialog = false;
     std::string title;                    // title of dialog.
     std::string subtitle;                 // subtitle of dialog.
     std::string content;                  // message of dialog.
@@ -232,6 +232,7 @@ struct DialogProperties {
     std::vector<ButtonInfo> buttons;
     std::function<void()> onCancel;       // NG cancel callback
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss; // Cancel Dismiss Callback
+    std::function<void()> onWillDismissRelease;
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
     std::function<void(DialogProperties&)> onLanguageChange;    // onLanguageChange callback
@@ -316,6 +317,7 @@ struct PromptDialogAttr {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
+    std::function<void()> customOnWillDismissRelease;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
@@ -353,6 +355,15 @@ struct PromptDialogAttr {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+};
+
+enum class PromptActionCommonState {
+    UNINITIALIZED = 0,
+    INITIALIZED = 1,
+    APPEARING = 2,
+    APPEARED = 3,
+    DISAPPEARING = 4,
+    DISAPPEARED  = 5,
 };
 
 } // namespace OHOS::Ace

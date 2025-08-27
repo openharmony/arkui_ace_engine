@@ -20,7 +20,6 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -32,6 +31,8 @@ namespace {
 constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
+constexpr Dimension DEFAULT_PADDING_HORIZONTAL = 16.0_vp;
+constexpr Dimension DEFAULT_PADDING_VERTICAL = 8.0_vp;
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -45,7 +46,7 @@ public:
 
         RefPtr<RichEditorTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<RichEditorTheme> theme = AceType::Claim(new RichEditorTheme());
+            RefPtr<RichEditorTheme> theme = AceType::MakeRefPtr<RichEditorTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -58,10 +59,8 @@ public:
         void InitThemeDefaults(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
             CHECK_NULL_VOID(theme && themeConstants);
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
+            theme->padding_ = Edge(DEFAULT_PADDING_HORIZONTAL, DEFAULT_PADDING_VERTICAL,
+                DEFAULT_PADDING_HORIZONTAL, DEFAULT_PADDING_VERTICAL);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
@@ -113,6 +112,7 @@ public:
             theme->scanSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.line_viewfinder");
             theme->imageSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.picture");
             theme->chevronRightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("rich_editor_border_radius", 0.0_vp));
         }
     };
 
@@ -275,6 +275,11 @@ public:
     {
         return chevronRightSymbolId_;
     }
+
+    const Radius& GetBorderRadius() const
+    {
+        return borderRadius_;
+    }
 protected:
     RichEditorTheme() = default;
     TextStyle textStyle_;
@@ -314,6 +319,7 @@ private:
     uint32_t scanSymbolId_;
     uint32_t imageSymbolId_;
     uint32_t chevronRightSymbolId_;
+    Radius borderRadius_;
 };
 } // namespace OHOS::Ace::NG
 

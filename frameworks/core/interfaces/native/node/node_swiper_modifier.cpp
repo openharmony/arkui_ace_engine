@@ -84,6 +84,24 @@ constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 const int32_t ERROR_INT_CODE = -1;
 constexpr float ZERO_F = 0.0f;
 constexpr bool DEFAULT_STOP_WHEN_TOUCHED = true;
+constexpr int32_t INDICATOR_RESOURCE_LEFT = 0;
+constexpr int32_t INDICATOR_RESOURCE_TOP = 1;
+constexpr int32_t INDICATOR_RESOURCE_RIGHT = 2;
+constexpr int32_t INDICATOR_RESOURCE_BOTTOM = 3;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_WIDTH = 4;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_HEIGHT = 5;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH = 6;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT = 7;
+constexpr int32_t DOT_INDICATOR_RESOURCE_COLOR = 8;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_COLOR = 9;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_COLOR = 4;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR = 5;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SIZE = 6;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE = 7;
+constexpr int32_t ARROW_RESOURCE_BACKGROUND_SIZE = 0;
+constexpr int32_t ARROW_RESOURCE_BACKGROUND_COLOR = 1;
+constexpr int32_t ARROW_RESOURCE_SIZE = 2;
+constexpr int32_t ARROW_RESOURCE_COLOR = 3;
 
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -122,7 +140,9 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
                 ? dimension
                 : swiperIndicatorTheme->GetBigArrowBackgroundSize();
         parseOk = Color::ParseColorString(backgroundColorValue, color);
-        swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowBackgroundColor();
+        swiperArrowParameters.backgroundColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
+            : swiperIndicatorTheme->GetBigArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
@@ -134,7 +154,9 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
             swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = Color::ParseColorString(arrowColorValue, color);
-        swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
+        swiperArrowParameters.arrowColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
+            : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         dimension = StringUtils::StringToCalcDimension(backgroundSizeValue, false, DimensionUnit::VP);
         swiperArrowParameters.backgroundSize =
@@ -142,7 +164,9 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
                 ? dimension
                 : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
         parseOk = Color::ParseColorString(backgroundColorValue, color);
-        swiperArrowParameters.backgroundColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters.backgroundColor = parseOk
+            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
+            : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
@@ -154,11 +178,14 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
             swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
         }
         parseOk = Color::ParseColorString(arrowColorValue, color);
-        swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowColor();
+        swiperArrowParameters.arrowColor = parseOk
+        ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
+        : swiperIndicatorTheme->GetSmallArrowColor();
     }
 }
 
-bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParameters& swiperArrowParameters)
+bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParameters& swiperArrowParameters,
+    const void* resObjs)
 {
     auto isShowBackgroundValue = arrowInfo[ARROW_IS_SHOW_BACKGROUND];
     auto isSidebarMiddleValue = arrowInfo[ARROW_IS_SIDE_BAR_MIDDLE];
@@ -178,6 +205,13 @@ bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParamete
         swiperArrowParameters.isSidebarMiddle = isSidebarMiddleValue == "1" ? true : false;
     }
     SetArrowBackgroundInfo(swiperArrowParameters, swiperIndicatorTheme, arrowInfo);
+    if (SystemProperties::ConfigChangePerform() && resObjs) {
+        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+        swiperArrowParameters.resourceBackgroundSizeValueObject = resourceObjs.at(ARROW_RESOURCE_BACKGROUND_SIZE);
+        swiperArrowParameters.resourceBackgroundColorValueObject =  resourceObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR);
+        swiperArrowParameters.resourceArrowSizeValueObject = resourceObjs.at(ARROW_RESOURCE_SIZE);
+        swiperArrowParameters.resourceArrowColorValueObject = resourceObjs.at(ARROW_RESOURCE_COLOR);
+    }
     return true;
 }
 
@@ -256,7 +290,26 @@ void GetDotIndicatorSpaceAndIgnoreSize(const std::vector<std::string>& dotIndica
     swiperParameters.setIgnoreSizeValue = (setIgnoreSize == "1" ? true : false);
 }
 
-SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
+void InitIndicatorParametersWithResObj(SwiperParameters& swiperParameters, const void* resObjs)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    CHECK_NULL_VOID(resObjs);
+    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+    swiperParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
+    swiperParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
+    swiperParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
+    swiperParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
+    swiperParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
+    swiperParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
+    swiperParameters.resourceSelectedItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
+    swiperParameters.resourceSelectedItemHeightValueObject =
+        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+    swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
+    swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
+}
+
+SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
+    const void* resObjs)
 {
     auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
     auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
@@ -281,13 +334,16 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     }
     Color colorVal;
     parseOk = Color::ParseColorString(colorValue, colorVal);
-    swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    swiperParameters.colorVal = parseOk ? (swiperParameters.parametersByUser.insert("colorVal"), colorVal)
+        : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
-    swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.selectedColorVal = parseOk
+        ? (swiperParameters.parametersByUser.insert("selectedColorVal"), colorVal)
+        : swiperIndicatorTheme->GetSelectedColor();
     ParseDotIndicatorSize(frameNode, dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
-
+    InitIndicatorParametersWithResObj(swiperParameters, resObjs);
     return swiperParameters;
 }
 
@@ -454,7 +510,7 @@ void ParseDigitIndicatorBottomAndIgnoreSize(const std::vector<std::string>& digi
     }
 }
 
-SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& digitIndicatorInfo)
+SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& digitIndicatorInfo, const void* resObjs)
 {
     auto dotLeftValue = digitIndicatorInfo[DIGIT_INDICATOR_LEFT] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_LEFT];
     auto dotTopValue = digitIndicatorInfo[DIGIT_INDICATOR_TOP] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_TOP];
@@ -463,20 +519,15 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto fontColorValue =
         digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR];
     auto selectedFontColorValue = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR] == "-"
-                                      ? ""
-                                      : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
+                                      ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR];
     auto digitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE] == "-"
-                             ? ""
-                             : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
+                             ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_SIZE];
     auto digitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT] == "-"
-                               ? ""
-                               : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
+                               ? "" : digitIndicatorInfo[DIGIT_INDICATOR_DIGIT_FONT_WEIGHT];
     auto selectedDigitFontSize = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE] == "-"
-                                     ? ""
-                                     : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
+                                     ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_SIZE];
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
-                                       ? ""
-                                       : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
+                                       ? "" : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
 
     auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
@@ -491,13 +542,28 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     Color fontColor;
     parseOk = Color::ParseColorString(fontColorValue, fontColor);
     digitalParameters.fontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("fontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = Color::ParseColorString(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("selectedFontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     ParseDigitIndicatorBottomAndIgnoreSize(digitIndicatorInfo, digitalParameters);
     GetFontContent(digitFontSize, digitFontWeight, false, digitalParameters);
     GetFontContent(selectedDigitFontSize, selectedDigitFontWeight, true, digitalParameters);
+    if (SystemProperties::ConfigChangePerform() && resObjs) {
+        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+        digitalParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
+        digitalParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
+        digitalParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
+        digitalParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
+        digitalParameters.resourceFontColorValueObject = resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR);
+        digitalParameters.resourceSelectedFontColorValueObject =
+            resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR);
+        digitalParameters.resourceFontSizeValueObject = resourceObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SIZE);
+        digitalParameters.resourceSelectedFontSizeValueObject =
+            resourceObjs.at(DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE);
+    }
     return digitalParameters;
 }
 
@@ -522,13 +588,27 @@ ArkUI_Int32 GetIndicatorInteractive(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetIndicatorInteractive(frameNode));
 }
 
-void SetSwiperNextMargin(
-    ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
+void SetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit,
+    ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetNextMargin(
         frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit), static_cast<bool>(ignoreBlank));
+}
+
+void SetSwiperNextMarginRAw(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit,
+    ArkUI_Bool ignoreBlank, void* nextMarginRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetNextMargin(
+        frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit), static_cast<bool>(ignoreBlank));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* nextMargin = reinterpret_cast<ResourceObject*>(nextMarginRawPtr);
+        auto nextMarginResObj = AceType::Claim(nextMargin);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
+    }
 }
 
 void ResetSwiperNextMargin(ArkUINodeHandle node)
@@ -537,6 +617,10 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
     SwiperModelNG::SetNextMargin(frameNode, value);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto nextMarginResObj = AceType::MakeRefPtr<ResourceObject>();
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
+    }
 }
 
 void SetSwiperMinSize(ArkUINodeHandle node, ArkUI_Float32 minSizeValue, ArkUI_Int32 minSizeUnitt)
@@ -554,13 +638,27 @@ void ResetSwiperMinSize(ArkUINodeHandle node)
     SwiperModelNG::SetMinSize(frameNode, value);
 }
 
-void SetSwiperPrevMargin(
-    ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit, ArkUI_Bool ignoreBlank)
+void SetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit,
+    ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetPreviousMargin(
         frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit), static_cast<bool>(ignoreBlank));
+}
+
+void SetSwiperPrevMarginRaw(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit,
+    ArkUI_Bool ignoreBlank, void* prevMarginRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetPreviousMargin(
+        frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit), static_cast<bool>(ignoreBlank));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* prevMargin = reinterpret_cast<ResourceObject*>(prevMarginRawPtr);
+        auto prevMarginResObj = AceType::Claim(prevMargin);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
+    }
 }
 
 void ResetSwiperPrevMargin(ArkUINodeHandle node)
@@ -569,6 +667,10 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
     SwiperModelNG::SetPreviousMargin(frameNode, value);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto prevMarginResObj = AceType::MakeRefPtr<ResourceObject>();
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
+    }
 }
 
 void SetSwiperDisplayCount(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType)
@@ -648,7 +750,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
     int32_t displayArrowCAPI = VectorStringToInt(res, DISPLAY_ARROW_CAPI);
     if (displayArrowValue == DISPLAY_ARROW_OBJECT) {
         SwiperArrowParameters swiperArrowParameters;
-        if (!GetArrowInfo(res, swiperArrowParameters)) {
+        if (!GetArrowInfo(res, swiperArrowParameters, nullptr)) {
             SwiperModelNG::SetDisplayArrow(frameNode, false);
             return;
         }
@@ -657,7 +759,55 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
     } else if (displayArrowValue == DISPLAY_ARROW_TRUE) {
         if (displayArrowCAPI == 1) {
             SwiperArrowParameters swiperArrowParameters;
-            if (!GetArrowInfo(res, swiperArrowParameters)) {
+            if (!GetArrowInfo(res, swiperArrowParameters, nullptr)) {
+                SwiperModelNG::SetDisplayArrow(frameNode, false);
+                return;
+            }
+            SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
+            SwiperModelNG::SetDisplayArrow(frameNode, true);
+        } else {
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+            CHECK_NULL_VOID(swiperIndicatorTheme);
+            SwiperArrowParameters swiperArrowParameters;
+            InitSwiperArrowParameters(swiperArrowParameters, swiperIndicatorTheme);
+            SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
+            SwiperModelNG::SetDisplayArrow(frameNode, true);
+        }
+    } else {
+        SwiperModelNG::SetDisplayArrow(frameNode, false);
+        return;
+    }
+    int32_t isHoverShow = VectorStringToInt(res, DISPLAY_ARROW_IS_HOVER_SHOW_INDEX);
+    if (isHoverShow != DISPLAY_ARROW_IS_HOVER_SHOW_UNDEFINED) {
+        SwiperModelNG::SetHoverShow(frameNode, isHoverShow == 1 ? true : false);
+    } else {
+        SwiperModelNG::SetHoverShow(frameNode, false);
+    }
+}
+
+void SetSwiperDisplayArrowRaw(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr, const void* resObjs)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> res;
+    std::string displayArrowValues = std::string(displayArrowStr);
+    StringUtils::StringSplitter(displayArrowValues, '|', res);
+    int32_t displayArrowValue = VectorStringToInt(res, DISPLAY_ARROW_VALUE);
+    int32_t displayArrowCAPI = VectorStringToInt(res, DISPLAY_ARROW_CAPI);
+    if (displayArrowValue == DISPLAY_ARROW_OBJECT) {
+        SwiperArrowParameters swiperArrowParameters;
+        if (!GetArrowInfo(res, swiperArrowParameters, resObjs)) {
+            SwiperModelNG::SetDisplayArrow(frameNode, false);
+            return;
+        }
+        SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
+        SwiperModelNG::SetDisplayArrow(frameNode, true);
+    } else if (displayArrowValue == DISPLAY_ARROW_TRUE) {
+        if (displayArrowCAPI == 1) {
+            SwiperArrowParameters swiperArrowParameters;
+            if (!GetArrowInfo(res, swiperArrowParameters, resObjs)) {
                 SwiperModelNG::SetDisplayArrow(frameNode, false);
                 return;
             }
@@ -925,16 +1075,52 @@ void SetSwiperIndicator(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr)
     }
     if (type == "ArkDigitIndicator") {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-        SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res);
+        SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res, nullptr);
         SwiperModelNG::SetDigitIndicatorStyle(frameNode, digitalParameters);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
     } else if (type == "ArkDotIndicator") {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res);
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res, nullptr);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, swiperParameters);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     } else {
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res);
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res, nullptr);
+        SwiperModelNG::SetDotIndicatorStyle(frameNode, swiperParameters);
+        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    }
+    if (type == "boolean") {
+        int32_t indicator = StringUtils::StringToInt(res[INDICATOR_VALUE]);
+        bool showIndicator = indicator == 1 ? true : false;
+        SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
+    } else {
+        SwiperModelNG::SetShowIndicator(frameNode, true);
+    }
+}
+
+void SetSwiperIndicatorRaw(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> res;
+    std::string indicatorValues = std::string(indicatorStr);
+    StringUtils::StringSplitter(indicatorValues, '|', res);
+    std::string type = res[INDICATOR_TYPE_INDEX];
+    if (type == "IndicatorComponentController") {
+        SwiperModelNG::SetBindIndicator(frameNode, true);
+        return;
+    }
+    if (type == "ArkDigitIndicator") {
+        SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+        SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res, resObjs);
+        SwiperModelNG::SetDigitIndicatorStyle(frameNode, digitalParameters);
+        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    } else if (type == "ArkDotIndicator") {
+        SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res, resObjs);
+        SwiperModelNG::SetDotIndicatorStyle(frameNode, swiperParameters);
+        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    } else {
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(frameNode, res, resObjs);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, swiperParameters);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }
@@ -1557,6 +1743,46 @@ ArkUISwiperIndicatorType GetIndicatorType(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ArkUISwiperIndicatorType::DOT);
     return static_cast<ArkUISwiperIndicatorType>(SwiperModelNG::GetIndicatorType(frameNode));
 }
+
+void SetMaintainVisibleContentPosition(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetMaintainVisibleContentPosition(frameNode, value);
+}
+
+void ResetMaintainVisibleContentPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetMaintainVisibleContentPosition(frameNode, false);
+}
+
+ArkUI_Int32 GetMaintainVisibleContentPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetMaintainVisibleContentPosition(frameNode);
+}
+
+void SetSwiperOnScrollStateChanged(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnScrollStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1565,14 +1791,17 @@ const ArkUISwiperModifier* GetSwiperModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISwiperModifier modifier = {
         .setSwiperNextMargin = SetSwiperNextMargin,
+        .setSwiperNextMarginRaw = SetSwiperNextMarginRAw,
         .resetSwiperNextMargin = ResetSwiperNextMargin,
         .setSwiperPrevMargin = SetSwiperPrevMargin,
+        .setSwiperPrevMarginRaw = SetSwiperPrevMarginRaw,
         .resetSwiperPrevMargin = ResetSwiperPrevMargin,
         .setSwiperDisplayCount = SetSwiperDisplayCount,
         .resetSwiperDisplayCount = ResetSwiperDisplayCount,
         .setSwiperSwipeByGroup = SetSwiperSwipeByGroup,
         .resetSwiperSwipeByGroup = ResetSwiperSwipeByGroup,
         .setSwiperDisplayArrow = SetSwiperDisplayArrow,
+        .setSwiperDisplayArrowRaw = SetSwiperDisplayArrowRaw,
         .resetSwiperDisplayArrow = ResetSwiperDisplayArrow,
         .setSwiperCurve = SetSwiperCurve,
         .resetSwiperCurve = ResetSwiperCurve,
@@ -1601,6 +1830,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperIndex = SetSwiperIndex,
         .resetSwiperIndex = ResetSwiperIndex,
         .setSwiperIndicator = SetSwiperIndicator,
+        .setSwiperIndicatorRaw = SetSwiperIndicatorRaw,
         .resetSwiperIndicator = ResetSwiperIndicator,
         .setSwiperDuration = SetSwiperDuration,
         .resetSwiperDuration = ResetSwiperDuration,
@@ -1665,6 +1895,11 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .getSwiperSwipeByGroup = GetSwiperSwipeByGroup,
         .getSwiperDisplayMode = GetSwiperDisplayMode,
         .getSwiperArrowStyle = GetSwiperArrowStyle,
+        .setMaintainVisibleContentPosition = SetMaintainVisibleContentPosition,
+        .resetMaintainVisibleContentPosition = ResetMaintainVisibleContentPosition,
+        .getMaintainVisibleContentPosition = GetMaintainVisibleContentPosition,
+        .setSwiperOnScrollStateChanged = SetSwiperOnScrollStateChanged,
+        .resetSwiperOnScrollStateChanged = ResetSwiperOnScrollStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1921,6 +2156,27 @@ void SetSwiperContentWillScroll(ArkUINodeHandle node, void* extraParam)
         return true;
     };
     SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(onEvent));
+}
+
+void SetSwiperScrollStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            LOGE("Swiper OnScrollStateChanged callback execute failed.");
+            return;
+        }
+        int32_t index = scrollStateInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_SCROLL_STATE_CHANGED;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUISyncEvent(&event);
+    };
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

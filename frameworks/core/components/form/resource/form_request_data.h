@@ -42,6 +42,7 @@ struct RequestFormInfo {
     float borderWidth = 0.0f;
     bool obscuredMode = false;
     int32_t shape = -1;
+    bool exemptAppLock;
 
     std::string ToString() const
     {

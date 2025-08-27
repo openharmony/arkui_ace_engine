@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ScrollBarBridge::SetScrollBarEnableNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -48,5 +49,69 @@ ArkUINativeModuleValue ScrollBarBridge::ResetScrollBarEnableNestedScroll(ArkUIRu
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarEnableNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBarBridge::SetScrollBarScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseColorMetricsToColor(vm, secondArg, color, resObj)) {
+            GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
+                nativeNode, nullptr);
+        } else {
+            auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+            ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
+            GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
+                nativeNode, AceType::RawPtr(resObj));
+        }
+    } else {
+        if (!ParseColorMetricsToColor(vm, secondArg, color)) {
+            GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBarBridge::ResetScrollBarScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+bool ScrollBarBridge::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    if (toNumericProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+        auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

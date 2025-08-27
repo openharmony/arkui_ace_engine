@@ -16,6 +16,7 @@
 #include "swiper_helper.h"
 
 #include "base/log/dump_log.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
@@ -489,8 +490,8 @@ float SwiperHelper::CalculateFriction(float gamma)
         gamma = 1.0f;
     }
     constexpr float scrollRatio = 0.72f;
-    constexpr float coefficient = M_E / (1.0f -  M_E);
-    auto fx = (gamma + coefficient) * (log(M_E - (M_E - 1.0f) * gamma) - 1.0f);
+    const float coefficient = ACE_E / (1.0f -  ACE_E);
+    auto fx = (gamma + coefficient) * (log(ACE_E - (ACE_E - 1.0f) * gamma) - 1.0f);
     return scrollRatio * fx / gamma;
 }
 } // namespace OHOS::Ace::NG

@@ -16,16 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_METHOD_H
 
+#include "ui/base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECKBOXGROUP_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 
 class CheckBoxGroupPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod);
 
 public:
     explicit CheckBoxGroupPaintMethod(const RefPtr<CheckBoxGroupModifier>& checkboxGroupModifier)
@@ -74,22 +76,34 @@ public:
         checkboxGroupModifier_->SetOffset(offset);
         checkboxGroupModifier_->SetSize(size);
         checkboxGroupModifier_->SetTouchHoverAnimationType(touchHoverType_);
-        checkboxGroupModifier_->UpdateAnimatableProperty();
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
-        auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        checkboxGroupModifier_->UpdateAnimatableProperty(host);
+        SetHoverEffectType(paintProperty);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto checkboxTheme = context->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(checkboxTheme);
-        auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-        auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        SetModifierBoundsRect(checkboxTheme, size, offset, paintWrapper);
+        checkboxGroupModifier_->SetInactivePointColor(checkboxTheme->GetInactivePointColor());
+    }
+
+    void SetModifierBoundsRect(
+        const RefPtr<CheckboxTheme>& theme, const SizeF& size, const OffsetF& offset, PaintWrapper* paintWrapper)
+    {
+        auto horizontalPadding = theme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = theme->GetHotZoneVerticalPadding().ConvertToPx();
         float boundsRectOriginX = offset.GetX() - horizontalPadding;
         float boundsRectOriginY = offset.GetY() - verticalPadding;
         float boundsRectWidth = size.Width() + 2 * horizontalPadding;
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        auto origin = checkboxGroupModifier_->GetBoundsRect();
+        CHECK_EQUAL_VOID(origin, boundsRect);
         checkboxGroupModifier_->SetBoundsRect(boundsRect);
-        SetHoverEffectType(paintProperty);
-        checkboxGroupModifier_->SetInactivePointColor(checkboxTheme->GetInactivePointColor());
+        paintWrapper->FlushContentModifier();
     }
 
     void SetModifierContentType(const RefPtr<CheckBoxGroupPaintProperty>& paintProperty)

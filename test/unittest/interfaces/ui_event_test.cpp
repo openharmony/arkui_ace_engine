@@ -161,4 +161,47 @@ HWTEST_F(UiEventTest, UiEventTest005, TestSize.Level1)
     bool result = UIEventFunc::Get().IsAvailable();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: UiEventTest006
+ * @tc.desc: test UIEvent GetSimplifiedInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    std::string tree = "treeTest";
+
+    /**
+     * @tc.steps2: Call the function GetSimplifiedInspectorTree.
+     * @tc.expected: The function is run ok.
+     */
+    TreeParams params;
+    params.infoType = InspectorInfoType::PAGE_PARAM;
+    UIEvent::GetSimplifiedInspectorTree(params, tree);
+    EXPECT_FALSE(tree.empty());
+}
+
+/**
+ * @tc.name: UiEventTest007
+ * @tc.desc: test UIEvent ExecuteCommandAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    UICommandParams params = { "test" };
+
+    /**
+     * @tc.steps2: Call the function ExecuteCommandAsync.
+     * @tc.expected: The function is run ok and IsAvailable() is true.
+     */
+    UIEvent::ExecuteCommandAsync(params, [](const std::shared_ptr<std::string> result) {});
+    bool result = UIEventFunc::Get().IsAvailable();
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace

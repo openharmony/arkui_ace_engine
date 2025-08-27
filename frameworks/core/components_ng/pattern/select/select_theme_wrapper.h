@@ -34,7 +34,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new SelectThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<SelectThemeWrapper>();
             auto theme = AceType::DynamicCast<SelectTheme>(wrapper);
             if (!themeConstants) {
                 return wrapper;

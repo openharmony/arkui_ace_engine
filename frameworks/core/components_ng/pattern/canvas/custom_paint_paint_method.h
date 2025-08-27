@@ -56,7 +56,7 @@ struct FilterProperty {
 };
 
 class CustomPaintPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod);
 public:
     CustomPaintPaintMethod();
     ~CustomPaintPaintMethod() override = default;
@@ -85,6 +85,7 @@ public:
     void Arc(const ArcParam& param);
     void ArcTo(const ArcToParam& param);
     void AddRect(const Rect& rect);
+    void AddRoundRect(const Rect& rect, const std::vector<double>& radii);
     void Ellipse(const EllipseParam& param);
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
@@ -211,20 +212,10 @@ public:
         state_.strokeState.SetTextAlign(align);
     }
 
-    void SetMeasureTextAlign(TextAlign align)
-    {
-        measureTextState_.SetTextAlign(align);
-    }
-
     void SetTextBaseline(TextBaseline baseline)
     {
         state_.fillState.SetTextBaseline(baseline);
         state_.strokeState.SetTextBaseline(baseline);
-    }
-
-    void SetMeasureTextBaseline(TextBaseline baseline)
-    {
-        measureTextState_.SetTextBaseline(baseline);
     }
 
     void SetShadowColor(const Color& color)
@@ -263,20 +254,10 @@ public:
         state_.strokeState.SetFontSize(size);
     }
 
-    void SetMeasureFontSize(const Dimension& size)
-    {
-        measureTextState_.SetFontSize(size);
-    }
-
     void SetLetterSpacing(const Dimension& letterSpacing)
     {
         state_.fillState.SetLetterSpacing(letterSpacing);
         state_.strokeState.SetLetterSpacing(letterSpacing);
-    }
-
-    void SetMeasureLetterSpacing(const Dimension& letterSpacing)
-    {
-        measureTextState_.SetLetterSpacing(letterSpacing);
     }
 
     void SetFontStyle(OHOS::Ace::FontStyle style)
@@ -285,20 +266,10 @@ public:
         state_.strokeState.SetFontStyle(style);
     }
 
-    void SetMeasureFontStyle(OHOS::Ace::FontStyle style)
-    {
-        measureTextState_.SetFontStyle(style);
-    }
-
     void SetFontWeight(FontWeight weight)
     {
         state_.fillState.SetFontWeight(weight);
         state_.strokeState.SetFontWeight(weight);
-    }
-
-    void SetMeasureFontWeight(FontWeight weight)
-    {
-        measureTextState_.SetFontWeight(weight);
     }
 
     void SetFontFamilies(const std::vector<std::string>& fontFamilies)
@@ -307,16 +278,10 @@ public:
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void SetMeasureFontFamilies(const std::vector<std::string>& fontFamilies)
-    {
-        measureTextState_.SetFontFamilies(fontFamilies);
-    }
-
     void SaveProperties();
     void RestoreProperties();
     void ResetTransformMatrix();
     void ResetLineDash();
-    void ResetMeasureTextState();
     void RotateMatrix(double angle);
     void ScaleMatrix(double x, double y);
     void SetTransformMatrix(const TransformParam& param);
@@ -341,11 +306,13 @@ protected:
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     bool UpdateFillParagraph(const std::string& text);
+    void UpdateFillTxtStyle(RSTextStyle& txtStyle);
     bool UpdateStrokeParagraph(const std::string& text);
     void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
-    std::shared_ptr<RSShaderEffect> MakeConicGradient(const Ace::Gradient& gradient);
+    std::shared_ptr<RSShaderEffect> MakeConicGradient(
+        const Ace::Gradient& gradient, const std::shared_ptr<RSColorSpace>& colorSpace);
 
     void Path2DFill();
     void Path2DStroke();
@@ -358,6 +325,7 @@ protected:
     void Path2DArc(const PathArgs& args);
     void Path2DArcTo(const PathArgs& args);
     void Path2DRect(const PathArgs& args);
+    void Path2DRoundRect(const PathArgs& args);
     void Path2DEllipse(const PathArgs& args);
     void Path2DBezierCurveTo(const PathArgs& args);
     void Path2DQuadraticCurveTo(const PathArgs& args);
@@ -417,8 +385,6 @@ protected:
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
     std::vector<LineDashParam> lineDashStates_;
-    PaintState measureTextState_;
-    std::vector<PaintState> measureTextStates_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";

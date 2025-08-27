@@ -25,11 +25,7 @@ class RosenRenderSvgFeColorMatrix : public RenderSvgFeColorMatrix, RosenRenderSv
     DECLARE_ACE_TYPE(RosenRenderSvgFeColorMatrix, RenderSvgFeColorMatrix, RosenRenderSvgFe);
 
 public:
-#ifndef USE_ROSEN_DRAWING
-    void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const override;
-#else
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const override;
-#endif
 };
 
 } // namespace OHOS::Ace

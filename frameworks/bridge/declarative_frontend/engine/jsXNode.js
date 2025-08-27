@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
+var LogTag;
+(function (LogTag) {
+    LogTag[LogTag["ARK_COMPONENT"] = 1] = "ARK_COMPONENT";
+})(LogTag || (LogTag = {}));
+class JSXNodeLogConsole {
+    static warn(...args) {
+        aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
+    }
+}
 var NodeRenderType;
 (function (NodeRenderType) {
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
@@ -48,6 +58,9 @@ class BaseNode extends ViewBuildNodeBase {
     postTouchEvent(touchEvent) {
         return this.builderBaseNode_.postTouchEvent(touchEvent);
     }
+    postInputEvent(event) {
+        return this.builderBaseNode_.postInputEvent(event);
+    }
     disposeNode() {
         return this.builderBaseNode_.disposeNode();
     }
@@ -65,7 +78,7 @@ class BaseNode extends ViewBuildNodeBase {
     }
 }
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,8 +93,20 @@ class BaseNode extends ViewBuildNodeBase {
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-class BuilderNode {
+class Disposable {
+    constructor() {
+        this.isDisposed_  = false;
+    }
+    dispose() {
+        this.isDisposed_  = true;
+    }
+    isDisposed() {
+        return this.isDisposed_ ;
+    }
+}
+class BuilderNode extends Disposable {
     constructor(uiContext, options) {
+        super();
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
         this._JSBuilderNode = jsBuilderNode;
         let id = Symbol('BuilderRootFrameNode');
@@ -110,8 +135,18 @@ class BuilderNode {
         __JSScopeUtil__.restoreInstanceId();
         return ret;
     }
+    postInputEvent(event) {
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postInputEvent(event);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
+    }
     dispose() {
+        super.dispose();
         this._JSBuilderNode.dispose();
+    }
+    isDisposed() {
+        return super.isDisposed() && (this._JSBuilderNode?.isDisposed() ?? true);
     }
     reuse(param) {
         this._JSBuilderNode.reuse(param);
@@ -128,6 +163,9 @@ class BuilderNode {
     onRecycleWithBindObject() {
         this._JSBuilderNode.onRecycleWithBindObject();
     }
+    inheritFreezeOptions(enable) {
+        this._JSBuilderNode.inheritFreezeOptions(enable);
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -135,21 +173,41 @@ class JSBuilderNode extends BaseNode {
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
+        this.disposable_ = new Disposable();
+        this.inheritFreeze = false;
+        this.allowFreezeWhenInactive = false;
+        this.parentallowFreeze = false;
+        this.isFreeze = false;
+        this.__parentViewOfBuildNode = undefined;
+        this.updateParams_ = null;
+        this.activeCount_ = 1;
+    }
+    findProvidePU__(providePropName) {
+        if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
+            return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
+        }
+        return undefined;
     }
     reuse(param) {
         this.updateStart();
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child) {
-                if (child instanceof ViewPU) {
-                    child.aboutToReuseInternal(param);
-                }
-                else {
-                    // FIXME fix for mixed V2 - V3 Hierarchies
-                    throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
-                }
-            } // if child
-        });
+        try {
+            this.childrenWeakrefMap_.forEach((weakRefChild) => {
+                const child = weakRefChild.deref();
+                if (child) {
+                    if (child instanceof ViewPU) {
+                        child.aboutToReuseInternal(param);
+                    }
+                    else {
+                        // FIXME fix for mixed V2 - V3 Hierarchies
+                        throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+                    }
+                } // if child
+            });
+        }
+        catch (err) {
+            this.updateEnd();
+            throw err;
+        }
         this.updateEnd();
     }
     recycle() {
@@ -175,6 +233,32 @@ class JSBuilderNode extends BaseNode {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         super.onRecycleWithBindObject();
         __JSScopeUtil__.restoreInstanceId();
+    }
+    inheritFreezeOptions(enable) {
+        this.inheritFreeze = enable;
+        if (enable) {
+            this.setAllowFreezeWhenInactive(this.getParentAllowFreeze());
+        } else {
+            this.setAllowFreezeWhenInactive(false);
+        }
+    }
+    getInheritFreeze() {
+        return this.inheritFreeze;
+    }
+    setAllowFreezeWhenInactive(enable) {
+        this.allowFreezeWhenInactive = enable;
+    }
+    getAllowFreezeWhenInactive() {
+        return this.allowFreezeWhenInactive;
+    }
+    setParentAllowFreeze(enable) {
+        this.parentallowFreeze = enable;
+    }
+    getParentAllowFreeze() {
+        return this.parentallowFreeze;
+    }
+    getIsFreeze() {
+        return this.isFreeze;
     }
     getCardId() {
         return -1;
@@ -208,7 +292,11 @@ class JSBuilderNode extends BaseNode {
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+        this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
         this.params_ = params;
+        if (options?.localStorage instanceof LocalStorage) {
+            this.setShareLocalStorage(options.localStorage);
+        }
         this.updateFuncByElmtId.clear();
         if (this.bindedViewOfBuilderNode) {
             globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
@@ -224,31 +312,56 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
+        this.frameNode_.setBuilderNode(this);
+        let id = this.frameNode_.getUniqueId();
+        if (this.id_ && this.id_ !== id) {
+            this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
+        }
+        this.id_ = id;
+        this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
+        FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
     update(param) {
+        if (this.isFreeze) {
+            this.updateParams_ = param;
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.updateStart();
-        this.purgeDeletedElmtIds();
-        this.params_ = param;
-        Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
-            return (a < b) ? -1 : (a > b) ? 1 : 0;
-        }).forEach(elmtId => this.UpdateElement(elmtId));
+        try {
+            this.purgeDeletedElmtIds();
+            this.params_ = param;
+            Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
+                return (a < b) ? -1 : (a > b) ? 1 : 0;
+            }).forEach(elmtId => this.UpdateElement(elmtId));
+        }
+        catch (err) {
+            this.updateEnd();
+            throw err;
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
     updateConfiguration() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.updateStart();
-        this.purgeDeletedElmtIds();
-        Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
-            return (a < b) ? -1 : (a > b) ? 1 : 0;
-        }).forEach(elmtId => this.UpdateElement(elmtId));
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.forceCompleteRerender(true);
+        try {
+            this.purgeDeletedElmtIds();
+            Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
+                return (a < b) ? -1 : (a > b) ? 1 : 0;
+            }).forEach(elmtId => this.UpdateElement(elmtId));
+            for (const child of this.childrenWeakrefMap_.values()) {
+                const childView = child.deref();
+                if (childView) {
+                    childView.forceCompleteRerender(true);
+                }
             }
+            getUINativeModule().frameNode.updateConfiguration(this.getFrameNode()?.getNodePtr());
+        }
+        catch (err) {
+            this.updateEnd();
+            throw err;
         }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
@@ -261,6 +374,29 @@ class JSBuilderNode extends BaseNode {
             updateFunc(elmtId, /* isFirstRender */ false);
             this.finishUpdateFunc();
         }
+    }
+    isBuilderNodeActive() {
+        return this.activeCount_ > 0;
+    }
+    setActiveInternal(active, isReuse = false) {
+        stateMgmtProfiler.begin('BuilderNode.setActive');
+        if (!isReuse) {
+            this.activeCount_ += active ? 1 : -1;
+            if (this.isBuilderNodeActive()) {
+                this.isFreeze = false;
+            } else {
+                this.isFreeze = this.allowFreezeWhenInactive;
+            }
+            if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
+                this.update(this.updateParams_);
+                this.updateParams_ = null;
+            }
+        }
+        if (this.inheritFreeze) {
+            this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+            this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+        }
+        stateMgmtProfiler.end();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -414,7 +550,15 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
+        this.disposable_.dispose();
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+        }
         this.frameNode_?.dispose();
+    }
+    isDisposed() {
+        return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
     }
     disposeNode() {
         super.disposeNode();
@@ -465,21 +609,33 @@ class JSBuilderNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class NodeAdapter {
+class NodeAdapter extends Disposable {
     constructor() {
+        super();
         this.nodeRefs_ = new Array();
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
         getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
+    getNodeType() {
+        return getUINativeModule().nodeAdapter.getNodeType(this.nativePtr_);
+    }
     dispose() {
+        super.dispose();
+        if (this.nativePtr_) {
+            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
+        }
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);
         }
         this.nativeRef_.dispose();
         this.nativePtr_ = null;
+    }
+    isDisposed() {
+        return super.isDisposed() && (this.nativePtr_ === undefined || this.nativePtr_ === null);
     }
     set totalNodeCount(count) {
         if (count < 0) {
@@ -650,7 +806,10 @@ BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
 class FrameNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+            if (!FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(heldValue)?.deref()) {
+                FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+            }
+            FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
         });
     }
     static register(target, heldValue) {
@@ -660,6 +819,7 @@ class FrameNodeFinalizationRegisterProxy {
 FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
 FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
 FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_ = new Map();
+FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_ = new Map();
 class NodeControllerRegisterProxy {
 }
 NodeControllerRegisterProxy.instance_ = new NodeControllerRegisterProxy();
@@ -739,8 +899,18 @@ var ExpandMode;
     ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
-class FrameNode {
+
+var UIState;
+(function (UIState) {
+    UIState[UIState["NORMAL"] = 0] = "NORMAL";
+    UIState[UIState["PRESSED"] = 1 << 0] = "PRESSED";
+    UIState[UIState["FOCUSED"] = 1 << 1] = "FOCUSED";
+    UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
+    UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
+})(UIState || (UIState = {}));
+class FrameNode extends Disposable {
     constructor(uiContext, type, options) {
+        super();
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -826,6 +996,12 @@ class FrameNode {
         this.baseNode_ = baseNode;
         this.renderNode_?.setBaseNode(baseNode);
     }
+    setBuilderNode(builderNode) {
+        this.builderNode_ = builderNode;
+    }
+    getBuilderNode() {
+        return this.builderNode_ || null;
+    }
     setAdapterRef(adapter) {
         this.nodeAdapterRef_ = adapter;
     }
@@ -841,11 +1017,19 @@ class FrameNode {
         }
     }
     dispose() {
+        super.dispose();
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+        }
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
         this.nodePtr_ = null;
+    }
+    isDisposed() {
+        return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null || this._nativeRef.invalid());
     }
     static disposeTreeRecursively(node) {
         if (node === null) {
@@ -881,6 +1065,12 @@ class FrameNode {
             nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
             __JSScopeUtil__.restoreInstanceId();
         }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (frameNode) {
+                return frameNode;
+            }
+        }
         if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             let frameNode = new ProxyFrameNode(this.uiContext_);
@@ -906,6 +1096,7 @@ class FrameNode {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -921,6 +1112,7 @@ class FrameNode {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -934,6 +1126,7 @@ class FrameNode {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
         getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
         content.setAttachedParent(undefined);
         __JSScopeUtil__.restoreInstanceId();
@@ -953,6 +1146,7 @@ class FrameNode {
         else {
             flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
         }
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -964,12 +1158,14 @@ class FrameNode {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
         getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         this._childList.delete(node._nodeId);
     }
     clearChildren() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
         getUINativeModule().frameNode.clearChildren(this.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         this._childList.clear();
@@ -999,10 +1195,6 @@ class FrameNode {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getFirstChildIndexWithoutExpand() {
@@ -1017,10 +1209,6 @@ class FrameNode {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getFirstChildWithoutExpand() {
@@ -1028,10 +1216,6 @@ class FrameNode {
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1041,10 +1225,6 @@ class FrameNode {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getNextSiblingWithoutExpand() {
@@ -1053,10 +1233,6 @@ class FrameNode {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getPreviousSibling(isExpanded) {
@@ -1064,10 +1240,6 @@ class FrameNode {
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1078,10 +1250,6 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1101,6 +1269,10 @@ class FrameNode {
     }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getGlobalPositionOnDisplay() {
+        const position = getUINativeModule().frameNode.getGlobalPositionOnDisplay(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
     getPositionToParentWithTransform() {
@@ -1289,6 +1461,21 @@ class FrameNode {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;
     }
+    createAnimation(property, startValue, endValue, param) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = getUINativeModule().frameNode.createAnimation(this.getNodePtr(), property, startValue, endValue, param);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+    cancelAnimations(properties) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = getUINativeModule().frameNode.cancelAnimations(this.getNodePtr(), properties);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+    getNodePropertyValue(property) {
+        return getUINativeModule().frameNode.getNodePropertyValue(this.getNodePtr(), property);
+    }
     triggerOnReuse() {
         getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
     }
@@ -1300,6 +1487,24 @@ class FrameNode {
     }
     recycle() {
         this.triggerOnRecycle();
+    }
+    addSupportedUIStates(uistates, statesChangeHandler, excludeInner) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates) => {
+            statesChangeHandler(this, currentUIStates);
+        }, excludeInner);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeSupportedUIStates(uiStates) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    invalidateAttributes() {
+        if (this.nodePtr_ === undefined || this.nodePtr_ === null) {
+            return;
+        }
+        getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -1327,6 +1532,14 @@ class ImmutableFrameNode extends FrameNode {
         }
         this._commonAttribute.setNodePtr(undefined);
         return this._commonAttribute;
+    }
+    createAnimation(property, startValue, endValue, param) {
+        JSXNodeLogConsole.warn("can't create animation on unmodifiable frameNode");
+        return false;
+    }
+    cancelAnimations(properties) {
+        JSXNodeLogConsole.warn("can't cancel animation on unmodifiable frameNode");
+        return false;
     }
 }
 class BuilderRootFrameNode extends ImmutableFrameNode {
@@ -1356,13 +1569,6 @@ class ProxyFrameNode extends ImmutableFrameNode {
             return null;
         }
         return this.nodePtr_;
-    }
-    dispose() {
-        this.renderNode_?.dispose();
-        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
-        this._nodeId = -1;
-        this._nativeRef = undefined;
-        this.nodePtr_ = undefined;
     }
     moveTo(targetParent, index) {
         throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -1398,6 +1604,17 @@ class TypedFrameNode extends FrameNode {
     constructor(uiContext, type, attrCreator, options) {
         super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
+    }
+    dispose() {
+        this.isDisposed_ = true;
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+        }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
+        this._nodeId = -1;
+        this._nativeRef?.dispose();
+        this._nativeRef = null;
+        this.nodePtr_ = null;
     }
     initialize(...args) {
         return this.attribute.initialize(args);
@@ -1641,16 +1858,266 @@ const __creatorMap__ = new Map([
         }],
 ]);
 const __attributeMap__ = new Map([
-    ['Scroll', (node) => {
-            if (node._componentAttribute) {
-                return node._componentAttribute;
-            }
-            if (!node.getNodePtr()) {
-                return undefined;
-            }
-            node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+    ['Swiper', (node) => {
+        if (node._componentAttribute) {
             return node._componentAttribute;
-        }],
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Scroll', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['List', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['ListItemGroup', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkListItemGroupComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['WaterFlow', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['FlowItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Grid', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['GridItem', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Text', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['TextInput', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextInputComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['TextArea', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Button', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Checkbox', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Radio', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Slider', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Toggle', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Column', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkColumnComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Row', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkRowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Stack', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkStackComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Flex', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkFlexComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['RelativeContainer', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkRelativeContainerComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['XComponent', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkXComponentComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Progress', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['LoadingProgress', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }],
+    ['Image', (node) => {
+        if (node._componentAttribute) {
+            return node._componentAttribute;
+        }
+        if (!node.getNodePtr()) {
+            return undefined;
+        }
+        node._componentAttribute = new ArkImageComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        return node._componentAttribute;
+    }]
 ]);
 const __eventMap__ = new Map(
     [
@@ -1704,6 +2171,34 @@ const __eventMap__ = new Map(
       }]
     ]
   )
+const __bindControllerCallbackMap__ = new Map(
+    [
+        ['Swiper', (node, controller) => {
+            getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
+        }],
+        ['Scroll', (node, controller) => {
+            getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        }],
+        ['List', (node, controller) => {
+            getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+        }],
+        ['WaterFlow', (node, controller) => {
+            getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
+        }],
+        ['Grid', (node, controller) => {
+            getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+        }],
+        ['Text', (node, controller) => {
+            getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
+        }],
+        ['TextInput', (node, controller) => {
+            getUINativeModule().textInput.setController(node.getNodePtr(), controller);
+        }],
+        ['TextArea', (node, controller) => {
+            getUINativeModule().textArea.setController(node.getNodePtr(), controller);
+        }]
+    ]
+)
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1727,23 +2222,31 @@ class typeNode {
     }
     static getEvent(node, nodeType) {
         if (node === undefined || node === null || node.getNodeType() !== nodeType) {
-          return undefined;
+            return undefined;
         }
         let event = __eventMap__.get(nodeType);
         if (event === undefined || event === null) {
-          return undefined;
+            return undefined;
         }
         return event(node);
-      } 
+    }
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
-            throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
+                throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+            } else {
+                throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
+            }
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
+        let callback = __bindControllerCallbackMap__.get(nodeType);
+        if (callback === undefined || callback === null) {
+            return;
+        }
+        callback(node, controller);
     }
 }
 /*
@@ -1781,7 +2284,7 @@ var LengthMetricsUnit;
     LengthMetricsUnit[LengthMetricsUnit["PX"] = 1] = "PX";
 })(LengthMetricsUnit || (LengthMetricsUnit = {}));
 class LengthMetrics {
-    constructor(value, unit) {
+    constructor(value, unit, res) {
         if (unit in LengthUnit) {
             this.unit = unit;
             this.value = value;
@@ -1790,6 +2293,7 @@ class LengthMetrics {
             this.unit = LengthUnit.VP;
             this.value = unit === undefined ? value : 0;
         }
+        this.res = res === undefined ? undefined : res;
     }
     static px(value) {
         return new LengthMetrics(value, LengthUnit.PX);
@@ -1808,7 +2312,7 @@ class LengthMetrics {
     }
     static resource(res) {
         let length = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
-        return new LengthMetrics(length[0], length[1]);
+        return new LengthMetrics(length[0], length[1], res);
     }
 }
 const MAX_CHANNEL_VALUE = 0xFF;
@@ -1816,11 +2320,12 @@ const MAX_ALPHA_VALUE = 1;
 const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
 const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 class ColorMetrics {
-    constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE) {
+    constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE, res) {
         this.red_ = ColorMetrics.clamp(red);
         this.green_ = ColorMetrics.clamp(green);
         this.blue_ = ColorMetrics.clamp(blue);
         this.alpha_ = ColorMetrics.clamp(alpha);
+        this.res_ = res === undefined ? undefined : res;
     }
     static clamp(value) {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
@@ -1840,6 +2345,15 @@ class ColorMetrics {
     }
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
         return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+    }
+    static colorWithSpace(colorSpace, red, green, blue, alpha = MAX_ALPHA_VALUE) {
+        let redInt = Math.round(red * MAX_CHANNEL_VALUE);
+        let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
+        let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
+        let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
+        const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
+        colorMetrics.setColorSpace(colorSpace);
+        return colorMetrics;
     }
     static rgbOrRGBA(format) {
         const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
@@ -1879,7 +2393,7 @@ class ColorMetrics {
             const blue = chanels[2];
             const alpha = chanels[3];
             const resourceId = chanels[4];
-            const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            const colorMetrics = new ColorMetrics(red, green, blue, alpha, color);
             colorMetrics.setResourceId(resourceId);
             return colorMetrics;
         }
@@ -1971,6 +2485,14 @@ class ColorMetrics {
     getResourceId() {
         return this.resourceId_;
     }
+    setColorSpace(colorSpace) {
+        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
+            this.colorSpace_ = colorSpace;
+        }
+    }
+    getColorSpace() {
+        return this.colorSpace_;
+    }
 }
 class BaseShape {
     constructor() {
@@ -2026,8 +2548,9 @@ class ShapeMask extends BaseShape {
         this.strokeWidth = 0;
     }
 }
-class RenderNode {
+class RenderNode extends Disposable {
     constructor(type) {
+        super();
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -2294,6 +2817,7 @@ class RenderNode {
         this.childrenList.push(node);
         node.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+        getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
         if (child === undefined || child === null) {
@@ -2316,6 +2840,7 @@ class RenderNode {
             this.childrenList.splice(indexOfSibling + 1, 0, child);
             getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
         }
+        getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
     }
     removeChild(node) {
         if (node === undefined || node === null) {
@@ -2328,9 +2853,11 @@ class RenderNode {
         const child = this.childrenList[index];
         child.parentRenderNode = null;
         this.childrenList.splice(index, 1);
+        getUINativeModule().renderNode.removeBuilderNode(this.nodePtr, node.nodePtr);
         getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
     }
     clearChildren() {
+        getUINativeModule().renderNode.clearBuilderNode(this.nodePtr);
         this.childrenList = new Array();
         getUINativeModule().renderNode.clearChildren(this.nodePtr);
     }
@@ -2390,12 +2917,23 @@ class RenderNode {
         this.nodePtr = null;
         this._nativeRef = null;
     }
+    getNodeType() {
+        return getUINativeModule().renderNode.getNodeType(this.nodePtr);
+    }
     dispose() {
+        super.dispose();
+        if (this.nodePtr) {
+            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+        }
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
         this._frameNode?.deref()?.resetNodePtr();
         this._nativeRef = null;
         this.nodePtr = null;
+    }
+    isDisposed() {
+        return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
     }
     getNodePtr() {
         return this.nodePtr;
@@ -2612,6 +3150,7 @@ class ComponentContent extends Content {
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params ?? undefined, options);
+        this.disposable_ = new Disposable();
     }
     update(params) {
         this.builderNode_.update(params);
@@ -2641,9 +3180,17 @@ class ComponentContent extends Content {
         this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
+        if (this.getNodePtr()) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
+        }
+        this.disposable_.dispose();
         this.detachFromParent();
         this.attachNodeRef_?.dispose();
         this.builderNode_?.dispose();
+    }
+    isDisposed() {
+        return this.disposable_.isDisposed() && (this.builderNode_?.isDisposed() ?? true);
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {
@@ -2667,6 +3214,9 @@ class ComponentContent extends Content {
     }
     updateConfiguration() {
         this.builderNode_.updateConfiguration();
+    }
+    inheritFreezeOptions(enable) {
+        this.builderNode_.inheritFreezeOptions(enable);
     }
 }
 /*
@@ -2710,10 +3260,84 @@ class NodeContent extends Content {
         }
     }
 }
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function __establishConnection__(allow, parentView, builderIds) {
+    if (!parentView) {
+        return false;
+    }
+    builderIds.forEach((builderId, indx) => {
+        let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+        if (!builderNode) {
+            return false;
+        }
+        builderNode.setParentAllowFreeze(allow);
+        if (builderNode.getInheritFreeze()) {
+            builderNode.setAllowFreezeWhenInactive(allow);
+        }
+        builderNode.__parentViewOfBuildNode = new WeakRef(parentView);
+        parentView?.addChildBuilderNode(builderNode);
+    });
+    return true;
+}
+function __disconnectConnection__(parentView, builderIds) {
+    if (!parentView) {
+        return false;
+    }
+    builderIds.forEach((builderId, indx) => {
+        let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+        if (!builderNode) {
+            return false;
+        }
+        builderNode.setParentAllowFreeze(false);
+        builderNode.setAllowFreezeWhenInactive(false);
+        if (builderNode.getIsFreeze()) {
+            builderNode.setActiveInternal(true);
+        }
+        builderNode.__parentViewOfBuildNode = undefined;
+        parentView?.removeChildBuilderNode(builderId);
+    });
+    return true;
+}
+globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
+    let view = UINodeRegisterProxy.GetView(id);
+    if (!view || !(view instanceof PUV2ViewBase)) {
+        globalThis.__addBuilderNodeToBuilder__(id, builderIds);
+        return false;
+    }
+    return __establishConnection__(view.isCompFreezeAllowed(), view, builderIds);
+};
+globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds) {
+    return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
+};
+globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id, builderIds) {
+    let builderNode = UINodeRegisterProxy.GetViewBuildNodeBase(id);
+    if (!builderNode || !(builderNode instanceof JSBuilderNode)) {
+        return false;
+    }
+    return __establishConnection__(builderNode.getAllowFreezeWhenInactive(), builderNode, builderIds);
+};
+globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
+    return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
+};
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode
+    typeNode, NodeAdapter, ExpandMode, UIState
 };

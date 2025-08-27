@@ -36,7 +36,7 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 
 void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
 {
-    if (!hasFadingEdge_) {
+    if (!needUpdateFadingEdge_) {
         return;
     }
     CHECK_NULL_VOID(renderContext);
@@ -48,12 +48,12 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         isFadingTop_ = isFadingBottom_;
         isFadingBottom_ = tempFadingValue;
     }
-    if (isFadingTop_) {
+    float startRange = isFadingTop_ ? percentFading_ : 0.0f;
+    float endRange = isFadingBottom_ ? percentFading_ : 0.0f;
+    if (hasFadingEdge_) {
         gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
-    }
-    if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_ + startRange, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_ - endRange, Color::WHITE));
         gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
     }
     if (vertical_) {
@@ -65,7 +65,7 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
-    if (!isFadingTop_ && !isFadingBottom_) {
+    if (!hasFadingEdge_) {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
         renderContext->UpdateBackBlendMode(BlendMode::NONE);
     } else {
@@ -104,7 +104,9 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
             case ContentClipMode::SAFE_AREA: {
                 auto host = renderContext->GetHost();
                 CHECK_NULL_RETURN(host, false);
-                const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true);
+                const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
+                    { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+                    IgnoreStrategy::AXIS_INSENSITIVE);
 
                 auto size = geo->GetPaddingSize();
                 AddPaddingToSize(safeAreaPad, size);

@@ -22,6 +22,9 @@ class SpanToHtml {
 public:
     static std::string ToHtml(const SpanString& spanString);
     static std::string ToHtml(std::vector<uint8_t>& values);
+    static std::string ToHtml(const std::list<RefPtr<NG::SpanItem>>& spanItems);
+    static std::string ToHtmlForNormalType(const NG::FontStyle& fontStyle,
+        const NG::TextLineStyle& textLineStyle, const std::u16string& contentStr);
 
 private:
     static std::string NormalStyleToHtml(
@@ -31,15 +34,19 @@ private:
     static std::string FontSizeToHtml(const std::optional<Dimension>& value);
     static std::string FontWeightToHtml(const std::optional<FontWeight>& value);
     static std::string ColorToHtml(const std::optional<Color>& value);
+    static std::string StrokeWidthToHtml(const std::optional<Dimension>& value);
+    static std::string StrokeColorToHtml(const std::optional<Color>& value);
+    static std::string FontSuperscriptToHtml(const std::optional<SuperscriptStyle>& value);
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
-    static std::string TextDecorationToHtml(TextDecoration decoration);
+    static std::string TextDecorationToHtml(const std::vector<TextDecoration>& decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
     static std::string ToHtml(const std::string& key, const std::optional<Dimension>& value);
-    static std::string DeclarationToHtml(const NG::FontStyle& fontStyle);
+    static std::string DecorationToHtml(const NG::FontStyle& fontStyle);
     static std::string ToHtml(const std::optional<std::vector<Shadow>>& shadows);
     static std::string ToHtml(const std::string& key, const std::optional<CalcDimension>& dimesion);
     static std::string ToHtml(const std::optional<ImageSpanSize>& size);
     static std::string ToHtml(const std::optional<OHOS::Ace::TextAlign>& object);
+    static std::string ToHtml(const std::optional<OHOS::Ace::TextVerticalAlign>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::WordBreak>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::TextOverflow>& object);
     static std::string ToHtml(const std::optional<OHOS::Ace::NG::BorderRadiusProperty>& borderRadius);
@@ -66,6 +73,11 @@ private:
     }
 
     static bool CreateDirectory(const std::string& path);
+    static void HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std::string& out,
+        size_t& paragrapStart, bool& newLine);
+    static std::string BackgroundColorToHtml(const std::optional<TextBackgroundStyle>& value);
+    static std::string NormalStyleToHtml(const RefPtr<NG::SpanItem>& item);
+    static std::string WrapWithAnchorIfNeeded(const RefPtr<NG::SpanItem>& item, const std::string& content);
 };
 }; // namespace OHOS::Ace
 #endif

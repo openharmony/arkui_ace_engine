@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -195,6 +196,20 @@ ArkUI_Int32 GetCachedIsShown(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ListModelNG::GetShowCached(frameNode));
 }
 
+void SetCacheRange(ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetCacheRange(frameNode, min, max);
+}
+
+void ResetCacheRange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetCacheRange(frameNode);
+}
+
 ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -258,7 +273,17 @@ void ResetListSpace(ArkUINodeHandle node)
     ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
 }
 
-ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(ListModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetListEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -320,6 +345,9 @@ void ResetListFriction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModelNG::CreateWithResourceObjFriction(frameNode, nullptr);
+    }
     double friction = -1.0;
     ListModelNG::SetListFriction(frameNode, friction);
 }
@@ -405,6 +433,15 @@ ArkUI_Uint32 GetListScrollBarColor(ArkUINodeHandle node)
     return ListModelNG::GetScrollBarColor(frameNode);
 }
 
+void CreateWithResourceObjScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
+}
+
 void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     CHECK_NULL_VOID(value);
@@ -418,6 +455,8 @@ void ResetListScrollBarColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBarColor(frameNode, "#FF000000");
+
+    CreateWithResourceObjScrollBarColor(node, nullptr);
 }
 
 ArkUI_Int32 GetAlignListItem(ArkUINodeHandle node)
@@ -532,6 +571,13 @@ void ListResetDivider(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     const V2::ItemDivider divider;
 
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModelNG::ParseResObjDividerStrokeWidth(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerColor(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerStartMargin(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerEndMargin(frameNode, nullptr);
+        ListModel::GetInstance()->SetDividerColorByUser(false);
+    }
     ListModelNG::SetDivider(frameNode, divider);
 }
 
@@ -772,6 +818,27 @@ ArkUI_Bool GetListStackFromEnd(ArkUINodeHandle node)
     return ListModelNG::GetListStackFromEnd(frameNode);
 }
 
+void SetListSyncLoad(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, enabled);
+}
+
+void ResetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ListModelNG::GetListSyncLoad(frameNode);
+}
+
 void SetListFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -787,6 +854,33 @@ void ResetListFadingEdge(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
+
+ArkUI_Int32 GetListFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto mode = ListModelNG::GetFocusWrapMode(frameNode);
+    if (mode == FocusWrapMode::WRAP_WITH_ARROW) {
+        return 1; // 1 means wrap with arrow
+    } else {
+        return 0; // 0 means default
+    }
+}
+
+void SetListFocusWrapMode(ArkUINodeHandle node, int32_t focusWrapMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FocusWrapMode mode = static_cast<FocusWrapMode>(focusWrapMode);
+    ListModelNG::SetFocusWrapMode(frameNode, mode);
+}
+
+void ResetListFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFocusWrapMode(frameNode, FocusWrapMode::DEFAULT);
 }
 
 void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
@@ -833,6 +927,11 @@ const ArkUIListModifier* GetListModifier()
         .resetCachedCount = ResetCachedCount,
         .setCachedIsShown = SetCachedIsShown,
         .resetCachedIsShown = ResetCachedIsShown,
+        .setCacheRange = SetCacheRange,
+        .resetCacheRange = ResetCacheRange,
+        .getListFocusWrapMode = GetListFocusWrapMode,
+        .setListFocusWrapMode = SetListFocusWrapMode,
+        .resetListFocusWrapMode = ResetListFocusWrapMode,
         .getCachedIsShown = GetCachedIsShown,
         .getEnableScrollInteraction = GetEnableScrollInteraction,
         .setEnableScrollInteraction = SetEnableScrollInteraction,
@@ -902,6 +1001,9 @@ const ArkUIListModifier* GetListModifier()
         .setListStackFromEnd = SetListStackFromEnd,
         .resetListStackFromEnd = ResetListStackFromEnd,
         .getListStackFromEnd = GetListStackFromEnd,
+        .setListSyncLoad = SetListSyncLoad,
+        .resetListSyncLoad = ResetListSyncLoad,
+        .getListSyncLoad = GetListSyncLoad,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,
@@ -937,6 +1039,13 @@ const ArkUIListModifier* GetListModifier()
         .resetOnListDidScroll = ResetOnListDidScroll,
         .resetOnListReachStart = ResetOnListReachStart,
         .resetOnListReachEnd = ResetOnListReachEnd,
+        .createWithResourceObjFriction = CreateWithResourceObjFriction,
+        .parseResObjDividerStrokeWidth = ParseResObjDividerStrokeWidth,
+        .parseResObjDividerColor = ParseResObjDividerColor,
+        .parseResObjDividerStartMargin = ParseResObjDividerStartMargin,
+        .parseResObjDividerEndMargin = ParseResObjDividerEndMargin,
+        .createWithResourceObjLaneConstrain = CreateWithResourceObjLaneConstrain,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -962,7 +1071,7 @@ const CJUIListModifier* GetCJUIListModifier()
         .getSticky = GetSticky,
         .setSticky = SetSticky,
         .resetSticky = ResetSticky,
-        .getListEdgeEffect = GetListEdgeEffect,
+        .getListEdgeEffect = GetListEdgeEffectCJ,
         .setListEdgeEffect = SetListEdgeEffect,
         .resetListEdgeEffect = ResetListEdgeEffect,
         .getListDirection = GetListDirection,
@@ -971,6 +1080,9 @@ const CJUIListModifier* GetCJUIListModifier()
         .getListFriction = GetListFriction,
         .setListFriction = SetListFriction,
         .resetListFriction = ResetListFriction,
+        .getListFocusWrapMode = GetListFocusWrapMode,
+        .setListFocusWrapMode = SetListFocusWrapMode,
+        .resetListFocusWrapMode = ResetListFocusWrapMode,
         .getListNestedScroll = GetListNestedScroll,
         .setListNestedScroll = SetListNestedScroll,
         .resetListNestedScroll = ResetListNestedScroll,
@@ -1486,6 +1598,57 @@ void ResetOnListReachEnd(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+
+void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::ParseResObjDividerStrokeWidth(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::ParseResObjDividerColor(frameNode, AceType::Claim(resourceObj));
+    ListModelNG::SetDividerColorByUser(frameNode, false);
+}
+
+void ParseResObjDividerStartMargin(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::ParseResObjDividerStartMargin(frameNode, AceType::Claim(resourceObj));
+}
+
+void ParseResObjDividerEndMargin(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::ParseResObjDividerEndMargin(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjLaneConstrain(ArkUINodeHandle node, void* resObjMinLengthValue, void* resObjMaxLengthValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourcObjMinLengthValue = reinterpret_cast<ResourceObject*>(resObjMinLengthValue);
+    auto* resourceObjMaxLengthValue = reinterpret_cast<ResourceObject*>(resObjMaxLengthValue);
+    ListModelNG::CreateWithResourceObjLaneConstrain(
+        frameNode, AceType::Claim(resourcObjMinLengthValue), AceType::Claim(resourceObjMaxLengthValue));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

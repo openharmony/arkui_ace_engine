@@ -278,7 +278,19 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
     JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
     uint32_t idx = 0;
     for (const RefPtr<SpanBase>& spanObject : spans) {
-        spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+        auto decorationSpan = AceType::DynamicCast<DecorationSpan>(spanObject);
+        if (decorationSpan) {
+            auto types = decorationSpan->GetTextDecorationTypes();
+            for (TextDecoration type : types) {
+                auto tempSpan = decorationSpan->GetSubSpan(
+                    decorationSpan->GetStartIndex(), decorationSpan->GetEndIndex());
+                auto tempDecorationSpan = AceType::DynamicCast<DecorationSpan>(tempSpan);
+                tempDecorationSpan->SetTextDecorationTypes({type});
+                spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(tempSpan));
+            }
+        } else {
+            spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+        }
     }
     info.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
 }
@@ -487,9 +499,13 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
     auto* base = obj->Unwrap<AceType>();
     auto* decorationSpan = AceType::DynamicCast<JSDecorationSpan>(base);
     if (decorationSpan && decorationSpan->GetDecorationSpan()) {
-        return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
+        return AceType::MakeRefPtr<DecorationSpan>(
+            decorationSpan->GetDecorationSpan()->GetTextDecorationTypes(),
             decorationSpan->GetDecorationSpan()->GetColor(),
-            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(), start, start + length);
+            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(),
+            decorationSpan->GetDecorationSpan()->GetLineThicknessScale(),
+            decorationSpan->GetDecorationSpan()->GetTextDecorationOptions(),
+            start, start + length);
     }
     return nullptr;
 }
@@ -765,7 +781,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::VIP);
+                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
         }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
@@ -820,10 +836,14 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
 void JSSpanString::MarshallingExtSpan(const JSCallbackInfo& info, std::vector<uint8_t>& buff)
 {
     if (info.Length() != 2 || !info[1]->IsFunction() || !info[0]->IsObject()) {
-        // marshalling only support one or two params
+        // marshalling only support two params: spanString and callback function
         return;
     }
-    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(jsVal)->Unwrap<JSSpanString>();
     CHECK_NULL_VOID(spanString);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
@@ -937,9 +957,15 @@ void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
         asyncContext->execContext = info.GetExecutionContext();
     }
     auto engine = EngineHelper::GetCurrentEngineSafely();
-    CHECK_NULL_VOID(engine);
+    if (!engine) {
+        delete(asyncContext);
+        return;
+    }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
+    if (!nativeEngine) {
+        delete(asyncContext);
+        return;
+    }
     asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value promise = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &promise);

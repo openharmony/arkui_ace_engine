@@ -21,12 +21,14 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -35,6 +37,8 @@ namespace OHOS::Ace::NG {
 void GridTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -47,13 +51,13 @@ void GridTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
-    auto refreshTheme = RefreshTheme::Builder().Build(refreshThemeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(RefreshTheme::TypeId())).WillRepeatedly(Return(refreshTheme));
+    auto refreshTheme = RefreshThemeNG::Builder().Build(refreshThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId())).WillRepeatedly(Return(refreshTheme));
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);
 #ifndef TEST_IRREGULAR_GRID
-    g_irregularGrid = false;
+    SystemProperties::gridIrregularLayoutEnable_ = false;
 #endif
 }
 
@@ -70,15 +74,21 @@ void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) c
 void GridTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void GridTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void GridTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
@@ -244,6 +254,34 @@ void GridTestNg::CreateBigItem(
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
+void GridTestNg::CreateFocusableBigItem(int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    if (rowStart != NULL_VALUE) {
+        itemModel.SetRowStart(rowStart);
+    }
+    if (rowEnd != NULL_VALUE) {
+        itemModel.SetRowEnd(rowEnd);
+    }
+    if (colStart != NULL_VALUE) {
+        itemModel.SetColumnStart(colStart);
+    }
+    if (colEnd != NULL_VALUE) {
+        itemModel.SetColumnEnd(colEnd);
+    }
+    {
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewAbstract::SetFocusable(true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+}
+
 void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)
 {
     CreateBigItem(NULL_VALUE, NULL_VALUE, colStart, colEnd, NULL_VALUE, ITEM_MAIN_SIZE);
@@ -340,6 +378,7 @@ protected:
         ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
         ViewAbstract::SetFocusable(true);
         auto node = ViewStackProcessor::GetInstance()->Finish();
+        node->nodeId_ = index;
         return { std::to_string(index), node };
     }
 

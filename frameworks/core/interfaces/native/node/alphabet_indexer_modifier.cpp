@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "ui/base/ace_type.h"
 
+#include "core/common/resource/resource_object.h"
+#include "core/components_ng/pattern/indexer/indexer_model.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/indexer/indexer_theme.h"
@@ -166,18 +169,23 @@ void SetPopupItemBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupItemBackground(frameNode, Color(color));
+    IndexerModelNG::SetPopupItemBackgroundByUser(frameNode, true);
 }
 
 void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupItemBackground(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupUnclickedBgAreaColor();
     IndexerModelNG::SetPopupItemBackground(frameNode, color);
+    IndexerModelNG::SetPopupItemBackgroundByUser(frameNode, false);
 }
 
 void SetAlphabetIndexerColor(ArkUINodeHandle node, uint32_t color)
@@ -185,18 +193,23 @@ void SetAlphabetIndexerColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetColor(frameNode, Color(color));
+    IndexerModelNG::SetColorByUser(frameNode, true);
 }
 
 void ResetAlphabetIndexerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemoveColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetDefaultTextColor();
     IndexerModelNG::SetColor(frameNode, color);
+    IndexerModelNG::SetColorByUser(frameNode, false);
 }
 
 void SetPopupColor(ArkUINodeHandle node, uint32_t color)
@@ -204,18 +217,23 @@ void SetPopupColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupColor(frameNode, Color(color));
+    IndexerModelNG::SetPopupColorByUser(frameNode, true);
 }
 
 void ResetPopupColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTextColor();
     IndexerModelNG::SetPopupColor(frameNode, color);
+    IndexerModelNG::SetPopupColorByUser(frameNode, false);
 }
 
 void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
@@ -223,18 +241,23 @@ void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedColor(frameNode, Color(color));
+    IndexerModelNG::SetSelectedColorByUser(frameNode, true);
 }
 
 void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemoveSelectedColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedTextColor();
     IndexerModelNG::SetSelectedColor(frameNode, color);
+    IndexerModelNG::SetSelectedColorByUser(frameNode, false);
 }
 
 void SetPopupBackground(ArkUINodeHandle node, uint32_t color)
@@ -242,18 +265,23 @@ void SetPopupBackground(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupBackground(frameNode, Color(color));
+    IndexerModelNG::SetPopupBackgroundByUser(frameNode, true);
 }
 
 void ResetPopupBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupBackground(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupBackgroundColor();
     IndexerModelNG::SetPopupBackground(frameNode, color);
+    IndexerModelNG::SetPopupBackgroundByUser(frameNode, false);
 }
 
 void SetSelectedBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -261,18 +289,23 @@ void SetSelectedBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+    IndexerModelNG::SetSelectedBGColorByUser(frameNode, true);
 }
 
 void ResetSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemoveSelectedBackgroundColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedBackgroundColor();
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
+    IndexerModelNG::SetSelectedBGColorByUser(frameNode, false);
 }
 
 void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
@@ -280,18 +313,23 @@ void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(color));
+    IndexerModelNG::SetPopupUnselectedColorByUser(frameNode, true);
 }
 
 void ResetPopupUnselectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupUnselectedColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupUnselectedTextColor();
     IndexerModelNG::SetPopupUnselectedColor(frameNode, color);
+    IndexerModelNG::SetPopupUnselectedColorByUser(frameNode, false);
 }
 
 void SetAlignStyle(ArkUINodeHandle node, int32_t value)
@@ -355,17 +393,22 @@ void SetPopupSelectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupSelectedColor(frameNode, Color(color));
+    IndexerModelNG::SetPopupSelectedColorByUser(frameNode, true);
 }
 void ResetPopupSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupSelectedColor(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupSelectedTextColor();
     IndexerModelNG::SetPopupSelectedColor(frameNode, color);
+    IndexerModelNG::SetPopupSelectedColorByUser(frameNode, false);
 }
 
 void SetItemSize(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -468,17 +511,22 @@ void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupTitleBackground(frameNode, Color(color));
+    IndexerModelNG::SetPopupTitleBackgroundByUser(frameNode, true);
 }
 void ResetPopupTitleBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModelNG::RemovePopupTitleBackground(frameNode);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTitleBackground();
     IndexerModelNG::SetPopupTitleBackground(frameNode, color);
+    IndexerModelNG::SetPopupTitleBackgroundByUser(frameNode, false);
 }
 
 void SetAdaptiveWidth(ArkUINodeHandle node)
@@ -600,6 +648,15 @@ void ResetOnPopupSelected(ArkUINodeHandle node)
     IndexerModelNG::SetOnPopupSelected(frameNode, nullptr);
 }
 
+void CreateWithResourceObj(ArkUINodeHandle node, ArkUI_Int32 jsType, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    IndexerModelNG::CreateWithResourceObj(
+        frameNode, static_cast<IndexerJsResourceType>(jsType), AceType::Claim(resourceObj));
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -663,6 +720,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         .resetOnRequestPopupData = ResetOnRequestPopupData,
         .setOnPopupSelected = SetOnPopupSelected,
         .resetOnPopupSelected = ResetOnPopupSelected,
+        .createWithResourceObj = CreateWithResourceObj
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

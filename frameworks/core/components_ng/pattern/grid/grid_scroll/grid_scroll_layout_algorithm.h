@@ -141,7 +141,7 @@ private:
         float mainSize, SizeF idealSize, bool matchChildren);
     void UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize);
 
-    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
+    virtual int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
 
     OffsetF CalculateLargeItemOffset(
         OffsetF currOffset, int32_t itemIndex, int32_t currLineIndex, int32_t currentCrossIndex);
@@ -185,9 +185,9 @@ private:
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
-    bool IsIrregularLine(int32_t lineIndex) const override;
-
     void ResetOffsetWhenHeightChanged();
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
 
@@ -225,6 +225,12 @@ private:
 
     bool HasLayoutOptions(LayoutWrapper* layoutWrapper);
 
+    virtual void PreloadItems(LayoutWrapper* layoutWrapper);
+
+    void ClearUnlayoutedItems(LayoutWrapper* layoutWrapper);
+
+    void UpdateUnlayoutedItems();
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -236,6 +242,11 @@ protected:
     int32_t currentItemColEnd_ = -1;
     float cellAveLength_ = -1.0f;
     float mainGap_ = 0;
+    float crossGap_ = 0;
+    std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
+    std::list<GridPreloadItem> predictBuildList_;
+    LayoutConstraintF cachedChildConstraint_;
+    std::map<int32_t, float> unLayoutedItems_;
 
 private:
     /**
@@ -252,26 +263,24 @@ private:
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
-    std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
-    float crossGap_ = 0;
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
+    int32_t cacheEnd_ = 0;
     bool isChildrenUpdated_ = false;
 
     bool expandSafeArea_ = false;
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;
     bool enableSkipping_ = true;               // enables skipping lines on a large offset change.
+    bool isLayouted_ = true;
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    std::list<GridPreloadItem> predictBuildList_;
-    LayoutConstraintF cachedChildConstraint_;
     GridReloadReason reason_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);

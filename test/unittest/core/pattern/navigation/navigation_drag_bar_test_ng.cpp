@@ -21,6 +21,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -32,6 +33,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float BLUR_OPACITY = 0.1f;
 class NavigationDragBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -477,5 +479,93 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest010, TestSize.Level1)
     auto dragBarItemRenderContext = dragBarItemNode->GetRenderContext();
     EXPECT_NE(dragBarRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
     EXPECT_NE(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest011
+ * @tc.desc: Test UpdateDefaultColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. test UpdateDefaultColor.
+     */
+    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    EXPECT_NE(dragBarPattern, nullptr);
+    dragBarPattern->UpdateDefaultColor();
+    
+    auto theme = NavigationGetTheme();
+    ASSERT_NE(theme, nullptr);
+    auto dragBarRenderContext = dragBarNode->GetRenderContext();
+    ASSERT_NE(dragBarRenderContext, nullptr);
+    auto defaultDragBarColor = theme->GetDragBarDefaultColor().ChangeOpacity(BLUR_OPACITY);
+    auto barItemDefaultColor = theme->GetDragBarItemDefaultColor();
+    
+    auto dragBarItemNode = AceType::DynamicCast<FrameNode>(dragBarNode->GetChildAtIndex(0));
+    EXPECT_NE(dragBarItemNode, nullptr);
+    auto dragBarItemRenderContext = dragBarItemNode->GetRenderContext();
+    
+    EXPECT_EQ(dragBarRenderContext->GetBackgroundColor().value_or(Color()), defaultDragBarColor);
+    EXPECT_EQ(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), barItemDefaultColor);
+}
+
+/**
+ * @tc.name: NavigationDragBarTest012
+ * @tc.desc: Test UpdateActiveColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationGroupNode and dragBar.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->enableDragBar_ = true;
+    navigationPattern->OnModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    /**
+     * @tc.steps: step2. test UpdateActiveColor.
+     */
+    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    EXPECT_NE(dragBarPattern, nullptr);
+    dragBarPattern->UpdateActiveColor();
+    
+    auto theme = NavigationGetTheme();
+    ASSERT_NE(theme, nullptr);
+    auto dragBarRenderContext = dragBarNode->GetRenderContext();
+    ASSERT_NE(dragBarRenderContext, nullptr);
+    auto defaultDragBarActiveColor = theme->GetDragBarActiveColor();
+    auto barItemDefaultActiveColor = theme->GetDragBarItemActiveColor();
+    
+    auto dragBarItemNode = AceType::DynamicCast<FrameNode>(dragBarNode->GetChildAtIndex(0));
+    EXPECT_NE(dragBarItemNode, nullptr);
+    auto dragBarItemRenderContext = dragBarItemNode->GetRenderContext();
+    
+    EXPECT_EQ(dragBarRenderContext->GetBackgroundColor().value_or(Color()), defaultDragBarActiveColor);
+    EXPECT_EQ(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), barItemDefaultActiveColor);
 }
 } // namespace OHOS::Ace::NG

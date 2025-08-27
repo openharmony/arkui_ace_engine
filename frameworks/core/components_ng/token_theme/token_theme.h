@@ -16,52 +16,6 @@
 #ifndef FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_H
 #define FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_H
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/token_theme/token_colors.h"
+#include "ui/view/theme/token_theme.h"
 
-
-namespace OHOS::Ace::NG {
-
-using TokenThemeScopeId = int32_t;
-
-class TokenTheme : public virtual AceType {
-    DECLARE_ACE_TYPE(TokenTheme, AceType);
-public:
-    TokenTheme(int32_t id)
-    {
-        id_ = id;
-    }
-    virtual ~TokenTheme() = default;
-
-    void SetColors(const RefPtr<TokenColors>& colors)
-    {
-        colors_ = colors;
-    }
-
-    const RefPtr<TokenColors>& Colors() const
-    {
-        return colors_;
-    }
-
-    void SetColorMode(ColorMode colorMode)
-    {
-        colorMode_ = colorMode;
-    }
-
-    ColorMode GetColorMode() const
-    {
-        return colorMode_;
-    }
-
-    int32_t GetId() const
-    {
-        return id_;
-    }
-private:
-    int32_t id_;
-    RefPtr<TokenColors> colors_;
-    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
-};
-
-} // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_CORE_COMPONENTS_NG_TOKEN_THEME_TOKEN_THEME_H

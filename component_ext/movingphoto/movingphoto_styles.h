@@ -31,6 +31,8 @@ struct MovingPhotoStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MovingPhotoUri, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(XmageHeight, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageSize, SizeF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(XmageOffset, SizeF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(XmageRawSize, SizeF);
 };
 
 } // namespace OHOS::Ace::NG

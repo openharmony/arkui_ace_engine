@@ -33,6 +33,7 @@ template("pa_backend") {
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "eventhandler:libeventhandler",
+      "form_fwk:form_manager",
       "hilog:libhilog",
       "i18n:intl_util",
       "ipc:ipc_core",

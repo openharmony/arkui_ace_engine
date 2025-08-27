@@ -240,6 +240,9 @@ public:
 
     bool IsContainsBuilder();
 
+    void SetAnimationCurve(const RefPtr<Curve>& curve);
+    const RefPtr<Curve> GetAnimationCurve(const RefPtr<Curve>& defaultCurve) const;
+
     void SetAnimationDuration(int32_t animationDuration)
     {
         animationDuration_ = animationDuration;
@@ -560,7 +563,8 @@ public:
         focusIndicator_ = focusIndicator;
     }
 
-    void ChangeIndex(int32_t index);
+    void ResetOnForceMeasure(int32_t index);
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     void OnModifyDone() override;
@@ -645,6 +649,7 @@ private:
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void InitTurnPageRateEvent();
+    void SetTurnPageRateCallback();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect);
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
@@ -670,8 +675,12 @@ private:
     void StopHideTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenOffset(float offset);
-    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarTranslate(const TranslateOptions& options, bool isUserDefined = false);
     void SetTabBarOpacity(float opacity);
+    float GetUserDefinedTranslateY() const
+    {
+        return userDefinedTranslateY_;
+    }
 
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
@@ -720,6 +729,7 @@ private:
     int32_t accessibilityFocusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::unordered_map<int32_t, TabBarParamType> tabBarType_;
+    RefPtr<Curve> animationCurve_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
@@ -770,6 +780,7 @@ private:
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
+    float userDefinedTranslateY_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;

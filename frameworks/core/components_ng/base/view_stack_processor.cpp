@@ -77,6 +77,16 @@ void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView
     elementsStack_.push(element);
 }
 
+#ifdef ACE_STATIC
+void ViewStackProcessor::PushPtr(int64_t elementPtr)
+{
+    if (elementPtr == 0) {
+        return;
+    }
+    Push(UINode::Claim(reinterpret_cast<UINode*>(elementPtr)), true);
+}
+#endif
+
 bool ViewStackProcessor::ShouldPopImmediately()
 {
     if (elementsStack_.size() <= 1) {

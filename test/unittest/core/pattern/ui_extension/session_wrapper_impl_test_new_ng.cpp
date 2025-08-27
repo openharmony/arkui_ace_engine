@@ -711,7 +711,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg015, TestSize.L
 
 /**
  * @tc.name: SessionWrapperImplNewTestNg016
- * @tc.desc: Test the method GetInstanceIdFromHost.
+ * @tc.desc: Test the method GetInstanceId.
  * @tc.type: FUNC
  */
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg016, TestSize.Level1)
@@ -726,14 +726,10 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg016, TestSize.L
     auto patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
 
     auto instanceId = pattern->GetInstanceIdFromHost();
-    sessionWrapper->instanceId_  = 200;
-    auto ret = sessionWrapper->GetInstanceIdFromHost();
+    sessionWrapper->instanceId_ = 200;
+    sessionWrapper->UpdateInstanceId(instanceId);
+    auto ret = sessionWrapper->GetInstanceId();
     EXPECT_EQ(ret, instanceId);
-
-    sessionWrapper->hostPattern_ = nullptr;
-    patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
-    ret = sessionWrapper->GetInstanceIdFromHost();
-    EXPECT_EQ(ret, INSTANCE_ID_UNDEFINED);
 }
 
 /**
@@ -1042,9 +1038,10 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg028, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->isNotifyOccupiedAreaChange_ = true;
     auto pipeline = PipelineBase::GetCurrentContext();
-    auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceIdFromHost());
+    auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceId());
     info->rect_.height_ = 10;
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
+    auto displayArea = sessionWrapper->GetDisplayAreaWithWindowScene();
 
     ret = sessionWrapper->InnerNotifyOccupiedAreaChangeInfo(info, isWaitTask, occupiedAreaTime);
     EXPECT_EQ(sessionWrapper->lastOccupiedAreaTime_, occupiedAreaTime);
@@ -1152,7 +1149,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg032, TestSize.L
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
-    sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+    sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
 }
 
 /**
@@ -1179,7 +1176,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg033, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
     EXPECT_NE(patternUpgrade, nullptr);
 }
 
@@ -1241,12 +1238,16 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     auto pipeline = PipelineBase::GetCurrentContext();
 
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::UNDEFINED;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::UNDEFINED);
     sessionWrapper->NotifyDisplayArea(displayArea);
 
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    EXPECT_EQ(transaction, transactionController->GetRSTransaction());
+    
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
     sessionWrapper->NotifyDisplayArea(displayArea);
     EXPECT_EQ(transaction, transactionController->GetRSTransaction());
 
@@ -1292,5 +1293,36 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg038, TestSize.L
 
     bool ret = sessionWrapper->RegisterDataConsumer();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg039
+ * @tc.desc: Test the method DispatchExtensionDataToHostWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg039, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    uint32_t customId = 1;
+    AAFwk::Want data;
+    std::optional<AAFwk::Want> reply;
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    auto patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
+    EXPECT_NE(patternUpgrade, nullptr);
+
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    int32_t callSessionId = sessionWrapper->GetSessionId();
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    EXPECT_NE(patternUpgrade, nullptr);
+    customId = static_cast<uint32_t>(UIContentBusinessCode::WINDOW_CODE_BEGIN);
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    EXPECT_NE(patternUpgrade, nullptr);
 }
 } // namespace OHOS::Ace::NG

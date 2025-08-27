@@ -49,6 +49,7 @@ public:
 
     double width_ = 0.0;
     double height_ = 0.0;
+    double alpha_ = 1.0;
     double defaultWidth_ = 0.0;
     double defaultHeight_ = 0.0;
     bool isSetSize_ = false;
@@ -65,6 +66,7 @@ public:
     void DoMeasure();
 
 private:
+    void UpdateUserSetSize(const RefPtr<SecurityComponentLayoutProperty>& property);
     bool isExist_ = false;
     double minIconSize_;
     RefPtr<SecurityComponentLayoutProperty> secCompProperty_;

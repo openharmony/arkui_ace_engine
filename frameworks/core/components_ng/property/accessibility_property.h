@@ -242,11 +242,7 @@ public:
 
     std::unordered_set<AceAction> GetSupportAction() const;
 
-    void ResetSupportAction()
-    {
-        supportActions_ = 0;
-        SetSpecificSupportAction();
-    };
+    void ResetSupportAction();
 
     void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl)
     {
@@ -418,6 +414,7 @@ public:
     bool ActActionClearSelection();
 
     void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl);
+
     void ResetUserOnAccessibilityFocusCallback();
 
     void SetUserOnAccessibilityFocusCallback(
@@ -529,11 +526,9 @@ public:
 
     void SetAccessibilityLevel(const std::string& accessibilityLevel);
 
-
     struct HoverTestDebugTraceInfo {
         std::vector<std::unique_ptr<JsonValue>> trace;
     };
-
 
     /*
     * Get path from root to node which hit the hoverPoint.
@@ -698,6 +693,21 @@ private:
 
     static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);
 
+    // the interface supports multithreading
+    void SetAccessibilityGroupMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityTextWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityDescriptionWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityLevelMultiThread(const std::string& backupLevel);
+
+    // the interface supports multithreading
+    void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -723,8 +733,8 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
-    GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
+    GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityHoverConsumeCheckImpl accessibilityHoverConsumeCheckImpl_;
 
     bool isAccessibilityFocused_ = false;
@@ -759,6 +769,7 @@ protected:
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
     FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
+    
     // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
     // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
     int32_t accessibilityZIndex_ = -1;

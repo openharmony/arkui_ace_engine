@@ -138,7 +138,7 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateForegroundColor(
         hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
-    hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    hyperlinkLayoutProperty->UpdateTextDecoration({theme->GetTextUnSelectedDecoration()});
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto address = hyperlinkLayoutProperty->GetAddress().value_or("");
     pipeline->HyperlinkStartAbility(address);
@@ -205,7 +205,7 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfo.GetTouchType();
     auto color = theme->GetTextColor();
     if (touchType == TouchType::DOWN) {
-        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
+        hyperlinkLayoutProperty->UpdateTextDecoration({theme->GetTextSelectedDecoration()});
         if (isLinked_) {
             hyperlinkLayoutProperty->UpdateTextDecorationColor(
                 hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
@@ -219,7 +219,7 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
-        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        hyperlinkLayoutProperty->UpdateTextDecoration({theme->GetTextUnSelectedDecoration()});
         if (!isLinked_) {
             hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(color));
             renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
@@ -282,7 +282,7 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
     if (isHovered) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
-        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
+        hyperlinkLayoutProperty->UpdateTextDecoration({theme->GetTextSelectedDecoration()});
         if (isLinked_) {
             hyperlinkLayoutProperty->UpdateTextDecorationColor(
                 hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
@@ -293,7 +293,7 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
-        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        hyperlinkLayoutProperty->UpdateTextDecoration({theme->GetTextUnSelectedDecoration()});
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -317,8 +317,53 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(
-            frameId, MouseFormat::HAND_POINTING, 0, info.GetAction() == MouseAction::WINDOW_LEAVE);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING, 0,
+            (info.GetAction() == MouseAction::WINDOW_LEAVE || info.GetAction() == MouseAction::CANCEL));
+    }
+}
+
+void HyperlinkPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    CHECK_NULL_VOID(value);
+    using Handler = std::function<void(HyperlinkLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    const std::unordered_map<std::string, Handler> handlers = {
+        { "Color",
+            [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
+                HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    prop->UpdateTextColor(*realValue);
+                    prop->UpdateColor(*realValue);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
+                }
+            }
+        },
+        { "Content",
+            [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    prop->UpdateContent(*realValue);
+                }
+            }
+        },
+        { "Address",
+            [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    prop->UpdateAddress(*realValue);
+                }
+            }
+        },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value);
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 } // namespace OHOS::Ace::NG

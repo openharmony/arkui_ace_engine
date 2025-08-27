@@ -24,6 +24,8 @@
 #include "frameworks/core/components/common/properties/color.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 
+#include "core/common/resource/resource_object.h"
+
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT RefreshModel {
@@ -54,6 +56,7 @@ public:
     virtual void SetOnRefreshing(std::function<void()>&& refreshing) = 0;
     virtual void SetOnOffsetChange(std::function<void(const float)>&& dragOffset) = 0;
     virtual void ResetOnOffsetChange() = 0;
+    virtual void SetMaxPullDownDistance(const std::optional<float>& maxDistance) {}
     virtual void SetPullDownRatio(const std::optional<float>& pullDownRatio) {}
     virtual void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) = 0;
     virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;
@@ -62,7 +65,7 @@ public:
     virtual void SetRefreshOffset(const Dimension& offset) = 0;
     virtual void SetPullToRefresh(bool isPullToRefresh) = 0;
     virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
-
+    virtual void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 private:
     static std::unique_ptr<RefreshModel> instance_;
     static std::mutex mutex_;

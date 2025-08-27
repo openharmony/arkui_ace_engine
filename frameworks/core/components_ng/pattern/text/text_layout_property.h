@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "frameworks/core/components_ng/pattern/text/advanced_text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 #define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
@@ -57,6 +58,55 @@ public:                                                                     \
         UpdatePropertyChangeFlag(changeFlag);                               \
         propNeedReCreateParagraph_ = true;                                  \
     }
+
+#define ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(name, type, changeFlag)                  \
+public:                                                                                         \
+    std::optional<type> Get##name() const                                                       \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
+        return advancedTextLayoutProperty_->Get##name();                                        \
+    }                                                                                           \
+    bool Has##name() const                                                                      \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, false);                                  \
+        return advancedTextLayoutProperty_->Get##name().has_value();                            \
+    }                                                                                           \
+    const type& Get##name##Value() const                                                        \
+    {                                                                                           \
+        return advancedTextLayoutProperty_->Get##name().value();                                \
+    }                                                                                           \
+    const type& Get##name##Value(const type& defaultValue) const                                \
+    {                                                                                           \
+        if (!Has##name()) {                                                                     \
+            return defaultValue;                                                                \
+        }                                                                                       \
+        return advancedTextLayoutProperty_->Get##name().value();                                \
+    }                                                                                           \
+    std::optional<type> Clone##name() const                                                     \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
+        return advancedTextLayoutProperty_->Get##name();                                        \
+    }                                                                                           \
+    void Reset##name()                                                                          \
+    {                                                                                           \
+    CHECK_NULL_VOID(advancedTextLayoutProperty_);                                               \
+        return advancedTextLayoutProperty_->Reset##name();                                      \
+    }                                                                                           \
+    void Update##name(const type& value)                                                        \
+    {                                                                                           \
+        if (!advancedTextLayoutProperty_) {                                                     \
+            advancedTextLayoutProperty_ = AceType::MakeRefPtr<AdvancedTextLayoutProperty>();    \
+        }                                                                                       \
+        CHECK_NULL_VOID(advancedTextLayoutProperty_);                                           \
+        if (Has##name()) {                                                                      \
+            if (NearEqual(Get##name##Value(), value)) {                                         \
+                return;                                                                         \
+            }                                                                                   \
+        }                                                                                       \
+        advancedTextLayoutProperty_->Set##name(value);                                          \
+        UpdatePropertyChangeFlag(changeFlag);                                                   \
+        propNeedReCreateParagraph_ = true;                                                      \
+    }                                                                                           
 
 class InspectorFilter;
 
@@ -104,8 +154,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
-
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -117,7 +165,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, VariableFontWeight, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecoration, TextDecoration, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        FontStyle, TextDecoration, std::vector<TextDecoration>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextCase, TextCase, PROPERTY_UPDATE_MEASURE);
@@ -125,12 +174,18 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableVariableFontWeight, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LineThicknessScale, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        FontForegroudGradiantColor, FontForegroudGradiantColor, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, IsOnlyBetweenLines, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextVerticalAlign, TextVerticalAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
@@ -154,7 +209,15 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_RENDER);
 
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(TextEffectStrategy, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipDirection, TextFlipDirection, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipEnableBlur, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+
 public:
     void UpdateContent(const std::string& value)
     {
@@ -181,9 +244,22 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
+
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        auto decorations = GetTextDecoration();
+        if (!decorations.has_value()) {
+            return TextDecoration::NONE;
+        }
+        return decorations.value().size() > 0 ?
+            decorations.value()[0] : TextDecoration::NONE;
+    }
 
     // for XTS inspector
     std::string InspectorGetTextFont() const
@@ -257,6 +333,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
     bool isLoopAnimation_ = false;
+    RefPtr<AdvancedTextLayoutProperty> advancedTextLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG
 

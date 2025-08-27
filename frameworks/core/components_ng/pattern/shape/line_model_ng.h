@@ -25,10 +25,16 @@ class ACE_EXPORT LineModelNG : public OHOS::Ace::LineModel {
 public:
     void Create() override;
     void StartPoint(const ShapePoint& value) override;
+    void StartPoint(const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray) override;
     void EndPoint(const ShapePoint& value) override;
-    
+    void EndPoint(const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray) override;
+
     static void StartPoint(FrameNode* frameNode, const ShapePoint& value);
+    static void StartPoint(
+        FrameNode* frameNode, const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray);
     static void EndPoint(FrameNode* frameNode, const ShapePoint& value);
+    static void EndPoint(
+        FrameNode* frameNode, const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray);
 };
 
 } // namespace OHOS::Ace::NG

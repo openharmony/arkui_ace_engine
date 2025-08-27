@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
 
 namespace OHOS::Ace::NG {
 class MockPipelineContext : public PipelineContext {
@@ -35,6 +36,10 @@ public:
     void SetRootSize(double rootWidth, double rootHeight);
     void SetInstanceId(int32_t instanceId);
     void SetContainerModalButtonsRect(bool hasModalButtonsRect);
+    void SetContainerCustomTitleVisible(bool visible);
+    void SetContainerControlButtonVisible(bool visible);
+    void SetContainerModalButtonsRect(RectF buttons);
+    void SetContainerModalTitleHeight(int32_t height);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
@@ -67,7 +72,7 @@ public:
         backCallback_ = callback;
     }
 
-    bool CallRouterBackToPopPage() override
+    bool CallRouterBackToPopPage(bool* isUserAccept = nullptr) override
     {
         if (backCallback_) {
             backCallback_();
@@ -75,8 +80,38 @@ public:
         }
         return false;
     }
-    void SetEnableSwipeBack(bool isEnable) {}
 
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
+    bool ReachResponseDeadline() const override
+    {
+        if (responseTime_ > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    void SetResponseTime(int32_t time)
+    {
+        responseTime_ = time;
+    }
+
+    void DecResponseTime()
+    {
+        if (responseTime_ > 0 && responseTime_ != INT32_MAX) {
+            responseTime_--;
+        }
+    }
+
+    std::string GetCurrentPageNameCallback()
+    {
+        return "";
+    }
+
+    auto Get()
+    {
+        return this;
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
@@ -84,6 +119,7 @@ protected:
     std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
+    int32_t responseTime_ = INT32_MAX;
 };
 } // namespace OHOS::Ace::NG
 

@@ -71,6 +71,26 @@ constexpr int32_t DOT_INDICATOR_SET_IGNORE_SIZE = 16;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 constexpr int32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr int32_t STOP_WHEN_TOUCHED = 2;
+constexpr int32_t INDICATOR_RESOURCE_LEFT = 0;
+constexpr int32_t INDICATOR_RESOURCE_TOP = 1;
+constexpr int32_t INDICATOR_RESOURCE_RIGHT = 2;
+constexpr int32_t INDICATOR_RESOURCE_BOTTOM = 3;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_WIDTH = 4;
+constexpr int32_t DOT_INDICATOR_RESOURCE_ITEM_HEIGHT = 5;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH = 6;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT = 7;
+constexpr int32_t DOT_INDICATOR_RESOURCE_COLOR = 8;
+constexpr int32_t DOT_INDICATOR_RESOURCE_SELECTED_COLOR = 9;
+constexpr int32_t INDICATOR_RESOURCE_VECTOR_LENGTH = 10;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_COLOR = 4;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR = 5;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_FONT_SIZE = 6;
+constexpr int32_t DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE = 7;
+constexpr int32_t ARROW_RESOURCE_BACKGROUND_SIZE = 0;
+constexpr int32_t ARROW_RESOURCE_BACKGROUND_COLOR = 1;
+constexpr int32_t ARROW_RESOURCE_SIZE = 2;
+constexpr int32_t ARROW_RESOURCE_COLOR = 3;
+constexpr int32_t ARROW_RESOURCE_VECTOR_LENGTH = 4;
 } // namespace
 
 ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -112,14 +132,21 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     Ace::CalcDimension nextMargin;
+    RefPtr<ResourceObject> nextMarginResObj;
     if (valueArg->IsUndefined() || valueArg->IsNull() ||
-        !ArkTSUtils::ParseJsDimension(vm, valueArg, nextMargin, DimensionUnit::VP) ||
+        !ArkTSUtils::ParseJsDimension(vm, valueArg, nextMargin, DimensionUnit::VP, nextMarginResObj) ||
         LessNotEqual(nextMargin.Value(), 0.0)) {
         nextMargin.SetValue(0.0);
     }
     int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
-        nativeNode, nextMargin.Value(), nextMarginUnit, 0);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto nextMarginRawPtr = AceType::RawPtr(nextMarginResObj);
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMarginRaw(
+            nativeNode, nextMargin.Value(), nextMarginUnit, 0, nextMarginRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
+            nativeNode, nextMargin.Value(), nextMarginUnit, 0);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -141,14 +168,21 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperPrevMargin(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     Ace::CalcDimension prevMargin;
+    RefPtr<ResourceObject> preMarginResObj;
     if (valueArg->IsUndefined() || valueArg->IsNull() ||
-        !ArkTSUtils::ParseJsDimension(vm, valueArg, prevMargin, DimensionUnit::VP) ||
+        !ArkTSUtils::ParseJsDimension(vm, valueArg, prevMargin, DimensionUnit::VP, preMarginResObj) ||
         LessNotEqual(prevMargin.Value(), 0.0)) {
         prevMargin.SetValue(0.0);
     }
     int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
-        nativeNode, prevMargin.Value(), prevMarginUnit, 0);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto preMarginRawPtr = AceType::RawPtr(preMarginResObj);
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMarginRaw(
+            nativeNode, prevMargin.Value(), prevMarginUnit, 0, preMarginRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
+            nativeNode, prevMargin.Value(), prevMarginUnit, 0);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperPrevMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -315,17 +349,19 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     }
     CalcDimension lengthValue;
     Color color;
-    std::string backgroundSizeStr =
-        ArkTSUtils::ParseJsDimension(vm, backgroundSize, lengthValue, DimensionUnit::VP, false)
-            ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit())
-            : "-";
-    std::string backgroundColorStr =
-        ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color) ? std::to_string(color.GetValue()) : "-";
-    std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP, false)
-                                   ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit())
-                                   : "-";
-    std::string arrowColorStr =
-        ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color) ? std::to_string(color.GetValue()) : "-";
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    resObjs.resize(ARROW_RESOURCE_VECTOR_LENGTH);
+    std::string backgroundSizeStr = ArkTSUtils::ParseJsDimension(vm, backgroundSize, lengthValue, DimensionUnit::VP,
+        resObjs.at(ARROW_RESOURCE_BACKGROUND_SIZE), false)
+        ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
+    std::string backgroundColorStr = ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color,
+        resObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
+    std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP,
+        resObjs.at(ARROW_RESOURCE_SIZE), false)
+        ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
+    std::string arrowColorStr = ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color,
+        resObjs.at(ARROW_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string isHoverShowStr = "2";
     if (!isHoverShow->IsUndefined()) {
         isHoverShowStr = isHoverShow->ToBoolean(vm)->Value() ? "1" : "0";
@@ -333,7 +369,12 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     std::string displayArrowStr = displayArrowValueStr + "|" + showBackgroundStr + "|" + isSidebarMiddleStr + "|" +
                                   backgroundSizeStr + "|" + backgroundColorStr + "|" + arrowSizeStr + "|" +
                                   arrowColorStr + "|" + isHoverShowStr + "|";
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(nativeNode, displayArrowStr.c_str());
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperDisplayArrowRaw(nativeNode, displayArrowStr.c_str(),
+            static_cast<void*>(&resObjs));
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperDisplayArrow(nativeNode, displayArrowStr.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperDisplayArrow(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -661,14 +702,14 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperIndex(ArkUIRuntimeCallInfo* runt
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIndex(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-std::string GetStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+std::string GetStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsValue, RefPtr<ResourceObject>& resObj)
 {
     std::string result = "-";
     if (jsValue->IsUndefined()) {
         return result;
     }
     CalcDimension calc;
-    result = ArkTSUtils::ParseJsDimension(vm, jsValue, calc, DimensionUnit::VP, true)
+    result = ArkTSUtils::ParseJsDimension(vm, jsValue, calc, DimensionUnit::VP, resObj, true)
                  ? (calc.Unit() == DimensionUnit::PERCENT
                            ? (std::to_string(calc.Value() * DEFAULT_PERCENT_VALUE) + "%")
                            : (std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())))
@@ -686,7 +727,8 @@ std::string GetIntStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& js
     return result;
 }
 
-std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool hasIgnoreSize)
+std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool hasIgnoreSize,
+    RefPtr<ResourceObject>& resObj)
 {
     std::string bottom = "-";
     if (jsValue->IsUndefined()) {
@@ -694,9 +736,9 @@ std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool
     }
     if (hasIgnoreSize) {
         CalcDimension bottomcCalc;
-        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc);
+        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc, resObj);
         if (!parseOK) {
-            bottom = GetStringByValueRef(vm, jsValue);
+            bottom = GetStringByValueRef(vm, jsValue, resObj);
             return bottom;
         } else {
             bottomcCalc = bottomcCalc > 0.0_vp ? bottomcCalc : 0.0_vp;
@@ -704,7 +746,7 @@ std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool
             return bottom;
         }
     } else {
-        bottom = GetStringByValueRef(vm, jsValue);
+        bottom = GetStringByValueRef(vm, jsValue, resObj);
         return bottom;
     }
 }
@@ -736,7 +778,7 @@ std::string ParseSpace(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 }
 
 void GetSpaceAndBottom(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::string& bottom,
-    std::string& spaceAndIgnoreSize)
+    std::string& spaceAndIgnoreSize, RefPtr<ResourceObject>& resObj)
 {
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_BOTTOM);
     Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_SPACE);
@@ -755,12 +797,13 @@ void GetSpaceAndBottom(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::s
         setIgnoreSizeStr = setIgnoreSizeArg->ToBoolean(vm)->Value() ? "1" : "0";
     }
 
-    bottom = ParseBottom(vm, bottomArg, hasIgnoreSize);
+    bottom = ParseBottom(vm, bottomArg, hasIgnoreSize, resObj);
     std::string space = ParseSpace(vm, spaceArg);
     spaceAndIgnoreSize =  space + "|" + ignoreSizeStr + "|" + setIgnoreSizeStr;
 }
 
-std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
+std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
     Local<JSValueRef> itemHeightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_HEIGHT);
@@ -774,43 +817,46 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_RIGHT);
 
     CalcDimension calc;
-    std::string itemWidth = ArkTSUtils::ParseJsDimension(vm, itemWidthArg, calc, DimensionUnit::VP, false)
-                                ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-                                : "-";
-    std::string itemHeight = ArkTSUtils::ParseJsDimension(vm, itemHeightArg, calc, DimensionUnit::VP, false)
-                                 ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-                                 : "-";
+    std::string itemWidth = ArkTSUtils::ParseJsDimension(vm, itemWidthArg, calc, DimensionUnit::VP,
+        resObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH), false)
+        ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
+    std::string itemHeight = ArkTSUtils::ParseJsDimension(vm, itemHeightArg, calc, DimensionUnit::VP,
+        resObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT), false)
+        ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
     std::string selectedItemWidth =
-        ArkTSUtils::ParseJsDimension(vm, selectedItemWidthArg, calc, DimensionUnit::VP, false)
-            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-            : "-";
+        ArkTSUtils::ParseJsDimension(vm, selectedItemWidthArg, calc, DimensionUnit::VP,
+            resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH), false)
+            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
     std::string selectedItemHeight =
-        ArkTSUtils::ParseJsDimension(vm, selectedItemHeightArg, calc, DimensionUnit::VP, false)
-            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-            : "-";
+        ArkTSUtils::ParseJsDimension(vm, selectedItemHeightArg, calc, DimensionUnit::VP,
+            resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT), false)
+            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
     std::string mask = "2";
     if (!maskArg->IsUndefined()) {
         mask = maskArg->ToBoolean(vm)->Value() ? "1" : "0";
     }
     Color color;
-    std::string colorStr = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color) ? std::to_string(color.GetValue()) : "-";
-    std::string selectedColor =
-        ArkTSUtils::ParseJsColorAlpha(vm, selectedColorArg, color) ? std::to_string(color.GetValue()) : "-";
-    std::string left = GetStringByValueRef(vm, leftArg);
-    std::string top = GetStringByValueRef(vm, topArg);
-    std::string right = GetStringByValueRef(vm, rightArg);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::string colorStr = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color,
+        resObjs.at(DOT_INDICATOR_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
+    std::string selectedColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedColorArg, color,
+        resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
+    std::string left = GetStringByValueRef(vm, leftArg, resObjs.at(INDICATOR_RESOURCE_LEFT));
+    std::string top = GetStringByValueRef(vm, topArg, resObjs.at(INDICATOR_RESOURCE_TOP));
+    std::string right = GetStringByValueRef(vm, rightArg, resObjs.at(INDICATOR_RESOURCE_RIGHT));
     Local<JSValueRef> maxDisplayCountArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_MAX_DISPLAY_COUNT);
     auto maxDisplayCount = GetIntStringByValueRef(vm, maxDisplayCountArg);
     std::string bottom = "-";
     std::string spaceAndIgnoreSize = "-";
-    GetSpaceAndBottom(runtimeCallInfo, vm, bottom, spaceAndIgnoreSize);
+    GetSpaceAndBottom(runtimeCallInfo, vm, bottom, spaceAndIgnoreSize, resObjs.at(INDICATOR_RESOURCE_BOTTOM));
     std::string indicatorStr = itemWidth + "|" + itemHeight + "|" + selectedItemWidth + "|" +
                                selectedItemHeight + "|" + mask + "|" + colorStr + "|" + selectedColor + "|" + left +
                                "|" + top + "|" + right + "|" + bottom + "|" + maxDisplayCount + "|" +
                                spaceAndIgnoreSize;
     return indicatorStr;
 }
-std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
+std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_FONT_COLOR);
     Local<JSValueRef> selectedFontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SELECTED_FONT_COLOR);
@@ -828,22 +874,22 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     Local<JSValueRef> setIgnoreSizeArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SET_IGNORE_SIZE);
     Color color;
     CalcDimension calc;
-    std::string fontColor =
-        ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color) ? std::to_string(color.GetValue()) : "-";
-    std::string selectedFontColor =
-        ArkTSUtils::ParseJsColorAlpha(vm, selectedFontColorArg, color) ? std::to_string(color.GetValue()) : "-";
-    std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP, false)
-                                    ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-                                    : "-";
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::string fontColor = ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color,
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
+    std::string selectedFontColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedFontColorArg, color,
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
+    std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP,
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SIZE), false)
+        ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
     std::string digitFontWeight = digitFontWeightArg->ToString(vm)->ToString(vm);
-    std::string selectedDigitFontSize =
-        ArkTSUtils::ParseJsDimension(vm, selectedDigitFontSizeArg, calc, DimensionUnit::FP, false)
-            ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
-            : "-";
+    std::string selectedDigitFontSize = ArkTSUtils::ParseJsDimension(vm, selectedDigitFontSizeArg, calc,
+        DimensionUnit::FP, resObjs.at(DIGIT_INDICATOR_RESOURCE_SELECTED_FONT_SIZE), false)
+        ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
     std::string selectedDigitFontWeight = selectedDigitFontWeightArg->ToString(vm)->ToString(vm);
-    std::string left = GetStringByValueRef(vm, leftArg);
-    std::string top = GetStringByValueRef(vm, topArg);
-    std::string right = GetStringByValueRef(vm, rightArg);
+    std::string left = GetStringByValueRef(vm, leftArg, resObjs.at(INDICATOR_RESOURCE_LEFT));
+    std::string top = GetStringByValueRef(vm, topArg, resObjs.at(INDICATOR_RESOURCE_TOP));
+    std::string right = GetStringByValueRef(vm, rightArg, resObjs.at(INDICATOR_RESOURCE_RIGHT));
     
     std::string setIgnoreSize = "-";
     if (!setIgnoreSizeArg->IsUndefined()) {
@@ -856,7 +902,7 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     if (ignoreSize.has_value()) {
         ignoreSizeStr = ignoreSize.value()  ? "1" : "0";
     }
-    std::string bottom = ParseBottom(vm, bottomArg, hasIgnoreSize);
+    std::string bottom = ParseBottom(vm, bottomArg, hasIgnoreSize, resObjs.at(INDICATOR_RESOURCE_BOTTOM));
     std::string indicatorStr = fontColor + "|" + selectedFontColor + "|" + digitFontSize + "|" + digitFontWeight +
                    "|" + selectedDigitFontSize + "|" + selectedDigitFontWeight + "|" + left + "|" + top + "|" + right +
                    "|" + bottom + "|" + ignoreSizeStr + "|" + setIgnoreSize;
@@ -875,14 +921,16 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
 
     std::string type = valueArg->ToString(vm)->ToString(vm);
     std::string indicatorStr = "";
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    resObjs.resize(INDICATOR_RESOURCE_VECTOR_LENGTH);
     if (type == "boolean") {
         Local<JSValueRef> indicatorArg = runtimeCallInfo->GetCallArgRef(INDICATOR_VALUE_INDEX);
         std::string indicator = indicatorArg->ToBoolean(vm)->Value() ? "1" : "0";
         indicatorStr = type + "|" + indicator;
     } else if (type == "ArkDotIndicator") {
-        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm);
+        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "ArkDigitIndicator") {
-        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm);
+        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "IndicatorComponentController") {
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
         Framework::JSIndicatorController* jsController =
@@ -896,7 +944,12 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
     } else {
         indicatorStr = "boolean|1";
     }
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicator(nativeNode, indicatorStr.c_str());
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicatorRaw(nativeNode, indicatorStr.c_str(),
+            static_cast<void*>(&resObjs));
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicator(nativeNode, indicatorStr.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1078,9 +1131,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallI
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.targetOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.velocity.value()) };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.targetOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.velocity.value_or(0.0f)) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[3] = { indexParam, targetIndexParam, eventObject }; // 3: Array length
         func->Call(vm, func.ToLocal(), params, 3); // 3: Array length
@@ -1405,6 +1458,78 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperOnContentWillScroll(ArkUIRuntime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnContentWillScroll(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperMaintainVisibleContentPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    if (valueArg->IsBoolean()) {
+        bool value = valueArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSwiperModifier()->setMaintainVisibleContentPosition(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetMaintainVisibleContentPosition(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ReSetSwiperMaintainVisibleContentPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetMaintainVisibleContentPosition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnScrollStateChanged(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");
+            return;
+        }
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, scrollStateInfo->GetIndex());
+        panda::Local<panda::JSValueRef> params[1] = { indexParam };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperOnScrollStateChanged(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnScrollStateChanged(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

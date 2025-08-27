@@ -1,0 +1,131 @@
+{
+    "compilerOptions": {
+        "package": "arkui",
+        "outDir": "build/abc",
+        "baseUrl": "./build/unmemoized/src",
+        "paths": {
+            "#components": [
+                "./component/arkts"
+            ],
+            "#external": [
+                "../../../src/external/arkts"
+            ],
+            "arkui.ani": [
+                "../../../src/ani/arkts"
+            ],
+            "arkui": [
+                "./"
+            ],
+            "arkui/*": [
+                "./*"
+            ],
+            "@koalaui/interop": [
+                "../../../../../interop/src/arkts"
+            ],
+            "@koalaui/common": [
+                "../../../../../incremental/common/src"
+            ],
+            "@koalaui/compat": [
+                "../../../../../incremental/compat/src/arkts"
+            ],
+            "@koalaui/runtime": [
+                "../../../../../incremental/runtime/build/unmemoized/src"
+            ],
+            "#helpindexarkui": [
+                "index.ts"
+            ],
+            "@ohos/animator": [
+                "../@ohos.animator.ts"
+            ],
+            "@ohos/arkui/componentUtils": [
+                "../@ohos.arkui.componentUtils.ts"
+            ],
+            "@ohos/arkui/focusController": [
+                "../@ohos.arkui.focusController.ts"
+            ],
+            "@ohos/arkui/componentSnapshot": [
+                "../@ohos.arkui.componentSnapshot.ts"
+            ],
+            "@ohos/arkui/dragController": [
+                "../@ohos.arkui.dragController.ts"
+            ],
+            "@ohos/arkui/inspector": [
+                "../@ohos.arkui.inspector.ts"
+            ],
+            "@ohos/arkui/UIContext": [
+                "../@ohos.arkui.UIContext.ts"
+            ],
+            "@ohos.arkui.UIContext": [
+                "../@ohos.arkui.UIContext.ts"
+            ],
+            "@ohos.arkui.stateManagement": [
+                "./stateManagement/index.ts"
+            ],
+            "@ohos.arkui.node": [
+                "./ohos.arkui.node.ts"
+            ],
+            "@ohos/measure": [
+                "../@ohos.measure.ts"
+            ],
+            "@ohos/font": [
+                "../@ohos.font.ts"
+            ],
+            "@ohos/router": [
+                "../@ohos.router.ts"
+            ],
+            "@ohos/arkui/observer": [
+                "../@ohos.arkui.observer.ts"
+            ],
+            "@ohos/mediaquery": [
+                "../@ohos.mediaquery.ts"
+            ],
+            "@ohos/graphics/common2D": [
+                "../@ohos.graphics.common2D.ts"
+            ],
+            "@ohos/graphics/drawing": [
+                "../@ohos.graphics.drawing.ts"
+            ],
+            "@ohos/arkui/graphics": [
+                "../@ohos.arkui.graphics.ts"
+            ],
+            "@ohos/overlayManager": [
+                "../@ohos.overlayManager.ts"
+            ],
+            "@ohos/promptAction": [
+                "../@ohos.promptAction.ts"
+            ],
+            "#stateMgmtTool": [
+                "./stateManagement/tools/arkts"
+            ]
+        }
+    },
+    "include": [
+        "build/unmemoized/src/**/*.ts",
+        "build/unmemoized/src/*.ts",
+        "build/unmemoized/@ohos.arkui.UIContext.ts",
+        "build/unmemoized/@ohos.measure.ts",
+        "build/unmemoized/@ohos.font.ts",
+        "build/unmemoized/@ohos.animator.ts",
+        "build/unmemoized/@ohos.arkui.componentUtils.ts",
+        "build/unmemoized/@ohos.arkui.focusController.ts",
+        "src/ani/arkts/*.ts",
+        "build/unmemoized/@ohos.router.ts",
+        "build/unmemoized/@ohos.arkui.observer.ts",
+        "build/unmemoized/@ohos.mediaquery.ts",
+        "build/unmemoized/@ohos.graphics.common2D.ts",
+        "build/unmemoized/@ohos.graphics.drawing.ts",
+        "build/unmemoized/@ohos.arkui.graphics.ts",
+        "build/unmemoized/@ohos.overlayManager.ts",
+        "build/unmemoized/@ohos.promptAction.ts",
+        "build/unmemoized/@ohos.arkui.componentSnapshot.ts",
+        "build/unmemoized/@ohos.arkui.dragController.ts"
+    ],
+    "exclude": [
+        "**/index.ts",
+        "build/unmemoized/src/component/ts/*.ts",
+        "build/unmemoized/src/component/main.ts",
+        "build/unmemoized/src/external/ts/**/*.ts",
+        "build/unmemoized/src/ani/ts/**/*.ts",
+        "build/unmemoized/src/stateManagement/tools/ts/*.ts"
+    ]
+}

@@ -47,7 +47,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "the touch info is illegal");
             return;
         }
-
         auto lastPoint = changeTouches.back();
         const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
@@ -94,7 +93,7 @@ void StateStyleManager::HandleTouchDown()
     if (!hasScrollingParent_ || scrollingFeatureForbidden_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
         PostListItemPressStyleTask(currentState_);
-    } else {
+    } else if (!isFastScrolling_) {
         if (IsPressedCancelStatePending()) {
             ResetPressedCancelState();
         }
@@ -129,6 +128,24 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
+void StateStyleManager::SetCurrentUIState(UIState state, bool flag)
+{
+    if (flag) {
+        currentState_ |= state;
+    } else {
+        currentState_ &= ~state;
+    }
+
+    if (!HasStateStyle(state)) {
+        return;
+    }
+
+    // When the UIState changes, trigger the user subscription callback registered by FrameNode and CAPI.
+    // If the frontend has already added supported UIState, forcibly skip frontend subscriber handling.
+    bool skipFrontendForcibly = frontendSubscribers_ != UI_STATE_UNKNOWN ? true : false;
+    FireStateFunc(state, currentState_, !flag, skipFrontendForcibly);
+}
+
 static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
     if (subscribers == UI_STATE_UNKNOWN) {
@@ -137,17 +154,66 @@ static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState curr
     return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
 }
 
-void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
+bool StateStyleManager::IsExcludeInner(UIState handlingState)
+{
+    return (userSubscribersExcludeConfigs_ & handlingState) == handlingState;
+}
+
+void StateStyleManager::AddSupportedUIStateWithCallback(
+    UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
+{
+    if (state == UI_STATE_NORMAL) {
+        return;
+    }
+    if (!HasStateStyle(state)) {
+        supportedStates_ = supportedStates_ | state;
+    }
+    if (isInner) {
+        innerStateStyleSubscribers_.first |= state;
+        innerStateStyleSubscribers_.second = callback;
+        return;
+    }
+    userStateStyleSubscribers_.first |= state;
+    userStateStyleSubscribers_.second = callback;
+    if (excludeInner) {
+        userSubscribersExcludeConfigs_ |= state;
+    } else {
+        userSubscribersExcludeConfigs_ &= ~state;
+    }
+}
+
+void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (state == UI_STATE_NORMAL) {
+        return;
+    }
+    if (isInner) {
+        innerStateStyleSubscribers_.first &= ~state;
+    } else {
+        userStateStyleSubscribers_.first &= ~state;
+        userSubscribersExcludeConfigs_ &= ~state;
+    }
+    UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
+    if ((temp & state) != state) {
+        supportedStates_ = supportedStates_ & ~state;
+    }
+}
+
+void StateStyleManager::HandleStateChangeInternal(
+    UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly)
 {
     std::function<void(UIState)> onStateStyleChange;
-    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState) &&
+        !IsExcludeInner(handlingState)) {
         onStateStyleChange = innerStateStyleSubscribers_.second;
         if (onStateStyleChange) {
             ScopedViewStackProcessor processor;
             onStateStyleChange(currentState);
+            TAG_LOGD(AceLogTag::ACE_STATE_STYLE,
+                "Internal state style subscriber callbacks, currentState=%{public}" PRIu64 "", currentState);
         }
     }
-    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState) && !skipFrontendForcibly) {
         auto node = GetFrameNode();
         CHECK_NULL_VOID(node);
         auto nodeId = node->GetId();
@@ -179,9 +245,10 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
     }
 }
 
-void StateStyleManager::FireStateFunc(UIState handlingState, UIState currentState, bool isReset)
+void StateStyleManager::FireStateFunc(
+    UIState handlingState, UIState currentState, bool isReset, bool skipFrontendForcibly)
 {
-    HandleStateChangeInternal(handlingState, currentState, isReset);
+    HandleStateChangeInternal(handlingState, currentState, isReset, skipFrontendForcibly);
 }
 
 void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)
@@ -238,7 +305,7 @@ bool StateStyleManager::GetCustomNodeFromNavgation(
             return true;
         }
         auto customParent = DynamicCast<CustomNode>(navDestinationCustomNode);
-        CHECK_NULL_RETURN(navDestinationCustomNode, false);
+        CHECK_NULL_RETURN(customParent, false);
         node = customParent->GetParent();
     }
     return false;
@@ -295,7 +362,7 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
 
 void StateStyleManager::PostListItemPressStyleTask(UIState state)
 {
-    bool isPressed = state == UI_STATE_PRESSED;
+    bool isPressed = (state & UI_STATE_PRESSED) > 0;
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
@@ -335,7 +402,7 @@ void StateStyleManager::HandleScrollingParent()
     };
 
     auto scrollingListener = MakeRefPtr<ScrollingListener>(std::move(scrollingEventCallback));
-
+    isFastScrolling_ = false;
     auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
@@ -343,6 +410,7 @@ void StateStyleManager::HandleScrollingParent()
         if (pattern->ShouldDelayChildPressedState()) {
             hasScrollingParent_ = true;
             pattern->RegisterScrollingListener(scrollingListener);
+            isFastScrolling_ = isFastScrolling_ || pattern->ShouldPreventChildPressedState();
         }
         parent = parent->GetAncestorNodeOfFrame(false);
     }
@@ -352,7 +420,6 @@ void StateStyleManager::CleanScrollingParentListener()
 {
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
-
     auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();

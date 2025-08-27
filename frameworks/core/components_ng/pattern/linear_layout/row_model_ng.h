@@ -25,17 +25,21 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RowModelNG : public RowModel {
 public:
     void Create(const std::optional<Dimension>& space, AlignDeclaration*, const std::string& tag) override;
+    void Create(
+        const RefPtr<ResourceObject>& spaceResObj, AlignDeclaration* declaration, const std::string& tag) override;
     void SetAlignItems(FlexAlign flexAlign) override;
     void SetJustifyContent(FlexAlign flexAlign) override;
     void SetIsReverse(bool isReverse) override;
     void CreateWithWrap() override {}
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static void SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj);
     static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetIsReverse(FrameNode* frameNode, bool isReverse);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static FlexAlign GetJustifyContent(FrameNode* frameNode);
     static FlexAlign GetAlignItems(FrameNode* frameNode);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 };
 
 } // namespace OHOS::Ace::NG

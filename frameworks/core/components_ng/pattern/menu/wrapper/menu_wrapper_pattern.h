@@ -51,7 +51,7 @@ class MenuWrapperPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:
-    explicit MenuWrapperPattern(int32_t Id) : targetId_(Id) {}
+    explicit MenuWrapperPattern(int32_t Id, const std::string& tag = "") : targetId_(Id), targetTag_(tag) {}
     ~MenuWrapperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -121,6 +121,8 @@ public:
     }
 
     void HideSubMenu();
+    void ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu);
+    void HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem);
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
     void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
@@ -236,6 +238,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetHoverScaleInterruption(bool interruption)
+    {
+        hoverScaleInterruption_ = interruption;
+    }
+
+    bool GetHoverScaleInterruption() const
+    {
+        return hoverScaleInterruption_;
+    }
+
     void SetIsStopHoverImageAnimation(bool isStop)
     {
         isStopHoverImageAnimation_ = isStop;
@@ -254,6 +266,26 @@ public:
     bool GetIsShowHoverImagePreviewStartDrag() const
     {
         return isShowHoverImagePreviewStartDrag_;
+    }
+
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -276,6 +308,26 @@ public:
     void RegisterMenuAboutToDisappearCallback(const std::function<void()>& aboutToDisappear)
     {
         aboutToDisappearCallback_ = aboutToDisappear;
+    }
+
+    void RegisterMenuOnWillAppearCallback(const std::function<void()>& onWillAppear)
+    {
+        onWillAppearCallback_ = onWillAppear;
+    }
+
+    void RegisterMenuOnDidAppearCallback(const std::function<void()>& onDidAppear)
+    {
+        onDidAppearCallback_ = onDidAppear;
+    }
+
+    void RegisterMenuOnWillDisappearCallback(const std::function<void()>& onWillDisappear)
+    {
+        onWillDisappearCallback_ = onWillDisappear;
+    }
+
+    void RegisterMenuOnDidDisappearCallback(const std::function<void()>& onDidDisappear)
+    {
+        onDidDisappearCallback_ = onDidDisappear;
     }
 
     void RegisterMenuStateChangeCallback(const std::function<void(const std::string&)>& callback)
@@ -310,6 +362,34 @@ public:
             aboutToDisappearCallback_();
         }
     }
+
+   void CallMenuOnWillAppearCallback()
+   {
+       if (onWillAppearCallback_) {
+           onWillAppearCallback_();
+       }
+   }
+
+   void CallMenuOnDidAppearCallback()
+   {
+       if (onDidAppearCallback_) {
+           onDidAppearCallback_();
+       }
+   }
+
+   void CallMenuOnWillDisappearCallback()
+   {
+       if (onWillDisappearCallback_) {
+           onWillDisappearCallback_();
+       }
+   }
+
+   void CallMenuOnDidDisappearCallback()
+   {
+       if (onDidDisappearCallback_) {
+           onDidDisappearCallback_();
+       }
+   }
 
     void CallMenuStateChangeCallback(const std::string& value)
     {
@@ -381,9 +461,19 @@ public:
         return filterColumnNode_;
     }
 
+    void SetIsFilterInSubwindow(bool inSubwindow)
+    {
+        isFilterInSubWindow_ = inSubwindow;
+    }
+
+    bool GetIsFilterInSubwindow() const
+    {
+        return isFilterInSubWindow_;
+    }
+
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     MenuDumpInfo GetDumpInfo() const
     {
@@ -412,6 +502,7 @@ public:
         dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+        dumpInfo_.anchorPosition = dumpInfo.anchorPosition;
     }
 
     bool GetHasCustomRadius() const
@@ -434,6 +525,22 @@ public:
         lastTouchItem_ = lastTouchItem;
     }
 
+    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
+    {
+        forceUpdateEmbeddedMenu_ = forceUpdate;
+    }
+
+    bool GetForceUpdateEmbeddedMenu() const
+    {
+        return forceUpdateEmbeddedMenu_;
+    }
+
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
+    bool HasStackSubMenu();
+
     int IncreaseEmbeddedSubMenuCount()
     {
         ++embeddedSubMenuExpandTotalCount_;
@@ -450,23 +557,8 @@ public:
         return embeddedSubMenuExpandTotalCount_;
     }
 
-    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
-    {
-        forceUpdateEmbeddedMenu_ = forceUpdate;
-    }
-
-    bool GetForceUpdateEmbeddedMenu() const
-    {
-        return forceUpdateEmbeddedMenu_;
-    }
-
-    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
-    RefPtr<FrameNode> GetShowedSubMenu();
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
-    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
-    bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
 
@@ -537,14 +629,19 @@ public:
         return isOpenMenu_;
     }
 
-    void SetHoverMode(bool enableFold)
+    void SetHoverMode(std::optional<bool> enableFold)
     {
         enableFold_ = enableFold;
     }
 
-    bool GetHoverMode() const
+    std::optional<bool> GetHoverMode() const
     {
-        return enableFold_.value_or(false);
+        return enableFold_;
+    }
+
+    bool HasHoverMode() const
+    {
+        return enableFold_.has_value();
     }
 
     bool GetIsSelectOverlaySubWindowWrapper() const
@@ -576,9 +673,15 @@ public:
     {
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
+
+    void CheckAndShowAnimation();
+    bool GetMenuMaskEnable() const;
+    Color GetMenuMaskColor() const;
+    BlurStyle GetMenuMaskBlurStyle() const;
+    void UpdateFilterMaskType();
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
-    void CheckAndShowAnimation();
 
 private:
     bool AvoidKeyboard() const override
@@ -592,6 +695,10 @@ private:
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void RegisterDetachCallback();
+    void UnRegisterDetachCallback();
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     // mark self and all children no-draggable
@@ -613,18 +720,29 @@ private:
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    bool HasSideSubMenu();
+    bool IsTouchWithinParentMenuItemZone(std::list<RefPtr<UINode>>::reverse_iterator& child,
+        const std::list<RefPtr<UINode>>& children, const PointF& position);
     RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
     void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
+    void AddTargetWindowHotArea(std::vector<Rect>& rects);
+    void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
+    void AddFilterHotArea(std::vector<Rect>& rects);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
     std::function<void()> aboutToDisappearCallback_ = nullptr;
+    std::function<void()> onWillAppearCallback_ = nullptr;
+    std::function<void()> onDidAppearCallback_ = nullptr;
+    std::function<void()> onWillDisappearCallback_ = nullptr;
+    std::function<void()> onDidDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     RefPtr<FrameNode> lastTouchItem_ = nullptr;
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    std::string targetTag_ = "";
     int embeddedSubMenuExpandTotalCount_ = 0;
     bool forceUpdateEmbeddedMenu_ = false;
     LayoutConstraintF childLayoutConstraint_;
@@ -634,14 +752,18 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool hoverScaleInterruption_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     bool hasFoldModeChangeTransition_ = false;
     OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
+    bool isFilterInSubWindow_ = false; 
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
     PreviewMenuAnimationInfo animationInfo_;
@@ -654,6 +776,7 @@ private:
     bool isSelectOverlaySubWindowWrapper_ = false;
     bool hasCustomOutlineWidth_ = false;
     bool hasCustomOutlineColor_ = false;
+    bool isClearLastMenuItem_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

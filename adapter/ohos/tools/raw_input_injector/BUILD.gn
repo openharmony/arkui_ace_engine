@@ -29,7 +29,7 @@ ohos_source_set("rawinput-injector") {
     debug = false
   }
 
-  public_external_deps = [
+  external_deps = [
     "c_utils:utils",
     "input:libmmi-client",
   ]
@@ -49,6 +49,8 @@ ohos_executable("rawinput") {
   }
 
   deps = [ ":rawinput-injector" ]
+
+  external_deps = [ "c_utils:utils" ]
 
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem

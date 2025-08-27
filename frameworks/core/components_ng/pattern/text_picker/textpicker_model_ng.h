@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
+#include "core/common/resource/resource_object.h"
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
@@ -94,7 +95,15 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value) override;
     void UpdateUserSetSelectColor() override;
+    void ParseGradientHeight(const RefPtr<ResourceObject>& resObj) override;
+    void ParseColumnWidthsResourceObj(const std::vector<RefPtr<ResourceObject>>& widthResObjs) override;
+    void ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
+        const RefPtr<ResourceObject>& valueResObj) override;
+    void ParseSingleIconTextResourceObj(const std::vector<NG::RangeContent>& value) override;
+    void ParseCascadeResourceObj(const std::vector<NG::TextCascadePickerOptions>& options,
+        const std::vector<RefPtr<ResourceObject>>& valueArrResObj) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
@@ -148,6 +157,11 @@ public:
     static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
+    static PickerBackgroundStyle GetSelectedBackgroundStyle(FrameNode* frameNode);
+    static void ParseGradientHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseDividerResObj(FrameNode* frameNode, const NG::ItemDivider& divider);
+    static void TextPickerRemoveResObj(FrameNode* frameNode, const std::string& key);
 
 private:
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
@@ -159,6 +173,14 @@ private:
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
+    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
+    static void ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;

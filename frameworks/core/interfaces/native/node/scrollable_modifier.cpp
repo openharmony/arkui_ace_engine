@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
+
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -175,13 +176,14 @@ void ResetOnScrollStopCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnScrollStop(frameNode, nullptr);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     (*values)[0] = ScrollableModelNG::GetEdgeEffect(frameNode);
     (*values)[1] = ScrollableModelNG::GetAlwaysEnabled(frameNode);
-    return 2;
+    (*values)[2] = static_cast<ArkUI_Int32>(ScrollableModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -225,6 +227,55 @@ void GetFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[1].f32 = ScrollableModelNG::GetFadingEdgeLength(frameNode);
 }
 
+void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetBackToTop(frameNode, value);
+}
+
+void ResetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetBackToTop(frameNode);
+}
+
+int32_t GetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_BACKTOTOP);
+    return ScrollableModelNG::GetBackToTop(frameNode);
+}
+
+void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
+    ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension(marginStart, static_cast<OHOS::Ace::DimensionUnit>(marginStartLengthUnit));
+    scrollBarMargin.end_ = Dimension(marginEnd, static_cast<OHOS::Ace::DimensionUnit>(marginEndLengthUnit));
+    ScrollableModelNG::SetScrollBarMargin(frameNode, scrollBarMargin);
+}
+
+void ResetScrollBarMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetScrollBarMargin(frameNode);
+}
+
+void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollBarMargin scrollBarMargin;
+    ScrollableModelNG::GetScrollBarMargin(frameNode, scrollBarMargin);
+    (*values)[0].f32 = scrollBarMargin.start_.ConvertToVp();
+    (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
+}
+
 void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -246,25 +297,23 @@ float GetFlingSpeedLimit(ArkUINodeHandle node)
     return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
 }
 
-void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
+void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetBackToTop(frameNode, value);
+    if (extraParam) {
+        auto onWillStopDragging = reinterpret_cast<OnWillStopDraggingEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillStopDragging(frameNode, std::move(*onWillStopDragging));
+    } else {
+        ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
+    }
 }
 
-void ResetBackToTop(ArkUINodeHandle node)
+void ResetOnWillStopDragging(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::ResetBackToTop(frameNode);
-}
-
-int32_t GetBackToTop(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, DEFAULT_BACKTOTOP);
-    return ScrollableModelNG::GetBackToTop(frameNode);
+    ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
 }
 } // namespace
 
@@ -286,6 +335,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnReachStartCallBack = ResetOnReachStartCallBack,
         .setOnReachEndCallBack = SetOnReachEndCallBack,
         .resetOnReachEndCallBack = ResetOnReachEndCallBack,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
+        .getBackToTop = GetBackToTop,
+        .setScrollBarMargin = SetScrollBarMargin,
+        .resetScrollBarMargin = ResetScrollBarMargin,
+        .getScrollBarMargin = GetScrollBarMargin,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setOnWillScrollCallBack = SetOnWillScrollCallBack,
         .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
         .setOnDidScrollCallBack = SetOnDidScrollCallBack,
@@ -296,12 +354,8 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnScrollStartCallBack = ResetOnScrollStartCallBack,
         .setOnScrollStopCallBack = SetOnScrollStopCallBack,
         .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
-        .getFlingSpeedLimit = GetFlingSpeedLimit,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
-        .setBackToTop = SetBackToTop,
-        .resetBackToTop = ResetBackToTop,
-        .getBackToTop = GetBackToTop,
+        .setOnWillStopDragging = SetOnWillStopDragging,
+        .resetOnWillStopDragging = ResetOnWillStopDragging,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -21,14 +21,14 @@
 namespace OHOS::Ace::Framework {
 
 class JsFocusFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsFocusFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsFocusFunction, JsFunction);
 
 public:
     explicit JsFocusFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsFocusFunction() override = default;
 
     void Execute(int direction);
-    void Execute() override;
+    void Execute();
 };
 
 } // namespace OHOS::Ace::Framework

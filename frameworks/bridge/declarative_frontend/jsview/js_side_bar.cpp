@@ -69,6 +69,19 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     if (info.Length() < 1) {
         return;
     }
+    switch (widthType) {
+        case WidthType::SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.sideBarWidth");
+            break;
+        case WidthType::MIN_SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.minSideBarWidth");
+            break;
+        case WidthType::MAX_SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.maxSideBarWidth");
+            break;
+        default:
+            break;
+    }
 
     CalcDimension value;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -76,9 +89,10 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
         DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
     }
 
+    RefPtr<ResourceObject> valueResObj;
     auto isValid = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)
-                       ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
-                       : JSViewAbstract::ParseJsDimensionVp(info[0], value);
+                       ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value, valueResObj)
+                       : JSViewAbstract::ParseJsDimensionVp(info[0], value, valueResObj);
     if (!isValid) {
         switch (widthType) {
             case WidthType::SIDEBAR_WIDTH:
@@ -93,6 +107,10 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
             default:
                 break;
         }
+    }
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        SideBarContainerModel::GetInstance()->ParseAndSetWidth(widthType, valueResObj);
+        return;
     }
     SideBarContainerModel::GetInstance()->ParseAndSetWidth(widthType, value);
 }
@@ -285,23 +303,41 @@ void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JS
         return;
     }
     std::string iconPath;
-    auto isStrType = ParseJsMedia(icon, iconPath);
+    RefPtr<ResourceObject> iconPathResObj;
+    auto isStrType = ParseJsMedia(icon, iconPath, iconPathResObj);
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!isStrType) {
         pixMap = CreatePixelMapFromNapiValue(icon);
     }
 #endif
+    bool isNewframework = iconPathResObj && SystemProperties::ConfigChangePerform();
     if (isStrType || pixMap != nullptr) {
         switch (iconType) {
             case SideBarControlButtonType::SHOWN:
-                SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(iconPath, !isStrType, pixMap);
+                if (isNewframework) {
+                    SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(
+                        iconPathResObj, !isStrType, pixMap);
+                } else {
+                    SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(iconPath, !isStrType, pixMap);
+                }
                 break;
             case SideBarControlButtonType::HIDDEN:
-                SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(iconPath, !isStrType, pixMap);
+                if (isNewframework) {
+                    SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(
+                        iconPathResObj, !isStrType, pixMap);
+                } else {
+                    SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(iconPath, !isStrType, pixMap);
+                }
                 break;
             case SideBarControlButtonType::SWITCHING:
-                SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(iconPath, !isStrType, pixMap);
+                if (isNewframework) {
+                    SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(
+                        iconPathResObj, !isStrType, pixMap);
+                } else {
+                    SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(
+                        iconPath, !isStrType, pixMap);
+                }
                 break;
             default:
                 break;
@@ -314,6 +350,9 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.shown");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.hidden");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.switching");
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             // controlButton icon set default style and position when input illegal value
@@ -349,11 +388,65 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     }
 }
 
+void JSSideBar::ProcessDividerProperties(const JSRef<JSObject>& obj)
+{
+    Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    if (!ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth, strokeWidthResObj) ||
+        (strokeWidth.Value() < 0.0f)) {
+        strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+    }
+    if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(strokeWidthResObj);
+    } else {
+        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(strokeWidth);
+    }
+
+    Color color = DEFAULT_DIVIDER_COLOR;
+    RefPtr<ResourceObject> colorResObj;
+    if (!ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
+        color = DEFAULT_DIVIDER_COLOR;
+    }
+    if (SystemProperties::ConfigChangePerform() && colorResObj) {
+        SideBarContainerModel::GetInstance()->SetDividerColor(colorResObj);
+    } else {
+        SideBarContainerModel::GetInstance()->SetDividerColor(color);
+    }
+
+    Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
+    RefPtr<ResourceObject> startMarginResObj;
+    if (!ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin, startMarginResObj) ||
+        (startMargin.Value() < 0.0f)) {
+        startMargin = DEFAULT_DIVIDER_START_MARGIN;
+    }
+    if (SystemProperties::ConfigChangePerform() && startMarginResObj) {
+        SideBarContainerModel::GetInstance()->SetDividerStartMargin(startMarginResObj);
+    } else {
+        SideBarContainerModel::GetInstance()->SetDividerStartMargin(startMargin);
+    }
+
+    Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
+    RefPtr<ResourceObject> endMarginResObj;
+    if (!ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin, endMarginResObj) ||
+        (endMargin.Value() < 0.0f)) {
+        endMargin = DEFAULT_DIVIDER_END_MARGIN;
+    }
+    if (SystemProperties::ConfigChangePerform() && endMarginResObj) {
+        SideBarContainerModel::GetInstance()->SetDividerEndMargin(endMarginResObj);
+    } else {
+        SideBarContainerModel::GetInstance()->SetDividerEndMargin(endMargin);
+    }
+}
+
 void JSSideBar::JsDivider(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.strokeWidth");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.color");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.startMargin");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.endMargin");
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             // sideBar divider set default width when input illegal value
@@ -365,30 +458,7 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
     }
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-
-        Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
-        if (!ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) || (strokeWidth.Value() < 0.0f)) {
-            strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
-        }
-        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(strokeWidth);
-
-        Color color = DEFAULT_DIVIDER_COLOR;
-        if (!ConvertFromJSValue(obj->GetProperty("color"), color)) {
-            color = DEFAULT_DIVIDER_COLOR;
-        }
-        SideBarContainerModel::GetInstance()->SetDividerColor(color);
-
-        Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
-        if (!ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) || (startMargin.Value() < 0.0f)) {
-            startMargin = DEFAULT_DIVIDER_START_MARGIN;
-        }
-        SideBarContainerModel::GetInstance()->SetDividerStartMargin(startMargin);
-
-        Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
-        if (!ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) || (endMargin.Value() < 0.0f)) {
-            endMargin = DEFAULT_DIVIDER_END_MARGIN;
-        }
-        SideBarContainerModel::GetInstance()->SetDividerEndMargin(endMargin);
+        ProcessDividerProperties(obj);
     }
 }
 
@@ -397,13 +467,19 @@ void JSSideBar::JsMinContentWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.minContentWidth");
     if (info[0]->IsNull()) {
         SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
         return;
     }
     CalcDimension minContentWidth;
-    if (!JSViewAbstract::ParseJsDimensionVp(info[0], minContentWidth)) {
+    RefPtr<ResourceObject> valueResObj;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], minContentWidth, valueResObj)) {
         SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        SideBarContainerModel::GetInstance()->SetMinContentWidth(valueResObj);
         return;
     }
     SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);

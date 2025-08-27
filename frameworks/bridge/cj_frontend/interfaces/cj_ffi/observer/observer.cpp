@@ -103,10 +103,10 @@ void CJObserver::UnRegisterScrollEventCallback(const std::string& id, int64_t ca
 }
 
 void CJObserver::HandleScrollEventStateChange(
-    const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset)
+    const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset, Ace::Axis axis)
 {
     for (const auto& pair : scrollEventListeners_) {
-        pair.second->OnScrollEventStateChange(id, uniqueId, eventType, offset);
+        pair.second->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
     }
 
     auto iter = specifiedScrollEventListeners_.find(id);
@@ -116,7 +116,7 @@ void CJObserver::HandleScrollEventStateChange(
 
     auto& holder = iter->second;
     for (const auto& pair : holder) {
-        pair.second->OnScrollEventStateChange(id, uniqueId, eventType, offset);
+        pair.second->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
     }
 }
 

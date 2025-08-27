@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,21 @@ std::string LinearGradientBlurDirection(GradientDirection direction)
         return toStringMap[idx].value;
     }
     return "";
+}
+
+void SerializeRotateAngleToJson(std::unique_ptr<JsonValue>& json, const DimensionOffset& center,
+    const InspectorFilter& filter, const std::optional<Vector4F>& propTransformRotateAngle)
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("angleX", std::to_string(propTransformRotateAngle->x).c_str());
+    jsonValue->Put("angleY", std::to_string(propTransformRotateAngle->y).c_str());
+    jsonValue->Put("angleZ", std::to_string(propTransformRotateAngle->z).c_str());
+    jsonValue->Put("perspective", std::to_string(propTransformRotateAngle->w).c_str());
+    jsonValue->Put("centerX", center.GetX().ToString().c_str());
+    jsonValue->Put("centerY", center.GetY().ToString().c_str());
+    auto centerZ = center.GetZ().value_or(Dimension());
+    jsonValue->Put("centerZ", centerZ.ToString().c_str());
+    json->PutExtAttr("rotate", jsonValue, filter);
 }
 } // namespace
 
@@ -240,6 +255,11 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
     json->PutExtAttr("backgroundImageResizable",
         propBackgroundImageResizableSlice.value_or(ImageResizableSlice()).ToString().c_str(), filter);
+    if (propSysOptions.has_value()) {
+        auto jsonBackgroundSysOption = JsonUtil::Create(true);
+        jsonBackgroundSysOption->Put("disableSystemAdaptation", propSysOptions->disableSystemAdaptation);
+        json->PutExtAttr("backgroundSysOptions", jsonBackgroundSysOption, filter);
+    }
 }
 
 void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -255,6 +275,8 @@ void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     json->PutExtAttr("backgroundPixelMap", backgroundPixelMap.c_str(), filter);
     json->PutExtAttr("backgroundAlign", propBackgroundAlign.value().ToString().c_str(), filter);
+    json->PutExtAttr(
+        "customBackgroundColor", propCustomBackgroundColor.value_or(Color::TRANSPARENT).ToString().c_str(), filter);
 }
 
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -275,6 +297,11 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         motionBlurAnchor->Put("y", propMotionBlur->anchor.y);
         motionBlur->Put("anchor", motionBlurAnchor);
         json->Put("motionBlur", motionBlur);
+    }
+    if (propSysOptionsForBlur.has_value()) {
+        auto jsonForegroundSysOption = JsonUtil::Create(true);
+        jsonForegroundSysOption->Put("disableSystemAdaptation", propSysOptionsForBlur->disableSystemAdaptation);
+        json->PutExtAttr("foregroundSysOptions", jsonForegroundSysOption, filter);
     }
 }
 
@@ -314,19 +341,19 @@ void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         return;
     }
     if (propLinearGradient.has_value()) {
-        json->PutExtAttr("linearGradient", propLinearGradient->LinearGradientToJson(), filter);
+        json->PutExtAttr("linearGradient", GradientJsonUtils::LinearGradientToJson(*propLinearGradient), filter);
     } else {
         json->PutExtAttr("linearGradient", JsonUtil::Create(true), filter);
     }
 
     if (propSweepGradient.has_value()) {
-        json->PutExtAttr("sweepGradient", propSweepGradient->SweepGradientToJson(), filter);
+        json->PutExtAttr("sweepGradient", GradientJsonUtils::SweepGradientToJson(*propSweepGradient), filter);
     } else {
         json->PutExtAttr("sweepGradient", JsonUtil::Create(true), filter);
     }
 
     if (propRadialGradient.has_value()) {
-        json->PutExtAttr("radialGradient", propRadialGradient->RadialGradientToJson(), filter);
+        json->PutExtAttr("radialGradient", GradientJsonUtils::RadialGradientToJson(*propRadialGradient), filter);
     } else {
         json->PutExtAttr("radialGradient", JsonUtil::Create(true), filter);
     }
@@ -356,6 +383,8 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
             json->PutExtAttr("centerZ", JsonUtil::Create(true), filter);
         }
         json->PutExtAttr("rotate", jsonValue, filter);
+    } else if (propTransformRotateAngle.has_value()) {
+        SerializeRotateAngleToJson(json, center, filter, propTransformRotateAngle);
     } else {
         json->PutExtAttr("rotate", JsonUtil::Create(true), filter);
     }

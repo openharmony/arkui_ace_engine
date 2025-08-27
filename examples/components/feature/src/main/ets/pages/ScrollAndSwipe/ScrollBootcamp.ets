@@ -122,6 +122,10 @@ export struct ScrollBootcamp {
   @State scrollBarColor: Color | number | string = '#182431';
   @State enableScrollBarWidth: boolean = false;
   @State scrollBarWidth: number | string = 4;
+  @State enableScrollBarMarginStart: boolean = false;
+  @State scrollBarMarginStart: number = 0;
+  @State enableScrollBarMarginEnd: boolean = false;
+  @State scrollBarMarginEnd: number = 0;
   @State enableScrollSnapSnapAlign: boolean = false;
   @State scrollSnapSnapAlign: ScrollSnapAlign = ScrollSnapAlign.NONE;
   @State enableScrollSnapSnapPagination: boolean = false;
@@ -802,6 +806,10 @@ export struct ScrollBootcamp {
           .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
           .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
           .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .scrollBarMargin({
+            start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+            end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+          })
           .scrollSnap({
             snapAlign: useEnabled(this.enableScrollSnapSnapAlign, this.scrollSnapSnapAlign),
             snapPagination: useEnabled(this.enableScrollSnapSnapPagination, this.scrollSnapSnapPagination),
@@ -1509,6 +1517,7 @@ export struct ScrollBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+
           // .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(0, '竖直布局'))
 
@@ -1530,6 +1539,10 @@ export struct ScrollBootcamp {
           .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
           .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
           .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .scrollBarMargin({
+            start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+            end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+          })
           .scrollSnap({
             snapAlign: useEnabled(this.enableScrollSnapSnapAlign, this.scrollSnapSnapAlign),
             snapPagination: useEnabled(this.enableScrollSnapSnapPagination, this.scrollSnapSnapPagination),
@@ -2237,6 +2250,7 @@ export struct ScrollBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+
           // .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(1, '水平布局'))
       }
@@ -2286,6 +2300,22 @@ export struct ScrollBootcamp {
           value: $scrollBarWidth,
           min: 1,
           max: 8
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.start',
+          isEnabled: $enableScrollBarMarginStart,
+          value: $scrollBarMarginStart,
+          min: 0,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.end',
+          isEnabled: $enableScrollBarMarginEnd,
+          value: $scrollBarMarginEnd,
+          min: 0,
+          max: 32
         })
 
         RadioBlock({
@@ -3041,6 +3071,7 @@ export struct ScrollBootcamp {
     .id('scroll')
     .height('52%')
   }
+
   @Builder
   popupBuilder() {
     Row() {

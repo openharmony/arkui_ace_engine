@@ -230,6 +230,19 @@ class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+class DatePickerCanLoopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('canLoop');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().datePicker.resetCanLoop(node);
+    } else {
+      getUINativeModule().datePicker.setCanLoop(node, this.value);
+    }
+  }
+}
 
 //@ts-ignore
 globalThis.DatePicker.attributeModifier = function (modifier: ArkComponent): void {

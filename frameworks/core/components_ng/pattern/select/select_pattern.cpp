@@ -21,10 +21,12 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/animation/curves.h"
+#include "core/common/ace_engine.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
@@ -41,11 +43,13 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -72,6 +76,10 @@ constexpr Dimension CALIBERATE_Y = 4.0_vp;
 constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
 
 constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
+
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+
+constexpr int32_t FIRST_NODE_INDEX = 0;
 
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
@@ -143,6 +151,9 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
     InitFocusEvent();
+    for (const auto& option : options_) {
+        option->MarkModifyDone();
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
@@ -211,6 +222,14 @@ void SelectPattern::ShowSelectMenu()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     UpdateTargetSize();
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false)) {
+        ShowSelectMenuInSubWindow();
+        return;
+    }
     auto offset = host->GetPaintRectOffset(false, true);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
@@ -221,6 +240,33 @@ void SelectPattern::ShowSelectMenu()
     ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::ShowSelectMenuInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto offset = host->GetPositionToScreenWithTransform();
+    auto offsetCustomTitleHeight = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx());
+    offset.AddY(selectSize_.Height() + offsetCustomTitleHeight + CALIBERATE_Y.ConvertToPx());
+    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(true);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(subwindowManager);
+    MenuParam menuParam {};
+    menuParam.type = MenuType::MENU;
+    menuParam.isShowInSubWindow = true;
+    menuParam.isShow = true;
+    menuParam.setShow = true;
+    subwindowManager->ShowMenuNG(menuWrapper_, menuParam, host, offset);
 }
 
 void SelectPattern::UpdateOptionsWidth(float selectWidth)
@@ -255,6 +301,18 @@ void SelectPattern::RegisterOnClick()
         if (selected > -1 && selected < static_cast<int32_t>(pattern->GetOptions().size())) {
             pattern->UpdateSelectedProps(selected);
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        CHECK_NULL_VOID(selectLayoutProps);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false) &&
+            NG::ViewAbstractModelNG::CheckSkipMenuShow(host)) {
+            return;
+        }
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
@@ -262,13 +320,79 @@ void SelectPattern::RegisterOnClick()
         return;
     }
     gestureHub->BindMenu(std::move(callback));
+
+    auto targetNode = RawPtr(host);
+    CHECK_NULL_VOID(targetNode);
+    BindMenuTouch(targetNode, gestureHub);
+}
+
+void SelectPattern::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto weakTarget = AceType::WeakClaim(targetNode);
+    auto touchCallback = [weakTarget](const TouchEventInfo& info) {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        const auto& touches = info.GetTouches();
+        CHECK_EQUAL_VOID(touches.empty(), true);
+        auto touchType = touches.front().GetTouchType();
+        auto targetId = targetNode->GetId();
+        auto subwindow =
+            SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(subwindowPipline);
+        auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+        CHECK_NULL_VOID(subwindowOverlay);
+        if (touchType == TouchType::DOWN) {
+            auto wrapperNode = subwindowOverlay->GetMenuNode(targetId);
+            CHECK_NULL_VOID(wrapperNode);
+            auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            if (wrapperPattern->IsShow() || wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                subwindowOverlay->SkipMenuShow(targetId);
+            }
+        } else if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) &&
+                   subwindowOverlay->CheckSkipMenuShow(targetId)) {
+            auto weakOverlay = AceType::WeakClaim(AceType::RawPtr(subwindowOverlay));
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weakOverlay, targetId]() mutable {
+                    auto subwindowOverlay = weakOverlay.Upgrade();
+                    CHECK_NULL_VOID(subwindowOverlay);
+                    subwindowOverlay->ResumeMenuShow(targetId);
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIResumeMenuShow");
+        }
+    };
+    gestrueHub->RegisterMenuOnTouch(touchCallback);
+}
+
+bool SelectPattern::CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto childContainerId = subwindow->GetChildContainerId();
+    auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+    CHECK_NULL_RETURN(childContainer, false);
+    auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(subwindowPipline, false);
+    auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+    CHECK_NULL_RETURN(subwindowOverlay, false);
+    return subwindowOverlay->CheckSkipMenuShow(targetNode->GetId());
 }
 
 void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -290,7 +414,7 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
-    });
+    }, nullptr, nullptr, pipeline);
 }
 
 // change background color when hovered
@@ -702,7 +826,7 @@ void SelectPattern::BuildChild()
     bool hasRowNode = HasRowNode();
     auto rowId = GetRowId();
     auto row = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<MenuItemRowPattern>(); });
     CHECK_NULL_VOID(row);
     if (textApply_ && textId_.has_value()) {
         if (hasRowNode) {
@@ -721,7 +845,7 @@ void SelectPattern::BuildChild()
     bool hasSpinnerNode = HasSpinnerNode();
     auto textId = GetTextId();
     auto spinnerId = GetSpinnerId();
-    
+
     row->SetInternal();
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
@@ -853,16 +977,13 @@ void SelectPattern::SetFontColor(const Color& color)
 void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
-    for (size_t i = 0; i < options_.size(); ++i) {
-        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
-            continue;
-        }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color);
-        pattern->SetIsBGColorSetByUser(true);
-        pattern->SetOptionBgColor(color);
-        pattern->SetIsOptionBgColorSetByUser(true);
+    if (!optionBgColor_.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateOptionBgColor(optionBgColor_.value());
     }
 }
 
@@ -922,14 +1043,18 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
+        if (optionFont_.FontColor.has_value()) {
+            auto paintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            paintProperty->UpdateOptionFontColor(optionFont_.FontColor.value());
+        }
+
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color);
         pattern->SetOptionFontColor(color);
-        pattern->SetIsOptionFontColorSetByUser(true);
     }
 }
 
@@ -937,11 +1062,13 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 {
     selectedBgColor_ = color;
-    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color);
-        pattern->SetIsBGColorSetByUser(true);
+    if (!selectedBgColor_.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateSelectedOptionBgColor(selectedBgColor_.value());
     }
 }
 
@@ -988,12 +1115,13 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
 void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 {
     selectedFont_.FontColor = color;
-    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color);
-        pattern->SetSelectFontColor(color);
-        pattern->SetIsTextColorSetByUser(true);
+    if (!selectedFont_.FontColor.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateSelectedOptionFontColor(selectedFont_.FontColor.value());
     }
 }
 
@@ -1084,27 +1212,105 @@ void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPa
 
 void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern)
 {
+    CHECK_NULL_VOID(optionPattern);
     optionPattern->SetSelected(false);
     optionPattern->UpdateNextNodeDivider(true);
-    optionPattern->SetIsBGColorSetByUser(false);
-    optionPattern->SetIsTextColorSetByUser(false);
-    optionPattern->SetIsOptionFontColorSetByUser(false);
-    optionPattern->SetIsOptionBgColorSetByUser(false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    if (selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        optionPattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+    }
 }
 
 void SelectPattern::ResetOptionProps()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(false);
         ResetOptionToInitProps(pattern);
         UpdateOptionCustomProperties(pattern);
-        pattern->SetIsBGColorSetByUser(false);
-        pattern->SetIsTextColorSetByUser(false);
-        pattern->SetIsOptionFontColorSetByUser(false);
-        pattern->SetIsOptionBgColorSetByUser(false);
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+            pattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+        }
     }
+}
+
+void SelectPattern::UpdateComponentColor(const Color& color, const SelectColorType selectColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (selectColorType) {
+            case SelectColorType::FONT_COLOR:
+                SetFontColor(color);
+                text_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+                break;
+            case SelectColorType::BACKGROUND_COLOR:
+                renderContext->UpdateBackgroundColor(color);
+                break;
+            case SelectColorType::SELECTED_OPTION_BG_COLOR:
+                SetSelectedOptionBgColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                break;
+            case SelectColorType::SELECTED_OPTION_FONT_COLOR:
+                SetSelectedOptionFontColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                break;
+            case SelectColorType::OPTION_BG_COLOR:
+                SetOptionBgColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                break;
+            case SelectColorType::OPTION_FONT_COLOR:
+                SetOptionFontColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                break;
+            case SelectColorType::MENU_BACKGROUND_COLOR:
+                SetMenuBackgroundColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SelectPattern::UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    switch (optionType) {
+        case SelectOptionType::TEXT:
+            menuPattern->UpdateSelectOptionTextByIndex(index, value);
+            break;
+        case SelectOptionType::ICON:
+            menuPattern->UpdateSelectOptionIconByIndex(index, value);
+            break;
+        default:
+            break;
+    }
+    menu->MarkModifyDone();
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateLastSelectedProps(int32_t index)
@@ -1120,23 +1326,8 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         ResetOptionToInitProps(lastSelected, newSelected);
         UpdateOptionCustomProperties(lastSelected);
         ResetLastSelectedOptionFlags(lastSelected);
-        if (selectedBgColor_.has_value()) {
-            newSelected->SetIsBGColorSetByUser(true);
-            newSelected->SetBgColor(selectedBgColor_.value());
-        }
-        if (selectedFont_.FontColor.has_value()) {
-            newSelected->SetIsTextColorSetByUser(true);
-            newSelected->SetSelectFontColor(selectedFont_.FontColor.value());
-        }
         if (optionFont_.FontColor.has_value()) {
-            lastSelected->SetIsOptionFontColorSetByUser(true);
             lastSelected->SetOptionFontColor(optionFont_.FontColor.value());
-            newSelected->SetIsOptionFontColorSetByUser(false);
-        }
-        if (optionBgColor_.has_value()) {
-            lastSelected->SetIsOptionBgColorSetByUser(true);
-            lastSelected->SetOptionBgColor(optionBgColor_.value());
-            newSelected->SetIsOptionBgColorSetByUser(false);
         }
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
@@ -1146,6 +1337,74 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
             lastSelectedPros->UpdateNeedDivider(true);
         }
         options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
+void SelectPattern::SetShowInSubWindow(bool isShowInSubWindow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::ResetShowInSubWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    bool isExpandDisplay = selectTheme->GetExpandDisplay();
+    bool isShowInSubWindow = isExpandDisplay;
+    SetShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectPattern::SetShowDefaultSelectedIcon(bool show)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(show);
+    }
+    if (show) {
+        ResetOptionProps();
+    }
+}
+
+void SelectPattern::ResetShowDefaultSelectedIcon()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    selectLayoutProps->ResetShowDefaultSelectedIcon();
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->ResetShowDefaultSelectedIcon();
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetShowDefaultSelectedIcon(false);
     }
 }
 
@@ -1160,6 +1419,23 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     ResetSelectedOptionToInitProps(newSelected);
     UpdateSelectedOptionCustomProperties(newSelected);
     newSelected->SetSelected(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+        newSelected->SetCheckMarkVisibleType(VisibleType::VISIBLE);
+        if (index != static_cast<int32_t>(GetOptions().size()) - 1) {
+            newSelected->UpdateNextNodeDivider(true);
+        }
+        if (index != FIRST_NODE_INDEX) {
+            auto newSelectedNode = newSelected->GetHost();
+            CHECK_NULL_VOID(newSelectedNode);
+            auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(newSelectedPros);
+            newSelectedPros->UpdateNeedDivider(true);
+        }
+        return;
+    }
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -1198,7 +1474,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
-    textProps->UpdateTextDecoration(theme->GetTextDecoration());
+    textProps->UpdateTextDecoration({theme->GetTextDecoration()});
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
 }
@@ -1232,6 +1508,7 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    spinnerLayoutProperty->UpdateSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_COLOR);
 }
 
 // XTS inspector code
@@ -1248,10 +1525,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
     json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
-    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
-    json->PutExtAttr("selectedOptionFontColor",
-        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
-
+    ToJsonSelectedOptionFontAndColor(json, filter);
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
         json->PutExtAttr("optionFont", "", filter);
@@ -1259,9 +1533,12 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     } else {
         auto optionPattern = options_[0]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
-        json->PutExtAttr("optionBgColor", optionPattern->GetBgColor().ColorToString().c_str(), filter);
+        auto bgColor = selected_ == 0 ? selectedBgColor_ : optionPattern->GetBgColor();
+        json->PutExtAttr("optionBgColor", bgColor->ColorToString().c_str(), filter);
         json->PutExtAttr("optionFont", optionPattern->InspectorGetFont().c_str(), filter);
-        json->PutExtAttr("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        auto fontColor =
+            selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK) : optionPattern->GetFontColor();
+        json->PutExtAttr("optionFontColor", fontColor.ColorToString().c_str(), filter);
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -1279,6 +1556,31 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
+}
+
+void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (textSelectOptionApply_) {
+        if (options_.empty() || options_.size() <= static_cast<size_t>(selected_)) {
+            json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+            json->PutExtAttr("selectedOptionFontColor",
+                selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+            return;
+        }
+        CHECK_NULL_VOID(options_[selected_]);
+        auto optionPattern = options_[selected_]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        json->PutExtAttr("selectedOptionFont", optionPattern->InspectorGetFont().c_str(), filter);
+        json->PutExtAttr("selectedOptionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        return;
+    }
+    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+    json->PutExtAttr(
+        "selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1370,10 +1672,28 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
             divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
             divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
             divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+            ToJsonDividerMode(divider);
             json->PutExtAttr("divider", divider->ToString().c_str(), filter);
         } else {
             json->PutExtAttr("divider", "", filter);
         }
+    }
+}
+
+void SelectPattern::ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    auto mode = menuLayoutProps->GetItemDividerMode();
+    if (!mode.has_value()) {
+        return;
+    }
+    if (mode.value() == DividerMode::FLOATING_ABOVE_MENU) {
+        json->Put("dividerMode", "FLOATING_ABOVE_MENU");
+    } else if (mode.value() == DividerMode::EMBEDDED_IN_MENU) {
+        json->Put("dividerMode", "EMBEDDED_IN_MENU");
     }
 }
 
@@ -1607,23 +1927,90 @@ void SelectPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-
     auto renderContext = menuNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+    CHECK_NULL_VOID(renderContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
+    } else {
+        renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+        if (!SystemProperties::ConfigChangePerform()) {
+            SetOptionBgColor(selectTheme->GetBackgroundColor());
+        }
     }
 
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
         optionsPattern->SetFontColor(selectTheme->GetFontColor());
+        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+        }
 
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    SetOptionBgColor(selectTheme->GetBackgroundColor());
+    UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
+    SetColorByUser(host, selectTheme);
+}
+
+void SelectPattern::SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(props);
+    if (props->GetMenuBackgroundColorSetByUserValue(false)) {
+        return;
+    }
+    SetMenuBackgroundColor(color);
+}
+
+void SelectPattern::SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(props);
+    if (props->GetOptionBgColorSetByUserValue(false)) {
+        return;
+    }
+    optionBgColor_ = color;
+    if (!optionBgColor_.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateOptionBgColor(optionBgColor_.value());
+        option->MarkModifyDone();
+        option->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
+void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(theme);
+    auto props = host->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(props);
+    auto themeBgcolor = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
+    SetMenuBackgroundColorByUser(themeBgcolor, props);
+    SetOptionBgColorByUser(Color::TRANSPARENT, props);
+    auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    SetSelectedOptionBgColorByUser(theme, props, layoutProps);
+    SetModifierByUser(theme, props);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SelectPattern::UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto scrollNode = AceType::DynamicCast<NG::FrameNode>(menuNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->OnColorConfigurationUpdate();
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -1685,7 +2072,6 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             if (onSelect) {
                 onSelect(index, value);
             }
-            
         },
         TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate");
 }
@@ -1715,7 +2101,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateSelectMenuModifiedWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
-    
+
     auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
     CHECK_NULL_VOID(scroll);
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
@@ -1724,7 +2110,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollLayoutProps);
     scrollLayoutProps->UpdateScrollWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
-    
+
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionWidth = value.ConvertToPx();
         auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
@@ -1775,6 +2161,7 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
 
 void SelectPattern::SetMenuBackgroundColor(const Color& color)
 {
+    menuBackgroundColor_ = color;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto renderContext = menu->GetRenderContext();
@@ -2006,6 +2393,18 @@ void SelectPattern::SetArrowModifierApply(const std::function<void(WeakPtr<NG::F
     }
 }
 
+void SelectPattern::SetArrowColor(const Color& color)
+{
+    CHECK_NULL_VOID(spinner_);
+    if (spinner_->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        spinner_->MarkModifyDone();
+        spinner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 std::function<void(WeakPtr<NG::FrameNode>)>& SelectPattern::GetTextModifier()
 {
     return textApply_;
@@ -2116,5 +2515,89 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
+}
+
+void SelectPattern::SetOptionTextModifierByUser(
+    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    if (!props->GetOptionFontColorSetByUserValue(false)) {
+        SetOptionFontColor(theme->GetFontColor());
+    }
+
+    if (props->GetOptionTextModifierSetByUserValue(false)) {
+        SetOptionTextModifier(textOptionApply_);
+    }
+}
+
+void SelectPattern::SetSelectedOptionTextModifierByUser(
+    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    if (!props->GetSelectedOptionFontColorSetByUserValue(false)) {
+        SetSelectedOptionFontColor(theme->GetSelectedColorText());
+    }
+
+    if (props->GetSelectedOptionTextModifierSetByUserValue(false)) {
+        SetSelectedOptionTextModifier(textSelectOptionApply_);
+    }
+}
+
+void SelectPattern::SetArrowModifierByUser(
+    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    if (!props->GetArrowModifierSetByUserValue(false)) {
+        auto spinnerId = GetSpinnerId();
+        auto spinner = FrameNode::GetOrCreateFrameNode(
+            V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(spinner);
+        InitSpinner(spinner, theme);
+        spinner->MarkModifyDone();
+        auto rowId = GetRowId();
+        auto row = FrameNode::GetOrCreateFrameNode(
+            V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        CHECK_NULL_VOID(row);
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    } else {
+        SetArrowModifierApply(arrowApply_);
+    }
+}
+
+void SelectPattern::SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& theme,
+    const RefPtr<SelectPaintProperty>& props, const RefPtr<SelectLayoutProperty>& layoutProps)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    CHECK_NULL_VOID(layoutProps);
+    if (layoutProps->GetShowDefaultSelectedIconValue(false)) {
+        return;
+    }
+
+    if (!props->GetSelectedOptionBgColorSetByUserValue(false)) {
+        SetSelectedOptionBgColor(theme->GetSelectedColor());
+    }
+}
+
+void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    if (!props->GetFontColorSetByUserValue(false)) {
+        ResetFontColor();
+        text_->MarkDirtyNode();
+    }
+
+    if (props->GetTextModifierSetByUserValue(false)) {
+        SetTextModifierApply(textApply_);
+    }
+
+    SetOptionTextModifierByUser(theme, props);
+    SetSelectedOptionTextModifierByUser(theme, props);
+    SetArrowModifierByUser(theme, props);
 }
 } // namespace OHOS::Ace::NG

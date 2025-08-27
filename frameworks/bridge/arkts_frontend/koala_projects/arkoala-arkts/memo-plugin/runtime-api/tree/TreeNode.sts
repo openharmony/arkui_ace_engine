@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { float64, int32, uint32 } from "../common"
+import { Disposable } from "../states/Disposable"
+import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
+export declare class TreeNode implements Disposable, ReadonlyTreeNode {
+    readonly kind: uint32
+    protected onChildInserted: ((node: TreeNode, index: int32) => void) | undefined
+    protected onChildRemoved: ((node: TreeNode, index: int32) => void) | undefined
+    constructor(kind: uint32 = 1)
+    get disposed(): boolean
+    dispose(): void
+    get parent(): TreeNode | undefined
+    get depth(): uint32
+    get childrenCount(): uint32
+    get children(): ReadonlyArray<TreeNode>
+    get index(): int32
+    isKind(kind: uint32): boolean
+    find<V>(valueOf: (node: TreeNode, index: int32) => V | undefined): V | undefined
+    forEach(action: (node: TreeNode, index: float64) => void): void
+    every(predicate: (node: TreeNode, index: float64) => boolean): boolean
+    some(predicate: (node: TreeNode, index: float64) => boolean): boolean
+    childAt(index: int32): TreeNode | undefined
+    appendChild(node: TreeNode): boolean
+    insertChildAt(index: int32, node: TreeNode): boolean
+    appendChildren(...nodes: TreeNode[]): boolean
+    insertChildrenAt(index: int32, ...nodes: TreeNode[]): boolean 
+    removeChildAt(index: int32): TreeNode | undefined
+    removeChildrenAt(index: int32, count?: uint32): Array<TreeNode>
+    removeChild(node: TreeNode): boolean
+    removeFromParent(): void
+    toString(): string
+    toHierarchy(): string
+    collectNodes(): Array<TreeNode>
+    collectParentsTo(array: Array<TreeNode>): void
+    collectChildrenTo(array: Array<TreeNode>, deep: boolean = false): void
+}

@@ -21,7 +21,6 @@
 #include "root_scene.h"
 #include "screen_scene.h"
 #include "screen_manager.h"
-#include "transaction/rs_transaction_proxy.h"
 
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -98,11 +97,16 @@ void ScreenPattern::OnAttachToFrameNode()
 
 void ScreenPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(screenSession_);
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance) {
-        instance->UnregisterScreenNode(screenSession_->GetScreenId());
+    if (screenSession_) {
+        auto instance = WindowSceneLayoutManager::GetInstance();
+        if (instance) {
+            instance->UnregisterScreenNode(screenSession_->GetScreenId());
+        }
     }
+    CHECK_NULL_VOID(frameNode);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->ClearModifiers();
 }
 
 void ScreenPattern::UpdateDisplayInfo()
@@ -125,12 +129,7 @@ void ScreenPattern::UpdateRenderPivot(float pivotX, float pivotY)
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->SetRenderPivot(pivotX, pivotY);
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    } else {
-        LOGE("RSTransactionProxy transactionProxy is nullptr");
-    }
+    WindowSceneHelper::FlushImplicitTransaction(host);
 }
 
 void ScreenPattern::UpdateToInputManager(float rotation)
@@ -180,7 +179,6 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         .height = paintRect.Height(),
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
-        .uniq = "default" + std::to_string(screenId),
         .direction = ConvertDegreeToMMIRotation(rotation)
     };
     InputManagerUpdateDisplayInfo(paintRect, displayInfo, windowInfo);
@@ -194,8 +192,6 @@ void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
     g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
 
     MMI::DisplayGroupInfo displayGroupInfo = {
-        .width = paintRect.Width(),
-        .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
         .displaysInfo = g_displayInfoVector
@@ -234,7 +230,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         rootScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
         rootScene->SetDisplayOrientation(orientation);
-        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE);
     } else if (rsWindow->GetClassType() == "ScreenScene") {
         auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());
         CHECK_NULL_RETURN(screenScene, false);

@@ -26,7 +26,8 @@ if (globalThis.WithTheme !== undefined) {
         }
 
         // create wrapper over original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
-        const deepRenderFunctionWrapper = (elmtId: number, isInitialRender: boolean) => {
+        const deepRenderFunctionWrapper :(elmtId: number, isInitialRender: boolean) => void =
+            (elmtId: number, isInitialRender: boolean) => {
             const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
             deepRenderFunction(elmtId, isInitialRender);
             if (result === true) {

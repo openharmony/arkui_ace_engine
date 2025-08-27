@@ -22,24 +22,41 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
+namespace {
+    constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
+    constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
+    constexpr uint64_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
+}
+
 ResSchedReport::ResSchedReport()
 {}
 
 void ResSchedReport::ResSchedDataReport(
-    const char* /* name */, const std::unordered_map<std::string, std::string>& /* param */)
+    const char* name, const std::unordered_map<std::string, std::string>& param,
+    int64_t tid)
 {
     reportDataFunc_ = nullptr;
+    if (std::strcmp(ABILITY_OR_PAGE_SWITCH_START, name) == 0 || std::strcmp(ABILITY_OR_PAGE_SWITCH_END, name) == 0) {
+        keyEventCountMS = RES_TYPE_ABILITY_OR_PAGE_SWITCH;
+    }
 }
 
 void ResSchedReport::ResSchedDataReport(
     uint32_t resType, int32_t value, const std::unordered_map<std::string, std::string>& payload)
 {}
 
-void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent) {}
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
+
+void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
 
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     const std::string& toPage, const std::string& mode)
 {}
+
+void ResSchedReport::TriggerModuleSerializer()
+{
+    loadPageOn_ = true;
+}
 
 ResSchedReportScope::ResSchedReportScope(
     const std::string& name, const std::unordered_map<std::string, std::string>& param)

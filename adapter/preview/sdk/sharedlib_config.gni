@@ -155,6 +155,11 @@ common_bin = [
     part_name = "resource_management"
   },
   {
+    label = "//base/global/resource_management/interfaces/js/innerkits/core:resmgr_napi_core_preview"
+    subsystem_name = "global"
+    part_name = "resource_management"
+  },
+  {
     label = label_hilog
     subsystem_name = "hiviewdfx"
     part_name = "hilog"
@@ -186,6 +191,11 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   common_bin += [
     {
       label = "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+    {
+      label = "//foundation/graphic/graphic_2d/frameworks/text:rosen_text"
       subsystem_name = "graphic"
       part_name = "graphic_2d"
     },
@@ -299,6 +309,18 @@ napi_modules = [
         lib_names = [ "previewer_window_napi" ]
       },
       {
+        label = "//base/global/resource_management/interfaces/js/kits:resourcemanager_preview"
+        subsystem_name = "global"
+        part_name = "resource_management"
+        lib_names = [ "resourcemanager" ]
+      },
+      {
+        label = "//base/global/resource_management/interfaces/js/kits:sendableresourcemanager_preview"
+        subsystem_name = "global"
+        part_name = "resource_management"
+        lib_names = [ "sendableresourcemanager" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -313,6 +335,7 @@ napi_modules = [
           "promptaction",
           "router",
           "animator",
+          "overlay",
         ]
       },
     ]
@@ -544,6 +567,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "downloadfilebutton" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/multinavigation/interfaces:multinavigation"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "multinavigation" ]
       },
     ]
   },

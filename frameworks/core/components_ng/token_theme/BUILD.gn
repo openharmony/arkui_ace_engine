@@ -24,7 +24,6 @@ template("ace_core_components_token_theme_set") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "token_colors.cpp",
       "token_theme_storage.cpp",
     ]
 

@@ -51,6 +51,7 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
@@ -78,6 +79,10 @@ public:
         const RefPtr<ScrollablePattern> scrollableParent, const Offset& globalOffset, bool isStopAutoScroll);
     const RefPtr<ScrollablePattern> FindScrollableParent();
     std::optional<Color> GetHandleColor() override;
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
+    bool ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode) override;
+    void GetVisibleDragViewHandles(RectF& first, RectF& second);
+    void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);

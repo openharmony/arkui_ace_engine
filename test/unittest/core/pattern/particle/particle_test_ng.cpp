@@ -300,6 +300,26 @@ HWTEST_F(ParticleTestNg, ParticleTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParticleResObj001
+ * @tc.desc: Test CreateParticleResObj of particle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleResObj001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("particle.Create", resObj, std::move(updateFunc));
+    std::string particle = pattern->GetResCacheMapByKey("particle.Create");
+    EXPECT_EQ(particle, "");
+}
+
+/**
  * @tc.name: ParticleToJsonValue001
  * @tc.desc: Test GetEmitterJson parse.
  * @tc.type: FUNC
@@ -353,6 +373,26 @@ HWTEST_F(ParticleTestNg, ParticleToJsonValue001, TestSize.Level1)
     EXPECT_EQ(type, "ParticleType.POINT");
     EXPECT_EQ(count, "5");
     EXPECT_EQ(radius, "6.000000");
+}
+
+/**
+ * @tc.name: ParticleResObj002
+ * @tc.desc: Test CreateParticleResObj of particle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleResObj002, TestSize.Level1)
+{
+    auto particleNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    ASSERT_NE(particleNode, nullptr);
+    auto pattern = AceType::DynamicCast<ParticlePattern>(particleNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj) {};
+    updateFunc(resObj);
+    pattern->AddResObj("particle.Update", resObj, std::move(updateFunc));
+    std::string particle = pattern->GetResCacheMapByKey("particle.Update");
+    EXPECT_EQ(particle, "");
 }
 
 /**
@@ -695,5 +735,112 @@ HWTEST_F(ParticleTestNg, ParticleToJsonValue008, TestSize.Level1)
     auto velocityJson = objectParticlesJson->GetObject("velocity");
     EXPECT_EQ(velocityJson->ToString(), "{\"speed\":\"[0.000000,0.000000]\","
                                         "\"angle\":\"[0.000000,0.000000]\"}");
+}
+
+/**
+ * @tc.name: ParticleTestAnnulus001
+ * @tc.desc: Test Particle Pattern, when shape is annulus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestAnnulus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create particle frameNode and get particle pattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto particlePattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    EXPECT_NE(particlePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create emitterProperty.
+     */
+    EmitterProperty emitter;
+    emitter.index = 0;
+    emitter.position = { 3, 7 };
+    emitter.size = { 140, 300 };
+    emitter.emitRate = 5;
+    auto defaultCenterValue = CalcDimension(0.5, DimensionUnit::PERCENT);
+    std::pair<CalcDimension, CalcDimension> center = {
+        defaultCenterValue, defaultCenterValue
+    };
+    CalcDimension innerRadiusValue = CalcDimension(30, DimensionUnit::VP);
+    CalcDimension outerRadiusValue = CalcDimension(50, DimensionUnit::VP);
+    auto startAngle = 90;
+    auto endAngle = 270;
+    emitter.annulusRegion = {
+        center, innerRadiusValue, outerRadiusValue, startAngle, endAngle
+    };
+    std::vector<EmitterProperty> emitterVector;
+    emitterVector.push_back(emitter);
+
+    /**
+     * @tc.steps: step2. call the function.
+     */
+    for (auto it = emitterVector.begin(); it != emitterVector.end(); it++) {
+        const EmitterProperty& emitterProperty = *it;
+        uint32_t index = emitterProperty.index;
+        EXPECT_EQ(index, 0);
+        if (emitterProperty.position) {
+            EXPECT_EQ(emitterProperty.position->x, 3);
+            EXPECT_EQ(emitterProperty.position->y, 7);
+        }
+        if (emitterProperty.size) {
+            EXPECT_EQ(emitterProperty.size->x, 140);
+            EXPECT_EQ(emitterProperty.size->y, 300);
+        }
+        if (emitterProperty.emitRate) {
+            EXPECT_EQ(emitterProperty.emitRate, 5);
+        }
+        if (emitterProperty.annulusRegion) {
+            EXPECT_EQ(emitterProperty.annulusRegion->center_.first.Value(), 0.5);
+            EXPECT_EQ(emitterProperty.annulusRegion->center_.second.Value(), 0.5);
+            EXPECT_EQ(emitterProperty.annulusRegion->innerRadius_.Value(), 30);
+            EXPECT_EQ(emitterProperty.annulusRegion->outerRadius_.Value(), 50);
+            EXPECT_EQ(emitterProperty.annulusRegion->startAngle_, 90);
+            EXPECT_EQ(emitterProperty.annulusRegion->endAngle_, 270);
+        }
+    }
+    particlePattern->updateEmitterPosition(emitterVector);
+    EXPECT_EQ(particlePattern->GetEmitterProperty().size(), 1);
+}
+
+/**
+ * @tc.name: ParticleTestAnnulusToJson001
+ * @tc.desc: Test GetEmitterJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestAnnulusToJson001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+
+    EmitterProperty emitter;
+    emitter.index = 0;
+    emitter.position = { 3, 7 };
+    emitter.size = { 140, 300 };
+    emitter.emitRate = 5;
+    auto defaultCenterValue = CalcDimension(0.5, DimensionUnit::PERCENT);
+    std::pair<CalcDimension, CalcDimension> center = {
+        defaultCenterValue, defaultCenterValue
+    };
+    CalcDimension innerRadiusValue = CalcDimension(30, DimensionUnit::VP);
+    CalcDimension outerRadiusValue = CalcDimension(50, DimensionUnit::VP);
+    auto startAngle = 90;
+    auto endAngle = 270;
+    emitter.annulusRegion = {
+        center, innerRadiusValue, outerRadiusValue, startAngle, endAngle
+    };
+
+    std::vector<EmitterProperty> emitterVector;
+    emitterVector.push_back(emitter);
+    InspectorFilter testFilter;
+    testFilter.AddFilterAttr("focusable");
+    auto jsonValue = std::make_unique<JsonValue>();
+    pattern->updateEmitterPosition(emitterVector);
+    pattern->ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(pattern->GetEmitterProperty().size(), 1);
 }
 } // namespace OHOS::Ace::NG

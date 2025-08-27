@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,6 +137,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridFrictionModifier.identity, GridFrictionModifier, value);
     return this;
   }
+  focusWrapMode(value: FocusWrapMode): this {
+    modifierWithKey(this._modifiersWithKeys, GridFocusWrapModeModifier.identity, GridFocusWrapModeModifier, value);
+    return this;
+  }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {
     throw new Error('Method not implemented.');
   }
@@ -170,6 +174,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   alignItems(value: GridItemAlignment): this {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
+    return this;
+  }
+  syncLoad(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
     return this;
   }
   onWillScroll(callback: (xOffset: number, yOffset: number,
@@ -419,6 +427,20 @@ class GridFrictionModifier extends ModifierWithKey<number | Resource> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class GridFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
+  constructor(value: FocusWrapMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridFocusWrapMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetFocusWrapMode(node);
+    } else {
+      getUINativeModule().grid.setFocusWrapMode(node, this.value);
+    }
   }
 }
 
@@ -735,6 +757,20 @@ class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
   }
 }
 
+class GridSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetSyncLoad(node);
+    } else {
+      getUINativeModule().grid.setSyncLoad(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Grid.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
@@ -742,4 +778,9 @@ globalThis.Grid.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.GridModifier(nativePtr, classType);
   });
+};
+
+globalThis.Grid.onWillStopDragging = function (value: (velocity: number) => void) {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };

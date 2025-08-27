@@ -26,6 +26,7 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -42,6 +43,11 @@ enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
     MIXED_CONTENT_NEVER_ALLOW = 1,
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
+};
+
+enum WebAudioSessionType {
+    AUTO = 0,
+    AMBIENT = 3
 };
 
 enum WebCacheMode {
@@ -82,8 +88,20 @@ enum class WebKeyboardAvoidMode : int32_t {
 enum class WebElementType : int32_t {
     TEXT = 0,
     IMAGE,
+    LINK,
     MIXED,
+    AILINK,
     NONE,
+};
+
+enum class WebBypassVsyncCondition : int32_t {
+    NONE = 0,
+    SCROLLBY_FROM_ZERO_OFFSET = 1
+};
+
+enum class GestureFocusMode : int32_t {
+    DEFAULT = 0,
+    GESTURE_TAP_AND_LONG_PRESS = 1
 };
 
 struct WebPreviewSelectionMenuParam {
@@ -543,6 +561,16 @@ public:
         return cookieManager_;
     }
 
+    using GetProgressImpl = std::function<int()>;
+    int GetProgress()
+    {
+        return getProgressImpl_ ? getProgressImpl_() : 0;
+    }
+    void SetGetProgressImpl(GetProgressImpl&& getProgressImpl)
+    {
+        getProgressImpl_ = getProgressImpl;
+    }
+
     using GetPageHeightImpl = std::function<int()>;
     int GetPageHeight()
     {
@@ -811,6 +839,7 @@ private:
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
     GetHitTestValueImpl getHitTestValueImpl_;
+    GetProgressImpl getProgressImpl_;
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;

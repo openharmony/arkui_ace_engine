@@ -1262,6 +1262,180 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest077
+ * @tc.desc: Test FormatString with basic format strings
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest077, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello %s", "world"), "Hello world");
+    EXPECT_EQ(StringUtils::FormatString("%d", 42), "42");
+    EXPECT_EQ(StringUtils::FormatString("%.2f", 3.14159), "3.14");
+    EXPECT_EQ(StringUtils::FormatString("%p", reinterpret_cast<void*>(42)), "0x2a");
+}
+
+/**
+ * @tc.name: BaseUtilsTest078
+ * @tc.desc: Test FormatString with no arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest078, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello"), "Hello");
+    EXPECT_EQ(StringUtils::FormatString("No vars"), "No vars");
+}
+
+/**
+ * @tc.name: BaseUtilsTest079
+ * @tc.desc: Test FormatString with max size boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest079, TestSize.Level1)
+{
+    std::string longStr(MAX_STRING_SIZE - 1, 'a');
+    std::string result = StringUtils::FormatString("%s", longStr.c_str());
+    EXPECT_EQ(result, longStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest080
+ * @tc.desc: Test FormatString exceeding max size
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest080, TestSize.Level1)
+{
+    std::string input(300, 'B');
+    std::string result = StringUtils::FormatString("%s", input.c_str());
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest081
+ * @tc.desc: Test FormatString with invalid format specifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest081, TestSize.Level1)
+{
+    EXPECT_TRUE(StringUtils::FormatString("%q").empty());
+    EXPECT_TRUE(StringUtils::FormatString("%z", 123).empty());
+    EXPECT_TRUE(StringUtils::FormatString("%", 123).empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest082
+ * @tc.desc: Test FormatString with escape characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest082, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello\tworld\n"), "Hello\tworld\n");
+    EXPECT_EQ(StringUtils::FormatString("%c", '\0'), "\0");
+}
+
+/**
+ * @tc.name: BaseUtilsTest083
+ * @tc.desc: Test FormatString with multiple arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest083, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d + %f = %s", 2, 3.0, "5");
+    EXPECT_EQ(result, "2 + 3.000000 = 5");
+}
+
+/**
+ * @tc.name: BaseUtilsTest084
+ * @tc.desc: Test FormatString with empty format
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest084, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%999s", "test");
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest085
+ * @tc.desc: Test FormatString with pointer formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest085, TestSize.Level1)
+{
+    int x = 42;
+    std::string result = StringUtils::FormatString("%p", &x);
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.length() > 2);
+    EXPECT_EQ(result.c_str()[0], '0');
+    EXPECT_EQ(result.c_str()[1], 'x');
+}
+
+/**
+ * @tc.name: BaseUtilsTest086
+ * @tc.desc: Test FormatString with mixed types
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest086, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d %f %s %c", 123, 45.67, "test", 'K');
+    EXPECT_EQ(result, "123 45.670000 test K");
+}
+
+/**
+ * @tc.name: BaseUtilsTest087
+ * @tc.desc: Test FormatString with special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest087, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("100%%");
+    EXPECT_EQ(result, "100%");
+}
+
+/**
+ * @tc.name: BaseUtilsTest088
+ * @tc.desc: Test FormatString with float formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest088, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%.2f", 3.1415);
+    EXPECT_EQ(result, "3.14");
+}
+
+/**
+ * @tc.name: BaseUtilsTest089
+ * @tc.desc: Test FormatString with integer padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest089, TestSize.Level1)
+{
+    std::string expected(255, '0');
+    std::string result = StringUtils::FormatString("%0255d", 0);
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: BaseUtilsTest090
+ * @tc.desc: Check string is a float
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest090, TestSize.Level1)
+{
+    std::string testStr = "0.125";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+    testStr = "0.0.1";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = "0.A5";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = "0.%5";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), false);
+    testStr = ".123";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+    testStr = "123.";
+    ASSERT_EQ(StringUtils::IsFloat(testStr), true);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC
@@ -1415,18 +1589,261 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
 {
     // replace sign number with unit with formula == ""
     std::string formula = "";
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(formula, "");
     EXPECT_EQ(ret.size(), 0);
 
     // replace sign number with unit normal case
     formula = "+1.1px";
-    std::vector<std::string> ret2 = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret2;
+    StringExpression::ConvertDal2Rpn(formula, ret2);
     EXPECT_EQ(ret2.size(), 0);
 
     formula = "calc(2 * 3 - (2 + 3) / 5 + 6 / 2 + (1 + 2))";
-    std::vector<std::string> ret3 = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret3;
+    StringExpression::ConvertDal2Rpn(formula, ret3);
     EXPECT_EQ(ret3.size(), 17);
+}
+
+/**
+ * @tc.name: StringExpressionTest008
+ * @tc.desc: Test ReplaceSignNumber HandlesSinglePositiveInteger
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest008, TestSize.Level1)
+{
+    std::string input = "+123";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 + 123)");
+}
+
+/**
+ * @tc.name: StringExpressionTest009
+ * @tc.desc: Test ReplaceSignNumber HandlesSingleNegativeInteger
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest009, TestSize.Level1)
+{
+    std::string input = "-456";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 456)");
+}
+
+/**
+ * @tc.name: StringExpressionTest010
+ * @tc.desc: Test ReplaceSignNumber HandlesPositiveDecimal
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest010, TestSize.Level1)
+{
+    std::string input = "+7.89";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 + 7.89)");
+}
+
+/**
+ * @tc.name: StringExpressionTest011
+ * @tc.desc: Test ReplaceSignNumber HandlesNegativeDecimal
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest011, TestSize.Level1)
+{
+    std::string input = "-3.14";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 3.14)");
+}
+
+/**
+ * @tc.name: StringExpressionTest012
+ * @tc.desc: Test ReplaceSignNumber MultipleReplacementsWithText
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest012, TestSize.Level1)
+{
+    std::string input = "a+12-b-34.5";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "a (0 + 12)-b (0 - 34.5)");
+}
+
+/**
+ * @tc.name: StringExpressionTest013
+ * @tc.desc: Test ReplaceSignNumber NoSignNumberUnchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest013, TestSize.Level1)
+{
+    std::string input = "123abc";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "123abc");
+}
+
+/**
+ * @tc.name: StringExpressionTest014
+ * @tc.desc: Test ReplaceSignNumber MixedOperatorsAndNumbers
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest014, TestSize.Level1)
+{
+    std::string input = "x-5.6+y+7-z";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "x (0 - 5.6)+y (0 + 7)-z");
+}
+
+/**
+ * @tc.name: StringExpressionTest015
+ * @tc.desc: Test ReplaceSignNumber ConsecutiveSignNumbers
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest015, TestSize.Level1)
+{
+    std::string input = "-1+2-3.4";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, " (0 - 1) (0 + 2) (0 - 3.4)");
+}
+
+/**
+ * @tc.name: StringExpressionTest016
+ * @tc.desc: Test ReplaceSignNumber SignWithoutNumberIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest016, TestSize.Level1)
+{
+    std::string input = "+-*/";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "+-*/");
+}
+
+/**
+ * @tc.name: StringExpressionTest017
+ * @tc.desc: Test ReplaceSignNumber NumberAfterNonDigitSignIgnored
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest017, TestSize.Level1)
+{
+    std::string input = "a-b123+45";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "a-b123 (0 + 45)");
+}
+
+/**
+ * @tc.name: StringExpressionTest018
+ * @tc.desc: Test ReplaceSignNumber ReplacementAtStringEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest018, TestSize.Level1)
+{
+    std::string input = "xyz-78.9";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "xyz (0 - 78.9)");
+}
+
+/**
+ * @tc.name: StringExpressionTest019
+ * @tc.desc: Test ReplaceSignNumber MultipleSignsBeforeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest019, TestSize.Level1)
+{
+    std::string input = "++123--45.6";
+    StringExpression::ReplaceSignNumber(input);
+    EXPECT_EQ(input, "+ (0 + 123)- (0 - 45.6)");
+}
+
+/**
+ * @tc.name: StringExpressionTest020
+ * @tc.desc: Test ConvertDal2Rpn: invalid formula with unbalanced parentheses
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest020, TestSize.Level1)
+{
+    std::string formula = "2+3*(4";
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: StringExpressionTest021
+ * @tc.desc: Test ConvertDal2Rpn: decimal numbers and negative values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest021, TestSize.Level1)
+{
+    std::string formula = "calc(-2.5 + 3.1)";
+    std::vector<std::string> expected = {"0", "2.5", "-", "3.1", "+"};
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest022
+ * @tc.desc: Test ConvertDal2Rpn: consecutive operators validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest022, TestSize.Level1)
+{
+    std::string formula = "3 + + 4";
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret.size(), 0);
+}
+
+/**
+ * @tc.name: StringExpressionTest023
+ * @tc.desc: Test ConvertDal2Rpn: formula with illegal special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest023, TestSize.Level1)
+{
+    std::string formula = "calc(1 + 2#3)";
+    std::vector<std::string> expected = { "1", "2#3", "+" };
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest024
+ * @tc.desc: Test ConvertDal2Rpn: negative numbers and operator precedence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest024, TestSize.Level1)
+{
+    std::string formula = "calc(-5 + 3 * -2)";
+    std::vector<std::string> expected = { "0", "5", "-", "3", "0", "2", "-", "*", "+" };
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest025
+ * @tc.desc: Test ConvertDal2Rpn: valid formula
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest025, TestSize.Level1)
+{
+    std::string formula = "calc(+10px)";
+    std::vector<std::string> expected = { "0px", "10px", "+" };
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret, expected);
+}
+
+/**
+ * @tc.name: StringExpressionTest026
+ * @tc.desc: Test ConvertDal2Rpn: verify space removal and nested operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest026, TestSize.Level1)
+{
+    std::string formula = "calc( 2 * ( 3 % 2 + 4 ))";
+    std::vector<std::string> expected = {"2", "3%2", "4", "+", "*"};
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
+    EXPECT_EQ(ret, expected);
 }
 
 /**
@@ -1466,6 +1883,160 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StringUtilsTest002
+ * @tc.desc: Test Empty String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest002, TestSize.Level1)
+{
+    std::string emptyStr = "";
+    EXPECT_FALSE(IsUTF8(emptyStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest003
+ * @tc.desc: Test One Ascii Character String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest003, TestSize.Level1)
+{
+    std::string asciiA = "a";
+    EXPECT_TRUE(IsUTF8(asciiA));
+}
+
+/**
+ * @tc.name: StringUtilsTest004
+ * @tc.desc: Test String "a + é + €"
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest004, TestSize.Level1)
+{
+    std::string validStr = "a\xC3\xA9\xE2\x82\xAC";
+    EXPECT_TRUE(IsUTF8(validStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest005
+ * @tc.desc: Test String "é"
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest005, TestSize.Level1)
+{
+    std::string twoByteStr = "\xC3\xA9";
+    EXPECT_TRUE(IsUTF8(twoByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest006
+ * @tc.desc: Test Half Long Character String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest006, TestSize.Level1)
+{
+    std::string halfTwoByteStr = "\xC3";
+    EXPECT_FALSE(IsUTF8(halfTwoByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest007
+ * @tc.desc: Test String with Invalid Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest007, TestSize.Level1)
+{
+    std::string invalidStr = "\xC3\x40";
+    EXPECT_FALSE(IsUTF8(invalidStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest008
+ * @tc.desc: Test Three Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest008, TestSize.Level1)
+{
+    std::string threeByteStr = "\xE2\x82\xAC";
+    EXPECT_TRUE(IsUTF8(threeByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest009
+ * @tc.desc: Test Three Byte String with Invalid Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest009, TestSize.Level1)
+{
+    std::string missingThirdStr = "\xE2\x82";
+    EXPECT_FALSE(IsUTF8(missingThirdStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest010
+ * @tc.desc: Test Three Byte String with One Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest010, TestSize.Level1)
+{
+    std::string invalidStr = "\xE2\x40\xAC";
+    EXPECT_FALSE(IsUTF8(invalidStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest011
+ * @tc.desc: Test Four Byte Stringg Smile Face
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest011, TestSize.Level1)
+{
+    std::string fourByteStr = "\xF0\x9F\x98\x8A";
+    EXPECT_TRUE(IsUTF8(fourByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest012
+ * @tc.desc: Test Four Byte String without Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest012, TestSize.Level1)
+{
+    std::string missingFourth = "\xF0\x9F\x98";
+    EXPECT_FALSE(IsUTF8(missingFourth));
+}
+
+/**
+ * @tc.name: StringUtilsTest013
+ * @tc.desc: Test Four Byte String with Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest013, TestSize.Level1)
+{
+    std::string invalidSecond = "\xF0\xC0\x80\x80";
+    EXPECT_FALSE(IsUTF8(invalidSecond));
+}
+
+/**
+ * @tc.name: StringUtilsTest014
+ * @tc.desc: Test Four Byte String with Invalid Start Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest014, TestSize.Level1)
+{
+    std::string invalidStart = "\xF8\x80\x80\x80";
+    EXPECT_FALSE(IsUTF8(invalidStart));
+}
+
+/**
+ * @tc.name: StringUtilsTest015
+ * @tc.desc: Test String Mixed with Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest015, TestSize.Level1)
+{
+    std::string mixedStr = "a\xC3\xA9\xE2\x82";
+    EXPECT_FALSE(IsUTF8(mixedStr));
+}
+
+/**
  * @tc.name: TimeUtilsTest001
  * @tc.desc: ConvertTimestampToStr
  * @tc.type: FUNC
@@ -1475,6 +2046,346 @@ HWTEST_F(BaseUtilsTest, TimeUtilsTest001, TestSize.Level1)
     int64_t timestamp = 1626211200;
     std::string ret = ConvertTimestampToStr(timestamp);
     EXPECT_EQ(ret, "1970-01-20 03:43:31.200");
+}
+
+/**
+ * @tc.name: TimeUtilsTest002
+ * @tc.desc: Test IsHoursWestValid Valid Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest002, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest003
+ * @tc.desc: Test IsHoursWestValid Valid Special Case
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest003, TestSize.Level1)
+{
+    int32_t hoursWest = -13;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 11);
+}
+
+/**
+ * @tc.name: TimeUtilsTest004
+ * @tc.desc: Test IsHoursWestValid Valid Geographical LowerBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest004, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest005
+ * @tc.desc: Test IsHoursWestValid Valid Upper Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest005, TestSize.Level1)
+{
+    int32_t hoursWest = 12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest006
+ * @tc.desc: Test IsHoursWestValid Invalid BelowLower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest006, TestSize.Level1)
+{
+    int32_t hoursWest = -15;
+    int32_t original = hoursWest;
+    EXPECT_FALSE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest007
+ * @tc.desc: Test IsHoursWestValid Invalid Above Upper Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest007, TestSize.Level1)
+{
+    int32_t hoursWest = 13;
+    int32_t original = hoursWest;
+    EXPECT_FALSE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest008
+ * @tc.desc: Test IsHoursWestValid Normal Value Zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest008, TestSize.Level1)
+{
+    int32_t hoursWest = 0;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 0);
+}
+
+/**
+ * @tc.name: TimeUtilsTest009
+ * @tc.desc: Test IsHoursWestValid Normal Value Mid Range
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest009, TestSize.Level1)
+{
+    int32_t hoursWest = -5;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -5);
+}
+
+/**
+ * @tc.name: TimeUtilsTest010
+ * @tc.desc: Test IsHoursWestValid At Geographical Lower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest010, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest011
+ * @tc.desc: Test IsHoursWestValid Just Below Geographical Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest011, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest012
+ * @tc.desc: Test IsHoursWestValid Valid Non Adjusting Value
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest012, TestSize.Level1)
+{
+    int32_t hoursWest = 5;
+    EXPECT_TRUE(IsHoursWestValid(hoursWest));
+    EXPECT_EQ(hoursWest, 5);
+}
+
+/**
+ * @tc.name: TimeUtilsTest013
+ * @tc.desc: Test IsDayTime Default
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest013, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 6;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest014
+ * @tc.desc: Test IsDayTime Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest014, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 6;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest016
+ * @tc.desc: Test IsDayTime Upper Boundary Edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest016, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 17;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest017
+ * @tc.desc: Test IsDayTime Upper Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest017, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 18;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest018
+ * @tc.desc: Test IsDayTime Below Lower Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest018, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 5;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest019
+ * @tc.desc: Test IsDayTime Midday
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest019, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 12;
+    EXPECT_TRUE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest020
+ * @tc.desc: Test IsDayTime Midnight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest020, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 0;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest021
+ * @tc.desc: Test IsDayTime LateNight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest021, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 23;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest022
+ * @tc.desc: Test IsDayTime Negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest022, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = -3;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest023
+ * @tc.desc: Test IsDayTime Over24
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest023, TestSize.Level1)
+{
+    TimeOfZone time;
+    time.hour24_ = 25;
+    EXPECT_FALSE(IsDayTime(time));
+}
+
+/**
+ * @tc.name: TimeUtilsTest024
+ * @tc.desc: Test HoursWestIsValid Valid With Adjustment Lower Edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest024, TestSize.Level1)
+{
+    int32_t hoursWest = -14;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 10);
+}
+
+/**
+ * @tc.name: TimeUtilsTest025
+ * @tc.desc: Test HoursWestIsValid Valid With Adjustment
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest025, TestSize.Level1)
+{
+    int32_t hoursWest = -13;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 11);
+}
+
+/**
+ * @tc.name: TimeUtilsTest026
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Lower Bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest026, TestSize.Level1)
+{
+    int32_t hoursWest = -12;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, -12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest027
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Middle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest027, TestSize.Level1)
+{
+    int32_t hoursWest = 0;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 0);
+}
+
+/**
+ * @tc.name: TimeUtilsTest028
+ * @tc.desc: Test HoursWestIsValid Valid No Adjustment Upper Bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest028, TestSize.Level1)
+{
+    int32_t hoursWest = 12;
+    EXPECT_TRUE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, 12);
+}
+
+/**
+ * @tc.name: TimeUtilsTest029
+ * @tc.desc: Test HoursWestIsValid Invalid Below Lower Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest029, TestSize.Level1)
+{
+    int32_t hoursWest = -15;
+    const int32_t original = hoursWest;
+    EXPECT_FALSE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
+}
+
+/**
+ * @tc.name: TimeUtilsTest030
+ * @tc.desc: Test HoursWestIsValid Invalid Above Upper Limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest030, TestSize.Level1)
+{
+    int32_t hoursWest = 13;
+    const int32_t original = hoursWest;
+    EXPECT_FALSE(HoursWestIsValid(hoursWest));
+    EXPECT_EQ(hoursWest, original);
 }
 
 /**

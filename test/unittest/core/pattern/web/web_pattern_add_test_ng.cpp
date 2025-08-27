@@ -29,12 +29,13 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #undef private
 #include "test/mock/core/common/mock_udmf.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_date_time_chooser.h"
+#include "nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -217,10 +218,11 @@ public:
     {
         return 0;
     }
-    bool GetIsWideColorGamut() const override
+    uint32_t GetInnerColorGamut() const override
     {
-        return false;
+        return 0;
     }
+    void SetMemoryName(std::string pixelMapName) const override {}
 };
 
 class NWebDragDataDummy : public NWeb::NWebDragData {
@@ -1012,6 +1014,246 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDragStart_002, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webPattern->HandleOnDragStart(info);
     EXPECT_FALSE(webPattern->isDragEndMenuShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnDeregister_001
+ * @tc.desc: OnDeregister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnDeregister_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    bool ret = accessibilityChildTreeCallback->OnDeregister();
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnSetChildTree001
+ * @tc.desc: OnSetChildTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnSetChildTree_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    bool ret = accessibilityChildTreeCallback->OnSetChildTree(1, 1);
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnDumpChildInfo_001
+ * @tc.desc: OnDumpChildInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnDumpChildInfo_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    std::vector<std::string> params = { "params1", "params2" };
+    std::vector<std::string> info = { "info1", "info2" };
+    bool ret = accessibilityChildTreeCallback->OnDumpChildInfo(params, info);
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnClearRegisterFlag_001
+ * @tc.desc: OnClearRegisterFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnClearRegisterFlag_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    accessibilityChildTreeCallback->OnClearRegisterFlag();
+    EXPECT_FALSE(accessibilityChildTreeCallback->isReg_);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityVisible_001
+ * @tc.desc: GetAccessibilityVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, GetAccessibilityVisible_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webpattern;
+    webpattern.delegate_ = nullptr;
+    bool ret = webpattern.GetAccessibilityVisible(1);
+    EXPECT_TRUE(ret);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityVisible_002
+ * @tc.desc: GetAccessibilityVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, GetAccessibilityVisible_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    bool ret = webPattern->GetAccessibilityVisible(1);
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: InitDragEvent006
+ * @tc.desc: InitDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, NotifyStartDragTask001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_NE(gestureHub, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto dragDropManager = pipeline->dragDropManager_;
+    dragDropManager->dragDropState_ = OHOS::Ace::NG::DragDropMgrState::DRAGGING;
+    bool result = webPattern->NotifyStartDragTask(false);
+    EXPECT_FALSE(result);
+    pipeline->dragDropManager_ = nullptr;
+    result = webPattern->NotifyStartDragTask(false);
+    EXPECT_FALSE(result);
+#endif
+}
+
+/**
+ * @tc.name: HandleOnDragDropFile001
+ * @tc.desc: WebPatternAddTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, HandleOnDragDropFile001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    RefPtr<UnifiedDataImpl> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    EXPECT_NE(aceUnifiedData, nullptr);
+    webPattern->delegate_->dragData_ = std::make_shared<NWebDragDataTrueDummy>();
+    auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
+    EXPECT_NE(mockUdmfClient, nullptr);
+    std::vector<std::string> urlVec = { "abc/dragdrop/test.txt" };
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _))
+        .WillOnce(testing::Invoke([&](const RefPtr<UnifiedData>& data, std::vector<std::string>& outUrlVec) {
+            outUrlVec = urlVec;
+            EXPECT_FALSE(outUrlVec.empty());
+            return true;
+        }));
+    webPattern->HandleOnDragDropFile(aceUnifiedData);
+#endif
+}
+
+/**
+ * @tc.name: handleDragCancelTask001
+ * @tc.desc: WebPatternAddTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, handleDragCancelTask001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_NE(gestureHub, nullptr);
+    webPattern->InitDragEvent(gestureHub);
+    EXPECT_NE(webPattern->dragEvent_, nullptr);
+    auto drag_cancel_task = webPattern->dragEvent_->GetActionCancelEventFunc();
+    EXPECT_NE(drag_cancel_task, nullptr);
+    drag_cancel_task();
+    EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
 } // namespace OHOS::Ace::NG

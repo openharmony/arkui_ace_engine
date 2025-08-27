@@ -49,6 +49,7 @@ public:
 
 protected:
     void SetSpecificSupportAction() override;
+    virtual const std::list<RefPtr<UINode>>& GetChildren(const RefPtr<FrameNode>& host) const;
 
 private:
     bool isSelected_ = false;

@@ -58,6 +58,14 @@ let TextAlign;
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
 })(TextAlign || (TextAlign = {}));
 
+let TextVerticalAlign;
+(function (TextVerticalAlign) {
+  TextVerticalAlign[TextVerticalAlign.BASELINE = 0] = 'BASELINE';
+  TextVerticalAlign[TextVerticalAlign.BOTTOM = 1] = 'BOTTOM';
+  TextVerticalAlign[TextVerticalAlign.CENTER = 2] = 'CENTER';
+  TextVerticalAlign[TextVerticalAlign.TOP = 3] = 'TOP';
+})(TextVerticalAlign || (TextVerticalAlign = {}));
+
 let TextDataDetectorType;
 (function (TextDataDetectorType) {
   TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
@@ -84,6 +92,12 @@ let FontWeight;
   FontWeight.Bolder = 'bolder';
 })(FontWeight || (FontWeight = {}));
 
+let MaxLinesMode;
+(function (MaxLinesMode) {
+    MaxLinesMode[MaxLinesMode.CLIP = 0] = 'clip';
+    MaxLinesMode[MaxLinesMode.SCROLL = 1] = 'scroll';
+})(MaxLinesMode || (MaxLinesMode = {}));
+
 let WordBreak;
 (function (WordBreak) {
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
@@ -103,6 +117,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
+
+let PreviewDpiFollowStrategy;
+(function (PreviewDpiFollowStrategy) {
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
+})(PreviewDpiFollowStrategy || (PreviewDpiFollowStrategy = {}));
 
 let WindowModeFollowStrategy;
 (function (WindowModeFollowStrategy) {
@@ -262,6 +282,10 @@ let ImageRotateOrientation;
   ImageRotateOrientation[ImageRotateOrientation.RIGHT = 2] = 'RIGHT';
   ImageRotateOrientation[ImageRotateOrientation.DOWN = 3] = 'DOWN';
   ImageRotateOrientation[ImageRotateOrientation.LEFT = 4] = 'LEFT';
+  ImageRotateOrientation[ImageRotateOrientation.UP_MIRRORED = 5] = 'UP_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.RIGHT_MIRRORED = 6] = 'RIGHT_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.DOWN_MIRRORED = 7] = 'DOWN_MIRRORED';
+  ImageRotateOrientation[ImageRotateOrientation.LEFT_MIRRORED = 8] = 'LEFT_MIRRORED';
 })(ImageRotateOrientation || (ImageRotateOrientation = {}));
 
 let ImageInterpolation;
@@ -346,6 +370,19 @@ let Alignment;
   Alignment[Alignment.Bottom = 7] = 'Bottom';
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
+
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
 
 let ChainStyle;
 (function (ChainStyle) {
@@ -507,6 +544,12 @@ let EffectEdge;
   EffectEdge[EffectEdge.ALL = 3] = 'ALL';
 })(EffectEdge || (EffectEdge = {}));
 
+let FocusWrapMode;
+(function (FocusWrapMode) {
+  FocusWrapMode[FocusWrapMode.DEFAULT = 0] = 'DEFAULT';
+  FocusWrapMode[FocusWrapMode.WRAP_WITH_ARROW = 1] = 'WRAP_WITH_ARROW';
+})(FocusWrapMode || (FocusWrapMode = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';
@@ -538,6 +581,10 @@ let TouchType;
   TouchType[TouchType.Up = 1] = 'Up';
   TouchType[TouchType.Move = 2] = 'Move';
   TouchType[TouchType.Cancel = 3] = 'Cancel';
+  TouchType[TouchType.HOVER_ENTER = 9] = 'HOVER_ENTER';
+  TouchType[TouchType.HOVER_MOVE = 10] = 'HOVER_MOVE';
+  TouchType[TouchType.HOVER_EXIT = 11] = 'HOVER_EXIT';
+  TouchType[TouchType.HOVER_CANCEL = 12] = 'HOVER_CANCEL';
 })(TouchType || (TouchType = {}));
 
 let MouseButton;
@@ -645,6 +692,12 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+let FlipDirection;
+(function (FlipDirection) {
+  FlipDirection[FlipDirection.DOWN = 0] = 'DOWN';
+  FlipDirection[FlipDirection.UP = 1] = 'UP';
+})(FlipDirection || (FlipDirection = {}));
+
 class LayoutPolicy {
   id_ = '';
 
@@ -654,6 +707,14 @@ class LayoutPolicy {
 
   static get matchParent() {
     return new LayoutPolicy('matchParent');
+  }
+
+  static get wrapContent() {
+    return new LayoutPolicy('wrapContent');
+  }
+
+  static get fixAtIdealSize() {
+    return new LayoutPolicy('fixAtIdealSize');
   }
 }
 
@@ -708,6 +769,7 @@ let ScrollDirection;
   ScrollDirection[ScrollDirection.Horizontal = 1] = 'Horizontal';
   ScrollDirection[ScrollDirection.Free = 2] = 'Free';
   ScrollDirection[ScrollDirection.None = 3] = 'None';
+  ScrollDirection[ScrollDirection.FREE = 4] = 'FREE';
 })(ScrollDirection || (ScrollDirection = {}));
 
 let Sticky;
@@ -760,7 +822,6 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
-  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1020,6 +1081,7 @@ let InputType;
   InputType[InputType.NEW_PASSWORD = 11] = 'NEW_PASSWORD';
   InputType[InputType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   InputType[InputType.URL = 13] = 'URL';
+  InputType[InputType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(InputType || (InputType = {}));
 
 let SearchType;
@@ -1030,6 +1092,7 @@ let SearchType;
   SearchType[SearchType.EMAIL = 5] = 'EMAIL';
   SearchType[SearchType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   SearchType[SearchType.URL = 13] = 'URL';
+  SearchType[SearchType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(SearchType || (SearchType = {}));
 
 let AutoCapitalizationMode;
@@ -1048,6 +1111,7 @@ let TextAreaType;
   TextAreaType[TextAreaType.EMAIL = 5] = 'EMAIL';
   TextAreaType[TextAreaType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   TextAreaType[TextAreaType.URL = 13] = 'URL';
+  TextAreaType[TextAreaType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(TextAreaType || (TextAreaType = {}));
 
 let EnterKeyType;
@@ -1147,6 +1211,12 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+let UndoStyle;
+(function (UndoStyle) {
+  UndoStyle[UndoStyle.CLEAR_STYLE = 0] = 'CLEAR_STYLE';
+  UndoStyle[UndoStyle.KEEP_STYLE = 1] = 'KEEP_STYLE';
+})(UndoStyle || (UndoStyle = {}));
+
 let MenuType;
 (function (MenuType) {
   MenuType[MenuType.SELECTION_MENU = 0] = 'SELECTION_MENU';
@@ -1166,12 +1236,49 @@ let HapticFeedbackMode;
   HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
 })(HapticFeedbackMode || (HapticFeedbackMode = {}));
 
+let ModalMode;
+(function (ModalMode) {
+  ModalMode[ModalMode.AUTO = 0] = 'AUTO';
+  ModalMode[ModalMode.NONE = 1] = 'NONE';
+  ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
+})(ModalMode || (ModalMode = {}));
+
+let PreviewScaleMode;
+(function (PreviewScaleMode) {
+  PreviewScaleMode[PreviewScaleMode.AUTO = 0] = 'AUTO';
+  PreviewScaleMode[PreviewScaleMode.CONSTANT = 1] = 'CONSTANT';
+  PreviewScaleMode[PreviewScaleMode.MAINTAIN = 2] = 'MAINTAIN';
+})(PreviewScaleMode || (PreviewScaleMode = {}));
+
+let AvailableLayoutArea;
+(function (AvailableLayoutArea) {
+  AvailableLayoutArea[AvailableLayoutArea.SAFE_AREA = 0] = 'SAFE_AREA';
+})(AvailableLayoutArea || (AvailableLayoutArea = {}));
+
+let TextChangeReason;
+(function (TextChangeReason) {
+  TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';
+  TextChangeReason[TextChangeReason.INPUT = 1] = 'INPUT';
+  TextChangeReason[TextChangeReason.PASTE = 2] = 'PASTE';
+  TextChangeReason[TextChangeReason.CUT = 3] = 'CUT';
+  TextChangeReason[TextChangeReason.DRAG = 4] = 'DRAG';
+  TextChangeReason[TextChangeReason.AUTO_FILL = 5] = 'AUTO_FILL';
+  TextChangeReason[TextChangeReason.AI_WRITE = 6] = 'AI_WRITE';
+  TextChangeReason[TextChangeReason.REDO = 7] = 'REDO';
+  TextChangeReason[TextChangeReason.UNDO = 8] = 'UNDO';
+  TextChangeReason[TextChangeReason.CONTROLLER = 9] = 'CONTROLLER';
+  TextChangeReason[TextChangeReason.ACCESSIBILITY = 10] = 'ACCESSIBILITY';
+  TextChangeReason[TextChangeReason.COLLABORATION = 11] = 'COLLABORATION';
+  TextChangeReason[TextChangeReason.STYLUS = 12] = 'STYLUS';
+})(TextChangeReason || (TextChangeReason = {}));
+
 let DismissReason;
 (function (DismissReason) {
   DismissReason[DismissReason.PRESS_BACK = 0] = 'PRESS_BACK';
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = 'TOUCH_OUTSIDE';
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = 'CLOSE_BUTTON';
   DismissReason[DismissReason.SLIDE_DOWN = 3] = 'SLIDE_DOWN';
+  DismissReason[DismissReason.SLIDE = 4] = 'SLIDE';
 })(DismissReason || (DismissReason = {}));
 
 let HoverEffect;
@@ -1268,6 +1375,11 @@ let PlaybackSpeed;
   PlaybackSpeed.Speed_Forward_1_25_X = '1.25';
   PlaybackSpeed.Speed_Forward_1_75_X = '1.75';
   PlaybackSpeed.Speed_Forward_2_00_X = '2.00';
+  PlaybackSpeed.Speed_Forward_0_50_X = '0.50';
+  PlaybackSpeed.Speed_Forward_1_50_X = '1.50';
+  PlaybackSpeed.Speed_Forward_3_00_X = '3.00';
+  PlaybackSpeed.Speed_Forward_0_25_X = '0.25';
+  PlaybackSpeed.Speed_Forward_0_125_X = '0.125';
 })(PlaybackSpeed || (PlaybackSpeed = {}));
 
 let MixedMode;
@@ -1503,14 +1615,34 @@ class BounceSymbolEffect extends SymbolEffect {
 }
 
 class ReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
+  constructor(scope, replaceType) {
     super();
     this.type = 'ReplaceSymbolEffect';
     this.scope = scope;
+    this.replaceType_ = replaceType;
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
   }
   scope(value) {
     this.scope = value;
     return this;
+  }
+
+  set replaceType(value) {
+    this.replaceType_ = value;
+    this.type = 'ReplaceSymbolEffect';
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
+  }
+
+  get replaceType() {
+    return this.replaceType_;
   }
 }
 
@@ -1518,6 +1650,57 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = 'PulseSymbolEffect';
+  }
+}
+
+class ContentTransition{
+}
+
+class NumericTextTransition extends ContentTransition {
+  constructor(options) {
+    super();
+    this.type = 'NumericTextTransition';
+    this.flipDirection = options.flipDirection;
+    this.enableBlur = options.enableBlur;
+  }
+}
+
+class ShaderStyle {
+}
+
+class RadialGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'RadialGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class LinearGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'LinearGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class ColorShaderStyle extends ShaderStyle {
+  constructor(color) {
+    super();
+    this.type = 'ColorShaderStyle';
+    this.color = color;
+  }
+  color(value) {
+    this.color = value;
+    return this;
   }
 }
 
@@ -1636,6 +1819,8 @@ let HitTestMode;
   HitTestMode[HitTestMode.Block = 1] = 'Block';
   HitTestMode[HitTestMode.Transparent = 2] = 'Transparent';
   HitTestMode[HitTestMode.None = 3] = 'None';
+  HitTestMode[HitTestMode.BLOCK_HIERARCHY = 4] = 'BLOCK_HIERARCHY';
+  HitTestMode[HitTestMode.BLOCK_DESCENDANTS = 5] = 'BLOCK_DESCENDANTS';
 })(HitTestMode || (HitTestMode = {}));
 
 let GridDirection;
@@ -1700,6 +1885,13 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let EffectLayer;
+(function (EffectLayer) {
+  EffectLayer.NONE = 0;
+  EffectLayer.CHARGE_MOTION = 1;
+  EffectLayer.CHARGE_TEXT = 2;
+})(EffectLayer || (EffectLayer = {}));
+
 let ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition.Default = 0] = 'Default';
@@ -1729,6 +1921,8 @@ let SheetType;
   SheetType[SheetType.BOTTOM = 0] = 'BOTTOM';
   SheetType[SheetType.CENTER = 1] = 'CENTER';
   SheetType[SheetType.POPUP = 2] = 'POPUP';
+  SheetType[SheetType.SIDE = 3] = 'SIDE';
+  SheetType[SheetType.CONTENT_COVER = 4] = 'CONTENT_COVER';
 })(SheetType || (SheetType = {}));
 
 let SheetMode;
@@ -1749,6 +1943,7 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.RESIZE_ONLY = 2] = 'RESIZE_ONLY';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 let FunctionKey;
@@ -2201,6 +2396,31 @@ class TextMenuItemId {
   static get AI_WRITER() {
     return new TextMenuItemId('OH_DEFAULT_AI_WRITE');
   }
+
+  static get phoneNumber() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_PHONE');
+  }
+
+  static get url() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_URL');
+  }
+
+  static get email() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_EMAIL');
+  }
+
+  static get address() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_ADDRESS');
+  }
+
+  static get dateTime() {
+    return new TextMenuItemId('OH_DEFAULT_AI_MENU_DATETIME');
+  }
+
+  static get askAI() {
+    return new TextMenuItemId('OH_DEFAULT_ASK_CELIA');
+  }
+
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;
@@ -2328,7 +2548,7 @@ class NavPathStack {
   initNavPathIndex(pathName) {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
-      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+      if (pathName[i] === this.pathArray[i].name) {
         this.pathArray[i].index = i;
       }
     }
@@ -2634,7 +2854,12 @@ class NavPathStack {
   popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
-      return -1;
+      if (this.pathArray.length === 0) {
+        return -1;
+      }
+      if (!this.nativeStack?.isHomeName(name)) {
+        return -1;
+      }
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
@@ -2849,6 +3074,36 @@ class NavPathStack {
     }
     item.isEntry = isEntry;
   }
+  // for inner use
+  pushIntentNavDestination(name, param, needTransition) {
+    if (typeof(name) !== 'string' || typeof(param) !== 'string') {
+      return;
+    }
+    let paramObj = param === '' ? undefined : JSON.parse(param);
+    let option = { launchMode: LaunchMode.MOVE_TO_TOP_SINGLETON, animated: needTransition };
+    this.pushPath(new NavPathInfo(name, paramObj), option);
+  }
+  // for inner use
+  getSerializedParamSafely(index) {
+    if (typeof(index) !== 'number' || index < 0 || index >= this.pathArray.length) {
+      return '';
+    }
+    try {
+      let serializeCount = 0;
+      const MAX_COUNT = 1000;
+      const serializeFilter = (key, value) => {
+        serializeCount++;
+        if (serializeCount > MAX_COUNT) {
+          console.warn('AceNavigation', 'too many iterations during serialize navigation param!');
+          throw new Error('too many iterations');
+        }
+        return value;
+      }
+      return JSON.stringify(this.pathArray[index].param, serializeFilter);
+    } catch (error) {
+      return '';
+    }
+  }
 }
 
 globalThis.NavPathStack = NavPathStack;
@@ -3057,6 +3312,7 @@ let ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment.CENTER = 2] = 'CENTER';
   ImageSpanAlignment[ImageSpanAlignment.BOTTOM = 3] = 'BOTTOM';
   ImageSpanAlignment[ImageSpanAlignment.BASELINE = 4] = 'BASELINE';
+  ImageSpanAlignment[ImageSpanAlignment.FOLLOW_PARAGRAPH = 5] = 'FOLLOW_PARAGRAPH';
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
 
 let MenuAlignType;
@@ -3156,6 +3412,12 @@ let SaveDescription;
   SaveDescription[SaveDescription.SAVE_ALL = 12] = 'SAVE_ALL';
 })(SaveDescription || (SaveDescription = {}));
 
+let SaveButtonTipPosition;
+(function (SaveButtonTipPosition) {
+  SaveButtonTipPosition[SaveButtonTipPosition.ABOVE_BOTTOM = 0] = 'ABOVE_BOTTOM';
+  SaveButtonTipPosition[SaveButtonTipPosition.BELOW_TOP = 1] = 'BELOW_TOP';
+})(SaveButtonTipPosition || (SaveButtonTipPosition = {}));
+
 let SaveButtonOnClickResult;
 (function (SaveButtonOnClickResult) {
   SaveButtonOnClickResult[SaveButtonOnClickResult.SUCCESS = 0] =
@@ -3248,12 +3510,19 @@ let SafeAreaEdge;
 let LayoutSafeAreaType;
 (function (LayoutSafeAreaType) {
   LayoutSafeAreaType[LayoutSafeAreaType.SYSTEM = 0] = 'SYSTEM';
+  LayoutSafeAreaType[LayoutSafeAreaType.KEYBOARD = 1] = 'KEYBOARD';
+  LayoutSafeAreaType[LayoutSafeAreaType.ALL = 2] = 'ALL';
 })(LayoutSafeAreaType || (LayoutSafeAreaType = {}));
 
 let LayoutSafeAreaEdge;
 (function (LayoutSafeAreaEdge) {
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.TOP = 0] = 'TOP';
   LayoutSafeAreaEdge[LayoutSafeAreaEdge.BOTTOM = 1] = 'BOTTOM';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.START = 2] = 'START';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.END = 3] = 'END';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.VERTICAL = 4] = 'VERTICAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.HORIZONTAL = 5] = 'HORIZONTAL';
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.ALL = 6] = 'ALL';
 })(LayoutSafeAreaEdge || (LayoutSafeAreaEdge = {}));
 
 let RenderFit;
@@ -3318,6 +3587,7 @@ let ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape.RECTANGLE = 0] = 'RECTANGLE';
   ParticleEmitterShape[ParticleEmitterShape.CIRCLE = 1] = 'CIRCLE';
   ParticleEmitterShape[ParticleEmitterShape.ELLIPSE = 2] = 'ELLIPSE';
+  ParticleEmitterShape[ParticleEmitterShape.ANNULUS = 3] = 'ANNULUS';
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
 let DistributionType;
@@ -3636,6 +3906,13 @@ let TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
+let SuperscriptStyle;
+(function (SuperscriptStyle) {
+  SuperscriptStyle[SuperscriptStyle.NORMAL = 0] = 'NORMAL';
+  SuperscriptStyle[SuperscriptStyle.SUPERSCRIPT = 1] = 'SUPERSCRIPT';
+  SuperscriptStyle[SuperscriptStyle.SUBSCRIPT = 2] = 'SUBSCRIPT';
+})(SuperscriptStyle || (SuperscriptStyle = {}));
+
 let GestureRecognizerState;
 (function (GestureRecognizerState) {
   GestureRecognizerState[GestureRecognizerState.READY = 0] = 'READY';
@@ -3711,7 +3988,7 @@ let AccessibilityRoleType;
   AccessibilityRoleType[AccessibilityRoleType.HYPERLINK = 39] = "HYPERLINK";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE = 40] = "IMAGE";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_ANIMATOR = 41] = "IMAGE_ANIMATOR";
-  AccessibilityRoleType[AccessibilityRoleType.ROLE_IMAGE_BITMAP = 42] = "ROLE_IMAGE_BITMAP";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE_BITMAP = 42] = "ROLE_IMAGE_BITMAP";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_DATA = 43] = "IMAGE_DATA";
   AccessibilityRoleType[AccessibilityRoleType.IMAGE_SPAN = 44] = "IMAGE_SPAN";
   AccessibilityRoleType[AccessibilityRoleType.LABEL = 45] = "LABEL";
@@ -3815,6 +4092,7 @@ let HeightBreakpoint;
 let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
+  WebElementType[WebElementType.LINK = 2] = 'LINK';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;
@@ -3902,6 +4180,12 @@ let AccessibilityActionInterceptResult;
   AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
 })(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
 
+let TipsAnchorType;
+(function (TipsAnchorType) {
+  TipsAnchorType[TipsAnchorType.TARGET = 0] = 'TARGET';
+  TipsAnchorType[TipsAnchorType.CURSOR = 1] = 'CURSOR';
+})(TipsAnchorType || (TipsAnchorType = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
@@ -3923,6 +4207,22 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let WebBypassVsyncCondition;
+(function (WebBypassVsyncCondition) {
+  WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
+  WebBypassVsyncCondition[WebBypassVsyncCondition.SCROLLBY_FROM_ZERO_OFFSET = 1] = 'SCROLLBY_FROM_ZERO_OFFSET';
+})(WebBypassVsyncCondition || (WebBypassVsyncCondition = {}));
+
+let CommonState;
+(function (CommonState) {
+  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
+  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
+  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
+  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
+  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
+  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
+})(CommonState || (CommonState = {}));
+
 let EventQueryType;
 (function (EventQueryType) {
   EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
@@ -3940,3 +4240,64 @@ let InteractionHand;
   InteractionHand[InteractionHand.LEFT = 1] = 'LEFT';
   InteractionHand[InteractionHand.RIGHT = 2] = 'RIGHT';
 })(InteractionHand || (InteractionHand = {}));
+
+let AnimationPropertyType;
+(function (AnimationPropertyType) {
+    AnimationPropertyType[AnimationPropertyType["ROTATION"] = 0] = "ROTATION";
+    AnimationPropertyType[AnimationPropertyType["TRANSLATION"] = 1] = "TRANSLATION";
+    AnimationPropertyType[AnimationPropertyType["SCALE"] = 2] = "SCALE";
+    AnimationPropertyType[AnimationPropertyType["OPACITY"] = 3] = "OPACITY";
+})(AnimationPropertyType || (AnimationPropertyType = {}));
+
+let DragSpringLoadingState;
+(function (DragSpringLoadingState) {
+  DragSpringLoadingState.BEGIN = 0;
+  DragSpringLoadingState.UPDATE = 1;
+  DragSpringLoadingState.END = 2;
+  DragSpringLoadingState.CANCEL = 3;
+})(DragSpringLoadingState || (DragSpringLoadingState = {}));
+
+let ColorSpace;
+(function (ColorSpace) {
+  ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
+  ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+})(ColorSpace || (ColorSpace = {}));
+
+let AudioSessionType;
+(function (AudioSessionType) {
+  AudioSessionType[AudioSessionType.AMBIENT = 3] = 'AMBIENT';
+})(AudioSessionType || (AudioSessionType = {}));
+
+let KeyboardGradientMode;
+(function (KeyboardGradientMode) {
+  KeyboardGradientMode[KeyboardGradientMode.NONE = 0] = 'NONE';
+  KeyboardGradientMode[KeyboardGradientMode.LINEAR_GRADIENT = 1] = 'LINEAR_GRADIENT';
+})(KeyboardGradientMode || (KeyboardGradientMode = {}));
+
+let KeyboardFluidLightMode;
+(function (KeyboardFluidLightMode) {
+  KeyboardFluidLightMode[KeyboardFluidLightMode.NONE = 0] = 'NONE';
+  KeyboardFluidLightMode[KeyboardFluidLightMode.BACKGROUND_FLUID_LIGHT = 1] = 'BACKGROUND_FLUID_LIGHT';
+})(KeyboardFluidLightMode || (KeyboardFluidLightMode = {}));
+
+let GestureFocusMode;
+(function (GestureFocusMode) {
+  GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
+  GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
+})(GestureFocusMode || (GestureFocusMode = {}));
+
+let PdfLoadResult;
+(function (PdfLoadResult) {
+  PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FILE = 1] = 'PARSE_ERROR_FILE';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FORMAT = 2] = 'PARSE_ERROR_FORMAT';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
+})(PdfLoadResult || (PdfLoadResult = {}));
+
+let ReplaceEffectType;
+(function (ReplaceEffectType) {
+  ReplaceEffectType[ReplaceEffectType.SEQUENTIAL = 0] = 'SEQUENTIAL';
+  ReplaceEffectType[ReplaceEffectType.CROSS_FADE = 1] = 'CROSS_FADE';
+  ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
+})(ReplaceEffectType || (ReplaceEffectType = {}));

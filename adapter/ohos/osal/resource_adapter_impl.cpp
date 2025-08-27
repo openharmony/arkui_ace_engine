@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,8 +98,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_SHADOW,
     THEME_PATTERN_CONTAINER_MODAL,
     THEME_PATTERN_SCROLLABLE,
-    THEME_PATTERN_APP,
-    THEME_PATTERN_LINEAR_INDICATOR
+    THEME_PATTERN_APP
 };
 
 bool IsDirExist(const std::string& path)
@@ -711,6 +710,15 @@ uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
     CHECK_NULL_RETURN(manager, -1);
     manager->GetSymbolById(resId, result);
     return result;
+}
+
+uint32_t ResourceAdapterImpl::GetResId(const std::string &resTypeName) const
+{
+    uint32_t resId = -1;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetResId(resTypeName, resId);
+    return resId;
 }
 
 } // namespace OHOS::Ace

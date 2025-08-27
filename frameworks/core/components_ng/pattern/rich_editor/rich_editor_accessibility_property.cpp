@@ -24,6 +24,17 @@ bool RichEditorAccessibilityProperty::IsEditable() const
     return true;
 }
 
+bool RichEditorAccessibilityProperty::IsHint() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetTextContentLength() == 0 && !layoutProperty->GetPlaceholderValue(u"").empty();
+}
+
 std::string RichEditorAccessibilityProperty::GetHintText() const
 {
     auto frameNode = host_.Upgrade();
@@ -32,4 +43,14 @@ std::string RichEditorAccessibilityProperty::GetHintText() const
     CHECK_NULL_RETURN(richEditorPattern, "");
     return richEditorPattern->GetPlaceHolder();
 }
+
+const std::list<RefPtr<UINode>>& RichEditorAccessibilityProperty::GetChildren(const RefPtr<FrameNode>& host) const
+{
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, host->GetChildren());
+    auto contentHost = pattern->GetContentHost();
+    CHECK_NULL_RETURN(contentHost, host->GetChildren());
+    return contentHost->GetChildren();
+}
+
 } // namespace OHOS::Ace::NG

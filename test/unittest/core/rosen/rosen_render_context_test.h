@@ -22,13 +22,17 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components_ng/render/adapter/background_modifier.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/adapter/transition_modifier.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "frameworks/core/components_ng/render/image_painter.h"
 #undef private
@@ -43,6 +47,8 @@ public:
     void SetUp() override;
     void TearDown() override;
     RefPtr<RosenRenderContext> InitRosenRenderContext(const RefPtr<FrameNode>& frameNode);
+    RefPtr<RosenRenderContext> InitRosenRenderContext(const RefPtr<FrameNode>& frameNode,
+        const RenderContext::ContextType& type);
 };
 } // namespace OHOS::Ace::NG
 

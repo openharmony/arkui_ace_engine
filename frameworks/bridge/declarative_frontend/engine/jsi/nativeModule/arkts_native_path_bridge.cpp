@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue PathBridge::SetPathCommands(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -23,13 +24,19 @@ ArkUINativeModuleValue PathBridge::SetPathCommands(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
-    if (secondArg->IsString(vm)) {
-        std::string commands = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str());
-    } else {
+    if (!secondArg->IsString(vm) && !secondArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getPathModifier()->resetPathCommands(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
 
+    std::string commands;
+    RefPtr<ResourceObject> resObj;
+    if (secondArg->IsString(vm)) {
+        commands = secondArg->ToString(vm)->ToString(vm);
+    } else if (secondArg->IsObject(vm)) {
+        ArkTSUtils::ParseJsStringFromResource(vm, secondArg, commands, resObj);
+    }
+    GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str(), AceType::RawPtr(resObj));
     return panda::JSValueRef::Undefined(vm);
 }
 

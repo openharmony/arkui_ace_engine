@@ -52,6 +52,7 @@ public:
         value->propScrollableBarModeOptions_ = CloneScrollableBarModeOptions();
         value->propBarGridAlign_ = CloneBarGridAlign();
         value->propBarAdaptiveHeight_ = CloneBarAdaptiveHeight();
+        value->propNoMinHeightLimit_ = CloneNoMinHeightLimit();
         return value;
     }
 
@@ -66,6 +67,7 @@ public:
         ResetScrollableBarModeOptions();
         ResetBarGridAlign();
         ResetBarAdaptiveHeight();
+        ResetNoMinHeightLimit();
     }
 
     RectF GetIndicatorRect(int32_t index);
@@ -104,6 +106,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollableBarModeOptions, ScrollableBarModeOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarGridAlign, BarGridColumnOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarAdaptiveHeight, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoMinHeightLimit, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

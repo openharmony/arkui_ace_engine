@@ -46,6 +46,7 @@ public:
     RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
     ScrollModelNG CreateScroll();
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
+    void CreateFreeContent(const SizeF& size);
     void CreateContentChild(int32_t childNumber = 10);
     void ScrollBy(double pixelX, double pixelY, bool smooth = false) override;
 
@@ -56,6 +57,21 @@ public:
     std::vector<RefPtr<FrameNode>> contentChildren_;
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<Scrollable> scrollable_;
+};
+
+class ScrollModelNGTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class ScrollPatternTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class ScrollBarOverlayTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H

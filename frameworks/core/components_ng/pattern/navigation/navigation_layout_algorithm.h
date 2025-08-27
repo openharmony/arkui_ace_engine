@@ -55,11 +55,18 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
-    void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+
+    void MeasurePrimaryContentNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& homePositionDestSize);
+    void MeasureNavBarOrHomeDestination(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
 
     void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize_);
+    void MeasureForceSplitPlaceHolderNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize);
+    void LayoutForceSplitPlaceHolderNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, float navBarWidth, float dividerWidth);
 
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
@@ -83,6 +90,11 @@ private:
     float CalculateNavigationWidth(const RefPtr<NavigationGroupNode>& hostNode);
 
     void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
+    void SetNavigationWidth(LayoutWrapper* layoutWrapper, SizeF& size);
+    void ReCalcNavigationSize(LayoutWrapper* layoutWrapper, SizeF& size);
+
+    void SizeCalculationForForceSplit(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
     bool ifNeedInit_ = true;
 
@@ -99,6 +111,7 @@ private:
     float realContentWidth_ = 0.0f;
     float realContentHeight_ = 0.0f;
 
+    SizeF primaryNodeSize_ = SizeF(0.0f, 0.0f);
     SizeF navBarSize_ = SizeF(0.0f, 0.0f);
     SizeF contentSize_ = SizeF(0.0f, 0.0f);
     SizeF dividerSize_ = SizeF(0.0f, 0.0f);

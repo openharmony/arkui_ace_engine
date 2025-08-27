@@ -27,6 +27,14 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
+#include "transaction/rs_transaction.h"
+#include "transaction/rs_transaction_handler.h"
+#include "transaction/rs_transaction_proxy.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_sync_transaction_handler.h"
+#include "ui/rs_node.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -129,6 +137,13 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(const RefPtr<FrameNode>&
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        if (focusedFrameNode && focusedFrameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            auto windowScenePattern = focusedFrameNode->GetPattern<SystemWindowScene>();
+            CHECK_NULL_RETURN(windowScenePattern, false);
+            auto window2patternSession = windowScenePattern->GetSession();
+            CHECK_NULL_RETURN(window2patternSession, false);
+            return window2patternSession->GetSCBKeepKeyboardFlag();
+        }
         return false;
     }
 
@@ -190,14 +205,16 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
     auto rect = renderContext->GetPaintRectWithoutTransform();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(pointerId, item)) {
+        auto windowX = item.GetWindowX();
+        auto windowY = item.GetWindowY();
         PointF tmp(item.GetWindowX() + rect.GetX(), item.GetWindowY() + rect.GetY());
         renderContext->GetPointTransform(tmp);
         item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
         item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
-        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             // CaculatePoint for double XY Position.
-            PointF tmpPos(item.GetWindowXPos() + rect.GetX(), item.GetWindowYPos() + rect.GetY());
+            PointF tmpPos((NearZero(item.GetWindowXPos()) ? windowX : item.GetWindowXPos()) + rect.GetX(),
+                (NearZero(item.GetWindowYPos()) ? windowY : item.GetWindowYPos()) + rect.GetY());
             renderContext->GetPointTransform(tmpPos);
             item.SetWindowXPos(tmpPos.GetX());
             item.SetWindowYPos(tmpPos.GetY());
@@ -345,5 +362,74 @@ bool WindowSceneHelper::IsNodeInKeyGuardWindow(const RefPtr<FrameNode>& node)
     auto sessionWindowType = window2patternSession->GetWindowType();
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "The windowtype of window scene session is %{public}d", sessionWindowType);
     return sessionWindowType == Rosen::WindowType::WINDOW_TYPE_KEYGUARD;
+}
+
+std::shared_ptr<Rosen::RSUIContext> WindowSceneHelper::GetRSUIContext(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "%{public}s", RSUIContextToStr(rsUIContext).c_str());
+    return rsUIContext;
+}
+
+std::shared_ptr<Rosen::RSTransaction> WindowSceneHelper::GetRSTransaction(const sptr<Rosen::Session>& session)
+{
+    auto rsUIContext = session->GetRSUIContext(__func__);
+    if (rsUIContext) {
+        if (auto rsSyncTransHandler = rsUIContext->GetSyncTransactionHandler()) {
+            return rsSyncTransHandler->GetRSTransaction();
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "Use RSSyncTransactionController");
+    return Rosen::RSSyncTransactionController::GetInstance()->GetRSTransaction();
+}
+
+
+std::shared_ptr<Rosen::RSTransactionHandler> WindowSceneHelper::GetRSTransactionHandler(
+    const RefPtr<FrameNode>& frameNode)
+{
+    auto rsUIContext = GetRSUIContext(frameNode);
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    return rsUIContext->GetRSTransaction();
+}
+
+void WindowSceneHelper::FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode)
+{
+    if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
+        transactionHandler->FlushImplicitTransaction();
+    } else {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RSTransactionHandler is null, use RSTransactionProxy");
+        Rosen::RSTransactionProxy::GetInstance()->FlushImplicitTransaction();
+    }
+}
+
+std::string WindowSceneHelper::RSNodeToStr(const std::shared_ptr<Rosen::RSNode>& rsNode)
+{
+    if (!rsNode) {
+        return "RSNode is null";
+    }
+    std::ostringstream oss;
+    oss << "RSNode [id: " << rsNode->GetId() << "], "
+        << RSUIContextToStr(rsNode->GetRSUIContext());
+    return oss.str();
+}
+
+std::string WindowSceneHelper::RSUIContextToStr(const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    if (!rsUIContext) {
+        return "RSUIContext is null";
+    }
+    std::ostringstream oss;
+    oss << "RSUIContext [token: " << rsUIContext->GetToken()
+        << ", tid: "
+        << static_cast<int32_t>(rsUIContext->GetToken() >> 32) // 32: tid's offset position in the token
+        << "]";
+    return oss.str();
 }
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/i18n/localization.h"
-#include "base/thread/task_dependency_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -41,11 +42,17 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
+constexpr int32_t ETS_TAG_LENGTH = 5;
 constexpr char ETS_PATH[] = "/src/main/ets/";
 constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
 constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
 constexpr char ETS_SUFFIX[] = ".ets";
+constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
+constexpr char INTENT_BUNDLE_NAME_KEY[] = "ohos.insightIntent.bundleName";
+constexpr char INTENT_MODULE_NAME_KEY[] = "ohos.insightIntent.moduleName";
+constexpr char INTENT_PAGE_PATH_KEY[] = "ohos.insightIntent.pageParam.pagePath";
+constexpr char ETS_TAG[] = "/ets/";
 
 void ExitToDesktop()
 {
@@ -286,7 +293,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushNamedRoute exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -839,6 +846,38 @@ void PageRouterManager::GetPageNameAndPath(const std::string& url, std::string& 
     }
 }
 
+std::string PageRouterManager::GetInitParams() const
+{
+    CHECK_RUN_ON(JS);
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BELLOW_TOP) {
+        constexpr size_t STACK_SIZE = 2;
+        if (pageRouterStack_.size() < STACK_SIZE) {
+            return "";
+        }
+        auto it = pageRouterStack_.rbegin();
+        ++it;
+        pageNode = it->Upgrade();
+    } else if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BOTTOM) {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = pageRouterStack_.front().Upgrade();
+    } else {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = GetCurrentPageNode();
+    }
+
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, "");
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_RETURN(pageInfo, "");
+    return pageInfo->GetPageInitParams();
+}
+
 std::string PageRouterManager::GetParams() const
 {
     CHECK_RUN_ON(JS);
@@ -1147,7 +1186,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushOhmUrl exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1211,10 +1250,12 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !stageManager->GetForceSplitEnable()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1223,7 +1264,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartPush with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+            info.errorCallback("The URI of the page to redirect is incorrect or does not exist.", ERROR_CODE_URI_ERROR);
         }
         return;
     }
@@ -1321,7 +1362,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartReplace with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+            info.errorCallback(
+                "Uri error. The URI of the page to be used for replacement is incorrect or does not exist.",
+                ERROR_CODE_URI_ERROR_LITE);
         }
         return;
     }
@@ -1457,23 +1500,29 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
-
-    TaskDependencyManager::GetInstance()->Sync();
-
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return;
     }
 
     pageRouterStack_.emplace_back(pageNode);
-    if (!OnPageReady(pageNode, needHideLast, needTransition)) {
+    if (intentInfo_.has_value()) {
+        if (!OnPageReadyAndHandleIntent(pageNode, needHideLast)) {
+            intentInfo_.reset();
+            pageRouterStack_.pop_back();
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "OnPageReadyAndHandleIntent Failed");
+            return;
+        }
+    } else if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
         TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
         return;
     }
-    AccessibilityEventType type = AccessibilityEventType::CHANGE;
-    pageNode->OnAccessibilityEvent(type);
     TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+    auto pipeline = pageNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_LOAD_PAGE,
+        pageNode->GetAccessibilityId());
 }
 
 RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPageInfo& target)
@@ -1543,20 +1592,15 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
 #if defined(PREVIEW)
     if (!isComponentPreview_()) {
 #endif
-    auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
-    if (!result) {
-        if (!target.isNamedRouterMode) {
-            result = updateRootComponent_();
-        } else if (target.errorCallback) {
-            target.errorCallback("The named route is not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
-        }
-    }
-
-    if (!result) {
+    if (!GenerateRouterPageInner(target)) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
 #if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_INTERNAL_ERROR);
+            const std::string errorMsg =
+                "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
+                "1. there is a js error in target page;\n"
+                "2. invalid moduleName or bundleName in target page.";
+            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
@@ -1854,7 +1898,8 @@ void PageRouterManager::StartRestorePageWithTarget(const RouterPageInfo& target,
             TAG_LOGW(AceLogTag::ACE_ROUTER,
                 "empty path found in StartRestorePageWithTarget with url: %{public}s", info.url.c_str());
             if (info.errorCallback != nullptr) {
-                info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+                info.errorCallback("The URI of the page to redirect is incorrect or does not exist.",
+                    ERROR_CODE_URI_ERROR);
             }
             return;
         }
@@ -1980,6 +2025,25 @@ bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool need
     return false;
 }
 
+bool PageRouterManager::OnPageReadyAndHandleIntent(const RefPtr<FrameNode>& pageNode, bool needHideLast)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto context = DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, false);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, false);
+    std::function<bool()> pushIntentPageCallback = [weak = AceType::WeakClaim(this)]() {
+        auto pageRouterManager = weak.Upgrade();
+        CHECK_NULL_RETURN(pageRouterManager, false);
+        pageRouterManager->RunIntentPage();
+        return true;
+    };
+    return stageManager->PushPage(pageNode, needHideLast, false, std::move(pushIntentPageCallback));
+}
+
 bool PageRouterManager::OnPopPage(bool needShowNext, bool needTransition)
 {
     auto container = Container::Current();
@@ -2046,6 +2110,7 @@ void PageRouterManager::CleanPageOverlay()
 
 void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
 {
+    UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
         return;
@@ -2348,5 +2413,162 @@ void PageRouterManager::UpdateSrcPage()
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetSrcPage(GetCurrentPageNode());
+}
+
+void PageRouterManager::RunIntentPage()
+{
+    if (!intentInfo_.has_value()) {
+        return;
+    }
+    auto pageInfo = FindIntentPageInStack();
+    if (pageInfo.second) {
+        bool routerNeedTransition = pageInfo.first != static_cast<int32_t>(pageRouterStack_.size()) - 1;
+        if (!routerNeedTransition && intentInfo_.value().isColdStart) {
+            // cold start case, fire router home page's onPageShow
+            StageManager::FirePageShow(pageInfo.second, PageTransitionType::NONE);
+        }
+        // fire navigation's intent firstly
+        bool fireNavigationIntentActivelySuccess = FireNavigationIntentActively(
+            pageInfo.second->GetId(), !routerNeedTransition);
+        // find page in stack, move postion and update params.
+        if (!fireNavigationIntentActivelySuccess) {
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(intentInfo_.value().param);
+            }
+        }
+        RouterPageInfo newInfo;
+        newInfo.params = intentInfo_.value().param;
+        intentInfo_.reset();
+        MovePageToFront(pageInfo.first, pageInfo.second, newInfo, true);
+        return;
+    }
+    auto loadPageCallback = intentInfo_.value().loadPageCallback;
+    if (loadPageCallback) {
+        loadPageCallback();
+    }
+    RouterPageInfo info;
+    info.intentInfo = intentInfo_.value();
+    info.isUseIntent = true;
+    info.url = intentInfo_.value().pagePath;
+    info.params = intentInfo_.value().param;
+    intentInfo_.reset();
+    RouterOptScope scope(this);
+    UpdateSrcPage();
+    LoadPage(GenerateNextPageId(), info, true, !info.intentInfo.isColdStart);
+}
+
+bool PageRouterManager::GenerateRouterPageInner(const RouterPageInfo& target)
+{
+    if (target.isUseIntent) {
+        auto intentInfo = target.intentInfo;
+        return generateIntentPageCallback_(intentInfo.bundleName, intentInfo.moduleName, intentInfo.pagePath);
+    }
+    if (loadNamedRouter_(target.url, target.isNamedRouterMode)) {
+        return true;
+    }
+    if (!target.isNamedRouterMode) {
+        return updateRootComponent_();
+    }
+    if (target.errorCallback) {
+        target.errorCallback("The named route is not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
+    }
+    return false;
+}
+
+void PageRouterManager::SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    if (intentInfoSerialized.empty()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "error, serialized intent info is empty!");
+        return;
+    }
+    intentInfo_ = ParseRouterIntentInfo(intentInfoSerialized);
+    intentInfo_.value().isColdStart = isColdStart;
+    intentInfo_.value().loadPageCallback = std::move(loadPageCallback);
+}
+
+RouterIntentInfo PageRouterManager::ParseRouterIntentInfo(const std::string& intentInfoSerialized)
+{
+    RouterIntentInfo intentInfo;
+    auto intentJson = JsonUtil::ParseJsonString(intentInfoSerialized);
+    if (!intentJson || !intentJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "error, intent info is an invalid json object!");
+        return intentInfo;
+    }
+    intentInfo.bundleName = intentJson->GetString(INTENT_BUNDLE_NAME_KEY, "");
+    intentInfo.moduleName = intentJson->GetString(INTENT_MODULE_NAME_KEY, "");
+    intentInfo.pagePath = ParseUrlNameFromOhmUrl(intentJson->GetString(INTENT_PAGE_PATH_KEY, ""));
+    intentInfo.param = intentJson->GetObject(INTENT_PARAM_KEY)->ToString();
+    return intentInfo;
+}
+
+std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindIntentPageInStack() const
+{
+    if (!intentInfo_.has_value()) {
+        return { INVALID_PAGE_INDEX, nullptr };
+    }
+    auto iter = std::find_if(pageRouterStack_.rbegin(), pageRouterStack_.rend(),
+        [pagePath = intentInfo_.value().pagePath](const WeakPtr<FrameNode>& item) {
+            auto pageNode = item.Upgrade();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_RETURN(entryPageInfo, false);
+            return entryPageInfo->GetPageUrl() == pagePath;
+        });
+    if (iter == pageRouterStack_.rend()) {
+        return { INVALID_PAGE_INDEX, nullptr };
+    }
+    // Returns to the forward position.
+    return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
+}
+
+bool PageRouterManager::FireNavigationIntentActively(int32_t pageId, bool needTransition)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        return false;
+    }
+    auto navigationManager = pipeline->GetNavigationManager();
+    if (!navigationManager) {
+        return false;
+    }
+    auto fireSuccess = navigationManager->FireNavigationIntentActively(pageId, needTransition);
+    navigationManager->ResetNavigationIntentInfo();
+    return fireSuccess;
+}
+
+std::string PageRouterManager::ParseUrlNameFromOhmUrl(const std::string& ohmUrl)
+{
+    if (ohmUrl.empty()) {
+        return "";
+    }
+    auto etsTagIndex = ohmUrl.rfind(ETS_TAG);
+    if (etsTagIndex == std::string::npos) {
+        return "";
+    }
+    auto pageUrlIndex = etsTagIndex + ETS_TAG_LENGTH;
+    auto andTagIndex = ohmUrl.rfind('&');
+    if (andTagIndex == std::string::npos || andTagIndex < etsTagIndex) {
+        andTagIndex = ohmUrl.size();
+    }
+    return ohmUrl.substr(pageUrlIndex, andTagIndex - pageUrlIndex);
+}
+
+std::string PageRouterManager::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    std::string serializedEmpty = "{}";
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, serializedEmpty);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, serializedEmpty);
+    auto currentPageNode = GetCurrentPageNode();
+    if (!currentPageNode) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "current router page node is nullptr!");
+        return serializedEmpty;
+    }
+    return navigationManager->GetTopNavDestinationInfo(currentPageNode->GetId(), onlyFullScreen, needParam);
 }
 } // namespace OHOS::Ace::NG

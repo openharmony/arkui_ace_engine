@@ -121,8 +121,7 @@ public:
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
         const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
-    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount = 0,
-        bool isBindIndicator = false);
+    void PaintBackground(DrawingContext& context, ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
@@ -341,6 +340,11 @@ public:
     {
         return isBottomAnimationFinished_;
     }
+
+    RectF GetBoundsRect() const
+    {
+        return boundsRectF_;
+    }
     void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
@@ -422,6 +426,7 @@ protected:
     Dimension paddingSide_;
     Dimension indicatorDotItemSpace_ = 8.0_vp;
     float scaleIndicator_ = 1.33f;
+    RectF boundsRectF_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };

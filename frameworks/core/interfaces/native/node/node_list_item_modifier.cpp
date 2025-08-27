@@ -52,8 +52,8 @@ void SetOptionBuilder(FrameNode* frameNode, ArkUIListItemSwipeActionItemHandle i
                 func(static_cast<int32_t>(swipeActionState), item->onStateChangeUserData);
             }
         };
-        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction, onEnterActionArea,
-            onExitActionArea, onStateChange, length, isStart);
+        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction,
+            onEnterActionArea, onExitActionArea, onStateChange, length, isStart);
     } else {
         CalcDimension length;
         ListItemModelNG::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr, length, isStart);

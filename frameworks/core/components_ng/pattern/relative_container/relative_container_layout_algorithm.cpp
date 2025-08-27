@@ -118,6 +118,16 @@ void RelativeContainerLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         idealSize.SetHeight(std::max(idealSize.Height().value_or(0.0f), layoutConstraint.value().minSize.Height()));
     }
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
+    auto layoutPolicy = relativeContainerLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+                                    .ConvertToSizeT();
+        containerSizeWithoutPaddingBorder_.UpdateSizeWithCheck(layoutPolicySize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);
     if (relativeContainerLayoutProperty->GetPaddingProperty() ||
         relativeContainerLayoutProperty->GetBorderWidthProperty()) {
@@ -882,13 +892,245 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetDebugEnabled()) {
         pattern->SetTopologicalResult(RelativeContainerPattern::TopoListToString(renderList_));
     }
-
+    DetermineSelf(layoutWrapper);
     MeasureChild(layoutWrapper);
     MeasureChainWeight(layoutWrapper);
     MeasureSelf(layoutWrapper);
     AdjustOffsetRtl(layoutWrapper);
     pattern->SetTopologicalResultCache(std::move(renderList_));
     ResetChildAlignRulesChanged(layoutWrapper);
+}
+
+void RelativeContainerLayoutAlgorithm::DetermineSelf(LayoutWrapper* layoutWrapper)
+{
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    auto layoutPolicy = relativeContainerLayoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    if (!layoutPolicy.value().IsAdaptive()) {
+        return;
+    }
+    RectF relativeContainerRect(0, 0, 0, 0);
+    float rCWidth = 0.0f;
+    float rCHeight = 0.0f;
+    const auto &layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
+    for (const auto &nodeName : renderList_) {
+        if (IsBarrier(nodeName)) {
+            MeasureBarrier(nodeName);
+        }
+        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+        auto it = idNodeMap_.find(nodeName);
+        if (it == idNodeMap_.end()) {
+            continue;
+        }
+        auto childWrapper = it->second.layoutWrapper;
+        if (!childWrapper->IsActive()) {
+            childWrapper->Measure(childConstraint);
+            continue;
+        }
+        auto isWidthRelyOnContainer = IsUnionRelyOnContainer(LineDirection::HORIZONTAL, nodeName);
+        auto isHeightRelyOnContainer = IsUnionRelyOnContainer(LineDirection::VERTICAL, nodeName);
+        if (isWidthRelyOnContainer && isHeightRelyOnContainer && layoutPolicy.value().IsAllAdaptive()) {
+            continue;
+        }
+        if (!PreCalcChildSize(layoutWrapper, childWrapper, nodeName, childConstraint)) {
+            continue;
+        };
+        if (!isWidthRelyOnContainer) {
+            rCWidth = std::max(rCWidth,
+                recordOffsetMap_[nodeName].GetX() + childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+        }
+        if (!isHeightRelyOnContainer) {
+            rCHeight = std::max(rCHeight,
+                recordOffsetMap_[nodeName].GetY() + childWrapper->GetGeometryNode()->GetMarginFrameSize().Height());
+        }
+        RectF tempRect(0, 0, rCWidth, rCHeight);
+        relativeContainerRect = relativeContainerRect.CombineRectT(tempRect);
+        ACE_SCOPED_TRACE("relativeContainerRect [%s]", relativeContainerRect.ToString().c_str());
+    }
+    PreCalcContainerSize(layoutWrapper, relativeContainerRect, layoutPolicy.value(), layoutConstraint);
+}
+
+bool RelativeContainerLayoutAlgorithm::PreCalcChildSize(LayoutWrapper* layoutWrapper,
+    RefPtr<LayoutWrapper> childWrapper, const std::string& nodeName, LayoutConstraintF& childConstraint)
+{
+    auto childLayoutProp = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProp, false);
+    const auto &flexItem = childLayoutProp->GetFlexItemProperty();
+    if (!flexItem) {
+        childWrapper->Measure(childConstraint);
+        recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
+        return true;
+    } else if (!flexItem->HasAlignRules()) {
+        childWrapper->Measure(childConstraint);
+        recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
+        return true;
+    } else {
+        flexItem->ClearAlignValue();
+        auto alignRules = flexItem->GetAlignRulesValue();
+        auto frameNode = childWrapper->GetHostNode();
+        if (!alignRules.empty() && frameNode && frameNode->GetLayoutProperty()) {
+            // when child has alignRules and position, the position property do not work.
+            frameNode->GetLayoutProperty()->SetUsingPosition(false);
+        }
+        CalcSizeParam(layoutWrapper, nodeName);
+        CalcOffsetParam(layoutWrapper, nodeName);
+        return true;
+    }
+
+    if (childLayoutProp->GetVisibility() == VisibleType::GONE) {
+        ACE_SCOPED_TRACE("VisibleType::GONE");
+        return false;
+    }
+    return true;
+}
+
+void RelativeContainerLayoutAlgorithm::PreCalcContainerSize(LayoutWrapper* layoutWrapper, RectF relativeContainerRect,
+    LayoutPolicyProperty layoutPolicy, const std::optional<LayoutConstraintF>& layoutConstraint)
+{
+    const auto maxSize = layoutConstraint->maxSize;
+    const auto minSize = layoutConstraint->minSize;
+    auto widthLayoutPolicy = layoutPolicy.widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy.heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    relativeContainerRect =
+        relativeContainerRect.IntersectRectT(RectF(0.0f, 0.0f, Infinity<float>(), Infinity<float>()));
+    if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        containerSizeWithoutPaddingBorder_.SetWidth(relativeContainerRect.Width());
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(relativeContainerRect.Width() + padding_.Width(),
+            layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
+    } else if (widthLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT) {
+        relativeContainerRect.Constrain(
+            RectF(0.0f, 0.0f, maxSize.Width() - padding_.Width(), relativeContainerRect.Height()));
+        relativeContainerRect.Constrain(RectF(0.0f, 0.0f, minSize.Width(), relativeContainerRect.Height()));
+        containerSizeWithoutPaddingBorder_.SetWidth(relativeContainerRect.Width());
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(relativeContainerRect.Width() + padding_.Width(),
+            layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
+    }
+    if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        containerSizeWithoutPaddingBorder_.SetHeight(relativeContainerRect.Height());
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(),
+            relativeContainerRect.Height() + padding_.Height()));
+    } else if (heightLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT) {
+        containerSizeWithoutPaddingBorder_.SetHeight(relativeContainerRect.Height());
+        relativeContainerRect.Constrain(
+            RectF(0.0f, 0.0f, relativeContainerRect.Width(), maxSize.Height() - padding_.Height()));
+        relativeContainerRect.Constrain(RectF(0.0f, 0.0f, relativeContainerRect.Width(), minSize.Height()));
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(),
+            relativeContainerRect.Height() + padding_.Height()));
+    }
+    ResetCalculatedChain();
+    ACE_SCOPED_TRACE("PreCalcContainerSize: [%s]", layoutWrapper->GetGeometryNode()->GetFrameSize().ToString().c_str());
+}
+
+bool RelativeContainerLayoutAlgorithm::MeasureWrapContent(
+    const std::string& nodeName, LayoutConstraintF& childConstraint)
+{
+    auto it = idNodeMap_.find(nodeName);
+    if (it == idNodeMap_.end()) {
+        ACE_LAYOUT_SCOPED_TRACE("Id %s not in map", nodeName.c_str());
+        return false;
+    }
+    auto childWrapper = it->second.layoutWrapper;
+    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
+                childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+            }
+            if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
+                childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+            }
+        }
+    if (!childWrapper->IsActive()) {
+        childWrapper->Measure(childConstraint);
+        return false;
+    }
+    if (!childLayoutProperty || !childLayoutProperty->GetFlexItemProperty()) {
+        childWrapper->Measure(childConstraint);
+        recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
+        return false;
+    }
+    const auto &flexItem = childLayoutProperty->GetFlexItemProperty();
+    if (!flexItem->HasAlignRules()) {
+        childWrapper->Measure(childConstraint);
+        recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
+        return false;
+    }
+    flexItem->ClearAlignValue();
+    auto alignRules = flexItem->GetAlignRulesValue();
+    auto frameNode = childWrapper->GetHostNode();
+    if (!alignRules.empty() && frameNode && frameNode->GetLayoutProperty()) {
+        // when child has alignRules and position, the position property do not work.
+        frameNode->GetLayoutProperty()->SetUsingPosition(false);
+    }
+    return true;
+}
+
+void RelativeContainerLayoutAlgorithm::InsertToVerticalReliedOnMap(
+    const std::string& anchorName, const std::string& nodeName)
+{
+    auto iter = verticalRelyMap_.find(nodeName);
+    if (iter == verticalRelyMap_.end()) {
+        std::set<std::string> anchorList;
+        anchorList.insert(anchorName);
+        verticalRelyMap_[nodeName] = anchorList;
+        return;
+    }
+    iter->second.insert(anchorName);
+}
+
+void RelativeContainerLayoutAlgorithm::InsertToHorizontalReliedOnMap(
+    const std::string& anchorName, const std::string& nodeName)
+{
+    auto iter = horizontalRelyMap_.find(nodeName);
+    if (iter == horizontalRelyMap_.end()) {
+        std::set<std::string> anchorList;
+        anchorList.insert(anchorName);
+        horizontalRelyMap_[nodeName] = anchorList;
+        return;
+    }
+    iter->second.insert(anchorName);
+}
+
+bool RelativeContainerLayoutAlgorithm::IsUnionRelyOnContainer(LineDirection direction, const std::string& id)
+{
+    if (direction == LineDirection::HORIZONTAL) {
+        auto iter = horizontalRelyMap_.find(id);
+        if (iter == horizontalRelyMap_.end()) {
+            return false;
+        }
+        for (const auto &element : iter->second) {
+            if (IsAnchorContainer(element) || IsUnionRelyOnContainer(LineDirection::HORIZONTAL, element)) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        auto iter = verticalRelyMap_.find(id);
+        if (iter == verticalRelyMap_.end()) {
+            return false;
+        }
+        for (const auto &element : iter->second) {
+            if (IsAnchorContainer(element) || IsUnionRelyOnContainer(LineDirection::VERTICAL, element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+void RelativeContainerLayoutAlgorithm::ResetCalculatedChain()
+{
+    CHECK_NULL_VOID(versionGreatorOrEqualToEleven_);
+    CHECK_NULL_VOID(!horizontalChains_.empty());
+    for (auto &horizontalChain : horizontalChains_) {
+        horizontalChain.second.remainingSpace = 0.0f;
+        horizontalChain.second.isCalculated = false;
+    }
+    for (auto &verticalChain : verticalChains_) {
+        verticalChain.second.remainingSpace = 0.0f;
+        verticalChain.second.isCalculated = false;
+    }
 }
 
 void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutWrapper)
@@ -904,12 +1146,20 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
             continue;
         }
         auto childWrapper = it->second.layoutWrapper;
-        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-        if (!childWrapper->IsActive() || !childWrapper->GetLayoutProperty() ||
-            !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+
+        auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        if (!childWrapper->IsActive() || !childLayoutProperty || !childLayoutProperty->GetFlexItemProperty()) {
             continue;
         }
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
+            childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+        }
+        if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
+            childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+        }
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         std::string chainName;
         if (!flexItem->HasAlignRules()) {
             continue;
@@ -1004,34 +1254,9 @@ void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper
         if (IsBarrier(nodeName)) {
             MeasureBarrier(nodeName);
         }
-        auto it = idNodeMap_.find(nodeName);
-        if (it == idNodeMap_.end()) {
-            ACE_LAYOUT_SCOPED_TRACE("Id %s not in map", nodeName.c_str());
-            continue;
-        }
-        auto childWrapper = it->second.layoutWrapper;
         auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-        if (!childWrapper->IsActive()) {
-            childWrapper->Measure(childConstraint);
+        if (!MeasureWrapContent(nodeName, childConstraint)) {
             continue;
-        }
-        if (!childWrapper->GetLayoutProperty() || !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
-            childWrapper->Measure(childConstraint);
-            recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
-            continue;
-        }
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!flexItem->HasAlignRules()) {
-            childWrapper->Measure(childConstraint);
-            recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
-            continue;
-        }
-        flexItem->ClearAlignValue();
-        auto alignRules = flexItem->GetAlignRulesValue();
-        auto frameNode = childWrapper->GetHostNode();
-        if (!alignRules.empty() && frameNode && frameNode->GetLayoutProperty()) {
-            // when child has alignRules and position, the position property do not work.
-            frameNode->GetLayoutProperty()->SetUsingPosition(false);
         }
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
@@ -1086,10 +1311,12 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding_.left.value_or(0.0f);
     auto top = padding_.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
-    auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto textDirection = relativeContainerLayoutProperty->GetNonAutoLayoutDirection();
     for (auto&& childWrapper : layoutWrapper->GetAllChildrenWithBuild()) {
         auto nodeName = GetOrCreateNodeInspectorId(childWrapper->GetHostNode());
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (!childLayoutProperty->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             childWrapper->Layout();
             continue;
@@ -1157,12 +1384,16 @@ bool RelativeContainerLayoutAlgorithm::IsAlignRuleInChain(const AlignDirection& 
         IsNodeInHorizontalChain(nodeName, chainName)) {
         GetDependencyRelationshipInChain(horizontalChains_[chainName].anchorHead.anchor, nodeName);
         GetDependencyRelationshipInChain(horizontalChains_[chainName].anchorTail.anchor, nodeName);
+        InsertToHorizontalReliedOnMap(horizontalChains_[chainName].anchorHead.anchor, nodeName);
+        InsertToHorizontalReliedOnMap(horizontalChains_[chainName].anchorTail.anchor, nodeName);
         return true;
     }
     if ((direction == AlignDirection::TOP || direction == AlignDirection::BOTTOM) &&
         IsNodeInVerticalChain(nodeName, chainName)) {
         GetDependencyRelationshipInChain(verticalChains_[chainName].anchorHead.anchor, nodeName);
         GetDependencyRelationshipInChain(verticalChains_[chainName].anchorTail.anchor, nodeName);
+        InsertToVerticalReliedOnMap(verticalChains_[chainName].anchorHead.anchor, nodeName);
+        InsertToVerticalReliedOnMap(verticalChains_[chainName].anchorTail.anchor, nodeName);
         return true;
     }
     return false;
@@ -1184,8 +1415,10 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
 {
     for (const auto& mapItem : idNodeMap_) {
         auto childWrapper = mapItem.second.layoutWrapper;
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        auto childHostNode = childWrapper->GetHostNode();
+        auto childId = mapItem.second.id;
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
@@ -1193,28 +1426,35 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (IsAlignRuleInChain(alignRule.first, mapItem.first)) {
                 continue;
             }
-
-            if (IsBarrier(alignRule.second.anchor)) {
-                InsertToReliedOnMap(alignRule.second.anchor, mapItem.second.id);
+            auto anchor = alignRule.second.anchor;
+            if (IsBarrier(anchor)) {
+                InsertToReliedOnMap(anchor, childId);
                 continue;
             }
-
-            if (IsAnchorContainer(alignRule.second.anchor) || IsGuideline(alignRule.second.anchor)) {
+            if (IsRelyOnContainer(anchor)) {
                 if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
                     isHorizontalRelyOnContainer_ = true;
+                    InsertToHorizontalReliedOnMap(anchor, childId);
                 } else if (static_cast<uint32_t>(alignRule.first) < VERTICAL_DIRECTION_RANGE) {
                     isVerticalRelyOnContainer_ = true;
+                    InsertToVerticalReliedOnMap(anchor, childId);
                 }
                 continue;
             }
-            auto it = idNodeMap_.find(alignRule.second.anchor);
+            if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
+                    InsertToHorizontalReliedOnMap(anchor, childId);
+            } else if (static_cast<uint32_t>(alignRule.first) < VERTICAL_DIRECTION_RANGE
+                    && static_cast<uint32_t>(alignRule.first) >= HORIZONTAL_DIRECTION_RANGE) {
+                    InsertToVerticalReliedOnMap(anchor, childId);
+            }
+            auto it = idNodeMap_.find(anchor);
             if (it == idNodeMap_.end()) {
                 continue;
             }
-
             if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto anchorChildWrapper = it->second.layoutWrapper;
                 auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
+                CHECK_NULL_CONTINUE(anchorChildLayoutProp);
                 auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
                 if (anchorChildVisibility == VisibleType::GONE) {
                     childWrapper->SetActive(false);
@@ -1222,7 +1462,7 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             }
             // if a is the anchor of b, then reliedOnMap should place <a, [b]> for the first appearance
             // of key a. Otherwise b will be inserted into the existing value list
-            InsertToReliedOnMap(alignRule.second.anchor, mapItem.second.id);
+            InsertToReliedOnMap(anchor, childId);
         }
     }
     GetDependencyRelationshipInBarrier();
@@ -1293,7 +1533,9 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection(LayoutWrapper
     for (const auto& mapItem : idNodeMap_) {
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         if (!flexItem || !flexItem->HasAlignRules()) {
             visitedNode.push(mapItem.first);
             layoutQueue.push(mapItem.second.id);
@@ -1344,7 +1586,9 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
     for (const auto& mapItem : idNodeMap_) {
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         if (!flexItem || incomingDegreeMap_[mapItem.second.id] == 0) {
             layoutQueue.push(mapItem.second.id);
         }
@@ -1378,12 +1622,19 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     auto childWrapper = it->second.layoutWrapper;
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
-    CHECK_NULL_VOID(childWrapper->GetLayoutProperty()->GetFlexItemProperty());
-    CHECK_NULL_VOID(childWrapper->GetLayoutProperty()->GetFlexItemProperty()->HasAlignRules());
+    CHECK_NULL_VOID(childLayoutProperty->GetFlexItemProperty());
+    CHECK_NULL_VOID(childLayoutProperty->GetFlexItemProperty()->HasAlignRules());
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy.value().IsWidthMatch()) {
+        childConstraint.parentIdealSize.SetWidth(containerSizeWithoutPaddingBorder_.Width());
+    }
+    if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
+        childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
+    }
+    auto alignRules = childLayoutProperty->GetFlexItemProperty()->GetAlignRulesValue();
     const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
     bool horizontalHasIdealSize = false;
     bool verticalHasIdealSize = false;
@@ -1485,7 +1736,9 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
 void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
 {
     auto childWrapper = idNodeMap_[nodeName].layoutWrapper;
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    auto alignRules = childLayoutProperty->GetFlexItemProperty()->GetAlignRulesValue();
     float offsetX = 0.0f;
     bool offsetXCalculated = false;
     float offsetY = 0.0f;
@@ -1792,6 +2045,11 @@ bool RelativeContainerLayoutAlgorithm::IsGuidelineOrBarrier(const std::string& i
     return IsGuideline(id) || IsBarrier(id);
 }
 
+bool RelativeContainerLayoutAlgorithm::IsRelyOnContainer(const std::string& id)
+{
+    return IsAnchorContainer(id) || IsGuideline(id);
+}
+
 float RelativeContainerLayoutAlgorithm::GetOriginMarginLeft(
     TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp)
 {
@@ -1812,7 +2070,9 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     if (!anchorIsContainer && !IsGuidelineOrBarrier(alignRule.anchor)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor].layoutWrapper;
         CHECK_NULL_RETURN(anchorWrapper, 0.0f);
-        auto textDirection = anchorWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        auto layoutProperty = anchorWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, 0.0f);
+        auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
         marginLeft = GetOriginMarginLeft(textDirection, anchorWrapper->GetGeometryNode()->GetMargin());
     }
     switch (alignDirection) {
@@ -1986,7 +2246,9 @@ BarrierDirection RelativeContainerLayoutAlgorithm::BarrierDirectionRtl(BarrierDi
 
 void RelativeContainerLayoutAlgorithm::AdjustOffsetRtl(LayoutWrapper* layoutWrapper)
 {
-    auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
     if (textDirection != TextDirection::RTL) {
         return;
     }

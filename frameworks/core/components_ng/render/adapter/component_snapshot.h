@@ -48,9 +48,18 @@ public:
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncByUniqueId(int32_t uniqueId,
         const SnapshotOptions& options);
 
+    static void GetWithRange(const NodeIdentity& startID, const NodeIdentity& endID, const bool& isStartRect,
+        JsCallback&& callback, const SnapshotOptions& options);
+    static std::string GetRangeIDStr(const NodeIdentity& ID);
+    static RefPtr<FrameNode> GetRangeIDNode(const NodeIdentity& ID);
+
     // create pixelMap in sync, this method only for drag.
     static std::shared_ptr<Media::PixelMap> CreateSync(
         const RefPtr<AceType>& customNode, const SnapshotParam& param);
+
+    // create solo node pixelMaps, this method only for IDE.
+    static std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> GetSoloNode(
+        const RefPtr<FrameNode>& node);
 
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
@@ -59,6 +68,9 @@ private:
         const SnapshotParam& param);
     static void BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
         const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param);
+    static void SetRSUIContext(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
+    static std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<PipelineContext>& pipeline);
 
     WeakPtr<FrameNode> node_;
 };

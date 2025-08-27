@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/gesture_info.h"
 
@@ -37,6 +38,8 @@ struct PixelMapInfo {
 
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
+    static void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+        const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus);
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
     static int32_t RequestDragEndPending();
@@ -83,6 +86,7 @@ public:
         const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow,
         bool isExpandDisplay, int32_t instanceId);
     static void SetMenuSubWindowTouchable(bool touchable);
+    static void HandleBackPressHideMenu();
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
@@ -104,7 +108,6 @@ public:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static void RecordMenuWrapperNodeForDrag(int32_t targetId);
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
-    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
     // modifier
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
@@ -128,6 +131,13 @@ public:
     static void GetThumbnailPixelMapForCustomNodeSync(
         const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
     static float GetPixelMapScale(const RefPtr<FrameNode>& frameNode);
+    static void ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
+        DragSummaryInfo& dragSummaryInfo, int32_t& ret);
+    static void EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey,
+        DragSummaryInfo& dragSummaryInfo, int32_t& dataSize);
+
+    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode>& targetNode);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

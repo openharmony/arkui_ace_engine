@@ -22,7 +22,16 @@
 namespace OHOS::Accessibility {
 }
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+class TouchEventInfo;
+
+namespace NG {
+class FrameNode;
+
+struct SecCompEnhanceEvent {
+    std::vector<uint8_t> dataBuffer;
+    TimeStamp time;
+};
 
 #define DEFINE_ACTION_FUNCTIONS(TYPE) \
 public: \
@@ -41,10 +50,17 @@ public: \
 protected: \
     Action##TYPE action##TYPE##_;
 
-using ActionNotifyChildAction = std::function<AccessibilityActionResult(NotifyChildActionType childActionType)>;
+using ActionNotifyChildAction = std::function<AccessibilityActionResult(const RefPtr<FrameNode>& node,
+    NotifyChildActionType childActionType)>;
 
 using ActionAccessibilityActionIntercept =
     std::function<AccessibilityActionInterceptResult(AccessibilityInterfaceAction action)>;
+
+using ActionAccessibilityTransparentCallback = std::function<void(TouchEventInfo& eventInfo)>;
+
+using ActionSpecificSupportActionCallback = std::function<void()>;
+
+using ActionSecurityClickAction = std::function<void(const SecCompEnhanceEvent& event)>;
 
 /**
  * @brief maintaining the callbacks for components
@@ -58,7 +74,8 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
      * @brief bubble up the action to ancestor after descendants handled accessibility action
      *
      * @details callback function prototype: ActionNotifyChildAction
-     *          register function: SetNotifyChildAction(const ActionNotifyChildAction& actionNotifyChildAction)
+     *          register function: SetNotifyChildAction(const RefPtr<FrameNode>& node,
+     *              const ActionNotifyChildAction& actionNotifyChildAction)
      *          use register function to register callback.
      *          when descendants handled accessibility action, will bubble up to the ancestor component, notifying the
      *          ancestor that accessibility action has occurred. The ancestor component can decide on subsequent
@@ -69,8 +86,37 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
      *
      * @attention it will be executed on the UI thread, so be aware of thread safety.
      */
-    DEFINE_ACTION_FUNCTIONS(NotifyChildAction)
+    DEFINE_ACTION_FUNCTIONS(NotifyChildAction);
 
+    /**
+     * @brief set the target's specificSupportActionCallback by other component, will update target's support action
+     *
+     * @details callback function prototype: ActionSpecificSupportActionCallback
+     *          register function: SetSpecificSupportActionCallback()
+     *          use register function to register callback.
+     *          when one component want influence another target component's support action, set target's callback
+     * @param [in] void
+     *
+     * @return void
+     *
+     * @attention it will be executed on the UI thread, so be aware of thread safety.
+     */
+    DEFINE_ACTION_FUNCTIONS(SpecificSupportActionCallback);
+
+    /**
+     * @brief the click action will by handle in this callback with sec enhance data
+     *
+     * @details callback function prototype: ActionSecurityClickAction
+     *          register function: SetSecurityClickAction(const SecCompEnhanceEvent& event)
+     *          use register function to register callback.
+     *          when sec comp want to handle accessibility click with data.
+     * @param [in] SecCompEnhanceEvent the enhance data from accessibility
+     *
+     * @return void
+     *
+     * @attention it will be executed on the UI thread, so be aware of thread safety.
+     */
+    DEFINE_ACTION_FUNCTIONS(SecurityClickAction);
 public:
     AccessibilityPropertyInnerFunction() = default;
 
@@ -105,11 +151,25 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInterfaceFunction {
      * @attention it will be executed on the UI thread, so be aware of thread safety.
      */
     DEFINE_ACTION_FUNCTIONS(AccessibilityActionIntercept)
+
+    /**
+     * @brief when register interface of onAccessibilityHoverTransparent,
+     *        saving the callback and processing after hover
+     *
+     * @details callback function prototype: ActionAccessibilityTransparentCallback
+     *          register function:
+     *              SetAccessibilityTransparentCallback(
+     *                  const ActionAccessibilityTransparentCallback& actionAccessibilityTransparentCallback)
+     *          use register function to register callback.
+     * @param [in] TouchEventInfo the original touch event needed return to developer
+     */
+    DEFINE_ACTION_FUNCTIONS(AccessibilityTransparentCallback)
 public:
     AccessibilityPropertyInterfaceFunction() = default;
 
     virtual ~AccessibilityPropertyInterfaceFunction() = default;
 };
+} // namespace NG
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ACCESSIBILITY_PROPERTY_FUNCTION_H

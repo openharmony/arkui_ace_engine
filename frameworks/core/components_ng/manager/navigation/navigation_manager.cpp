@@ -23,11 +23,97 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
+constexpr int32_t INVALID_NODE_ID = -1;
+constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
+constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
+constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
 
-void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
+bool NavigationManager::IsOuterMostNavigation(int32_t nodeId, int32_t depth)
+{
+    if (dumpMap_.empty()) {
+        return false;
+    }
+    auto outerMostKey = dumpMap_.begin()->first;
+    return outerMostKey == DumpMapKey(nodeId, depth);
+}
+
+void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode)
+{
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    // Notification target navigation can attempt to force split.
+    pattern->SetIsTargetForceSplitNav(isTargetForceSplitNav);
+    // Record that the force split has been done in navigation manager
+    SetExistForceSplitNav(isTargetForceSplitNav, isTargetForceSplitNav ? navigationNode->GetId() : INVALID_NODE_ID);
+}
+
+void NavigationManager::RemoveForceSplitNavStateIfNeed(int32_t nodeId)
+{
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (existForceSplitNav.first && existForceSplitNav.second == nodeId) {
+        SetExistForceSplitNav(false, INVALID_NODE_ID);
+    }
+}
+
+void NavigationManager::IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode)
+{
+    /**
+     * If it does not support force split,
+     * or if there is already a force split navigation,
+     * return directly.
+     */
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (!IsForceSplitSupported() || existForceSplitNav.first) {
+        return;
+    }
+
+    /**
+     * If id and depth are not configured, the target force split navigation is the outermost navigation.
+     * It is necessary to determine whether the current navigation is the outermost navigation.
+     * Current navigation determines whether to force split before dumpMap information is stored,
+     * if the map is empty, the current navigation is the outermost navigation.
+     */
+    if (!TargetIdOrDepthExists()) {
+        bool isOuterMostNavigation = dumpMap_.begin() == dumpMap_.end();
+        SetForceSplitNavState(isOuterMostNavigation, navigationNode);
+        return;
+    }
+
+    // Prioritize whether the configured id matches the id of the current navigation, when configuring id.
+    auto targetInspectorId = GetTargetNavigationId();
+    if (targetInspectorId.has_value()) {
+        auto currInspectorId = navigationNode->GetInspectorId().value_or("");
+        bool isTargetForceSplitNav = currInspectorId == targetInspectorId.value();
+        SetForceSplitNavState(isTargetForceSplitNav, navigationNode);
+        return;
+    }
+    auto targetNestedDepth = GetTargetNavigationDepth();
+    if (!targetNestedDepth.has_value()) {
+        return;
+    }
+
+    /**
+     * If the current navigation depth is greater than the maximum depth stored in the dumpMap_,
+     * this means that there are no nodes at the same level in the current navigation node,
+     * and nested depth increased by one.
+     * After get the nested depth of the current navigation,
+     * compare whether it is the target nested depth navigation.
+     */
+    auto currDeepest = dumpMap_.rbegin();
+    auto currNodeDepth = navigationNode->GetDepth();
+    currNestedDepth_ =
+        currDeepest != dumpMap_.rend() && currNodeDepth > currDeepest->first.depth
+        ? ++currNestedDepth_
+        : currNestedDepth_;
+    bool isTargetForceSplitNav = currNestedDepth_ == targetNestedDepth.value();
+    SetForceSplitNavState(isTargetForceSplitNav, navigationNode);
+}
+
+void NavigationManager::AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
-    dumpMap_.emplace(DumpMapKey(nodeId, depth), callback);
+    IsTargetForceSplitNav(navigationNode);
+    dumpMap_.emplace(DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()), callback);
 }
 
 void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth)
@@ -37,6 +123,7 @@ void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t dep
     if (it != dumpMap_.end()) {
         dumpMap_.erase(it);
     }
+    RemoveForceSplitNavStateIfNeed(nodeId);
 }
 
 void NavigationManager::OnDumpInfo()
@@ -67,6 +154,16 @@ void NavigationManager::OnDumpInfo()
             CHECK_NULL_VOID(navDestination);
             DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
             depth++;
+            auto parent = curNode->GetParent();
+            if (!stack.empty() && parent && parent->GetTag() == V2::PRIMARY_CONTENT_NODE_ETS_TAG &&
+                stack.top().first->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                DumpLog::GetInstance().Print("----------------------------------------------------------");
+            }
+        } else if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
+            auto navBar = AceType::DynamicCast<NavBarNode>(curNode);
+            CHECK_NULL_VOID(navBar);
+            DumpLog::GetInstance().Print(space + navBar->ToDumpString());
+            DumpLog::GetInstance().Print("----------------------------------------------------------");
         }
         const auto& children = curNode->GetChildren();
         for (auto it = children.rbegin(); it != children.rend(); it++) {
@@ -108,14 +205,14 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
         return nullptr;
     }
-    
+
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
     CHECK_NULL_RETURN(navigation, nullptr);
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
-    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack, navigation->GetId());
 }
 
 bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
@@ -185,14 +282,15 @@ RefPtr<FrameNode> NavigationManager::GetNavDestContentFrameNode(const RefPtr<Fra
 
 void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(preNavNode_);
-    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode_);
+    auto preNavNode = preNavNode_.Upgrade();
+    CHECK_NULL_VOID(preNavNode);
+    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode);
     CHECK_NULL_VOID(preNavDestContentNode);
     auto state = CheckNodeNeedCache(preNavDestContentNode);
     UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
     preNodeAnimationCached_ = state;
     preNodeNeverSet_ = false;
-    auto preNavPattern = preNavNode_->GetPattern<NavDestinationPattern>();
+    auto preNavPattern = preNavNode->GetPattern<NavDestinationPattern>();
     auto name = preNavPattern == nullptr ? "NavBar" : preNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache PreNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
@@ -200,23 +298,71 @@ void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
 
 void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(curNavNode_);
-    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
     CHECK_NULL_VOID(curNavDestContentNode);
     auto state = CheckNodeNeedCache(curNavDestContentNode);
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
     curNodeAnimationCached_ = state;
     currentNodeNeverSet_ = false;
-    auto curNavPattern = curNavNode_->GetPattern<NavDestinationPattern>();
+    auto curNavPattern = curNavNode->GetPattern<NavDestinationPattern>();
     auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
 }
 
+void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set navigation force split %{public}s, homePage:%{public}s, "
+        "ignoreOrientation:%{public}d", (isForceSplit ? "enable" : "disable"), homePage.c_str(), ignoreOrientation);
+    /**
+     * As long as the application supports force split, regardless of whether it is enabled or not,
+     * the SetForceSplitleEnable interface will be called.
+     */
+    isForceSplitSupported_ = true;
+    if (isForceSplitEnable_ == isForceSplit && homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) {
+        return;
+    }
+    isForceSplitEnable_ = isForceSplit;
+    homePageName_ = homePage;
+    ignoreOrientation_ = ignoreOrientation;
+
+    auto listeners = forceSplitListeners_;
+    for (auto& listener : listeners) {
+        if (listener.second) {
+            listener.second();
+        }
+    }
+}
+
+bool NavigationManager::GetIgnoreOrientation() const
+{
+    if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation forceSplit ignore Orientation");
+        return true;
+    }
+    return ignoreOrientation_;
+}
+
+void NavigationManager::AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener)
+{
+    forceSplitListeners_[nodeId] = std::move(listener);
+}
+
+void NavigationManager::RemoveForceSplitListener(int32_t nodeId)
+{
+    auto it = forceSplitListeners_.find(nodeId);
+    if (it != forceSplitListeners_.end()) {
+        forceSplitListeners_.erase(it);
+    }
+}
+
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(curNavNode_);
-    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
     CHECK_NULL_VOID(curNavDestContentNode);
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, false);
     curNodeAnimationCached_ = false;
@@ -335,33 +481,32 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     return ret;
 }
 
-void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
+void NavigationManager::AddNavigation(int32_t parentNodeId, const RefPtr<FrameNode>& navigationNode)
 {
-    auto iter = navigationMaps_.find(parentId);
-    if (iter == navigationMaps_.end()) {
-        // insert into navigation maps
-        std::vector<int32_t> navigationIds;
-        navigationIds.push_back(navigationId);
-        navigationMaps_[parentId] = navigationIds;
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navigationNode);
+    CHECK_NULL_VOID(navigation);
+    auto navigationInfo = NavigationInfo(navigation->GetId(), navigation->GetCurId(), navigation);
+    if (navigationMap_.find(parentNodeId) != navigationMap_.end()) {
+        navigationMap_[parentNodeId].push_back(navigationInfo);
         return;
     }
-    auto navigations = iter->second;
-    navigations.push_back(navigationId);
-    iter->second = navigations;
+    navigationMap_[parentNodeId] = { navigationInfo };
 }
 
-void NavigationManager::RemoveNavigation(int32_t navigationId)
+void NavigationManager::RemoveNavigation(int32_t navigationNodeId)
 {
-    for (auto navigationIter = navigationMaps_.begin(); navigationIter != navigationMaps_.end();) {
-        auto navigationIds = navigationIter->second;
-        auto it = std::find(navigationIds.begin(), navigationIds.end(), navigationId);
-        if (it == navigationIds.end()) {
+    for (auto navigationIter = navigationMap_.begin(); navigationIter != navigationMap_.end();) {
+        auto& navigationInfos = navigationIter->second;
+        auto it = std::find_if(navigationInfos.begin(), navigationInfos.end(), [navigationNodeId](auto info) {
+            return navigationNodeId == info.nodeId;
+        });
+        if (it == navigationInfos.end()) {
             navigationIter++;
             continue;
         }
-        navigationIds.erase(it);
-        if (navigationIds.empty()) {
-            navigationIter = navigationMaps_.erase(navigationIter);
+        navigationInfos.erase(it);
+        if (navigationInfos.empty()) {
+            navigationIter = navigationMap_.erase(navigationIter);
         } else {
             navigationIter++;
         }
@@ -370,12 +515,17 @@ void NavigationManager::RemoveNavigation(int32_t navigationId)
 
 std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t targetId)
 {
-    auto it = navigationMaps_.find(targetId);
-    if (it == navigationMaps_.end()) {
+    auto it = navigationMap_.find(targetId);
+    if (it == navigationMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find inner navigation");
         return {};
     }
-    return it->second;
+    std::vector<int32_t> navigationIds = {};
+    auto navigationInfos = it->second;
+    for (auto navigationInfo : navigationInfos) {
+        navigationIds.push_back(navigationInfo.nodeId);
+    }
+    return navigationIds;
 }
 
 void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
@@ -520,42 +670,132 @@ void NavigationManager::OnOrientationChanged()
     }
 }
 
-void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
+void NavigationManager::SetNavigationIntentInfo(const std::string& intentInfoSerialized, bool isColdStart)
 {
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    bool animated = false;
-    if (config.has_value()) {
-        // developer set statusBar config to NavDestination
-        enable = config.value().first;
-        animated = config.value().second;
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = statusBarConfigByWindowApi_.first;
-        animated = statusBarConfigByWindowApi_.second;
+    if (intentInfoSerialized.empty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, serialized intent info is empty!");
+        return;
     }
-
-    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
+    navigationIntentInfo_ = ParseNavigationIntentInfo(intentInfoSerialized);
+    navigationIntentInfo_.value().isColdStart = isColdStart;
 }
 
-void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
+NavigationIntentInfo NavigationManager::ParseNavigationIntentInfo(const std::string& intentInfoSerialized)
 {
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    if (config.has_value()) {
-        // developer set navigationIndicator config to NavDestination
-        enable = config.value();
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = navigationIndicatorConfigByWindowApi_;
+    NavigationIntentInfo intentInfo;
+    auto intentJson = JsonUtil::ParseJsonString(intentInfoSerialized);
+    if (!intentJson || !intentJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, intent info is an invalid json object!");
+        return intentInfo;
     }
+    intentInfo.param = intentJson->GetObject(INTENT_PARAM_KEY)->ToString();
+    intentInfo.navigationInspectorId = intentJson->GetString(INTENT_NAVIGATION_ID_KEY, "");
+    intentInfo.navDestinationName = intentJson->GetString(INTENT_NAVDESTINATION_NAME_KEY, "");
+    return intentInfo;
+}
 
-    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
+bool NavigationManager::FireNavigationIntentActively(int32_t pageId, bool needTransition)
+{
+    if (navigationMap_.find(pageId) == navigationMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, no navigation in current page(id: %{public}d)", pageId);
+        return false;
+    }
+    if (!navigationIntentInfo_.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "error, navigation intent info is empty!");
+        return false;
+    }
+    auto navigationInfos = navigationMap_[pageId];
+    // find target navigation
+    for (auto navigationInfo : navigationInfos) {
+        if (navigationInfo.navigationId == navigationIntentInfo_.value().navigationInspectorId) {
+            auto navigationNode = navigationInfo.navigationNode.Upgrade();
+            if (!navigationNode) {
+                return false;
+            }
+            auto pattern = navigationNode->GetPattern<NavigationPattern>();
+            if (!pattern) {
+                return false;
+            }
+            return pattern->HandleIntent(needTransition);
+        }
+    }
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+        "error, specified navigation(id: %{public}s) doesn't exist in current page(id: %{public}d)",
+        navigationIntentInfo_.value().navigationInspectorId.c_str(), pageId);
+    return false;
+}
+
+std::string NavigationManager::GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam)
+{
+    if (navigationMap_.find(pageId) == navigationMap_.end()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "no navigation in current page(id: %{public}d)", pageId);
+        return "{}";
+    }
+    auto navigationInfos = navigationMap_[pageId];
+    for (int32_t index = static_cast<int32_t>(navigationInfos.size()) -1; index >= 0; index--) {
+        auto navigationInfo = navigationInfos[index];
+        auto navigationNode = navigationInfo.navigationNode.Upgrade();
+        if (!navigationNode) {
+            continue;
+        }
+        auto pattern = navigationNode->GetPattern<NavigationPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (onlyFullScreen && !pattern->IsFullPageNavigation()) {
+            continue;
+        }
+        return pattern->GetTopNavdestinationJson(needParam)->ToString();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "no valid navigation in current page(id: %{public}d)", pageId);
+    return "{}";
+}
+
+void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart)
+{
+    auto navDestinationJson = JsonUtil::ParseJsonString(navDestinationInfo);
+    if (!navDestinationJson || !navDestinationJson->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "restore navdestination info is an invalid json object!");
+        return;
+    }
+    auto name = navDestinationJson->GetString("name");
+    auto param = navDestinationJson->GetString("param");
+    auto mode = navDestinationJson->GetInt("mode");
+    if (isColdStart) {
+        // for cold start case
+        auto navigationId = navDestinationJson->GetString("navigationId", "");
+        if (navigationId.empty()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "will restore %{public}s without navigationId, "
+                "it may lead to error in multi-navigation case!", name.c_str());
+        }
+        navigationRecoveryInfo_[navigationId] = { NavdestinationRecoveryInfo(name, param, mode) };
+        return;
+    }
+    // for hot start case
+    if (navigationMap_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "restore navdestination failed cause  is an invagitlid json object!");
+        return;
+    }
+    auto navigationNode = GetNavigationByInspectorId(navDestinationJson->GetString("navigationId", ""));
+    CHECK_NULL_VOID(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationStack = pattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    navigationStack->CallPushDestinationInner(NavdestinationRecoveryInfo(name, param, mode));
+}
+
+RefPtr<FrameNode> NavigationManager::GetNavigationByInspectorId(const std::string& id) const
+{
+    for (auto iter : navigationMap_) {
+        auto allNavigations = iter.second;
+        for (int32_t index = static_cast<int32_t>(allNavigations.size()) - 1; index >= 0; index--) {
+            auto navigationInfo = allNavigations[index];
+            if (navigationInfo.navigationId == id && navigationInfo.navigationNode.Upgrade()) {
+                return navigationInfo.navigationNode.Upgrade();
+            }
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

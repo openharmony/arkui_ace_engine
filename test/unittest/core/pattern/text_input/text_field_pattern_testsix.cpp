@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 
 namespace OHOS::Ace::NG {
 
@@ -338,5 +339,175 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus005, TestSize.Level0)
     ASSERT_NE(stateHolder, nullptr);
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), true);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation001
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation001, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set enableAutoFillAnimation not meet the animation conditions
+    layoutProperty_->UpdateEnableAutoFillAnimation(false);
+
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation002
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation002, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set autofillType not meet the animation conditions
+    AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
+    std::u16string content = u"openharmony";
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation003
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation003, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set text length not meet the animation conditions
+    std::u16string content = u"";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation004
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation004, TestSize.Level0)
+{
+    CreateTextField();
+
+    // set text length not meet the animation conditions by maxLength attribute
+    layoutProperty_->UpdateMaxLength(0);
+
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+
+    std::u16string emptyContent = u"";
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(emptyContent));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: BeforeAutoFillAnimation005
+ * @tc.desc: test testInput text BeforeAutoFillAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation005, TestSize.Level0)
+{
+    CreateTextField();
+
+    // all attribute  meet the animation conditions
+    std::u16string content = u"openharmony";
+    AceAutoFillType type = AceAutoFillType::ACE_PASSWORD;
+    pattern_->BeforeAutoFillAnimation(content, type);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->autoFillController_->GetAutoFillTextUtf16Value()),
+        StringUtils::Str16ToStr8(content));
+    EXPECT_EQ(pattern_->autoFillController_->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword001
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword001, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::CITY_ADDRESS);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword002
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword002, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::COUNTRY_ADDRESS);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword003
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword003, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::DATE);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword004
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword004, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::HOUSE_NUMBER);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword005
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword005, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::PASSPORT_NUMBER);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword006
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword006, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::PROVINCE_ADDRESS);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
 }
 } // namespace OHOS::Ace::NG

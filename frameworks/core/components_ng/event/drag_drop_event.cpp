@@ -34,6 +34,28 @@ constexpr int32_t PREVIEW_LONG_PRESS_RECOGNIZER = 800;
 constexpr int32_t DEFAULT_DRAG_FINGERS = 1;
 constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 constexpr PanDirection DEFAULT_DRAG_DIRECTION = { PanDirection::ALL };
+
+GestureEvent PostNotifyPanOnActionStart(const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, info);
+    auto newInfo = info;
+    auto globalLocation = info.GetGlobalLocation();
+    auto postEventManager = pipeline->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, info);
+    auto node = postEventManager->GetPostTargetNode();
+    CHECK_NULL_RETURN(node, info);
+    auto offset = node->GetOffsetRelativeToWindow();
+    globalLocation.SetX(globalLocation.GetX() + offset.GetX());
+    globalLocation.SetY(globalLocation.GetY() + offset.GetY());
+    newInfo.SetGlobalLocation(globalLocation);
+    auto screenLocation = info.GetScreenLocation();
+    auto screenOffset = DragDropFuncWrapper::GetFrameNodeOffsetToScreen(node);
+    screenLocation.SetX(screenLocation.GetX() + screenOffset.GetX());
+    screenLocation.SetY(screenLocation.GetY() + screenOffset.GetY());
+    newInfo.SetScreenLocation(screenLocation);
+    return newInfo;
+}
 } // namespace
 
 DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
@@ -71,7 +93,12 @@ void DragDropEventActuator::InitPanAction()
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
             CHECK_NULL_VOID(handler);
-            handler->NotifyPanOnActionStart(info);
+            if (!info.GetPassThrough()) {
+                handler->NotifyPanOnActionStart(info);
+                return;
+            }
+            auto newInfo = PostNotifyPanOnActionStart(info);
+            handler->NotifyPanOnActionStart(newInfo);
         });
     panRecognizer_->SetOnActionUpdate(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
@@ -82,7 +109,11 @@ void DragDropEventActuator::InitPanAction()
     panRecognizer_->SetOnActionEnd(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
-            CHECK_NULL_VOID(handler);
+            if (!handler) {
+                TAG_LOGW(AceLogTag::ACE_DRAG, "on action end, frameNode has been destroyed, resetting");
+                DragEventActuator::ResetDragStatus();
+                return;
+            }
             handler->NotifyPanOnActionEnd(info);
         });
     panRecognizer_->SetOnActionCancel(
@@ -120,6 +151,20 @@ void DragDropEventActuator::InitLongPressAction()
         });
 }
 
+const GestureEventFunc DragDropEventActuator::GetSequenceOnActionCancel()
+{
+    return [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Drag gesture has been canceled");
+        auto handler = weakHandler.Upgrade();
+        if (!handler) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "FrameNode has been destroyed, resetting");
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
+        handler->NotifySequenceOnActionCancel(info);
+    };
+}
+
 void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
@@ -141,18 +186,12 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     InitPanAction();
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-    auto sequenceOnActionCancel = [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](
-                                      GestureEvent& info) {
-        auto handler = weakHandler.Upgrade();
-        CHECK_NULL_VOID(handler);
-        handler->NotifySequenceOnActionCancel(info);
-    };
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
         SequencedRecognizer_->RemainChildOnResetStatus();
         SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        SequencedRecognizer_->SetOnActionCancel(sequenceOnActionCancel);
+        SequencedRecognizer_->SetOnActionCancel(GetSequenceOnActionCancel());
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_back(SequencedRecognizer_);
         return;
@@ -166,7 +205,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    SequencedRecognizer_->SetOnActionCancel(sequenceOnActionCancel);
+    SequencedRecognizer_->SetOnActionCancel(GetSequenceOnActionCancel());
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetIsEventHandoverNeeded(true);
     result.emplace_back(SequencedRecognizer_);
@@ -266,6 +305,8 @@ void DragDropEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool is
         touchEvent.y = info.GetTouches().front().GetGlobalLocation().GetY();
         touchEvent.screenX = info.GetTouches().front().GetScreenLocation().GetX();
         touchEvent.screenY = info.GetTouches().front().GetScreenLocation().GetY();
+        touchEvent.globalDisplayX = info.GetTouches().front().GetGlobalDisplayLocation().GetX();
+        touchEvent.globalDisplayY = info.GetTouches().front().GetGlobalDisplayLocation().GetY();
         touchEvent.id = info.GetTouches().front().GetFingerId();
         dragDropInitiatingHandler_->NotifyTouchEvent(touchEvent);
     }
@@ -283,6 +324,13 @@ void DragDropEventActuator::NotifyDragEnd()
 {
     if (dragDropInitiatingHandler_) {
         dragDropInitiatingHandler_->NotifyDragEnd();
+    }
+}
+
+void DragDropEventActuator::NotifyPreDragStatus(const PreDragStatus preDragStatus)
+{
+    if (dragDropInitiatingHandler_) {
+        dragDropInitiatingHandler_->NotifyPreDragStatus(preDragStatus);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -25,7 +25,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT TextClockComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(TextClockComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(TextClockComposedElement, InspectorComposedElement);
 
 public:
     explicit TextClockComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

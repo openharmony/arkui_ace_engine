@@ -15,6 +15,10 @@
     "src/lib/common/ifelse_native.d.ts",
     "src/lib/common/ark_component.d.ts",
 
+    // interop configure
+    "src/lib/interop/interop_configure.ts",
+    "src/lib/interop/interop_module.ts",
+
     // interfaces
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_storage.ts",
@@ -31,6 +35,7 @@
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
     "src/lib/sdk/i_repeat.ts",
+    "src/lib/sdk/i_monitor.d.ts",
 
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
@@ -44,6 +49,7 @@
     "src/lib/common/arkts_util.d.ts",
     "src/lib/common/finalization_registry.d.ts",
     "src/lib/common/weakref_pool.ts",
+    "src/lib/common/arkui_object_finalization_register_proxy.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",
@@ -78,6 +84,7 @@
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
+    "src/lib/partial_update/pu_builder_binding.ts",
 
     // 'new' stateMgmt vers 2
     "src/lib/v2/v2_observed_proxy.ts",
@@ -101,10 +108,15 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+    "src/lib/sdk/business_error.ts",
 
     // common
     "src/lib/common/gesture_span.ts",
     "src/lib/common/gesture_span_native.d.ts",
+
+    // interop
+    "src/lib/interop/interop.ts",
+    "src/lib/interop/v2_builder.ts",
 
     // init
     "src/index.ts",

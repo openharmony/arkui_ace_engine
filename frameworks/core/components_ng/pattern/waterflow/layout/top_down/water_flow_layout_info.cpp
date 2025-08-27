@@ -44,6 +44,9 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
     auto mainHeight = GetMaxMainHeight();
     // need more items for currentOffset_
     if (LessOrEqual(currentOffset_ + mainHeight, 0.0f)) {
+        if (measureInNextFrame_) {
+            startIndex_ = endIndex_;
+        }
         return;
     }
 
@@ -317,8 +320,13 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
         }
     }
 
-    if (static_cast<size_t>(currentIndex + 1) < itemInfos_.size()) {
-        itemInfos_.resize(currentIndex + 1);
+	// to pass taint data detection by tools.
+    int32_t newIndex = currentIndex + 1;
+    if (newIndex >= 0) {
+        size_t newSize = static_cast<size_t>(newIndex);
+        if (newSize < itemInfos_.size()) {
+            itemInfos_.resize(newSize);
+        }
     }
 
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), currentIndex,
@@ -468,9 +476,13 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
     }
 
     segmentCache_.clear();
-    if (static_cast<size_t>(start) < segmentStartPos_.size()) {
-        segmentStartPos_.resize(start);
-        // startPos of next segment can only be determined after margins_ is reinitialized.
+    // to pass taint data detection by tools.
+    if (start >= 0) {
+        size_t startSize = static_cast<size_t>(start);
+        if (startSize < segmentStartPos_.size()) {
+            segmentStartPos_.resize(startSize);
+            // startPos of next segment can only be determined after margins_ is reinitialized.
+        }
     }
 
     int32_t lastValidItem = (start > 0) ? segmentTails_[start - 1] : -1;
@@ -611,7 +623,7 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (!itemInfos_.empty()) {
         // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
-    } else if (maxHeight_ && repeatDifference_ == 0) {
+    } else if (itemEnd_ && repeatDifference_ == 0) {
         // in original layout, already reach end.
         return maxHeight_;
     } else {
@@ -641,5 +653,17 @@ int32_t WaterFlowLayoutInfo::GetLastItem() const
         res = std::max(res, map.second.rbegin()->first);
     }
     return res;
+}
+
+void WaterFlowLayoutInfo::UpdateItemStart(bool canOverScrollStart)
+{
+    if (currentOffset_ >= 0) {
+        if (!canOverScrollStart) {
+            currentOffset_ = 0;
+        }
+        itemStart_ = true;
+    } else {
+        itemStart_ = false;
+    }
 }
 } // namespace OHOS::Ace::NG

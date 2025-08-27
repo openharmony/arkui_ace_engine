@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
@@ -48,11 +47,6 @@ public:
     void SetEnableSkip(bool value)
     {
         enableSkip_ = value;
-    }
-
-    void SetScrollSource(bool source)
-    {
-        scrollSource_ = source;
     }
 
 private:
@@ -172,11 +166,11 @@ private:
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
 
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
+    float overscrollOffsetBeforeJump_ = 0.0f;
 
     bool enableSkip_ = true;
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;
-    int32_t scrollSource_ = SCROLL_FROM_NONE;
 
     SizeF frameSize_;
 

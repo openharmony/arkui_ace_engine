@@ -20,6 +20,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline/base/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -251,7 +252,7 @@ const std::vector<PanTestCase> TEST_CASES = {
 namespace {
 float DegreesToRadians(float degrees)
 {
-    return static_cast<float>(degrees * M_PI / HALF_CIRCLE);
+    return static_cast<float>(degrees * ACE_PI / HALF_CIRCLE);
 }
 
 void CalculateEndPoint(const PointF& startPoint, float distance, float angle, PointF& endPoint)
@@ -384,7 +385,7 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest001, TestSize.Level1)
      */
     panGestureOption->SetDistance(-1);
     panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 5);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 5);
     /**
      * @tc.steps: step3. create PanRecognizer with illegal direction.
      * @tc.expected: step3. direction_ equals.
@@ -548,4 +549,52 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest004, TestSize.Level1)
     EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
+/**
+ * @tc.name: PanRecognizerBaseTest005
+ * @tc.desc: Test PanRecognizer: Test for TriggerGestureJudgeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    panGestureOption->SetFingers(1);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    panGestureOption->SetDirection(panDirection);
+    panGestureOption->SetDistance(10.0f);
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    panRecognizer->SetMouseDistance(1.0f);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    auto judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                     const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+    auto judgeFunc2 = [](const RefPtr<GestureInfo>& gestureInfo,
+                     const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    targetComponent->onGestureJudgeBegin_ = judgeFunc2;
+    panRecognizer->SetTargetComponent(targetComponent);
+    /**
+     * @tc.steps: step2. TriggerGestureJudgeCallback with inputEventType::AXIS.
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    panRecognizer->lastAxisEvent_ = axisEvent;
+    EXPECT_EQ(panRecognizer->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    /**
+     * @tc.steps: step3. TriggerGestureJudgeCallback with inputEventType::TOUCH_SCREEN.
+     * @tc.expected: step3. result equals.
+     */
+    TouchEvent touchEvent;
+    panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    panRecognizer->lastTouchEvent_ = touchEvent;
+    EXPECT_EQ(panRecognizer->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+}
 } // namespace OHOS::Ace::NG

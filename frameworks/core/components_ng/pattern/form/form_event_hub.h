@@ -27,7 +27,7 @@ using FormCallback = std::function<void(const std::string&)>;
 using FormCacheCallback = std::function<void()>;
 
 class FormEventHub : public EventHub {
-    DECLARE_ACE_TYPE(FormEventHub, EventHub)
+    DECLARE_ACE_TYPE(FormEventHub, EventHub);
 
 public:
     FormEventHub() = default;
@@ -56,6 +56,11 @@ public:
     void SetOnLoad(FormCallback&& onLoad)
     {
         onLoad_ = std::move(onLoad);
+    }
+
+    void SetOnUpdate(FormCallback&& onUpdate)
+    {
+        onUpdate_ = std::move(onUpdate);
     }
 
     void SetOnCache(FormCacheCallback&& onCache)
@@ -103,6 +108,14 @@ public:
         }
     }
 
+    void FireOnUpdate(const std::string& param) const
+    {
+        if (onUpdate_) {
+            auto onUpdate = onUpdate_;
+            onUpdate(param);
+        }
+    }
+
     void FireOnCache() const
     {
         if (onCache_) {
@@ -117,6 +130,7 @@ private:
     FormCallback onUninstall_;
     FormCallback onRouter_;
     FormCallback onLoad_;
+    FormCallback onUpdate_;
     FormCacheCallback onCache_;
 };
 

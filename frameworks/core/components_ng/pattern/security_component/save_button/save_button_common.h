@@ -45,6 +45,11 @@ enum class SaveButtonSaveDescription : int32_t {
     SAVE_ALL,
     MAX_LABEL_TYPE
 };
+
+enum class TipPosition : int32_t {
+    ABOVE_BOTTOM = 0,
+    BELOW_TOP = 1
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SAVE_BUTTON_SAVE_COMMON_H

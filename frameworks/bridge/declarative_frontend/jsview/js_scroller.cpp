@@ -115,9 +115,10 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     Dimension yOffset;
     auto xOffsetStr = obj->GetProperty("xOffset");
     auto yOffsetStr = obj->GetProperty("yOffset");
-    if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
-        !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
-        !ConvertFromJSValue(yOffsetStr, yOffset)) {
+    auto convertFail = (xOffsetStr->IsString() && !std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX)) ||
+                       (yOffsetStr->IsString() && !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX)) ||
+                       !ConvertFromJSValue(xOffsetStr, xOffset) || !ConvertFromJSValue(yOffsetStr, yOffset);
+    if (convertFail) {
         return;
     }
 
@@ -135,12 +136,13 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
             hasDuration = false;
         }
         bool hasCurve = ParseCurveParams(curve, curveArgs);
-        bool hasCanOverScroll =
-            ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll) ? true : false;
-        smooth = !hasDuration && !hasCurve && !hasCanOverScroll ? true : false;
+        bool hasCanOverScroll = ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll);
+        smooth = !hasDuration && !hasCurve && !hasCanOverScroll;
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
+    auto optionCanOverScroll = obj->GetProperty("canOverScroll");
+    bool canStayOverScroll = optionCanOverScroll->IsBoolean() ? optionCanOverScroll->ToBoolean() : false;
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
@@ -149,7 +151,17 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
+    if (direction == Axis::FREE &&
+        scrollController->FreeScrollTo({ .xOffset = xOffset,
+            .yOffset = yOffset,
+            .duration = static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
+            .curve = curve,
+            .smooth = (animationValue->IsBoolean() && smooth) || animationValue->IsObject(),
+            .canOverScroll = canStayOverScroll })) {
+        return;
+    }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollController->SetCanStayOverScroll(canStayOverScroll);
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 
@@ -185,6 +197,13 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         return;
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
+    if (scrollController->GetScrollDirection() == Axis::FREE) { // allow scrolling to left and right edges
+        if (edge == AlignDeclaration::Edge::START) {
+            edgeType = ScrollEdgeType::SCROLL_LEFT;
+        } else if (edge == AlignDeclaration::Edge::END) {
+            edgeType = ScrollEdgeType::SCROLL_RIGHT;
+        }
+    }
     ContainerScope scope(instanceId_);
 
     if (args.Length() > 1 && args[1]->IsObject()) {

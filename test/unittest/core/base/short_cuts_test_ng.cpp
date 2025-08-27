@@ -1420,4 +1420,25 @@ HWTEST_F(ShortCutsTestNg, ShortCutsTest040, TestSize.Level1)
     EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
+
+/**
+ * @tc.name: ShortCutsTest041
+ * @tc.desc: Test the KeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShortCutsTestNg, ShortCutsTest041, TestSize.Level1)
+{
+    KeyEvent event;
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto keyEventManager = PipelineContext::GetCurrentContext()->GetEventManager();
+    event.code = KeyCode::KEY_TAB;
+    event.action = KeyAction::DOWN;
+    event.isPreIme = false;
+    event.pressedCodes = {KeyCode::KEY_TAB};
+    auto ret = keyEventManager->TriggerKeyEventDispatch(event);
+    EXPECT_TRUE(ret);
+    ret = keyEventManager->TriggerKeyEventDispatch(event);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG

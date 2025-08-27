@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
@@ -188,10 +189,10 @@ struct RichEditorInfo {
 };
 
 struct FRCSceneFpsInfo {
-    int32_t duration_120 = 0;
-    int32_t duration_90 = 0;
-    int32_t duration_72 = 0;
-    int32_t duration_60 = 0;
+    int64_t duration_120 = 0;
+    int64_t duration_90 = 0;
+    int64_t duration_72 = 0;
+    int64_t duration_60 = 0;
 };
 
 class ACE_FORCE_EXPORT EventReport {
@@ -220,19 +221,13 @@ public:
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
     static void JsErrReport(
-        const std::string& packageName, const std::string& reason, const std::string& summary,
-        const std::string& uniqueId = "");
+        const std::string& packageName, const std::string& reason, const std::string& summary);
     static void ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = " ");
     static void ANRShowDialog(int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = "");
     static void JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
         const std::string& pageUrl, uint32_t jankStatusVersion = 1);
-    static void ReportEventComplete(DataBase& data);
-    static void ReportEventJankFrame(DataBase& data);
-    static void ReportJankFrameApp(JankInfo& info);
-    static void ReportJankFrameFiltered(JankInfo& info);
-    static void ReportJankFrameUnFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
     static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
@@ -240,8 +235,6 @@ public:
     static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
     static void ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
         int32_t appRotation, int32_t windowMode);
-    static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
-                                  const std::string& pageName);
     static void ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
@@ -256,17 +249,18 @@ public:
     static void ReportPageSlidInfo(NG::SlidInfo &slidInfo);
     static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
-    static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
+    static void AddFrameRateDuration(int32_t frameRate, int64_t duration);
 
+    static void StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
+        const std::string &formName);
+    static void StopFormModifyTimeoutReportTimer(int64_t formId);
 private:
     static void SendEventInner(const EventInfo& eventInfo);
     static FRCSceneFpsInfo curFRCSceneFpsInfo_;
     static int64_t calTime_;
     static int32_t calFrameRate_;
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
-        const int64_t maxFrameTime = 0);
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
+    static std::unordered_map<int64_t, int32_t> formEventTimerMap_;
+    static std::mutex formEventTimerMutex_;
 };
 
 } // namespace OHOS::Ace

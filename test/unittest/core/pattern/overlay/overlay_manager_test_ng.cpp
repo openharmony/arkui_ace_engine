@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -62,6 +63,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -94,6 +96,9 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr float MINUS_HEIGHT = -5.0f;
+constexpr float PIXELMAP_WIDTH = 100.0;
+constexpr float PIXELMAP_HEIGHT = 100.0;
+constexpr float BORDER_VALUE = 10.0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
@@ -105,12 +110,14 @@ public:
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
-
+    RefPtr<FrameNode> sheetContentNode_;
+    std::function<RefPtr<UINode>()> sheetTitleBuilderFunc_;
 protected:
     static RefPtr<FrameNode> CreateBubbleNode(const TestProperty& testProperty);
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    void CreateSheetContentNode();
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -209,6 +216,24 @@ void OverlayManagerTestNg::CreateSheetBuilder()
     titleBuilderFunc_ = buildTitleNodeFunc;
 }
 
+void OverlayManagerTestNg::CreateSheetContentNode()
+{
+    sheetContentNode_ =
+    FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode_->AddChild(childFrameNode);
+    sheetTitleBuilderFunc_ = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+}
 
 /**
  * @tc.name: DeleteModal001
@@ -346,7 +371,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet001, TestSize.Level1)
     EXPECT_FALSE(scrollNode == nullptr);
     auto closeIconNode = topSheetNode->GetLastChild();
     EXPECT_FALSE(closeIconNode == nullptr);
-    auto sheetDragBarNode = AceType::DynamicCast<FrameNode>(oprationNode->GetFirstChild());
+    auto sheetDragBarNode = topSheetPattern->GetDragBarNode();
     EXPECT_FALSE(sheetDragBarNode == nullptr);
     auto sheetDragBarPattern = sheetDragBarNode->GetPattern<SheetDragBarPattern>();
     EXPECT_FALSE(sheetDragBarPattern == nullptr);
@@ -463,7 +488,7 @@ HWTEST_F(OverlayManagerTestNg, OpenBindSheetByUIContext001, TestSize.Level1)
     EXPECT_FALSE(scrollNode == nullptr);
     auto closeIconNode = topSheetNode->GetLastChild();
     EXPECT_FALSE(closeIconNode == nullptr);
-    auto sheetDragBarNode = AceType::DynamicCast<FrameNode>(oprationNode->GetFirstChild());
+    auto sheetDragBarNode = topSheetPattern->GetDragBarNode();
     EXPECT_FALSE(sheetDragBarNode == nullptr);
     auto sheetDragBarPattern = sheetDragBarNode->GetPattern<SheetDragBarPattern>();
     EXPECT_FALSE(sheetDragBarPattern == nullptr);
@@ -708,6 +733,80 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
     EXPECT_TRUE(currentStyle.scrollSizeMode.has_value());
     EXPECT_TRUE(currentStyle.shadow.has_value());
     EXPECT_TRUE(currentStyle.width.has_value());
+}
+
+/**
+ * @tc.name: UpdateBindSheetByUIContext003
+ * @tc.desc: Test OverlayManager::UpdateBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set api version over api 11.
+     */
+    int32_t orignApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step3. create sheetNode, get sheetPattern.
+     */
+    CreateSheetContentNode();
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    SheetKey sheetKey = SheetKey(true, sheetContentNode_->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode_, std::move(sheetTitleBuilderFunc_), sheetStyle, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. test set pageHeight = 1000.
+     * @tc.expected: over api11 mediumPercent = 0.6, height = pageHeight_ * 0.6 = 1000 * 0.6 = 600.
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    float expectSheetHeight = topSheetPattern->pageHeight_ * 0.6;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, expectSheetHeight));
+
+    /**
+     * @tc.steps: step5. UpdateBindSheetByUIContext
+     * @tc.expected: related property is isPartialUpdate.
+     */
+    SheetStyle updateSheetStyle;
+    updateSheetStyle.backgroundColor = Color::BLACK;
+    overlayManager->UpdateBindSheetByUIContext(sheetContentNode_, updateSheetStyle, targetId, true);
+
+    auto sheetNode = overlayManager->sheetMap_[sheetKey].Upgrade();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    ASSERT_TRUE(currentStyle.sheetHeight.sheetMode.has_value());
+    EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
+    EXPECT_EQ(currentStyle.backgroundColor, updateSheetStyle.backgroundColor);
+    EXPECT_EQ(overlayManager->sheetHeight_, expectSheetHeight);
+
+    /**
+     * @tc.steps: step7. recover api version info.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(orignApiVersion);
 }
 
 /**
@@ -1491,13 +1590,16 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
     ASSERT_NE(topSheetNode, nullptr);
     auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
+    topSheetPattern->InitSheetObject();
+    auto sheetObject = topSheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
     topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
 
     /**
      * @tc.steps: step3. Set currentOffset_ = 0, NestedState = CHILD_SCROLL.
      */
     topSheetPattern->currentOffset_ = 0;
-    auto result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0);
 
@@ -1505,7 +1607,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
      * @tc.steps: step4. Set currentOffset_ = 0, NestedState = CHILD_OVER_SCROLL.
      */
     topSheetPattern->currentOffset_ = 0;
-    result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 20.f);
 
@@ -1513,7 +1615,66 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
      * @tc.steps: step5. Set currentOffset_ < 0, NestedState = CHILD_SCROLL.
      */
     topSheetPattern->currentOffset_ = -5;
-    result = topSheetPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 20.f);
+}
+
+/**
+ * @tc.name: TestOnBindSheet
+ * @tc.desc: SheetPresentationPattern::HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    CHECK_NULL_VOID(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    CHECK_NULL_VOID(stageNode);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    CreateSheetBuilder();
+    SheetStyle sheetStyle;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+    topSheetPattern->InitSheetObject();
+    auto sheetObject = topSheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
+    /**
+     * @tc.steps: step3. Set source = SCROLL_FROM_JUMP, NestedState = CHILD_SCROLL, deal with HandleDragEnd.
+     */
+    topSheetPattern->currentOffset_ = 100.0f;
+    sheetObject->isSheetNeedScroll_ = true;
+    auto result = sheetObject->HandleScroll(20.f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 0);
+    /**
+     * @tc.steps: step4. isSheetNeedScroll_ = false, and will Not HandleDragEnd.
+     */
+    topSheetPattern->currentOffset_ = 0;
+    sheetObject->isSheetNeedScroll_ = false;
+    result = sheetObject->HandleScroll(20.f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    EXPECT_FALSE(sheetObject->isSheetNeedScroll_);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 20.f);
 }
@@ -1560,7 +1721,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 2000;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(2000);
     sheetPattern->height_ = 500;
     auto sheetLayoutAlgorithm = sheetPattern->CreateLayoutAlgorithm();
     AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetLayoutAlgorithm)->sheetMaxHeight_ = 500;
@@ -1621,7 +1785,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
     SheetStyle sheetStyle;
@@ -1724,7 +1891,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea4, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -1864,7 +2034,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea5, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2006,7 +2179,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2190,7 +2366,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2376,7 +2555,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2538,7 +2720,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -2701,7 +2886,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->height_ = 1800;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     EXPECT_FALSE(sheetLayoutProperty == nullptr);
@@ -2881,7 +3069,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     SafeAreaInsets::Inset upKeyboard { 0, 600 };
     SafeAreaInsets::Inset emptyKeyboard { 0, 0 };
     sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 1800;
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    sheetPattern->GetSheetObject()->SetSheetHeight(1800);
     sheetPattern->centerHeight_ = 1800;
     sheetPattern->height_ = 1900;
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -3033,7 +3224,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
     ASSERT_NE(scrollNode, nullptr);
     sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
@@ -3703,6 +3894,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationProcess_ = false.
      */
     topSheetPattern->isAnimationBreak_ = false;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationProcess_);
 
@@ -3711,6 +3903,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationBreak_ = false.
      */
     topSheetPattern->isAnimationBreak_ = true;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationBreak_);
 
@@ -4017,7 +4210,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
-    topSheetPattern->FireOnWidthDidChange(topSheetNode);
+    topSheetPattern->FireOnWidthDidChange();
     EXPECT_EQ(widthVal, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
 }
 
@@ -4279,10 +4472,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage001, TestSize.Level1)
      */
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
     EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
-    auto operationColumn = sheetNode->GetFirstChild();
+    auto operationColumn = sheetPattern->GetTitleBuilderNode();
     ASSERT_NE(operationColumn, nullptr);
-    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 1);
 }
 /**
  * @tc.name: TestSheetPage002
@@ -4308,12 +4503,14 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage002, TestSize.Level1)
      * @tc.steps: step2. set style.isTitleBuilder = true、 sheetTitle and sheetSubtitle.
      * @tc.expected: create titleColumn and titleColumn.GetChildren().size() equal 3.
      */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(sheetLayoutProperty, nullptr);
     EXPECT_TRUE(sheetLayoutProperty->GetSheetStyle()->isTitleBuilder);
-    auto operationColumn = sheetNode->GetFirstChild();
+    auto operationColumn = sheetPattern->GetTitleBuilderNode();
     ASSERT_NE(operationColumn, nullptr);
-    EXPECT_EQ(operationColumn->GetChildren().size(), 2);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 1);
     auto titleColumn = operationColumn->GetLastChild();
     ASSERT_NE(titleColumn, nullptr);
     EXPECT_EQ(titleColumn->GetChildren().size(), 3);
@@ -4338,7 +4535,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     style.sheetSubtitle = MESSAGE;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. call Measure function.
      * @tc.expected: sheetHeight_ equal 320.
@@ -4410,7 +4610,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = 0.0_px;
     auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
-    EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
+    EXPECT_EQ(height, sheetTheme->bigWindowMinHeight_.ConvertToPx());
     sheetLayoutAlgorithm->sheetStyle_.sheetHeight.height = -1.0_px;
     height = sheetLayoutAlgorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
@@ -4685,5 +4885,266 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage005, TestSize.Level1)
     ASSERT_NE(topTitleNode, nullptr);
     auto topOffsetY = topTitleNode->GetPositionToScreen().GetY();
     EXPECT_EQ(topOffsetY, offsetY);
+}
+
+/**
+ * @tc.name: TestSheetPage006
+ * @tc.desc: Test CreateSheetPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage006, TestSize.Level1)
+{
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.detents = {
+        SheetHeight{std::make_optional(Dimension(100, DimensionUnit::VP)), std::make_optional(SheetMode::MEDIUM)},
+        SheetHeight{std::make_optional(Dimension(300, DimensionUnit::VP)), std::make_optional(SheetMode::LARGE)},
+        SheetHeight{std::make_optional(Dimension(500, DimensionUnit::VP)), std::make_optional(SheetMode::AUTO)}
+    };
+    style.enableFloatingDragBar = true;
+    style.showDragBar = true;
+    RefPtr<FrameNode> titleBuilder = builder;
+
+    auto sheetNode = SheetView::CreateSheetPage(
+        0, "", builder, titleBuilder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    ASSERT_NE(scrollNode, nullptr);
+
+    auto operationColumn = sheetPattern->GetTitleBuilderNode();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_TRUE(scrollNode->GetParent() == sheetNode->GetPattern()->frameNode_.Upgrade());
+    EXPECT_EQ(operationColumn->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: PlaySheetTransition001
+ * @tc.desc: Test PlaySheetTransition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step. set sheetHeight_ is 0.0f, PlaySheetTransition.
+     * @tc.expected: NearZero(overlayManager->sheetHeight_) is true.
+     */
+    overlayManager->sheetHeight_ = 0.0f;
+    overlayManager->PlaySheetTransition(sheetNode, true, true);
+    EXPECT_TRUE(NearZero(overlayManager->sheetHeight_));
+}
+
+/**
+ * @tc.name: RebuildCustomBuilder001
+ * @tc.desc: Test OverlayManager::RebuildCustomBuilder
+ * @tc.type: FUNC
+ */
+ HWTEST_F(OverlayManagerTestNg, RebuildCustomBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    RefPtr<UINode> customNode;
+    /**
+     * @tc.steps: step2. test RebuildCustomBuilder
+     */
+    auto result = overlayManager->RebuildCustomBuilder(customNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest001
+ * @tc.desc: Verify early return when isOnAnimation_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = true;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_TRUE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest002
+ * @tc.desc: Verify early return when hasPixelMap_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = false;
+
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest003
+ * @tc.desc: Verify RemovePixelMap is triggered when startDrag = true and isSubwindowOverlay = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest003, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest004
+ * @tc.desc: Verify RemovePixelMap is skipped when isSubwindowOverlay = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest004, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, true);
+    EXPECT_TRUE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest005
+ * @tc.desc: Verify RemoveEventColumn is called when pixmapColumnNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest005, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>();
+    overlayManager->RemovePixelMapAnimation(false, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest001
+ * @tc.desc: Return default radius when mainPipeline is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    MockPipelineContext::SetUp();
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest002
+ * @tc.desc: Return default radius when dragDropManager is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    MockPipelineContext::GetCurrent()->dragDropManager_ = nullptr;
+    MockPipelineContext::SetUp();
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest003
+ * @tc.desc: Return default radius when dragFrameNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest003, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    MockPipelineContext::SetUp();
+
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(WeakPtr<FrameNode>());
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest004
+ * @tc.desc: Return computed radius when all dependencies valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest004, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(
+        Dimension(BORDER_VALUE), Dimension(BORDER_VALUE), Dimension(BORDER_VALUE), Dimension(BORDER_VALUE)));
+
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_NE(result.radiusTopLeft, defaultRadius.radiusTopLeft);
+    EXPECT_NE(result.radiusTopRight, defaultRadius.radiusTopRight);
+    EXPECT_NE(result.radiusBottomLeft, defaultRadius.radiusBottomLeft);
+    EXPECT_NE(result.radiusBottomRight, defaultRadius.radiusBottomRight);
 }
 }

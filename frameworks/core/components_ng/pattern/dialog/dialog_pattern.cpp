@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,7 +91,6 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
-constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 
 std::string GetBoolStr(bool isTure)
@@ -133,6 +132,7 @@ void DialogPattern::OnAttachToFrameNode()
     auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
     RegisterHoverModeChangeCallback();
+    RegisterAvoidInfoChangeListener(host);
 }
 
 void DialogPattern::RegisterHoverModeChangeCallback()
@@ -163,7 +163,8 @@ void DialogPattern::RegisterHoverModeChangeCallback()
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
@@ -172,6 +173,10 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (HasHoverModeChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
     }
+    if (onWillDismissRelease_) {
+        onWillDismissRelease_();
+    }
+    UnRegisterAvoidInfoChangeListener(frameNode);
 }
 
 void DialogPattern::OnFontConfigurationUpdate()
@@ -282,7 +287,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
-        hub->FireSuccessEvent(buttonIdx);
+        hub->FireSuccessEvent(buttonIdx, host);
         RecordEvent(buttonIdx);
     } else {
         // trigger onCancel callback
@@ -319,6 +324,43 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
         .SetExtra(Recorder::KEY_TITLE, title_)
         .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+}
+
+void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
+    const DialogProperties& props, bool isCustomBorder, RefPtr<DialogTheme> dialogTheme)
+{
+    auto contentRenderContext = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(contentRenderContext);
+    if (props.borderStyle.has_value()) {
+        contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
+    }
+    auto contentPattern = contentNode->GetPattern();
+    CHECK_NULL_VOID(contentPattern);
+    if (props.borderColor.has_value()) {
+        contentRenderContext->UpdateBorderColor(props.borderColor.value());
+        contentPattern->CheckLocalized();
+    } else {
+        BorderColorProperty borderColor;
+        if (!isCustomBorder && dialogTheme->GetDialogDoubleBorderEnable()) {
+            borderColor.SetColor(dialogTheme->GetDialogInnerBorderColor());
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(dialogTheme->GetDialogOuterBorderColor());
+            contentRenderContext->UpdateOuterBorderColor(outerColorProp);
+        } else {
+            borderColor.SetColor(dialogTheme->GetBackgroudBorderColor());
+        }
+        contentRenderContext->UpdateBorderColor(borderColor);
+        BorderColorProperty outerColorProp;
+        outerColorProp.SetColor(dialogTheme->GetDialogOuterBorderColor());
+        contentRenderContext->UpdateOuterBorderColor(outerColorProp);
+    }
+    if (props.shadow.has_value()) {
+        contentRenderContext->UpdateBackShadow(props.shadow.value());
+    } else {
+        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
+        contentRenderContext->UpdateBackShadow(shadow);
+    }
+    contentRenderContext->SetClipToBounds(true);
 }
 
 // set render context properties of content frame
@@ -361,7 +403,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     } else {
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));
     }
-    bool isCustomBorder = props.borderRadius.has_value() || props.borderWidth.has_value() ||
+    bool isCustomBorder = props.borderWidth.has_value() ||
         props.borderStyle.has_value() || props.borderColor.has_value();
     BorderRadiusProperty radius;
     if (props.borderRadius.has_value()) {
@@ -375,15 +417,16 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     } else {
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
-        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
-            contentRenderContext->UpdateOuterBorderRadius(radius);
-        }
+    }
+    if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+        contentRenderContext->UpdateOuterBorderRadius(radius);
     }
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
+        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     } else {
         BorderWidthProperty borderWidth;
         if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
@@ -402,35 +445,12 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
             }
         }
         contentRenderContext->UpdateBorderWidth(borderWidth);
+        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
+        BorderWidthProperty outerWidthProp;
+        outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
+        contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
     }
-    contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
-    if (props.borderStyle.has_value()) {
-        contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
-    }
-    auto contentPattern = contentNode->GetPattern();
-    CHECK_NULL_VOID(contentPattern);
-    if (props.borderColor.has_value()) {
-        contentRenderContext->UpdateBorderColor(props.borderColor.value());
-        contentPattern->CheckLocalized();
-    } else {
-        BorderColorProperty borderColor;
-        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
-            borderColor.SetColor(dialogTheme_->GetDialogInnerBorderColor());
-            BorderColorProperty outerColorProp;
-            outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
-            contentRenderContext->UpdateOuterBorderColor(outerColorProp);
-        } else {
-            borderColor.SetColor(dialogTheme_->GetBackgroudBorderColor());
-        }
-        contentRenderContext->UpdateBorderColor(borderColor);
-    }
-    if (props.shadow.has_value()) {
-        contentRenderContext->UpdateBackShadow(props.shadow.value());
-    } else {
-        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme_->GetShadowDialog()));
-        contentRenderContext->UpdateBackShadow(shadow);
-    }
-    contentRenderContext->SetClipToBounds(true);
+    UpdateAdditionalContentRenderContext(contentNode, props, isCustomBorder, dialogTheme_);
 }
 
 void DialogPattern::ParseBorderRadius(BorderRadiusProperty& raidus)
@@ -563,8 +583,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
-    if ((IsUIExtensionSubWindow() && props.isModal) ||
-        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
+    if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
@@ -590,6 +609,11 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     auto dialog = GetHost();
     contentWrapper->MountToParent(dialog);
     AddExtraMaskNode(props);
+}
+
+bool IsAlertDialog(const DialogProperties& props)
+{
+    return props.type == DialogType::ALERT_DIALOG && props.isAlertDialog;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -639,9 +663,14 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(titleRowProps, nullptr);
-    titleRowProps->UpdateMainAxisAlign(
-        dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
+    titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (IsAlertDialog(dialogProperties)) {
+        titleProp->UpdateFontWeight(FontWeight::BOLD);
+        titleProp->UpdateTextAlign(TextAlign::CENTER);
+        titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
+        titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    }
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
@@ -684,9 +713,13 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     CHECK_NULL_RETURN(subtitleRow, nullptr);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
-    subtitleRowProps->UpdateMainAxisAlign(
-        dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
+    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (IsAlertDialog(dialogProperties)) {
+        titleProp->UpdateTextAlign(TextAlign::CENTER);
+        titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
+        subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    }
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
     contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
@@ -741,6 +774,21 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentPadding.right = CalcLength(contentPaddingInTheme.Right());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
     contentProp->UpdatePadding(contentPadding);
+    if (IsAlertDialog(props)) {
+        contentProp->UpdateTextAlign(TextAlign::CENTER);
+        auto contentRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(contentRow, nullptr);
+        auto contentRowProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(contentRowProps, nullptr);
+        contentRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+        contentRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        contentNode->MountToParent(contentRow);
+        message_ = props.content;
+        contentNode->MarkModifyDone();
+        contentNodeMap_[DialogContentNode::MESSAGE] = contentNode;
+        return contentRow;
+    }
 
     // XTS inspector value
     message_ = props.content;
@@ -867,7 +915,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = buttonNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -1251,10 +1299,11 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
-Shadow GetDefaultShadow(ShadowStyle style)
+Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, shadow);
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, shadow);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
@@ -1265,16 +1314,22 @@ Shadow GetDefaultShadow(ShadowStyle style)
 
 void DialogPattern::HandleBlurEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff)));
+    contentRenderContext_->UpdateBackShadow(
+        dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff, host)));
 }
 
 void DialogPattern::HandleFocusEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn)));
+    contentRenderContext_->UpdateBackShadow(
+        dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn, host)));
 }
 
 // XTS inspector
@@ -1314,27 +1369,27 @@ void DialogPattern::OnColorConfigurationUpdate()
 
 void DialogPattern::UpdateTitleAndContentColor()
 {
+    CHECK_NULL_VOID(dialogTheme_);
     if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE], dialogTheme_->GetTitleTextStyle());
     }
     if (!dialogProperties_.subtitle.empty() &&
         contentNodeMap_.find(DialogContentNode::SUBTITLE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE],
+            dialogProperties_.title.empty() ? dialogTheme_->GetTitleTextStyle() : dialogTheme_->GetSubTitleTextStyle());
     }
     if (!dialogProperties_.content.empty() &&
         contentNodeMap_.find(DialogContentNode::MESSAGE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE], dialogTheme_->GetContentTextStyle());
     }
 }
 
-void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode)
+void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle)
 {
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(dialogTheme_);
-    auto titleStyle = dialogTheme_->GetTitleTextStyle();
     auto textProps = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
     CHECK_NULL_VOID(textProps);
-    textProps->UpdateTextColor(titleStyle.GetTextColor());
+    textProps->UpdateTextColor(textStyle.GetTextColor());
     textNode->MarkModifyDone();
 }
 
@@ -1506,7 +1561,9 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
 {
     isSuitableForElderly_ = false;
     notAdapationAging_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -1515,7 +1572,8 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
     TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog GetContext fontScale : %{public}f", dialogContext->GetFontScale());
     if (GreatOrEqual(dialogContext->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
         if (pipeline->GetRootHeight() < dialogTheme_->GetDialogLandscapeHeightBoundary().ConvertToPx() &&
-            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
             notAdapationAging_ = true;
             return;
         }
@@ -1620,6 +1678,11 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 
 void DialogPattern::UpdateTitleTextFontScale()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
     CHECK_NULL_VOID(titleContainer_);
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     if (isSuitableForElderly_) {
@@ -1633,9 +1696,9 @@ void DialogPattern::UpdateTitleTextFontScale()
             auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
             CHECK_NULL_VOID(titleProp);
             if (notAdapationAging_) {
-                titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                titleProp->UpdateMaxFontScale(scale);
+                titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
                 titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
             }
         }
@@ -1645,9 +1708,9 @@ void DialogPattern::UpdateTitleTextFontScale()
         auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
         CHECK_NULL_VOID(titleProp);
         if (notAdapationAging_) {
-            titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+            titleProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
         } else {
-            titleProp->UpdateMaxFontScale(scale);
+            titleProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
         }
     }
@@ -1660,6 +1723,9 @@ void DialogPattern::UpdateTextFontScale()
     auto scale = dialogTheme_->GetMinFontScaleForElderly();
     auto contentProp =
         AceType::DynamicCast<TextLayoutProperty>(contentNodeMap_[DialogContentNode::MESSAGE]->GetLayoutProperty());
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    double maxAppFontScale = context->GetMaxAppFontScale();
     CHECK_NULL_VOID(contentProp);
     if (isSuitableForElderly_) {
         scale = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
@@ -1667,9 +1733,9 @@ void DialogPattern::UpdateTextFontScale()
                     : dialogTheme_->GetContentMaxFontScale();
     }
     if (notAdapationAging_) {
-        contentProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+        contentProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
     } else {
-        contentProp->UpdateMaxFontScale(scale);
+        contentProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
     }
     CHECK_NULL_VOID(buttonContainer_);
     MarginProperty margin;
@@ -1690,15 +1756,68 @@ void DialogPattern::UpdateTextFontScale()
             auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
             CHECK_NULL_VOID(textProp);
             if (notAdapationAging_) {
-                textProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+                textProp->UpdateMaxFontScale(std::min<double>(dialogTheme_->GetDialogDefaultScale(), maxAppFontScale));
             } else {
-                textProp->UpdateMaxFontScale(scale);
+                textProp->UpdateMaxFontScale(std::min<double>(scale, maxAppFontScale));
             }
             if (isSuitableForElderly_) {
                 textProp->UpdateMargin(margin);
             }
         }
     }
+}
+
+bool DialogPattern::GetWindowButtonRect(NG::RectF& floatButtons)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "When hidden, floatButtons rect is %{public}s",
+            floatButtons.ToString().c_str());
+        return true;
+    };
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Window title builder shown");
+    return false;
+}
+
+void DialogPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void DialogPattern::RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void DialogPattern::UnRegisterAvoidInfoChangeListener(FrameNode* hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
+
+RefPtr<LayoutAlgorithm> DialogPattern::CreateLayoutAlgorithm()
+{
+    auto context = GetContext();
+    return context == nullptr ? AceType::MakeRefPtr<DialogLayoutAlgorithm>()
+                              : AceType::MakeRefPtr<DialogLayoutAlgorithm>(WeakClaim(context));
 }
 
 void DialogPattern::UpdateFontScale()
@@ -1920,7 +2039,13 @@ void DialogPattern::InitHostWindowRect()
 
     if (container->IsUIExtensionWindow()) {
         isUIExtensionSubWindow_ = true;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto subContainerId = pipeline->GetInstanceId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            subContainerId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -2037,37 +2162,6 @@ bool DialogPattern::IsShowInFreeMultiWindow()
     return container->IsFreeMultiWindow();
 }
 
-bool DialogPattern::IsWaterfallWindowMode()
-{
-    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
-        return false;
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, false);
-
-    auto currentId = pipeline->GetInstanceId();
-    auto container = AceEngine::Get().GetContainer(currentId);
-    if (!container) {
-        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
-        return false;
-    }
-    if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        container = AceEngine::Get().GetContainer(currentId);
-        if (!container) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
-            return false;
-        }
-    }
-
-    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
-    auto isWaterfallWindow = container->IsWaterfallWindow();
-    return halfFoldStatus && isWaterfallWindow;
-}
-
 bool DialogPattern::IsShowInFloatingWindow()
 {
     auto currentId = Container::CurrentId();
@@ -2085,35 +2179,6 @@ bool DialogPattern::IsShowInFloatingWindow()
         }
     }
     return container->IsFloatingWindow();
-}
-
-void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
-{
-    json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
-    if (!dialogProperties_.title.empty()) {
-        json->Put("Title", dialogProperties_.title.c_str());
-    }
-    if (!dialogProperties_.subtitle.empty()) {
-        json->Put("Subtitle", dialogProperties_.subtitle.c_str());
-    }
-    if (!dialogProperties_.content.empty()) {
-        json->Put("Content", dialogProperties_.content.c_str());
-    }
-    if (dialogProperties_.buttonDirection != DialogButtonDirection::AUTO) {
-        json->Put("ButtonDirection",
-            DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
-                dialogProperties_.buttonDirection).c_str());
-    }
-    if (dialogProperties_.backgroundBlurStyle.has_value() && dialogProperties_.backgroundBlurStyle.value() != 0) {
-        json->Put("BackgroundBlurStyle", std::to_string(dialogProperties_.backgroundBlurStyle.value()).c_str());
-    }
-    if (dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT) != Color::TRANSPARENT) {
-        json->Put("BackgroundColor", dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT).ToString().c_str());
-    }
-    DumpSimplifySizeProperty(json);
-    DumpSimplifyBorderProperty(json);
-    DumpSimplifyBoolProperty(json);
-    DumpSimplifyObjectProperty(json);
 }
 
 void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)
@@ -2241,6 +2306,7 @@ RefPtr<OverlayManager> DialogPattern::GetEmbeddedOverlay(const RefPtr<OverlayMan
 
 void DialogPattern::OnAttachToMainTree()
 {
+    AddFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -2256,13 +2322,27 @@ void DialogPattern::OnAttachToMainTree()
     dialogRenderContext->UpdateZIndex(zIndex + 1);
 }
 
+void DialogPattern::OnDetachFromMainTree()
+{
+    RemoveFollowParentWindowLayoutNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->RemoveDialogFromMapForcefully(host);
+}
+
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)
 {
     RefPtr<PipelineContext> pipeline;
     if (host) {
         pipeline = host->GetContext();
     } else {
-        pipeline = PipelineContext::GetCurrentContext();
+        auto node = GetHost();
+        CHECK_NULL_RETURN(node, nullptr);
+        pipeline = node->GetContextRefPtr();
     }
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -2278,5 +2358,29 @@ void DialogPattern::OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode)
     if (overlayManager->isMaskNode(GetHost()->GetId())) {
         overlayManager->PopModalDialog(GetHost()->GetId());
     }
+}
+
+void DialogPattern::AddFollowParentWindowLayoutNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->AddFollowParentWindowLayoutNode(host->GetId());
+}
+
+void DialogPattern::RemoveFollowParentWindowLayoutNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG

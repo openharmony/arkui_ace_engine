@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -45,8 +46,9 @@ public:
         value->propArrowWidth_ = CloneArrowWidth();
         value->propRadius_ = CloneRadius();
         value->propIsCaretMode_ = CloneIsCaretMode();
-        value->propEnableHoverMode_ = CloneEnableHoverMode();
         value->propFollowTransformOfTarget_ = CloneFollowTransformOfTarget();
+        value->propEnableHoverMode_ = CloneEnableHoverMode();
+        value->propShowAtAnchor_ = CloneShowAtAnchor();
         return value;
     }
 
@@ -66,8 +68,9 @@ public:
         ResetArrowWidth();
         ResetRadius();
         ResetIsCaretMode();
-        ResetEnableHoverMode();
         ResetFollowTransformOfTarget();
+        ResetEnableHoverMode();
+        ResetShowAtAnchor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -83,8 +86,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Radius, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCaretMode, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FollowTransformOfTarget, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowAtAnchor, TipsAnchorType, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

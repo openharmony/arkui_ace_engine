@@ -362,7 +362,8 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace());
     }
     return panda::JSValueRef::Undefined(vm);
 }

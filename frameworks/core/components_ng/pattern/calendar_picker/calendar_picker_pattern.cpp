@@ -253,7 +253,11 @@ void CalendarPickerPattern::InitClickEvent()
 
 void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLocation)
 {
-    bool yearState = false, monthState = false, dayState = false, addState = false, subState = false;
+    bool yearState = false;
+    bool monthState = false;
+    bool dayState = false;
+    bool addState = false;
+    bool subState = false;
     if (state) {
         auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {
@@ -291,7 +295,8 @@ void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLoc
 
 void CalendarPickerPattern::HandleTouchEvent(bool isPressed, const Offset& globalLocation)
 {
-    bool addState = false, subState = false;
+    bool addState = false;
+    bool subState = false;
     if (isPressed) {
         auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {
@@ -394,7 +399,7 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -1256,6 +1261,20 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
 
 void CalendarPickerPattern::OnColorConfigurationUpdate()
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+            auto pipelineContext = host->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+            CHECK_NULL_VOID(calendarTheme);
+            pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
+        }
+    }
+
     if (IsDialogShow()) {
         return;
     }
@@ -1462,4 +1481,46 @@ std::string CalendarPickerPattern::GetDisabledDateRange()
     }
     return disabledDateRangeStr;
 }
+
+void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        Color defaultColor = pickerProperty->GetColor().value_or(calendarTheme->GetEntryFontColor());
+        pickerProperty->UpdateColor(textStyle.textColor.value_or(defaultColor));
+
+        Dimension fontSize = calendarTheme->GetEntryFontSize();
+        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+            fontSize = textStyle.fontSize.value();
+        }
+        pickerProperty->UpdateFontSize(fontSize);
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void CalendarPickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+
+    if (layoutPolicy->IsWidthMatch() || layoutPolicy->IsHeightMatch()) {
+        layoutProperty->ClearUserDefinedIdealSize(false, true);
+    }
+}
+
 } // namespace OHOS::Ace::NG

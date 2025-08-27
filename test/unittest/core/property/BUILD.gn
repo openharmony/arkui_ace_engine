@@ -39,12 +39,14 @@ ace_unittest("accessibility_property_test_three_ng") {
 
 ace_unittest("border_property_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "property"
   sources = [ "border_property_test_ng.cpp" ]
 }
 
 ace_unittest("calc_length_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "property"
   sources = [ "calc_length_test_ng.cpp" ]
 }
@@ -57,18 +59,21 @@ ace_unittest("gradient_property_test_ng") {
 
 ace_unittest("measure_utils_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "property"
   sources = [ "measure_utils_test_ng.cpp" ]
 }
 
 ace_unittest("property_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "property"
   sources = [ "property_test_ng.cpp" ]
 }
 
 ace_unittest("layout_constraint_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "property"
   sources = [ "layout_constraint_test_ng.cpp" ]
 }

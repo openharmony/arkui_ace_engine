@@ -150,7 +150,6 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
         return rsProp;
     }
 
-    LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }
 
@@ -247,40 +246,46 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
 }
 } // namespace
 
-template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
-    const AnimationOption& option, float value, float velocity, const FinishCallback& finishCallback)
+// Common template implementation
+template<typename T, typename S>
+void NodeAnimatableProperty<T, S>::AnimateWithVelocity(
+    const AnimationOption& option, T value, T velocity, const FinishCallback& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    auto targetValue = std::make_shared<RSAnimatableProperty<float>>(value);
-    auto initialVelocity = std::make_shared<RSAnimatableProperty<float>>(velocity);
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    if (modify) {
-        auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+    auto targetValue = std::make_shared<RSAnimatableProperty<T>>(value);
+    auto initialVelocity = std::make_shared<RSAnimatableProperty<T>>(velocity);
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    if (modifier) {
+        auto property = std::static_pointer_cast<RSAnimatableProperty<T>>(modifier->GetProperty());
         if (property) {
-            property->AnimateWithInitialVelocity(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
+            property->AnimateWithInitialVelocity(timingProtocol, 
+                NativeCurveHelper::ToNativeCurve(option.GetCurve()),
                 targetValue, initialVelocity, finishCallback, nullptr);
         }
     }
 }
 
-template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
+template<typename T, typename S>
+void NodeAnimatableProperty<T, S>::SetThresholdType(ThresholdType type)
 {
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    CHECK_NULL_VOID(modify);
-    auto property = std::static_pointer_cast<RSPropertyBase>(modify->GetProperty());
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modifier);
+    auto property = std::static_pointer_cast<RSPropertyBase>(modifier->GetProperty());
     CHECK_NULL_VOID(property);
     property->SetThresholdType(static_cast<Rosen::ThresholdType>(type));
 }
 
-template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetPropertyUnit(PropertyUnit unit)
+template<typename T, typename S>
+void NodeAnimatableProperty<T, S>::SetPropertyUnit(PropertyUnit unit)
 {
-    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
-    CHECK_NULL_VOID(modify);
-    auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+    auto modifier = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modifier);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<T>>(modifier->GetProperty());
     CHECK_NULL_VOID(property);
     property->SetPropertyUnit(static_cast<Rosen::RSPropertyUnit>(unit));
 }
+
+// Explicit template instantiations
+template class NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+template class NodeAnimatableProperty<OffsetF, AnimatablePropertyOffsetF>;
 } // namespace OHOS::Ace::NG

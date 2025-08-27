@@ -44,6 +44,14 @@ bool ThemeFactory::CreateTheme(Ace::ThemeType type, BuildFunc func)
     return true;
 }
 
+bool ThemeFactory::CreateCustomTheme(Ace::ThemeType type, BuildThemeWrapperFunc func)
+{
+    auto themeManager = GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    themeManager->RegisterCustomThemeKit(type, func);
+    return true;
+}
+
 RefPtr<ThemeStyle> ThemeFactory::GetThemeStyle(const std::string& patternName,
     std::optional<std::string> bundleName, std::optional<std::string> moduleName)
 {
@@ -66,6 +74,20 @@ RefPtr<Ace::Theme> ThemeFactory::GetTheme(Ace::ThemeType type)
     auto themeManager = GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     return themeManager->GetTheme(type);
+}
+
+RefPtr<Ace::Theme> ThemeFactory::GetTheme(Ace::ThemeType type, int32_t themeScopeId)
+{
+    auto themeManager = GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetTheme(type, themeScopeId);
+}
+
+int32_t ThemeFactory::GetThemeScopeId(RefPtr<FrameNode>& node)
+{
+    auto ui_node = reinterpret_cast<NG::UINode*>(node->GetHandle());
+    CHECK_NULL_RETURN(ui_node, 0);
+    return ui_node->GetThemeScopeId();
 }
 
 } // namespace OHOS::Ace::Kit

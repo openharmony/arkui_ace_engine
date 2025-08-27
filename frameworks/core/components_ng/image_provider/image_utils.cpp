@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/image_provider/image_utils.h"
 
+#include "base/image/image_task_pool.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace::NG {
@@ -22,7 +23,7 @@ void ImageUtils::PostTask(
 {
     auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     if (!taskExecutor) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null when try post task to %{public}s", taskTypeName);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null : %{public}s", taskTypeName);
         return;
     }
     taskExecutor->PostTask(
@@ -39,7 +40,7 @@ void ImageUtils::PostDelayedTask(std::function<void()>&& task, TaskExecutor::Tas
 {
     auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     if (!taskExecutor) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null when try post task to %{public}s", taskTypeName);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "taskExecutor is null : %{public}s", taskTypeName);
         return;
     }
     taskExecutor->PostDelayedTask(
@@ -71,9 +72,16 @@ void ImageUtils::PostToUI(
 void ImageUtils::PostToBg(
     std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
-    ContainerScope scope(containerId);
-
     CHECK_NULL_VOID(task);
+#ifdef PREVIEW
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str(), priorityType);
+    return;
+#endif
+    ImageTaskPool::GetInstance()->PostTask(
+        [task, containerId] {
+            ContainerScope scope(containerId);
+            task();
+        },
+        name);
 }
 } // namespace OHOS::Ace::NG

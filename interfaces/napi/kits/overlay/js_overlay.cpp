@@ -223,8 +223,11 @@ static napi_value JSGetOverlayManagerOptions(napi_env env, napi_callback_info in
     std::optional<NG::OverlayManagerInfo> options = delegate->GetOverlayManagerOptions();
     if (options.has_value()) {
         napi_value renderRootOverlay = nullptr;
+        napi_value enableBackPressedEvent = nullptr;
         napi_get_boolean(env, options.value().renderRootOverlay, &renderRootOverlay);
+        napi_get_boolean(env, options.value().enableBackPressedEvent, &enableBackPressedEvent);
         napi_set_named_property(env, result, "renderRootOverlay", renderRootOverlay);
+        napi_set_named_property(env, result, "enableBackPressedEvent", enableBackPressedEvent);
     }
     return result;
 }

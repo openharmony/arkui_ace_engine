@@ -61,6 +61,12 @@ ohos_source_set("rosen_render_context_test_mock") {
     "$ace_root/test/unittest/core/rosen/mock_pixmap_image.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [
+      "c_utils:utils",
+      "skia:skia_canvaskit",
+    ]
+  }
 }
 
 ohos_unittest("arkui_rosen_render_context_test") {
@@ -81,8 +87,8 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
-    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/circle_painter.cpp",
@@ -97,18 +103,23 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
+    "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
+    "$ace_root/test/mock/base/mock_feature_param.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_measure_util.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
@@ -127,8 +138,11 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_reporter.cpp",    
+    "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
     "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
@@ -139,8 +153,10 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
+    "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
@@ -171,12 +187,16 @@ ohos_unittest("arkui_rosen_render_context_test") {
   external_deps = [
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+    "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
+  defines = [ "ACE_NON_VIRTUAL=virtual" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
-    defines = [ "USE_ROSEN_DRAWING" ]
+    defines += [ "USE_ROSEN_DRAWING" ]
   }
 }
 
@@ -198,8 +218,8 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
-    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/circle_painter.cpp",
@@ -215,15 +235,18 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_feature_param.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
@@ -243,8 +266,11 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_reporter.cpp",    
+    "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
     "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
@@ -253,8 +279,10 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
+    "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
@@ -283,7 +311,10 @@ ohos_unittest("gradient_style_modifier_test") {
   external_deps = [
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+    "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]

@@ -28,8 +28,10 @@
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/clipboard/clipboard.h"
@@ -57,6 +59,7 @@
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -69,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -231,7 +235,6 @@ struct ContentScroller {
     float stepOffset = 0.0f;
     Offset localOffset;
     std::optional<Offset> hotAreaOffset;
-    float updateMagniferEpsilon = 0.5f;
 
     void OnBeforeScrollingCallback(const Offset& localOffset)
     {
@@ -239,6 +242,13 @@ struct ContentScroller {
             beforeScrollingCallback(localOffset);
         }
     }
+};
+
+struct MoveCaretToContentRectData {
+    int32_t index = 0;
+    TextAffinity textAffinity = TextAffinity::UPSTREAM;
+    bool isEditorValueChanged = true;
+    bool moveContent = true;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -278,6 +288,12 @@ public:
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
 
+    void ClearOperationRecords()
+    {
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         keyboardAppearance_ = value;
@@ -294,6 +310,8 @@ public:
     }
 
     bool CheckBlurReason();
+
+    bool NeedSetScrollRect();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -326,6 +344,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void MultiThreadDelayedExecution();
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -367,7 +386,11 @@ public:
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
+    void SetPreviewTextOperationMultiThread(PreviewTextInfo info);
+    void SetPreviewTextOperationMultiThreadPart(PreviewTextInfo info, int32_t start, int32_t end);
     void FinishTextPreviewOperation(bool triggerOnWillChange = true);
+    void FinishTextPreviewOperationMultiThread(bool triggerOnWillChange = true);
+    void FinishTextPreviewOperationMultiThreadPart(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
@@ -412,11 +435,6 @@ public:
         return jsTextEditableController_.Upgrade();
     }
 
-    void SetTextEditController(const RefPtr<TextEditController>& textEditController)
-    {
-        textEditingController_ = textEditController;
-    }
-
     std::string GetTextValue() const
     {
         return contentController_->GetTextValue();
@@ -425,6 +443,14 @@ public:
     const std::u16string& GetTextUtf16Value() const
     {
         return contentController_->GetTextUtf16Value();
+    }
+
+    const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
+    {
+        if (!autoFillController_) {
+            autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
+        }
+        return autoFillController_;
     }
 
 #if defined(IOS_PLATFORM)
@@ -596,7 +622,8 @@ public:
     float GetBorderBottom(BorderWidthProperty border) const;
     float GetBorderRight(BorderWidthProperty border) const;
 
-    const RectF& GetTextRect() override
+    void OnDragNodeDetachFromMainTree() override;
+    const RectF& GetTextRect() const override
     {
         return textRect_;
     }
@@ -676,9 +703,17 @@ public:
     bool CursorMoveUpOperation();
     bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position, bool moveContent = true);
+    void SetCaretPositionMultiThread(int32_t position, bool moveContent = true);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
+    void HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     OffsetF GetDragUpperLeftCoordinates() override;
 
     std::vector<RectF> GetTextBoxes() override
@@ -692,6 +727,7 @@ public:
     void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
@@ -775,7 +811,11 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
     void InitSurfaceChangedCallback();
+    void InitSurfaceChangedCallbackMultiThread();
+    void InitSurfaceChangedCallbackMultiThreadAction();
     void InitSurfacePositionChangedCallback();
+    void InitSurfacePositionChangedCallbackMultiThread();
+    void InitSurfacePositionChangedCallbackMultiThreadAction();
 
     bool HasSurfaceChangedCallback()
     {
@@ -898,10 +938,6 @@ public:
         return dragContents_;
     }
 
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode);
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode);
-
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
@@ -915,11 +951,13 @@ public:
     bool CloseCustomKeyboard();
 
     // xts
+    std::string GetStrokeWidth() const;
+    std::string GetStrokeColor() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
-    std::string GetPlaceholderFont() const;
+    virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     void InitTheme();
     std::string GetTextColor() const;
@@ -939,6 +977,7 @@ public:
     std::u16string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
+    uint32_t GetMinLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
@@ -948,6 +987,8 @@ public:
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
+    void SetSelectionFlagMultiThread(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
@@ -967,16 +1008,19 @@ public:
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
+    bool CheckAttachInput();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
     void HandleSelectionLeftWord();
     void HandleSelectionLineBegin();
     void HandleSelectionHome();
+    void HandleSelectionParagraghBegin();
     void HandleSelectionRight();
     void HandleSelectionRightWord();
     void HandleSelectionLineEnd();
     void HandleSelectionEnd();
+    void HandleSelectionParagraghEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
@@ -984,6 +1028,12 @@ public:
         PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+    
     void HandleOnRedoAction() override;
     bool CanUndo();
     bool HasOperationRecords();
@@ -1045,9 +1095,44 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetTypingUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.typing = normalColor;
+    }
+
+    void ResetTypingUnderlineColor()
+    {
+        userUnderlineColor_.typing = std::nullopt;
+    }
+
     void SetNormalUnderlineColor(const Color& normalColor)
     {
         userUnderlineColor_.normal = normalColor;
+    }
+
+    void ResetNormalUnderlineColor()
+    {
+        userUnderlineColor_.normal = std::nullopt;
+    }
+
+    void SetErrorUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.error = normalColor;
+    }
+
+    void ResetErrorUnderlineColor()
+    {
+        userUnderlineColor_.error = std::nullopt;
+    }
+
+    void SetDisableUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.disable = normalColor;
+    }
+
+    void ResetDisableUnderlineColor()
+    {
+        userUnderlineColor_.disable = std::nullopt;
     }
 
     void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
@@ -1072,6 +1157,8 @@ public:
     }
 
     void StopEditing();
+    void StopEditingMultiThread();
+    void StopEditingMultiThreadAction();
 
     void MarkContentChange()
     {
@@ -1094,6 +1181,7 @@ public:
     std::string GetDisableUnderlineColorStr() const;
     std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
 
     bool GetTextInputFlag() const
     {
@@ -1147,6 +1235,8 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
 
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
+    void SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder);
+    void SetCustomKeyboardWithNodeMultiThreadAction(const RefPtr<UINode>& keyboardBuilder);
 
     bool HasCustomKeyboard() const
     {
@@ -1154,7 +1244,7 @@ public:
     }
 
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();
@@ -1289,7 +1379,24 @@ public:
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
-    void RegisterWindowSizeCallback();
+    inline void RegisterWindowSizeCallback()
+    {
+        auto host = GetHost();
+        // call RegisterWindowSizeCallbackMultiThread() by multi thread
+        FREE_NODE_CHECK(host, RegisterWindowSizeCallback);
+        if (isOritationListenerRegisted_) {
+            return;
+        }
+        isOritationListenerRegisted_ = true;
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddWindowSizeChangeCallback(host->GetId());
+    }
+
+    void RegisterWindowSizeCallbackMultiThread();
+    void RegisterWindowSizeCallbackMultiThreadAction();
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool IsTransparent()
@@ -1299,6 +1406,13 @@ public:
 
     RefPtr<Clipboard> GetClipboard() override
     {
+        if (!clipboard_) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, clipboard_);
+            auto context = host->GetContext();
+            CHECK_NULL_RETURN(context, clipboard_);
+            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+        }
         return clipboard_;
     }
 
@@ -1372,13 +1486,14 @@ public:
     }
 
     void SetShowKeyBoardOnFocus(bool value);
+    void SetShowKeyBoardOnFocusMultiThread(bool value);
     bool GetShowKeyBoardOnFocus()
     {
         return showKeyBoardOnFocus_;
     }
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
 
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
@@ -1388,6 +1503,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
 
     void SetSupportPreviewText(bool isSupported)
@@ -1470,10 +1590,15 @@ public:
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
+    void DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction);
+
     bool SetCaretOffset(int32_t caretPostion) override;
 
-    const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
+    const RefPtr<MultipleClickRecognizer>& GetOrCreateMultipleClickRecognizer()
     {
+        if (!multipleClickRecognizer_) {
+            multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+        }
         return multipleClickRecognizer_;
     }
 
@@ -1487,6 +1612,8 @@ public:
     void TriggerAvoidOnCaretChange();
 
     void TriggerAvoidWhenCaretGoesDown();
+
+    bool CheckIfNeedAvoidOnCaretChange(float caretPos);
 
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
@@ -1527,7 +1654,8 @@ public:
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
-    void UpdateContentScroller(const Offset& localOffset);
+    void UpdateContentScroller(const Offset& localOffset, float delay = 0.0f, bool enableScrollOutside = true);
+    Offset AdjustAutoScrollOffset(const Offset& offset);
     void SetIsInitTextRect(bool isInitTextRect)
     {
         initTextRect_ = isInitTextRect;
@@ -1562,6 +1690,7 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void FilterInitializeText();
     void SetIsFilterChanged(bool isFilterChanged)
     {
         isFilterChanged_ = isFilterChanged;
@@ -1570,11 +1699,44 @@ public:
     {
         return cancelButtonTouched_;
     }
+
+    bool IsUnderlineAndButtonMode() const
+    {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
+        auto isCancelMode = IsShowCancelButtonMode() && !(cleanNodeStyle == CleanNodeStyle::INVISIBLE);
+        return IsUnderlineMode() && (isCancelMode || IsInPasswordMode());
+    }
+
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+    {
+        imeGradientMode_ = config.gradientMode;
+        imeFluidLightMode_ = config.fluidLightMode;
+    }
+
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    void UpdateBorderResource() override;
+    void UpdateMarginResource() override;
+    void SetBackBorderRadius();
+    void OnColorModeChange(uint32_t colorMode) override;
+
+    void ProcessDefaultStyleAndBehaviors();
+    void ProcessDefaultStyleAndBehaviorsMultiThread();
+
+    void ProcessResponseArea();
+    void AddContentScrollingCallback(std::function<void(const Offset&)>&& callback)
+    {
+        contentScroller_.scrollingCallback = std::move(callback);
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnAttachToMainTreeMultiThreadAddition();
 
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     
     bool IsReverse() const override
     {
@@ -1610,8 +1772,12 @@ protected:
 
     // 是否独立控制键盘
     bool independentControlKeyboard_ = false;
+    RefPtr<AutoFillController> autoFillController_;
+    virtual IMEClient GetIMEClientInfo();
+    RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
@@ -1657,7 +1823,7 @@ private:
     void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, const HoverInfo& info);
     void UpdateHoverStyle(bool isHover);
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
@@ -1690,6 +1856,7 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachContext(PipelineContext* context) override;
     void OnDetachContext(PipelineContext* context) override;
     void UpdateSelectionByMouseDoubleClick();
@@ -1702,8 +1869,6 @@ private:
     bool FireOnTextChangeEvent();
     void AddTextFireOnChange();
     void RecordTextInputEvent();
-
-    void FilterInitializeText();
 
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
@@ -1738,8 +1903,9 @@ private:
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
+    void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
-    void SetAccessibilityErrotText();
+    void SetAccessibilityErrorText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();
@@ -1790,7 +1956,6 @@ private:
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void NotifyOnEditChanged(bool isChanged);
-    void ProcessResponseArea();
     void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
@@ -1821,11 +1986,11 @@ private:
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
+    Edge GetUnderlinePadding(const RefPtr<TextFieldTheme>& theme, bool processLeftPadding,
+        bool processRightPadding) const;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
-    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
-        std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {
@@ -1875,13 +2040,23 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
+    void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void RemoveFillContentMap();
+    bool NeedsSendFillContent();
+    void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
+    void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
+    void FireOnWillAttachIME();
+    Offset GetCaretClickLocalOffset(const Offset& offset);
+    void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
+    bool ShouldSkipUpdateParagraph();
+    void UpdateParagraphForDragNode(bool skipUpdate);
+    void UpdateMagnifierWithFloatingCaretPos();
 
     RectF frameRect_;
     RectF textRect_;
     float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
-    TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -1956,7 +2131,6 @@ private:
 
     RefPtr<TextFieldController> textFieldController_;
     WeakPtr<Referenced> jsTextEditableController_;
-    RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw
     bool changeSelectedRects_ = false;
@@ -2035,12 +2209,10 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
-    RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
     bool autoFillOtherAccount_ = false;
 
     bool textInputBlurOnSubmit_ = true;
@@ -2064,16 +2236,16 @@ private:
     std::u16string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::u16string lastTextValue_ = u"";
+    float lastCursorLeft_ = 0.0f;
     float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
-    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = nullptr;
     WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
@@ -2092,6 +2264,29 @@ private:
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
     bool cancelButtonTouched_ = false;
+    KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
+    KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
+    OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
+    TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
+
+    // ----- multi thread state variables -----
+    bool initSurfacePositionChangedCallbackMultiThread_ = false;
+    bool initSurfaceChangedCallbackMultiThread_ = false;
+    bool handleCountStyleMultiThread_ = false;
+    bool startTwinklingMultiThread_ = false;
+    bool registerWindowSizeCallbackMultiThread_ = false;
+    bool processDefaultStyleAndBehaviorsMultiThread_ = false;
+    bool stopEditingMultiThread_ = false;
+    bool triggerAvoidOnCaretChangeMultiThread_ = false;
+    bool updateCaretInfoToControllerMultiThread_ = false;
+    bool setShowKeyBoardOnFocusMultiThread_ = false;
+    bool setShowKeyBoardOnFocusMultiThreadValue_ = false;
+    bool setSelectionFlagMultiThread_ = false;
+    bool setCustomKeyboardWithNodeMultiThread_ = false;
+    RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    bool moveCaretToContentRectMultiThread_ = false;
+    MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
+    // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG
 

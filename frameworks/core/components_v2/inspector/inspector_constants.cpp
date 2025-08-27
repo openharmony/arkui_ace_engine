@@ -101,6 +101,7 @@ const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 // rich editor
 const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
 const char RICH_EDITOR_DRAG_ETS_TAG[] = "RichEditorDRAG";
+const char RICH_EDITOR_CONTENT_ETS_TAG[] = "RichEditorContent";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
@@ -142,7 +143,9 @@ const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
+const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[] = "SplitPlaceholderContentNode";
 const char NAVBAR_ETS_TAG[] = "NavBar";
+const char PRIMARY_CONTENT_NODE_ETS_TAG[] = "PrimaryContent";
 
 // navRouter view
 const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouter";
@@ -369,10 +372,6 @@ const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 // slider
 const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
 const char SLIDER_ETS_TAG[] = "Slider";
-
-// sliderTip
-const char SLIDER_TIP_NODE_COMPONENT_TAG[] = "sliderTipFrameNodeComponent";
-const char SLIDER_TIP_NODE_ETS_TAG[] = "sliderTipFrameNode";
 
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
@@ -666,4 +665,7 @@ const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_nod
 
 // LazyVGridLayout
 const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
+
+// UndefinedNode
+const char UNDEFINED_NODE_ETS_TAG[] = "";
 } // namespace OHOS::Ace::V2

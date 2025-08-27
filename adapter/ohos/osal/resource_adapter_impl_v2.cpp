@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ const std::unordered_set<std::string> PATTERN_NOT_SYNC_LOAD_SET = { THEME_PATTER
     THEME_PATTERN_RICH_EDITOR, THEME_PATTERN_VIDEO, THEME_PATTERN_INDEXER, THEME_PATTERN_APP_BAR,
     THEME_PATTERN_ADVANCED_PATTERN, THEME_PATTERN_SECURITY_COMPONENT, THEME_PATTERN_FORM, THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_PATTERN_LOCK, THEME_PATTERN_GAUGE, THEME_PATTERN_SHEET, THEME_PATTERN_AGING_ADAPATION_DIALOG,
-    THEME_PATTERN_LINEAR_INDICATOR, THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_SCROLLABLE,
+    THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_SCROLLABLE,
     THEME_PATTERN_APP };
 
 const std::unordered_set<std::string> PATTERN_SYNC_LOAD_SET = { THEME_PATTERN_BUTTON, THEME_PATTERN_CAMERA,
@@ -270,7 +270,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         ResType patternType = std::get<1>(themeQueueFront);     // e.g. 22
         std::string patternData = std::get<2>(themeQueueFront); // e.g. 125830098
         if (patternType == ResType::PATTERN) {
-            patternNameMap_[patternTag] = StringUtils::StringToInt(patternData);
+            patternNameMap_[patternTag] = StringUtils::StringToUintCheck(patternData);
         }
         if (patternType == ResType::PATTERN && PATTERN_SYNC_LOAD_SET.find(patternTag) != PATTERN_SYNC_LOAD_SET.end()) {
             // is theme pattern and sync load
@@ -1100,5 +1100,62 @@ RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
     }
     auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
     return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+}
+
+bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resId = StringUtils::StringToUintCheck(resourceId, UINT32_MAX);
+    if (resId == UINT32_MAX) {
+        return false;
+    }
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
+    auto state = manager->GetResConfigById(resId, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
+}
+
+bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, const std::string& resourceType)
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto resType = StringUtils::StringToUintCheck(resourceType, UINT32_MAX);
+    if (resType < OHOS::Global::Resource::ResType::VALUES ||
+        resType > OHOS::Global::Resource::ResType::MAX_RES_TYPE) {
+        return false;
+    }
+    auto type = static_cast<OHOS::Global::Resource::ResType>(resType);
+    auto colorMode = GetResourceColorMode();
+    bool colorChanged = false;
+    if (colorMode == ColorMode::LIGHT) {
+        UpdateColorMode(ColorMode::DARK);
+        colorChanged = true;
+    }
+    std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
+    auto state = manager->GetResConfigByName(resourceName, type, *appResCfg);
+    if (colorChanged) {
+        UpdateColorMode(ColorMode::LIGHT);
+    }
+    return (state == Global::Resource::SUCCESS) &&
+        (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
+}
+
+uint32_t ResourceAdapterImplV2::GetResId(const std::string &resTypeName) const
+{
+    uint32_t resId = -1;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetResId(resTypeName, resId);
+    return resId;
 }
 } // namespace OHOS::Ace

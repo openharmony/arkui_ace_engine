@@ -325,17 +325,17 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     auto rightPadding = SystemProperties::GetDeviceAccess() ? TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE
                                                             : TITLE_ELEMENT_MARGIN_HORIZONTAL;
     if (!hideSplit_) {
-        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, rightPadding));
+        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING_ALL, rightPadding));
     }
     if (!hideMaximize_) {
         titleChildren.emplace_back(
-            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, rightPadding));
+            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING_ALL, rightPadding));
     }
     if (!hideMinimize_) {
-        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, rightPadding));
+        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING_ALL, rightPadding));
     }
     if (!hideClose_) {
-        titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
+        titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING_ALL, TITLE_PADDING_END));
     }
     return titleChildren;
 }

@@ -26,19 +26,19 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
     return;
 }
 
-void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
+HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     const RefPtr<FrameNode>& root,
-    const PointF& point,
-    SourceType sourceType,
-    AccessibilityHoverEventType eventType,
-    TimeStamp time)
+    const HandleHoverEventParam& param,
+    const TouchEvent& event)
 {
-    return;
+    return HandleHoverRet::HOVER_HIT;
 }
 
-void AccessibilityManagerNG::ResetHoverState()
+HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventBySurfaceId(
+    const std::string& surfaceId,
+    HandleHoverEventParam& param)
 {
-    return;
+    return HandleHoverRet::HOVER_HIT;
 }
 
 void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,

@@ -102,6 +102,16 @@ int64_t ExtNapiUtils::GetCInt64(napi_env env, napi_value value)
     return num;
 }
 
+double ExtNapiUtils::GetDouble(napi_env env, napi_value value)
+{
+    double numberValue = 0;
+    napi_status ret = napi_get_value_double(env, value, &numberValue);
+    if (ret == napi_ok) {
+        return numberValue;
+    }
+    return 0;
+}
+
 napi_value ExtNapiUtils::CreateNull(napi_env env)
 {
     napi_value jsNull = nullptr;
@@ -260,6 +270,7 @@ RefPtr<ThemeConstants> ExtNapiUtils::GetThemeConstants(napi_env env, napi_value 
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);

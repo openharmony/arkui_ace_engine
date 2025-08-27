@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_static.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -257,7 +258,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest003, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. test get renderStrategy property
+     * @tc.steps: step3. test get renderStrategy property.
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
@@ -351,7 +352,6 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest006, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
@@ -588,5 +588,585 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest012, TestSize.Level1)
 
     auto symbolType = textStyle.GetSymbolType();
     EXPECT_EQ(symbolType, SymbolType::CUSTOM);
+}
+
+/*
+* @tc.name: SymbolPropertyTest013
+* @tc.desc: test symbol set font properties of symbol
+* @tc.type: FUNC
+*/
+HWTEST_F(SymbolTestNg, SymbolPropertyTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetFontSize(FONT_SIZE_VALUE);
+    symbolModelNG.SetFontWeight(FontWeight::W100);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get fontFamily property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
+    EXPECT_EQ(symbolStyle->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest014
+ * @tc.desc: test symbol render property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY);
+    symbolModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    symbolModelNG.SetSymbolEffect(EFFECT_STRATEGY);
+    symbolModelNG.SetSymbolEffectOptions(SYMBOL_EFFECT_OPTIONS);
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get renderStrategy property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    EXPECT_EQ(textStyle.GetRenderStrategy(), RENDER_STRATEGY);
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+}
+
+
+/**
+ * @tc.name: SymbolPropertyTest015
+ * @tc.desc: test symbol render property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetFontSize(FONT_SIZE_VALUE);
+    symbolModelNG.SetFontWeight(FontWeight::W100);
+    symbolModelNG.SetSymbolEffect(EFFECT_STRATEGY);
+    symbolModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY);
+    symbolModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    symbolModelNG.SetSymbolEffectOptions(SYMBOL_EFFECT_OPTIONS);
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(AceType::RawPtr(frameNode), CREATE_VALUE, SYMBOL_FONT_FAMILY);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get renderStrategy property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderStrategy(), RENDER_STRATEGY);
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+    EXPECT_EQ(textStyle.GetSymbolType(), SymbolType::CUSTOM);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest016
+ * @tc.desc: test symbol set FontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest017
+ * @tc.desc: test symbol property
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolType(SymbolType::SYSTEM);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    auto symbolType = textStyle.GetSymbolType();
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+    EXPECT_EQ(symbolType, SymbolType::SYSTEM);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest018
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest018, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelNG::SetFontColor(node, SYMBOL_COLOR_LIST);
+    SymbolModelStatic::SetFontSize(node, FONT_SIZE_VALUE);
+    SymbolModelStatic::SetFontWeight(node, FontWeight::W100);
+    SymbolModelStatic::SetRenderingStrategy(node, RENDER_STRATEGY);
+    SymbolModelStatic::SetSymbolEffect(node, EFFECT_STRATEGY);
+    SymbolModelNG::SetSymbolEffectOptions(node, SYMBOL_EFFECT_OPTIONS);
+    SymbolModelStatic::SetMinFontScale(node, MIN_FONT_SCALE);
+    SymbolModelStatic::SetMaxFontScale(node, MAX_FONT_SCALE);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
+    const std::unique_ptr<FontStyle>& symbolStyle = textProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto effectOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+    EXPECT_EQ(effectOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(effectOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(effectOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest019
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest019, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelStatic::SetFontSize(node, std::nullopt);
+    SymbolModelStatic::SetFontWeight(node, std::nullopt);
+    SymbolModelStatic::SetRenderingStrategy(node, std::nullopt);
+    SymbolModelStatic::SetSymbolEffect(node, std::nullopt);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
+}
+
+/**
+ * @tc.name: ShaderStyle001
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    // test input base color
+    SymbolGradient colorShaderCase;
+    colorShaderCase.type = SymbolGradientType::COLOR_SHADER;
+
+    // test input line gradient
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+
+    // test input radial gradient
+    SymbolGradient radialGradientCase;
+    radialGradientCase.type = SymbolGradientType::RADIAL_GRADIENT;
+    radialGradientCase.radialCenterX = Dimension(0.5);
+    radialGradientCase.radialCenterY = Dimension(0.5);
+    radialGradientCase.radius =  Dimension(0.6);
+
+    gradients.emplace_back(std::move(colorShaderCase));
+    gradients.emplace_back(std::move(linearGradientCase));
+    gradients.emplace_back(std::move(radialGradientCase));
+
+    symbolModelNG.SetShaderStyle(gradients);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+
+    auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 3);
+}
+
+/**
+ * @tc.name: ShaderStyle002
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    symbolModelNG.SetShaderStyle(gradients);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+
+    auto symbolOptions = textStyle.GetShaderStyle();
+    EXPECT_EQ(symbolOptions.size(), gradients.size());
+}
+
+/**
+ * @tc.name: ShaderStyle003
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    // test input line gradient
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+    linearGradientCase.gradientType = GradientDefinedStatus::GRADIENT_TYPE;
+
+    gradients.emplace_back(std::move(linearGradientCase));
+
+    symbolModelNG.SetShaderStyle(gradients);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+ 
+    auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 1);
+}
+
+/**
+ * @tc.name: ShaderStyle004
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    // test input base color
+    SymbolGradient colorShaderCase;
+    colorShaderCase.type = SymbolGradientType::COLOR_SHADER;
+
+    // test input line gradient
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+
+    // test input radial gradient
+    SymbolGradient radialGradientCase;
+
+    gradients.emplace_back(std::move(colorShaderCase));
+    gradients.emplace_back(std::move(linearGradientCase));
+    gradients.emplace_back(std::move(radialGradientCase));
+
+    symbolModelNG.SetShaderStyle(gradients);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+ 
+    auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 3);
+}
+
+/**
+ * @tc.name: ShaderStyle005
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    // test input base color
+    SymbolGradient colorShaderCase;
+    colorShaderCase.type = SymbolGradientType::COLOR_SHADER;
+
+    // test input line gradient
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+
+    // test input radial gradient
+    SymbolGradient radialGradientCase;
+    radialGradientCase.type = SymbolGradientType::RADIAL_GRADIENT;
+    radialGradientCase.radialCenterX = Dimension(0.5);
+    radialGradientCase.radialCenterY = Dimension(0.5);
+    radialGradientCase.radius =  Dimension(0.6);
+
+    gradients.emplace_back(std::move(colorShaderCase));
+    gradients.emplace_back(std::move(linearGradientCase));
+    gradients.emplace_back(std::move(radialGradientCase));
+
+    symbolModelNG.SetShaderStyle(gradients);
+    symbolModelNG.ResetShaderStyle();
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+
+    auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 0);
+}
+
+/**
+ * @tc.name: SymbolShadow001
+ * @tc.desc: test SetSymbolShadow and GetSymbolShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetSymbolShadow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+
+    SymbolShadow symbolShadow;
+    symbolShadow.radius = 10.0f;
+    symbolModelNG.SetSymbolShadow(symbolShadow);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolShadow property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasSymbolShadow());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+    EXPECT_FLOAT_EQ(textStyle.GetSymbolShadow().radius, 10.0f);
 }
 } // namespace OHOS::Ace::NG

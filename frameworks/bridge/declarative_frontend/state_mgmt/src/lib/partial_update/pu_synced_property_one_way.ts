@@ -127,7 +127,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // sync peer can be 
   // 1. the embedded ObservedPropertyPU, followed by a reset when the owning ViewPU received a local update in parent 
   // 2. a @Link or @Consume that uses this @Prop as a source.  FIXME is this possible? - see the if (eventSource && this.source_ == eventSource) {
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, isSync: boolean = false): void {
     stateMgmtProfiler.begin('SyncedPropertyOneWayPU.syncPeerHasChanged');
     if (this.source_ === undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -141,7 +141,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       if (this.checkIsSupportedValue(newValue)) {
         stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
-          this.notifyPropertyHasChangedPU();
+          this.notifyPropertyHasChangedPU(isSync);
         }
       }
     } else {
@@ -151,7 +151,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
 
-  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName): void {
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName, isSync: boolean = false): void {
     stateMgmtProfiler.begin('SyncedPropertyOneWayPU.syncPeerTrackedPropertyHasChanged');
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -165,7 +165,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       if (this.checkIsSupportedValue(newValue)) {
         stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
-          this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
+          this.notifyTrackedObjectPropertyHasChanged(changedPropertyName, isSync);
         }
       }
     } else {
@@ -297,7 +297,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.localCopyObservedObject_ = newObservedObjectValue;
     }
 
-    if (typeof this.localCopyObservedObject_ === 'object') {
+    if (this.localCopyObservedObject_ && typeof this.localCopyObservedObject_ === 'object') {
       if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
         // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
         // not those of its parent value.
@@ -397,6 +397,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       return obj;
     }
 
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop() && isStaticProxy(obj)) {
+      throw new Error(`deepCopyObjectInternal: Static variable assignment to @Prop${variable} is not allowed.`);
+    }
+
     let copiedObjects = new Map<Object, Object>();
 
     return getDeepCopyOfObjectRecursive(obj);
@@ -449,7 +454,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
          * it will not crash but copy will be a normal JSObject, not a @Sendable object.
          * To keep the functionality of @Sendable, still not define copy with initial value.
          */
-        stateMgmtConsole.warn('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
+        stateMgmtConsole.debug('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
         return obj;
       }
       Object.keys(obj).forEach((objKey: any) => {

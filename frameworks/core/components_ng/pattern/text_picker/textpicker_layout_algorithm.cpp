@@ -26,8 +26,9 @@ const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const float DOUBLE_VALUE = 2.0f;
-constexpr double PERCENT_100 = 100.0;
+constexpr double PERCENT_100 = 100.0f;
 constexpr double PERCENT_120 = 1.2f;
+constexpr float DEFAULT_FONT_SCALE = 1.f;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -36,6 +37,7 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
     return gredient;
 }
 } // namespace
+
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -64,11 +66,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textPickerPattern->CheckAndUpdateColumnSize(frameSize, columnNode, NeedAdaptForAging());
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutChildConstraint);
-    }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(layoutWrapper, pickerTheme, frameSize);
     float gradientPercent = GetGradientPercent(layoutProperty, textPickerPattern, frameSize, pickerTheme);
     InitGradient(gradientPercent, blendNode, columnNode);
 }
@@ -78,7 +76,7 @@ float TextPickerLayoutAlgorithm::GetGradientPercent(const RefPtr<TextPickerLayou
 {
     float gradientPercent = 0.0f;
     bool isGradientHeight = layoutProperty->HasGradientHeight();
-    if (LessNotEqual(textPickerPattern->GetGradientHeight().ConvertToPx(), 0.0)) {
+    if (LessNotEqual(textPickerPattern->GetGradientHeight().ConvertToPx(), 0.0f)) {
         isGradientHeight = false;
     }
     if (isGradientHeight) {
@@ -110,54 +108,48 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
     isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
     if (isDefaultPickerItemHeight_) {
         auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
-        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
+        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0f)) {
             isDefaultPickerItemHeight_ = false;
         } else {
             UpdateDefaultPickerItemHeightLPX(pickerNode, defaultPickerItemHeightValue);
         }
     }
-
-    uint32_t showCount_ = pickerTheme->GetShowCountPortrait();
+    uint32_t showCount = pickerTheme->GetShowCountPortrait();
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = pickerTheme->GetShowCountLandscape();
+        showCount = pickerTheme->GetShowCountLandscape();
     }
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+
     auto isUserSetDividerSpacingFont = textPickerPattern->GetIsUserSetDividerSpacingFont();
     auto isUserSetGradientFont = textPickerPattern->GetIsUserSetGradientFont();
     if (isUserSetDividerSpacingFont) {
         dividerSpacingFontScale_ = ReCalcItemHeightScale(textPickerPattern->GetDividerSpacing());
         textPickerPattern->SetPaintDividerSpacing(dividerSpacingFontScale_);
     }
-
     if (isUserSetGradientFont) {
         gradientFontScale_ = ReCalcItemHeightScale(textPickerPattern->GetGradientHeight(), false);
     }
-
     if (isDefaultPickerItemHeight_) {
-        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount_);
+        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount);
     } else {
         pickerHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() *
-                                              (static_cast<int32_t>(showCount_) - 1) * gradientFontScale_ +
-                                          pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_);
+            (static_cast<int32_t>(showCount) - 1) * gradientFontScale_ +
+            pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_);
     }
-
     auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
     float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
-
     if (textPickerPattern->GetIsShowInDialog()) {
         float dialogButtonHeight =
             static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
-                                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
-                                .ConvertToPx());
+                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2).ConvertToPx());
         pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
         if (isDefaultPickerItemHeight_) {
-            defaultPickerItemHeight_ = NearZero(showCount_) ? defaultPickerItemHeight_ : pickerHeight / showCount_;
+            defaultPickerItemHeight_ = (showCount == 0) ? defaultPickerItemHeight_ : pickerHeight / showCount;
             textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
             textPickerPattern->SetResizeFlag(true);
         }
     }
-
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);
 }
@@ -181,6 +173,7 @@ void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(blendRenderContext);
     CHECK_NULL_VOID(columnRenderContext);
+
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
@@ -228,34 +221,6 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
-    UpdateContentSize(frameSize, childLayoutWrapper);
-}
-
-void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
-{
-    SizeF frameSize = size;
-    CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
-    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
-    CHECK_NULL_VOID(!children.empty());
-    for (const auto& child : children) {
-        if (child == children.back()) {
-            auto frameNode  = child->GetHostNode();
-            CHECK_NULL_VOID(frameNode);
-            auto overlayNode = frameNode ->GetOverlayNode();
-            CHECK_NULL_VOID(overlayNode);
-            auto geometryNode = frameNode->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto overlayGeometryNode = overlayNode->GetGeometryNode();
-            CHECK_NULL_VOID(overlayGeometryNode);
-            auto textRect = geometryNode->GetFrameRect();
-            contentWrapper.selfIdealSize = { frameSize.Width() - textRect.Left(), textRect.Height() };
-            child->Measure(contentWrapper);
-            auto textFrameSize_ = geometryNode->GetMarginFrameSize();
-            overlayGeometryNode->SetFrameSize(textFrameSize_);
-            overlayNode->Layout();
-        }
-    }
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -269,6 +234,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -285,13 +251,11 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 0, MAX_HALF_DISPLAY_COUNT);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
-            pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_* (ITEM_HEIGHT_HALF + 1) -
+            pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ * (ITEM_HEIGHT_HALF + 1) -
             pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_ / ITEM_HEIGHT_HALF);
-        halfDisplayCounts_ = std::clamp(
-            static_cast<int32_t>(std::ceil((pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                               pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
-                                           pickerTheme->GetGradientHeight().ConvertToPx())),
-            0, MAX_HALF_DISPLAY_COUNT);
+        halfDisplayCounts_ = std::clamp(static_cast<int32_t>(std::ceil(
+            (pickerItemHeight_ / ITEM_HEIGHT_HALF - pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
+            pickerTheme->GetGradientHeight().ConvertToPx())), 0, MAX_HALF_DISPLAY_COUNT);
     }
     int32_t i = 0;
     int32_t showCount = static_cast<int32_t>(pickerTheme->GetShowOptionCount()) + BUFFER_NODE_NUMBER;
@@ -302,7 +266,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
         auto childOffset =
-            OffsetF(0.0, childStartCoordinate + static_cast<float>(currentOffset_[i++]) + padding.Offset().GetY());
+            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_[i++]) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();
@@ -316,10 +280,7 @@ bool TextPickerLayoutAlgorithm::NeedAdaptForAging()
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
 
-    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
-        return true;
-    }
-    return false;
+    return GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale());
 }
 
 const Dimension TextPickerLayoutAlgorithm::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
@@ -340,18 +301,18 @@ const Dimension TextPickerLayoutAlgorithm::AdjustFontSizeScale(const Dimension& 
 
 float TextPickerLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing)
 {
-    auto fontScale = 1.0f;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, fontScale);
+    CHECK_NULL_RETURN(pipeline, DEFAULT_FONT_SCALE);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, fontScale);
+    CHECK_NULL_RETURN(pickerTheme, DEFAULT_FONT_SCALE);
+
     auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
     auto themePadding = pickerTheme->GetPickerDialogFontPadding();
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
     double adjustedScale =
         std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
     if (NearZero(adjustedScale)) {
-        return fontScale;
+        return DEFAULT_FONT_SCALE;
     }
     userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
     auto themeHeightLimit =
@@ -364,11 +325,41 @@ float TextPickerLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetH
     }
 
     if (NearZero(themeHeight.ConvertToPx())) {
-        return fontScale;
+        return DEFAULT_FONT_SCALE;
     }
 
-    fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
-    return fontScale;
+    return std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), DEFAULT_FONT_SCALE);
+}
+
+void TextPickerLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme,
+    const SizeF& size)
+{
+    auto totalChild = layoutWrapper->GetTotalChildCount();
+    CHECK_EQUAL_VOID(totalChild, 0);
+
+    auto selectedIndex = totalChild / 2;
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    const float dividerHeight = static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx() * \
+        dividerSpacingFontScale_);
+    const float gradientHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * \
+        gradientFontScale_);
+    const float defaultHeight = static_cast<float>(defaultPickerItemHeight_);
+
+    for (auto index = 0; index < totalChild; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        SizeF frameSize = { size.Width(), -1.0f };
+        if (isDefaultPickerItemHeight_) {
+            frameSize.SetHeight(defaultHeight);
+        } else {
+            if (index == selectedIndex) {
+                frameSize.SetHeight(dividerHeight);
+            } else {
+                frameSize.SetHeight(gradientHeight);
+            }
+        }
+        layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
+        child->Measure(layoutChildConstraint);
+    }
 }
 
 } // namespace OHOS::Ace::NG

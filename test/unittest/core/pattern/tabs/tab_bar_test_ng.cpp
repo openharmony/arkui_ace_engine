@@ -2044,7 +2044,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayIndicatorTranslateAnimation003, TestSize
     EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
     auto widthProperty =
         AceType::DynamicCast<NodeAnimatablePropertyFloat>(tabBarNode_->GetAnimatablePropertyFloat("indicatorOffset"));
-    EXPECT_NEAR(widthProperty->Get(), 150.0f, 0.001f);
+    EXPECT_NEAR(widthProperty->GetStagingValue(), 150.0f, 0.001f);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
 

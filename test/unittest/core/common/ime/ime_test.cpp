@@ -861,4 +861,48 @@ HWTEST_F(ImeTest, FormatTest009, TestSize.Level1)
     EXPECT_EQ(newValue.text, "test@example");
     EXPECT_EQ(newValue.selection.baseOffset, -1);
 }
+
+/**
+ * @tc.name: CastToAutoCapitalizationModeTest001
+ * @tc.desc: Test convert to Text Input Operation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, CastToAutoCapitalizationModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Value is 0
+     * @tc.expected: step1. The return value is the set value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(0), AutoCapitalizationMode::NONE);
+
+    /**
+     * @tc.steps: step2. Value is 1
+     * @tc.expected: step2. The return value is the set value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(1), AutoCapitalizationMode::WORDS);
+
+    /**
+     * @tc.steps: step3. Value is 2
+     * @tc.expected: step3. The return value is the set value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(2), AutoCapitalizationMode::SENTENCES);
+
+    /**
+     * @tc.steps: step4. Value is 3
+     * @tc.expected: step4. The return value is the set value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(3), AutoCapitalizationMode::ALL_CHARACTERS);
+
+    /**
+     * @tc.steps: step5. Value is 4
+     * @tc.expected: step5. The return value is the default value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(4), AutoCapitalizationMode::NONE);
+
+    /**
+     * @tc.steps: step6. Value is -1
+     * @tc.expected: step6. The return value is the default value.
+     */
+    EXPECT_EQ(CastToAutoCapitalizationMode(-1), AutoCapitalizationMode::NONE);
+}
 } // namespace OHOS::Ace

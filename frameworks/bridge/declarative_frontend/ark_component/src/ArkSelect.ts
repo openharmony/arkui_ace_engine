@@ -110,8 +110,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, OptionFontColorModifier.identity, OptionFontColorModifier, value);
     return this;
   }
-  onSelect(callback: (index: number, value: string) => void): this {
-    throw new Error('Method not implemented.');
+  onSelect(callback: (value: OnSelectCallback) => void): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectOnSelectModifier.identity, SelectOnSelectModifier, callback);
+    return this;
   }
   space(value: Length): this {
     modifierWithKey(
@@ -175,14 +177,15 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
     return this;
   }
-  menuOutline(outline: MenuOutlineOptions): this {
-    modifierWithKey(
-      this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
-  }
   avoidance(mode: AvoidanceMode): this {
     modifierWithKey(
       this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
+  }
+  menuOutline(outline: MenuOutlineOptions): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+      return this;
   }
 }
 
@@ -349,7 +352,7 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
   private isEqual(stageValue: Length, value: Length): boolean {
     if ((!isUndefined(stageValue) && isResource(stageValue)) &&
       (!isUndefined(value) && isResource(value))) {
-      return !isResourceEqual(stageValue, value);
+      return true;
     } else {
       return stageValue !== value;
     }
@@ -623,9 +626,7 @@ class SelectDividerStyleModifier extends ModifierWithKey<Optional<DividerStyleOp
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
@@ -761,6 +762,20 @@ class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
   }
   checkObjectDiff(): boolean {
     return this.stageValue !== this.value;
+  }
+}
+
+class SelectOnSelectModifier extends ModifierWithKey<(value: OnSelectCallback) => void> {
+  constructor(value: OnSelectCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectOnSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetOnSelect(node);
+    } else {
+      getUINativeModule().select.setOnSelect(node, this.value);
+    }
   }
 }
 // @ts-ignore

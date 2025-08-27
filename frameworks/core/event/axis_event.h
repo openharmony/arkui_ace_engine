@@ -32,21 +32,27 @@ namespace OHOS::Ace {
 struct UIInputEvent {
     virtual ~UIInputEvent() = default;
     TimeStamp time;
+    ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
     UIInputEventType eventType = UIInputEventType::NONE;
 };
 
 struct PointerEvent : public UIInputEvent {
     virtual ~PointerEvent() = default;
-    explicit PointerEvent(float x = {}, float y = {}, float screenX = {},
-        float screenY = {}, TimeStamp time = {})
-        :x(x), y(y), screenX(screenX), screenY(screenY)
+    explicit PointerEvent(float x = {}, float y = {}, float screenX = {}, float screenY = {},
+        double globalDisplayX = {}, double globalDisplayY = {}, TimeStamp time = {})
+        : globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY), x(x), y(y), screenX(screenX), screenY(screenY)
     {
         this->time = time;
     }
+    double globalDisplayX = {};
+    double globalDisplayY = {};
     float x = {};
     float y = {};
     float screenX = {};
     float screenY = {};
+    // ID of the node to which this event is being explicitly posted (not necessarily the original target)
+    int32_t postEventNodeId = {};
+    bool passThrough = {};
 };
 
 struct AxisEvent final : public PointerEvent {
@@ -87,17 +93,17 @@ struct AxisEvent final : public PointerEvent {
     {
         eventType = UIInputEventType::AXIS;
     }
-
-    AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
-        double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
-        int64_t deviceId, SourceType sourceType, SourceTool sourceTool,
+    AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double globalDisplayX, double globalDisplayY,
+        double verticalAxis, double horizontalAxis, double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent,
+        AxisAction action, TimeStamp timestamp, int64_t deviceId, SourceType sourceType, SourceTool sourceTool,
         std::shared_ptr<const MMI::PointerEvent> pointerEvent, std::vector<KeyCode> pressedCodes,
         int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep)
-        : PointerEvent(x, y, screenX, screenY, timestamp), id(id), verticalAxis(verticalAxis),
-          horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
-          isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
-          targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected), scrollStep(scrollStep)
+        : PointerEvent(x, y, screenX, screenY, globalDisplayX, globalDisplayY, timestamp), id(id),
+          verticalAxis(verticalAxis), horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale),
+          rotateAxisAngle(rotateAxisAngle), isRotationEvent(isRotationEvent), action(action), deviceId(deviceId),
+          sourceType(sourceType), sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)),
+          pressedCodes(pressedCodes), targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected),
+          scrollStep(scrollStep)
     {
         eventType = UIInputEventType::AXIS;
     }
@@ -105,6 +111,7 @@ struct AxisEvent final : public PointerEvent {
     AxisEvent CreateScaleEvent(float scale) const;
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
+    Offset GetGlobalDisplayOffset() const;
     int32_t GetTargetDisplayId() const;
     AxisDirection GetDirection() const;
     static bool IsDirectionUp(AxisDirection direction);
@@ -127,10 +134,6 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
-    void SetVerticalAxis(float axis);
-    float GetVerticalAxis() const;
-    void SetHorizontalAxis(float axis);
-    float GetHorizontalAxis() const;
     void SetPinchAxisScale(float scale);
     float GetPinchAxisScale() const;
     void SetRotateAxisAngle(float angle);
@@ -140,6 +143,8 @@ public:
     AxisInfo& SetGlobalLocation(const Offset& globalLocation);
     AxisInfo& SetLocalLocation(const Offset& localLocation);
     AxisInfo& SetScreenLocation(const Offset& screenLocation);
+    AxisInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation);
+    const Offset& GetGlobalDisplayLocation() const;
     const Offset& GetScreenLocation() const;
     const Offset& GetLocalLocation() const;
     const Offset& GetGlobalLocation() const;
@@ -148,8 +153,6 @@ public:
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;
-    float verticalAxis_ = 0.0;
-    float horizontalAxis_ = 0.0;
     float pinchAxisScale_ = 0.0;
     float rotateAxisAngle_ = 0.0;
     bool isRotationEvent_ = false;
@@ -159,6 +162,8 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
 };
 
 using OnAxisEventFunc = std::function<void(AxisInfo&)>;
@@ -170,6 +175,7 @@ class AxisEventTarget : public virtual AceType {
 public:
     AxisEventTarget() = default;
     AxisEventTarget(std::string frameName) : frameName_(std::move(frameName)) {}
+    AxisEventTarget(std::string frameName, int32_t frameId) : frameName_(std::move(frameName)), frameId_(frameId) {}
     ~AxisEventTarget() override = default;
     void SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback);
     void SetCoordinateOffset(const NG::OffsetF& coordinateOffset);
@@ -179,12 +185,17 @@ public:
     std::string GetFrameName() const;
     bool HandleAxisEvent(const AxisEvent& event);
     virtual void HandleEvent(const AxisEvent& event) {}
+    int32_t GetFrameId() const
+    {
+        return frameId_;
+    }
 
 private:
     OnAxisEventFunc onAxisCallback_;
     NG::OffsetF coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string frameName_ = "Unknown";
+    int32_t frameId_ = 0;
 };
 
 class AxisEventChecker final {

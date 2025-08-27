@@ -38,6 +38,21 @@ public:
     {
         return false;
     }
+    
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
 
     void OnModifyDone() override
     {

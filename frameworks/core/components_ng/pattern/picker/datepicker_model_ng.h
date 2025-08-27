@@ -34,6 +34,7 @@ public:
     void SetSelectedDate(const PickerDate& value) override;
     void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
+    void SetCanLoop(bool isLoop) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
     void SetOnDateChange(DateChangeEvent&& onChange) override;
     void SetSelectedTime(const PickerTime& selectedTime) override {};
@@ -78,14 +79,20 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetCanLoop(FrameNode* frameNode);
+    static void SetCanLoop(FrameNode* frameNode, bool isLoop);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    void createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
-        const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor);
-    void createYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    void CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
+
     std::string dateOrder = "";
     std::string dateTimeOrder = "";
 };

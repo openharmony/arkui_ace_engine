@@ -118,7 +118,7 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Get EventHub's properties.
-     * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
+     * @tc.expected: These properties are null when GetEventHub functions have not been invoked.
      */
     EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
@@ -137,7 +137,7 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
 
 /**
  * @tc.name: EventHubPropertyTest002
- * @tc.desc: Create EventHub and invoke GetOrCreateEventHub functions.
+ * @tc.desc: Create EventHub and invoke GetEventHub functions.
  * @tc.type: FUNC
  */
 HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
@@ -151,7 +151,7 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
     EXPECT_NE(eventHub, nullptr);
 
     /**
-     * @tc.steps: step2. Invoke GetOrCreateEventHub functions.
+     * @tc.steps: step2. Invoke GetEventHub functions.
      * @tc.expected: These eventHub properties are not null.
      */
     eventHub->GetOrCreateGestureEventHub();
@@ -211,7 +211,6 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
      */
     eventHub->SetOnAppear([]() {});
     eventHub->FireOnAppear();
-
     eventHub->SetOnDisappear([]() {});
     eventHub->FireOnDisappear();
 }
@@ -803,7 +802,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest001, TestSize.Level1)
      * @tc.expected: flag is equal 1.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnDisappear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnDisappear(std::move(flagFunc));
     EXPECT_NE(eventHub->onJSFrameNodeDisappear_, nullptr);
     eventHub->ClearJSFrameNodeOnDisappear();
     EXPECT_EQ(eventHub->onJSFrameNodeDisappear_, nullptr);
@@ -836,7 +835,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest002, TestSize.Level1)
      * @tc.expected:onJSFrameNodeAppear_ is nullptr.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(flagFunc));
     EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
     eventHub->ClearJSFrameNodeOnAppear();
     EXPECT_EQ(eventHub->onJSFrameNodeAppear_, nullptr);
@@ -870,9 +869,17 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
      * @tc.expected: onJSFrameNodeAppear_ is not nullptr.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(flagFunc));
     eventHub->FireOnAppear();
     EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
+
+    /**
+     * @tc.steps: step4. Call FireOnAppear with onAppear_  is and onJSFrameNodeAppear_ are both not nullptr.
+     * @tc.expected: onAppear_ is nullptr.
+     */
+    eventHub->SetOnAppear(std::move(flagFunc));
+    eventHub->FireOnAppear();
+    EXPECT_NE(eventHub->onAppear_, nullptr);
 }
 
 /**
@@ -1021,6 +1028,7 @@ HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
     std::vector<double> ratios = { 0, 1.0 };
     eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, false);
 
+    eventHub->OnAttachContext(nullptr);
     auto context = MockPipelineContext::GetCurrent();
     eventHub->OnAttachContext(AceType::RawPtr(context));
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
@@ -1136,7 +1144,7 @@ HWTEST_F(EventHubTestNg, EventHubTest012, TestSize.Level1)
     OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
     RectF tempOldRect;
     RectF tempNewRect;
-    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
     eventHub->FireJSFrameNodeOnSizeChanged(tempOldRect, tempNewRect);
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
@@ -1177,7 +1185,7 @@ HWTEST_F(EventHubTestNg, EventHubTest015, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     bool flags = false;
     OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
-    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
     eventHub->ClearJSFrameNodeOnSizeChange();
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
@@ -1428,5 +1436,56 @@ HWTEST_F(EventHubTestNg, EventHubTest028, TestSize.Level1)
     EXPECT_TRUE(eventHub->stateStyleMgr_);
     bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED);
     EXPECT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventHubTest029
+ * @tc.desc: AddSupportedUIStateWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddSupportedUIStateWithCallback.
+     * @tc.expected: userSubscribersExcludeConfigs_ value is correct.
+     */
+    UIState uiState = UI_STATE_DISABLED | UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    uint64_t expectedValue = uiState;
+    std::function<void(UIState)> callback = [](UIState state) {};
+    eventHub->AddSupportedUIStateWithCallback(uiState, callback, false, true);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue = UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_DISABLED, callback, false, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_FOCUSED, callback, true, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue =  UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_FOCUSED, callback, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    /**
+     * @tc.steps: step3. Call RemoveSupportedUIState.
+     * @tc.expected: userSubscribersExcludeConfigs_ value is correct.
+     */
+    uiState = UI_STATE_FOCUSED | UI_STATE_PRESSED | UI_STATE_NORMAL;
+    expectedValue = uiState;
+    eventHub->AddSupportedUIStateWithCallback(uiState, callback, false, true);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+
+    expectedValue =  UI_STATE_PRESSED | UI_STATE_NORMAL;
+    eventHub->RemoveSupportedUIState(UI_STATE_FOCUSED, false);
+    EXPECT_EQ(expectedValue, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
+    eventHub->RemoveSupportedUIState(UI_STATE_PRESSED, false);
+    EXPECT_EQ(EXCLUDE_INNER_FLAG_NONE, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
 }
 } // namespace OHOS::Ace::NG

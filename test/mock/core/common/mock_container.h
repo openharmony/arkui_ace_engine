@@ -45,6 +45,7 @@ public:
     }
 
     static void SetUp();
+    static void SetUp(RefPtr<PipelineBase> pipelineContext);
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
@@ -102,6 +103,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsDialogContainer() const override
+    {
+        return isDialogContainer_;
+    }
+
     bool IsFreeMultiWindow() const override
     {
         return isFreeMultiWindow_;
@@ -151,13 +157,8 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
-    MOCK_METHOD(bool, IsPcOrPadFreeMultiWindowMode, (), (const, override));
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
-    MOCK_METHOD(bool, IsFullScreenWindow, (), (const, override));
-    MOCK_METHOD(RefPtr<PageViewportConfig>, GetCurrentViewportConfig, (), (const, override));
-    MOCK_METHOD(RefPtr<PageViewportConfig>, GetTargetViewportConfig, (Orientation orientation,
-        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator), (override));
-    MOCK_METHOD(bool, SetSystemBarEnabled, (SystemBarType type, bool enable, bool animation), (override));
+    MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 
@@ -167,6 +168,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isSubContainer_ = false;
+    bool isDialogContainer_ = false;
     bool isFreeMultiWindow_ = false;
     bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;

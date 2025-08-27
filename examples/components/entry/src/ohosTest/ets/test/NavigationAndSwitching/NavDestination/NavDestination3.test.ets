@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   JsonType,
   KeyStruct,
@@ -27,7 +27,7 @@ import {
 } from '../../../utils';
 import { NavDestination } from './NavDestination';
 
-export default function NavDestination3(){
+export default function NavDestination3() {
   describe('NavDestination3', () => {
     beforeAll(async (done: Function) => {
       await NavDestination(done)

@@ -32,7 +32,8 @@ constexpr int NUM_32 = 32;
 namespace OHOS::Ace::NG {
 
 const std::vector<ArkUIAPINodeFlags> NODE_FLAGS = { ArkUIAPINodeFlags::CUSTOM_MEASURE, ArkUIAPINodeFlags::CUSTOM_LAYOUT,
-    ArkUIAPINodeFlags::CUSTOM_DRAW, ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW, ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW };
+    ArkUIAPINodeFlags::CUSTOM_DRAW, ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW, ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW,
+    ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT, ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND };
 
 ArkUICanvasHandle ExtensionCompanionNode::GetCanvas()
 {
@@ -142,6 +143,19 @@ void ExtensionCompanionNode::OnLayout(int32_t width, int32_t height, int32_t pos
 
 void ExtensionCompanionNode::OnDraw(DrawingContext& context)
 {
+    if (flags_ & ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND) {
+        auto canvas = reinterpret_cast<uintptr_t>(&context.canvas);
+        ArkUICustomNodeEvent eventDrawBehind;
+        eventDrawBehind.kind = ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND;
+        eventDrawBehind.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND));
+        eventDrawBehind.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        eventDrawBehind.data[NUM_1] = (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
+        eventDrawBehind.data[NUM_2] = context.width;
+        eventDrawBehind.data[NUM_3] = context.height;
+        eventDrawBehind.canvas = reinterpret_cast<intptr_t>(&context.canvas);
+        SendArkUIAsyncCustomEvent(&eventDrawBehind);
+    }
+
     if (flags_ & ArkUIAPINodeFlags::CUSTOM_DRAW) {
         // call extension logic to manager side.
         auto canvas = reinterpret_cast<uintptr_t>(&context.canvas);
@@ -157,6 +171,19 @@ void ExtensionCompanionNode::OnDraw(DrawingContext& context)
         SendArkUIAsyncCustomEvent(&event);
     } else {
         InnerDraw(context);
+    }
+
+    if (flags_ & ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT) {
+        auto canvas = reinterpret_cast<uintptr_t>(&context.canvas);
+        ArkUICustomNodeEvent eventDrawFront;
+        eventDrawFront.kind = ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT;
+        eventDrawFront.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT));
+        eventDrawFront.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        eventDrawFront.data[NUM_1] = (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
+        eventDrawFront.data[NUM_2] = context.width;
+        eventDrawFront.data[NUM_3] = context.height;
+        eventDrawFront.canvas = reinterpret_cast<intptr_t>(&context.canvas);
+        SendArkUIAsyncCustomEvent(&eventDrawFront);
     }
 }
 
@@ -213,7 +240,8 @@ bool ExtensionCompanionNode::HasCustomerLayout() const
 bool ExtensionCompanionNode::NeedRender() const
 {
     ArkUI_Uint32 mask = ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW | ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW |
-        ArkUIAPINodeFlags::CUSTOM_DRAW;
+                        ArkUIAPINodeFlags::CUSTOM_DRAW | ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT |
+                        ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND;
     return (flags_ & mask) != 0;
 }
 } // namespace OHOS::Ace::NG

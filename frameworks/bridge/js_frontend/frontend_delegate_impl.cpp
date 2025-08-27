@@ -48,8 +48,8 @@ struct DialogStrings {
 
 DialogStrings GetDialogStrings()
 {
-    DialogStrings strs = {"", ""};
-    auto context = NG::PipelineContext::GetCurrentContext();
+    DialogStrings strs = {"Cancel", "OK"};
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, strs);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, strs);
@@ -1328,6 +1328,13 @@ void FrontendDelegateImpl::OnSurfaceChanged()
 void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
 
 void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
+
+void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId) {}
+
+bool FrontendDelegateImpl::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    return false;
+}
 
 void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
 {

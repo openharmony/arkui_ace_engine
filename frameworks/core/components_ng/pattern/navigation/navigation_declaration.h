@@ -154,6 +154,11 @@ struct BarItem {
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
     std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> activeIconSymbol;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, BarItem&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
     std::string ToString() const
     {
         std::string result;
@@ -162,6 +167,22 @@ struct BarItem {
         result.append(", icon: ");
         result.append(icon.value_or("na"));
         return result;
+    }
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BarItem&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 
@@ -266,6 +287,12 @@ enum class NavigationSystemTransitionType {
     SLIDE_BOTTOM = 1 << 5,
 };
 
+enum class NavDestinationType {
+    DETAIL = 0,
+    HOME = 1,
+    PROXY = 2
+};
+
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
     return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
@@ -281,6 +308,18 @@ struct NavDestinationTransition {
     RefPtr<Curve> curve;
     std::function<void()> event;
     std::function<void()> onTransitionEnd;
+};
+
+enum class LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON,
+    POP_TO_TOP_SINGLETON,
+    NEW_INSTANCE,
+};
+
+struct NavigationOptions {
+    LaunchMode launchMode = LaunchMode::STANDARD;
+    bool animated = true;
 };
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(

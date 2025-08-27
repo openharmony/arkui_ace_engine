@@ -17,9 +17,11 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/components/remote_window/rosen_render_remote_window.h"
+#include "core/pipeline/base/rs_node_adapter.h"
 #endif
 
 #include "base/log/dump_log.h"
@@ -2172,7 +2174,10 @@ void RenderNode::MarkParentNeedRender() const
 std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    return Rosen::RSCanvasNode::Create();
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return Rosen::RSCanvasNode::Create();
+    }
+    return RsNodeAdapter::CreateCanvasNode();
 #else
     return nullptr;
 #endif

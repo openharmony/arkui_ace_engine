@@ -259,6 +259,12 @@ public:
     float GetCachedHeightInLanes(int32_t idx) const;
     void SetHeightInLanes(int32_t idx, float mainHeight);
     bool HaveRecordIdx(int32_t idx) const;
+    float CalcMaxHeight(int itemCnt);
+
+    void InvalidatedOffset() override
+    {
+        isPrevOffsetValid_ = false;
+    };
 
     /**
      * @brief lanes in multiple sections.
@@ -339,6 +345,8 @@ private:
     bool synced_ = false;
     bool prevItemStart_ = false;
     bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
+
+    bool isPrevOffsetValid_ = true;
 
     struct ItemInfo;
 };

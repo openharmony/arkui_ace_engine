@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_MODIFIER_H
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -26,9 +25,6 @@
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-
-using RSModifierType = Rosen::RSModifierType;
-using RSExtendedModifier = Rosen::RSExtendedModifier;
 using RSPropertyBase = Rosen::RSPropertyBase;
 
 class FocusModifier {

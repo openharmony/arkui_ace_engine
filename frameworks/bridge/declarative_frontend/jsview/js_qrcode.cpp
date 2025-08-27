@@ -52,10 +52,28 @@ QRCodeModel* QRCodeModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void JSQRCode::Create(const std::string& value)
+void JSQRCode::Create(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    std::string value;
+    RefPtr<ResourceObject> resObj;
+    if (info[0]->IsNumber()) {
+        auto num = info[0]->ToNumber<int32_t>();
+        value = std::to_string(num);
+    } else if (info[0]->IsNull()) {
+        value = "null";
+    } else if (info[0]->IsUndefined()) {
+        value = "undefined";
+    } else {
+        ParseJsString(info[0], value, resObj);
+    }
     QRCodeModel::GetInstance()->Create(value);
     JSQRCodeTheme::ApplyTheme();
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::CREATE, resObj);
+    }
 }
 
 void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
@@ -64,7 +82,13 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
         return;
     }
     Color qrcodeColor;
-    if (!ParseJsColor(info[0], qrcodeColor) && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool state = ParseJsColor(info[0], qrcodeColor, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::COLOR, resObj);
+    }
+
+    if (!state && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
         CHECK_NULL_VOID(qrcodeTheme);
         qrcodeColor = qrcodeTheme->GetQrcodeColor();
@@ -78,7 +102,13 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor) && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool state = ParseJsColor(info[0], backgroundColor, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::BACKGROUND_COLOR, resObj);
+    }
+
+    if (!state && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
         CHECK_NULL_VOID(qrcodeTheme);
         backgroundColor = qrcodeTheme->GetBackgroundColor();
@@ -90,7 +120,13 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
 void JSQRCode::SetContentOpacity(const JSCallbackInfo& info)
 {
     double opacity = 1.0;
-    if (!ParseJsDouble(info[0], opacity)) {
+
+    RefPtr<ResourceObject> resObj;
+    bool state = ParseJsDouble(info[0], opacity, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::CONTENT_OPACITY, resObj);
+    }
+    if (!state) {
         opacity = 1.0;
     }
     if (LessNotEqual(opacity, 0.0) || GreatNotEqual(opacity, 1.0)) {

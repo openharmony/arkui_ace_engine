@@ -27,6 +27,16 @@ std::string GetNavigationId(const RefPtr<NavDestinationPattern>& pattern)
     CHECK_NULL_RETURN(pattern, "");
     return pattern->GetNavigationId();
 }
+
+int32_t GetNavigationUniqueId(const RefPtr<NavDestinationPattern>& pattern)
+{
+    auto uniqueId = -1;
+    CHECK_NULL_RETURN(pattern, uniqueId);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, uniqueId);
+    auto navigationUniqueId = navigationNode->GetId();
+    return navigationUniqueId;
+}
 } // namespace
 
 UIObserverHandler& UIObserverHandler::GetInstance()
@@ -64,7 +74,8 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     }
     pathInfo->OpenScope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
+        GetNavigationUniqueId(pattern));
     navigationHandleFunc_(info);
     pathInfo->CloseScope();
 }
@@ -85,8 +96,9 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     std::string id = host->GetInspectorId().value_or("");
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();
+    Ace::Axis axis = pattern->GetAxis();
     CHECK_NULL_VOID(scrollEventHandleFunc_);
-    scrollEventHandleFunc_(id, uniqueId, eventType, offset);
+    scrollEventHandleFunc_(id, uniqueId, eventType, offset, axis);
 }
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
@@ -114,7 +126,6 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 
 void UIObserverHandler::NotifyDensityChange(double density)
 {
-    CHECK_NULL_VOID(densityHandleFunc_);
     auto container = Container::Current();
     if (!container) {
         LOGW("notify density event failed, current UI instance invalid");
@@ -125,7 +136,12 @@ void UIObserverHandler::NotifyDensityChange(double density)
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    densityHandleFunc_(info, density);
+    if (densityHandleFunc_) {
+        densityHandleFunc_(info, density);
+    }
+    if (densityHandleFuncForAni_) {
+        densityHandleFuncForAni_(info, density);
+    }
 }
 
 void UIObserverHandler::NotifyWillClick(
@@ -169,6 +185,17 @@ void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureE
         AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
 
     panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+}
+
+void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gestureListenerType,
+    const GestureEvent& gestureEventInfo, const RefPtr<NGGestureRecognizer>& current,
+    const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase)
+{
+    CHECK_NULL_VOID(current);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(gestureHandleFunc_);
+
+    gestureHandleFunc_(gestureListenerType, gestureEventInfo, current, frameNode, phase);
 }
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
@@ -275,7 +302,8 @@ std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const Re
         id,
         uniqueId,
         ScrollEventType::SCROLL_START,
-        pattern->GetTotalOffset());
+        pattern->GetTotalOffset(),
+        pattern->GetAxis());
 }
 
 std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)
@@ -366,6 +394,11 @@ void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
     densityHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)
+{
+    densityHandleFuncForAni_ = func;
+}
+
 void UIObserverHandler::SetDrawCommandSendHandleFunc(DrawCommandSendHandleFunc func)
 {
     drawCommandSendHandleFunc_ = func;
@@ -394,6 +427,11 @@ void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
 {
     panGestureHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleGestureHandleFunc(GestureHandleFunc func)
+{
+    gestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

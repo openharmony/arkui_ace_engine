@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,16 +35,56 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetWrapContentMaxHeight(LayoutConstraintF& childLayoutConstraint, float maxHeight)
+    {
+        if (heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT) {
+            childLayoutConstraint.maxSize.SetHeight(maxHeight);
+        }
+    }
+
+    void SetWrapContentMaxWidth(LayoutConstraintF& childLayoutConstraint, float maxWidth)
+    {
+        if (widthLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT) {
+            childLayoutConstraint.maxSize.SetWidth(maxWidth);
+        }
+    }
+
+    void SetFixAtIdealSizeMaxSize(LayoutConstraintF& childLayoutConstraint)
+    {
+        if (widthLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            childLayoutConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            childLayoutConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+
+    bool IsWidthFixOrWrap() const
+    {
+        return widthLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+            widthLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    }
+
+    bool IsHeightFixOrWrap() const
+    {
+        return heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+            heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    }
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
     float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
+    void MeasureEffectNode(const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& idealSize);
     SizeF MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty, RefPtr<LayoutWrapper>& swiperWrapper,
         const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth);
     std::vector<OffsetF> LayoutOffsetList(
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
+        const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const;
+    LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    LayoutCalPolicy heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
 };
 
 } // namespace OHOS::Ace::NG

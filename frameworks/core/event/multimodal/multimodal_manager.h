@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 class PipelineContext;
 
 class MultiModalManager final : public AceType {
-    DECLARE_ACE_TYPE(MultiModalManager, AceType)
+    DECLARE_ACE_TYPE(MultiModalManager, AceType);
 
 public:
     MultiModalManager() = default;

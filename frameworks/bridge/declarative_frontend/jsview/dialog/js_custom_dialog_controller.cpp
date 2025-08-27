@@ -64,7 +64,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
@@ -109,6 +109,7 @@ void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> ob
 }
 
 static std::atomic<int32_t> controllerId = 0;
+
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
     uint32_t argc = info.Length();
@@ -347,7 +348,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     if (!jsBuilderFunction_) {
         return;
     }
-
     if (this->ownerView_ == nullptr) {
         return;
     }
@@ -397,12 +397,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     dialogProperties_.isSysBlurStyle =
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
-        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
+        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_,
+        hasBind_);
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
-
     if (this->ownerView_ == nullptr) {
         return;
     }
@@ -430,6 +430,12 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
 }
 
+void JSCustomDialogController::JsGetState(const JSCallbackInfo& info)
+{
+    PromptActionCommonState state = CustomDialogControllerModel::GetInstance()->GetState(dialogs_, hasBind_);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(state))));
+}
+
 bool JSCustomDialogController::ParseAnimation(
     const JsiExecutionContext& execContext, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
 {
@@ -444,10 +450,8 @@ bool JSCustomDialogController::ParseAnimation(
     int32_t iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
     float tempo = obj->GetPropertyValue<float>("tempo", 1.0);
     auto finishCallbackType = static_cast<FinishCallbackType>(obj->GetPropertyValue<int32_t>("finishCallbackType", 0));
-    if (tempo < 0) {
+    if (NonPositive(tempo)) {
         tempo = 1.0f;
-    } else if (tempo == 0) {
-        tempo = 1000.0f;
     }
     auto direction = StringToAnimationDirection(obj->GetPropertyValue<std::string>("playMode", "normal"));
     RefPtr<Curve> curve;
@@ -496,6 +500,7 @@ void JSCustomDialogController::JSBind(BindingTarget object)
     JSClass<JSCustomDialogController>::Declare("NativeCustomDialogController");
     JSClass<JSCustomDialogController>::CustomMethod("open", &JSCustomDialogController::JsOpenDialog);
     JSClass<JSCustomDialogController>::CustomMethod("close", &JSCustomDialogController::JsCloseDialog);
+    JSClass<JSCustomDialogController>::CustomMethod("getState", &JSCustomDialogController::JsGetState);
     JSClass<JSCustomDialogController>::Bind(
         object, &JSCustomDialogController::ConstructorCallback, &JSCustomDialogController::DestructorCallback);
 }

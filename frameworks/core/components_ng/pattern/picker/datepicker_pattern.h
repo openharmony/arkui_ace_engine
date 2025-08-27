@@ -39,6 +39,8 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
+constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
+constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 }
 
 class DatePickerPattern : public LinearLayoutPattern {
@@ -48,6 +50,16 @@ public:
     DatePickerPattern() : LinearLayoutPattern(false) {};
 
     ~DatePickerPattern() override = default;
+
+    void BeforeCreateLayoutWrapper() override;
+
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+    }
 
     bool IsAtomicNode() const override
     {
@@ -105,6 +117,11 @@ public:
     void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
     {
         weakLunarSwitchText_ = lunarSwitchTextNode;
+    }
+
+    void SetLunarSwitchCheckbox(WeakPtr<FrameNode> lunarSwitchCheckbox)
+    {
+        weakLunarSwitchCheckbox_ = lunarSwitchCheckbox;
     }
 
     void OnFontConfigurationUpdate() override;
@@ -209,13 +226,24 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 
     bool IsShowLunar() const
     {
         return lunar_;
+    }
+
+    void SetCanLoop(bool value)
+    {
+        isLoop_ = value;
+    }
+
+    bool GetCanLoop() const
+    {
+        auto datePickerRowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_RETURN(datePickerRowLayoutProperty, isLoop_);
+        return datePickerRowLayoutProperty->GetCanLoopValue(true);
     }
 
     void SetShowMonthDaysFlag(bool value)
@@ -438,6 +466,7 @@ public:
 
     void SetMode(const DatePickerMode& value)
     {
+        isForceUpdate_ = value != datePickerMode_;
         datePickerMode_ = value;
     }
 
@@ -777,6 +806,10 @@ public:
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -815,6 +848,7 @@ private:
         const VisibleType visibleType, const int32_t weight);
     void ClearFocus();
     void SetDefaultFocus();
+    void AdjustFocusBoxOffset(double& centerX);
     bool IsCircle();
     bool CurrentIsLunar();
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -825,7 +859,15 @@ private:
     void FlushChildNodes();
     void UpdateLunarSwitch();
     void UpdateDateOrder();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -836,6 +878,7 @@ private:
     std::string dateOrder_ = "";
     std::vector<WeakPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
+    bool isLoop_ = true;
     bool showMonthDays_ = false;
     bool showTime_ = false;
     bool showLunarSwitch_ = false;
@@ -862,6 +905,7 @@ private:
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
     WeakPtr<FrameNode> weakLunarSwitchText_;
+    WeakPtr<FrameNode> weakLunarSwitchCheckbox_;
     WeakPtr<FrameNode> nextPrevButtonNode_;
     bool isNext_ = true;
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
@@ -918,6 +962,7 @@ private:
     std::string selectedColumnId_;
     bool lastTimeIsLuanar_ = true;
     bool isFirstTimeSetFocus_ = true;
+    bool isDirectionSetByAr = false;
 };
 } // namespace OHOS::Ace::NG
 

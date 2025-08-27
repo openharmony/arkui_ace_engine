@@ -20,7 +20,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -38,6 +38,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -271,6 +273,7 @@ void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObje
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    pickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
@@ -308,6 +311,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
+    JSClass<JSDatePicker>::StaticMethod("canLoop", &JSDatePicker::SetCanLoop);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
@@ -370,6 +374,15 @@ void JSDatePicker::SetLunar(bool isLunar)
     DatePickerModel::GetInstance()->SetShowLunar(isLunar);
 }
 
+void JSDatePicker::SetCanLoop(const JSCallbackInfo& info)
+{
+    bool value = true;
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
+        value = info[0]->ToBoolean();
+    }
+    DatePickerModel::GetInstance()->SetCanLoop(value);
+}
+
 void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     DatePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
@@ -414,6 +427,20 @@ void JSDatePicker::IsUserDefinedFontFamily(const std::string& pos)
     }
 }
 
+void JSDatePicker::ParseTextStyleFontSize(const JSRef<JSVal>& fontSize, NG::PickerTextStyle& textStyle)
+{
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        CalcDimension size;
+        if (!ParseJsDimensionFp(fontSize, size, textStyle.fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
+            textStyle.fontSize = Dimension(-1);
+        } else {
+            textStyle.fontSize = size;
+        }
+    }
+}
+
 void JSDatePicker::ParseTextStyle(
     const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
@@ -421,8 +448,9 @@ void JSDatePicker::ParseTextStyle(
     auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
-    if (JSViewAbstract::ParseJsColor(fontColor, textColor)) {
+    if (JSViewAbstract::ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontOptions->IsObject()) {
@@ -433,16 +461,8 @@ void JSDatePicker::ParseTextStyle(
     auto fontWeight = fontObj->GetProperty("weight");
     auto fontFamily = fontObj->GetProperty("family");
     auto fontStyle = fontObj->GetProperty("style");
-    if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        textStyle.fontSize = Dimension(-1);
-    } else {
-        CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            textStyle.fontSize = Dimension(-1);
-        } else {
-            textStyle.fontSize = size;
-        }
-    }
+
+    ParseTextStyleFontSize(fontSize, textStyle);
 
     if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
         std::string weight;
@@ -456,7 +476,7 @@ void JSDatePicker::ParseTextStyle(
 
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> families;
-        if (ParseJsFontFamilies(fontFamily, families)) {
+        if (ParseJsFontFamilies(fontFamily, families, textStyle.fontFamilyResObj)) {
             textStyle.fontFamily = families;
             IsUserDefinedFontFamily(pos);
         }
@@ -960,11 +980,14 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     if (second && second->IsNumber()) {
         dateTime.tm_sec = second->GetInt();
     }
+
+    dateTime.tm_isdst = -1; // Auto considering daylight saving time
     if (!isDatePicker) {
         auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
         auto dateObj = JSDate::New(milliseconds);
         return dateObj;
     }
+
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -1081,6 +1104,12 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
         }
     }
     settingData.mode = datePickerMode;
+    auto isLoop = paramObject->GetProperty("canLoop");
+    if (isLoop->IsBoolean()) {
+        settingData.canLoop = isLoop->ToBoolean();
+    } else {
+        settingData.canLoop = true;
+    }
 
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
     if (dateTimeOptionsValue->IsObject()) {
@@ -2001,7 +2030,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
         isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
     settingData.isEnableHapticFeedback = isEnableHapticFeedback;
-    
+
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

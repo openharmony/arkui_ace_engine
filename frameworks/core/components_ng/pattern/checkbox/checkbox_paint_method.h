@@ -20,11 +20,12 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components/checkable/checkable_theme.h"
 namespace OHOS::Ace::NG {
 class CheckBoxPaintProperty;
 constexpr float CHECKBOX_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 class CheckBoxPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod);
 
 public:
     CheckBoxPaintMethod() = default;
@@ -37,7 +38,8 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    void SetModifierBoundsRect(const SizeF& size, const OffsetF& offset);
+    void SetModifierBoundsRect(
+        const RefPtr<CheckboxTheme>& theme, const SizeF& size, const OffsetF& offset, PaintWrapper* paintWrapper);
 
     void SetHoverEffectType(const RefPtr<CheckBoxPaintProperty>& checkBoxPaintProperty);
 
@@ -91,12 +93,18 @@ public:
         return checkboxModifier_;
     }
 
+    void SetNeedAnimation(bool needAnimation)
+    {
+        needAnimation_ = needAnimation;
+    }
+
 private:
     bool enabled_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     bool hasBuilder_ = false;
     bool useContentModifier_ = false;
+    bool needAnimation_ = true;
     CheckBoxStyle checkBoxStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;

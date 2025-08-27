@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
@@ -50,9 +51,19 @@ public:
 
     ~TimePickerRowPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        LinearLayoutPattern::OnColorModeChange(colorMode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -151,10 +162,6 @@ public:
 
     void UpdateAllChildNode();
 
-    void HandleHourColumnBuilding();
-
-    void HandleMinAndSecColumnBuilding();
-
     void HandleHourColumnBuildingRange(const PickerTime& value);
 
     void HandleMinAndSecColumnBuildingRange();
@@ -162,6 +169,14 @@ public:
     void FlushColumn();
 
     void FlushAmPmFormatString();
+    
+    std::string GetTranslatedTimeString(uint32_t time, bool hasZeroPrefix);
+
+    std::string GetHourColumnFormatString(uint32_t hour);
+
+    std::string GetMinuteColumnFormatString(uint32_t minute);
+
+    std::string GetSecondColumnFormatString(uint32_t second);
 
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
@@ -213,6 +228,11 @@ public:
         showCount_ = showCount;
     }
 
+    std::map<WeakPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> GetOptions()
+    {
+        return options_;
+    }
+
     uint32_t GetOptionCount(const RefPtr<FrameNode>& frameNode)
     {
         return optionsTotalCount_[frameNode];
@@ -260,6 +280,11 @@ public:
         auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
         CHECK_NULL_RETURN(timePickerLayoutProperty, hour24_);
         return timePickerLayoutProperty->GetIsUseMilitaryTimeValue(hour24_);
+    }
+
+    bool GetCachedHour24() const
+    {
+        return hour24_;
     }
 
     void SetDateTimeOptionUpdate(bool value)
@@ -414,13 +439,8 @@ public:
     bool GetWheelModeEnabled() const
     {
         auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
-        CHECK_NULL_RETURN(timePickerLayoutProperty, wheelModeEnabled_);
+        CHECK_NULL_RETURN(timePickerLayoutProperty, loop_);
         return timePickerLayoutProperty->GetLoopValue(true);
-    }
-
-    void SetWheelModeEnabled(bool value)
-    {
-        wheelModeEnabled_ = value;
     }
 
     RefPtr<FrameNode> GetColumn(int32_t tag) const
@@ -469,12 +489,6 @@ public:
     std::string GetPmFormatString() const;
 
     std::string AddZeroPrefix(const std::string& value) const;
-
-    std::string GetHourFormatString(uint32_t hour) const;
-
-    std::string GetMinuteFormatString(uint32_t minute) const;
-
-    std::string GetSecondFormatString(uint32_t Second) const;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -525,6 +539,8 @@ public:
     void SetFocusDisable();
     void SetFocusEnable();
 
+    void UpdateTranslatedOptionsMap();
+
     void UpdateLanguageAndAmPmTimeOrder()
     {
         if (language_ == "ug") {
@@ -535,6 +551,18 @@ public:
         auto preAmPmTimeOrder = amPmTimeOrder_;
         amPmTimeOrder_ = DateTimeSequence::GetAmPmTimeOrder(language_).amPmTimeOrder;
         preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (language_ == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+            isDirectionSetByAr = true;
+        } else if (isDirectionSetByAr) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+            isDirectionSetByAr = false;
+        }
     }
 
     void HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -662,7 +690,14 @@ public:
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     bool IsStartEndTimeDefined();
+    bool CheckHourIndexAtStart(uint32_t amPmIndex, uint32_t hourIndex, bool nextStart);
+    bool CheckHourIndexAtEnd(uint32_t amPmIndex, uint32_t hourIndex, bool prevEnd);
+    bool IsNeedToRebuildColumn(bool isHour, bool isAdd, int32_t amPmIndex, int32_t hourIndex, int32_t minuteIndex);
     void UpdateUserSetSelectColor();
+    void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
+    void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
+    void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
@@ -685,6 +720,7 @@ private:
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
+    void AdjustFocusBoxOffset(double& centerX);
     void SetButtonIdeaSize();
     double SetAmPmButtonIdeaSize();
     void GetAllChildNodeWithSecond();
@@ -704,33 +740,38 @@ private:
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
                           int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
     void HandleAmPmColumnBuilding(const PickerTime& value);
-    void HandleAmPmColumnChange(uint32_t selectedHour);
-    void HandleAmToPmHourColumnBuilding(uint32_t selectedHour, uint32_t startHour, uint32_t endHour);
     void HandleMinColumnBuilding();
-    void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
     PickerTime AdjustTime(const PickerTime& time);
-    void HourChangeBuildTimeRange();
-    void MinuteChangeBuildTimeRange(uint32_t hourOf24);
-    void RecordHourAndMinuteOptions();
     void RecordHourMinuteValues();
     bool GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex);
     std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
     std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
-    void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
+    void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag, bool isAdd);
     void UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>& tag);
-    void Hour24ChangeBuildTimeRange();
-    void Hour12ChangeBuildTimeRange();
+    void HandleHourBuildTimeRange(uint32_t hour);
+    void HandleHour24BuildTimeRange();
+    void HandleHour12BuildTimeRange();
+    void HandleMinuteBuildTimeRange(uint32_t hourOf24, uint32_t minute);
+    void HandleSecondBuildTimeRange();
+    void SetHourColumnIndexByTime(std::string hour);
+    void SetMinuteColumnIndexByTime(std::string minute);
     void RecordHourOptions();
-    void UpdateSecondTimeRange();
-    void HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn);
     void LimitSelectedTimeInRange();
     bool IsAmJudgeByAmPmColumn(const RefPtr<FrameNode>& amPmColumn);
     void MinOrSecColumnBuilding(
-        const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
+        const RefPtr<FrameNode>& columnFrameNode, bool isMinute, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
+    Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+
+    void UpdateTextStyleCommon(
+        const PickerTextStyle& textStyle,
+        const TextStyle& defaultTextStyle,
+        std::function<void(const Color&)> updateTextColorFunc,
+        std::function<void(const Dimension&)> updateFontSizeFunc,
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -738,6 +779,7 @@ private:
     uint32_t currentPage_ = 0;
     std::unordered_map<std::string, WeakPtr<FrameNode>> allChildNode_;
     std::map<WeakPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
+    std::unordered_map<std::string, std::string> translatedOptionsMap_;
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
@@ -763,7 +805,7 @@ private:
     bool isNext_ = true;
     std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
-    bool wheelModeEnabled_ = true;
+    bool loop_ = true;
     std::vector<WeakPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
@@ -802,11 +844,12 @@ private:
     std::vector<std::string> definedAMHours_;
     std::vector<std::string> definedPMHours_;
     std::vector<std::string> defined24Hours_;
-    std::string oldHourValue_;
-    std::string oldMinuteValue_;
+    uint32_t oldHourValue_;
+    uint32_t oldMinuteValue_;
     std::string selectedColumnId_;
     bool isUserSetSelectColor_ = false;
     bool isClearFocus_ = true;
+    bool isDirectionSetByAr = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_path.h"
-
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
@@ -195,6 +195,19 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
         path2d_->Rect(x * density, y * density, width * density, height * density);
         SetPathSize(info);
     }
+}
+
+// roundRect(x: number, y: number, width: number, height: number, radius: number|Array<number>): void
+void JSCanvasPath::JsPath2DRoundRect(const JSCallbackInfo& info)
+{
+    Rect rect;
+    std::vector<double> radii;
+    double density = GetDensity();
+    if (!ParseRoundRect(info, rect, radii, density, isJudgeSpecialValue_)) {
+        return;
+    }
+    path2d_->RoundRect(rect * density, radii);
+    SetPathSize(info);
 }
 
 // closePath(): void

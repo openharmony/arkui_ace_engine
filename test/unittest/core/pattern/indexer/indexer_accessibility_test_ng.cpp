@@ -127,4 +127,23 @@ HWTEST_F(IndexerAccessibilityTestNg, PerformAction002, TestSize.Level1)
     EXPECT_EQ(pattern_->GetSelected(), 4);
     EXPECT_EQ(accessibilityProperty_->GetText(), "M");
 }
+
+/**
+ * @tc.name: GetCollectionItemCounts001
+ * @tc.desc: Indexer AccessibilityProperty GetCollectionItemCounts
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, GetCollectionItemCounts001, TestSize.Level1)
+{
+    RefPtr<IndexerAccessibilityProperty> indexerAccessibilityProperty =
+        AceType::MakeRefPtr<IndexerAccessibilityProperty>();
+    RefPtr<IndexerPattern> indexerPattern = AceType::MakeRefPtr<IndexerPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, indexerPattern);
+    RefPtr<IndexerLayoutProperty> layoutProperty = AceType::MakeRefPtr<IndexerLayoutProperty>();
+    layoutProperty->propActualArrayValue_ = std::nullopt;
+    frameNode->layoutProperty_ = layoutProperty;
+    indexerAccessibilityProperty->host_ = frameNode;
+    auto result = indexerAccessibilityProperty->GetCollectionItemCounts();
+    EXPECT_EQ(result, 0);
+}
 } // namespace OHOS::Ace::NG

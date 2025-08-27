@@ -59,16 +59,16 @@ namespace OHOS::Ace {
 class FontManager;
 }
 
-namespace OHOS::Ace::Platform {
-#ifdef ACE_ENABLE_VK
-namespace {
-class HighContrastObserver;
+namespace OHOS::AppExecFwk {
+class FormAshmem;
 }
-#endif
+namespace OHOS::Ace::Platform {
+class HighContrastObserver;
 
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using AbilityOnCalendarCallback = std::function<void(const std::map<std::string, std::string>& params)>;
 using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
 using SubSystemId = OHOS::Rosen::SubSystemId;
 using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
@@ -304,6 +304,9 @@ public:
 
     std::shared_ptr<Framework::JsValue> GetJsContext();
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue);
+    void TriggerModuleSerializer() override;
+    void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder);
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
     void SetOrientation(Orientation orientation) override
@@ -313,11 +316,10 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
-    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const override;
-    RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
-        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator) override;
-    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
-    Orientation GetRequestedOrientation() override;
+    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const;
+    RefPtr<PageViewportConfig> GetTargetViewportConfig(
+        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const;
 
     uint64_t GetDisplayId() const override
     {
@@ -353,6 +355,8 @@ public:
 
     bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
+    bool DumpExistDarkRes(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
@@ -364,6 +368,8 @@ public:
     void ForceFullGC() override;
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
+
+    void SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
     void CheckAndSetFontFamily() override;
 
@@ -385,6 +391,34 @@ public:
     {
         if (abilityOnQueryCallback_) {
             abilityOnQueryCallback_(queryWord);
+        }
+    }
+
+    void OnStartAbilityOnInstallAppInStore(const std::string& appName)
+    {
+        if (abilityOnInstallAppInStore_) {
+            abilityOnInstallAppInStore_(appName);
+        }
+    }
+
+    void OnStartAbilityOnJumpBrowser(const std::string& address)
+    {
+        if (abilityOnJumpBrowser_) {
+            abilityOnJumpBrowser_(address);
+        }
+    }
+
+    void OnOpenLinkOnMapSearch(const std::string& address)
+    {
+        if (linkOnMapSearch_) {
+            linkOnMapSearch_(address);
+        }
+    }
+
+    void OnStartAbilityOnCalendar(const std::map<std::string, std::string>& params)
+    {
+        if (abilityOnCalendar_) {
+            abilityOnCalendar_(params);
         }
     }
 
@@ -482,6 +516,26 @@ public:
         abilityOnQueryCallback_ = std::move(callback);
     }
 
+    void SetAbilityOnInstallAppInStore(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnInstallAppInStore_ = std::move(callback);
+    }
+
+    void SetAbilityOnJumpBrowser(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnJumpBrowser_ = std::move(callback);
+    }
+
+    void SetOpenLinkOnMapSearch(AbilityOnQueryCallback&& callback)
+    {
+        linkOnMapSearch_ = std::move(callback);
+    }
+
+    void SetAbilityOnCalendar(AbilityOnCalendarCallback&& callback)
+    {
+        abilityOnCalendar_ = std::move(callback);
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -570,15 +624,6 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender) override
-    {
-        isFormRender_ = isFormRender;
-    }
-
-    void SetAppRunningUniqueId(const std::string& uniqueId) override;
-
-    const std::string& GetAppRunningUniqueId() const override;
-
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -589,6 +634,8 @@ public:
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void CheckForceVsync(const ParsedConfig& parsedConfig);
+    void OnFrontUpdated(const ConfigurationChange& configurationChange, const std::string& configuration);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
@@ -620,7 +667,7 @@ public:
     }
 
     void SetToken(sptr<IRemoteObject>& token);
-    sptr<IRemoteObject> GetToken();
+    sptr<IRemoteObject> GetToken() override;
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
     uint32_t GetParentWindowType() const;
@@ -714,6 +761,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
+    void RequestAtomicServiceTerminate() override;
     bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
@@ -773,6 +821,7 @@ public:
     }
     void RenderLayoutBoundary(bool isDebugBoundary);
     void AddWatchSystemParameter();
+    void RemoveUISessionCallbacks();
     void RemoveWatchSystemParameter();
 
     const std::vector<std::string>& GetUieParams() const
@@ -790,18 +839,34 @@ public:
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
+    Rect GetGlobalScaledRect() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rect());
+        Rosen::Rect rect{};
+        uiWindow_->GetGlobalScaledRect(rect);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
     bool IsWaterfallWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->IsWaterfallModeEnabled();
     }
 
-    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    bool IsPcOrFreeMultiWindowCapability() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsPcOrFreeMultiWindowCapabilityEnabled();
+    }
+
+    Rect GetUIExtensionHostWindowRect() override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
-        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        auto hostWindowId = uiWindow_->GetRealParentId();
+        auto rect = uiWindow_->GetHostWindowRect(hostWindowId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
+    void UpdateColorMode(uint32_t colorMode) override;
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
@@ -824,6 +889,9 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
+    
+    // Get the available rect of the full screen.
+    Rect GetFoldExpandAvailableRect() const override;
 
     void GetExtensionConfig(AAFwk::WantParams& want);
 
@@ -846,6 +914,43 @@ public:
     void InitFoldStatusFromListener() override
     {
         foldStatusFromListener_ = GetCurrentFoldStatus();
+    }
+
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistentId);
+
+    void DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback);
+
+    UIContentErrorCode RunIntentPage();
+    void SetIsFormRender(bool isFormRender) override;
+
+    RefPtr<Frontend> GetSubFrontend() const override
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, nullptr);
+        std::lock_guard<std::mutex> lock(subFrontendMutex_);
+        return subFrontend_;
+    }
+
+    FrontendType GetFrontendType() const override
+    {
+        return type_;
+    }
+
+    bool IsArkTsFrontEnd() const override
+    {
+        return type_ == FrontendType::ARK_TS;
+    }
+
+    FrontendType GetSubFrontendType() const
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, type_);
+        if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+            return FrontendType::DECLARATIVE_JS;
+        } else {
+            return FrontendType::ARK_TS;
+        }
     }
 
 private:
@@ -884,17 +989,17 @@ private:
 
     void RegisterAvoidInfoCallback();
     void RegisterAvoidInfoDataProcessCallback();
-
-    void RegisterOrientationUpdateListener();
     void RegisterOrientationChangeListener();
-    void InitSystemBarConfig();
-    bool IsPcOrPadFreeMultiWindowMode() const override;
-    bool IsFullScreenWindow() const override
-    {
-        CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
-    }
-    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
+
+    static bool SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
+        std::optional<bool> enable, std::optional<bool> animation);
+
+    void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+
+    void UpdateSubContainerDensity(ResourceConfiguration& resConfig);
+
+    void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
+    void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -958,10 +1063,12 @@ private:
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
+    AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
+    AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
+    AbilityOnQueryCallback linkOnMapSearch_ = nullptr;
+    AbilityOnCalendarCallback abilityOnCalendar_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
-
-    std::string uniqueId_;
 
     // For custom drag event
     std::mutex pointerEventMutex_;
@@ -977,11 +1084,15 @@ private:
 
     SingleHandTransform singleHandTransform_;
 
-#ifdef ACE_ENABLE_VK
+    bool lastThemeHasSkin_ = false;
+
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
     std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
-#endif
+    // for multiple frontEnd
+    // valid only when type_ is STATIC_HYBRID_DYNAMIC or DYNAMIC_HYBRID_STATIC
+    RefPtr<Frontend> subFrontend_ = nullptr;
+    mutable std::mutex subFrontendMutex_;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_PROPERTY_H
 
 #include "core/common/container.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -42,9 +43,32 @@ struct GaugeShadowOptions {
         return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY &&
                isShadowVisible == rhs.isShadowVisible;
     }
+    using UpdateFunc = std::function<void(const RefPtr<ResourceObject>&, GaugeShadowOptions&)>;
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj, UpdateFunc&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        UpdateFunc updateFunc;
+    };
+
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 class GaugePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty);
 
 public:
     GaugePaintProperty() = default;
@@ -111,6 +135,7 @@ public:
         json->PutExtAttr("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str(), filter);
         json->PutExtAttr("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str(), filter);
         json->PutExtAttr("isSensitive", std::to_string(GetIsSensitive().value_or(false)).c_str(), filter);
+        json->PutExtAttr("privacySensitive", GetIsSensitive().value_or(false)? "true": "false", filter);
         if (propStrokeWidth_.has_value()) {
             json->PutExtAttr("strokeWidth", propStrokeWidth_.value().ToString().c_str(), filter);
         } else {
@@ -274,6 +299,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorChange, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSensitive, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseJsLinearGradient, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseSpecialDefaultIndicator, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColorsInit, std::vector<ColorStopArray>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColorModeInit, int, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

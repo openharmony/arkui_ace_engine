@@ -63,7 +63,7 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    void SetToolbarOptions(NavigationToolbarOptions&& opt);
+    void SetToolbarOptions(NavigationToolbarOptions& opt);
     void SetToolbarMoreButtonOptions(MoreButtonOptions&& opt);
 
     MoreButtonOptions GetToolbarMoreButtonOptions() const
@@ -81,6 +81,10 @@ public:
         dialogNode_ = dialogNode;
     }
 
+    NavigationToolbarOptions GetToolBarOptions() const
+    {
+        return options_;
+    }
 private:
     bool CustomizeExpandSafeArea() override;
     void OnModifyDone() override;

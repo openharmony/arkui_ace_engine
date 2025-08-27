@@ -42,7 +42,7 @@ public:
         : sheetType_(sheetType), sheetPopupInfo_(popupInfo) {}
     ~SheetPresentationLayoutAlgorithm() override = default;
 
-    void InitParameter();
+    void InitParameter(LayoutWrapper* layoutWrapper);
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -74,16 +74,20 @@ public:
     void UpdatePopupInfoAndRemeasure(LayoutWrapper* layoutWrapper, const SheetPopupInfo& sheetPopupInfo,
         const float& sheetWidth, const float& sheetHeight);
 
-    void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
+    float CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper, const float heightBefore) const;
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
 
     void LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutDragBar(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+
 private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;
     void ComputeCenterStyleOffset(LayoutWrapper* layoutWrapper);
+    void ComputeCenterOffsetForUECSubwindow(LayoutWrapper* layoutWrapper);
+    void ComputeCenterOffsetForNotUECSubwindow(LayoutWrapper* layoutWrapper);
     void ComputePopupStyleOffset(LayoutWrapper* layoutWrapper);
     void ComputeWidthAndHeight(LayoutWrapper* layoutWrapper);
     float ComputeMaxHeight(const float parentConstraintHeight, const float parentConstraintWidth,
@@ -93,12 +97,14 @@ private:
     bool SheetInSplitWindow() const;
     LayoutConstraintF CreateSheetChildConstraint(
         RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
-    void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight);
-    void UpdateTranslateOffsetWithPlacement(OffsetF& translate);
+    void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight, LayoutWrapper* layoutWrapper);
+    void UpdateTranslateOffsetWithPlacement(OffsetF& translate, LayoutWrapper* layoutWrapper);
     void AddArrowHeightToSheetSize();
     void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper);
     float GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const;
     void MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
+    void MeasureDragBar(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
 
     float sheetHeight_ = 0.0f;
@@ -111,6 +117,7 @@ private:
     SheetStyle sheetStyle_;
     bool isKeyBoardShow_ = false;
     bool isHoverMode_ = false;
+    bool isWaterfallWindowMode_ = false;
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     using DirectionCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;

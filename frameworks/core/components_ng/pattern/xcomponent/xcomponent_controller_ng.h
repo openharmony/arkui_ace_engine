@@ -64,6 +64,10 @@ public:
 
     bool GetSurfaceRotation() override;
 
+    RSCanvas* LockCanvas() override;
+
+    void UnlockCanvasAndPost(RSCanvas* canvas) override;
+
 private:
     WeakPtr<XComponentPattern> pattern_;
 };

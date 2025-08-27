@@ -252,6 +252,38 @@ void ContentController::FilterValueType(std::u16string& value)
     }
 }
 
+void ContentController::FilterValue(std::u16string& value)
+{
+    bool textChanged = false;
+    auto result = value;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    bool hasInputFilter = property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty();
+    if (!hasInputFilter) {
+        FilterTextInputStyle(textChanged, result);
+    } else {
+        textChanged |= FilterWithEvent(StringUtils::Str8ToStr16(property->GetInputFilter().value()), result);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            FilterTextInputStyle(textChanged, result);
+        }
+    }
+    if (textChanged) {
+        value = result;
+    }
+    auto maxLength =
+        property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
+    auto textWidth = static_cast<int32_t>(value.length());
+    if (GreatNotEqual(textWidth, maxLength)) {
+        // clamp emoji
+        value = TextEmojiProcessor::SubU16string(0, maxLength, value);
+    }
+}
+
 std::u16string ContentController::RemoveErrorTextFromValue(const std::u16string& value, const std::u16string& errorText)
 {
     std::u16string result;
@@ -368,9 +400,6 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         eventHub->FireOnInputFilterError(errorValue);
-        auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-        CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
-        textFieldAccessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(errorValue));
     }
     return !errorValue.empty();
 }

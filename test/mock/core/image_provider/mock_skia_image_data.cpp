@@ -14,7 +14,7 @@
  */
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 
 namespace OHOS::Ace::NG {
 

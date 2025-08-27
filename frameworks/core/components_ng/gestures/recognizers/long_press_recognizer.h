@@ -21,8 +21,10 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
@@ -139,33 +141,40 @@ private:
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction = false);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
+    void UpdateGestureEventInfo(std::shared_ptr<LongPressGestureEvent>& info);
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);
     RefPtr<DragEventActuator> GetDragEventActuator();
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+    void TriggerCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
+
+    int32_t duration_ = 500;
+    bool repeat_ = false;
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
 
     TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
-    CancelableCallback<void()> thumbnailTimer_;
     int32_t thumbnailDeadline = 150;
+    long long inputTime_ = 0;
+    TimeStamp time_;
+    bool useCatchMode_ = true;
+    Point globalPoint_;
+    int32_t longPressFingerCountForSequence_ = 0;
+    bool isOnActionTriggered_ = false;
+
+    CancelableCallback<void()> thumbnailTimer_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
     std::function<void(Offset)> callback_;
-    int32_t duration_ = 500;
-    bool repeat_ = false;
-    TimeStamp time_;
-    bool useCatchMode_ = true;
-    bool isForDrag_ = false;
-    bool isDisableMouseLeft_ = false;
-    Point globalPoint_;
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
-    bool hasRepeated_ = false;
-    int32_t longPressFingerCountForSequence_ = 0;
-    bool isOnActionTriggered_ = false;
+    int32_t lastAction_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

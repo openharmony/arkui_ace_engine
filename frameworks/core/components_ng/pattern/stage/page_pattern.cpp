@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 
@@ -134,6 +135,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
         AnimationOption option(effect->GetCurve(), effect->GetDuration());
         option.SetDelay(effect->GetDelay());
         option.SetOnFinishEvent(wrappedOnFinish);
+        option.SetAnimationInterface(AnimationInterface::PAGE_TRANSITION);
         currCustomAnimation_ = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
             auto pageNode = weakPage.Upgrade();
             CHECK_NULL_VOID(pageNode);
@@ -218,6 +220,9 @@ void PagePattern::OnAttachToMainTree()
 
 void PagePattern::OnDetachFromMainTree()
 {
+#if defined(ACE_STATIC)
+    FireOnNodeDisposeCallback();
+#endif
 #if defined(ENABLE_SPLIT_MODE)
     if (!needFireObserver_) {
         return;
@@ -236,8 +241,11 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
-void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
 {
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
     if (!isPageInTransition_) {
         return;
     }
@@ -519,18 +527,16 @@ void PagePattern::StopPageTransition()
 
 void PagePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("[%s][self:%d] SafeArea already applied to AppBar", host->GetTag().c_str(), host->GetId());
         return;
     }
     ContentRootPattern::BeforeCreateLayoutWrapper();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto&& insets = host->GetLayoutProperty()->GetSafeAreaInsets();
     CHECK_NULL_VOID(insets);
     auto manager = pipeline->GetSafeAreaManager();
@@ -539,7 +545,9 @@ void PagePattern::BeforeCreateLayoutWrapper()
 
 bool PagePattern::AvoidKeyboard() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
@@ -849,6 +857,10 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
@@ -960,6 +972,7 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     AnimationOption option;
     UpdateAnimationOption(transition, effect, option, type);
     option.SetOnFinishEvent(onFinish);
+    option.SetAnimationInterface(AnimationInterface::PAGE_TRANSITION);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipelineContext = hostNode->GetContext();
@@ -1046,4 +1059,58 @@ void PagePattern::NotifyNavigationLifecycle(bool isShow, bool isFromWindow)
     navigationManager->FireNavigationLifecycle(hostNode, static_cast<int32_t>(lifecycle),
         static_cast<int32_t>(activeReason));
 }
+
+WeakPtr<FocusHub> PagePattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto root = context->GetRootElement();
+    CHECK_NULL_RETURN(root, nullptr);
+    auto container = AceType::DynamicCast<FrameNode>(root->GetChildren().front());
+    CHECK_NULL_RETURN(container && container->GetTag() == V2::CONTAINER_MODAL_ETS_TAG, nullptr);
+    auto pattern = container->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    CHECK_NULL_RETURN(toolBarRow, nullptr);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
+
+    if (step == FocusStep::UP) {
+        return toolBarRowFocusHub->GetHeadOrTailChild(true);
+    } else if (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB) {
+        return toolBarRowFocusHub;
+    }
+    return nullptr;
+}
+
+ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
+{
+    auto focusAlgorithm = ScopeFocusAlgorithm(true, true, ScopeType::OTHERS);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, focusAlgorithm);
+    auto root = context->GetRootElement();
+    CHECK_NULL_RETURN(root, focusAlgorithm);
+    auto container = AceType::DynamicCast<FrameNode>(root->GetChildren().front());
+    CHECK_NULL_RETURN(container && container->GetTag() == V2::CONTAINER_MODAL_ETS_TAG, focusAlgorithm);
+    auto pattern = container->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_RETURN(pattern && pattern->GetIsHaveToolBar(), focusAlgorithm);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    CHECK_NULL_RETURN(toolBarRow, focusAlgorithm);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    CHECK_NULL_RETURN(toolBarRowFocusHub, focusAlgorithm);
+    CHECK_NULL_RETURN(toolBarRowFocusHub->GetHeadOrTailChild(true), focusAlgorithm);
+    focusAlgorithm.getNextFocusNode = [wp = WeakClaim(this)](FocusStep step, const WeakPtr<FocusHub>& currFocusNode,
+                                          WeakPtr<FocusHub>& nextFocusNode) -> bool {
+        auto page = wp.Upgrade();
+        CHECK_NULL_RETURN(page, false);
+        nextFocusNode = page->GetNextFocusNode(step, currFocusNode);
+        return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
+    };
+    return focusAlgorithm;
+}
+
 } // namespace OHOS::Ace::NG

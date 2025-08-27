@@ -43,7 +43,7 @@ public:
 
         RefPtr<MarqueeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MarqueeTheme> theme = AceType::Claim(new MarqueeTheme());
+            RefPtr<MarqueeTheme> theme = AceType::MakeRefPtr<MarqueeTheme>();
             if (!themeConstants) {
                 return theme;
             }

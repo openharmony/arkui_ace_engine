@@ -1,0 +1,135 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "types": [],
+        "plugins": [
+            {
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
+                "trace": false,
+                "only_unmemoize": true,
+                "unmemoizeDir": "./build/unmemoized"
+            }
+        ],
+        "outDir": "./build/junk",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": [
+                "../../incremental/common/src"
+            ],
+            "@koalaui/interop": [
+                "../../interop/src/interop"
+            ],
+            "@koalaui/runtime": [
+                "../../incremental/runtime/src"
+            ],
+            "@koalaui/compat": [
+                "../../incremental/compat/src"
+            ],
+            "@ohos/arkui": [
+                "arkui/component"
+            ],
+            "#components": [
+                "arkui/component/ts"
+            ],
+            "#external": [
+                "arkui/external/ts",
+            ],
+            "arkui.ani": [
+                "arkui/ani/ts"
+            ],
+            "@ohos/animator": [
+                "./@ohos.animator.ts"
+            ],
+            "@ohos/arkui/componentUtils": [
+                "./@ohos.arkui.componentUtils.ts"
+            ],
+            "@ohos/arkui/focusController": [
+                "./@ohos.arkui.focusController.ts"
+            ],
+            "@ohos/arkui/componentSnapshot": [
+                "./@ohos.arkui.componentSnapshot.ts"
+            ],
+            "@ohos/arkui/dragController": [
+                "./@ohos.arkui.dragController.ts"
+            ],
+            "@ohos/arkui/inspector": [
+                "./@ohos.arkui.inspector.ts"
+            ],
+            "@ohos/arkui/UIContext": [
+                "./@ohos.arkui.UIContext.ts"
+            ],
+            "@ohos/measure": [
+                "./@ohos.measure.ts"
+            ],
+            "@ohos/font": [
+                "./@ohos.font.ts"
+            ],
+            "@ohos.router": [
+                "./@ohos.router.ts"
+            ],
+            "@ohos/arkui/observer": [
+                "./@ohos.arkui.observer.ts"
+            ],
+            "@ohos/mediaquery": [
+                "./@ohos.mediaquery.ts"
+            ],
+            "@ohos/graphics/common2D": [
+                "./@ohos.graphics.common2D.ts"
+            ],
+            "@ohos/graphics/drawing": [
+                "./@ohos.graphics.drawing.ts"
+            ],
+            "@ohos/arkui/graphics": [
+                "./@ohos.arkui.graphics.ts"
+            ],
+            "@ohos/overlayManager": [
+                "./@ohos.overlayManager.ts"
+            ],
+            "@ohos/promptAction": [
+                "./@ohos.promptAction.ts"
+            ],
+            "#stateMgmtTool": [
+                "arkui/stateManagement/tools/ts"
+            ]
+        },
+        "rootDir": "."
+    },
+    "include": [
+        "arkui/**/*.ts",
+        "./@ohos.measure.ts",
+        "./@ohos.font.ts",
+        "./@ohos.arkui.UIContext.ts",
+        "./@ohos.animator.ts",
+        "./@ohos.arkui.componentUtils.ts",
+        "./@ohos.arkui.focusController.ts",
+        "./@ohos.arkui.componentSnapshot.ts",
+        "./@ohos.arkui.dragController.ts",
+        "./@ohos.arkui.inspector.ts",
+        "./global/**/*.ts",
+        "./@ohos.router.ts",
+        "./@ohos.arkui.observer.ts",
+        "./@ohos.mediaquery.ts",
+        "./@ohos.graphics.common2D.ts",
+        "./@ohos.graphics.drawing.ts",
+        "./@ohos.arkui.graphics.ts",
+        "./@ohos.overlayManager.ts",
+        "./@ohos.promptAction.ts"
+    ],
+    "exclude": [
+        "arkui/component/arkts",
+        "arkui/component/arkts/ArkUIGeneratedNativeModule.ts",
+        "arkui/component/test_utils.ts",
+        "arkui/component/main.ts",
+        "arkui/external/arkts",
+        "arkui/ani/arkts",
+        "arkui/stateManagement/tools/arkts"
+    ],
+    "files": [
+        "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
+    ],
+    "references": [
+        {
+            "path": "../../interop"
+        }
+    ]
+}

@@ -22,5 +22,10 @@ build_component("qrcode") {
   ]
 
   rosen_sources = [ "rosen_render_qrcode.cpp" ]
-  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+
+  if (is_arkui_x) {
+    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+  } else {
+    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+  }
 }

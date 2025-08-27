@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "ui/base/ace_type.h"
 #include "base/utils/device_type.h"
 
 namespace OHOS::Ace {
@@ -29,18 +30,13 @@ enum class DeviceOrientation : int32_t {
     ORIENTATION_UNDEFINED,
 };
 
-enum class ColorMode : int32_t {
-    LIGHT = 0,
-    DARK,
-    COLOR_MODE_UNDEFINED,
-};
-
 struct DeviceConfig {
     DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
     double density { 1.0 };
     DeviceType deviceType { DeviceType::PHONE };
     double fontRatio { 1.0 };
     ColorMode colorMode { ColorMode::LIGHT };
+    const static DeviceType realDeviceType;
 };
 
 struct DeviceResourceInfo {

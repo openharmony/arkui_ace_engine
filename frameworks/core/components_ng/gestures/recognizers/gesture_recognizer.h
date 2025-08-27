@@ -27,6 +27,8 @@
 #include "frameworks/base/geometry/ng/point_t.h"
 
 namespace OHOS::Ace::NG {
+enum class GestureListenerType;
+enum class GestureActionPhase;
 
 struct DelayedTask {
     WeakPtr<NGGestureRecognizer> recognizer;
@@ -51,11 +53,14 @@ inline std::string TransRefereeState(RefereeState state)
 class FrameNode;
 
 class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
+    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget);
 
 public:
     // IsRealTime is true when using real-time layouts.
     static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
+        bool isPostEventResult = false, int32_t postEventNodeId = -1);
+
+    static std::vector<Matrix4> GetTransformMatrix(const WeakPtr<FrameNode>& node, bool isRealTime = false,
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
@@ -88,6 +93,7 @@ public:
     // Called when request of handling gesture sequence is pending by gesture referee.
     virtual void OnPending()
     {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::PENDING;
     }
 
@@ -95,9 +101,11 @@ public:
     virtual void OnBlocked()
     {
         if (disposal_ == GestureDisposal::ACCEPT) {
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::SUCCEED_BLOCKED;
         }
         if (disposal_ == GestureDisposal::PENDING) {
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::PENDING_BLOCKED;
         }
     }
@@ -185,6 +193,11 @@ public:
         onActionStart_ = std::make_unique<GestureEventFunc>(onActionStart);
     }
 
+    void SetOnActionExtUpdate(const GestureEventFunc& onActionExtUpdate)
+    {
+        onActionExtUpdate_ = std::make_unique<GestureEventFunc>(onActionExtUpdate);
+    }
+
     void SetOnActionUpdate(const GestureEventFunc& onActionUpdate)
     {
         onActionUpdate_ = std::make_unique<GestureEventFunc>(onActionUpdate);
@@ -239,6 +252,7 @@ public:
         if (isBlocked && refereeState_ == RefereeState::SUCCEED) {
             OnSucceedCancel();
         }
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         currentFingers_ = 0;
@@ -252,6 +266,7 @@ public:
     // called to reset status manually without rejected callback.
     void ResetStatus()
     {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         OnResetStatus();
         SetBridgeMode(false);
@@ -260,6 +275,8 @@ public:
         enabled_ = true;
     }
     virtual bool CheckTouchId(int32_t touchId) = 0;
+
+    virtual std::map<int32_t, TouchEvent> GetTouchPoints() = 0;
 
     SourceType getDeviceType()
     {
@@ -274,6 +291,37 @@ public:
     void AddGestureProcedure(const std::string& procedure) const;
     // for recognizer group
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
+    void AddGestureProcedure(const AxisEvent& event, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
+    bool IsSystemGesture() const
+    {
+        if (!gestureInfo_) {
+            return false;
+        }
+        return gestureInfo_->IsSystemGesture();
+    }
+
+    GestureTypeName GetRecognizerType() const
+    {
+        if (!gestureInfo_) {
+            return GestureTypeName::UNKNOWN;
+        }
+        return gestureInfo_->GetRecognizerType();
+    }
+
+    void SetRecognizerType(GestureTypeName trueType)
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        gestureInfo_->SetRecognizerType(trueType);
+    }
+
+    virtual void ForceCleanRecognizer() {};
+
+    virtual void ForceCleanRecognizerWithGroup() {
+        ForceCleanRecognizer();
+    };
 
     void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
     {
@@ -307,31 +355,6 @@ public:
         }
     }
 
-    bool IsSystemGesture() const
-    {
-        if (!gestureInfo_) {
-            return false;
-        }
-        return gestureInfo_->IsSystemGesture();
-    }
-
-    GestureTypeName GetRecognizerType() const
-    {
-        if (!gestureInfo_) {
-            return GestureTypeName::UNKNOWN;
-        }
-        return gestureInfo_->GetRecognizerType();
-    }
-
-    void SetRecognizerType(GestureTypeName trueType)
-    {
-        if (!gestureInfo_) {
-            gestureInfo_ = MakeRefPtr<GestureInfo>();
-        }
-        gestureInfo_->SetRecognizerType(trueType);
-    }
-
-    virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(const TouchEvent& event);
@@ -346,6 +369,11 @@ public:
         if (gestureInfo_) {
             gestureInfo_->SetUserData(userData);
         }
+    }
+
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
     }
 
     void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
@@ -399,13 +427,8 @@ public:
 
     bool IsInResponseLinkRecognizers();
 
-    virtual bool IsReady()
-    {
-        return refereeState_ == RefereeState::READY;
-    }
-
     bool IsAllowedType(SourceTool type);
-    
+
     std::string GetExtraInfo() const
     {
         return extraInfo_;
@@ -421,6 +444,14 @@ public:
 
     void CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event);
 
+    void TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
+        bool isPostEventResult = false, int32_t postEventNodeId = -1);
+
+    void SetPreventBegin(bool preventBegin);
+
+    std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
+
+    void ResetResponseLinkRecognizer();
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -436,6 +467,7 @@ protected:
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
+    virtual void HandleReports(const GestureEvent& info, GestureCallbackType type) {};
     virtual void HandleTouchDownEvent(const AxisEvent& event) {}
     virtual void HandleTouchUpEvent(const AxisEvent& event) {}
     virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
@@ -446,6 +478,8 @@ protected:
     virtual void OnSucceedCancel() {}
     virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
+    bool IsPreventBegin() const;
+    bool CheckoutDownFingers(int32_t fingerId) const;
 
     void HandleWillAccept();
     void HandleDidAccept();
@@ -455,8 +489,15 @@ protected:
     void HandleTouchDown(const TouchEvent& point);
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
+    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType);
+    virtual bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
+    {
+        return false;
+    }
 
     RefereeState refereeState_ = RefereeState::READY;
+
+    RefereeState lastRefereeState_ = RefereeState::READY;
 
     GestureDisposal disposal_ = GestureDisposal::NONE;
 
@@ -471,6 +512,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onAction_;
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
+    std::unique_ptr<GestureEventFunc> onActionExtUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected
@@ -496,9 +538,12 @@ protected:
     // raised.
     bool isNeedResetVoluntarily_ = false;
     bool isNeedResetRecognizerState_ = false;
+    std::vector<Matrix4> localMatrix_ = {};
+    bool preventBegin_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
+    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureListenerType listenerType) const;
 };
 
 } // namespace OHOS::Ace::NG

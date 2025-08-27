@@ -43,7 +43,7 @@ public:
 
         RefPtr<RatingTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<RatingTheme> theme = AceType::Claim(new RatingTheme());
+            RefPtr<RatingTheme> theme = AceType::MakeRefPtr<RatingTheme>();
             if (!themeConstants) {
                 return theme;
             }

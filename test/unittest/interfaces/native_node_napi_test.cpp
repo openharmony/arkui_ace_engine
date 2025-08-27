@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "gtest/gtest.h"
+#include "napi/napi_runtime.cpp"
 #include "native_interface.h"
 #include "native_node_napi.h"
 #include "native_type.h"
 #include "node_model.h"
+#include "node_model_safely.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -145,6 +148,19 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest009, TestSize.Level1)
     void* object = OH_ArkUI_QueryModuleInterfaceByName(
         static_cast<ArkUI_NativeAPIVariantKind>(ARKUI_NATIVE_GESTURE + 1), "");
     EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest010
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest010, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "");
+    EXPECT_EQ(object, nullptr);
+    object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1");
+    EXPECT_NE(object, nullptr);
 }
 
 /**
@@ -291,6 +307,232 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitModuleForArkTSEnvAPITest001
+ * @tc.desc: Test OH_ArkUI_InitModuleForArkTSEnv function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, InitModuleForArkTSEnvAPITest001, TestSize.Level1)
+{
+    NativeEngineMock engine;
+
+    /**
+     * @tc.steps: step1. Call OH_ArkUI_InitModuleForArkTSEnv with a null environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    auto ret = OH_ArkUI_InitModuleForArkTSEnv(nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2. Call OH_ArkUI_InitModuleForArkTSEnv with a valid environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step3. Call OH_ArkUI_InitModuleForArkTSEnv again with the same environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Call OH_ArkUI_NotifyArkTSEnvDestroy.
+     */
+    OH_ArkUI_NotifyArkTSEnvDestroy(napi_env(engine));
+    OH_ArkUI_NotifyArkTSEnvDestroy(nullptr);
+}
+
+/**
+ * @tc.name: WhiteListInCustomEnvTest001
+ * @tc.desc: In custom env, white list check.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, WhiteListInCustomEnvTest001, TestSize.Level1)
+{
+    std::unordered_set<std::string> supportedTargetsInCustomEnvTest = {
+        "Flex",
+        "TextController",
+        "Text",
+        "Animator",
+        "SpringProp",
+        "SpringMotion",
+        "ScrollMotion",
+        "Span",
+        "NativeCustomSpan",
+        "SpanString",
+        "MutableSpanString",
+        "TextStyle",
+        "DecorationStyle",
+        "BaselineOffsetStyle",
+        "LetterSpacingStyle",
+        "UrlStyle",
+        "NativeGestureStyle",
+        "TextShadowSpan",
+        "BackgroundColorStyle",
+        "ImageAttachment",
+        "ParagraphStyleSpan",
+        "LineHeightSpan",
+        "TextLayout",
+        "Button",
+        "Canvas",
+        "LazyForEach",
+        "LazyVGridLayout",
+        "List",
+        "ListItem",
+        "ListItemGroup",
+        "LoadingProgress",
+        "Image",
+        "ImageAnimator",
+        "Counter",
+        "Progress",
+        "Column",
+        "Row",
+        "Grid",
+        "GridItem",
+        "GridContainer",
+        "Slider",
+        "Stack",
+        "ForEach",
+        "Divider",
+        "Swiper",
+        "Indicator",
+        "Panel",
+        "RepeatNative",
+        "RepeatVirtualScrollNative",
+        "RepeatVirtualScroll2Native",
+        "NativeNavPathStack",
+        "If",
+        "Scroll",
+        "ScrollBar",
+        "GridRow",
+        "GridCol",
+        "Stepper",
+        "StepperItem",
+        "Toggle",
+        "ToolBarItem",
+        "Blank",
+        "Calendar",
+        "Rect",
+        "Shape",
+        "Path",
+        "Circle",
+        "Line",
+        "Polygon",
+        "Polyline",
+        "Ellipse",
+        "Tabs",
+        "TabContent",
+        "TextPicker",
+        "TimePicker",
+        "DatePicker",
+        "PageTransitionEnter",
+        "PageTransitionExit",
+        "RowSplit",
+        "ColumnSplit",
+        "AlphabetIndexer",
+        "Hyperlink",
+        "Radio",
+        "ActionSheet",
+        "AlertDialog",
+        "ContextMenu",
+        "Particle",
+        "__KeyboardAvoid__",
+        "TextMenu",
+        "TextArea",
+        "TextInput",
+        "TextClock",
+        "SideBarContainer",
+        "DataPanel",
+        "Badge",
+        "Gauge",
+        "Marquee",
+        "Menu",
+        "MenuItem",
+        "MenuItemGroup",
+        "Gesture",
+        "TapGesture",
+        "LongPressGesture",
+        "PanGesture",
+        "SwipeGesture",
+        "PinchGesture",
+        "RotationGesture",
+        "GestureGroup",
+        "PanGestureOption",
+        "PanGestureOptions",
+        "NativeCustomDialogController",
+        "Scroller",
+        "ListScroller",
+        "SwiperController",
+        "IndicatorController",
+        "TabsController",
+        "CalendarController",
+        "CanvasRenderingContext2D",
+        "OffscreenCanvasRenderingContext2D",
+        "CanvasGradient",
+        "ImageData",
+        "Path2D",
+        "RenderingContextSettings",
+        "Matrix2D",
+        "CanvasPattern",
+        "DrawingRenderingContext",
+        "Search",
+        "Select",
+        "SearchController",
+        "TextClockController",
+        "Sheet",
+        "JSClipboard",
+        "PatternLock",
+        "PatternLockController",
+        "TextTimer",
+        "TextAreaController",
+        "TextInputController",
+        "TextTimerController",
+        "Checkbox",
+        "CheckboxGroup",
+        "Refresh",
+        "WaterFlow",
+        "FlowItem",
+        "RelativeContainer",
+        "__Common__",
+        "__Recycle__",
+        "LinearGradient",
+        "ImageSpan",
+        "RichEditor",
+        "RichEditorController",
+        "RichEditorStyledStringController",
+        "LayoutManager",
+        "NodeContainer",
+        "__JSBaseNode__",
+        "SymbolGlyph",
+        "SymbolSpan",
+        "ContainerSpan",
+        "__RectShape__",
+        "__CircleShape__",
+        "__EllipseShape__",
+        "__PathShape__",
+        "ContentSlot",
+        "ArkUINativeNodeContent",
+        "GestureRecognizer",
+        "EventTargetInfo",
+        "ScrollableTargetInfo",
+        "PanRecognizer",
+        "LinearIndicator",
+        "LinearIndicatorController",
+        "TapRecognizer",
+        "LongPressRecognizer",
+        "SwipeRecognizer",
+        "PinchRecognizer",
+        "RotationRecognizer",
+        "TouchRecognizer",
+    };
+    for (const auto& target : supportedTargetsInCustomEnvTest) {
+        EXPECT_NE(OHOS::Ace::Framework::supportedTargetsInCustomEnv.find(target),
+            OHOS::Ace::Framework::supportedTargetsInCustomEnv.end());
+    }
+}
+
+/**
  * @tc.name: PostFrameCallbackAPITest001
  * @tc.desc: Test OH_ArkUI_PostFrameCallback function.
  * @tc.type: FUNC
@@ -328,3 +570,52 @@ HWTEST_F(NativeNodeNapiTest, PostFrameCallbackAPITest003, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
 }
 
+/**
+ * @tc.name: GreatOrEqualTargetAPIVersion001
+ * @tc.desc: Test GreatOrEqualTargetAPIVersion function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, GreatOrEqualTargetAPIVersion001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto ret = OHOS::Ace::AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(
+        OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    auto ret1 = OHOS::Ace::NodeModel::GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    EXPECT_EQ(ret, ret1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostAsyncUITaskAPITest001
+ * @tc.desc: Test OH_ArkUI_PostAsyncUITask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostAsyncUITaskAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostAsyncUITask(uiContext, nullptr, [](void* asyncUITaskData){}, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostUITaskAPITest001
+ * @tc.desc: Test OH_ArkUI_PostUITask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostUITask(uiContext, nullptr, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostUITaskAndWaitAPITest001
+ * @tc.desc: Test OH_ArkUI_PostUITaskAndWait function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAndWaitAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostUITaskAndWait(uiContext, nullptr, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}

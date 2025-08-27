@@ -22,6 +22,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
@@ -55,11 +56,13 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) = 0;
+    virtual void SetAutoScale(bool autoScale) {}
     virtual void SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node) = 0;
-    virtual void SetAutoScale(bool autoScale) {}
+    virtual void ParseResObjStartArea(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjEndArea(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

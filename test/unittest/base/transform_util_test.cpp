@@ -357,4 +357,70 @@ HWTEST_F(TransformUtilTest, TransformUtilTest012, TestSize.Level1)
     TransformUtil::DecomposeTransform(out, transform2);
     EXPECT_EQ(out.scale[0] == 0.0f, true);
 }
+
+/**
+ * @tc.name: TransformUtilTest013
+ * @tc.desc: Test the functions of the DecomposeTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, TransformUtilTest013, TestSize.Level1)
+{
+    // Normalize is false
+    DecomposedTransform out;
+    float INDEX_0_004 = 0.004f;
+    float INDEX_0_008 = 0.008f;
+    float INDEX_0_7071 = 0.7071;
+    Matrix4 transform(0, INDEX_0_004, 0, 0, -INDEX_0_004, -INDEX_0_004, 0, -INDEX_0_008, 0, 0, 1, 0, 0, 0, 0, 1);
+    TransformUtil::DecomposeTransform(out, transform);
+    EXPECT_EQ(out.skew[0], 1);
+    EXPECT_EQ(out.skew[1], 0);
+    EXPECT_EQ(out.skew[2], 0);
+    EXPECT_EQ(out.scale[0], INDEX_0_004);
+    EXPECT_EQ(out.scale[1], INDEX_0_004);
+    EXPECT_EQ(out.scale[2], 1);
+    EXPECT_EQ(out.quaternion.GetX(), 0);
+    EXPECT_EQ(out.quaternion.GetY(), 0);
+    EXPECT_TRUE(NearEqual(out.quaternion.GetZ(), -INDEX_0_7071));
+    EXPECT_TRUE(NearEqual(out.quaternion.GetW(), INDEX_0_7071));
+    EXPECT_EQ(out.translate[0], 0);
+    EXPECT_EQ(out.translate[1], -INDEX_0_008);
+    EXPECT_EQ(out.translate[2], 0);
+    EXPECT_EQ(out.perspective[0], 0);
+    EXPECT_EQ(out.perspective[1], 0);
+    EXPECT_EQ(out.perspective[2], 0);
+    EXPECT_EQ(out.perspective[3], 1);
+}
+
+/**
+ * @tc.name: Invert001
+ * @tc.desc: Test function: Invert
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, Invert001, TestSize.Level1)
+{
+    float INDEX_0_004 = 0.004f;
+    float INDEX_0_008 = 0.008f;
+    float INDEX_250 = 250.0f;
+    Matrix4 matrix =
+        Matrix4::Invert({ 0, INDEX_0_004, 0, 0, -INDEX_0_004, -INDEX_0_004, 0, -INDEX_0_008, 0, 0, 1, 0, 0, 0, 0, 1 });
+    EXPECT_TRUE(NearEqual(matrix.Get(0, 0), -INDEX_250));
+    EXPECT_TRUE(NearEqual(matrix.Get(0, 1), -INDEX_250));
+    EXPECT_EQ(matrix.Get(0, 2), 0);
+    EXPECT_EQ(matrix.Get(0, 3), -2);
+    EXPECT_TRUE(NearEqual(matrix.Get(1, 0), INDEX_250));
+    EXPECT_EQ(matrix.Get(1, 1), 0);
+    EXPECT_EQ(matrix.Get(1, 2), 0);
+    EXPECT_EQ(matrix.Get(1, 3), 0);
+    EXPECT_EQ(matrix.Get(2, 0), 0);
+    EXPECT_EQ(matrix.Get(2, 1), 0);
+    EXPECT_EQ(matrix.Get(2, 2), 1);
+    EXPECT_EQ(matrix.Get(2, 3), 0);
+    EXPECT_EQ(matrix.Get(3, 0), 0);
+    EXPECT_EQ(matrix.Get(3, 1), 0);
+    EXPECT_EQ(matrix.Get(3, 2), 0);
+    EXPECT_EQ(matrix.Get(3, 3), 1);
+
+    matrix = Matrix4::Invert({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+    EXPECT_EQ(matrix.Get(0, 0), Matrix4::CreateIdentity().Get(0, 0));
+}
 } // namespace OHOS::Ace

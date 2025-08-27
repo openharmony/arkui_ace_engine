@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 class NodeContainerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NodeContainerEventHub, EventHub)
+    DECLARE_ACE_TYPE(NodeContainerEventHub, EventHub);
 public:
     void SetControllerAboutToAppear(std::function<void()>&& onAppearCallback)
     {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <shared_mutex>
-#include "core/components_ng/image_provider/adapter/image_decoder.h"
+#include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +27,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage(
 }
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
-    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig)
+    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig, ImageErrorInfo& errorInfo)
 {
     return MakeRefPtr<PixelMapImage>(nullptr);
 }

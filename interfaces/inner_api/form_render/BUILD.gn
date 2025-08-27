@@ -59,20 +59,20 @@ ohos_shared_library("ace_form_render") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
-
-  if (ohos_indep_compiler_enable) {
-    external_deps += [ "graphic_2d:librender_service_base" ]
-  }
 
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]

@@ -26,15 +26,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.setFontColor(node, this.value);
       }
     }
-    
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        let ret: boolean = !isResourceEqual(this.stageValue, this.value);
-        return ret;
-      } else {
-        return true;
-      }
-    }
   }
     
   class SymbolFontSizeModifier extends ModifierWithKey<number | string | Resource> {
@@ -47,14 +38,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.resetFontSize(node);
       } else {
         getUINativeModule().symbolGlyph.setFontSize(node, this.value);
-      }
-    }
-  
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
       }
     }
   }
@@ -71,14 +54,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
       }
     }
-  
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
-      }
-    }
   }
     
   class RenderingStrategyModifier extends ModifierWithKey<SymbolRenderingStrategy> {
@@ -93,14 +68,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.setRenderingStrategy(node, this.value);
       }
     }
-  
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
-      }
-    }
   }
   
   class EffectStrategyModifier extends ModifierWithKey<SymbolEffectStrategy> {
@@ -113,14 +80,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.resetEffectStrategy(node);
       } else {
         getUINativeModule().symbolGlyph.setEffectStrategy(node, this.value);
-      }
-    }
-  
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
       }
     }
   }
@@ -139,6 +98,34 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
+  class SymbolShadowModifier extends ModifierWithKey<Optional<ShadowOptions>> {
+    constructor(value: Optional<ShadowOptions>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphSymbolShadow');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
+      }
+    }
+  }
+
+  class ShaderStyleModifier extends ModifierWithKey<Array<ShaderStyle | undefined> | ShaderStyle> {
+    constructor(value: Array<ShaderStyle | undefined> | ShaderStyle) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphShaderStyle');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetShaderStyle(node);
+      } else {
+        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
+      }
+    }
+  }
+
   class SymbolMinFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
     constructor(value: Optional<number | Resource>) {
       super(value);
@@ -149,14 +136,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.resetMinFontScale(node);
       } else {
         getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
-      }
-    }
-
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
       }
     }
   }
@@ -171,14 +150,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
         getUINativeModule().symbolGlyph.resetMaxFontScale(node);
       } else {
         getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
-      }
-    }
-
-    checkObjectDiff(): boolean {
-      if (isResource(this.stageValue) && isResource(this.value)) {
-        return !isResourceEqual(this.stageValue, this.value);
-      } else {
-        return true;
       }
     }
   }
@@ -241,6 +212,14 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
       symbolEffect.action = action;
       modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
       return this;
+    }
+    symbolShadow(value: SymbolShadow): SymbolGlyphAttribute {
+        modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
+        return this;
+    }
+    shaderStyle(value: ShaderStyle): SymbolGlyphAttribute {
+        modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
+        return this;
     }
   }
     

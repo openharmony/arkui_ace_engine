@@ -44,11 +44,12 @@ std::string JSColumn::inspectorTag_ = "";
 void JSColumn::Create(const JSCallbackInfo& info)
 {
     std::optional<CalcDimension> space;
+    RefPtr<ResourceObject> spaceResObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
         CalcDimension value;
-        if (ParseJsDimensionVp(spaceVal, value)) {
+        if (ParseJsDimensionVp(spaceVal, value, spaceResObj)) {
             space = value.IsValid() ? value : Dimension();
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             space = Dimension();
@@ -63,7 +64,11 @@ void JSColumn::Create(const JSCallbackInfo& info)
             declaration = JSRef<JSObject>::Cast(useAlign)->Unwrap<HorizontalAlignDeclaration>();
         }
     }
-    ColumnModel::GetInstance()->Create(space, declaration, inspectorTag_);
+    if (SystemProperties::ConfigChangePerform() && spaceResObj) {
+        ColumnModel::GetInstance()->Create(spaceResObj, declaration, inspectorTag_);
+    } else {
+        ColumnModel::GetInstance()->Create(space, declaration, inspectorTag_);
+    }
 }
 
 void JSColumn::CreateWithWrap(const JSCallbackInfo& info)

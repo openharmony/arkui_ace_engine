@@ -32,7 +32,6 @@ class ImageAnalyzerManager;
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
-class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
@@ -44,6 +43,16 @@ public:
 
     void SetOnContext2DAttach(std::function<void()>&& callback);
     void SetOnContext2DDetach(std::function<void()>&& callback);
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
 
     int32_t GetId() const
     {
@@ -107,6 +116,7 @@ public:
     void Arc(const ArcParam& param);
     void ArcTo(const ArcToParam& param);
     void AddRect(const Rect& rect);
+    void AddRoundRect(const Rect& rect, const std::vector<double>& radii);
     void Ellipse(const EllipseParam& param);
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
@@ -191,7 +201,7 @@ public:
     void Reset();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -221,6 +231,7 @@ private:
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;
+    int32_t id_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

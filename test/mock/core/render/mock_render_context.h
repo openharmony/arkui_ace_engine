@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
+    DECLARE_ACE_TYPE(MockRenderContext, RenderContext);
 public:
     ~MockRenderContext() override = default;
 
@@ -41,7 +41,11 @@ public:
     MOCK_METHOD1(SetSecurityLayer, void(bool));
     MOCK_METHOD1(SetHDRBrightness, void(float));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
+    MOCK_METHOD0(ResetContentClip, void());
     MOCK_METHOD1(SetTransparentLayer, void(bool));
+    MOCK_METHOD1(SetClipToBounds, void(bool));
+    MOCK_METHOD1(RemoveOverlayModifier, void(const RefPtr<OverlayModifier>&));
+    MOCK_METHOD0(UpdateCustomBackground, void());
 
     void SetVisible(bool visible) override
     {
@@ -141,6 +145,16 @@ public:
         actualForegroundColor_ = value;
     }
 
+    size_t GetAnimationsCount() const override
+    {
+        return animationsCount_;
+    }
+
+    void SetAnimationsCount(size_t count)
+    {
+        animationsCount_ = count;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -150,6 +164,9 @@ public:
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
+
+private:
+    size_t animationsCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

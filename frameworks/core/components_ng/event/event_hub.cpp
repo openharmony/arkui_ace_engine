@@ -26,13 +26,14 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
 
 void EventHub::OnAttachContext(PipelineContext *context)
 {
+    CHECK_NULL_VOID(context);
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
     if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
         context->AddOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         context->AddVisibleAreaChangeNode(host->GetId());
     }
 }
@@ -45,7 +46,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
         context->RemoveOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
@@ -77,12 +78,14 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
-void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
+void EventHub::AddSupportedUIStateWithCallback(
+    UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
+    AddPressedListener();
 }
 
 void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
@@ -173,13 +176,18 @@ void EventHub::FireEnabledTask()
     }
 }
 
+void EventHub::AddPressedListener()
+{
+    if (stateStyleMgr_ && stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
+        GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
+    }
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
         // focused style is managered in focus event hub.
-        if (stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
-            GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
-        }
+        AddPressedListener();
         if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);
@@ -355,46 +363,6 @@ void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
     onAreaChangedInnerCallbacks_.erase(id);
 }
 
-void EventHub::ClearCustomerOnDragFunc()
-{
-    onDragStart_ = nullptr;
-    customerOnDragEnter_ = nullptr;
-    customerOnDragLeave_ = nullptr;
-    customerOnDragMove_ = nullptr;
-    customerOnDrop_ = nullptr;
-    customerOnDragEnd_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragStart()
-{
-    onDragStart_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragEnter()
-{
-    customerOnDragEnter_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragMove()
-{
-    customerOnDragMove_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragLeave()
-{
-    customerOnDragLeave_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDrop()
-{
-    customerOnDrop_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragEnd()
-{
-    customerOnDragEnd_ = nullptr;
-}
-
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);
@@ -409,7 +377,7 @@ void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
     }
 }
 
-void EventHub::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
+void EventHub::SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
 {
     onJsFrameNodeSizeChanged_ = std::move(onSizeChanged);
 }
@@ -448,7 +416,53 @@ void EventHub::ClearOnAreaChangedInnerCallbacks()
     onAreaChangedInnerCallbacks_.clear();
 }
 
-void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)
+void EventHub::ClearCustomerOnDragFunc()
+{
+    onDragStart_ = nullptr;
+    customerOnDragEnter_ = nullptr;
+    customerOnDragSpringLoading_ = nullptr;
+    customerOnDragLeave_ = nullptr;
+    customerOnDragMove_ = nullptr;
+    customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragSpringLoading()
+{
+    customerOnDragSpringLoading_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::SetFrameNodeCommonOnAppear(std::function<void()>&& onAppear)
 {
     onJSFrameNodeAppear_ = std::move(onAppear);
 }
@@ -460,7 +474,7 @@ void EventHub::ClearJSFrameNodeOnAppear()
     }
 }
 
-void EventHub::SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear)
+void EventHub::SetFrameNodeCommonOnDisappear(std::function<void()>&& onDisappear)
 {
     onJSFrameNodeDisappear_ = std::move(onDisappear);
 }
@@ -817,6 +831,16 @@ void EventHub::SetOnDragEnter(OnDragFunc&& onDragEnter)
     onDragEnter_ = std::move(onDragEnter);
 }
 
+void EventHub::SetCustomerOnDragSpringLoading(OnDragDropSpringLoadingFunc&& onDragSpringLoading)
+{
+    customerOnDragSpringLoading_ = std::move(onDragSpringLoading);
+}
+
+const OnDragDropSpringLoadingFunc& EventHub::GetCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_;
+}
+
 void EventHub::SetOnDragLeave(OnDragFunc&& onDragLeave)
 {
     onDragLeave_ = std::move(onDragLeave);
@@ -885,6 +909,11 @@ bool EventHub::HasCustomerOnDragEnd() const
 bool EventHub::HasCustomerOnDrop() const
 {
     return customerOnDrop_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragSpringLoading() const
+{
+    return customerOnDragSpringLoading_ != nullptr;
 }
 
 void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)
@@ -961,7 +990,7 @@ bool EventHub::HasStateStyle(UIState state) const
 void EventHub::SetKeyboardShortcut(
     const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
 {
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SetKeyboardShortcut value = %{public}s, keys = %{public}d", value.c_str(), keys);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetKeyboardShortcut value = %{public}s, keys = %{public}d", value.c_str(), keys);
     KeyboardShortcut keyboardShortcut;
     for (auto&& ch : value) {
         keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
@@ -1066,6 +1095,11 @@ bool EventHub::HasVisibleAreaCallback(bool isUser)
     }
 }
 
+bool EventHub::HasThrottledVisibleAreaCallback() const
+{
+    return static_cast<bool>(throttledVisibleAreaCallback_.callback);
+}
+
 void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
     const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
     const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow)
@@ -1108,35 +1142,37 @@ void EventHub::FireUntriggeredInnerOnAreaChanged(
 
 void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
 {
-    if (ndkDrawCompletedCallback_) {
-        if (!pipeline) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
-            return;
-        }
-        auto executor = pipeline->GetTaskExecutor();
-        if (!executor) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
-            return;
-        }
-        auto cb = ndkDrawCompletedCallback_;
-        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    if (!ndkDrawCompletedCallback_) {
+        return;
     }
+    if (pipeline == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
+        return;
+    }
+    auto executor = pipeline->GetTaskExecutor();
+    if (executor == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
+        return;
+    }
+    auto cb = ndkDrawCompletedCallback_;
+    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
 }
 
-void EventHub::FireLayoutNDKCallback(PipelineContext* pipeline)
+void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
 {
-    if (ndkLayoutCallback_) {
-        if (!pipeline) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
-            return;
-        }
-        auto executor = pipeline->GetTaskExecutor();
-        if (!executor) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
-            return;
-        }
-        auto cb = ndkLayoutCallback_;
-        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    if (!ndkLayoutCallback_) {
+        return;
     }
+    if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
+        return;
+    }
+    auto executor = pipeline->GetTaskExecutor();
+    if (!executor) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
+        return;
+    }
+    auto cb = ndkLayoutCallback_;
+    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
 } // namespace OHOS::Ace::NG

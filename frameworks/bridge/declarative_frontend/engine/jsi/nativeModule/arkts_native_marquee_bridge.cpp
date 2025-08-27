@@ -152,12 +152,13 @@ ArkUINativeModuleValue MarqueeBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize) || fontSize.IsNegative() ||
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, fontSizeResObj) || fontSize.IsNegative() ||
         fontSize.Unit() == DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), AceType::RawPtr(fontSizeResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -182,10 +183,13 @@ ArkUINativeModuleValue MarqueeBridge::SetFontColor(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }

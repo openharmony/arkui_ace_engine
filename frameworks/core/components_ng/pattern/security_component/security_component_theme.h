@@ -41,7 +41,7 @@ public:
         ~Builder() = default;
         RefPtr<SecurityComponentTheme> Build(const RefPtr<ThemeConstants>& themeConstants)
         {
-            RefPtr<SecurityComponentTheme> theme = AceType::Claim(new SecurityComponentTheme());
+            RefPtr<SecurityComponentTheme> theme = AceType::MakeRefPtr<SecurityComponentTheme>();
             if (!themeConstants) {
                 SC_LOG_ERROR("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;

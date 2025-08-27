@@ -27,6 +27,10 @@
 namespace OHOS::Ace {
 
 enum class ParticleDisturbanceShapeType :uint32_t { RECT, CIRCLE, ELLIPSE };
+const CalcDimension DEFAULT_CENTER_VALUE = CalcDimension(0.5, DimensionUnit::PERCENT);
+constexpr float DEFAULT_RADIUS_VALUE = 0.0f;
+constexpr float DEFAULT_START_ANGLE_VALUE = 0.0f;
+constexpr float DEFAULT_END_ANGLE_VALUE = 360.0f;
 
 struct ParticleDisturbance {
     float strength = 0.0f;
@@ -52,6 +56,7 @@ struct EmitterProperty {
     std::optional<NG::VectorF> position;
     std::optional<NG::VectorF> size;
     std::optional<uint32_t> emitRate;
+    std::optional<NG::ParticleAnnulusRegion> annulusRegion;
 };
 
 class ACE_FORCE_EXPORT ParticleModel {

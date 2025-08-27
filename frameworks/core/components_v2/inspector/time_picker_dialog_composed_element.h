@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT TimePickerDialogComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(TimePickerDialogComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(TimePickerDialogComposedElement, InspectorComposedElement);
 
 public:
     explicit TimePickerDialogComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

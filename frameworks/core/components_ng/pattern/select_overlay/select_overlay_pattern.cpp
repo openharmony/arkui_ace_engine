@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/offset.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -45,11 +46,14 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
 
     UpdateHandleHotZone();
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     if (overlayMode_ == SelectOverlayMode::MENU_ONLY) {
         gesture->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
         return;
@@ -66,6 +70,7 @@ void SelectOverlayPattern::SetGestureEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -329,7 +334,7 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     orignMenuIsShow_ = info_->menuInfo.menuIsShow;
     if (info_->menuInfo.menuIsShow) {
         info_->menuInfo.menuIsShow = false;
-        host->UpdateToolBar(false);
+        host->UpdateToolBar(false, true);
     }
     if (info_->isSingleHandle) {
         StopHiddenHandleTask();
@@ -561,11 +566,17 @@ void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
     if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
         return;
     }
+    bool needUpdate = false;
     if (info_->firstHandle != firstInfo && !firstHandleDrag_) {
         info_->firstHandle = firstInfo;
+        needUpdate = true;
     }
     if (info_->secondHandle != secondInfo && !secondHandleDrag_) {
         info_->secondHandle = secondInfo;
+        needUpdate = true;
+    }
+    if (!needUpdate) {
+        return;
     }
     CheckHandleReverse();
     UpdateHandleHotZone();
@@ -665,7 +676,7 @@ void SelectOverlayPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrappe
     CHECK_NULL_VOID(GetIsMenuShowInSubWindow());
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!IsMenuShow()) {
+    if (!IsMenuShow() || !host->IsOnMainTree()) {
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(GetContainerId(), host->GetId());
         return;
     }
@@ -744,8 +755,7 @@ void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
         taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS,
             "ArkUISelectOverlayHiddenHandle");
     } else {
-        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle",
-                               PriorityType::VIP);
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle");
     }
 }
 

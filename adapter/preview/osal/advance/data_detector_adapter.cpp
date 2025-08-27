@@ -26,10 +26,21 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos) {}
 void DataDetectorAdapter::StartAITask() {}
 
-bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
-    const RefPtr<NG::FrameNode>& targetNode, bool isShowCopy, bool isShowSelectText)
+bool DataDetectorAdapter::ShowAIEntityMenu(
+    const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info)
 {
     return true;
+}
+
+bool DataDetectorAdapter::GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode,
+    AIMenuInfo info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
+{
+    return false;
+}
+RefPtr<NG::FrameNode> DataDetectorAdapter::CreateAIEntityMenu(
+    const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info)
+{
+    return nullptr;
 }
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan) {}

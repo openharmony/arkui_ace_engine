@@ -25,6 +25,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void Pop();
+    static void SetBarModifierApply(const JSCallbackInfo& info,
+        std::function<void(WeakPtr<NG::FrameNode>)>& barModiferApply, const JSRef<JSVal> val);
 
 protected:
     static void CreateForNG(const JSCallbackInfo& info);
@@ -43,6 +45,7 @@ protected:
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);
+    static void SetAnimationCurve(const JSCallbackInfo& info);
     static void SetAnimationDuration(const JSCallbackInfo& info);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);

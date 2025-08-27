@@ -27,6 +27,7 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 class AccessibilityElementOperator;
+class ExtraEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,7 @@ struct RotateTransform {
 };
 
 class ComposedElement;
+class PipelineBase;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
@@ -72,6 +74,7 @@ struct AccessibilityEvent {
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
     int32_t startIndex = 0;
     int32_t endIndex = 0;
+    std::map<std::string, std::string> extraEventInfo;
 };
 
 enum class OperatorType {
@@ -105,10 +108,6 @@ struct AccessibilityParentRectInfo {
     bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
 };
 
-struct AccessibilityWorkMode {
-    bool isTouchExplorationEnabled = true;
-};
-
 struct AccessibilityWindowInfo {
     int32_t left = 0;
     int32_t top = 0;
@@ -117,6 +116,11 @@ struct AccessibilityWindowInfo {
     float_t scaleY = 1.0f;
     RotateTransform rotateTransform;
 };
+
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
 
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
@@ -189,10 +193,21 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
+
+    virtual bool IsTouchExplorationEnabled()
+    {
+        return true;
+    }
     virtual bool IsScreenReaderEnabled()
     {
         return false;
     }
+    virtual WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId)
+    {
+        return nullptr;
+    }
+    virtual void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) {}
+    virtual void RemoveWebPatternBySurfaceId(const std::string& surfaceId) {}
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -253,7 +268,8 @@ public:
     {
         return false;
     }
-    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
         return false;
     }
@@ -347,6 +363,11 @@ public:
         return AccessibilityWindowInfo();
     }
 
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
+    }
+
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
     virtual void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) {}
     virtual void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) {}
@@ -355,14 +376,18 @@ public:
         return 0;
     }
 
-    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
-    {
-        return AccessibilityWorkMode();
-    }
-
-    virtual void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) {}
+    virtual void ReleasePageEvent(
+        const RefPtr<NG::FrameNode>& node,
+        bool deleteController = true,
+        bool releaseAll = false) {}
     virtual void AddToPageEventController(const RefPtr<NG::FrameNode>& node) {}
+    virtual bool DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node) {return false;}
+    virtual bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) {return false;}
     virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
+
+    virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
+    virtual bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) {return true;};
+
 protected:
     int32_t treeId_ = 0;
 

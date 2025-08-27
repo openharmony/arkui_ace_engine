@@ -204,7 +204,9 @@ public:
 
     //  TS call JS to update l1Rid4Index_ following a
     // Repeat.rerender
-    void UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index);
+    void UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index, std::unordered_set<uint32_t> ridNeedToRecycle);
+
+    void UpdateIsL1(const CacheItem& cacheItem, bool isL1, bool shouldTriggerRecycleOrReuse = true);
 
     /**
      * for debug purposes, use wisely, performance is slow!
@@ -274,6 +276,8 @@ private:
      * CacheItem has node, isL1=True
      */
     OptCacheItem CallOnGetRid4Index(IndexType index);
+    OptCacheItem GetNewRid4Index(IndexType index, RIDType rid, RefPtr<UINode>& node4Index);
+    OptCacheItem GetUpdatedRid4Index(IndexType index, RIDType rid);
 
     /**
      * return CacheItem for RID, if it exists
@@ -309,6 +313,9 @@ private:
 
     // record (from, to), only valid during dragging item.
     std::optional<std::pair<IndexType, IndexType>> moveFromTo_;
+
+    // for tracking reused/recycled nodes
+    std::unordered_set<int32_t> recycledNodeIds_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

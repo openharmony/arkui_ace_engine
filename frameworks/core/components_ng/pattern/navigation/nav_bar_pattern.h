@@ -37,6 +37,21 @@ public:
     NavBarPattern() = default;
     ~NavBarPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<NavBarLayoutProperty>();
@@ -61,11 +76,21 @@ public:
 
     bool NeedCoordWithScroll() override
     {
-        return !isHideTitlebar_;
+        return !isHideTitlebar_ && (titleMode_ == NavigationTitleMode::FREE || IsNeedHandleScroll());
+    }
+    bool IsNeedHandleScroll() const override
+    {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            return true;
+        }
+        return false;
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& menuNode);
 
     float GetTitleBarHeightLessThanMaxBarHeight() const override;
+
+    void BeforeCreateLayoutWrapper() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

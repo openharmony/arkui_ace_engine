@@ -111,7 +111,8 @@ bool CheckUrlValid(const std::string& url, const std::string& hapPath)
 RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
     const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache)
 {
-    if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
+    if (std::regex_match(packagePath, std::regex(".*\\.hap")) ||
+        std::regex_match(packagePath, std::regex(".*\\.hsp"))) {
         auto assetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
         if (assetProviderImpl->Initialize(packagePath, assetBasePaths, useCache)) {
             return assetProviderImpl;
@@ -127,19 +128,26 @@ RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
 
 NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
 {
-    return NG::SafeAreaInsets({ avoidArea.leftRect_.posX_, avoidArea.leftRect_.posX_ + avoidArea.leftRect_.width_ },
-        { avoidArea.topRect_.posY_, avoidArea.topRect_.posY_ + avoidArea.topRect_.height_ },
-        { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
-        { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
+    return NG::SafeAreaInsets(
+        { static_cast<uint32_t>(avoidArea.leftRect_.posX_), avoidArea.leftRect_.posX_ + avoidArea.leftRect_.width_ },
+        { static_cast<uint32_t>(avoidArea.topRect_.posY_), avoidArea.topRect_.posY_ + avoidArea.topRect_.height_ },
+        { static_cast<uint32_t>(avoidArea.rightRect_.posX_),
+            avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
+        { static_cast<uint32_t>(avoidArea.bottomRect_.posY_),
+            avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
 }
 
 Rosen::AvoidArea ConvertAvoidArea(const NG::SafeAreaInsets& insets, int32_t rootWidth, int32_t rootHeight)
 {
     Rosen::AvoidArea area;
-    area.topRect_ = Rosen::Rect{ 0, insets.top_.start, rootWidth, insets.top_.end - insets.top_.start };
-    area.leftRect_ = Rosen::Rect{ insets.left_.start, 0, insets.left_.end - insets.left_.start, rootHeight };
-    area.rightRect_ = Rosen::Rect{ insets.right_.start, 0, insets.right_.end - insets.right_.start, rootHeight };
-    area.bottomRect_ = Rosen::Rect{ 0, insets.bottom_.start, rootWidth, insets.bottom_.end - insets.bottom_.start };
+    area.topRect_ = Rosen::Rect{ 0, static_cast<int32_t>(insets.top_.start),
+        static_cast<uint32_t>(rootWidth), insets.top_.end - insets.top_.start };
+    area.leftRect_ = Rosen::Rect{ static_cast<int32_t>(insets.left_.start), 0,
+        insets.left_.end - insets.left_.start, static_cast<uint32_t>(rootHeight) };
+    area.rightRect_ = Rosen::Rect{ static_cast<int32_t>(insets.right_.start), 0,
+        insets.right_.end - insets.right_.start, static_cast<uint32_t>(rootHeight) };
+    area.bottomRect_ = Rosen::Rect{ 0, static_cast<int32_t>(insets.bottom_.start),
+        static_cast<uint32_t>(rootWidth), insets.bottom_.end - insets.bottom_.start };
     return area;
 }
 

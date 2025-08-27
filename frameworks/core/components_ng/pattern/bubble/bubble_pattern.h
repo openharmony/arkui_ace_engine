@@ -21,8 +21,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
-#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,7 +50,6 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-
 class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
     DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
@@ -77,7 +77,9 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, bubbleMethod);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);
@@ -85,12 +87,26 @@ public:
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
         if (outlineWidth_.has_value()) {
             bubbleMethod->SetOuterBorderWidthByUser(outlineWidth_.value());
+            bubbleMethod->SetOuterBorderWidth(outlineWidth_.value());
         }
         if (innerBorderWidth_.has_value()) {
             bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
+            bubbleMethod->SetInnerBorderWidth(innerBorderWidth_.value());
         }
-        bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
-        bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+        if (!outlineLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+            if (!outlineWidth_.has_value()) {
+                bubbleMethod->SetOuterBorderWidthByUser(Dimension(1.0_vp));
+                bubbleMethod->SetOuterBorderWidth(Dimension(1.0_vp));
+            }
+        }
+        if (!innerBorderLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+            if (!innerBorderWidth_.has_value()) {
+                bubbleMethod->SetInnerBorderWidthByUser(Dimension(1.0_vp));
+                bubbleMethod->SetInnerBorderWidth(Dimension(1.0_vp));
+            }
+        }
         return bubbleMethod;
     }
 
@@ -103,7 +119,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_);
+        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_, mouseOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -155,6 +171,14 @@ public:
     void AddPipelineCallBack();
     void UpdateAgingTextSize();
     void DumpInfo() override;
+    void UpdateBubbleText(const Color& value);
+    void UpdateBubbleBackGroundColor(const Color& value);
+    void UpdateMaskColor(const Color& value);
+    void UpdateMask(bool maskValue);
+    void UpdateArrowWidth(const CalcDimension& dimension);
+    void UpdateArrowHeight(const CalcDimension& dimension);
+    void UpdateWidth(const CalcDimension& dimension);
+    void UpdateRadius(const CalcDimension& dimension);
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -220,20 +244,10 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
-            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+            TAG_LOGI(AceLogTag::ACE_OVERLAY,
                 "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
-    }
-
-    void SetEnableHoverMode(bool enableHoverMode)
-    {
-        enableHoverMode_ = enableHoverMode;
-    }
-
-    bool GetEnableHoverMode() const
-    {
-        return enableHoverMode_;
     }
     
     void SetHasTransition(bool hasTransition)
@@ -249,6 +263,36 @@ public:
     bool GetAvoidKeyboard()
     {
         return avoidKeyboard_;
+    }
+
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
+    }
+
+    void SetHasWidth(bool hasWidth)
+    {
+        hasWidth_ = hasWidth;
+    }
+
+    bool HasWidth() const
+    {
+        return hasWidth_;
+    }
+
+    void SetAvoidTarget(std::optional<AvoidanceMode> avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+    
+    std::optional<AvoidanceMode> GetAvoidTarget() const
+    {
+        return avoidTarget_;
     }
 
     bool GetHasTransition() const
@@ -339,6 +383,11 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetMouseOffset(const std::optional<Offset>& offset)
+    {
+        mouseOffset_ = offset;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -366,8 +415,7 @@ private:
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
-    void PopBubble();
-    void PopTipsBubble();
+    void PopBubble(bool tips = false);
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
@@ -379,6 +427,7 @@ private:
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
     void StartAlphaExitingAnimation(std::function<void()> finish);
+    void UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
@@ -409,6 +458,9 @@ private:
     bool isSetMessageColor_ = false;
     Border border_;
     bool avoidKeyboard_ = false;
+    bool hasPlacement_ = false;
+    bool hasWidth_ = false;
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
@@ -417,6 +469,7 @@ private:
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;
+    std::optional<Offset> mouseOffset_;
 
     bool isCustomPopup_ = false;
     bool isTips_ = false;
@@ -428,7 +481,6 @@ private:
 
     bool hasTransition_ = false;
     bool hasOnAreaChange_ = false;
-    bool enableHoverMode_ = false;
     int32_t halfFoldHoverCallbackId_ = -1;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     std::function<void(const std::string&)> doubleBindCallback_ = nullptr;

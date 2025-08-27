@@ -41,6 +41,10 @@ namespace OHOS::Rosen {
     class Window;
 }
 
+namespace OHOS::AbilityRuntime {
+    class Context;
+}
+
 namespace OHOS::Ace::Platform {
 
 namespace {
@@ -313,6 +317,19 @@ public:
         crownEventCallback_ = std::move(callback);
     }
 
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
+        const std::string& bundle, const std::string& module);
+    void SetAbilityContext(const std::weak_ptr<OHOS::AbilityRuntime::Context>& context);
+    void RecordResAdapter(const std::string& key)
+    {
+        resAdapterRecord_.emplace(key);
+    }
+
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -350,9 +367,9 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
-
-    CrownEventCallback crownEventCallback_;
-
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
+    std::unordered_set<std::string> resAdapterRecord_;
+    
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;
 
@@ -361,6 +378,7 @@ private:
     int32_t labelId_;
     static bool isComponentMode_;
     std::string containerSdkPath_;
+    CrownEventCallback crownEventCallback_;
     friend class WindowFreeContainer;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);

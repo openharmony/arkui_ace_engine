@@ -109,19 +109,32 @@ config("lto_link_config") {
   if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
     ldflags += [
       "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}",
-      "-Wl,-plugin-opt=-split-machine-functions",
-      "-Wl,-mllvm",
-      "-Wl,-fixup-unconditional-branch-unsafely",
-      "-Wl,--no-create-thunks-introduced-by-mfs",
-      "-Wl,-mllvm",
-      "-Wl,-mfs-psi-cutoff=999500",
-      "-Wl,-z",
-      "-Wl,keep-text-section-prefix",
-      "-Wl,--symbol-ordering-file=" +
-          rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
-                      root_build_dir),
-      "-Wl,--no-warn-symbol-ordering",
+      "-Wl,-Bsymbolic",
     ]
+    if (ace_engine_feature_enable_codemerge && !is_asan) {
+      ldflags += [
+        "-Wl,-plugin-opt=-split-machine-functions",
+        "-Wl,-mllvm",
+        "-Wl,-fixup-unconditional-branch-unsafely",
+        "-Wl,--no-create-thunks-introduced-by-mfs",
+        "-Wl,-mllvm",
+        "-Wl,-mfs-psi-cutoff=999500",
+        "-Wl,-z",
+        "-Wl,keep-text-section-prefix",
+        "-Wl,--symbol-ordering-file=" +
+            rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
+                        root_build_dir),
+        "-Wl,--no-warn-symbol-ordering",
+      ]
+    }
+    if (ace_engine_feature_enable_inst_prefetch && target_cpu == "arm64") {
+      ldflags += [
+        "-Wl,-mllvm,--aarch64-enable-inst-prefetch",
+        "-Wl,-mllvm,--mir-cachemiss-profile-l2i=" + rebase_path(
+                "${ace_engine_feature_pgo_path}/afdo/libace_compatible.z-l2i.afdo",
+                root_build_dir),
+      ]
+    }
   }
 }
 
@@ -142,6 +155,7 @@ ohos_shared_library("libace_compatible") {
       debug = ace_sanitize_debug
     }
     deps += [ "$ace_root/build:libace_static_ohos" ]
+    deps += [ "$ace_root/adapter/ohos/services/etc:ace_engine_param" ]
     version_script = "libace.map"
     innerapi_tags = [ "platformsdk" ]
     configs = [ "$ace_root:ace_coverage_config" ]

@@ -20,7 +20,9 @@
 #include "include/core/SkColor.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/pipeline/base/rs_node_adapter.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 #include "base/log/dump_log.h"
@@ -167,7 +169,10 @@ void RosenRenderTexture::DumpTree(int32_t depth)
 std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
 {
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderTexture"};
-    return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    }
+    return RsNodeAdapter::CreateSurfaceNode(surfaceNodeConfig);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

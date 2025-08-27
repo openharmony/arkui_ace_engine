@@ -21,10 +21,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
@@ -32,10 +28,12 @@
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -45,8 +43,8 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/image/image_source_info.h"
 #include "core/image/image_cache.h"
+#include "core/image/image_source_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -221,7 +219,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };
@@ -348,6 +346,86 @@ HWTEST_F(ImageProviderTestNg, GetImageSize001, TestSize.Level1)
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
     size = ctx->GetImageSize();
     EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_128));
+}
+
+/**
+ * @tc.name: GetImageSize003
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize003, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::RIGHT_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
+}
+
+/**
+ * @tc.name: GetImageSize004
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize004, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::LEFT_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
+}
+
+/**
+ * @tc.name: GetImageSize006
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::UP_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_63, LENGTH_128));
+}
+
+/**
+ * @tc.name: GetImageSize007
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize007, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::DOWN_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_63, LENGTH_128));
 }
 
 /**
@@ -503,19 +581,20 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
 
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
     data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
-    imageObject = ImageProvider::BuildImageObject(src, data);
+    imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 
     // thumbnail src with mismatched data
     src = ImageSourceInfo(SRC_THUMBNAIL);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, data));
 }
 
 /**
@@ -568,6 +647,26 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg007, TestSize.Level1)
         std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
     }
+}
+
+/**
+ * @tc.name: GetImageSize005
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize005, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::LEFT);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_63));
 }
 
 /**
@@ -645,7 +744,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest002, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         callbackFlag = 3;
         return;
     };
@@ -1535,9 +1634,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData001, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
 
     auto lock = imageObject->GetPrepareImageDataLock();
     lock.__owns_ = false;
@@ -1556,9 +1656,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData002, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     imageObject->data_ = nullptr;
 
     MockContainer::SetUp();
@@ -1578,9 +1679,10 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData003, TestSize.Level1)
     EXPECT_NE(imageProvider, nullptr);
 
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     imageObject->data_ = nullptr;
 
     MockContainer::SetUp();
@@ -1630,7 +1732,7 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper002, TestSize.Level1)
     MockContainer::SetUp();
     auto container = MockContainer::Current();
     auto data = AceType::MakeRefPtr<MockImageData>();
-    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_)).WillOnce(testing::Return(data));
+    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_, testing::_)).WillOnce(testing::Return(data));
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
     src.pixmap_ = pixmap;
 
@@ -1660,9 +1762,10 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper003, TestSize.Level1)
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
     src.pixmap_ = pixmap;
     auto data = AceType::MakeRefPtr<PixmapData>(pixmap);
-    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_)).WillOnce(testing::Return(data));
+    EXPECT_CALL(*g_loader, LoadDecodedImageData(testing::_, testing::_, testing::_)).WillOnce(testing::Return(data));
 
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    ImageErrorInfo errorInfo;
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
 
     EXPECT_CALL(*pixmap, GetWidth()).Times(1);
     EXPECT_CALL(*pixmap, GetHeight()).Times(1);
@@ -1700,10 +1803,12 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback001, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    // Define the error information.
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: ctx1 and ctx3 should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that ctx1 and ctx3 have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);
@@ -1744,10 +1849,12 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback002, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    // Define the error information.
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: ctx1 and ctx3 should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that ctx1 and ctx4 have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);
@@ -1786,15 +1893,304 @@ HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback003, TestSize.Level1)
 
     // Define the error message.
     auto errorMsg = "error";
+    ImageErrorInfo errorInfo;
 
     // Invoke FailCallback to trigger the failure callback.
     // Expected behavior: all ctx should update their error messages.
-    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, errorInfo, true);
 
     // Verify that all ctx have correctly received the error message.
     EXPECT_EQ(ctx1->errorMsg_, errorMsg);
     EXPECT_EQ(ctx2->errorMsg_, errorMsg);
     EXPECT_EQ(ctx3->errorMsg_, errorMsg);
     EXPECT_EQ(ctx4->errorMsg_, errorMsg);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask001
+ * @tc.desc: Test ImageProvider::CancelTask with multiple contexts; only one is removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask001, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Create multiple ImageLoadingContext instances and register them under the same key
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+    auto ctx2 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx2, nullptr);
+
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx2));
+
+    // CancelTask for ctx1 should return false since ctx2 is still waiting
+    bool result1 = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx1));
+    EXPECT_FALSE(result1);
+
+    // CancelTask for ctx2 should return true as it's the last context
+    bool result2 = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx2));
+    EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: StaticImageDecoder001
+ * @tc.desc: Test MakeCanvasImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, StaticImageDecoder001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_THUMBNAIL);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    SizeF size(LENGTH_100, LENGTH_100);
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask002
+ * @tc.desc: Test ImageProvider::CancelTask when context is not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask002, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Register one context
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+
+    // Create a context that is not registered
+    auto ctxNotRegistered =
+        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctxNotRegistered, nullptr);
+
+    // Attempting to cancel an unregistered context should return false
+    bool result = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctxNotRegistered));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask003
+ * @tc.desc: Test ImageProvider::CancelTask when key does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask003, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Create a context but do not register it
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    // Attempting to cancel with a non-existent key should return false
+    bool result = ImageProvider::CancelTask("non_exist_key", WeakPtr(ctx));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ImageProviderCancelTask004
+ * @tc.desc: Test ImageProvider::CancelTask when only one context is registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask004, TestSize.Level1)
+{
+    ImageProvider::tasks_.clear();
+    auto src = ImageSourceInfo();
+
+    // Register a single context
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx));
+
+    // CancelTask should return true and remove the entire task
+    bool result = ImageProvider::CancelTask(src.GetKey(), WeakPtr(ctx));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ImageProviderTestNg_EndTaskKeyCorrectness
+ * @tc.desc: Verify that ImageProvider uses GetTaskKey() for registering and ending tasks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg_EndTaskKeyCorrectness, TestSize.Level1)
+{
+    // Expect LoadImageData to be called only once, since repeated tasks should be merged.
+    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
+
+    auto src = ImageSourceInfo(SRC_JPG);
+
+    // Step 1: Create multiple ImageLoadingContext instances with the same image source.
+    std::vector<RefPtr<ImageLoadingContext>> contexts(10);
+    for (auto& ctx : contexts) {
+        ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), false);
+        ctx->LoadImageData(); // Triggers CreateImageObject and registers task.
+    }
+
+    // Step 2: Verify that task was registered using the correct key and merged properly.
+    {
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            EXPECT_TRUE(false) << "Failed to acquire mutex.";
+            return;
+        }
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
+
+        // Use GetTaskKey() instead of GetKey() to check the task map.
+        auto taskKey = src.GetTaskKey();
+        auto it = ImageProvider::tasks_.find(taskKey);
+        EXPECT_NE(it, ImageProvider::tasks_.end());     // Task should exist.
+        EXPECT_EQ(it->second.ctxs_.size(), (size_t)10); // All contexts should be merged under the same task.
+        auto errorKey = "non_exist_key";
+        auto tmpIt = ImageProvider::tasks_.find(errorKey);
+        EXPECT_EQ(tmpIt, ImageProvider::tasks_.end()); // errorTask shouldn't exist.
+    }
+
+    // Step 3: Wait for the background loading task to finish, which will trigger EndTask().
+    WaitForAsyncTasks();
+
+    // Step 4: Check that the task has been properly removed from the map after completion.
+    {
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            EXPECT_TRUE(false) << "Failed to acquire mutex after WaitForAsyncTasks.";
+            return;
+        }
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0); // The task map should be empty after cleanup.
+    }
+}
+
+/**
+ * @tc.name: StaticImageMakeCanvasImage001
+ * @tc.desc: Test MakeCanvasImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, StaticImageMakeCanvasImage001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_THUMBNAIL);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    SizeF size(LENGTH_100, LENGTH_100);
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImageFileSizeTest001
+ * @tc.desc: Test ImageFileSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageFileSizeTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_128));
+    auto imageObj = ctx->imageObj_;
+    EXPECT_NE(imageObj, nullptr);
+    imageObj->SetImageFileSize(100);
+    EXPECT_EQ(imageObj->GetImageFileSize(), 100);
+    EXPECT_EQ(imageObj->GetImageDataSize(), 0);
+}
+
+/**
+ * @tc.name: DownLoadSuccessCallbackTest001
+ * @tc.desc: Test DownLoadSuccessCallback caches image and notifies context
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownLoadSuccessCallbackTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo("test.jpg");
+    auto imageObj = AceType::MakeRefPtr<NG::StaticImageObject>(src, SizeF(100, 100), nullptr);
+
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    std::string key = "test_key";
+    bool res = ImageProvider::RegisterTask(key, WeakPtr<ImageLoadingContext>(ctx));
+    EXPECT_TRUE(res);
+    ImageProvider::DownLoadSuccessCallback(imageObj, key, true, 0);
+    ImageProvider::DownLoadSuccessCallback(imageObj, key, false, 0);
+}
+
+/**
+ * @tc.name: DownLoadOnProgressCallbackTest001
+ * @tc.desc: Test DownLoadOnProgressCallback notifies context progress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownLoadOnProgressCallbackTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo("test.jpg");
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    std::string key = "progress_key";
+    ImageProvider::RegisterTask(key, WeakPtr<ImageLoadingContext>(ctx));
+
+    uint32_t progressNow = 0;
+    uint32_t progressTotal = 0;
+    ctx->SetOnProgressCallback([&progressNow, &progressTotal](uint32_t now, uint32_t total) {
+        progressNow = now;
+        progressTotal = total;
+    });
+
+    ImageProvider::DownLoadOnProgressCallback(key, true, 50, 100, 0);
+
+    EXPECT_EQ(progressNow, 50);
+    EXPECT_EQ(progressTotal, 100);
+}
+
+/**
+ * @tc.name: QueryDataFromCacheTest001
+ * @tc.desc: Test QueryDataFromCache returns nullptr if no cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, QueryDataFromCacheTest001, TestSize.Level1)
+{
+    UriDownLoadConfig config;
+    config.src = ImageSourceInfo("cache_hit.jpg");
+    config.imageDfxConfig = ImageDfxConfig();
+    config.taskKey = "download_key";
+    config.sync = true;
+    config.hasProgressCallback = false;
+    ImageProvider::DownLoadImage(config);
+
+    ImageSourceInfo src("not_exist.jpg");
+    auto data = ImageProvider::QueryDataFromCache(src);
+    EXPECT_EQ(data, nullptr);
 }
 } // namespace OHOS::Ace::NG

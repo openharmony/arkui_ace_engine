@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H
 
 #include <vector>
-
+#include <functional>
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class ProgressMaskProperty : public AceType {
@@ -28,6 +29,12 @@ class ProgressMaskProperty : public AceType {
 public:
     ProgressMaskProperty() = default;
     ~ProgressMaskProperty() override = default;
+
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, ProgressMaskProperty&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 
     float GetValue() const
     {
@@ -84,6 +91,24 @@ public:
             color_ = other.GetColor();
         }
         return *this;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ProgressMaskProperty&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 
 private:

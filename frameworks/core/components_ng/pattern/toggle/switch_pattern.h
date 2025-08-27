@@ -145,7 +145,15 @@ public:
     void SetSwitchIsOn(bool value);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -178,7 +186,6 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
-    void UpdateSwitchStyle();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -196,6 +203,8 @@ private:
     void UpdateSwitchLayoutProperty();
     void FireBuilder();
     bool OnKeyEvent(const KeyEvent& keyEventInfo);
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -212,9 +221,9 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isFocus_ = false;
-    bool isBgColorUnselectFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
+    bool isUserSetMargin_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

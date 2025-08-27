@@ -21,7 +21,6 @@ struct Index {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: '非UIExtension场景', path: 'NavIndex' },
-    { name: 'UIExtension场景', path: 'UIExtensionTest' },
   ]
 
   build() {

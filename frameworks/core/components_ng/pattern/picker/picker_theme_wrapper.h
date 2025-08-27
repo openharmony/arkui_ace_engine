@@ -35,7 +35,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto theme = AceType::Claim(new PickerThemeWrapper());
+            auto theme = AceType::MakeRefPtr<PickerThemeWrapper>();
             InitTheme(theme, themeConstants);
             return theme;
         }

@@ -34,7 +34,6 @@ public:
     static bool ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader);
     static bool SetHeaderBuilder(const JSRef<JSObject>& obj);
     static bool SetFooterBuilder(const JSRef<JSObject>& obj);
-    static V2::ListItemGroupStyle GetListItemGroupStyle(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

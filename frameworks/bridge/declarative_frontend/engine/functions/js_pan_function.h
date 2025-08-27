@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsPanFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsPanFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsPanFunction, JsFunction);
 
 public:
     explicit JsPanFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
@@ -33,7 +33,7 @@ public:
     void Execute(const DragStartInfo& info);
     void Execute(const DragUpdateInfo& info);
     void Execute(const DragEndInfo& info);
-    void Execute() override;
+    void Execute();
 
 private:
     JSRef<JSObject> createPanInfo(const TouchLocationInfo& info);

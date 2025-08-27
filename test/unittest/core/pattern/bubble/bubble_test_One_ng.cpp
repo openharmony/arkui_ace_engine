@@ -68,11 +68,17 @@ constexpr int CHILD_SIZE_Y = 2;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float POSITION_OFFSET = 100.0f;
+constexpr float FONT_MAX_SIZE_SCALE = 2.0f;
+constexpr float FONT_SIZE_SCALE_TEST1 = 1.75f;
+constexpr float FONT_SIZE_SCALE_TEST2 = 3.20f;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE = true;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
+constexpr Dimension DEFAULT_RADIUS = 20.0_px;
+constexpr Dimension DEFAULT_ARROW_HEIGHT = 20.0_px;
+constexpr Dimension DEFAULT_ARROW_WIDTH = 20.0_px;
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 
 const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
@@ -117,7 +123,7 @@ public:
 
         RefPtr<MockBubbleTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MockBubbleTheme> theme = AceType::Claim(new MockBubbleTheme());
+            RefPtr<MockBubbleTheme> theme = AceType::MakeRefPtr<MockBubbleTheme>();
             return theme;
         }
     };
@@ -1370,6 +1376,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
     bubbleLayoutAlgorithm->targetSecurity_ = 0;
     OffsetF position(ZERO, ZERO);
+    OffsetF arrowPosition;
     size_t i = 1;
     SizeF childSize(CHILD_SIZE_X, CHILD_SIZE_Y);
     std::vector<Placement> curPlaceStates = { Placement::LEFT, Placement::RIGHT, Placement::TOP,
@@ -1380,7 +1387,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
      */
     for (auto &placement : curPlaceStates) {
         bubbleLayoutAlgorithm->placement_ = placement;
-        auto ret = bubbleLayoutAlgorithm->CheckPosition(position, childSize, 1, i);
+        auto ret = bubbleLayoutAlgorithm->CheckPosition(position, childSize, 1, i, arrowPosition);
         if (placement == Placement::NONE)
             EXPECT_FALSE(ret);
     }
@@ -1531,8 +1538,8 @@ HWTEST_F(BubbleTestOneNg, BubblePaintMethod004, TestSize.Level1)
     /**
      * @tc.steps: step2. Call the function PaintOuterBorder and PaintInnerBorder.
      */
-    
-    bubblePaintMethod.GetInnerBorderOffset();
+    auto theme = AceType::MakeRefPtr<PopupTheme>();
+    bubblePaintMethod.GetInnerBorderOffset(theme);
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
@@ -1566,18 +1573,20 @@ HWTEST_F(BubbleTestOneNg, BubblePaintMethod005, TestSize.Level1)
     /**
      * @tc.steps: step2. Call the function BuildDoubleBorderPath.
      */
+    auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(popupTheme, nullptr);
     bubblePaintMethod.needPaintOuterBorder_ = false;
     bubblePaintMethod.arrowPlacement_ = Placement::NONE;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.needPaintOuterBorder_ = true;
     bubblePaintMethod.arrowPlacement_ = Placement::BOTTOM;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::LEFT;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::RIGHT;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::TOP;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     /**
      * @tc.steps: step3. call SetShowArrow.
      * @tc.expected: step3. Check the property.
@@ -1649,6 +1658,10 @@ HWTEST_F(BubbleTestOneNg, BubblePatternTest018, TestSize.Level1)
     EXPECT_FALSE(layoutProp->GetShowInSubWindow().value_or(false));
     layoutProp->UpdateShowInSubWindow(true);
     bubblePattern->OnWindowSizeChanged(20, 10, WindowSizeChangeReason::TRANSFORM);
+    bubblePattern->OnWindowHide();
+    EXPECT_TRUE(layoutProp->GetShowInSubWindow().value_or(false));
+    layoutProp->UpdateShowInSubWindow(true);
+    bubblePattern->OnWindowSizeChanged(20, 10, WindowSizeChangeReason::AVOID_AREA_CHANGE);
     bubblePattern->OnWindowHide();
     EXPECT_TRUE(layoutProp->GetShowInSubWindow().value_or(false));
 }
@@ -1755,52 +1768,6 @@ HWTEST_F(BubbleTestOneNg, BubblePatternTest020, TestSize.Level1)
      * @tc.expected: after hover callback, isHover_ equal to true.
      */
     auto buttonRowNode = pattern->GetButtonRowNode();
-}
-
- /**
-  * @tc.name: BubblePatternTest022
-  * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth, Shadow and EnableHoverMode.
-  * @tc.type: FUNC
-  */
-HWTEST_F(BubbleTestOneNg, BubblePatternTest022, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set popup value to popupParam.
-     */
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
-    popupParam->setErrorArrowHeight_ = true;
-    popupParam->setErrorArrowWidth_ = true;
-    popupParam->setErrorRadius_ = true;
-    popupParam->childwidth_ = 100.0_px;
-    popupParam->SetEnableHoverMode(true);
-    /**
-     * @tc.steps: step2. create CustomBubbleNode with positon offset
-     */
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(targetNode, nullptr);
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    ASSERT_NE(rowFrameNode, nullptr);
-    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(blankFrameNode, nullptr);
-    rowFrameNode->AddChild(blankFrameNode);
-    auto popupNode =
-        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
-    ASSERT_NE(popupNode, nullptr);
-    /**
-     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
-     * @tc.expected: check whether GetPositionOffset value is correct.
-     */
-    int32_t settingApiVersion = 13;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    BubbleView::UpdateCommonParam(popupNode->GetId(), popupParam);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
 }
 
 /**
@@ -2274,6 +2241,10 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
     /**
      * @tc.steps: step1. set value to popupParam.
      */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(FONT_SIZE_SCALE_TEST1);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
@@ -2313,6 +2284,59 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
     auto popupTheme = pattern->GetPopupTheme();
     auto color = popupTheme->GetFontPrimaryColor();
     EXPECT_EQ(layoutProperty->GetTextColor().value(), color);
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
+}
+
+/**
+ * @tc.name: UpdateBubbleText01
+ * @tc.desc: Test UpdateBubbleText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, UpdateBubbleText01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(FONT_SIZE_SCALE_TEST2);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. test UpdateBubbleText.
+     */
+    pattern->UpdateBubbleText();
+    auto columnNode = popupNode->GetFirstChild();
+    ASSERT_NE(columnNode, nullptr);
+    auto combinedChild = columnNode->GetFirstChild();
+    ASSERT_NE(combinedChild, nullptr);
+    auto scrollNode = combinedChild->GetFirstChild();
+    ASSERT_NE(scrollNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(scrollNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), FONT_MAX_SIZE_SCALE);
 }
 
 /**
@@ -2464,12 +2488,14 @@ HWTEST_F(BubbleTestOneNg, UpdateScrollHeight, TestSize.Level1)
     /**
      * @tc.steps: step2. test UpdateScrollHeight.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     bool showInSubwindow = true;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
     showInSubwindow = false;
     layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**
@@ -2591,10 +2617,12 @@ HWTEST_F(BubbleTestOneNg, InitWrapperRect, TestSize.Level1)
     /**
      * @tc.steps: step2. test InitWrapperRect.
      */
-    bubblePattern->enableHoverMode_ = true;
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateEnableHoverMode(true);
     layoutAlgorithm->isHalfFoldHover_ = true;
-    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper), property);
+    EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 
 /**
@@ -2612,15 +2640,13 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
 
-    Dimension radius = 20.0_px;
-    Dimension arrowHeight = 20.0_px;
-    Dimension arrowWidth = 20.0_px;
     Shadow shadow = ShadowConfig::DefaultShadowL;
-    popupParam->SetRadius(radius);
+    popupParam->SetRadius(DEFAULT_RADIUS);
     popupParam->SetTipsFlag(true);
-    popupParam->SetArrowHeight(arrowHeight);
-    popupParam->SetArrowWidth(arrowWidth);
+    popupParam->SetArrowHeight(DEFAULT_ARROW_HEIGHT);
+    popupParam->SetArrowWidth(DEFAULT_ARROW_WIDTH);
     popupParam->SetShadow(shadow);
+    popupParam->SetAnchorType(TipsAnchorType::CURSOR);
 
     /**
      * @tc.steps: step2. create BubbleNode with position offset
@@ -2642,8 +2668,41 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
      */
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
-    EXPECT_EQ(property->GetRadius().value(), radius);
-    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
-    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+    EXPECT_EQ(property->GetRadius().value(), DEFAULT_RADIUS);
+    EXPECT_EQ(property->GetArrowHeight().value(), DEFAULT_ARROW_HEIGHT);
+    EXPECT_EQ(property->GetArrowWidth().value(), DEFAULT_ARROW_WIDTH);
+    EXPECT_EQ(property->GetShowAtAnchor().value(), TipsAnchorType::CURSOR);
+}
+
+/**
+ * @tc.name: FitAvailableRect001
+ * @tc.desc: Test CreateBubbleNode with istips Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, FitAvailableRect001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->UpdateDisplayAvailableRect(Rect(0.0f, 0.0f, 0.0f, 0.0f));
+    layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), false);
+    layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), true);
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG

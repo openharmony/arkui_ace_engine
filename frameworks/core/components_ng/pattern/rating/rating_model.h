@@ -21,10 +21,16 @@
 #include <mutex>
 #include <string>
 
+#include "core/common/resource/resource_object.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 using RatingChangeEvent = std::function<void(const std::string&)>;
+enum class RatingUriType {
+    BACKGROUND_URI,
+    FOREGROUND_URI,
+    SECONDARY_URI
+};
 class ACE_FORCE_EXPORT RatingModel {
 public:
     static RatingModel* GetInstance();
@@ -40,6 +46,8 @@ public:
     virtual void SetBackgroundSrc(const std::string& value, bool flag) = 0;
     virtual void SetOnChange(RatingChangeEvent&& onChange) = 0;
     virtual void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) = 0;
+    virtual void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,
+        const RatingUriType ratingUriType) = 0;
 
 private:
     static std::unique_ptr<RatingModel> instance_;

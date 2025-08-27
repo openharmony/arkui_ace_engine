@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsShouldBuiltInRecognizerParallelWithFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsShouldBuiltInRecognizerParallelWithFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsShouldBuiltInRecognizerParallelWithFunction, JsFunction);
 
 public:
     explicit JsShouldBuiltInRecognizerParallelWithFunction(const JSRef<JSFunc>& jsFunction)
@@ -29,7 +29,7 @@ public:
 
     ~JsShouldBuiltInRecognizerParallelWithFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

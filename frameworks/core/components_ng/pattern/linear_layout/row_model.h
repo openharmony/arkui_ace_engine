@@ -23,6 +23,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 
@@ -35,6 +36,8 @@ public:
 
     virtual void Create(
         const std::optional<Dimension>& space, AlignDeclaration* declaration, const std::string& tag) = 0;
+    virtual void Create(
+        const RefPtr<ResourceObject>& spaceResObj, AlignDeclaration* declaration, const std::string& tag) {}
     virtual void CreateWithWrap() = 0;
     virtual void SetAlignItems(FlexAlign flexAlign) = 0;
     virtual void SetJustifyContent(FlexAlign flexAlign) = 0;

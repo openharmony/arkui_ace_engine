@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   searchParentBlock,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   Search,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { DatePickerStart } from './DatePicker';
 
 export default function DatePicker3() {

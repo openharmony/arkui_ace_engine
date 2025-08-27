@@ -44,6 +44,7 @@
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/interfaces/native/node/navigation_modifier.h"
 #include "core/interfaces/native/node/navigator_modifier.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_container_modifier.h"
@@ -62,6 +63,7 @@
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
+#include "core/interfaces/native/node/node_render_node_modifier.h"
 #include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
@@ -100,6 +102,7 @@
 #include "core/interfaces/native/node/shape_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
+#include "core/interfaces/native/node/stepper_modifier.h"
 #include "core/interfaces/native/node/swiper_controller_modifier.h"
 #include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
@@ -129,9 +132,14 @@
 #include "core/interfaces/native/node/web_modifier.h"
 #endif
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/interfaces/native/node/embeddedComponent_modifier.h"
+#endif
+
 using namespace OHOS::Ace::NG;
 
 #define MODIFIER_COUNTS 9
+#define MODIFIER_COUNTS_CJ 8
 #define BLANK_LINES 6
 
 extern "C" {
@@ -151,11 +159,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -193,14 +197,14 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
@@ -285,6 +289,14 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
         .getLazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutModifier,
+    #ifdef WINDOW_SCENE_SUPPORTED
+        .getEmbeddedComponentModifier = NodeModifier::GetEmbeddedComponentModifier,
+    #else
+        .getEmbeddedComponentModifier = nullptr,
+    #endif
+        .getCanvasModifier = NodeModifier::GetCanvasModifier,
+        .getStepperModifier = NodeModifier::GetStepperModifier,
+        .getNDKRenderNodeModifier = NodeModifier::GetNDKRenderNodeModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
@@ -306,11 +318,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
@@ -348,14 +356,14 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
         .getMenuItemModifier = nullptr,
@@ -441,7 +449,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS, BLANK_LINES, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS_CJ, BLANK_LINES, 0); // don't move this line
     return &modifiers;
 }
 }

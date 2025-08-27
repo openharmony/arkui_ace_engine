@@ -60,9 +60,6 @@ void CanvasRenderingContext2DModelNG::OnDetachFromCanvas()
     if (onContext2DDetach_) {
         onContext2DDetach_();
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        weakPattern_ = nullptr;
-    }
 }
 
 void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> newPattern)
@@ -473,6 +470,13 @@ void CanvasRenderingContext2DModelNG::AddRect(const Rect& rect)
     auto pattern = weakPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->AddRect(rect);
+}
+
+void CanvasRenderingContext2DModelNG::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddRoundRect(rect, radii);
 }
 
 void CanvasRenderingContext2DModelNG::BeginPath()

@@ -16,7 +16,6 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 #include "core/common/ace_engine.h"
-#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -29,6 +28,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,7 +42,7 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 2;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
@@ -153,20 +153,9 @@ void EnvelopedDragData(
     }
     auto pointerId = dragAction->dragPointerEvent.pointerId;
     std::string udKey;
-    std::map<std::string, int64_t> summary;
+    DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
-    if (dragAction->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
-        if (ret != 0) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
-        }
-        dataSize = static_cast<int32_t>(dragAction->unifiedData->GetSize());
-    }
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     if (dragAction->previewOption.isNumber) {
         recordSize = dragAction->previewOption.badgeNumber > 1 ? dragAction->previewOption.badgeNumber : 1;
@@ -182,13 +171,41 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
-        dragAction->dragPointerEvent.sourceType, recordSize, pointerId,
-        static_cast<int32_t>(dragAction->dragPointerEvent.sourceTool), dragAction->dragPointerEvent.displayX,
+        dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
-        summary };
+        dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
+        dragSummaryInfo.version, dragSummaryInfo.totalSize };
 }
 
-void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+    std::string& udKey, DragSummaryInfo& dragSummaryInfo, int32_t& dataSize)
+{
+    CHECK_NULL_VOID(dragAction);
+    int32_t ret = 1;
+    if (dragAction->unifiedData) {
+        ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
+        }
+        dataSize = static_cast<int32_t>(dragAction->unifiedData->GetSize());
+    }
+    if (dragAction->dataLoadParams) {
+        ret = UdmfClient::GetInstance()->SetDelayInfo(dragAction->dataLoadParams, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+        }
+        auto recodeCount = dragAction->dataLoadParams->GetRecordCount();
+        dataSize = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
+        }
+    }
+}
+
+void DragDropFuncWrapper::HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
     const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "drag notify message result is %{public}d.", dragNotifyMsg.result);
@@ -273,9 +290,6 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
     if (ret != 0) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;
-        DragNotifyMsg dragNotifyMsg;
-        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
-        HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
         TAG_LOGE(AceLogTag::ACE_DRAG, "msdp start drag failed.");
         return -1;
     }
@@ -726,7 +740,10 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.windowY = touchPoint.y;
     event.displayX = touchPoint.screenX;
     event.displayY = touchPoint.screenY;
+    event.globalDisplayX = touchPoint.globalDisplayX;
+    event.globalDisplayY = touchPoint.globalDisplayY;
     event.deviceId = touchPoint.deviceId;
+    event.displayId = touchPoint.targetDisplayId;
     event.x = event.windowX;
     event.y = event.windowY;
     event.pressedKeyCodes.clear();
@@ -838,120 +855,6 @@ bool DragDropFuncWrapper::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
 }
 
 /**
- * Do some nessessary check before returning the gesture recognizer collection result
- * to parent during the hittest process. For example, if there is one drag operation
- * already in our system, it is not allowed to start new interation for drag operation.
- */
-bool DragDropFuncWrapper::IsGlobalStatusSuitableForDragging()
-{
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, false);
-    if (dragDropManager->IsDragging()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is dragging status");
-        return false;
-    }
-
-    if (dragDropManager->IsMSDPDragging()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is msdp dragging status");
-        return false;
-    }
-
-    return true;
-}
-
-bool DragDropFuncWrapper::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode)
-{
-    auto parent = frameNode;
-    while (parent) {
-        auto eventHub = parent->GetEventHub<EventHub>();
-        parent = parent->GetAncestorNodeOfFrame(true);
-        if (!eventHub) {
-            continue;
-        }
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        if (!gestureEventHub) {
-            continue;
-        }
-        if (gestureEventHub->IsDragForbidden()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool DragDropFuncWrapper::IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto uiNode = frameNode->GetParent();
-    CHECK_NULL_RETURN(uiNode, false);
-    while (!IsSelectedItemNode(uiNode)) {
-        uiNode = uiNode->GetParent();
-        CHECK_NULL_RETURN(uiNode, false);
-    }
-    return true;
-}
-
-bool DragDropFuncWrapper::CheckIsNeedGather(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto dragPreview = frameNode->GetDragPreviewOption();
-    if (!dragPreview.isMultiSelectionEnabled) {
-        return false;
-    }
-    return IsSelectedItemNode(frameNode);
-}
-
-RefPtr<FrameNode> DragDropFuncWrapper::FindItemParentNode(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    if (frameNode->GetTag() != V2::GRID_ITEM_ETS_TAG && frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
-        return nullptr;
-    }
-    auto parentType = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG ? V2::GRID_ETS_TAG : V2::LIST_ETS_TAG;
-    auto uiNode = frameNode->GetParent();
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    while (uiNode->GetTag() != parentType) {
-        uiNode = uiNode->GetParent();
-        CHECK_NULL_RETURN(uiNode, nullptr);
-    }
-    return AceType::DynamicCast<FrameNode>(uiNode);
-}
-
-RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto dragPreviewInfo = frameNode->GetDragPreview();
-    if (dragPreviewInfo.inspectorId != "") {
-        auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
-        return previewPixelMap;
-    }
-    if (dragPreviewInfo.pixelMap != nullptr) {
-        return dragPreviewInfo.pixelMap;
-    }
-    auto context = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto pixelMap = context->GetThumbnailPixelMap(true);
-    return pixelMap;
-}
-
-void DragDropFuncWrapper::TrySetDraggableStateAsync(
-    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && !gestureHub->GetIsTextDraggable()) {
-        return;
-    }
-    int64_t downTime = static_cast<int64_t>(touchRestrict.touchEvent.time.time_since_epoch().count());
-    if (DragDropGlobalController::GetInstance().IsAppGlobalDragEnabled()) {
-        InteractionInterface::GetInstance()->SetDraggableStateAsync(true, downTime / CONVERT_TIME_BASE);
-    }
-}
-
-/**
  * check the current node's status to decide if it can initiate one drag operation
  */
 bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
@@ -962,7 +865,8 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
     CHECK_NULL_RETURN(gestureHub, false);
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        touchRestrict.inputEventType == InputEventType::AXIS) {
+        touchRestrict.inputEventType == InputEventType::AXIS ||
+        touchRestrict.touchEvent.convertInfo.first == UIInputEventType::AXIS) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",
@@ -972,23 +876,26 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
 
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && !pattern->IsSelected()) {
-            TrySetDraggableStateAsync(frameNode, touchRestrict);
+        if (pattern && !pattern->IsSelected() && !pattern->CanAIEntityDrag()) {
+            DragDropFuncWrapper::TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
         }
     }
 
     if (IsSelfAndParentDragForbidden(frameNode)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, parent is drag forbidden.");
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, parent is drag forbidden.");
         return false;
     }
 
     return true;
 }
+
 void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
 {
-    auto subWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    auto subWindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subWindow);
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1100,98 +1007,103 @@ BorderRadiusProperty DragDropFuncWrapper::GetDragFrameNodeBorderRadius(const Ref
     return borderRadius;
 }
 
-/* Retrieves a preview PixelMap for a given drag event action.
- * This function attempts to obtain a screenshot of a frameNode associated with an inspector ID.
- * If the frameNode with the given ID does not exist or hasn't been rendered,
- * it falls back to taking a screenshot of the provided frame node.
- *
- * @param inspectorId A string representing the unique identifier for the frameNode's ID.
- * @param selfFrameNode A RefPtr to the frame node associated with the drag event.
- * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found.
+/**
+ * Do some nessessary check before returning the gesture recognizer collection result
+ * to parent during the hittest process. For example, if there is one drag operation
+ * already in our system, it is not allowed to start new interation for drag operation.
  */
-RefPtr<PixelMap> DragDropFuncWrapper::GetPreviewPixelMap(
-    const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode)
+bool DragDropFuncWrapper::IsGlobalStatusSuitableForDragging()
 {
-    // Attempt to retrieve the PixelMap using the inspector ID.
-    auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId, selfFrameNode);
-    // If a preview PixelMap was found, return it.
-    if (previewPixelMap != nullptr) {
-        return previewPixelMap;
-    }
-    // If not found by inspector ID, attempt to get a screenshot of the frame node.
-    return GetScreenShotPixelMap(selfFrameNode);
-}
-
-/* Retrieves a preview PixelMap based on an inspector ID.
- * This function attempts to find a frame node associated with the given inspector ID and then takes a screenshot of it.
- *
- * @param inspectorId The unique identifier for a frameNode.
- * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found or the ID is empty.
- */
-RefPtr<PixelMap> DragDropFuncWrapper::GetPreviewPixelMapByInspectorId(
-    const std::string& inspectorId, const RefPtr<FrameNode>& frameNode)
-{
-    // Check for an empty inspector ID and return nullptr if it is empty.
-    if (inspectorId == "") {
-        return nullptr;
-    }
-
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pipeLine = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeLine, nullptr);
-    auto rootNode = pipeLine->GetRootElement();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    // Retrieve the frame node using the inspector's ID.
-    auto dragPreviewFrameNode = DragDropFuncWrapper::GetFrameNodeByKey(rootNode, inspectorId);
-    CHECK_NULL_RETURN(dragPreviewFrameNode, nullptr);
-
-    auto layoutProperty = dragPreviewFrameNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-
-    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    if (visibility == VisibleType::INVISIBLE || visibility == VisibleType::GONE) {
-        return nullptr;
-    }
-
-    // Take a screenshot of the frame node and return it as a PixelMap.
-    return GetScreenShotPixelMap(dragPreviewFrameNode);
-}
-
-/* Captures a screenshot of the specified frame node and encapsulates it in a PixelMap.
- *
- * @param frameNode A RefPtr reference to the frame node from which to capture the screenshot.
- * @return A RefPtr to a PixelMap containing the screenshot.
- */
-RefPtr<PixelMap> DragDropFuncWrapper::GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode)
-{
-    // Ensure the frame node is not nulls before proceeding.
-    CHECK_NULL_RETURN(frameNode, nullptr);
-
-    // Obtain the rendering context from the frame node.
-    auto context = frameNode->GetRenderContext();
-
-    // If the rendering context is not available, return nullptr.
-    CHECK_NULL_RETURN(context, nullptr);
-
-    // Capture and return the thumbnail PixelMap from the rendering context.
-    return context->GetThumbnailPixelMap(true);
-}
-
-bool DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode, int32_t fingerId)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
-    auto eventManager = pipeline->GetEventManager();
-    CHECK_NULL_RETURN(eventManager, false);
-    RefPtr<LongPressRecognizer> recognizer;
-    auto gestureReferee = eventManager->GetGestureRefereeNG(recognizer);
-    CHECK_NULL_RETURN(gestureReferee, false);
-    if (gestureReferee->IsAnySucceedRecognizerExist(fingerId)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to get thumbnail pixelmap with success recognizer.");
-        return true;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, false);
+    if (dragDropManager->IsDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is dragging status");
+        return false;
+    }
+
+    if (dragDropManager->IsMSDPDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, is msdp dragging status");
+        return false;
+    }
+
+    return true;
+}
+
+bool DragDropFuncWrapper::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = frameNode;
+    while (parent) {
+        auto eventHub = parent->GetEventHub<EventHub>();
+        parent = parent->GetAncestorNodeOfFrame(true);
+        if (!eventHub) {
+            continue;
+        }
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        if (!gestureEventHub) {
+            continue;
+        }
+        if (gestureEventHub->IsDragForbidden()) {
+            return true;
+        }
     }
     return false;
+}
+
+bool DragDropFuncWrapper::IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, false);
+    while (!IsSelectedItemNode(uiNode)) {
+        uiNode = uiNode->GetParent();
+        CHECK_NULL_RETURN(uiNode, false);
+    }
+    return true;
+}
+
+bool DragDropFuncWrapper::CheckIsNeedGather(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto dragPreview = frameNode->GetDragPreviewOption();
+    if (!dragPreview.isMultiSelectionEnabled) {
+        return false;
+    }
+    return IsSelectedItemNode(frameNode);
+}
+
+RefPtr<FrameNode> DragDropFuncWrapper::FindItemParentNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() != V2::GRID_ITEM_ETS_TAG && frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return nullptr;
+    }
+    auto parentType = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG ? V2::GRID_ETS_TAG : V2::LIST_ETS_TAG;
+    auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    while (uiNode->GetTag() != parentType) {
+        uiNode = uiNode->GetParent();
+        CHECK_NULL_RETURN(uiNode, nullptr);
+    }
+    return AceType::DynamicCast<FrameNode>(uiNode);
+}
+
+RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    if (dragPreviewInfo.inspectorId != "") {
+        auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        return previewPixelMap;
+    }
+    if (dragPreviewInfo.pixelMap != nullptr) {
+        return dragPreviewInfo.pixelMap;
+    }
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto pixelMap = context->GetThumbnailPixelMap(true);
+    return pixelMap;
 }
 
 RefPtr<PixelMap> DragDropFuncWrapper::CreateTiledPixelMap(const RefPtr<FrameNode>& frameNode)
@@ -1297,6 +1209,100 @@ bool DragDropFuncWrapper::IsNeedCreateTiledPixelMap(
     if (frameNode->GetDragPreviewOption().isMultiTiled && scrollPattern->GetVisibleSelectedItems().size() > 1 &&
         DragDropFuncWrapper::IsSelectedItemNode(frameNode) && !dragEventActuator->GetRestartDrag() &&
         type == SourceType::MOUSE) {
+        return true;
+    }
+    return false;
+}
+
+/* Retrieves a preview PixelMap for a given drag event action.
+ * This function attempts to obtain a screenshot of a frameNode associated with an inspector ID.
+ * If the frameNode with the given ID does not exist or hasn't been rendered,
+ * it falls back to taking a screenshot of the provided frame node.
+ *
+ * @param inspectorId A string representing the unique identifier for the frameNode's ID.
+ * @param selfFrameNode A RefPtr to the frame node associated with the drag event.
+ * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found.
+ */
+RefPtr<PixelMap> DragDropFuncWrapper::GetPreviewPixelMap(
+    const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode)
+{
+    // Attempt to retrieve the PixelMap using the inspector ID.
+    auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId, selfFrameNode);
+    // If a preview PixelMap was found, return it.
+    if (previewPixelMap != nullptr) {
+        return previewPixelMap;
+    }
+    // If not found by inspector ID, attempt to get a screenshot of the frame node.
+    return GetScreenShotPixelMap(selfFrameNode);
+}
+
+/* Retrieves a preview PixelMap based on an inspector ID.
+ * This function attempts to find a frame node associated with the given inspector ID and then takes a screenshot of it.
+ *
+ * @param inspectorId The unique identifier for a frameNode.
+ * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found or the ID is empty.
+ */
+RefPtr<PixelMap> DragDropFuncWrapper::GetPreviewPixelMapByInspectorId(
+    const std::string& inspectorId, const RefPtr<FrameNode>& frameNode)
+{
+    // Check for an empty inspector ID and return nullptr if it is empty.
+    if (inspectorId == "") {
+        return nullptr;
+    }
+
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeLine = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeLine, nullptr);
+    auto rootNode = pipeLine->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    // Retrieve the frame node using the inspector's ID.
+    auto dragPreviewFrameNode = DragDropFuncWrapper::GetFrameNodeByKey(rootNode, inspectorId);
+    CHECK_NULL_RETURN(dragPreviewFrameNode, nullptr);
+
+    auto layoutProperty = dragPreviewFrameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    if (visibility == VisibleType::INVISIBLE || visibility == VisibleType::GONE) {
+        return nullptr;
+    }
+
+    // Take a screenshot of the frame node and return it as a PixelMap.
+    return GetScreenShotPixelMap(dragPreviewFrameNode);
+}
+
+/* Captures a screenshot of the specified frame node and encapsulates it in a PixelMap.
+ *
+ * @param frameNode A RefPtr reference to the frame node from which to capture the screenshot.
+ * @return A RefPtr to a PixelMap containing the screenshot.
+ */
+RefPtr<PixelMap> DragDropFuncWrapper::GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    // Ensure the frame node is not nulls before proceeding.
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    // Obtain the rendering context from the frame node.
+    auto context = frameNode->GetRenderContext();
+
+    // If the rendering context is not available, return nullptr.
+    CHECK_NULL_RETURN(context, nullptr);
+
+    // Capture and return the thumbnail PixelMap from the rendering context.
+    return context->GetThumbnailPixelMap(true);
+}
+
+bool DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode, int32_t fingerId)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    RefPtr<LongPressRecognizer> recognizer;
+    auto gestureReferee = eventManager->GetGestureRefereeNG(recognizer);
+    CHECK_NULL_RETURN(gestureReferee, false);
+    if (gestureReferee->IsAnySucceedRecognizerExist(fingerId)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to get thumbnail pixelmap with success recognizer.");
         return true;
     }
     return false;
@@ -1449,6 +1455,21 @@ float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
     return scale;
 }
 
+void DragDropFuncWrapper::TrySetDraggableStateAsync(
+    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && !gestureHub->GetIsTextDraggable()) {
+        return;
+    }
+    int64_t downTime = static_cast<int64_t>(touchRestrict.touchEvent.time.time_since_epoch().count());
+    if (DragDropGlobalController::GetInstance().IsAppGlobalDragEnabled()) {
+        InteractionInterface::GetInstance()->SetDraggableStateAsync(true, downTime / CONVERT_TIME_BASE);
+    }
+}
+
 bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
 {
     return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
@@ -1489,5 +1510,73 @@ void DragDropFuncWrapper::SetMenuSubWindowTouchable(bool touchable)
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subwindow);
     subwindow->SetWindowTouchable(touchable);
+}
+
+void DragDropFuncWrapper::HandleBackPressHideMenu()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsDragNodeNeedClean(true);
+    auto container = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        auto overlayManager = mainPipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RemoveGatherNode();
+    }
+}
+
+void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
+    DragSummaryInfo& dragSummaryInfo, int32_t& ret)
+{
+    CHECK_NULL_VOID(dragEvent);
+    auto unifiedData = dragEvent->GetData();
+    if (unifiedData) {
+        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
+    }
+    auto dataLoadParams = dragEvent->GetDataLoadParams();
+    auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
+    if (dataLoadParams && isUseDataLoadParams) {
+        ACE_SCOPED_TRACE("drag: set delayInfo to udmf");
+        if (UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey) != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+        }
+    }
+    if (unifiedData && !isUseDataLoadParams) {
+        ACE_SCOPED_TRACE("drag: set drag data to udmf");
+        if (UdmfClient::GetInstance()->SetData(unifiedData, udKey) != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+        }
+    }
+    ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetSummaryMap(dragSummaryInfo.summary);
+}
+
+RefPtr<UINode> DragDropFuncWrapper::FindWindowScene(RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto pipeline = targetNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, nullptr);
+    if (!container->IsSceneBoardWindow()) {
+        return nullptr;
+    }
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    return parent;
 }
 } // namespace OHOS::Ace::NG

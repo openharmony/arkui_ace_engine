@@ -141,6 +141,15 @@ void NavDestinationPattern::OnModifyDone()
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    auto layoutPolicy = navDestinationLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        contentNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), true);
+        contentNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
+    }
+
     UpdateHideBarProperty();
     ExpandContentSafeAreaIfNeeded();
     UpdateNameIfNeeded(hostNode);
@@ -204,6 +213,16 @@ void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& 
     auto pathInfo = GetNavPathInfo();
     if (pathInfo) {
         pathInfo->SetName(name_);
+    }
+}
+
+void NavDestinationPattern::UpdateBackgroundColor()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (hostNode->GetRerenderable()) {
+        ContainerScope scope(hostNode->GetInstanceId());
+        UpdateBackgroundColorIfNeeded(hostNode);
     }
 }
 
@@ -320,11 +339,19 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, false);
     if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
         showBackButton = false;
     }
     if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
+        showBackButton = false;
+    }
+    /**
+     * When using navBar as home in forceSplit scenario, the first NavDestination on
+     * the right side need to hide it's backButton.
+     */
+    if (pattern->IsForceSplitSuccess() && pattern->IsForceSplitUseNavBar() && index == 0) {
         showBackButton = false;
     }
     auto isCustomTitle = hostNode->GetPrevTitleIsCustomValue(false);
@@ -355,6 +382,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
             .edges = SAFE_AREA_EDGE_ALL };
@@ -379,6 +407,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -474,6 +503,22 @@ void NavDestinationPattern::OnWindowHide()
     CHECK_NULL_VOID(stack);
     auto index = navDestinationContext_->GetIndex();
     stack->SetIsEntryByIndex(index, false);
+}
+
+void NavDestinationPattern::OnDetachFromMainTree()
+{
+    backupStyle_.reset();
+    currStyle_.reset();
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!host->IsHomeDestination()) {
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->NotifyDestinationLifecycle(host, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
 }
 
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -743,7 +788,8 @@ void NavDestinationPattern::StartHideOrShowBarInner(
         ctx.isBarShowing = true;
     }
     NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(nodeBase, barNode, curTranslate, isTitle);
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    AnimationUtils::Animate(
+        option, propertyCallback, finishCallback, nullptr /* repeatCallback */, nodeBase->GetContextRefPtr());
 }
 
 void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle)
@@ -765,7 +811,10 @@ void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, propertyCallback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationUtils::Animate(
+        option, propertyCallback, nullptr /* finishCallback */, nullptr /* repeatCallback */, host->GetContextRefPtr());
     ctx.isBarHiding = false;
 }
 
@@ -791,7 +840,7 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
     auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
-    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
     return 0.0f;
 }
 
@@ -844,18 +893,13 @@ void NavDestinationPattern::CheckIfOrientationChanged()
 
     if (hostNode->IsOnAnimation()) {
         StopAnimation();
+    } else {
+        auto context = hostNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto windowMgr = context->GetWindowManager();
+        CHECK_NULL_VOID(windowMgr);
+        windowMgr->SetRequestedOrientation(curOri, true);
     }
-
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto container = Container::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    if (!curOri.has_value()) {
-        auto mgr = context->GetNavigationManager();
-        CHECK_NULL_VOID(mgr);
-        curOri = mgr->GetOrientationByWindowApi();
-    }
-    container->SetRequestedOrientation(curOri.value(), true);
 }
 
 void NavDestinationPattern::StopAnimation()
@@ -899,9 +943,15 @@ void NavDestinationPattern::CheckIfStatusBarConfigChanged()
 
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto mgr = context->GetNavigationManager();
+    auto mgr = context->GetWindowManager();
     CHECK_NULL_VOID(mgr);
-    mgr->SetStatusBarConfig(curConfig);
+    std::optional<bool> enable;
+    std::optional<bool> animated;
+    if (curConfig.has_value()) {
+        enable = curConfig.value().first;
+        animated = curConfig.value().second;
+    }
+    mgr->SetWindowSystemBarEnabled(SystemBarType::STATUS, enable, animated);
 }
 
 void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
@@ -936,8 +986,21 @@ void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
 
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto mgr = context->GetNavigationManager();
+    auto mgr = context->GetWindowManager();
     CHECK_NULL_VOID(mgr);
-    mgr->SetNavigationIndicatorConfig(curConfig);
+    std::optional<bool> enable;
+    if (curConfig.has_value()) {
+        enable = curConfig.value();
+    }
+    mgr->SetWindowSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, std::nullopt);
+}
+
+void NavDestinationPattern::BeforeCreateLayoutWrapper()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
 }
 } // namespace OHOS::Ace::NG

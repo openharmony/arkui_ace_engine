@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 void DataPanelPattern::OnAttachToFrameNode() {}
@@ -30,7 +32,7 @@ bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
 RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
 {
     if (!dataPanelModifier_) {
-        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
+        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>(WeakClaim(this));
     }
     auto paintMethod = MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
     auto host = GetHost();
@@ -124,5 +126,90 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
     double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);
     DataPanelConfiguration config(tmpArry, max, enabled);
     return (makeFunc_.value())(config);
+}
+
+void DataPanelPattern::UpdateTrackBackground(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateTrackBackground(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void DataPanelPattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateStrokeWidth(strokeWidth);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void DataPanelPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+
+void DataPanelPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dataPanelTheme = pipeline->GetTheme<DataPanelTheme>();
+    CHECK_NULL_VOID(dataPanelTheme);
+    auto paintProperty = GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetTrackBackgroundSetByUser().value_or(false)) {
+        UpdateTrackBackground(dataPanelTheme->GetBackgroundColor(), false);
+    }
+    if (!paintProperty->GetStrokeWidthSetByUser().value_or(false)) {
+        UpdateStrokeWidth(dataPanelTheme->GetThickness(), false);
+    }
+    if (!paintProperty->GetValueColorsSetByUser().value_or(false)) {
+        auto themeColors = dataPanelTheme->GetColorsArray();
+        std::vector<OHOS::Ace::NG::Gradient> colors;
+        for (const auto& item : themeColors) {
+            OHOS::Ace::NG::Gradient gradient;
+            OHOS::Ace::NG::GradientColor gradientColorStart;
+            gradientColorStart.SetLinearColor(LinearColor(item.first));
+            gradientColorStart.SetDimension(Dimension(0.0));
+            gradient.AddColor(gradientColorStart);
+            OHOS::Ace::NG::GradientColor gradientColorEnd;
+            gradientColorEnd.SetLinearColor(LinearColor(item.second));
+            gradientColorEnd.SetDimension(Dimension(1.0));
+            gradient.AddColor(gradientColorEnd);
+            colors.emplace_back(gradient);
+        }
+        paintProperty->UpdateValueColors(colors);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

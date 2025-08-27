@@ -120,18 +120,21 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     if (dragState_ == ListItemDragState::IDLE) {
         HandleOnItemLongPress(info);
     }
-    SetDragState(ListItemDragState::DRAGGING);
+    dragState_ = ListItemDragState::DRAGGING;
+    SetIsNeedDividerAnimation(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
     CHECK_NULL_VOID(geometry);
     dragOffset_ = geometry->GetMarginFrameOffset();
+
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto paddingOffset = GetParentPaddingOffset();
     dragOffset_ = dragOffset_ - paddingOffset;
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    isRtl_ = pattern->IsRTL();
     axis_ = pattern->GetAxis();
     lanes_ = pattern->GetLanes();
     isStackFromEnd_ = pattern->IsStackFromEnd();
@@ -145,7 +148,8 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 {
-    SetDragState(ListItemDragState::LONG_PRESS);
+    dragState_ = ListItemDragState::LONG_PRESS;
+    SetIsNeedDividerAnimation(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -169,6 +173,8 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     AnimationOption option;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(300); /* 300:animate duration */
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -181,7 +187,7 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
             renderContext->UpdateZIndex(DEFAULT_Z_INDEX);
             renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -219,6 +225,9 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
 
     auto node = forEach->GetFrameNode(index);
     CHECK_NULL_RETURN(node, res);
+    if (!node->IsActive()) {
+        return res;
+    }
     auto geometry = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, res);
     auto nearRect = geometry->GetMarginFrameRect();
@@ -228,33 +237,38 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
             return res;
         }
     }
-    float mainDelta = delta.GetMainOffset(axis);
+    float axisDelta = delta.GetMainOffset(axis);
     float c0 = rect.GetOffset().GetMainOffset(axis) + rect.GetSize().MainSize(axis) / 2;
     float c1 = nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) / 2;
     if (NearEqual(c0, c1)) {
         return res;
     }
-    float sharped = Curves::SHARP->MoveInternal(std::abs(mainDelta / (c1 - c0)));
+    float sharped = Curves::SHARP->MoveInternal(std::abs(axisDelta / (c1 - c0)));
     float scale = 1 - sharped * 0.05f;
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
+    res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
 
-    if (Positive(mainDelta)) {
+    return res;
+}
+
+bool ListItemDragManager::IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta)
+{
+    bool needMove = false;
+    if (Positive(axisDelta)) {
         float th = (nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) -
             rect.GetOffset().GetMainOffset(axis) - rect.GetSize().MainSize(axis)) / 2;
-        if (GreatNotEqual(mainDelta, th)) {
-            res.needMove = true;
-            return res;
+        if (GreatNotEqual(axisDelta, th)) {
+            needMove = true;
         }
     }
-    if (Negative(mainDelta)) {
+    if (Negative(axisDelta)) {
         float th = (nearRect.GetOffset().GetMainOffset(axis) - rect.GetOffset().GetMainOffset(axis)) / 2;
-        if (LessNotEqual(mainDelta, th)) {
-            res.needMove = true;
-            return res;
+        if (LessNotEqual(axisDelta, th)) {
+            needMove = true;
         }
     }
-    return res;
+    return needMove;
 }
 
 void ListItemDragManager::ScaleDiagonalItem(int32_t index, const RectF& rect, const OffsetF& delta)
@@ -287,11 +301,20 @@ int32_t ListItemDragManager::CalcMainNearIndex(const int32_t index, const Offset
 {
     int32_t nearIndex = index;
     float mainDelta = delta.GetMainOffset(axis_);
-    if (Positive(mainDelta)) {
-        nearIndex = index + lanes_;
-    } else if (Negative(mainDelta)) {
-        nearIndex = index - lanes_;
+    if (isRtl_ && axis_ == Axis::HORIZONTAL) {
+        if (Positive(mainDelta)) {
+            nearIndex = index - lanes_;
+        } else if (Negative(mainDelta)) {
+            nearIndex = index + lanes_;
+        }
+    } else {
+        if (Positive(mainDelta)) {
+            nearIndex = index + lanes_;
+        } else if (Negative(mainDelta)) {
+            nearIndex = index - lanes_;
+        }
     }
+    
     return nearIndex;
 }
 
@@ -300,12 +323,29 @@ int32_t ListItemDragManager::CalcCrossNearIndex(const int32_t index, const Offse
     int32_t nearIndex = index;
     float crossDelta = delta.GetCrossOffset(axis_);
     int32_t step = isStackFromEnd_ ? -1 : 1;
-    if (Positive(crossDelta)) {
-        nearIndex = index + step;
-    } else if (Negative(crossDelta)) {
-        nearIndex = index - step;
+    if (isRtl_ && axis_ == Axis::VERTICAL) {
+        if (Positive(crossDelta)) {
+            nearIndex = index - step;
+        } else if (Negative(crossDelta)) {
+            nearIndex = index + step;
+        }
+    } else {
+        if (Positive(crossDelta)) {
+            nearIndex = index + step;
+        } else if (Negative(crossDelta)) {
+            nearIndex = index - step;
+        }
     }
     return nearIndex;
+}
+
+int32_t ListItemDragManager::CalcDiagonalIndex(const int32_t mainNearIndex, const OffsetF& delta)
+{
+    int32_t diagonalIndex = Positive(delta.GetCrossOffset(axis_)) ? mainNearIndex + 1 : mainNearIndex - 1;
+    if (isRtl_ && axis_ == Axis::VERTICAL) {
+        diagonalIndex = Negative(delta.GetCrossOffset(axis_)) ? mainNearIndex + 1 : mainNearIndex - 1;
+    }
+    return diagonalIndex;
 }
 
 int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta)
@@ -334,7 +374,7 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
     }
     int32_t diagonalIndex = index;
     if (isNeedScaleDiagonal) {
-        diagonalIndex = Positive(delta.GetCrossOffset(axis_)) ? mainNearIndex + 1 : mainNearIndex - 1;
+        diagonalIndex = CalcDiagonalIndex(mainNearIndex, delta);
         if (diagonalIndex < 0) {
             diagonalIndex = 0;
         } else if (diagonalIndex > totalCount_ - 1) {
@@ -367,6 +407,10 @@ bool ListItemDragManager::IsInHotZone(int32_t index, const RectF& frameRect) con
     float endOffset = startOffset + frameRect.GetSize().MainSize(axis_);
     bool reachStart = (index == 0 && startOffset > hotZone);
     bool reachEnd = (index == totalCount_ - 1) && endOffset < (listSize.MainSize(axis_) - hotZone);
+    if (isRtl_ && axis_ == Axis::HORIZONTAL) {
+        reachStart = index == 0 && endOffset < (listSize.MainSize(axis_) - hotZone);
+        reachEnd = (index == totalCount_ - 1) && startOffset > hotZone;
+    }
     return (!reachStart && !reachEnd);
 }
 
@@ -410,7 +454,8 @@ void ListItemDragManager::HandleScrollCallback()
         pattern->SetHotZoneScrollCallback(nullptr);
         scrolling_ = false;
     }
-    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    auto paddingOffset = GetParentPaddingOffset();
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }
@@ -477,6 +522,9 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
             pipeline->FlushUITasks();
         }
     }
+    auto pattern = list->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(to);
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
     option.SetCurve(curve);
@@ -494,12 +542,16 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
     );
 }
 
-void ListItemDragManager::HandleDragEndAnimation()
+void ListItemDragManager::HandleZIndexAndPosition()
 {
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
     option.SetCurve(curve);
     option.SetDuration(30); /* 30:duration */
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -512,11 +564,29 @@ void ListItemDragManager::HandleDragEndAnimation()
             renderContext->ResetPosition();
             renderContext->OnPositionUpdate(OffsetT<Dimension>());
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
+}
 
+void ListItemDragManager::HandleBackShadow()
+{
+    AnimationOption option;
+    isDragAnimationStopped_ = false;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(300); /* animate duration:300ms */
+    // choose the animation with max duration to re-open divider animation.
+    option.SetOnFinishEvent([weak = WeakClaim(this)]() {
+        auto manager = weak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->isDragAnimationStopped_ = true;
+        if (manager->dragState_ == ListItemDragState::IDLE) {
+            manager->SetIsNeedDividerAnimation(true);
+        }
+    });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -526,13 +596,21 @@ void ListItemDragManager::HandleDragEndAnimation()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackShadow(manager->prevShadow_);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
+}
 
+void ListItemDragManager::HandleTransformScale()
+{
+    AnimationOption option;
     /* 14:init velocity, 170:stiffness, 17:damping */
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(14, 1, 170, 17));
     option.SetDuration(30);  /* 30:duration */
     option.SetDelay(150); /* 150:animate delay */
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -542,8 +620,18 @@ void ListItemDragManager::HandleDragEndAnimation()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale(manager->prevScale_);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
+}
+
+void ListItemDragManager::HandleDragEndAnimation()
+{
+    // start animation to reset z-index and position.
+    HandleZIndexAndPosition();
+    // start animation to reset backshadow.
+    HandleBackShadow();
+    // start animation to reset transformscale.
+    HandleTransformScale();
 }
 
 void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
@@ -552,6 +640,7 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
     pattern->SetHotZoneScrollCallback(nullptr);
     if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
@@ -563,17 +652,24 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(forEach);
     forEach->FireOnMove(fromIndex_, to);
     forEach->FireOnDrop(to);
-    SetDragState(dragState_ = ListItemDragState::IDLE);
+    dragState_ = ListItemDragState::IDLE;
+    if (isDragAnimationStopped_) {
+        SetIsNeedDividerAnimation(true);
+    }
 }
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
-    HandleDragEndAnimation();
-    SetDragState(dragState_ = ListItemDragState::IDLE);
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetDraggingIndex(-1);
+    HandleDragEndAnimation();
+    dragState_ = ListItemDragState::IDLE;
+    if (isDragAnimationStopped_) {
+        SetIsNeedDividerAnimation(true);
+    }
     pattern->HandleLeaveHotzoneEvent();
     pattern->SetHotZoneScrollCallback(nullptr);
 }
@@ -594,14 +690,12 @@ int32_t ListItemDragManager::GetLanes() const
     return pattern->GetLanes();
 }
 
-void ListItemDragManager::SetDragState(ListItemDragState dragState)
+void ListItemDragManager::SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
 {
-    dragState_ = dragState;
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    bool isNeedDividerAnimation = dragState_ == ListItemDragState::IDLE;
     pattern->SetIsNeedDividerAnimation(isNeedDividerAnimation);
 }
 } // namespace OHOS::Ace::NG

@@ -43,6 +43,8 @@ struct LaterAvoidInfo {
     int32_t orientation = -1;
 };
 
+using FillContentMap = std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>;
+
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
@@ -144,11 +146,6 @@ public:
     void UpdatePrevHasTextFieldPattern()
     {
         prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
-    }
-
-    bool HasKeyboard() const override
-    {
-        return imeShow_ || uiExtensionImeShow_;
     }
 
     void AvoidKeyBoardInNavigation();
@@ -254,16 +251,6 @@ public:
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
 
-
-    bool GetFocusFieldAlreadyTriggerWsCallback() const
-    {
-        return focusFieldAlreadyTriggerWsCallback_;
-    }
-
-    void SetFocusFieldAlreadyTriggerWsCallback(bool focusFieldAlreadyTriggerWsCallback) {
-        focusFieldAlreadyTriggerWsCallback_ = focusFieldAlreadyTriggerWsCallback;
-    }
-
     int32_t GetFocusFieldOrientation() const
     {
         return focusFieldOrientation_;
@@ -294,10 +281,38 @@ public:
 
     void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
+    int32_t GetContextTriggerAvoidTaskOrientation() const
+    {
+        return contextTriggerAvoidTaskOrientation_;
+    }
+
+    void SetContextTriggerAvoidTaskOrientation(int32_t contextTriggerAvoidTaskOrientation)
+    {
+        contextTriggerAvoidTaskOrientation_ = contextTriggerAvoidTaskOrientation;
+    }
+
+    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject);
+    FillContentMap GetFillContentMap(int32_t id);
+    void RemoveFillContentMap(int32_t id);
+
+    int32_t GetAttachInputId() const
+    {
+        return attachInputId_;
+    }
+
+    void SetAttachInputId(int32_t attachInputId)
+    {
+        attachInputId_ = attachInputId;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
+    void GenerateFillContentMap(const std::string& fillContent, FillContentMap& map);
+
+    RefPtr<FrameNode> FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
+        bool isShowKeyboard);
 
     bool focusFieldIsInline_ = false;
     double inlinePositionY_ = 0.0f;
@@ -307,7 +322,7 @@ private:
     bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
-    bool focusFieldAlreadyTriggerWsCallback_ = false;
+    int32_t contextTriggerAvoidTaskOrientation_ = -1;
     int32_t focusFieldOrientation_ = -1;
     Offset position_;
     float clickPositionOffset_ = 0.0f;
@@ -327,6 +342,8 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
+    std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
+    int32_t attachInputId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

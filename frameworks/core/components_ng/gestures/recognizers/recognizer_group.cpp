@@ -73,6 +73,15 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& 
     }
 }
 
+void RecognizerGroup::RemoveRecognizerInGroup(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    auto iter = std::find(recognizers_.begin(), recognizers_.end(), recognizer);
+    if (iter == recognizers_.end()) {
+        return;
+    }
+    recognizers_.erase(iter);
+}
+
 RefereeState RecognizerGroup::CheckStates(size_t touchId)
 {
     int count = 0;
@@ -228,6 +237,29 @@ void RecognizerGroup::AddHittedRecognizerType(
             group->AddHittedRecognizerType(hittedRecognizerInfo);
         }
     }
+}
+
+void RecognizerGroup::ForceCleanRecognizerWithGroup()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizerWithGroup();
+        }
+    }
+    touchPoints_.clear();
+    fingersId_.clear();
+    fingerList_.clear();
+    activeFingers_.clear();
+    currentFingers_ = 0;
+    refereeState_ = RefereeState::READY;
+    disposal_ = GestureDisposal::NONE;
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->SetGestureGroup(nullptr);
+            child->ResetEventImportGestureGroup();
+        }
+    }
+    recognizers_.clear();
 }
 
 void RecognizerGroup::CleanRecognizerState()

@@ -89,6 +89,7 @@ Gradient GradientStyleModifier::GetGradient() const
     }
     GradientColor color;
     for (size_t index = 0; index < size; index++) {
+        colors[index].SetColorSpace(colorSpace_);
         color.SetColor(colors[index]);
         auto colorStop =
             stops[index].Value() > MAX_COLOR_STOP ? Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT) : stops[index];
@@ -123,6 +124,11 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
         AttachProperty(gradient_);
     } else {
         gradient_->Set(gradient);
+    }
+    if (gradient.GetColors().empty()) {
+        colorSpace_ = ColorSpace::SRGB;
+    } else {
+        colorSpace_ = gradient.GetColors().back().GetColor().GetColorSpace();
     }
 }
 

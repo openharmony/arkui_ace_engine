@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ScrollBarComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ScrollBarComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ScrollBarComposedElement, InspectorComposedElement);
 
 public:
     explicit ScrollBarComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

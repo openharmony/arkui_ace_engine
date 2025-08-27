@@ -46,6 +46,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -725,6 +726,10 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg016, TestSize.Level1)
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
      */
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(false));
     ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
 }
 
@@ -933,6 +938,10 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg020, TestSize.Level1)
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
      */
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(false));
     ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
 }
 
@@ -1141,6 +1150,10 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg024, TestSize.Level1)
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
      */
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(false));
     ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
 }
 
@@ -2271,11 +2284,15 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg046, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
      */
+    auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(false));
     ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
 }
 

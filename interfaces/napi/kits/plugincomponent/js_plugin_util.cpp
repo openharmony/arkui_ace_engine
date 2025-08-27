@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "js_plugin_util.h"
+#include "json/json.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
@@ -912,7 +913,7 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
         NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void**)&ability));
     }
 
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafelyWithCheck();
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new (std::nothrow) ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,

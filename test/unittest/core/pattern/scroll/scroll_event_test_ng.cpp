@@ -895,16 +895,16 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
 }
 
 /**
-* @tc.name: IntervalSnap004
-* @tc.desc: Test snap set intervalSize percent
-* @tc.type: FUNC
-*/
+ * @tc.name: IntervalSnap004
+ * @tc.desc: Test snap set intervalSize percent
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScrollTestNg, IntervalSnap004, TestSize.Level1)
 {
     /**
-    * @tc.steps: set snap intervalSize percent
-    * @tc.expected: CalcPredictSnapOffset has value
-    */
+     * @tc.steps: set snap intervalSize percent
+     * @tc.expected: CalcPredictSnapOffset has value
+     */
     Dimension intervalSize = Dimension(0.1f, DimensionUnit::PERCENT);
     std::vector<Dimension> snapPaginations = {};
     std::pair<bool, bool> enableSnapToSide = { true, true };
@@ -917,19 +917,19 @@ HWTEST_F(ScrollTestNg, IntervalSnap004, TestSize.Level1)
 }
 
 /**
-* @tc.name: IntervalSnap005
-* @tc.desc: Test snap set snapPaginations percent
-* @tc.type: FUNC
-*/
+ * @tc.name: IntervalSnap005
+ * @tc.desc: Test snap set snapPaginations percent
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScrollTestNg, IntervalSnap005, TestSize.Level1)
 {
     /**
-    * @tc.steps: set snap snapPaginations percent
-    * @tc.expected: CalcPredictSnapOffset has value
-    */
+     * @tc.steps: set snap snapPaginations percent
+     * @tc.expected: CalcPredictSnapOffset has value
+     */
     Dimension intervalSize = Dimension(0.f, DimensionUnit::PERCENT);
-    std::vector<Dimension> snapPaginations = {Dimension(0.1f, DimensionUnit::PERCENT),
-            Dimension(0.2f, DimensionUnit::PERCENT)};
+    std::vector<Dimension> snapPaginations = { Dimension(0.1f, DimensionUnit::PERCENT),
+        Dimension(0.2f, DimensionUnit::PERCENT) };
     std::pair<bool, bool> enableSnapToSide = { true, true };
     ScrollModelNG model = CreateScroll();
     model.SetScrollSnap(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
@@ -1319,17 +1319,17 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
     SizeF viewPortExtent(WIDTH, viewPortLength * 11);
     pattern_->viewPortExtent_ = viewPortExtent;
     pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
-    pattern_->CaleSnapOffsets();
+    pattern_->CaleSnapOffsets(frameNode_);
 
     /**
      * @tc.steps: step2. dragDistance and dragSpeed less than threshold
-     * @tc.expected: predictSnapOffset.value() less than 0
+     * @tc.expected: stay on the current page
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
     auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
-    EXPECT_LT(predictSnapOffset.value(), 0);
+    EXPECT_EQ(predictSnapOffset.value(), 10.f);
 
     /**
      * @tc.steps: step3. dragDistance and dragSpeed larger than threshold
@@ -1667,6 +1667,33 @@ HWTEST_F(ScrollEventTestNg, EnablePaging006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPagingOffset001
+ * @tc.desc: Test GetPagingOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, GetPagingOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set enablePaging true.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step2. simulate the scene of scrolling the last page
+     * @tc.expected: pagingOffset is scrollableDistance_
+     */
+    float contentMainSize = 900.f;
+    float pageLength = 400.f;
+    pattern_->lastPageLength_ = fmod(contentMainSize, pageLength);;
+    pattern_->scrollableDistance_ = -(contentMainSize - pageLength);
+    pattern_->viewPortLength_ = pageLength;
+    pattern_->currentOffset_ = -550.f;
+    EXPECT_EQ(pattern_->GetPagingOffset(0.f, 0.f, 0.f), -(contentMainSize - pageLength));
+}
+
+/**
  * @tc.name: CAPIScrollPage001
  * @tc.desc: Test CAPI ScrollPage
  * @tc.type: FUNC
@@ -1916,6 +1943,153 @@ HWTEST_F(ScrollEventTestNg, SpringFinalPosition001, TestSize.Level1)
     EXPECT_TRUE(TickPosition(dragDelta / TICK));
     EXPECT_TRUE(TickPosition(0));
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
-    EXPECT_EQ(scrollable->springOffsetProperty_->Get(), -1);
+    EXPECT_EQ(scrollable->springOffsetProperty_->GetStagingValue(), -1);
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: HandleCrownActionEnd001
+ * @tc.desc: Test HandleCrownActionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, HandleCrownActionEnd001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateContent();
+    CreateScrollDone();
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    TimeStamp ts = std::chrono::high_resolution_clock::now();
+    GestureEvent info;
+    scrollable->isCrownDragging_ = true;
+    scrollable->isCrownEventDragging_ = true;
+    scrollable->HandleCrownActionEnd(ts, 1.0, info);
+    EXPECT_FALSE(scrollable->isCrownDragging_);
+    scrollable->isCrownEventDragging_ = true;
+    scrollable->HandleCrownActionEnd(ts, 0.0, info);
+    EXPECT_TRUE(scrollable->isCrownEventDragging_);
+}
+
+/**
+ * @tc.name: HandleCrownActionUpdate001
+ * @tc.desc: Test HandleCrownActionUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, HandleCrownActionUpdate001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateContent();
+    CreateScrollDone();
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.mainDelta_ = 1.0;
+    mainDelta = 2.0;
+    TimeStamp ts = std::chrono::high_resolution_clock::now();
+    scrollable->HandleCrownActionUpdate(ts, 0.0, info);
+    EXPECT_NE(info.mainDelta_, mainDelta);
+    scrollable->isCrownEventDragging_ = true;
+    EXPECT_EQ(info.mainDelta_, mainDelta);
+}
+#endif
+
+/**
+ * @tc.name: HandleCrownActionEnd001
+ * @tc.desc: Test HandleCrownActionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, HandleCrownActionEnd001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateContent();
+    CreateScrollDone();
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->isTouching_ = false;
+    scrollable->HandleTouchDown(false);
+    EXPECT_TRUE(scrollable->isTouching_);
+    scrollable->isTouching_ = false;
+    scrollable->HandleTouchDown(true);
+    EXPECT_FALSE(scrollable->isTouching_);
+}
+
+/**
+ * @tc.name: onWillStopDragging001
+ * @tc.desc: Test onWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, onWillStopDragging001, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: onWillStopDragging002
+ * @tc.desc: Test onWillStopDragging002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, onWillStopDragging002, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
 } // namespace OHOS::Ace::NG

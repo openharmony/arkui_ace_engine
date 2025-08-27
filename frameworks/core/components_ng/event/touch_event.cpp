@@ -36,11 +36,15 @@ void TouchEventActuator::OnFlushTouchEventsEnd()
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    bool isNeedPropagation = false;
     // if current node is forbidden by monopolize, upper nodes should not response either
     if (!ShouldResponse()) {
+        SetNeedPropagation(isNeedPropagation);
         return false;
     }
-    return TriggerTouchCallBack(point);
+    isNeedPropagation = TriggerTouchCallBack(point);
+    SetNeedPropagation(isNeedPropagation);
+    return isNeedPropagation;
 }
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
@@ -147,14 +151,16 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
 
 TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& lastPoint, const TouchEvent& event)
 {
-    TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
+    TouchLocationInfo changedInfo("onTouch", lastPoint.GetOriginalReCovertId());
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
-    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(lastPoint.globalDisplayX, lastPoint.globalDisplayY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
     changedInfo.SetPressedTime(lastPoint.pressedTime);
@@ -178,15 +184,19 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     float globalY = pointItem.y;
     float screenX = pointItem.screenX;
     float screenY = pointItem.screenY;
+    double globalDisplayX = pointItem.globalDisplayX;
+    double globalDisplayY = pointItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
-    TouchLocationInfo info("onTouch", pointItem.originalId);
+    TouchLocationInfo info("onTouch", pointItem.GetOriginalReCovertId());
     info.SetGlobalLocation(Offset(globalX, globalY));
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
-    info.SetTouchType(type);
+    info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
+    info.SetTouchType((pointItem.originalId == event.originalId) ? type : TouchType::MOVE);
     info.SetForce(pointItem.force);
     info.SetPressedTime(pointItem.downTime);
     info.SetWidth(pointItem.width);
@@ -208,15 +218,19 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     float globalY = eventItem.y;
     float screenX = eventItem.screenX;
     float screenY = eventItem.screenY;
+    double globalDisplayX = eventItem.globalDisplayX;
+    double globalDisplayY = eventItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
-    TouchLocationInfo historyInfo("onTouch", eventItem.originalId);
+    TouchLocationInfo historyInfo("onTouch", eventItem.GetOriginalReCovertId());
     historyInfo.SetTimeStamp(eventItem.time);
     historyInfo.SetGlobalLocation(Offset(globalX, globalY));
     historyInfo.SetLocalLocation(Offset(localX, localY));
     historyInfo.SetScreenLocation(Offset(screenX, screenY));
+    historyInfo.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
     historyInfo.SetTouchType(eventItem.type);
     historyInfo.SetForce(eventItem.force);
     historyInfo.SetPressedTime(eventItem.pressedTime);

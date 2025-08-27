@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new DividerThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<DividerThemeWrapper>();
             if (!themeConstants) {
                 return wrapper;
             }

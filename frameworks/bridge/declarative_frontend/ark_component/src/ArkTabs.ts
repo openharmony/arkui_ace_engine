@@ -14,9 +14,40 @@
  */
 
 /// <reference path='./import.ts' />
+
+interface TabsOptionsParam {
+  barPosition?: BarPosition;
+  index?: number;
+  controller?: TabsController;
+  barModifier?: CommonModifier;
+}
+
 class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(options: Object[]) {
+    if ((options[0] as TabsOptionsParam).barPosition !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, options[0].barPosition);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).index !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, options[0].index);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).controller !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, options[0].controller);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).barModifier !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, options[0].barModifier);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, undefined);
+    }
+    return this;
   }
   onAnimationStart(handler: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsAnimationStartModifier.identity, TabsAnimationStartModifier, handler);
@@ -55,13 +86,29 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
 
     return this;
   }
-  barHeight(value: Length): TabsAttribute {
+  barHeight(value: Length, noMinHeightLimit?: boolean): TabsAttribute {
     if (isUndefined(value) || isNull(value)) {
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, undefined);
     } else {
+      let adaptiveHeight = false;
+      if (value === 'auto') {
+        adaptiveHeight = true;
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, adaptiveHeight);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, undefined);
+      }
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, value);
     }
 
+    if (isNull(noMinHeightLimit) || isUndefined(noMinHeightLimit)) {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, noMinHeightLimit);
+    }
+    return this;
+  }
+  animationCurve(value: Curve | ICurve): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabsAnimationCurveModifier.identity, TabsAnimationCurveModifier, value);
     return this;
   }
   animationDuration(value: number): TabsAttribute {
@@ -259,6 +306,20 @@ class BarAdaptiveHeightModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class NoMinHeightLimitModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('noMinHeightLimit');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetNoMinHeightLimit(node);
+    } else {
+      getUINativeModule().tabs.setNoMinHeightLimit(node, this.value);
+    }
+  }
+}
 class BarHeightModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -305,6 +366,42 @@ class TabsVerticalModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().tabs.setIsVertical(node, this.value);
     }
+  }
+}
+
+class TabsAnimationCurveModifier extends ModifierWithKey<Curve | ICurve> {
+  static identity: Symbol = Symbol('tabsAnimationCurve');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetAnimationCurve(node);
+    } else {
+      if (typeof this.value === 'number') {
+        const curveMap = {
+          [0]: 'linear',
+          [1]: 'ease',
+          [2]: 'ease-in',
+          [3]: 'ease-out',
+          [4]: 'ease-in-out',
+          [5]: 'fast-out-slow-in',
+          [6]: 'linear-out-slow-in',
+          [7]: 'fast-out-linear-in',
+          [8]: 'extreme-deceleration',
+          [9]: 'sharp',
+          [10]: 'rhythm',
+          [11]: 'smooth',
+          [12]: 'friction'
+        };
+        if (this.value in curveMap) {
+          this.value = curveMap[this.value];
+        } else {
+          this.value = this.value.toString();
+        }
+      }
+      getUINativeModule().tabs.setAnimationCurve(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -375,9 +472,7 @@ class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.barMode === this.stageValue.barMode &&
         this.value.options?.margin === this.stageValue.options?.margin &&
         this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle);
@@ -398,6 +493,51 @@ class BarPositionModifier extends ModifierWithKey<number> {
       getUINativeModule().tabs.resetTabBarPosition(node);
     } else {
       getUINativeModule().tabs.setTabBarPosition(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsIndexModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsIndex');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsIndex(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsIndex(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsControllerModifier extends ModifierWithKey<TabsController> {
+  constructor(value: TabsController) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsController');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsController(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsController(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsBarModifierModifier extends ModifierWithKey<CommonModifier> {
+  constructor(value: CommonModifier) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsBarModifier');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsBarModifier(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsBarModifier(node, this.value);
     }
   }
 }
@@ -492,9 +632,9 @@ class TabsOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
   static identity: Symbol = Symbol('tabOnUnselected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().swiper.resetTabOnUnselected(node);
+      getUINativeModule().tabs.resetTabOnUnselected(node);
     } else {
-      getUINativeModule().swiper.setTabOnUnselected(node, this.value);
+      getUINativeModule().tabs.setTabOnUnselected(node, this.value);
     }
   }
 }
@@ -636,9 +776,9 @@ class TabsOnChangeModifier extends ModifierWithKey<(index: number) => void> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnChange(node);
+      getUINativeModule().tabs.resetTabsOnChange(node);
     } else {
-      getUINativeModule().tabs.setOnChange(node, this.value);
+      getUINativeModule().tabs.setTabsOnChange(node, this.value);
     }
   }
 }
@@ -651,9 +791,9 @@ class TabsOnTabBarClick extends ModifierWithKey<(index: number) => void> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnTabBarClick(node);
+      getUINativeModule().tabs.resetTabsOnTabBarClick(node);
     } else {
-      getUINativeModule().tabs.setOnTabBarClick(node, this.value);
+      getUINativeModule().tabs.setTabsOnTabBarClick(node, this.value);
     }
   }
 }
@@ -666,9 +806,9 @@ class TabsAnimationStartModifier extends ModifierWithKey<(index: number, targetI
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnAnimationStart(node);
+      getUINativeModule().tabs.resetTabsOnAnimationStart(node);
     } else {
-      getUINativeModule().tabs.setOnAnimationStart(node, this.value);
+      getUINativeModule().tabs.setTabsOnAnimationStart(node, this.value);
     }
   }
 }    
@@ -681,9 +821,9 @@ class TabsAnimationEndModifier extends ModifierWithKey<(index: number, event: Ta
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnAnimationEnd(node);
+      getUINativeModule().tabs.resetTabsOnAnimationEnd(node);
     } else {
-      getUINativeModule().tabs.setOnAnimationEnd(node, this.value);
+      getUINativeModule().tabs.setTabsOnAnimationEnd(node, this.value);
     }
   }
 }
@@ -696,9 +836,9 @@ class TabsGestureSwipeModifier extends ModifierWithKey<(index: number, event: Ta
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnGestureSwipe(node);
+      getUINativeModule().tabs.resetTabsOnGestureSwipe(node);
     } else {
-      getUINativeModule().tabs.setOnGestureSwipe(node, this.value);
+      getUINativeModule().tabs.setTabsOnGestureSwipe(node, this.value);
     }
   }
 }
@@ -711,9 +851,9 @@ class TabsOnContentWillChange extends ModifierWithKey<(currentIndex: number, tar
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetOnContentWillChange(node);
+      getUINativeModule().tabs.resetTabsOnContentWillChange(node);
     } else {
-      getUINativeModule().tabs.setOnContentWillChange(node, this.value);
+      getUINativeModule().tabs.setTabsOnContentWillChange(node, this.value);
     }
   }
 } 
@@ -726,9 +866,9 @@ class TabsCustomContentTransition extends ModifierWithKey<(from: number, to: num
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().tabs.resetCustomContentTransition(node);
+      getUINativeModule().tabs.resetTabsCustomContentTransition(node);
     } else {
-      getUINativeModule().tabs.setCustomContentTransition(node, this.value);
+      getUINativeModule().tabs.setTabsCustomContentTransition(node, this.value);
     }
   }
 } 

@@ -55,7 +55,7 @@ void LinearSplitModelImpl::SetResizable(NG::SplitType splitType, bool resizable)
     }
 }
 
-void LinearSplitModelImpl::SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider)
+void LinearSplitModelImpl::SetDivider(NG::SplitType splitType, const NG::ColumnSplitDivider& divider)
 {
 }
 

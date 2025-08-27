@@ -30,4 +30,9 @@ bool EventInfoConvertor::MatchCompatibleCondition()
 {
     return false;
 }
+
+bool EventInfoConvertor::IfNeedMouseTransform()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

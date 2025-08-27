@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -64,9 +65,10 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
@@ -116,6 +118,7 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
 }
 

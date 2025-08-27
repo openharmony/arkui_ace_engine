@@ -70,15 +70,19 @@ class MyModifier implements AttributeModifier<WaterFlowAttribute> {
   applyNormalAttribute(instance: WaterFlowAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: WaterFlowAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: WaterFlowAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: WaterFlowAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: WaterFlowAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -117,6 +121,10 @@ export struct WaterFlowBootcamp {
   @State fadingEdgeLengthValue: number = 32;
   @State enableFadingEdgeLengthUnit: boolean = false;
   @State fadingEdgeLengthUnit: LengthUnit = LengthUnit.VP;
+  @State enableScrollBarMarginStart: boolean = false;
+  @State scrollBarMarginStart: number = 0;
+  @State enableScrollBarMarginEnd: boolean = false;
+  @State scrollBarMarginEnd: number = 0;
   @State enableLayoutDirection: boolean = false;
   @State layoutDirection: FlexDirection = FlexDirection.Column;
   @State enableLayoutMode: boolean = false;
@@ -178,7 +186,6 @@ export struct WaterFlowBootcamp {
   @State totalCount: number = 30;
   scroller: Scroller = new Scroller();
   private listScroller: ListScroller = new ListScroller()
-
   /*通用属性和通用事件*/
   @State enableCompConstraintSize: boolean = false;
   @State enableCompConstraintSizeMinWidth: boolean = false;
@@ -611,7 +618,6 @@ export struct WaterFlowBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -634,15 +640,13 @@ export struct WaterFlowBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State enableBackToTop: boolean = true;
   @State backToTop: boolean = false;
-
   scroller1: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller1)
   }
@@ -659,7 +663,7 @@ export struct WaterFlowBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -679,7 +683,6 @@ export struct WaterFlowBootcamp {
       }
     }, 200)
   }
-
 
   getElements() {
     return Array.from({ length: this.totalCount }, (_: ESObject, index: number) => `${index}`);
@@ -719,7 +722,7 @@ export struct WaterFlowBootcamp {
 
   @Builder
   Content() {
-    List({scroller: this.listScroller}) {
+    List({ scroller: this.listScroller }) {
       ListItem() {
         Text('1').width('90%').textAlign(TextAlign.Center)
       }
@@ -751,6 +754,10 @@ export struct WaterFlowBootcamp {
             .borderRadius(12)
           }, (item: string) => item)
         }
+        .scrollBarMargin({
+          start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+          end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+        })
         .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
         .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
         .rowsTemplate(useEnabled(this.enableRowsTemplate, this.rowsTemplate))
@@ -1218,8 +1225,8 @@ export struct WaterFlowBootcamp {
           bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
             this.compPixelStretchEffectOptionsBottom)
         })
-        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1297,7 +1304,7 @@ export struct WaterFlowBootcamp {
           this.compAccessibilityDescription))
         .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
         .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-        this.modifier : null)//part3
+        this.modifier : null) //part3
         .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
         this.myGestureModifier1 : this.myGestureModifier2)
         .outline({
@@ -1337,7 +1344,7 @@ export struct WaterFlowBootcamp {
             this.getUIContext().getCursorController().restoreDefault()
           }
         })
-        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
         .onClick((event?: ClickEvent) => {
           this.compEventTriggeredLog('点击事件onClick触发');
         })
@@ -1432,6 +1439,22 @@ export struct WaterFlowBootcamp {
             { label: 'ALWAYS_TOP_DOWN', value: WaterFlowLayoutMode.ALWAYS_TOP_DOWN },
             { label: 'SLIDING_WINDOW', value: WaterFlowLayoutMode.SLIDING_WINDOW }
           ]
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.start',
+          isEnabled: $enableScrollBarMarginStart,
+          value: $scrollBarMarginStart,
+          min: 0,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.end',
+          isEnabled: $enableScrollBarMarginEnd,
+          value: $scrollBarMarginEnd,
+          min: 0,
+          max: 32
         })
 
         RadioBlock({
@@ -1726,7 +1749,7 @@ export struct WaterFlowBootcamp {
             { label: 'false', value: false }
           ]
         })
-        
+
         RadioBlock({
           title: 'backToTop',
           isEnabled: $enableBackToTop,
@@ -1735,7 +1758,7 @@ export struct WaterFlowBootcamp {
             { label: 'true', value: true },
             { label: 'false', value: false }
           ]
-        })        
+        })
       }
       .width('100%')
     }
@@ -1745,6 +1768,7 @@ export struct WaterFlowBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1756,7 +1780,7 @@ export struct WaterFlowBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1777,11 +1801,12 @@ export struct WaterFlowBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller1) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,
@@ -2358,7 +2383,6 @@ export struct WaterFlowBootcamp {
     .id('scroll')
     .height('52%')
   }
-
 }
 
 @Preview

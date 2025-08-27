@@ -17,16 +17,29 @@ import curves from '@ohos.curves';
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
 import { blankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/BlankAndDivider';
-import { rowsColumnsAndStackingDestination, rowsColumnsAndStackingRoute } from 'feature/src/main/ets/pages/RowsColumnsAndStacking'
-import { gridAndColumnLayoutDestination, gridAndColumnLayoutRoute } from 'feature/src/main/ets/pages/GridAndColumnLayout'
+import {
+  rowsColumnsAndStackingDestination,
+  rowsColumnsAndStackingRoute
+} from 'feature/src/main/ets/pages/RowsColumnsAndStacking'
+import {
+  gridAndColumnLayoutDestination,
+  gridAndColumnLayoutRoute
+} from 'feature/src/main/ets/pages/GridAndColumnLayout'
 import { scrollAndSwipeDestination, scrollAndSwipeRoute } from 'feature/src/main/ets/pages/ScrollAndSwipe'
-import { navigationAndSwitchingDestination, navigationAndSwitchingRoute } from 'feature/src/main/ets/pages/NavigationAndSwitching'
-import { buttonsAndSelectionsDestination, buttonsAndSelectionsRoute } from 'feature/src/main/ets/pages/ButtonsAndSelections'
+import {
+  navigationAndSwitchingDestination,
+  navigationAndSwitchingRoute
+} from 'feature/src/main/ets/pages/NavigationAndSwitching'
+import {
+  buttonsAndSelectionsDestination,
+  buttonsAndSelectionsRoute
+} from 'feature/src/main/ets/pages/ButtonsAndSelections'
 import { textAndInputDestination, textAndInputRoute } from 'feature/src/main/ets/pages/TextAndInput'
 import { imagesAndVideosDestination, imagesAndVideosRoute } from 'feature/src/main/ets/pages/ImagesAndVideos'
 import { informationDisplayDestination, informationDisplayRoute } from 'feature/src/main/ets/pages/InformationDisplay'
 import { menusDestination, menusRoute } from 'feature/src/main/ets/pages/Menus'
 import { dialogBoxesDestination, dialogBoxesRoute } from 'feature/src/main/ets/pages/DialogBoxes'
+
 @Styles
 function CardPressedStyle() {
   .backgroundColor('rgba(0,0,0,0.1)')
@@ -53,25 +66,25 @@ function CardDisabledStyle() {
 function Destination(name: string, route: Route) {
   if (name.startsWith('BlankAndDivider/')) {
     blankAndDividerDestination(name, route)
-  } else if (name.startsWith('RowsColumnsAndStacking/')){
+  } else if (name.startsWith('RowsColumnsAndStacking/')) {
     rowsColumnsAndStackingDestination(name, route)
-  } else if (name.startsWith('GridAndColumnLayout/')){
+  } else if (name.startsWith('GridAndColumnLayout/')) {
     gridAndColumnLayoutDestination(name, route)
-  } else if (name.startsWith('ScrollAndSwipe/')){
+  } else if (name.startsWith('ScrollAndSwipe/')) {
     scrollAndSwipeDestination(name, route)
-  } else if (name.startsWith('NavigationAndSwitching/')){
+  } else if (name.startsWith('NavigationAndSwitching/')) {
     navigationAndSwitchingDestination(name, route)
-  } else if (name.startsWith('ButtonsAndSelections/')){
+  } else if (name.startsWith('ButtonsAndSelections/')) {
     buttonsAndSelectionsDestination(name, route)
-  } else if (name.startsWith('TextAndInput/')){
+  } else if (name.startsWith('TextAndInput/')) {
     textAndInputDestination(name, route)
-  } else if (name.startsWith('ImagesAndVideos/')){
+  } else if (name.startsWith('ImagesAndVideos/')) {
     imagesAndVideosDestination(name, route)
-  }else if (name.startsWith('InformationDisplay/')){
+  } else if (name.startsWith('InformationDisplay/')) {
     informationDisplayDestination(name, route)
-  }else if (name.startsWith('Menus/')){
+  } else if (name.startsWith('Menus/')) {
     menusDestination(name, route)
-  }else if (name.startsWith('DialogBoxes/')){
+  } else if (name.startsWith('DialogBoxes/')) {
     dialogBoxesDestination(name, route)
   }
 }
@@ -142,9 +155,10 @@ struct Index {
     })
   }
 
-  aboutToAppear(): void{
+  aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
   }
+
   build() {
     Navigation(this.router) {
       Text('ArkUI 是 OpenHarmony 的控件底座，这是一个 ArkUI 控件检视应用，你可以查阅目前版本的控件能力与默认样式。')
@@ -201,7 +215,7 @@ struct Index {
           .padding(4)
           .divider({ strokeWidth: 0.5 })
         })
-      }.padding({bottom: 70})
+      }.padding({ bottom: 70 })
     }
     .title('Component')
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))

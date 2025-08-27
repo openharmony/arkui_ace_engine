@@ -17,7 +17,6 @@ import("preview_common.gni")
 # windows platform defines and configs
 defines += [
   "WINDOWS_PLATFORM",
-  "_USE_MATH_DEFINES",
   "NOGDI",
   "U_CHARSET_IS_UTF8=1",
   "SK_BUILD_FOR_WIN",

@@ -15,6 +15,7 @@
 
 #include <optional>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -28,7 +29,9 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/ace_engine.h"
 #include "core/common/app_bar_helper.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -55,6 +58,11 @@ class AppBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+
+    void SetUp() override
+    {
+        ViewStackProcessor::GetInstance()->SetCustomAppBarNode(nullptr);
+    }
 };
 
 void AppBarTestNg::SetUpTestSuite()
@@ -463,5 +471,768 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
     manager->keyboardSafeAreaEnabled_ = true;
     pattern->BeforeCreateLayoutWrapper();
     EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: TestOnMenuClick019
+ * @tc.desc: Test OnMenuClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestOnMenuClick019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage , appBar , atom ,pattern , pipeline and theme.
+     * @tc.expected: stage , appBar , atom ,pattern , pipeline and theme are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    appBar->OnMenuClick();
+    EXPECT_NE(appBar, nullptr);
+}
+
+/**
+ * @tc.name: TestOnCloseClick020
+ * @tc.desc: Test OnCloseClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestOnCloseClick020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage , appBar , atom ,pattern , pipeline and theme.
+     * @tc.expected: stage , appBar , atom ,pattern , pipeline and theme are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    int32_t containerId = 100;
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    appBar->OnCloseClick();
+    EXPECT_NE(appBar, nullptr);
+}
+
+/**
+ * @tc.name: TestSetStatusBarItemColor021
+ * @tc.desc: Test SetStatusBarItemColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestSetStatusBarItemColor021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage , appBar , atom ,pattern , pipeline.
+     * @tc.expected: stage , appBar , atom ,pattern , pipeline are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    /**
+     * @tc.steps: step2. Expect settedColorMode is true after using SetStatusBarItemColor.
+     */
+    appBar->SetStatusBarItemColor(true);
+    EXPECT_EQ(pattern->settedColorMode, true);
+}
+
+/**
+ * @tc.name: TestUpdateColor022
+ * @tc.desc: Test UpdateColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateColor022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage , appBar , atom ,pattern , pipeline.
+     * @tc.expected: stage , appBar , atom ,pattern , pipeline are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    /**
+      * @tc.steps: step2. Create theme, icon, renderContext, button, layoutProperty.
+      * @tc.expected: theme, icon, renderContext, button, layoutProperty are not null.
+      */
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    auto icon = appBar->BuildIcon(true);
+    EXPECT_NE(icon, nullptr);
+    auto renderContext = icon->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    auto button = appBar->BuildButton(true);
+    EXPECT_NE(button, nullptr);
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    pattern->settedColorMode = true;
+
+    /**
+      * @tc.steps: step3. Expect appBar->sessionId_ is 0 after using UpdateColor.
+      */
+    pattern->OnColorConfigurationUpdate();
+    pattern->UpdateColor(false);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: TestUpdateMenuBarColor023
+ * @tc.desc: Test UpdateMenuBarColor1
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateMenuBarColor023, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern, pipeline.
+      * @tc.expected: stage, appBar, atom, pattern, pipeline are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    /**
+      * @tc.steps: step2. Create theme, icon, renderContext, button, layoutProperty.
+      * @tc.expected: theme, icon, renderContext, button, layoutProperty are not null.
+      */
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    auto icon = appBar->BuildIcon(true);
+    EXPECT_NE(icon, nullptr);
+    auto renderContext = icon->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    auto button = appBar->BuildButton(true);
+    EXPECT_NE(button, nullptr);
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+      * @tc.steps: step3. Expect appBar->sessionId_ is 0 after using UpdateMenuBarColor.
+      */
+    pattern->UpdateOverlayLayout();
+    pattern->UpdateMenuBarColor(theme, menuBar, true);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: TestUpdateMenuBarColor024
+ * @tc.desc: Test UpdateMenuBarColor2
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateMenuBarColor024, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern, pipeline.
+      * @tc.expected: stage, appBar, atom, pattern, pipeline are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    /**
+      * @tc.steps: step2. Create theme, icon, renderContext, button, layoutProperty.
+      * @tc.expected: theme, icon, renderContext, button, layoutProperty are not null.
+      */
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    auto icon = appBar->BuildIcon(true);
+    EXPECT_NE(icon, nullptr);
+    auto renderContext = icon->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    auto button = appBar->BuildButton(true);
+    EXPECT_NE(button, nullptr);
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+      * @tc.steps: step3. Expect appBar->sessionId_ is 0 after using UpdateMenuBarColor.
+      */
+    pattern->UpdateOverlayLayout();
+    pattern->UpdateMenuBarColor(theme, menuBar, false);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: TestUpdateButtonColor025
+ * @tc.desc: Test UpdateButtonColor1
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateButtonColor025, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern, pipeline.
+      * @tc.expected: stage, appBar, atom, pattern, pipeline are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    /**
+      * @tc.steps: step2. Create theme, icon, renderContext, button, layoutProperty, driver.
+      * @tc.expected: theme, icon, renderContext, button, layoutProperty, driver are not null.
+      */
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    auto icon = appBar->BuildIcon(true);
+    EXPECT_NE(icon, nullptr);
+    auto renderContext = icon->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    auto button = appBar->BuildButton(true);
+    EXPECT_NE(button, nullptr);
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto driver = appBar->BuildDivider();
+    EXPECT_NE(driver, nullptr);
+    atom->AddChild(menuBar);
+    atom->AddChild(button);
+    atom->AddChild(driver);
+
+    /**
+      * @tc.steps: step3. Set clickEffectColorLight_ is red.
+      * @tc.expected: clickedColor_ is red after using UpdateButtonColor.
+      */
+    theme->clickEffectColorLight_ = Color::RED;
+    pattern->UpdateButtonColor(theme, button, true);
+    auto buttonPattern1 = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern1->clickedColor_, Color::RED);
+}
+
+/**
+ * @tc.name: TestUpdateButtonColor026
+ * @tc.desc: Test UpdateButtonColor2
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateButtonColor026, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern, pipeline.
+      * @tc.expected: stage, appBar, atom, pattern, pipeline are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    /**
+      * @tc.steps: step2. Create theme, icon, renderContext, button, layoutProperty, driver.
+      * @tc.expected: theme, icon, renderContext, button, layoutProperty, driver are not null.
+      */
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    EXPECT_NE(theme, nullptr);
+    auto icon = appBar->BuildIcon(true);
+    EXPECT_NE(icon, nullptr);
+    auto renderContext = icon->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    auto button = appBar->BuildButton(true);
+    EXPECT_NE(button, nullptr);
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto driver = appBar->BuildDivider();
+    EXPECT_NE(driver, nullptr);
+    atom->AddChild(menuBar);
+    atom->AddChild(button);
+    atom->AddChild(driver);
+
+    /**
+      * @tc.steps: step3. Set clickEffectColorLight_ is blue.
+      * @tc.expected: clickedColor_ is blue after using UpdateButtonColor.
+      */
+    theme->clickEffectColorDark_ = Color::BLUE;
+    pattern->UpdateButtonColor(theme, button, false);
+    auto buttonPattern = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern->clickedColor_, Color::BLUE);
+}
+
+/**
+ * @tc.name: TestColorConfigurationCallBack027
+ * @tc.desc: Test ColorConfigurationCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestColorConfigurationCallBack027, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern.
+      * @tc.expected: stage, appBar, atom, pattern are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+
+    /**
+     * @tc.steps: step2. Create CustomAppBarNode.
+     */
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    /**
+     * @tc.steps: step3. Set callback.
+     */
+    bool isExecute = false;
+    std::string name1 = "qw";
+    auto callback = [&isExecute, &name1](const std::string& name, const std::string& value) mutable {
+        name1 = name;
+        isExecute = true;
+    };
+
+    /**
+     * @tc.steps: step4. Add the callback in customAppBarNode.
+     */
+    custom->SetCustomCallback(std::move(callback));
+    auto customAppBar = pattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+    auto context = pattern->GetContext();
+    EXPECT_NE(context, nullptr);
+
+    /**
+     * @tc.steps: step5. Expect the callback is used.
+     */
+    pattern->ColorConfigurationCallBack();
+    EXPECT_EQ(name1, "arkui_app_bar_color_configuration");
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: TestAppInfoCallBack028
+ * @tc.desc: Test AppInfoCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppInfoCallBack028, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern, atomTwo, pipeline, themeManager, themeConstants,
+      * windowManager.
+      * @tc.expected: stage, appBar, atom, themeManager, themeConstants, windowManagerare not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    auto atomTwo = pattern->GetHost();
+    EXPECT_NE(atomTwo, nullptr);
+    auto pipeline = atomTwo->GetContextRefPtr();
+    EXPECT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    EXPECT_NE(themeManager, nullptr);
+    auto themeConstants = themeManager->GetThemeConstants();
+    EXPECT_NE(themeConstants, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    EXPECT_NE(windowManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create CustomAppBarNode.
+     */
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    /**
+     * @tc.steps: step3. Set callback.
+     */
+    bool isExecute = false;
+    std::string name1 = "qw";
+    auto callback = [&isExecute, &name1](const std::string& name, const std::string& value) mutable {
+        name1 = name;
+        isExecute = true;
+    };
+
+    /**
+     * @tc.steps: step4. Add the callback in customAppBarNode.
+     */
+    custom->SetCustomCallback(std::move(callback));
+    auto customAppBar = pattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+
+    /**
+     * @tc.steps: step5. Expect the callback is used.
+     */
+    pattern->AppInfoCallBack();
+    EXPECT_EQ(name1, "arkui_app_bar_info");
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: TestAppBgColorCallBack029
+ * @tc.desc: Test AppBgColorCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppBgColorCallBack029, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, appBar, atom, pattern.
+      * @tc.expected: stage, appBar, atom, pattern are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+
+    /**
+     * @tc.steps: step2. Create CustomAppBarNode.
+     */
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    /**
+     * @tc.steps: step3. Set callback.
+     */
+    bool isExecute = false;
+    std::string name1 = "qw";
+    auto callback = [&isExecute, &name1](const std::string& name, const std::string& value) mutable {
+        name1 = name;
+        isExecute = true;
+    };
+
+    /**
+     * @tc.steps: step4. Add the callback in customAppBarNode.
+     */
+    custom->SetCustomCallback(std::move(callback));
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    EXPECT_NE(pipeline, nullptr);
+    auto customAppBar = pattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+
+    /**
+     * @tc.steps: step5. Expect the callback is used.
+     */
+    pattern->AppBgColorCallBack();
+    EXPECT_EQ(isExecute, true);
+    EXPECT_EQ(name1, "arkui_app_bg_color");
+}
+
+/**
+ * @tc.name: TestAppScreenCallBack030
+ * @tc.desc: Test AppScreenCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppScreenCallBack030, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. Create stage, atomicServicePattern, customAppBar.
+      * @tc.expected: stage, atomicServicePattern, customAppBar are not null.
+      */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    NG::ViewStackProcessor::GetInstance()->SetCustomAppBarNode(stage);
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+
+    /**
+     * @tc.steps: step2. Expect the callback is used.
+     */
+    std::string name1 = "qw";
+    customAppBar->customCallback_ = [&name1](const std::string& name, const std::string& value) { name1 = "test"; };
+    atomicServicePattern->AppScreenCallBack();
+    EXPECT_EQ(name1, "test");
+}
+
+/**
+ * @tc.name: TestAppScreenCallBack031
+ * @tc.desc: Test AppScreenCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppScreenCallBack031, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    AppBarView::BuildAppbar(pipeline);
+    EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
+
+/**
+ * @tc.name: TestOnBackPressedCallback032
+ * @tc.desc: Test OnBackPressedCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage, appBar, atom, pattern.
+     * @tc.expected: stage, appBar, atom, pattern are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create CustomAppBarNode and set callback.
+     */
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    bool callbackCalled = false;
+    std::string callbackName;
+    std::string callbackValue;
+    
+    auto callback =
+        [&callbackCalled, &callbackName, &callbackValue](const std::string& name, const std::string& value) mutable {
+        callbackCalled = true;
+        callbackName = name;
+        callbackValue = value;
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto appBar = container->GetAppBar();
+        CHECK_NULL_VOID(appBar);
+        appBar->SetOnBackPressedConsumed();
+    };
+
+    custom->SetCustomCallback(std::move(callback));
+    auto customAppBar = pattern->GetJSAppBarContainer();
+    ASSERT_NE(customAppBar, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnBackPressedCallback and verify the callback is triggered.
+     * @tc.expected: The callback should be called with ARKUI_APP_BAR_ON_BACK_PRESSED and value "true".
+     */
+    pattern->OnBackPressedCallback();
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(callbackName, ARKUI_APP_BAR_ON_BACK_PRESSED);
+    EXPECT_EQ(callbackValue, "true");
+
+    /**
+     * @tc.steps: step4. Verify onBackPressedConsumed_ flag is reset correctly.
+     * @tc.expected: The flag should be reset (no value) after the callback is executed.
+     */
+    EXPECT_FALSE(pattern->onBackPressedConsumed_.has_value());
+}
+
+/**
+ * @tc.name: TestCreateServicePanel033
+ * @tc.desc: Test CreateServicePanel with bundleName
+ * @tc.type: FUNC
+ */
+ HWTEST_F(AppBarTestNg, TestCreateServicePanel033, TestSize.Level1)
+{
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    std::string bundleName = "com.hmos.asde";
+    std::string abilityName = "PanelAbility";
+    std::map<std::string, std::string> params = {
+        {"bundleName", "com.hmos.asde"},
+        {"abilityName", "MainAbility"},
+        {"module", "entry"},
+        {"pageName", "DETAIL"},
+        {"ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel"},
+        {"TopNavPathInfo", ""},
+    };
+    appBar->CreateServicePanel(bundleName, abilityName, params);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: InitAccessibility001
+ * @tc.desc: Test InitAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, InitAccessibility001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    AppBarView::InitAccessibility(stage);
+    auto stageAccessibilityProperty = stage->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_EQ(stageAccessibilityProperty->GetAccessibilityZIndex(), -2);
+}
+
+/**
+ * @tc.name: BuildAppbar001
+ * @tc.desc: Test BuildAppbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, BuildAppbar001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    AppBarView::BuildAppbar(pipeline);
+    EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
+
+/**
+ * @tc.name: RectChangeListener001
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    pattern->AddRectChangeListener(callback);
+    pattern->NotifyRectChange(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: RectChangeListener002
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener002, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    auto listenerId =  pattern->AddRectChangeListener(callback);
+    auto size = static_cast<size_t>(pattern->rectChangeListeners_.size());
+    EXPECT_EQ(size, 1);
+    pattern->RemoveRectChangeListener(listenerId);
+    auto sizeRectChange = static_cast<size_t>(pattern->rectChangeListeners_.size());
+    EXPECT_EQ(sizeRectChange, 0);
+}
+
+/**
+ * @tc.name: RectChangeListener003
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener003, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    pattern->AddRectChangeListener(callback);
+    pattern->CallRectChange();
+    EXPECT_EQ(pattern->appBarRect_, std::nullopt);
+}
+
+/**
+ * @tc.name: TestGetAppBarRect003
+ * @tc.desc: Test GetAppBarRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestGetAppBarRect003, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atom = appBar->Create(stage);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    pipeline->SetInstallationFree(0);
+    auto rect = appBar->GetAppBarRect();
+    EXPECT_EQ(rect, std::nullopt);
+
+    pipeline->SetInstallationFree(1);
+    rect = appBar->GetAppBarRect();
+    EXPECT_EQ(rect, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

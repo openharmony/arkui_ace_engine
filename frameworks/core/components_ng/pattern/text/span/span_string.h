@@ -60,7 +60,17 @@ public:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
     std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
-    void AddSpan(const RefPtr<SpanBase>& span);
+    bool CheckMultiTypeDecorationSpan(const RefPtr<SpanBase>& span);
+    std::vector<RefPtr<SpanBase>> GetWholeSpans(int32_t start, int32_t end, SpanType spanType) const;
+    void ProcessMultiDecorationSpanForIntersection(
+        const RefPtr<SpanBase>& span, const RefPtr<SpanBase>& lastSpan,
+        std::vector<int32_t>& spanNoIntersection, int32_t start, int32_t end);
+    void ProcessMultiDecorationSpanForNoIntersection(
+        const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
+        int32_t start, int32_t end);
+    bool ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end);
+    void AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration = true, bool isFromHtml = false,
+        bool removeOriginStyle = true);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
@@ -78,6 +88,8 @@ public:
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
     void UpdateSpansMap();
+    static std::vector<RefPtr<NG::Paragraph>> GetLayoutInfo(const RefPtr<SpanString>& spanStr,
+        std::optional<double>& maxWidth);
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<BackgroundColorSpan> ToBackgroundColorSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
@@ -93,6 +105,8 @@ public:
     RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<UrlSpan> ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     std::string ToString();
+    bool isFromStyledStringMode = false;
+    
 protected:
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;

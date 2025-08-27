@@ -115,6 +115,23 @@ public:
 
     void ResetExportTextureInfo();
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    void AddBaseNode(const RefPtr<UINode>& newNode);
+
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;

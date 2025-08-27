@@ -248,6 +248,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
      * @tc.steps: step1. Set AutoPlay to true and call HandleDragEnd
      * @tc.expected: HandleDragEnd correctly handles AutoPlay case
      */
+    indicatorPattern->isPressed_ = true;
     swiperPaintProperty->UpdateAutoPlay(true);
     indicatorPattern->HandleDragEnd(0.0);
     EXPECT_EQ(pattern_->isIndicatorLongPress_, false);
@@ -803,10 +804,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     ASSERT_NE(pattern_, nullptr);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     TouchEventInfo touchEventInfo("default");
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
@@ -818,6 +815,60 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     indicatorPattern->HandleDragStart(info);
     indicatorPattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateOverlongPaintMethod001
+ * @tc.desc: Test UpdateOverlongPaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, UpdateOverlongPaintMethod001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto overlongPaintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    indicatorPattern->overlongDotIndicatorModifier_ = modifier;
+    modifier->longPointLeftAnimEnd_ = false;
+    indicatorPattern->changeIndexWithAnimation_ = true;
+    indicatorPattern->jumpIndex_ = 1;
+    overlongPaintMethod->gestureState_ = GestureState::GESTURE_STATE_INIT;
+    modifier->currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_EQ(pattern_->GetCurrentFirstIndex(), 0);
+    indicatorPattern->isInFast_ = true;
+    indicatorPattern->keepGestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    indicatorPattern->UpdateOverlongPaintMethod(pattern_, overlongPaintMethod);
+    EXPECT_EQ(overlongPaintMethod->gestureState_, GestureState::GESTURE_STATE_NONE);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
+}
+
+/**
+ * @tc.name: UpdateOverlongPaintMethod002
+ * @tc.desc: Test UpdateOverlongPaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, UpdateOverlongPaintMethod002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto overlongPaintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    indicatorPattern->overlongDotIndicatorModifier_ = modifier;
+    modifier->longPointLeftAnimEnd_ = false;
+    indicatorPattern->changeIndexWithAnimation_ = true;
+    indicatorPattern->jumpIndex_ = 1;
+    overlongPaintMethod->gestureState_ = GestureState::GESTURE_STATE_INIT;
+    modifier->currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_EQ(pattern_->GetCurrentFirstIndex(), 0);
+    indicatorPattern->keepGestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_);
 }
 } // namespace OHOS::Ace::NG

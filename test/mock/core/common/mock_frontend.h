@@ -77,6 +77,7 @@ public:
         (const override));
     MOCK_METHOD(void, LoadPluginJsByteCode, (std::vector<uint8_t> && jsCode, std::vector<int32_t>&& jsCodeLen),
         (const override));
+    MOCK_METHOD(bool, BuilderNodeFunc, (std::string functionName, const std::vector<int32_t>& nodeIds), (override));
 
     void OnSurfaceChanged(int32_t width, int32_t height) override
     {
@@ -91,6 +92,16 @@ public:
     void OnDrawCompleted(const std::string& componentId) override
     {
         componentId_ = componentId;
+    }
+
+    void OnDrawChildrenCompleted(const std::string& componentId) override
+    {
+        componentId_ = componentId;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return false;
     }
 
     int32_t GetWidth() const

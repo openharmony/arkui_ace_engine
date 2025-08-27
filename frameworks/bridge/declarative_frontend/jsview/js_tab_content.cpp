@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -94,11 +95,18 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     auto tabBarInfo = info[0];
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, nullptr);
+    RefPtr<ResourceObject> resTextObj;
     std::string infoStr;
-    if (ParseJsString(tabBarInfo, infoStr)) {
+    if (ParseJsString(tabBarInfo, infoStr, resTextObj)) {
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, std::nullopt, nullptr, true);
         TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+        if (SystemProperties::ConfigChangePerform()) {
+            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
+        }
         return;
     }
 
@@ -162,23 +170,28 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     std::optional<std::string> textOpt = std::nullopt;
     if (!isTextEmpty) {
         std::string text;
-        if (ParseJsString(textParam, text)) {
+        if (ParseJsString(textParam, text, resTextObj)) {
             textOpt = text;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
         }
     }
 
+    RefPtr<ResourceObject> resIconObj;
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
     auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
     std::optional<std::string> iconOpt = std::nullopt;
     if (!isIconEmpty) {
         std::string icon;
-        if (ParseJsMedia(iconParam, icon)) {
+        if (ParseJsMedia(iconParam, icon, resIconObj)) {
             iconOpt = icon;
         }
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, resIconObj);
 }
 
 void JSTabContent::Pop()
@@ -196,17 +209,25 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
         obj = JSRef<JSObject>::Cast(info);
     }
     IndicatorStyle indicator;
+    RefPtr<ResourceObject> indicatorColorResObj;
+    RefPtr<ResourceObject> indicatorHightResObj;
+    RefPtr<ResourceObject> indicatorWidthResObj;
+    RefPtr<ResourceObject> indicatorRadiusResObj;
+    RefPtr<ResourceObject> indicatorMarginTopResObj;
     CalcDimension indicatorHeight;
     CalcDimension indicatorWidth;
     CalcDimension indicatorBorderRadius;
     CalcDimension indicatorMarginTop;
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color)) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color, indicatorColorResObj)) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(false);
+    } else {
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(true);
     }
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight) ||
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight, indicatorHightResObj) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
@@ -215,19 +236,21 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
     } else {
         indicator.height = indicatorHeight;
     }
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("width"), indicatorWidth) ||
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("width"), indicatorWidth, indicatorWidthResObj) ||
         indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
         indicator.width = 0.0_vp;
     } else {
         indicator.width = indicatorWidth;
     }
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), indicatorBorderRadius) ||
+    if (!info->IsObject() ||
+        !ParseJsDimensionVp(obj->GetProperty("borderRadius"), indicatorBorderRadius, indicatorRadiusResObj) ||
         indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
         indicator.borderRadius = 0.0_vp;
     } else {
         indicator.borderRadius = indicatorBorderRadius;
     }
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("marginTop"), indicatorMarginTop) ||
+    if (!info->IsObject() ||
+        !ParseJsDimensionVp(obj->GetProperty("marginTop"), indicatorMarginTop, indicatorMarginTopResObj) ||
         indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
@@ -237,6 +260,15 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
         indicator.marginTop = indicatorMarginTop;
     }
     TabContentModel::GetInstance()->SetIndicator(indicator);
+    if (SystemProperties::ConfigChangePerform()) {
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::INDICATOR_COLOR, indicatorColorResObj);
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::INDICATOR_HEIGHT, indicatorHightResObj);
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::INDICATOR_WIDTH, indicatorWidthResObj);
+        TabContentModel::GetInstance()->CreateWithResourceObj(
+            TabContentJsType::INDICATOR_RADIUS, indicatorRadiusResObj);
+        TabContentModel::GetInstance()->CreateWithResourceObj(
+            TabContentJsType::INDICATOR_MARGIN_TOP, indicatorMarginTopResObj);
+    }
 }
 
 void JSTabContent::SetBoard(const JSRef<JSVal>& info)
@@ -247,7 +279,8 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
     }
     BoardStyle board;
     CalcDimension borderRadius;
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius) ||
+    RefPtr<ResourceObject> borderRadiusResObj;
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius, borderRadiusResObj) ||
         borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
@@ -257,6 +290,9 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
         board.borderRadius = borderRadius;
     }
     TabContentModel::GetInstance()->SetBoard(board);
+    if (SystemProperties::ConfigChangePerform()) {
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BORDER_RADIUS, borderRadiusResObj);
+    }
 }
 
 void JSTabContent::SetSelectedMode(const JSRef<JSVal>& info)
@@ -272,9 +308,11 @@ void JSTabContent::SetSelectedMode(const JSRef<JSVal>& info)
 void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle, bool isSubTabStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+    RefPtr<ResourceObject> sizeResObj;
+    RefPtr<ResourceObject> familyColorResObj;
     JSRef<JSVal> size = obj->GetProperty("size");
     CalcDimension fontSize;
-    if (ParseJsDimensionFp(size, fontSize) && NonNegative(fontSize.Value()) &&
+    if (ParseJsDimensionFp(size, fontSize, sizeResObj) && NonNegative(fontSize.Value()) &&
         fontSize.Unit() != DimensionUnit::PERCENT) {
         labelStyle.fontSize = fontSize;
     }
@@ -289,7 +327,7 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
 
     JSRef<JSVal> family = obj->GetProperty("family");
     std::vector<std::string> fontFamilies;
-    if (ParseJsFontFamilies(family, fontFamilies)) {
+    if (ParseJsFontFamilies(family, fontFamilies, familyColorResObj)) {
         labelStyle.fontFamily = fontFamilies;
     }
 
@@ -299,6 +337,10 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             labelStyle.fontStyle = FONT_STYLES[value];
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::FONT_SIZE, sizeResObj);
+        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::FONT_FAMILY, familyColorResObj);
     }
 }
 
@@ -324,16 +366,22 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 
         JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
         CalcDimension minFontSize;
-        if (ParseJsDimensionFp(minFontSizeValue, minFontSize) && NonNegative(minFontSize.Value()) &&
+        RefPtr<ResourceObject> minResObj;
+        if (ParseJsDimensionFp(minFontSizeValue, minFontSize, minResObj) && NonNegative(minFontSize.Value()) &&
             minFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.minFontSize = minFontSize;
         }
 
         JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
         CalcDimension maxFontSize;
-        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize) && NonNegative(maxFontSize.Value()) &&
+        RefPtr<ResourceObject> maxResObj;
+        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize, maxResObj) && NonNegative(maxFontSize.Value()) &&
             maxFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.maxFontSize = maxFontSize;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::MIN_FONT_SIZE, minResObj);
+            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::MAX_FONT_SIZE, maxResObj);
         }
 
         JSRef<JSVal> heightAdaptivePolicyValue = obj->GetProperty("heightAdaptivePolicy");
@@ -361,18 +409,34 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
 {
     IconStyle iconStyle;
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_SELECT_COLOR, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_UNSELECT_COLOR, nullptr);
     if (info->IsObject()) {
+        RefPtr<ResourceObject> unselectedColorResObj;
+        RefPtr<ResourceObject> selectedColorResObj;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
         Color unselectedColor;
         JSRef<JSVal> unselectedColorValue = obj->GetProperty("unselectedColor");
-        if (ConvertFromJSValue(unselectedColorValue, unselectedColor)) {
+        if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectedColorResObj)) {
             iconStyle.unselectedColor = unselectedColor;
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(false);
         }
 
         Color selectedColor;
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
-        if (ConvertFromJSValue(selectedColorValue, selectedColor)) {
+        if (ConvertFromJSValue(selectedColorValue, selectedColor, selectedColorResObj)) {
             iconStyle.selectedColor = selectedColor;
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(false);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            TabContentModel::GetInstance()->CreateWithResourceObj(
+                TabContentJsType::ICON_SELECT_COLOR, selectedColorResObj);
+            TabContentModel::GetInstance()->CreateWithResourceObj(
+                TabContentJsType::ICON_UNSELECT_COLOR, unselectedColorResObj);
         }
     }
     TabContentModel::GetInstance()->SetIconStyle(iconStyle);
@@ -381,16 +445,32 @@ void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
 void JSTabContent::GetLabelUnselectedContent(const JSRef<JSVal> unselectedColorValue, LabelStyle& labelStyle)
 {
     Color unselectedColor;
-    if (ConvertFromJSValue(unselectedColorValue, unselectedColor)) {
+    RefPtr<ResourceObject> unselectColorResObj;
+    if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectColorResObj)) {
         labelStyle.unselectedColor = unselectedColor;
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(false);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        TabContentModel::GetInstance()->CreateWithResourceObj(
+            TabContentJsType::LABEL_UNSELECT_COLOR, unselectColorResObj);
     }
 }
 
 void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue, LabelStyle& labelStyle)
 {
     Color selectedColor;
-    if (ConvertFromJSValue(selectedColorValue, selectedColor)) {
+    RefPtr<ResourceObject> selectColorResObj;
+    if (ConvertFromJSValue(selectedColorValue, selectedColor, selectColorResObj)) {
         labelStyle.selectedColor = selectedColor;
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(false);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        TabContentModel::GetInstance()->CreateWithResourceObj(
+            TabContentJsType::LABEL_SELECT_COLOR, selectColorResObj);
     }
 }
 
@@ -418,12 +498,17 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     CalcDimension length;
     NG::PaddingProperty padding;
     bool useLocalizedPadding = false;
-    if (ParseJsDimensionVp(info, length) && NonNegative(length.Value()) && length.Unit() != DimensionUnit::PERCENT) {
+    RefPtr<ResourceObject> resPaddingObj;
+    if (ParseJsDimensionVp(info, length, resPaddingObj) && NonNegative(length.Value()) &&
+        length.Unit() != DimensionUnit::PERCENT) {
         padding.left = NG::CalcLength(length);
         padding.right = NG::CalcLength(length);
         padding.top = NG::CalcLength(length);
         padding.bottom = NG::CalcLength(length);
         TabContentModel::GetInstance()->SetPadding(padding);
+        if (SystemProperties::ConfigChangePerform()) {
+            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::PADDING, resPaddingObj);
+        }
         return;
     }
 
@@ -441,26 +526,30 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
             padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
         }
     }
+    RefPtr<ResourceObject> resObjLeft;
+    RefPtr<ResourceObject> resObjRight;
+    RefPtr<ResourceObject> resObjTop;
+    RefPtr<ResourceObject> resObjBottom;
     if (info->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
         CalcDimension left;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), left) && NonNegative(left.Value()) &&
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), left, resObjLeft) && NonNegative(left.Value()) &&
             left.Unit() != DimensionUnit::PERCENT) {
             padding.left = NG::CalcLength(left);
         }
         CalcDimension right;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), right) && NonNegative(right.Value()) &&
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), right, resObjRight) && NonNegative(right.Value()) &&
             right.Unit() != DimensionUnit::PERCENT) {
             padding.right = NG::CalcLength(right);
         }
         CalcDimension top;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), top) && NonNegative(top.Value()) &&
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), top, resObjTop) && NonNegative(top.Value()) &&
             top.Unit() != DimensionUnit::PERCENT) {
             padding.top = NG::CalcLength(top);
         }
         CalcDimension bottom;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottom) && NonNegative(bottom.Value()) &&
-            bottom.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottom, resObjBottom) &&
+            NonNegative(bottom.Value()) && bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
         }
     }
@@ -475,6 +564,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
             if (ParseJsLengthMetrics(startObj, start)) {
                 padding.left = NG::CalcLength(start);
                 useLocalizedPadding = true;
+                resObjLeft = nullptr;
             }
         }
         if (paddingObj->GetProperty("end")->IsObject()) {
@@ -482,6 +572,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
             if (ParseJsLengthMetrics(endObj, end)) {
                 padding.right = NG::CalcLength(end);
                 useLocalizedPadding = true;
+                resObjRight = nullptr;
             }
         }
         if (paddingObj->GetProperty("top")->IsObject()) {
@@ -489,6 +580,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
             if (ParseJsLengthMetrics(topObj, top)) {
                 padding.top = NG::CalcLength(top);
                 useLocalizedPadding = true;
+                resObjTop = nullptr;
             }
         }
         if (paddingObj->GetProperty("bottom")->IsObject()) {
@@ -496,11 +588,16 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
             if (ParseJsLengthMetrics(bottomObj, bottom)) {
                 padding.bottom = NG::CalcLength(bottom);
                 useLocalizedPadding = true;
+                resObjBottom = nullptr;
             }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);
     TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
+    TabContentModel::GetInstance()->CreatePaddingHorWithResourceObj(resObjLeft, resObjRight,
+        isSubTabStyle, useLocalizedPadding);
+    TabContentModel::GetInstance()->CreatePaddingVerWithResourceObj(resObjTop, resObjBottom,
+        isSubTabStyle, useLocalizedPadding);
 }
 
 void JSTabContent::SetId(const JSRef<JSVal>& info)
@@ -584,7 +681,8 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     }
     std::optional<std::string> contentOpt;
     std::string content;
-    if (ParseJsString(contentParam, content)) {
+    RefPtr<ResourceObject> resTextObj;
+    if (ParseJsString(contentParam, content, resTextObj)) {
         contentOpt = content;
     }
 
@@ -606,6 +704,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
@@ -647,7 +746,10 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
     std::optional<std::string> textOpt = std::nullopt;
     std::string text;
-    if (ParseJsString(textParam, text)) {
+    RefPtr<ResourceObject> resTextObj;
+    RefPtr<ResourceObject> resIconObj;
+    
+    if (ParseJsString(textParam, text, resTextObj)) {
         textOpt = text;
     }
 
@@ -655,7 +757,7 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     std::optional<std::string> iconOpt = std::nullopt;
     std::string icon;
     std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
-    if (ParseJsMedia(iconParam, icon)) {
+    if (ParseJsMedia(iconParam, icon, resIconObj)) {
         iconOpt = icon;
     } else if (iconParam->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(iconParam);
@@ -691,6 +793,8 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, resIconObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);

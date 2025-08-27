@@ -42,9 +42,8 @@ void CJRenderImage::LoadImage(const ImageSourceInfo& sourceInfo)
 {
     auto dataReadyCallback = [this](const ImageSourceInfo& sourceInfo) { this->OnImageDataReady(); };
     auto loadSuccessCallback = [this](const ImageSourceInfo& sourceInfo) { this->OnImageLoadSuccess(); };
-    auto loadFailCallback = [this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
-        this->OnImageLoadFail(errorMsg);
-    };
+    auto loadFailCallback = [this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg,
+                                ImageErrorInfo /* errorInfo */) { this->OnImageLoadFail(errorMsg); };
     NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
     loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
     loadingCtx_->LoadImageData();

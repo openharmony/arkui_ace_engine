@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 
+#include <functional>
 #include <sstream>
 #include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::V2 {
 
 constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
+constexpr int32_t DEFAULT_XS_COLUMN = 2;
+constexpr int32_t DEFAULT_SM_COLUMN = 4;
+constexpr int32_t DEFAULT_MD_COLUMN = 8;
+constexpr int32_t DEFAULT_LG_COLUMN = 12;
+
 struct GridContainerSize : public Referenced {
     GridContainerSize() = default;
     explicit GridContainerSize(int32_t column)
@@ -40,12 +47,12 @@ struct GridContainerSize : public Referenced {
     };
     DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
         GridContainerSize, (xs)(sm)(md)(lg)(xl)(xxl))
-    int32_t xs = DEFAULT_COLUMN_NUMBER;
-    int32_t sm = DEFAULT_COLUMN_NUMBER;
-    int32_t md = DEFAULT_COLUMN_NUMBER;
-    int32_t lg = DEFAULT_COLUMN_NUMBER;
-    int32_t xl = DEFAULT_COLUMN_NUMBER;
-    int32_t xxl = DEFAULT_COLUMN_NUMBER;
+    int32_t xs = DEFAULT_XS_COLUMN;
+    int32_t sm = DEFAULT_SM_COLUMN;
+    int32_t md = DEFAULT_MD_COLUMN;
+    int32_t lg = DEFAULT_LG_COLUMN;
+    int32_t xl = DEFAULT_LG_COLUMN;
+    int32_t xxl = DEFAULT_LG_COLUMN;
 
     std::string ToString()
     {
@@ -140,6 +147,11 @@ public:
     Dimension yXl;
     Dimension xXXl;
     Dimension yXXl;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, RefPtr<V2::Gutter>&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 
     std::string ToString()
     {
@@ -160,6 +172,24 @@ public:
         ss << " }";
         return ss.str();
     }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, RefPtr<V2::Gutter>&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources(RefPtr<V2::Gutter>& gutter)
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, gutter);
+        }
+    }
 };
 
 class BreakPoints : public AceType {
@@ -168,9 +198,10 @@ class BreakPoints : public AceType {
 public:
     BreakPoints() = default;
     DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
-        BreakPoints, (reference)(breakpoints))
+        BreakPoints, (reference)(breakpoints)(userDefine))
     BreakPointsReference reference = BreakPointsReference::WindowSize;
     std::vector<std::string> breakpoints { "320vp", "600vp", "840vp" };
+    bool userDefine = false;
 
     std::string ToString()
     {

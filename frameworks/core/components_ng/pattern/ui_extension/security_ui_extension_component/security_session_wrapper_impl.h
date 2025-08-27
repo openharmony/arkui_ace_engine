@@ -111,8 +111,10 @@ public:
 private:
     void InitAllCallback();
     bool RegisterDataConsumer();
-    void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
-    void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void PostBusinessDataConsumeAsync(uint32_t customId, const AAFwk::Want& data);
+    void PostBusinessDataConsumeSyncReply(
+        uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data);
     void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
     AceLogTag tag_ = AceLogTag::ACE_SECURITYUIEXTENSION;
     WeakPtr<SecurityUIExtensionPattern> hostPattern_;

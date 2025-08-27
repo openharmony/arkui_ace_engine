@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 class QRCodePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(QRCodePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(QRCodePaintMethod, NodePaintMethod);
 
 public:
     QRCodePaintMethod(float qrCodeSize, const RefPtr<QRCodeModifier>& qrCodeModifier)

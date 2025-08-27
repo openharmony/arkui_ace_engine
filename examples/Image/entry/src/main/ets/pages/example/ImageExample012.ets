@@ -14,60 +14,84 @@
  */
 
 /**
- * 为图片添加变换效果
+ * 为图片设置扫光效果
  */
-import { matrix4 } from '@kit.ArkUI'
+import { curves } from '@kit.ArkUI';
 
 @Entry
 @Component
-struct Test {
-  private matrix1 = matrix4.identity()
-    .translate({ x: -400, y: -750 })
-    .scale({ x: 0.5, y: 0.5 })
-    .rotate({
-      x: 2,
-      y: 0.5,
-      z: 3,
-      centerX: 10,
-      centerY: 10,
-      angle: -10
+struct ImageExample11 {
+  private curve = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
+  @State moveImg: string[] = ['imageScanEffect'];
+  @State moveImgVisible: Visibility = Visibility.Visible;
+  @State durationTime: number = 1500;
+  @State iterationsTimes: number = -1;
+  @State private opacityValue: number = 0.5;
+  @State imageWidth: number = 450;
+  @State visible: Visibility = Visibility.Hidden;
+  @State stackBackgroundColor: string = '#E1E4E9';
+  @State linePositionX: number = 0 - this.imageWidth;
+  @State linePositionY: number = 0;
+  @State imgResource: Resource | undefined = undefined;
+
+  startupAnimate() {
+    this.moveImg.pop();
+    this.moveImg.push('imageScanEffect');
+    setTimeout(() => {
+      this.imgResource = $r('app.media.img');
+    }, 3000);
+    this.getUIContext()?.animateTo({
+      duration: this.durationTime,
+      curve: this.curve,
+      tempo: 1,
+      iterations: this.iterationsTimes,
+      delay: 0
+    }, () => {
+      this.linePositionX = this.imageWidth;
     })
+  }
 
   build() {
-    Row() {
-      Column({ space: 50 }) {
-        Column({ space: 5 }) {
-          Image($r('app.media.example'))
-            .border({ width:2, color: Color.Black })
+    Column() {
+      Row() {
+        Stack() {
+          Image(this.imgResource)
+            .width(this.imageWidth)
+            .height(200)
             .objectFit(ImageFit.Contain)
-            .width(150)
-            .height(150)
-          Text('图片无变换')
-            .fontSize('25px')
+            .visibility(this.visible)
+            .onComplete(() => {
+              this.visible = Visibility.Visible;
+              this.moveImg.pop();
+            })
+            .onError(() =>{
+              setTimeout(() => {
+                this.visible = Visibility.Visible;
+                this.moveImg.pop();
+              }, 2600)
+            })
+          ForEach(this.moveImg, (item: string) => {
+            Row()
+              .width(this.imageWidth)
+              .height(200)
+              .visibility(this.moveImgVisible)
+              .position({ x: this.linePositionX, y: this.linePositionY })
+              .linearGradient({
+                direction: GradientDirection.Right,
+                repeating: false,
+                colors: [[0xE1E4E9, 0], [0xFFFFFF, 0.75], [0xE1E4E9, 1]]
+              })
+              .opacity(this.opacityValue)
+          })
         }
-        Column({ space: 5 }) {
-          Image($r('app.media.example'))
-            .border({ width:2, color: Color.Black })
-            .objectFit(ImageFit.None)
-            .translate({ x: 10, y: 10 })
-            .scale({ x: 0.5, y: 0.5 })
-            .width(100)
-            .height(100)
-          Text('Image直接变换，默认显示图源左上角。')
-            .fontSize('25px')
-        }
-        Column({ space: 5 }) {
-          Image($r('app.media.example'))
-            .objectFit(ImageFit.MATRIX)
-            .imageMatrix(this.matrix1)
-            .border({ width:2, color: Color.Black })
-            .width(150)
-            .height(150)
-          Text('通过imageMatrix变换，调整图源位置，实现最佳呈现。')
-            .fontSize('25px')
-        }
+        .backgroundColor(this.visible ? this.stackBackgroundColor : undefined)
+        .margin({top: 20, left: 20, right: 20})
+        .borderRadius(20)
+        .clip(true)
+        .onAppear(() => {
+          this.startupAnimate();
+        })
       }
-      .width('100%')
     }
   }
 }

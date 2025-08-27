@@ -51,6 +51,7 @@ enum class SpanType {
 
 struct SpanParagraphStyle {
     std::optional<TextAlign> align;
+    std::optional<TextVerticalAlign> textVerticalAlign;
     std::optional<int32_t> maxLines;
     std::optional<WordBreak> wordBreak;
     std::optional<TextOverflow> textOverflow;
@@ -60,7 +61,8 @@ struct SpanParagraphStyle {
 
     bool Equal(const SpanParagraphStyle& other) const
     {
-        auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
+        auto flag = align == other.align && textVerticalAlign == other.textVerticalAlign &&
+                    maxLines == other.maxLines && wordBreak == other.wordBreak &&
                     textOverflow == other.textOverflow && textIndent == other.textIndent &&
                     paragraphSpacing == other.paragraphSpacing;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
@@ -89,6 +91,7 @@ public:
 struct GestureStyle {
     std::optional<GestureEventFunc> onClick;
     std::optional<GestureEventFunc> onLongPress;
+    std::optional<std::function<void(TouchEventInfo&)>> onTouch;
 
     bool IsEqual(const GestureStyle& other) const
     {
@@ -147,25 +150,45 @@ class DecorationSpan : public SpanBase {
 
 public:
     DecorationSpan() = default;
-    explicit DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style);
-    DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style,
+    // remove when richEditor ready
+    explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options);
+    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
         int32_t start, int32_t end);
-    TextDecoration GetTextDecorationType() const;
+    explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+        std::optional<TextDecorationOptions> options);
+    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+        std::optional<TextDecorationOptions> options, int32_t start, int32_t end);
+    TextDecoration GetTextDecorationFirst() const;
+    std::vector<TextDecoration> GetTextDecorationTypes() const;
+    void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
+    void RemoveTextDecorationType(TextDecoration value);
+    void AddTextDecorationType(TextDecoration value);
     std::optional<Color> GetColor() const;
     std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
+    std::optional<float> GetTextDecorationLineThicknessScale() const;
+    std::optional<TextDecorationOptions> GetTextDecorationOptions() const;
+    void SetTextDecorationOptions(const TextDecorationOptions& options);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
+    std::string DecorationTypesToString() const;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    std::optional<float> GetLineThicknessScale() const;
 
 private:
     void AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem);
 
-    TextDecoration type_;
+    std::vector<TextDecoration> types_;
     std::optional<Color> color_;
     std::optional<TextDecorationStyle> style_;
+    std::optional<float> lineThicknessScale_;
+    std::optional<TextDecorationOptions> options_;
 };
 
 class BaselineOffsetSpan : public SpanBase {

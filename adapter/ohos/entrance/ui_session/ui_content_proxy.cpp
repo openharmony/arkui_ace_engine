@@ -20,7 +20,6 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
-
 int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
     MessageParcel data;
@@ -355,16 +354,16 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LOGW("UnregisterComponentChangeEventCallback write interface token failed");
+        LOGW("UnregisterWebUnfocusEventCallback write interface token failed");
         return FAILED;
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
         return FAILED;
     }
-    report_->UnregisterComponentChangeEventCallback();
-    if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
-        LOGW("UnregisterComponentChangeEventCallback send request failed");
+    report_->UnregisterWebUnfocusEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterWebUnfocusEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
@@ -623,6 +622,32 @@ int32_t UIContentServiceProxy::GetCurrentImagesShowing(
     report_->RegisterGetShowingImageCallback(finishCallback);
     if (Remote()->SendRequest(GET_CURRENT_SHOWING_IMAGE, data, reply, option) != ERR_NONE) {
         LOGW("GetCurrentImagesShowing send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::ExeAppAIFunction(
+    const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ExeAppAIFunction write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteString(funcName) || !data.WriteString(params)) {
+        LOGW("ExeAppAIFunction write data failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("ExeAppAIFunction is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterExeAppAIFunction(finishCallback);
+    if (Remote()->SendRequest(EXE_APP_AI_FUNCTION, data, reply, option) != ERR_NONE) {
+        LOGW("ExeAppAIFunction send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

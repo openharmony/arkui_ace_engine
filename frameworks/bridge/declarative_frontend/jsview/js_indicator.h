@@ -70,13 +70,15 @@ public:
 
     void SetController(const RefPtr<NG::IndicatorController>& controller, RefPtr<NG::FrameNode>& indicatorNode)
     {
-        auto resetFunc = [wp = WeakClaim(this), indicatorNode]() {
+        auto resetFunc = [wp = WeakClaim(this), wpNode = WeakClaim(RawPtr(indicatorNode))]() {
             auto JSController = wp.Upgrade();
-            if (JSController) {
-                auto host = JSController->controller_.Upgrade()->GetIndicatorNode();
-                if (host == indicatorNode) {
-                    JSController->controller_ = nullptr;
-                }
+            CHECK_NULL_VOID(JSController);
+            auto controller = JSController->controller_.Upgrade();
+            CHECK_NULL_VOID(controller);
+            auto host = controller->GetIndicatorNode();
+            auto node = wpNode.Upgrade();
+            if (node && node == host) {
+                JSController->controller_ = nullptr;
             }
         };
         if (controller_.Upgrade()) {
@@ -85,6 +87,11 @@ public:
         controller_ = controller;
         controller->SetJSIndicatorController(resetFunc);
         controller->SetSwiperNode(swiperNode_.Upgrade());
+    }
+
+    void ResetSwiperNode()
+    {
+        swiperNode_ = nullptr;
     }
 
     void SetInstanceId(int32_t id)
@@ -100,10 +107,11 @@ public:
         }
         if (node != swiperNode_) {
             swiperNode_ = node;
-            return [wp = WeakClaim(this), node]() {
+            return [wp = WeakClaim(this), wpNode = WeakClaim(RawPtr(node))]() {
                 auto JSController = wp.Upgrade();
                 if (JSController) {
-                    if (node == JSController->swiperNode_) {
+                    auto node = wpNode.Upgrade();
+                    if (node && node == JSController->swiperNode_) {
                         JSController->swiperNode_ = nullptr;
                     }
                     auto controller = JSController->controller_.Upgrade();

@@ -129,7 +129,7 @@ void ParseDateTimeOptions(const NativeDateDialogOptions& options, DateTimeType& 
     dateTimeOptions.secondType = ZeroPrefixType::AUTO;
 
     std::string hour = std::string(options.dateTimeOptions.hour);
-    if (std::string() == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+    if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
         dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
         dateTimeOptions.hourType = ZeroPrefixType::HIDE;

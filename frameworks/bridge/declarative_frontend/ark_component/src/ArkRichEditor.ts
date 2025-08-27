@@ -420,6 +420,65 @@ class RichEditorMaxLinesModifier extends ModifierWithKey<number | undefined> {
   }
 }
 
+class RichEditorOnDidIMEInputModifier extends ModifierWithKey<(value: TextRange) => void> {
+  constructor(value: (value: TextRange) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorOnDidIMEInput');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDidIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setOnDidIMEInput(node, this.value);
+    }
+  }
+}
+
+class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().richEditor.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class RichEditorEnableAutoSpacingModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableAutoSpacing(node);
+    } else {
+      getUINativeModule().richEditor.setEnableAutoSpacing(node, this.value);
+    }
+  }
+}
+
+class RichEditorUndoStyleModifier extends ModifierWithKey<Optional<UndoStyle>> {
+  constructor(value: Optional<UndoStyle>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorUndoStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetUndoStyle(node);
+    } else {
+      getUINativeModule().richEditor.setUndoStyle(node, this.value);
+    }
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -548,6 +607,22 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   maxLines(value: number): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
+    return this;
+  }
+  onDidIMEInput(callback: (value: TextRange) => void): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidIMEInputModifier.identity, RichEditorOnDidIMEInputModifier, callback);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableHapticFeedbackModifier.identity, RichEditorEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableAutoSpacingModifier.identity, RichEditorEnableAutoSpacingModifier, enable);
+    return this;
+  }
+  undoStyle(style: Optional<UndoStyle>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
     return this;
   }
 }

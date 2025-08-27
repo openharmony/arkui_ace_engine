@@ -257,9 +257,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+     if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.overflow === this.stageValue.overflow &&
         this.value.maxLines === this.stageValue.maxLines &&
         this.value.minFontSize === this.stageValue.minFontSize &&
@@ -364,9 +362,7 @@ class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&

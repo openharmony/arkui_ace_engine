@@ -28,6 +28,7 @@ bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
     auto tap = AceType::DynamicCast<NG::TapGesture>(gesture);
     return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
 }
+} // namespace
 
 GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
 {
@@ -50,7 +51,6 @@ GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
     }
     return nullptr;
 }
-} // namespace
 
 void GestureModelNG::Create(int32_t priorityNum, int32_t gestureMaskNum)
 {
@@ -88,7 +88,7 @@ void GestureModelNG::Finish()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->AddGesture(gesture);
 
-    GestureEventFunc clickEvent = GetTapGestureEventFunc(gesture);
+    GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesture);
     if (clickEvent) {
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -152,8 +152,8 @@ void PanGestureModelNG::Create(
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PanGestureModelNG::Create(
-    int32_t fingersNum, const PanDirection& panDirection, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+void PanGestureModelNG::Create(int32_t fingersNum, const PanDirection& panDirection,
+    const PanDistanceMapDimension& distanceMap, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();

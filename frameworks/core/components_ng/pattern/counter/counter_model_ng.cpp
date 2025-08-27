@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -370,5 +371,113 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::CreateWithResourceObj(JsCounterResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, jsResourceType, resObj);
+}
+
+void CounterModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, JsCounterResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    switch (jsResourceType) {
+        case JsCounterResourceType::Height:
+            HandleHeightResource(frameNode, resObj);
+            break;
+        case JsCounterResourceType::Width:
+            HandleWidthResource(frameNode, resObj);
+            break;
+        case JsCounterResourceType::BackgroundColor:
+            HandleBackgroundColorResource(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.height";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        Dimension height;
+        if (!ResourceParseUtils::ConvertFromResObjNG(resObj, height)) {
+            return;
+        }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        if (pipelineContext->IsSystmColorChange()) {
+            if (!LessNotEqual(height.Value(), 0.0)) {
+                SetHeight(AceType::RawPtr(frameNode), height);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.width";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        Dimension width;
+        if (!ResourceParseUtils::ConvertFromResObjNG(resObj, width)) {
+            return;
+        }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        if (pipelineContext->IsSystmColorChange()) {
+            if (!LessNotEqual(width.Value(), 0.0)) {
+                SetWidth(AceType::RawPtr(frameNode), width);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "counter.backgroundColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        Color color;
+        if (ResourceParseUtils::ParseResColor(resObj, color)) {
+            auto frameNode = pattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            if (pipelineContext->IsSystmColorChange()) {
+                SetBackgroundColor(AceType::RawPtr(frameNode), color);
+            }
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

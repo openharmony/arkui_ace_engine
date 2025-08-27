@@ -38,8 +38,10 @@ public:
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
     bool IsLoop() const override;
     void SetDisableTransitionAnimation(bool isDisable) override;
+    bool GetAndResetDisableFlushFocus() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
     void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) override;
     bool IsCrownSpring() const override;
     void SetIsCrownSpring(bool isCrownSpring) override;
@@ -167,21 +169,26 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     bool disableTransitionAnimation_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info);
+    void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionEnd(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionCancel();
+    double GetCrownRotatePx(const CrownEvent& event) const;
     void UpdateCrownVelocity(double degree, double mainDelta, bool isEnd = false);
     void StartVibrator(bool isLeft);
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
     Offset accumulativeCrownPx_;
     bool isCrownSpring_ = false;
     double crownVelocity_ = 0.0;
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
+    int32_t oldCurrentIndex_ = -1;
+    bool isChanged_ = false;
 #endif
+    bool isDisableFlushFocus_ = false;
     bool canChangeDirectionFlag_ = false;
     bool scrollToLeft_ = false;
     bool scrollToTop_ = false;

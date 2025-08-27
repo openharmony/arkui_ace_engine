@@ -16,8 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
+#include "ui/view/theme/token_theme.h"
 
 #define COLORS_NUMBER (51)
 
@@ -81,17 +83,18 @@
 #define INTERACTIVE_CLICK (50)
 
 namespace OHOS::Ace::Framework {
+
+struct ResourceValue {
+    RefPtr<ResourceObject> colorObj;
+    Color colorValue;
+};
+
 class JSThemeColors {
 public:
     JSThemeColors() = default;
     virtual ~JSThemeColors() = default;
 
-    void SetColors(const JSRef<JSArray>& colors)
-    {
-        for (int i = 0; i < COLORS_NUMBER; i++) {
-            colors_.push_back(colors->GetValueAt(i));
-        }
-    }
+    void SetColors(const JSRef<JSArray>& colors);
 
     Color Brand() const
     {
@@ -305,14 +308,17 @@ public:
         return ConvertJsValueToColor(colors_[INTERACTIVE_CLICK]);
     }
 private:
-    Color ConvertJsValueToColor(const JSRef<JSVal>& jsValue) const
+    Color ConvertJsValueToColor(const ResourceValue& resValue) const
     {
-        Color color;
-        JSViewAbstract::ParseJsColor(jsValue, color);
-        return color;
+        if (resValue.colorObj) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resValue.colorObj, color);
+            return color;
+        }
+        return resValue.colorValue;
     }
 
-    std::vector<JSRef<JSVal>> colors_;
+    std::vector<ResourceValue> colors_;
 };
 
 class JSTheme {
@@ -325,12 +331,23 @@ public:
         colors_ = colors;
     }
 
+    void SetDarkColors(const JSThemeColors& darkColors)
+    {
+        darkColors_ = darkColors;
+    }
+
     const JSThemeColors& Colors() const
     {
-        return colors_;
+        bool isDark = IsDarkMode();
+        return isDark ? darkColors_ : colors_;
     }
 private:
     JSThemeColors colors_;
+    JSThemeColors darkColors_;
+    static bool IsDarkMode()
+    {
+        return OHOS::Ace::TokenTheme::IsDarkMode();
+    }
 };
 
 class JSThemeScope {

@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
 } // namespace
 
 void TextFieldManagerNG::ClearOnFocusTextField()
@@ -78,9 +79,10 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    auto y = std::max(0.0, position.GetY());
-    position_ = {position.GetX(), y};
-    optionalPosition_ = position_;
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition from %{public}s to %{public}s",
+        position_.ToString().c_str(), position.ToString().c_str());
+    position_ = position;
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -129,7 +131,7 @@ void TextFieldManagerNG::TriggerCustomKeyboardAvoid()
     auto host = curPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
-    keyboardOverLay->AvoidCustomKeyboard(nodeId, safeHeight);
+    keyboardOverLay->TriggerCustomKeyboardAvoid(nodeId, safeHeight);
 }
 
 void TextFieldManagerNG::TriggerAvoidOnCaretChange()
@@ -145,11 +147,10 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
     if (!pipeline->UsingCaretAvoidMode() || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    ScrollTextFieldToSafeArea();
     if (UsingCustomKeyboardAvoid()) {
-        ScrollTextFieldToSafeArea();
         TriggerCustomKeyboardAvoid();
     } else {
-        ScrollTextFieldToSafeArea();
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
         lastKeyboardOffset_ = safeAreaManager->GetKeyboardOffset(true);
         Rect keyboardRect;
@@ -177,6 +178,32 @@ void TextFieldManagerNG::GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocus
     TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
 }
 
+RefPtr<FrameNode> TextFieldManagerNG::FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
+    bool isShowKeyboard)
+{
+    auto node = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto pattern = parent->GetPattern<ScrollablePattern>();
+        if (!pattern) {
+            parent = parent->GetAncestorNodeOfFrame(true);
+            continue;
+        }
+        if (!pattern->IsScrollToSafeAreaHelper() || pattern->GetAxis() == Axis::HORIZONTAL) {
+            return nullptr;
+        }
+        auto scrollableRect = parent->GetTransformRectRelativeToWindow();
+        if (!isShowKeyboard || LessNotEqual(scrollableRect.Top(), bottomInset.start)) {
+            return parent;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
 bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard)
 {
@@ -188,7 +215,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_RETURN(textBase, false);
     textBase->OnVirtualKeyboardAreaChanged();
 
-    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
+    auto scrollableNode = FindCorrectScrollNode(bottomInset, isShowKeyboard);
     CHECK_NULL_RETURN(scrollableNode, false);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper(), false);
@@ -197,14 +224,6 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     if (isShowKeyboard) {
         CHECK_NULL_RETURN(LessNotEqual(scrollableRect.Top(), bottomInset.start), false);
-    }
-
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, false);
-    if (pipeline->UsingCaretAvoidMode()) {
-        scrollableRect.SetTop(scrollableRect.Top() - safeAreaManager->GetKeyboardOffset());
     }
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
@@ -258,9 +277,9 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
         auto nowOrientation = static_cast<int32_t>(container->GetDisplayInfo()->GetRotation());
         if (nowOrientation != keyboardOrientation) {
             // When rotating the screen, sometimes we might get a keyboard height that in wrong
-            // orientation due to timeing issue. In this case, we ignore the illegal keyboard height.
-            TAG_LOGI(ACE_KEYBOARD, "Current Orientation not match keyboard orientation, ignore it");
-            isShowKeyboard = false;
+            // orientation due to timeing issue. In this case, we assume there is no keyboard.
+            TAG_LOGI(ACE_KEYBOARD, "Current Orientation can't match keyboard orientation");
+            keyboardInset = { .start = bottom, .end = bottom };
         }
     }
     if (isShowKeyboard) {
@@ -540,5 +559,81 @@ void TextFieldManagerNG::OnAfterAvoidKeyboard(bool isCustomKeyboard)
 TextFieldManagerNG::~TextFieldManagerNG()
 {
     textFieldInfoMap_.clear();
+    textFieldFillContentMaps_.clear();
+}
+
+bool TextFieldManagerNG::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject)
+{
+    if (!jsonObject->IsValid() || !jsonObject->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent list format is invalid");
+        return false;
+    }
+
+    for (int32_t i = 0; i < jsonObject->GetArraySize(); ++i) {
+        auto item = jsonObject->GetArrayItem(i);
+        if (!item) {
+            continue;
+        }
+        auto nodeId = item->GetInt("id", -1);
+        if (nodeId == -1) {
+            continue;
+        }
+        FillContentMap fillContentMap;
+        auto fillContent = item->GetValue("fillContent");
+        if (!fillContent) {
+            continue;
+        }
+        GenerateFillContentMap(fillContent->GetString(), fillContentMap);
+        if (!fillContentMap.empty()) {
+            textFieldFillContentMaps_[nodeId] = fillContentMap;
+        }
+    }
+    return true;
+}
+
+void TextFieldManagerNG::GenerateFillContentMap(const std::string& fillContent, FillContentMap& map)
+{
+    auto jsonObject = JsonUtil::ParseJsonString(fillContent);
+    CHECK_NULL_VOID(jsonObject);
+    if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent format is invalid");
+        return;
+    }
+    auto child = jsonObject->GetChild();
+    while (child && child->IsValid()) {
+        if (!child->IsObject() && child->IsString()) {
+            std::string strKey = child->GetKey();
+            std::string strVal = child->GetString();
+            if (strKey.empty()) {
+                child = child->GetNext();
+                continue;
+            }
+            if (map.size() < MAX_FILL_CONTENT_SIZE) {
+                map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t>>(strKey, strVal));
+            } else {
+                TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
+                break;
+            }
+        }
+        child = child->GetNext();
+    }
+}
+
+FillContentMap TextFieldManagerNG::GetFillContentMap(int32_t id)
+{
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap;
+    auto fillContentMapIter = textFieldFillContentMaps_.find(id);
+    if (fillContentMapIter != textFieldFillContentMaps_.end()) {
+        fillContentMap = fillContentMapIter->second;
+    }
+    return fillContentMap;
+}
+
+void TextFieldManagerNG::RemoveFillContentMap(int32_t id)
+{
+    auto fillContentMapIter = textFieldFillContentMaps_.find(id);
+    if (fillContentMapIter != textFieldFillContentMaps_.end()) {
+        textFieldFillContentMaps_.erase(fillContentMapIter);
+    }
 }
 } // namespace OHOS::Ace::NG

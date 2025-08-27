@@ -88,6 +88,9 @@ def build_event_node_tree(scope: EventScope):
                 parent.append_child(child)
                 if len(flatten_frame_nodes) == 14 and i == 10 and len(node_map) == 10:
                     break
+            else:
+                child = get_dict_value(node_map, item.address)
+                result.append(child)
         else:
             child = get_dict_value(node_map, item.address)
             result.append(child)

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_lifting.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
@@ -133,24 +134,15 @@ void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEve
 
 void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
 {
+    if (info.GetOriginUIInputEventType() == UIInputEventType::AXIS) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "Trigger drag pan event by touch transformed from axis");
+        return;
+    }
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();
@@ -243,6 +235,8 @@ void DragDropInitiatingStateLifting::SetScaleAnimation(int32_t fingerId)
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_TIME);
     option.SetCurve(motion);
@@ -262,7 +256,7 @@ void DragDropInitiatingStateLifting::SetScaleAnimation(int32_t fingerId)
         [imageContext]() {
             imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropInitiatingStateLifting::SetPixelMap()
@@ -323,6 +317,8 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
 
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto params = machine->GetDragDropInitiatingParams();
     frameNode->SetOptionsAfterApplied(params.optionsAfterApplied);
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
@@ -348,7 +344,7 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
             }
             DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropInitiatingStateLifting::SetGatherAnimation(const RefPtr<PipelineBase>& context)
@@ -372,27 +368,6 @@ void DragDropInitiatingStateLifting::SetGatherAnimation(const RefPtr<PipelineBas
     DragAnimationHelper::HideDragNodeCopy(manager);
     DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
     DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, manager);
-}
-
-void DragDropInitiatingStateLifting::ResetNodeInMultiDrag()
-{
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    auto params = machine->GetDragDropInitiatingParams();
-    if (!params.isNeedGather) {
-        return;
-    }
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto frameNode = params.frameNode.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    mainPipeline->AddAfterRenderTask([mainPipeline, weak = WeakClaim(RawPtr(frameNode))]() {
-        CHECK_NULL_VOID(mainPipeline);
-        auto manager = mainPipeline->GetOverlayManager();
-        auto frameNode = weak.Upgrade();
-        DragAnimationHelper::HideDragNodeCopy(manager);
-        DragDropFuncWrapper::ResetNode(frameNode);
-    });
 }
 
 void DragDropInitiatingStateLifting::SetEventColumn()
@@ -461,7 +436,6 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
         UpdateDragPreviewOptionFromModifier();
     }
     if (!CheckDoShowPreview(frameNode)) {
-        ResetNodeInMultiDrag();
         return;
     }
     if (gestureHub->GetTextDraggable()) {
@@ -469,6 +443,10 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
             SetTextAnimation();
             SetEventColumn();
         }
+        return;
+    }
+    if (!IsAllowedDrag()) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDrop long press and info received");
         return;
     }
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
@@ -533,9 +511,32 @@ void OHOS::Ace::NG::DragDropInitiatingStateLifting::SetTextAnimation()
     if (renderContext) {
         params.preScaledPixelMap = renderContext->GetThumbnailPixelMap();
     }
+    // ai长按预览菜单hovescale依赖dragNode节点截图
+    if (textBase->CanAIEntityDrag()) {
+        auto hub = dragNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto dragGestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(dragGestureHub);
+        dragGestureHub->SetPixelMap(params.preScaledPixelMap);
+    }
     modifier->StartFloatingAnimate();
     pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
+}
+
+void DragDropInitiatingStateLifting::HandlePreDragStatus(const PreDragStatus preDragStatus)
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (!params.isNeedGather) {
+        return;
+    }
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (preDragStatus == PreDragStatus::PREVIEW_LIFT_FINISHED) {
+        DragDropFuncWrapper::ResetNode(frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

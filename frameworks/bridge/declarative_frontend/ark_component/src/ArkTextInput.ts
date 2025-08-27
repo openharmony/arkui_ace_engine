@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class TextInputStyleModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -31,9 +28,6 @@ class TextInputStyleModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLengthModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -47,9 +41,6 @@ class TextInputMaxLengthModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLinesModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -80,9 +71,7 @@ class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecoration
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
@@ -162,7 +151,7 @@ class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | Un
       }
     }
   }
-
+ 
   checkObjectDiff(): boolean {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -297,6 +286,7 @@ class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAd
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
 class TextInputTextOverflowModifier extends ModifierWithKey<TextOverflow> {
   constructor(value: TextOverflow) {
     super(value);
@@ -313,7 +303,7 @@ class TextInputTextOverflowModifier extends ModifierWithKey<TextOverflow> {
     return this.stageValue !== this.value;
   }
 }
-
+ 
 class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
   constructor(value: Dimension) {
     super(value);
@@ -333,9 +323,6 @@ class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
 }
 
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputShowPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -365,9 +352,6 @@ class TextInputShowPasswordModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputTextAlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -382,9 +366,6 @@ class TextInputTextAlignModifier extends ModifierWithKey<number> {
 }
 
 class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputPlaceholderFont');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -401,14 +382,10 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
       this.stageValue.style === this.value.style)) {
       return true;
     } else {
-      if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-        isResourceEqual(this.stageValue.size, this.value.size)) ||
-        (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-          this.stageValue.size === this.value.size)) &&
-        ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-          isResourceEqual(this.stageValue.family, this.value.family)) ||
-          (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-            this.stageValue.family === this.value.family))) {
+      if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+          this.stageValue.size === this.value.size) &&
+        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+          this.stageValue.family === this.value.family)) {
         return false;
       } else {
         return true;
@@ -418,9 +395,6 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
 }
 
 class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -435,9 +409,6 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
-  constructor(value: PasswordIcon) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -453,9 +424,6 @@ class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
 }
 
 class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -470,9 +438,6 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceC
 }
 
 class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -486,9 +451,6 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputShowUnderLine');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -533,6 +495,24 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class TextInputEnableAutoFillAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoFillAnimation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoFillAnimation(node);
+    } else {
+      getUINativeModule().textInput.setEnableAutoFillAnimation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined> {
   constructor(value: ResourceStr | undefined) {
     super(value);
@@ -550,9 +530,6 @@ class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined
   }
 }
 class TextInputTypeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -567,9 +544,6 @@ class TextInputTypeModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCaretPositionModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputCaretPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -584,9 +558,6 @@ class TextInputCaretPositionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCopyOptionModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -601,9 +572,6 @@ class TextInputCopyOptionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -618,9 +586,6 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
 }
 
 class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
-  constructor(value: CaretStyle) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -633,7 +598,8 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 
   checkObjectDiff(): boolean {
     if (isObject(this.stageValue) && isObject(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
+      return (!isBaseOrResourceEqual(this.stageValue.width, this.value.width)) ||
+        !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
     } else {
       return true;
     }
@@ -641,9 +607,6 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 }
 
 class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputEnterKeyType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -658,9 +621,6 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
 }
 
 class TextInputBarStateModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -675,9 +635,6 @@ class TextInputBarStateModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textinputCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -691,9 +648,6 @@ class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -709,9 +663,6 @@ class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
 
 
 class TextInputFontSizeModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputFontSize');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -727,9 +678,6 @@ class TextInputFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class TextInputFontStyleModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -743,8 +691,8 @@ class TextInputFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextInputFontWeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputFontWeight');
@@ -761,9 +709,6 @@ class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
 }
 
 class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
-  constructor(value: ResourceStr) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textInputFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1094,9 +1039,7 @@ class TextInputBorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> 
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
@@ -1149,9 +1092,7 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
@@ -1242,9 +1183,7 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
@@ -1333,6 +1272,12 @@ class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
     }
   }
 
+}
+
+interface TextInputParam {
+  placeholder?: ResourceStr;
+  text?: ResourceStr;
+  controller?: TextInputController;
 }
 
 class TextInputOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
@@ -1453,6 +1398,20 @@ class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputOnSecurityStateChangeModifier extends ModifierWithKey<Callback<boolean>> {
+  constructor(value: Callback<boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnSecurityStateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnSecurityStateChange(node);
+    } else {
+      getUINativeModule().textInput.setOnSecurityStateChange(node, this.value);
+    }
+  }
+}
+
 class TextInputEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   constructor(value: EllipsisMode) {
     super(value);
@@ -1470,10 +1429,58 @@ class TextInputEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   }
 }
 
-interface TextInputParam {
-  placeholder?: ResourceStr;
-  text?: ResourceStr;
-  controller?: TextInputController;
+class TextInputStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStrokeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().textArea.setStrokeWidth(node, this.value.value, this.value.unit);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputStrokeColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStrokeColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetStrokeColor(node);
+    } else {
+      getUINativeModule().text.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnableAutoSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnableAutoSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
@@ -1521,6 +1528,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   passwordRules(value: string): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
       TextInputPasswordRulesModifier, value);
+    return this;
+  }
+  enableAutoFillAnimation(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillAnimationModifier.identity,
+      TextInputEnableAutoFillAnimationModifier, value);
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextInputAttribute {
@@ -1612,7 +1624,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextInputAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputFontWeightModifier.identity,
       TextInputFontWeightModifier, value);
     return this;
@@ -1829,98 +1841,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   border(value: BorderOptions): this {
-    let borderValue = new ArkBorder();
-    if (isUndefined(value)) {
-      borderValue = undefined;
-    }
-
-    if (!isUndefined(value?.width) && value?.width !== null) {
-      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
-        borderValue.arkWidth.left = value.width;
-        borderValue.arkWidth.right = value.width;
-        borderValue.arkWidth.top = value.width;
-        borderValue.arkWidth.bottom = value.width;
-      } else {
-        borderValue.arkWidth.left = (value.width as EdgeWidths).left;
-        borderValue.arkWidth.right = (value.width as EdgeWidths).right;
-        borderValue.arkWidth.top = (value.width as EdgeWidths).top;
-        borderValue.arkWidth.bottom = (value.width as EdgeWidths).bottom;
-      }
-    }
-    if (!isUndefined(value?.color) && value?.color !== null) {
-      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
-        borderValue.arkColor.leftColor = value.color;
-        borderValue.arkColor.rightColor = value.color;
-        borderValue.arkColor.topColor = value.color;
-        borderValue.arkColor.bottomColor = value.color;
-      } else {
-        borderValue.arkColor.leftColor = (value.color as EdgeColors).left;
-        borderValue.arkColor.rightColor = (value.color as EdgeColors).right;
-        borderValue.arkColor.topColor = (value.color as EdgeColors).top;
-        borderValue.arkColor.bottomColor = (value.color as EdgeColors).bottom;
-      }
-    }
-    if (!isUndefined(value?.radius) && value?.radius !== null) {
-      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
-        borderValue.arkRadius.topLeft = value.radius;
-        borderValue.arkRadius.topRight = value.radius;
-        borderValue.arkRadius.bottomLeft = value.radius;
-        borderValue.arkRadius.bottomRight = value.radius;
-      } else {
-        borderValue.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
-        borderValue.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
-        borderValue.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
-        borderValue.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
-      }
-    }
-    if (!isUndefined(value?.style) && value?.style !== null) {
-      let arkBorderStyle = new ArkBorderStyle();
-      if (arkBorderStyle.parseBorderStyle(value.style)) {
-        if (!isUndefined(arkBorderStyle.style)) {
-          borderValue.arkStyle.top = arkBorderStyle.style;
-          borderValue.arkStyle.left = arkBorderStyle.style;
-          borderValue.arkStyle.bottom = arkBorderStyle.style;
-          borderValue.arkStyle.right = arkBorderStyle.style;
-        } else {
-          borderValue.arkStyle.top = arkBorderStyle.top;
-          borderValue.arkStyle.left = arkBorderStyle.left;
-          borderValue.arkStyle.bottom = arkBorderStyle.bottom;
-          borderValue.arkStyle.right = arkBorderStyle.right;
-        }
-      }
-    }
-    if (!isUndefined(value?.dashGap) && value?.dashGap !== null) {
-      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) ||
-        isObject(value.dashGap) && isNumber(value.dashGap.value)) {
-        borderValue.arkDashGap.left = value.dashGap;
-        borderValue.arkDashGap.right = value.dashGap;
-        borderValue.arkDashGap.top = value.dashGap;
-        borderValue.arkDashGap.bottom = value.dashGap;
-      } else {
-        borderValue.arkDashGap.left = (value.dashGap as EdgeWidths).left;
-        borderValue.arkDashGap.right = (value.dashGap as EdgeWidths).right;
-        borderValue.arkDashGap.top = (value.dashGap as EdgeWidths).top;
-        borderValue.arkDashGap.bottom = (value.dashGap as EdgeWidths).bottom;
-        borderValue.arkDashGap.start = (value.dashGap as LocalizedEdgeWidths).start;
-        borderValue.arkDashGap.end = (value.dashGap as LocalizedEdgeWidths).end;
-      }
-    }
-    if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
-      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) ||
-        isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
-        borderValue.arkDashWidth.left = value.dashWidth;
-        borderValue.arkDashWidth.right = value.dashWidth;
-        borderValue.arkDashWidth.top = value.dashWidth;
-        borderValue.arkDashWidth.bottom = value.dashWidth;
-      } else {
-        borderValue.arkDashWidth.left = (value.dashWidth as EdgeWidths).left;
-        borderValue.arkDashWidth.right = (value.dashWidth as EdgeWidths).right;
-        borderValue.arkDashWidth.top = (value.dashWidth as EdgeWidths).top;
-        borderValue.arkDashWidth.bottom = (value.dashWidth as EdgeWidths).bottom;
-        borderValue.arkDashWidth.start = (value.dashWidth as EdgeWidths).start;
-        borderValue.arkDashWidth.end = (value.dashWidth as EdgeWidths).end;
-      }
-    }
+    let borderValue = valueToArkBorder(value);
     modifierWithKey(this._modifiersWithKeys, TextInputBorderModifier.identity, TextInputBorderModifier, borderValue);
     return this;
   }
@@ -2005,6 +1926,23 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  strokeWidth(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeWidthModifier.identity, TextInputStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeColorModifier.identity, TextInputStrokeColorModifier, value);
+    return this;
+  }
+  enableAutoSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  onSecurityStateChange(callback: Callback<boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
+      TextInputOnSecurityStateChangeModifier, callback);
     return this;
   }
 }

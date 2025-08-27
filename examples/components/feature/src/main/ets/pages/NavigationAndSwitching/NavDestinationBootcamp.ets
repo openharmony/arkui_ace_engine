@@ -60,7 +60,7 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 
 class DerivedNavPathStack extends NavPathStack {
   // usr defined property 'id'
-  private  id: string = '__default__'
+  private id: string = '__default__'
 
   // new function in derived class
   setId(id: string) {
@@ -776,7 +776,6 @@ export struct NavDestinationBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   scroller: Scroller = new Scroller()
 
   compMaskColorChange() {
@@ -1766,6 +1765,7 @@ export struct NavDestinationBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1777,7 +1777,7 @@ export struct NavDestinationBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1797,11 +1797,12 @@ export struct NavDestinationBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,

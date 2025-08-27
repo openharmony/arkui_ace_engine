@@ -244,8 +244,8 @@ export struct GridObjectSortComponent {
     try {
       this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
       hilog.error(0x3900, 'Ace',
         `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
     }
@@ -471,7 +471,7 @@ export struct GridObjectSortComponent {
         type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
-        customId: `ComposeTitleBar_ImageMenuItem_${composeTittleBarUniqueId}_0`
+        customId: `ComposeTitleBar_ImageMenuItem_${composeTittleBarUniqueId}_0`,
       });
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
         setTimeout(() => {
@@ -703,7 +703,7 @@ export struct GridObjectSortComponent {
     yNew = line * this.blockHeight + subTitleHeight;
     return {
       x: xNew,
-      y: yNew
+      y: yNew,
     };
   }
 
@@ -717,7 +717,7 @@ export struct GridObjectSortComponent {
     }
     return {
       x: xNew,
-      y: yNew
+      y: yNew,
     };
   }
 
@@ -753,7 +753,7 @@ export struct GridObjectSortComponent {
     yNew = itemHeight + subTitleHeight;
     return {
       x: xNew,
-      y: yNew
+      y: yNew,
     };
   }
 
@@ -770,7 +770,7 @@ export struct GridObjectSortComponent {
     }
     return {
       x: xNew,
-      y: yNew
+      y: yNew,
     };
   }
 
@@ -793,7 +793,7 @@ export struct GridObjectSortComponent {
       let coodXY = this.getCoodXY(index);
       return {
         x: coodXY.x,
-        y: coodXY.y
+        y: coodXY.y,
       };
     }
 
@@ -801,7 +801,7 @@ export struct GridObjectSortComponent {
     if (!this.isStartDrag && index === this.selectedIndex) {
       return {
         x: this.editItemMoveX,
-        y: this.editItemMoveY
+        y: this.editItemMoveY,
       };
     }
 
@@ -810,7 +810,7 @@ export struct GridObjectSortComponent {
       let coveringGridPosition = this.getCoveringGridPosition(index);
       return {
         x: coveringGridPosition.x,
-        y: coveringGridPosition.y
+        y: coveringGridPosition.y,
       };
     }
 
@@ -824,7 +824,7 @@ export struct GridObjectSortComponent {
       let addItemRightMove = this.getAddItemRightMove(index);
       return {
         x: addItemRightMove.x,
-        y: addItemRightMove.y
+        y: addItemRightMove.y,
       };
     }
 
@@ -832,7 +832,7 @@ export struct GridObjectSortComponent {
     if (!this.clickRemoveBtn && index === this.unSelectedIndex) {
       return {
         x: this.addItemMoveX,
-        y: -this.addItemMoveY
+        y: -this.addItemMoveY,
       };
     }
 
@@ -841,7 +841,7 @@ export struct GridObjectSortComponent {
       let coveringGridPositionBottom = this.getCoveringGridPositionBottom(index);
       return {
         x: coveringGridPositionBottom.x,
-        y: coveringGridPositionBottom.y
+        y: coveringGridPositionBottom.y,
       };
     }
 
@@ -891,7 +891,7 @@ export struct GridObjectSortComponent {
             .height(ICON_SIZE)
             .position({
               x: this.blockWidth - 40,
-              y: -MARGIN_EIGHT
+              y: -MARGIN_EIGHT,
             })
         }
         .alignItems(HorizontalAlign.Center)
@@ -922,7 +922,7 @@ export struct GridObjectSortComponent {
             .height(ICON_SIZE)
             .position({
               x: this.blockWidth - 52, // gridItem-padding: 16，row-padding: 12，icon: 24 - 8 = 16
-              y: -MARGIN_EIGHT
+              y: -MARGIN_EIGHT,
             })
         }
         .borderRadius(50)
@@ -965,14 +965,21 @@ export struct GridObjectSortComponent {
           this.pointToAddTitleBarEditButton();
         } else {
           if (this.isPointToEditTitleBarSaveButton) {
-            let eventInfo: accessibility.EventInfo = ({
-              type: 'announceForAccessibility', // 表示主动播报的事件。
-              bundleName: this.bundleName, // 目标应用名；不可缺省。
-              triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
-              textAnnouncedForAccessibility: getContext().resourceManager
-                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
-            });
-            accessibility.sendAccessibilityEvent(eventInfo);
+            try {
+              let eventInfo: accessibility.EventInfo = ({
+                type: 'announceForAccessibility', // 表示主动播报的事件。
+                bundleName: this.bundleName, // 目标应用名；不可缺省。
+                triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+                textAnnouncedForAccessibility: getContext().resourceManager
+                  .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE), // 主动播报的内容。
+              });
+              accessibility.sendAccessibilityEvent(eventInfo);
+            } catch (paramError) {
+              let code = (paramError as BusinessError)?.code;
+              let message = (paramError as BusinessError)?.message;
+              hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to get textAnnouncedForAccessibility param error: ${code}, ${message}`);
+            }
           }
         }
       })
@@ -1034,7 +1041,7 @@ export struct GridObjectSortComponent {
           .maxFontScale(this.fontSizeScale)
           .padding({
             top: PADDING_EIGHT,
-            bottom: PADDING_EIGHT
+            bottom: PADDING_EIGHT,
           })
 
         SymbolGlyph(this.imageTextAddIcon(select))
@@ -1215,13 +1222,13 @@ export struct GridObjectSortComponent {
       .height('100%')
       .animation(!this.firstIn ? {
         duration: ENTER_EXIT_ICON_DURATION,
-        curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+        curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER,
       } : { duration: 0 })
     }
     .scale(select.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
     .padding({
       left: MARGIN_EIGHT,
-      right: MARGIN_EIGHT
+      right: MARGIN_EIGHT,
     })
     .height(this.textItemEditHeight)
   }
@@ -1252,7 +1259,7 @@ export struct GridObjectSortComponent {
           .margin({ right: 4 })
           .animation({
             duration: ENTER_EXIT_ICON_DURATION,
-            curve: COMMON_BEZIER
+            curve: COMMON_BEZIER,
           })
 
         Text(select.text)
@@ -1274,7 +1281,7 @@ export struct GridObjectSortComponent {
             .translate(this.gridComState ? { x: -MARGIN_EIGHT } : {})
             .position({
               x: this.blockWidth - 44,
-              y: -MARGIN_EIGHT
+              y: -MARGIN_EIGHT,
             })
         }
       }
@@ -1289,14 +1296,14 @@ export struct GridObjectSortComponent {
       .translate(this.addIconShow && select.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 })
       .animation({
         duration: ENTER_EXIT_ICON_DURATION,
-        curve: COMMON_BEZIER
+        curve: COMMON_BEZIER,
       })
       .height('100%')
     }
     .scale(select.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
     .padding({
       left: MARGIN_EIGHT,
-      right: MARGIN_EIGHT
+      right: MARGIN_EIGHT,
     })
     .height(this.textItemEditHeight)
   }
@@ -1305,7 +1312,7 @@ export struct GridObjectSortComponent {
     this.addAreaLongPressGesture = false;
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
-      curve: LONG_TOUCH_SCALE
+      curve: LONG_TOUCH_SCALE,
     }, () => {
       this.longScaleOnePointTwo = 1;
     });
@@ -1356,7 +1363,7 @@ export struct GridObjectSortComponent {
                 } else {
                   animateTo({
                     duration: ENTER_EXIT_ICON_DURATION,
-                    curve: LONG_TOUCH_SCALE
+                    curve: LONG_TOUCH_SCALE,
                   }, () => {
                     this.longScaleOnePointTwo = 1.05;
                   })
@@ -1437,7 +1444,7 @@ export struct GridObjectSortComponent {
       }
       animateTo({
         duration: ENTER_EXIT_ICON_DURATION,
-        curve: COMMON_BEZIER
+        curve: COMMON_BEZIER,
       }, () => {
         this.addIconShow = true;
       })
@@ -1501,7 +1508,7 @@ export struct GridObjectSortComponent {
     }
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
-      curve: COMMON_BEZIER
+      curve: COMMON_BEZIER,
     }, () => {
       this.addIconShow = true;
     })
@@ -1533,7 +1540,7 @@ export struct GridObjectSortComponent {
           }
           animateTo({
             duration: ENTER_EXIT_ICON_DURATION,
-            curve: COMMON_BEZIER
+            curve: COMMON_BEZIER,
           }, () => {
             this.addIconShow = false;
           });
@@ -1594,7 +1601,7 @@ export struct GridObjectSortComponent {
                 this.isTouchDown = false;
                 animateTo({
                   duration: ENTER_EXIT_ICON_DURATION,
-                  curve: LONG_TOUCH_SCALE
+                  curve: LONG_TOUCH_SCALE,
                 }, () => {
                   this.longScaleOnePointTwo = 1;
                 })
@@ -1635,7 +1642,7 @@ export struct GridObjectSortComponent {
             if (!this.gridComState) {
               animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
-                curve: COMMON_BEZIER
+                curve: COMMON_BEZIER,
               }, () => {
                 this.gridComState = true;
               });
@@ -1646,7 +1653,7 @@ export struct GridObjectSortComponent {
             } else {
               animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
-                curve: LONG_TOUCH_SCALE
+                curve: LONG_TOUCH_SCALE,
               }, () => {
                 this.longScaleOnePointTwo = 1.05;
               });
@@ -1719,16 +1726,6 @@ export struct GridObjectSortComponent {
       LongPressGesture({ repeat: true })
         .onAction(() => {
           this.menuSwitch = true;
-        })
-        .onActionEnd(() => {
-          let eventInfo: accessibility.EventInfo = ({
-            type: 'announceForAccessibility', // 表示主动播报的事件。
-            bundleName: this.bundleName, // 目标应用名；不可缺省。
-            triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
-            textAnnouncedForAccessibility: getContext().resourceManager
-              .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
-          });
-          accessibility.sendAccessibilityEvent(eventInfo);
         }))
     .accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA))
     .accessibilityDescription(this.menuSwitch ? ' ' :
@@ -1742,21 +1739,28 @@ export struct GridObjectSortComponent {
     if (type === ADD) {
       index = this.unSelected.findIndex(i => i.id === this.content.id);
       this.readIndex4AddArea = index;
-      customId = `add_grid_item_${index}`
+      customId = `add_grid_item_${index}`;
     } else {
       index = this.selected.findIndex(i => i.id === this.content.id);
       this.readIndex4EditArea = index;
-      customId = `edit_grid_item_${index}`
+      customId = `edit_grid_item_${index}`;
     }
 
-    this.textAnnouncedForAccessibility = getContext().resourceManager
-      .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE);
+    try {
+      this.textAnnouncedForAccessibility = getContext().resourceManager
+        .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE);
+    } catch (paramError) {
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to get textAnnouncedForAccessibility error: ${code}, ${message}`);
+    }
 
     let eventInfo: accessibility.EventInfo = ({
       type: 'requestFocusForAccessibility',
       bundleName: this.bundleName,
       triggerAction: 'common',
-      customId: customId
+      customId: customId,
     });
 
     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
@@ -1776,7 +1780,7 @@ export struct GridObjectSortComponent {
     this.vibrationDone = false;
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
-      curve: LONG_TOUCH_SCALE
+      curve: LONG_TOUCH_SCALE,
     }, () => {
       this.longScaleOnePointTwo = 1;
     })
@@ -1809,7 +1813,7 @@ export struct GridObjectSortComponent {
       type: 'requestFocusForAccessibility',
       bundleName: this.bundleName,
       triggerAction: 'common',
-      customId: `edit_grid_item_${this.readIndex4EditArea}`
+      customId: `edit_grid_item_${this.readIndex4EditArea}`,
     });
 
     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
@@ -1847,7 +1851,7 @@ export struct GridObjectSortComponent {
             primaryTitle: '',
             secondaryTitle: this.options.showAreaTitle || $r('sys.string.ohos_grid_edit_subtitle_sort'),
             icon: '',
-            operationType: OperationType.BUTTON
+            operationType: OperationType.BUTTON,
           })
             .margin({ bottom: MARGIN_EIGHT })
           this.EditTagBuilder()
@@ -1856,7 +1860,7 @@ export struct GridObjectSortComponent {
             primaryTitle: '',
             secondaryTitle: this.options.addAreaTitle || $r('sys.string.ohos_grid_edit_subtitle_add'),
             icon: '',
-            operationType: OperationType.BUTTON
+            operationType: OperationType.BUTTON,
           })
             .translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {})
             .animation({

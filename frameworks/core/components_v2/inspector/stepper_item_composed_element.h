@@ -22,7 +22,7 @@
 #include "core/pipeline/base/composed_element.h"
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT StepperItemComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(StepperItemComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(StepperItemComposedElement, InspectorComposedElement);
 
 public:
     explicit StepperItemComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

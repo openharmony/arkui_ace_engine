@@ -22,7 +22,11 @@
 namespace OHOS::Ace::NG {
 class MeasureLayoutParam;
 
+#ifdef ACE_STATIC
+class ACE_FORCE_EXPORT MeasureLayoutChild {
+#else
 class MeasureLayoutChild {
+#endif
 public:
     inline void Init(MeasureLayoutParam* parent, int32_t index)
     {
@@ -38,8 +42,12 @@ private:
     int32_t index_ = 0;
 };
 
+#ifdef ACE_STATIC
+class ACE_FORCE_EXPORT MeasureLayoutParam : public AceType {
+#else
 class MeasureLayoutParam : public AceType {
-    DECLARE_ACE_TYPE(MeasureLayoutParam, AceType)
+#endif
+    DECLARE_ACE_TYPE(MeasureLayoutParam, AceType);
 public:
     MeasureLayoutParam(LayoutWrapper* layoutWrapper);
     ~MeasureLayoutParam();

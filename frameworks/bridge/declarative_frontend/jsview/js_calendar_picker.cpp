@@ -29,6 +29,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
@@ -260,13 +262,30 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
         return;
     }
     auto offsetObj = JSRef<JSObject>::Cast(info[1]);
-    CalcDimension dx;
     auto dxValue = offsetObj->GetProperty("dx");
-    ParseJsDimensionVp(dxValue, dx);
-    CalcDimension dy;
     auto dyValue = offsetObj->GetProperty("dy");
-    ParseJsDimensionVp(dyValue, dy);
-    offset = DimensionOffset(dx, dy);
+
+    CalcDimension dx;
+    CalcDimension dy;
+
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> dxResObj;
+        RefPtr<ResourceObject> dyResObj;
+        ParseJsDimensionVp(dxValue, dx, dxResObj);
+        ParseJsDimensionVp(dyValue, dy, dyResObj);
+        offset = DimensionOffset(dx, dy);
+
+        if (dxResObj || dyResObj) {
+            std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
+            CalendarPickerModel::GetInstance()->ParseEdgeAlignResObj(resArray);
+        } else {
+            CalendarPickerModel::GetInstance()->CalendarPickerRemoveResObj("CalendarPicker.EdgeAlign");
+        }
+    } else {
+        ParseJsDimensionVp(dxValue, dx);
+        ParseJsDimensionVp(dyValue, dy);
+        offset = DimensionOffset(dx, dy);
+    }
 
     CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
 }
@@ -281,11 +300,9 @@ void JSCalendarPicker::SetTextStyle(const JSCallbackInfo& info)
     textStyle.fontSize = calendarTheme->GetEntryFontSize();
     textStyle.textColor = calendarTheme->GetEntryFontColor();
     textStyle.fontWeight = FontWeight::NORMAL;
-    if (!info[0]->IsObject()) {
-        CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
-        return;
+    if (info[0]->IsObject()) {
+        JSCalendarPicker::ParseTextStyle(info[0], textStyle);
     }
-    JSCalendarPicker::ParseTextStyle(info[0], textStyle);
     CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
 }
 
@@ -339,9 +356,21 @@ void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
     CalcDimension value;
     if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
         JSViewAbstract::JsHeight(info);
-    } else {
-        CalendarPickerModel::GetInstance()->ClearHeight();
+        return;
     }
+
+    LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        CHECK_NULL_VOID(!object->IsEmpty());
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        CHECK_NULL_VOID(!layoutPolicy->IsEmpty());
+        if (layoutPolicy->IsString()) {
+            policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        }
+    }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+    CalendarPickerModel::GetInstance()->ClearHeight();
 }
 
 void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)
@@ -456,6 +485,27 @@ void JSCalendarPicker::ParseDisabledDateRange(
     }
 }
 
+void JSCalendarPicker::ParseHintRadius(JSRef<JSObject>& obj, NG::CalendarSettingData& settingData,
+    CalcDimension& dayRadius)
+{
+    RefPtr<CalendarTheme> calendarTheme = GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> hintRadiusResObj;
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius, hintRadiusResObj)) {
+            dayRadius = calendarTheme->GetCalendarDayRadius();
+        }
+
+        if (hintRadiusResObj) {
+            settingData.dayRadiusResObj = hintRadiusResObj;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
+            dayRadius = calendarTheme->GetCalendarDayRadius();
+        }
+    }
+}
+
 void JSCalendarPicker::Create(const JSCallbackInfo& info)
 {
     NG::CalendarSettingData settingData;
@@ -464,9 +514,8 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
     CalcDimension dayRadius;
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        if (!ParseJsDimensionVpNG(obj->GetProperty("hintRadius"), dayRadius)) {
-            dayRadius = calendarTheme->GetCalendarDayRadius();
-        }
+        ParseHintRadius(obj, settingData, dayRadius);
+
         auto selected = obj->GetProperty("selected");
         auto parseSelectedDate = ParseDate(selected);
         if (selected->IsObject() && parseSelectedDate.GetYear() != 0) {
@@ -505,8 +554,9 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     auto fontStyle = paramObj->GetProperty("font");
 
     Color color;
-    if (ParseJsColor(fontColor, color)) {
+    if (ParseJsColor(fontColor, color, textStyle.textColorResObj)) {
         textStyle.textColor = color;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontStyle->IsObject()) {
@@ -519,7 +569,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
         textStyle.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
-        if (!ParseJsDimensionFpNG(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (!ParseJsDimensionFpNG(fontSize, size, textStyle.fontSizeResObj) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
         } else {
             textStyle.fontSize = size;
@@ -876,6 +926,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+
+    properties.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
     JSViewAbstract::SetDialogEffectOption(paramObj, properties);

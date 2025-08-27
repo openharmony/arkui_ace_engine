@@ -24,8 +24,8 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -46,6 +46,9 @@ constexpr double TITLE_TOP_PADDING = 8.0;
 constexpr double TITLE_RIGHT_PADDING = 8.0;
 constexpr double TITLE_BOTTOM_PADDING = 16.0;
 constexpr double SELECT_OPTION_INTERVAL = 6.0;
+constexpr FontWeight SELECT_MENU_CHECK_MARK_FONT_WEIGHT = FontWeight::REGULAR;
+constexpr Dimension SELECT_MENU_CHECK_MARK_FONT_SIZE = 24.0_vp;
+constexpr uint32_t SELECT_MENU_CHECK_MARK_DEFAULT_COLOR = 0xFF182431;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -62,7 +65,7 @@ public:
 
         RefPtr<SelectTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SelectTheme> theme = AceType::Claim(new SelectTheme());
+            RefPtr<SelectTheme> theme = AceType::MakeRefPtr<SelectTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -114,6 +117,7 @@ public:
             theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
             theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->spinnerSource_ = themeConstants->GetSymbolByName("sys.symbol.arrowtriangle_down_fill");
+            theme->checkMarkIconId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             ParsePartOne(theme, pattern);
             ParsePartTwo(theme, pattern);
             ParsePartThree(theme, pattern);
@@ -204,7 +208,7 @@ public:
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
-            theme->menuNeedFocus_ = static_cast<bool>(pattern->GetAttr<int>("menu_need_focus", 0));
+            theme->menuItemNeedFocus_ = static_cast<bool>(pattern->GetAttr<int>("menu_item_need_focus", 0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->selectSpinnerWidthMap_.insert(
                     std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->spinnerWidth_));
@@ -256,7 +260,11 @@ public:
                 theme->expandDisplay_ = false;
             } else {
                 std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
-                theme->expandDisplay_ = (expandDisplay == "true");
+                if (expandDisplay == "true") {
+                    theme->expandDisplay_ = true;
+                } else {
+                    theme->expandDisplay_ = false;
+                }
             }
             theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
@@ -331,6 +339,17 @@ public:
             theme->menuItemHorIntervalPadding_ =
                 pattern->GetAttr<Dimension>("menu_item_hor_interval", theme->menuItemHorIntervalPadding_);
             theme->menuPadding_ = pattern->GetAttr<Dimension>("menu_padding_interval", theme->menuPadding_);
+            if (theme->GetExpandDisplay()) {
+                theme->menuWordBreak_ = WordBreak::BREAK_ALL;
+            } else {
+                theme->menuWordBreak_ = WordBreak::BREAK_WORD;
+            }
+            theme->checkMarkFontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>(
+                "select_check_mark_font_weight", static_cast<double>(SELECT_MENU_CHECK_MARK_FONT_WEIGHT))));
+            theme->checkMarkFontSize_ =
+                pattern->GetAttr<Dimension>("select_check_mark_font_size", SELECT_MENU_CHECK_MARK_FONT_SIZE);
+            theme->checkMarkColor_ =
+                pattern->GetAttr<Color>("select_check_mark_color", Color(SELECT_MENU_CHECK_MARK_DEFAULT_COLOR));
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -381,6 +400,9 @@ public:
             theme->menuMaxWidthRatio_ = pattern->GetAttr<double>("menu_max_width_ratio", 0.67f);
             theme->menuBackgroundBlurStyle_ =
                 pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->menuAnimationDuration_ = pattern->GetAttr<int>("menu_animation_duration", 0);
+            theme->menuAnimationScale_ = pattern->GetAttr<double>("menu_animation_scale", 0.6f);
+            theme->menuAnimationCurve_ = pattern->GetAttr<std::string>("menu_animation_curve", "fast_out_slow_in");
         }
     };
 
@@ -388,7 +410,7 @@ public:
 
     RefPtr<SelectTheme> clone()
     {
-        RefPtr<SelectTheme> theme = AceType::Claim(new SelectTheme());
+        RefPtr<SelectTheme> theme = AceType::MakeRefPtr<SelectTheme>();
         ClonePartOne(theme);
         ClonePartTwo(theme);
         ClonePartThree(theme);
@@ -492,12 +514,16 @@ public:
         theme->iconSideLength_ = iconSideLength_;
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
+        theme->checkMarkIconId_ = checkMarkIconId_;
+        theme->checkMarkFontSize_ = checkMarkFontSize_;
+        theme->checkMarkFontWeight_ = checkMarkFontWeight_;
+        theme->checkMarkColor_ = checkMarkColor_;
         theme->contentMargin_ = contentMargin_;
-        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
-        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
         theme->maxPaddingEnd_ = maxPaddingEnd_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
         theme->menuItemChildMinHeight_ = menuItemChildMinHeight_;
@@ -513,6 +539,7 @@ public:
         theme->menuBackgroundBlurStyle_ = menuBackgroundBlurStyle_;
         theme->menuItemHorIntervalPadding_ = menuItemHorIntervalPadding_;
         theme->menuPadding_ = menuPadding_;
+        theme->menuWordBreak_ = menuWordBreak_;
     }
 
     void CloneWideScreenAttrs(RefPtr<SelectTheme>& theme)
@@ -921,6 +948,16 @@ public:
         return focusedDisableColor_;
     }
 
+    const Color& GetCheckMarkColor() const
+    {
+        return checkMarkColor_;
+    }
+
+    FontWeight GetCheckMarkFontWeight() const
+    {
+        return checkMarkFontWeight_;
+    }
+
     const Color& GetNormalDisableColor() const
     {
         return normalDisableColor_;
@@ -959,6 +996,11 @@ public:
     const uint32_t& GetSpinnerSource() const
     {
         return spinnerSource_;
+    }
+
+    const uint32_t& GetCheckMarkIconId() const
+    {
+        return checkMarkIconId_;
     }
 
     const Color& GetMenuIconColor() const
@@ -1095,9 +1137,9 @@ public:
         return spinnerWidth_;
     }
 
-    bool GetMenuNeedFocus() const
+    bool GetMenuItemNeedFocus() const
     {
-        return menuNeedFocus_;
+        return menuItemNeedFocus_;
     }
 
     const Dimension& GetSpinnerWidth(ControlSize controlSize) const
@@ -1177,6 +1219,11 @@ public:
     const Dimension& GetEndIconHeight() const
     {
         return endIconHeight_;
+    }
+
+    const Dimension& GetCheckMarkFontSize() const
+    {
+        return checkMarkFontSize_;
     }
 
     const Dimension& GetContentMargin() const
@@ -1488,6 +1535,30 @@ public:
         return menuBackgroundBlurStyle_;
     }
     
+    int32_t GetMenuAnimationDuration() const
+    {
+        return menuAnimationDuration_;
+    }
+
+    double GetMenuAnimationScale() const
+    {
+        return menuAnimationScale_;
+    }
+
+    RefPtr<Curve> GetMenuAnimationCurve() const
+    {
+        if (menuAnimationCurve_ == "smooth") {
+            return Curves::SMOOTH;
+        } else {
+            return Curves::FAST_OUT_SLOW_IN;
+        }
+    }
+
+    WordBreak GetWordBreak() const
+    {
+        return menuWordBreak_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1504,6 +1575,7 @@ private:
     Color spinnerSymbolColor_ = Color(0xff182431);
     Color disabledSpinnerSymbolColor_;
     uint32_t spinnerSource_ = 983615;
+    uint32_t checkMarkIconId_ = 0;
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;
@@ -1517,6 +1589,7 @@ private:
     Color secondaryFontColor_;
     std::string fontFamily_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
+    FontWeight checkMarkFontWeight_ { FontWeight::REGULAR };
     TextDecoration textDecoration_ { TextDecoration::NONE };
 
     std::size_t optionSize_ { 0 };
@@ -1569,6 +1642,7 @@ private:
     Dimension endIconWidth_;
     Dimension endIconHeight_;
     Dimension contentMargin_;
+    Dimension checkMarkFontSize_;
 
     Color tvFocusTextColor_;
     Color tvNormalBackColor_;
@@ -1578,6 +1652,7 @@ private:
     Color normalDisableColor_;
     Color focusedTextDisableColor_;
     Color normalTextDisableColor_;
+    Color checkMarkColor_;
 
     TextStyle titleStyle_;
     TextStyle optionTextStyle_;
@@ -1591,11 +1666,11 @@ private:
 
     Edge optionPadding_;
 
-    Color selectDefaultBgColor_;
-    Dimension selectDefaultBorderRadius_;
     bool expandDisplay_ = false;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
     std::unordered_map<ControlSize, Dimension> selectMinWidthMap_;
     std::unordered_map<ControlSize, Dimension> selectMinHeightMap_;
     std::unordered_map<ControlSize, Dimension> selectBorderRadiusMap_;
@@ -1604,6 +1679,7 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
+    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
     Dimension menuItemChildMinHeight_;
     Dimension menuItemVerticalPadding_;
     Dimension menuItemGroupTitleTextFontSize_;
@@ -1614,7 +1690,6 @@ private:
     Dimension menuMaxWidth_;
     double menuMaxWidthRatio_;
     Color menuTextColor_;
-    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
     Dimension selectNormalBorderWidth_;
     Color selectNormalBorderColor_;
     Color selectFocusedTextColor_;
@@ -1655,8 +1730,12 @@ private:
     Color menuItemFocusedTextColor_;
     double selectFocusStyleType_ = 0.0;
     double optionFocusStyleType_ = 0.0;
-    bool menuNeedFocus_ = false;
+    bool menuItemNeedFocus_ = false;
     int menuBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    WordBreak menuWordBreak_ = WordBreak::BREAK_WORD;
+    int32_t menuAnimationDuration_ = 0;
+    double menuAnimationScale_ = 0.6;
+    std::string menuAnimationCurve_;
 };
 
 } // namespace OHOS::Ace

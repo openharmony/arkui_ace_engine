@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -27,6 +28,7 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
+#include "core/components_ng/pattern/toggle/switch_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
@@ -38,6 +40,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t NODE_ID = 1;
+constexpr int32_t THEME_SCOPEID = 0;
 constexpr bool IS_ON = true;
 constexpr float CONTAINER_WIDTH = 200.0f;
 constexpr float CONTAINER_HEIGHT = 100.0f;
@@ -50,7 +54,11 @@ constexpr float POINT_RADIUS_INITIAL = 0.0f;
 constexpr float POINT_RADIUS_ILLEGAL = -20.0f;
 constexpr float POINT_RADIUS_LARGE = 30.0f;
 constexpr float TRACK_BORDER_RADIUS = 10.0f;
+constexpr float USER_DEFINE_WIDTH = 180.0f;
+constexpr float USER_DEFINE_HEIGHT = 100.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+const SizeF TEST_CONTAINER_SIZE(200.0f, 200.0f);
+constexpr float TEST_ZERO = 0.0f;
 } // namespace
 
 class ToggleSwitchTestNg : public testing::Test {
@@ -361,10 +369,10 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest005, TestSize.Level1)
     // different branch: update (frameWidth / frameHeight) = ratio = 1.8
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(180, 100)); //180 is width of toggle, 100 is height of toggle
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(USER_DEFINE_WIDTH, USER_DEFINE_HEIGHT));
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 180);  //180 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 100); //100 is height of toggle
+    EXPECT_EQ(switchSize->Width(), USER_DEFINE_WIDTH);
+    EXPECT_EQ(switchSize->Height(), USER_DEFINE_HEIGHT);
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1532,5 +1540,335 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
     EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 0.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest007
+ * @tc.desc: Test HandleEnabled and OnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest007, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.contentModifierNode_ =
+        FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    switchPattern.HandleEnabled();
+    switchPattern.OnClick();
+    EXPECT_TRUE(switchPattern.UseContentModifier());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest008
+ * @tc.desc: Test MarkIsSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest008, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.isOn_ = true;
+    switchPattern.MarkIsSelected(true);
+    EXPECT_TRUE(switchPattern.isOn_);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest009
+ * @tc.desc: Test OnTouchDown and OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest009, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    switchPattern.contentModifierNode_ =
+        FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    switchPattern.OnTouchDown();
+    switchPattern.OnTouchUp();
+    EXPECT_TRUE(switchPattern.UseContentModifier());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest010
+ * @tc.desc: Test BuildContentModifierNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest010, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    EXPECT_EQ(switchPattern.BuildContentModifierNode(), nullptr);
+    SwitchMakeCallback callback = [](const ToggleConfiguration& toggleConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    };
+    switchPattern.makeFunc_ = callback;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    framnode->paintProperty_ = AceType::MakeRefPtr<SwitchPaintProperty>();
+    framnode->eventHub_ = framnode->pattern_->CreateEventHub();
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.isOn_.reset();
+    EXPECT_NE(switchPattern.BuildContentModifierNode(), nullptr);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest011
+ * @tc.desc: Test FireBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest011, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto childrenOne = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, -1, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(childrenOne, nullptr);
+    auto childrenTwo = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(childrenTwo, nullptr);
+    framnode->children_.push_back(childrenOne);
+    framnode->children_.push_back(childrenTwo);
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.FireBuilder();
+    EXPECT_FALSE(switchPattern.makeFunc_.has_value());
+    SwitchMakeCallback callback = [](const ToggleConfiguration& toggleConfiguration) -> RefPtr<FrameNode> {
+        return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    };
+    switchPattern.makeFunc_ = callback;
+    switchPattern.contentModifierNode_ = switchPattern.BuildContentModifierNode();
+    switchPattern.FireBuilder();
+    switchPattern.contentModifierNode_.Reset();
+    switchPattern.FireBuilder();
+    EXPECT_NE(switchPattern.contentModifierNode_, switchPattern.BuildContentModifierNode());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest012
+ * @tc.desc: Test DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest012, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    framnode->paintProperty_ = paintProperty;
+    switchPattern.frameNode_ = std::move(framnode);
+    switchPattern.DumpInfo();
+    EXPECT_NE(switchPattern.GetPaintProperty<SwitchPaintProperty>(), nullptr);
+    paintProperty->UpdateIsOn(true);
+    paintProperty->UpdateSelectedColor(Color::RED);
+    paintProperty->UpdateUnselectedColor(Color::GREEN);
+    paintProperty->UpdateSwitchPointColor(Color::BLUE);
+    paintProperty->UpdatePointRadius(5.0_vp);
+    paintProperty->UpdateTrackBorderRadius(2.0_vp);
+    switchPattern.DumpInfo();
+    EXPECT_TRUE(paintProperty->HasIsOn());
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest013
+ * @tc.desc: Test OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest013, TestSize.Level1)
+{
+    SwitchPattern switchPattern;
+    auto framnode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, NODE_ID, AceType::MakeRefPtr<SwitchPattern>());
+    ASSERT_NE(framnode, nullptr);
+    auto paintProperty = AceType::MakeRefPtr<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    framnode->paintProperty_ = paintProperty;
+    switchPattern.frameNode_ = std::move(framnode);
+    EXPECT_TRUE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
+    paintProperty->UpdateSelectedColor(Color::RED);
+    EXPECT_TRUE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
+    paintProperty->UpdateSwitchPointColor(Color::BLUE);
+    EXPECT_FALSE(switchPattern.OnThemeScopeUpdate(THEME_SCOPEID));
+}
+
+/**
+ * @tc.name: ToggleSwitchLayoutTest014
+ * @tc.desc: Test toggle switch matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest014, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize->Width(), TEST_CONTAINER_SIZE.Width());
+    EXPECT_NE(switchSize->Height(), TEST_CONTAINER_SIZE.Height());
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize->Width(), TEST_CONTAINER_SIZE.Width());
+    EXPECT_EQ(switchSize->Height(), TEST_CONTAINER_SIZE.Height());
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleSwitchLayoutTest015
+ * @tc.desc: Test LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2.  get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. layoutPolicy is default.
+     * @tc.expected: step3. frameWidth and frameHeight are equal to TEST_ZERO.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    LayoutConstraintF contentConstraint;
+    float frameWidth = 0.0f;
+    float frameHeight = 0.0f;
+    switchLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy,
+        frameWidth, frameHeight);
+    EXPECT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_EQ(frameHeight, TEST_ZERO);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step4. frameWidth and frameHeight are equal to TEST_ZERO.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    switchLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy,
+        frameWidth, frameHeight);
+    EXPECT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_EQ(frameHeight, TEST_ZERO);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize toggle model and validate dependencies.
+     * @tc.expected: step1. Frame node, paint property, pipeline context, pattern, and theme are created and valid.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    ASSERT_NE(switchTheme, nullptr);
+
+    /**
+     * @tc.steps: step2. Configure theme colors and initialize paint method and modifier.
+     * @tc.expected: step2. Theme colors are set to RED, paint method and modifier are created.
+     */
+    switchTheme->activeColor_ = Color::RED;
+    switchTheme->pointColor_ = Color::RED;
+    switchTheme->inactiveColor_ = Color::RED;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(pattern->paintMethod_, nullptr);
+    OptionalSize<float> size(1.0f, 2.0f);
+    pattern->paintMethod_->switchModifier_ =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, 0.0f);
+
+    /**
+     * @tc.steps: step3. First call to OnColorConfigurationUpdate with default state.
+     * @tc.expected: step3. No user-set colors, all properties should update to theme defaults.
+     */
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step4. Simulate config change and set user preferences.
+     * @tc.expected: step4. Selected color updates to theme's RED when not set by user.
+     */
+    g_isConfigChangePerform = true;
+    paintProperty->UpdateSelectedColorSetByUser(false);
+    paintProperty->UpdateSwitchPointColorSetByUser(true);
+    paintProperty->UpdateUnselectedColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    auto ret = paintProperty->GetSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    /**
+     * @tc.steps: step5. Reverse user preferences and re-run update.
+     * @tc.expected: step5. Switch point and unselected colors update to theme's RED when not set by user.
+     */
+    paintProperty->UpdateSelectedColorSetByUser(true);
+    paintProperty->UpdateSwitchPointColorSetByUser(false);
+    paintProperty->UpdateUnselectedColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetSwitchPointColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetUnselectedColor(), Color::RED);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

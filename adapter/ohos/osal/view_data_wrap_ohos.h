@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 class PageNodeInfoWrapOhos : public PageNodeInfoWrap {
-    DECLARE_ACE_TYPE(PageNodeInfoWrapOhos, PageNodeInfoWrap)
+    DECLARE_ACE_TYPE(PageNodeInfoWrapOhos, PageNodeInfoWrap);
 
 public:
     PageNodeInfoWrapOhos() {}
@@ -154,7 +154,7 @@ private:
 };
 
 class ViewDataWrapOhos : public ViewDataWrap {
-    DECLARE_ACE_TYPE(ViewDataWrapOhos, ViewDataWrap)
+    DECLARE_ACE_TYPE(ViewDataWrapOhos, ViewDataWrap);
 
 public:
     ViewDataWrapOhos() {}

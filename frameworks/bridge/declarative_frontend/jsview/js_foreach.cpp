@@ -245,10 +245,8 @@ void JSForEach::OnMove(const JSCallbackInfo& info)
     }
 }
 
-void JSForEach::JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue)
+void JSForEach::JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
-    auto itemDragEventObj = JSRef<JSObject>::Cast(jsValue);
-
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {

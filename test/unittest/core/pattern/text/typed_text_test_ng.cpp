@@ -300,6 +300,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent001, TestSize.Level1)
     span.end = 20;
     span.content = "content";
     span.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = span;
     RefPtr<MockParagraph> mockParagraph = AIWriteAdapter::MakeRefPtr<MockParagraph>();
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
@@ -348,6 +349,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent002, TestSize.Level1)
     span.end = 20;
     span.content = "content";
     span.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = span;
     RefPtr<SpanItem> spanItem = AIWriteAdapter::MakeRefPtr<SpanItem>();
     spanItem->content = u"example content";
@@ -405,6 +407,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent005, TestSize.Level1)
     spanOne.end = 20;
     spanOne.content = "content";
     spanOne.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = spanOne;
     AISpan spanTwo;
     spanTwo.start = 20;
@@ -448,6 +451,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent006, TestSize.Level1)
     spanOne.end = 20;
     spanOne.content = "content";
     spanOne.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = spanOne;
     AISpan spanTwo;
     spanTwo.start = 20;
@@ -493,6 +497,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent007, TestSize.Level1)
     spanOne.end = 20;
     spanOne.content = "content";
     spanOne.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = spanOne;
     AISpan spanTwo;
     spanTwo.start = 20;
@@ -538,6 +543,7 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent008, TestSize.Level1)
     spanOne.end = 20;
     spanOne.content = "content";
     spanOne.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(textPattern.GetDataDetectorAdapter(), nullptr);
     textPattern.dataDetectorAdapter_->aiSpanMap_[0] = spanOne;
     AISpan spanTwo;
     spanTwo.start = 20;

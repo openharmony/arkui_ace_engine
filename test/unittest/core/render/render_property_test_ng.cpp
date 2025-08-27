@@ -52,6 +52,7 @@ const Offset OFFSETS { 2.0, 2.0 };
 
 const NG::VectorF VECTOR_TEST = { 10.0, 20.0 };
 const NG::Vector5F VECTOR_5F_TEST = { 20.0f, 40.0f, 60.0f, 80.0f, 0.0f };
+const NG::Vector4F VECTOR_4F_TEST = { 20.0f, 40.0f, 60.0f, 0.0f };
 const NG::TranslateOptions PTTION_TEST = { OFFSET_X, OFFSET_Y, POSITION_X };
 const NG::OffsetT<Dimension> POSITION = { POSITION_X, POSITION_Y };
 const NG::OffsetT<Dimension> OFFSET_TEST = { OFFSET_X, OFFSET_Y };
@@ -489,6 +490,59 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransformPropertyTest002
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, TransformPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object backgroundProperty.
+     */
+    NG::TransformProperty transformProperty;
+    auto json = JsonUtil::Create(true);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.push transformProperty is null.
+     */
+    transformProperty.ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(json->GetString("rotate"), "");
+    EXPECT_EQ(json->GetString("scale"), "");
+    EXPECT_EQ(json->GetString("translate"), "");
+    json->Delete("rotate");
+    json->Delete("scale");
+    json->Delete("translate");
+
+    /**
+     * @tc.steps: step3. call ToJsonValue. push propTransformRotate is VECTOR_5F_TEST.
+     * @tc.steps: step3. push propTransformScale is VECTOR_TEST.
+     * @tc.steps: step3. push propTransformTranslate is PTTION_TEST.
+     */
+    transformProperty.propTransformRotateAngle = VECTOR_4F_TEST;
+    transformProperty.propTransformScale = VECTOR_TEST;
+    transformProperty.propTransformTranslate = PTTION_TEST;
+    transformProperty.ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(json->GetValue("rotate")->GetString("angleX"), "20.000000");
+    EXPECT_EQ(json->GetValue("rotate")->GetString("angleY"), "40.000000");
+    EXPECT_EQ(json->GetValue("rotate")->GetString("angleZ"), "60.000000");
+
+    EXPECT_EQ(json->GetValue("scale")->GetString("centerX"), "5000.00%");
+    EXPECT_EQ(json->GetValue("scale")->GetString("centerY"), "5000.00%");
+
+    EXPECT_EQ(json->GetValue("translate")->GetString("x"), "40.00px");
+    EXPECT_EQ(json->GetValue("translate")->GetString("y"), "80.00px");
+    EXPECT_EQ(json->GetValue("translate")->GetString("z"), "10.00px");
+}
+
+/**
  * @tc.name: RenderPropertyTest001
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
@@ -769,5 +823,55 @@ HWTEST_F(RenderPropertyTestNg, RenderPropertyTest009, TestSize.Level1)
     testFilter.AddFilterAttr("focusable");
     pointLightProperty.ToJsonValue(jsonValue, testFilter);
     EXPECT_EQ(jsonValue->GetValue("pointLight")->GetString("lightIntensity"), "");
+}
+
+/**
+ * @tc.name: RenderPropertyTest010
+ * @tc.desc: Branch: if (propSysOptionsForBlur.has_value()) == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object foregroundProperty.
+     */
+    NG::ForegroundProperty foregroundProperty;
+    SysOptions sysOps = { .disableSystemAdaptation = true };
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    foregroundProperty.propSysOptionsForBlur = sysOps;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    foregroundProperty.ToJsonValue(jsonValue, testFilter);
+    auto obj = jsonValue->GetValue("foregroundSysOptions");
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(obj->GetBool("disableSystemAdaptation"), true);
+}
+
+/**
+ * @tc.name: RenderPropertyTest011
+ * @tc.desc: Branch: if (propSysOptions.has_value()) == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object backgroundProperty.
+     */
+    NG::BackgroundProperty backgroundProperty;
+    SysOptions sysOps = { .disableSystemAdaptation = true };
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    backgroundProperty.propSysOptions = sysOps;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    backgroundProperty.ToJsonValue(jsonValue, testFilter);
+    auto obj = jsonValue->GetValue("backgroundSysOptions");
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(obj->GetBool("disableSystemAdaptation"), true);
 }
 } // namespace OHOS::Ace

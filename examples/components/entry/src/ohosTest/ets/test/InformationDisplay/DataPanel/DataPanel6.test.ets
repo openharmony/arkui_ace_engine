@@ -42,7 +42,6 @@ export default function DataPanel6() {
     })
 
 
-
     //focusable
     it('ArkUI_DataPanel_Comp_0461', 0, async (done: Function) => {
 
@@ -319,7 +318,6 @@ export default function DataPanel6() {
 
       done()
     })
-
 
 
   })

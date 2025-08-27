@@ -279,6 +279,16 @@ TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
     return textDecorationStyle_;
 }
 
+void RichEditorAbstractSpanResult::SetLineThicknessScale(float thicknessScale)
+{
+    lineThicknessScale_ = thicknessScale;
+}
+
+float RichEditorAbstractSpanResult::GetLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
 {
     valuePixelMap_ = valuePixelMap;
@@ -452,6 +462,11 @@ void RichEditorChangeValue::SetRangeAfter(const TextRange& rangeAfter)
 TextRange RichEditorChangeValue::GetRangeAfter() const
 {
     return rangeAfter_;
+}
+
+TextChangeReason RichEditorChangeValue::GetChangeReason() const
+{
+    return changeReason_;
 }
 
 void StyledStringChangeValue::SetRangeBefore(const TextRange& range)

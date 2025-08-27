@@ -24,6 +24,9 @@ template("ace_base_base64") {
     } else {
       external_deps = [ "skia:skia_canvaskit" ]
     }
+    if (ace_engine_feature_enable_upgrade_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
 
     # add base source file here
     sources = [ "base64_util.cpp" ]

@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using NavPathList = std::vector<std::pair<std::string, RefPtr<UINode>>>;
 class NavDestinationContext;
 class RouteInfo : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::RouteInfo, AceType)
+    DECLARE_ACE_TYPE(NG::RouteInfo, AceType);
 public:
     RouteInfo() = default;
     virtual ~RouteInfo() = default;
@@ -41,7 +41,7 @@ public:
 };
 
 class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::NavigationStack, AceType)
+    DECLARE_ACE_TYPE(NG::NavigationStack, AceType);
 public:
     NavigationStack() = default;
     ~NavigationStack() override = default;
@@ -201,6 +201,7 @@ public:
     virtual void MoveIndexToTop(int32_t index) {}
 
     virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
+    virtual std::string GetSerializedParamSafely(int32_t index) const { return ""; }
     virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
     virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
     virtual bool IsFromRecovery(int32_t index) { return false; }
@@ -268,6 +269,17 @@ public:
     }
 
     virtual void SetIsEntryByIndex(int32_t index, bool isEntry) {}
+
+    virtual void RemoveByIndexes(const std::vector<int32_t>& indexes) {}
+
+    virtual void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) {}
+
+    virtual void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) {}
+
+    virtual bool CreateHomeDestination(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
+    {
+        return false;
+    }
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);

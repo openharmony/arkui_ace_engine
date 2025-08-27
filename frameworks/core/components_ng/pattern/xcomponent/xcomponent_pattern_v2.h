@@ -17,6 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_PATTERN_V2_H
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
+#include "core/accessibility/native_interface_accessibility_provider.h"
+
+namespace OHOS::Rosen {
+class Session;
+class RSNode;
+class RSTransaction;
+class RSTransactionHandler;
+class RSUIContext;
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
 class XComponentPatternV2 : public XComponentPattern {
@@ -47,6 +56,20 @@ public:
         return true;
     }
 
+    void SetExpectedRateRange(int32_t min, int32_t max, int32_t expected);
+
+    void UpdateOnFrameEvent(void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode);
+
+    void UnregisterOnFrameEvent();
+
+    void SetNeedSoftKeyboard(bool isNeedSoftKeyboard);
+
+    ArkUI_AccessibilityProvider* CreateAccessibilityProvider();
+
+    void DisposeAccessibilityProvider(ArkUI_AccessibilityProvider* provider);
+
+    static FrameNode* QueryAccessibilityProviderHost(void* provider, bool& isProviderValied);
+
 private:
     void OnAttachToFrameNode() override;
     void OnAttachToMainTree() override;
@@ -59,6 +82,12 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
 
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread();
+
     void InitSurface();
     void DisposeSurface();
     int32_t HandleSurfaceCreated();
@@ -68,6 +97,14 @@ private:
     void HandleSurfaceChangeEvent(bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
+    void FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<Rosen::RSTransactionHandler> GetRSTransactionHandler(const RefPtr<FrameNode>& frameNode);
+
+    void OnSurfaceShow();
+    void OnSurfaceHide();
+
+    void ResetAndInitializeNodeHandleAccessibility();
 
     void UpdateUsesSuperMethod()
     {
@@ -85,6 +122,8 @@ private:
     OH_ArkUI_SurfaceHolder* surfaceHolder_ = nullptr;
     XComponentNodeType nodeType_ = XComponentNodeType::UNKNOWN;
     Color bkColor_ = Color::BLACK;
+
+    static std::unordered_map<void*, WeakPtr<FrameNode>> XComponentAccessibilityProviderMap;
 };
 } // namespace OHOS::Ace::NG
 

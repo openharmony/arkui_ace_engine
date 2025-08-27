@@ -2179,4 +2179,35 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL004, TestSize.Level1)
         EXPECT_EQ(modifier->contentSize_->Get(), i);
     }
 }
+
+/**
+ * @tc.name: ProgressFrameRateRangeTest001
+ * @tc.desc: Test PROGRESS_TYPE_RING ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressFrameRateRangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    modifier->SetProgressType(PROGRESS_TYPE_RING);
+    auto contentSize = SizeF(100.0f, 100.0f);
+    modifier->SetContentSize(contentSize);
+    EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
+    EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    modifier->SetRingSweepEffect(true);
+    modifier->dateUpdated_ = true;
+    modifier->SetValue(10.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 10.f);
+    EXPECT_EQ(modifier->ringSweepEffect_->Get(), true);
+    EXPECT_EQ(modifier->isSweeping_, true);
+    EXPECT_EQ(modifier->dateUpdated_, false);
+}
 } // namespace OHOS::Ace::NG

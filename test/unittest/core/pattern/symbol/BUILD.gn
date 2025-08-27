@@ -14,6 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("symbol_test_ng") {
+  module_name = "Component-Text"
+  module_output = ""
   type = "new"
   sources = [ "symbol_test_ng.cpp" ]
 }

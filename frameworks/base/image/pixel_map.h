@@ -26,6 +26,7 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS {
 
@@ -80,6 +81,11 @@ struct ImageResizableSlice {
     Dimension right;
     Dimension top;
     Dimension bottom;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
     std::string ToString() const
     {
         std::string result;
@@ -138,6 +144,31 @@ struct ImageResizableSlice {
                 break;
         }
     }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
 };
 
 enum class AceAntiAliasingOption : int32_t {
@@ -174,15 +205,23 @@ struct WritePixelsOptions {
 };
 
 class ACE_FORCE_EXPORT PixelMap : public AceType {
-    DECLARE_ACE_TYPE(PixelMap, AceType)
+    DECLARE_ACE_TYPE(PixelMap, AceType);
 
 public:
+#if defined(ACE_STATIC)
+    /**
+     * @description: only for 1.2
+     * @param opts initialize options
+     * @return refptr pixelmap
+     */
+    static RefPtr<PixelMap> Create(const std::shared_ptr<Media::PixelMap>& pixmap);
+#endif
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> Create(const InitializationOptions& opts);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     static RefPtr<PixelMap> DecodeTlv(std::vector<uint8_t>& buff);
-    
+
     /**
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */
@@ -219,7 +258,8 @@ public:
     virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
     virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
-    virtual bool GetIsWideColorGamut() const = 0;
+    virtual uint32_t GetInnerColorGamut() const = 0;
+    virtual void SetMemoryName(std::string pixelMapName) const = 0;
 };
 
 } // namespace Ace

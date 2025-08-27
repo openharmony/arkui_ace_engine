@@ -388,4 +388,113 @@ HWTEST_F(UtilsTest, transformConvertorTest001, TestSize.Level1)
     transformConvertor.ApplyCurve(curve);
     EXPECT_EQ(transformConvertor.operationList_.size(), 1);
 }
+
+/**
+ * @tc.name: transformConvertorTest002
+ * @tc.desc: test func ClearAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest002, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    transformConvertor.ClearAnimations();
+
+    EXPECT_EQ(transformConvertor.operationList_.size(), 0);
+}
+
+/**
+ * @tc.name: transformConvertorTest003
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest003, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    TranslateOperation translate;
+    transformConvertor.AddKeyframe(type, time, translate);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
+
+/**
+ * @tc.name: transformConvertorTest004
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest004, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    SkewOperation skew(1.0f, 1.0f);
+    transformConvertor.AddKeyframe(type, time, skew);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
+
+/**
+ * @tc.name: transformConvertorTest005
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest005, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    ScaleOperation scale(1.0f, 1.0f, 1.0f);
+    transformConvertor.AddKeyframe(type, time, scale);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
+
+/**
+ * @tc.name: transformConvertorTest006
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest006, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    RotateOperation rotate(1.0f, 1.0f, 1.0f, 1.0f);
+    transformConvertor.AddKeyframe(type, time, rotate);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
+
+/**
+ * @tc.name: transformConvertorTest007
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest007, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    Matrix4 matrix4 = Matrix4::CreateIdentity();
+    transformConvertor.AddKeyframe(type, time, matrix4);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
+
+/**
+ * @tc.name: transformConvertorTest008
+ * @tc.desc: test func AddKeyframe
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest008, TestSize.Level1)
+{
+    TransformConvertor transformConvertor;
+    AnimationType type = AnimationType::TRANSLATE;
+    double time = 1.0;
+    PerspectiveOperation distance;
+    transformConvertor.AddKeyframe(type, time, distance);
+    
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
+}
 } // namespace OHOS::Ace::Framework

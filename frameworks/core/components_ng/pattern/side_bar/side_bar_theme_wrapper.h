@@ -32,7 +32,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto theme = AceType::Claim(new SideBarThemeWrapper());
+            auto theme = AceType::MakeRefPtr<SideBarThemeWrapper>();
             InitTheme(theme, themeConstants);
             return theme;
         }

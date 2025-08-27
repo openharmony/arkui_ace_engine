@@ -41,11 +41,16 @@ public:
     static std::shared_ptr<JsValue> GetDynamicComponentContext(
         int32_t instanceId, const std::shared_ptr<JsRuntime>& runtime);
     static void AddDynamicComponentContext(int32_t key, const std::shared_ptr<JsValue>& value);
+#ifdef PREVIEW
+    static void IsPreview();
+#endif
 
 private:
     static int32_t GetInstanceIdByThis(
         const std::shared_ptr<JsRuntime>& runtime, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc);
-
+#ifdef PREVIEW
+    static bool normalPreview;
+#endif
     static thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> contexts_;
     static std::unordered_map<int32_t, std::weak_ptr<JsValue>> weakptrContexts_;
 };

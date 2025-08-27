@@ -89,7 +89,8 @@ void CompleteResourceObjectFromParams(
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
     std::smatch resNameResults;
     if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
-        obj.moduleName = std::string(resNameResults[1]).c_str();
+        auto result = resNameResults[1].str();
+        obj.moduleName = strdup(result.c_str());
     }
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         obj.type = static_cast<int32_t>(resType);
@@ -282,7 +283,9 @@ void ViewAbstract::CompleteResourceObjectInner(
         CompleteResourceObjectFromParams(resIdValue, obj, targetModule, resType, resName);
     }
     bundleName = obj.bundleName;
-    moduleName = obj.moduleName;
+    if (obj.moduleName) {
+        moduleName = obj.moduleName;
+    }
 
     if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
         bundleName = GetBundleNameFromContainer();

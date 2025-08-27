@@ -188,6 +188,13 @@ typedef struct OH_UdmfData OH_UdmfData;
 typedef struct OH_UdmfGetDataParams OH_UdmfGetDataParams;
 
 /**
+ * @brief Defines a struct for UDMF to get data with progress info.
+ *
+ * @since 20
+ */
+typedef struct OH_UdmfDataLoadParams OH_UdmfDataLoadParams;
+
+/**
  * @brief Defines the <b>Pixelmap</b> struct, which is used to perform operations related to a pixel map.
  *
  * @since 12
@@ -275,6 +282,35 @@ int32_t OH_ArkUI_DragEvent_SetDragResult(ArkUI_DragEvent* event, ArkUI_DragResul
  * @since 12
  */
 int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data);
+
+/**
+ * @brief Use this method to obtain the application bundle name of the drag-and-drop initiator, you need
+ *  to pass a character array for receiving the string and explicitly specify the array length. It is
+ *  recommended that the array length be no less than 128 characters. If the length cannot accommodate
+ *  the actual bundle name length, the ERROR result will be returned.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param bundleName A string array used to receive the source application's bundle name.
+ * @param length Use this to explicitly specify the length of the incoming string array.
+ *  It is recommended to be bigger than 128.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* bundleName, int32_t length);
+
+/**
+ * @brief Call this method to determine whether the current drag and drop operation is cross-device.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param isRemote Boolean pointer to receive the result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemote);
 
 /**
  * @brief Obtains the default drag data from a drag event.
@@ -411,6 +447,26 @@ float OH_ArkUI_DragEvent_GetTouchPointXToDisplay(ArkUI_DragEvent* event);
 float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event);
 
 /**
+ * @brief Obtains the global display X coordinate of the touch point from an <b>ArkUI_DragEvent</b> object.
+ *
+ * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
+ * @return float Global display X coordinate of the touch point, in px.
+ *         If the input parameter is invalid, the default value <b>0</b> is returned.
+ * @since 20
+ */
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event);
+
+/**
+ * @brief Obtains the global display Y coordinate of the touch point from an <b>ArkUI_DragEvent</b> object.
+ *
+ * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
+ * @return float Global display Y coordinate of the touch point, in px.
+ *         If the input parameter is invalid, the default value <b>0</b> is returned.
+ * @since 20
+ */
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event);
+
+/**
  * @brief Obtains the dragging velocity along the x-axis.
  *
  * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
@@ -454,6 +510,18 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
 
 /**
+ * @brief Obtains the display ID of the screen for the specified drag event.
+ *
+ * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param displayId Display ID of the event occurs in.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDisplayId(ArkUI_DragEvent* event, int32_t* displayId);
+
+/**
 *
 * @brief Request to start the data sync process with the sync option.
 *
@@ -470,6 +538,26 @@ int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t
 */
 int32_t OH_ArkUI_DragEvent_StartDataLoading(
     ArkUI_DragEvent* event, OH_UdmfGetDataParams* options, char* key, unsigned int keyLen);
+
+/**
+ * @brief Use this method to provide a data loading parameter to the system instead of providing
+ * a complete data object directly. When the user drags and drops to the target application,
+ * the system will use this parameter to request data from you. This can greatly improve the efficiency
+ * of the dragging operation for large amounts of data and the effectiveness of the drop data handling
+ * in the target application.
+ *
+ * This method should be always prioritized over using {@link OH_ArkUI_DragEvent_SetData}.
+ * See {@link OH_UdmfDataLoadParams_Create} in <b>udmf.h</b> for how to create and prepare the data loading parameter.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param dataLoadParams Indicates the data loading parameters which will be used when dropping.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_UdmfDataLoadParams* dataLoadParams);
 
 /**
 *
@@ -832,6 +920,26 @@ int32_t OH_ArkUI_DragAction_RegisterStatusListener(ArkUI_DragAction* dragAction,
 void OH_ArkUI_DragAction_UnregisterStatusListener(ArkUI_DragAction* dragAction);
 
 /**
+ * @brief Use this method to provide a data loading parameter to the system instead of providing
+ * a complete data object directly. When the user drags and drops to the target application,
+ * the system will use this parameter to request data from you. This can greatly improve the efficiency
+ * of the dragging operation for large amounts of data and the effectiveness of the drop data handling
+ * in the target application.
+ *
+ * It's recommanded to use this method instead of using {@link OH_ArkUI_DragAction_SetData}.
+ * See {@link OH_UdmfDataLoadParams_Create} in <b>udmf.h</b> for how to create and prepare the data loading parameter.
+ *
+ * @param dragAction Indicates the pointer to the target drag action object.
+ * @param dataLoadParams Indicates the data loading parameters which will be used when dropping.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
+    ArkUI_DragAction* dragAction, OH_UdmfDataLoadParams* dataLoadParams);
+
+/**
  * @brief Obtains the drag status of a drag action.
  *
  * @param dragAndDropInfo Indicates the drag and drop information returned by the drag status listener.
@@ -876,7 +984,7 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction);
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
- * @since 18
+ * @since 19
  */
 int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t* requestIdentify);
 
@@ -891,7 +999,7 @@ int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
- * @since 18
+ * @since 19
  */
 int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult result);
 
@@ -903,9 +1011,35 @@ int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult resu
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
- * @since 18
+ * @since 19
  */
 int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify);
+
+/**
+ * @brief Sets whether to enable the display of a disallow status icon.
+ *
+ * Typically, when a component can receive or process data dragged by the user, or when it declares to the
+ * system that data should be processed in COPY way by setting ARKUI_DROP_OPERATION_COPY through
+ * {@link OH_ArkUI_DragEvent_SetSuggestedDropOperation}, the system will display
+ * a plus sign together with the data number on the upper-left corner of the dragged object; if setting
+ * ARKUI_DROP_OPERATION_MOVE to the system to declare that data should be processed in CUT way, the system will only
+ * display the data number on the upper-left corner of the dragged object.
+ *
+ * In some cases, when the system determines or the component explicitly declares that it cannot handle the
+ * data that the user is dragging, the system displays a badge icon in the same way as it does for DragBehavior.MOVE.
+ * So if you want to show the more clearly status, you can call this method on the UI instance in advance to force
+ * the system to display a clear prohibition icon on the upper left corner in such cases, and the user can clearly
+ * know that data cannot be dropped here.
+ *
+ * @param uiContext Pointer to a UI instance.
+ * @param enabled Whether to enable the display of the disallow badge icon.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled);
+
 #ifdef __cplusplus
 };
 #endif

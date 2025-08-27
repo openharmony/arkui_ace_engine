@@ -32,6 +32,8 @@ public:
     PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false);
     PanRecognizer(int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap,
         bool isLimitFingerCount = false);
+    PanRecognizer(int32_t fingers, const PanDirection& direction, const PanDistanceMapDimension& distanceMap,
+        bool isLimitFingerCount = false);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 
@@ -73,29 +75,35 @@ public:
     void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const;
-    float GetDistanceConfigFor(SourceTool sourceTool = SourceTool::UNKNOWN) const;
+    double GetDistanceConfigFor(SourceTool sourceTool = SourceTool::UNKNOWN) const;
 
     PanDirection GetDirection() const
     {
         return direction_;
     }
 
-    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    void SetDistanceMap(const PanDistanceMap& distanceMap);
+
+    void SetDistanceMap(const PanDistanceMapDimension& distanceMap)
     {
         distanceMap_ = distanceMap;
     }
 
-    PanDistanceMap GetDistanceMap() const
+    PanDistanceMapDimension GetDistanceMap() const
     {
         return distanceMap_;
     }
 
-    void HandlePanGestureAccept(
-        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
+    void HandlePanGestureAccept(const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type);
     
     void SetPanEndCallback(const GestureEventFunc& panEndCallback)
     {
         panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
+    }
+
+    const RefPtr<PanGestureOption>& GetPanGestureOption() const
+    {
+        return panGestureOption_;
     }
 
 private:
@@ -145,13 +153,17 @@ private:
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void HandleCallbackReports(const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
+    void UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& info);
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    bool HandlePanExtAccept();
     void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
     void ResetDistanceMap();
@@ -168,9 +180,17 @@ private:
         return touchRestrict_;
     }
 
+    void UpdateAxisDeltaTransform(const AxisEvent& event);
+
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
+    int32_t newFingers_ = 1;
+    double newDistance_ = 0.0;
+    PanDirection newDirection_;
+    PanDistanceMapDimension distanceMap_;
+    PanDistanceMapDimension newDistanceMap_;
+
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
@@ -178,25 +198,20 @@ private:
     double mainDelta_ = 0.0;
     PanVelocity panVelocity_;
     TimeStamp time_;
-
-    Point globalPoint_;
-    TouchEvent lastTouchEvent_;
-    RefPtr<PanGestureOption> panGestureOption_;
-    OnPanFingersFunc onChangeFingers_;
-    OnPanDirectionFunc onChangeDirection_;
-    OnPanDistanceFunc onChangeDistance_;
-
-    int32_t newFingers_ = 1;
-    double newDistance_ = 0.0;
-    PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
     bool isStartTriggered_ = false;
+    Point globalPoint_;
+    TouchEvent lastTouchEvent_;
+    RefPtr<PanGestureOption> panGestureOption_;
+
+    OnPanFingersFunc onChangeFingers_;
+    OnPanDirectionFunc onChangeDirection_;
+    OnPanDistanceFunc onChangeDistance_;
     // this callback will be triggered when pan end, but the enable state is false
     std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
-    PanDistanceMap distanceMap_;
-    PanDistanceMap newDistanceMap_;
+    int32_t lastAction_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

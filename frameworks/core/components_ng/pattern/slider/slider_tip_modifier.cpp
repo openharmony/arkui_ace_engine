@@ -64,8 +64,7 @@ constexpr Dimension SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE = 28.0_vp;
 
 } // namespace
 
-SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc,
-    std::function<void()> onFinishEventTipSize)
+SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc)
     : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
@@ -73,8 +72,7 @@ SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> 
       opacityScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_OPACITY_MIN_SCALE)),
       content_(AceType::MakeRefPtr<PropertyString>("")), bubbleVertex_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       sliderGlobalOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
-      getBubbleVertexFunc_(std::move(getBubbleVertexFunc)),
-      onFinishEventTipSize_(std::move(onFinishEventTipSize))
+      getBubbleVertexFunc_(std::move(getBubbleVertexFunc))
 {
     AttachProperty(tipFlag_);
     AttachProperty(contentOffset_);
@@ -386,15 +384,16 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
 
 void SliderTipModifier::onDraw(DrawingContext& context)
 {
-    if ((!tipFlag_->Get()) || (tipFlag_->Get() && GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE))) {
+    if (tipFlag_->Get() || GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE)) {
         BuildParagraph();
         UpdateBubbleSize();
         PaintTip(context);
     }
 }
 
-void SliderTipModifier::SetBubbleDisplayAnimation()
+void SliderTipModifier::SetBubbleDisplayAnimation(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     AnimationOption option = AnimationOption();
     option.SetDuration(BUBBLE_DISPLAY_SIZE_CHANGE_TIMER);
@@ -403,7 +402,7 @@ void SliderTipModifier::SetBubbleDisplayAnimation()
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->sizeScale_->Set(BUBBLE_SIZE_MAX_SCALE);
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 
     option.SetDuration(BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER);
     option.SetCurve(Curves::SHARP);
@@ -411,11 +410,12 @@ void SliderTipModifier::SetBubbleDisplayAnimation()
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->opacityScale_->Set(BUBBLE_OPACITY_MAX_SCALE);
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderTipModifier::SetBubbleDisappearAnimation()
+void SliderTipModifier::SetBubbleDisappearAnimation(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     AnimationOption option = AnimationOption();
     option.SetDuration(BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER);
@@ -424,7 +424,7 @@ void SliderTipModifier::SetBubbleDisappearAnimation()
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->sizeScale_->Set(BUBBLE_SIZE_MIN_SCALE);
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 
     option.SetDuration(BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER);
     option.SetCurve(Curves::SHARP);
@@ -432,10 +432,10 @@ void SliderTipModifier::SetBubbleDisappearAnimation()
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->opacityScale_->Set(BUBBLE_OPACITY_MIN_SCALE);
-    }, onFinishEventTipSize_);
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderTipModifier::SetTipFlag(bool flag)
+void SliderTipModifier::SetTipFlag(bool flag, const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(tipFlag_);
     if (tipFlag_->Get() == flag) {
@@ -443,27 +443,29 @@ void SliderTipModifier::SetTipFlag(bool flag)
     }
     taskId_++;
     if (flag) {
-        SetBubbleDisplayAnimation();
+        SetBubbleDisplayAnimation(host);
     } else if (tipDelayTime_ > 0) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this), taskId = taskId_]() {
+            [weak = WeakClaim(this), taskId = taskId_, weakHost = AceType::WeakClaim(AceType::RawPtr(host))]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
+                auto host = weakHost.Upgrade();
+                CHECK_NULL_VOID(host);
                 if (modifier->taskId_ != taskId) {
                     return;
                 }
-                modifier->SetBubbleDisappearAnimation();
-                auto pipeline = PipelineBase::GetCurrentContext();
+                modifier->SetBubbleDisappearAnimation(host);
+                auto pipeline = host->GetContextRefPtr();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->RequestFrame();
             },
             TaskExecutor::TaskType::UI, tipDelayTime_, "ArkUISliderSetBubbleDisappearAnimation");
     } else {
-        SetBubbleDisappearAnimation();
+        SetBubbleDisappearAnimation(host);
     }
     tipFlag_->Set(flag);
 }

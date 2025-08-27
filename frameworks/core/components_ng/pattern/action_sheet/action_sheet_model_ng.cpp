@@ -17,7 +17,6 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

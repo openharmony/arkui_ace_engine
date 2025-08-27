@@ -597,16 +597,6 @@ bool TextFieldComponent::IsVisible() const
     return declaration_->IsVisible();
 }
 
-void TextFieldComponent::SetOverflowX(const TextFieldOverflowX& overflowX)
-{
-    declaration_->SetOverflowX(overflowX);
-}
-
-TextFieldOverflowX& TextFieldComponent::GetOverflowX() const
-{
-    return declaration_->GetOverflowX();
-}
-
 void TextFieldComponent::SetResetToStart(bool resetToStart)
 {
     declaration_->SetResetToStart(resetToStart);

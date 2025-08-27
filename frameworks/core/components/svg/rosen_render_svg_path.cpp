@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_path.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/utils/SkParsePath.h"
-#endif
-
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -42,17 +38,10 @@ void RosenRenderSvgPath::Paint(RenderContext& context, const Offset& offset)
         rsNode->SetPivot(pivotX, pivotY);
         RosenRenderTransform::SyncTransformToRsNode(rsNode, transform);
     }
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, false);
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath out;
-#else
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
     RSRecordingPath out;
-#endif
     GetPath(out);
     UpdateGradient(fillState_);
 
@@ -72,15 +61,6 @@ void RosenRenderSvgPath::PaintDirectly(RenderContext& context, const Offset& off
         LOGE("Paint canvas is null");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, true);
-    if (NeedTransform()) {
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
-    }
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath out;
-#else
     RSAutoCanvasRestore save(*canvas, true);
     if (NeedTransform()) {
         canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
@@ -88,7 +68,6 @@ void RosenRenderSvgPath::PaintDirectly(RenderContext& context, const Offset& off
     PaintMaskLayer(context, offset, offset);
 
     RSRecordingPath out;
-#endif
     GetPath(out);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, out, fillState_, opacity_);
@@ -107,51 +86,12 @@ void RosenRenderSvgPath::UpdateMotion(const std::string& path, const std::string
 
 Rect RosenRenderSvgPath::GetPaintBounds(const Offset& offset)
 {
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    GetPath(path);
-    auto& bounds = path.getBounds();
-    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
-#else
     RSRecordingPath recordingPath;
     GetPath(recordingPath);
     auto bounds = recordingPath.GetBounds();
     return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
-#endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderSvgPath::GetPath(SkPath& out)
-{
-    if (paths_.empty()) {
-        SkParsePath::FromSVGString(d_.c_str(), &out);
-    } else {
-        SkPath path;
-        SkPath ending;
-        int32_t firstPart = (int)weight_;
-        int32_t pathsSize = static_cast<int32_t>(paths_.size());
-        bool ret = false;
-        if (firstPart < 0 || firstPart > (pathsSize - 1)) {
-            ret = false;
-        } else if (firstPart == (pathsSize - 1)) {
-            SkParsePath::FromSVGString(paths_[firstPart].c_str(), &path);
-            SkParsePath::FromSVGString(paths_[firstPart - 1].c_str(), &ending);
-            ret = ending.interpolate(path, 1.0f, &out);
-        } else {
-            float newWeight = weight_ - firstPart;
-            SkParsePath::FromSVGString(paths_[firstPart + 1].c_str(), &path);
-            SkParsePath::FromSVGString(paths_[firstPart].c_str(), &ending);
-            ret = ending.interpolate(path, newWeight, &out);
-        }
-        if (!ret) {
-            SkParsePath::FromSVGString(d_.c_str(), &out);
-        }
-    }
-    if (fillState_.IsEvenodd()) {
-        out.setFillType(SkPathFillType::kEvenOdd);
-    }
-}
-#else
 void RosenRenderSvgPath::GetPath(RSRecordingPath& out)
 {
     if (paths_.empty()) {
@@ -182,6 +122,5 @@ void RosenRenderSvgPath::GetPath(RSRecordingPath& out)
         out.SetFillStyle(RSPathFillType::EVENTODD);
     }
 }
-#endif
 
 } // namespace OHOS::Ace

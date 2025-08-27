@@ -55,6 +55,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerCaretPosition(int64_t selfI
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerSetTextSelection(
     int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t menuPolicy = -1);
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextInputSetCustomKeyboard(void (*keybordBuild)());
 CJ_EXPORT CJRectResult FfiOHOSAceFrameworkTextInputControllerGetTextContentRect(int64_t id);
 CJ_EXPORT int32_t FfiOHOSAceFrameworkTextInputControllerGetTextContentLineCount(int64_t id);
 CJ_EXPORT CJCaretOffset FfiOHOSAceFrameworkTextInputControllerGetCaretOffset(int64_t id);

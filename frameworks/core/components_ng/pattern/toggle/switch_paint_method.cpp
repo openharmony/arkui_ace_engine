@@ -65,6 +65,7 @@ void SwitchModifier::InitializeParam(int32_t themeScopeId)
     inactiveColor_ = switchTheme->GetInactiveColor();
     clickEffectColor_ = switchTheme->GetInteractivePressedColor();
     hoverColor_ = switchTheme->GetInteractiveHoverColor();
+    focusColor_ = switchTheme->GetFocusedBGColorUnselected();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();
@@ -211,6 +212,24 @@ float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
                      (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
     auto switchWidth = contentSize.Width() - contentSize.Height() + actualGap;
     return switchWidth;
+}
+
+void SwitchModifier::FixPointOffset()
+{
+    if (!isSizeChange_) {
+        return;
+    }
+    auto currentOffset = pointOffset_->Get();
+    if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
+        if (currentOffset > actualSize_.Width() - actualSize_.Height()) {
+            pointOffset_->Set(actualSize_.Width() - actualSize_.Height());
+        }
+    } else {
+        if (currentOffset > actualSize_.Width() - actualTrackRadius_) {
+            pointOffset_->Set(actualSize_.Width() - actualTrackRadius_);
+        }
+    }
+    isSizeChange_ = false;
 }
 
 int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const

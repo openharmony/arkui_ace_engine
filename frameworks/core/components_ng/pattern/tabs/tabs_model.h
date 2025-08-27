@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,18 +32,33 @@
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
+#include "ui/view/components/tabs/tabs_data.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
-enum class LayoutStyle {
-    ALWAYS_CENTER,
-    ALWAYS_AVERAGE_SPLIT,
-    SPACE_BETWEEN_OR_CENTER,
-};
 
 enum class TabsCacheMode {
     CACHE_BOTH_SIDE = 0,
     CACHE_LATEST_SWITCHED
 };
+
+namespace {
+enum class TabJsResType {
+    BAR_BACKGROUND_COLOR,
+    BAR_WIDTH,
+    BAR_HEIGHT,
+    BAR_GRID_GUTTER,
+    BAR_GRID_MARGIN,
+    DIVIDER_STROKE_WIDTH,
+    DIVIDER_COLOR,
+    DIVIDER_START_MARGIN,
+    DIVIDER_END_MARGIN,
+    SCROLLABLE_BAR_MARGIN,
+    COLOR,
+    INACTIVE_COLOR,
+    BlurStyle_INACTIVE_COLOR
+};
+}
 
 struct TabsItemDivider final {
     Dimension strokeWidth = 0.0_vp;
@@ -98,19 +113,6 @@ struct BarGridColumnOptions final {
     }
 };
 
-struct ScrollableBarModeOptions final {
-    Dimension margin = 0.0_vp;
-    std::optional<LayoutStyle> nonScrollableLayoutStyle = std::nullopt;
-
-    bool operator==(const ScrollableBarModeOptions& option) const
-    {
-        return (margin == option.margin) &&
-               (nonScrollableLayoutStyle.has_value() == option.nonScrollableLayoutStyle.has_value()) &&
-               (nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) ==
-                   option.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER));
-    }
-};
-
 using TabsCustomAnimationEvent = std::function<TabContentAnimatedTransition(int32_t from, int32_t to)>;
 
 class ACE_FORCE_EXPORT TabsModel {
@@ -130,8 +132,10 @@ public:
     virtual void SetWidthAuto(bool isAuto) = 0;
     virtual void SetHeightAuto(bool isAuto) = 0;
     virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
+    virtual void SetNoMinHeightLimit(bool noMinHeightLimit) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;
+    virtual void SetAnimationCurve(const RefPtr<Curve>& curve) {};
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
@@ -141,10 +145,12 @@ public:
     virtual void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) {}
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
+    virtual void SetDividerColorByUser(bool isByUser) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
+    virtual void SetBarBackgroundColorByUser(bool isByUser) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
     virtual void ResetScrollableBarModeOptions() = 0;
@@ -158,6 +164,7 @@ public:
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
     virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
+    virtual void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

@@ -875,7 +875,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanSpringAnimation();
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void TitleBarPattern::ClearDragState()
@@ -923,6 +923,8 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
 
 void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
@@ -948,7 +950,7 @@ void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanAnimation();
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void TitleBarPattern::SetMaxTitleBarHeight()
@@ -1124,6 +1126,7 @@ void TitleBarPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
@@ -1393,7 +1396,7 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offset;
 }
 
-void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
+void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
 {
     bool needUpdateBgOptions = options_.bgOptions != opt.bgOptions;
     if (options_.textOptions.mainTitleApplyFunc && !opt.textOptions.mainTitleApplyFunc) {
@@ -1405,7 +1408,7 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
         needUpdateBgOptions = true;
     }
-    options_ = std::move(opt);
+    options_ = opt;
     if (!needUpdateBgOptions) {
         return;
     }

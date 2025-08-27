@@ -1,0 +1,14 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "../build/test",
+        "module": "CommonJS",
+        "noEmit": true,
+        "removeComments": false,
+        "paths": {
+            "@koalaui/harness": ["../../../incremental/harness/src/typescript"]
+        }
+    },
+    "include": []
+}

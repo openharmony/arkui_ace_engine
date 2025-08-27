@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_clock/text_clock_controller.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT TextClockModel {
@@ -43,7 +44,13 @@ public:
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void InitFontDefault(const TextStyle& textStyle) = 0;
     virtual void SetDateTimeOptions(const ZeroPrefixType& hourType) {};
-    
+    virtual void CreateWithTextColorResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void CreateWithFontSizeResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void CreateWithFontWeightResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void CreateWithFormatResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void RemoveResObjByKey(const std::string& key) = 0;
+
 private:
     static std::unique_ptr<TextClockModel> instance_;
     static std::mutex mutex_;

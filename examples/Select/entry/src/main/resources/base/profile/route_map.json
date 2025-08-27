@@ -1,0 +1,544 @@
+{
+  "routerMap": [
+    {
+      "name": "NavIndex",
+      "pageSourceFile": "src/main/ets/pages/navigationPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "SelectIndex",
+      "pageSourceFile": "src/main/ets/pages/components/select/Index.ets",
+      "buildFunction": "SelectIndexBuilder"
+    },
+    {
+      "name": "SelectDivider",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDivider.ets",
+      "buildFunction": "SelectDividerBuilder"
+    },
+    {
+      "name": "SelectOption",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectOption.ets",
+      "buildFunction": "SelectOptionBuilder"
+    },
+    {
+      "name": "SelectSymbolModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectSymbolModifier.ets",
+      "buildFunction": "SelectSymbolModifierBuilder"
+    },
+    {
+      "name": "SelectLanguagePadding",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLanguagePadding.ets",
+      "buildFunction": "SelectLanguagePaddingBuilder"
+    },
+    {
+      "name": "SelectLanguageChange",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLanguageChange.ets",
+      "buildFunction": "SelectLanguageChangeBuilder"
+    },
+    {
+      "name": "SelectOnSelect",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectOnSelect.ets",
+      "buildFunction": "SelectOnSelectBuilder"
+    },
+    {
+      "name": "SelectOptionMenu",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectNormal.ets",
+      "buildFunction": "SelectOptionMenuBuilder"
+    },
+    {
+      "name": "SelectSymbol",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectSymbol.ets",
+      "buildFunction": "SelectSymbolBuilder"
+    },
+    {
+      "name": "SelectCustom",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectCustom.ets",
+      "buildFunction": "SelectCustomBuilder"
+    },
+    {
+      "name": "SelectDividerOptions",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDividerNormal.ets",
+      "buildFunction": "SelectDividerOptionsBuilder"
+    },
+    {
+      "name": "SelectDividerNull",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDividerNull.ets",
+      "buildFunction": "SelectDividerNullBuilder"
+    },
+    {
+      "name": "SelectArrow",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectArrow.ets",
+      "buildFunction": "SelectArrowBuilder"
+    },
+    {
+      "name": "SelectOptionTextModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectModifier.ets",
+      "buildFunction": "SelectOptionTextModifierBuilder"
+    },
+    {
+      "name": "SelectLevel00",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel00.ets",
+      "buildFunction": "SelectLevel00Builder"
+    },
+    {
+      "name": "SelectLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel11.ets",
+      "buildFunction": "SelectLevel11Builder"
+    },
+    {
+      "name": "SelectLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel2.ets",
+      "buildFunction": "SelectLevel2Builder"
+    },
+    {
+      "name": "SelectLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel3.ets",
+      "buildFunction": "SelectLevel3Builder"
+    },
+    {
+      "name": "SelectLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel4.ets",
+      "buildFunction": "SelectLevel4Builder"
+    },
+    {
+      "name": "SelectLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel5.ets",
+      "buildFunction": "SelectLevel5Builder"
+    },
+    {
+      "name": "SelectLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel6.ets",
+      "buildFunction": "SelectLevel6Builder"
+    },
+    {
+      "name": "SelectLevel7",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel7.ets",
+      "buildFunction": "SelectLevel7Builder"
+    },
+    {
+      "name": "ButtonIndex",
+      "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
+      "buildFunction": "ButtonIndexBuilder"
+    },
+    {
+      "name": "ButtonStyle",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonStyle.ets",
+      "buildFunction": "ButtonStyleBuilder"
+    },
+    {
+      "name": "ButtonJudgment",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonJudgment.ets",
+      "buildFunction": "ButtonJudgmentBuilder"
+    },
+    {
+      "name": "ButtonLabelStyle",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLabelStyle.ets",
+      "buildFunction": "ButtonLabelStyleBuilder"
+    },
+    {
+      "name": "ButtonControlSize",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonControlSize.ets",
+      "buildFunction": "ButtonControlSizeBuilder"
+    },
+    {
+      "name": "ButtonRole",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonRole.ets",
+      "buildFunction": "ButtonRoleBuilder"
+    },
+    {
+      "name": "ButtonCustom",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonCustom.ets",
+      "buildFunction": "ButtonCustomBuilder"
+    },
+    {
+      "name": "ButtonType",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonType.ets",
+      "buildFunction": "ButtonTypeBuilder"
+    },
+    {
+      "name": "ButtonModifier",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonModifier.ets",
+      "buildFunction": "ButtonModifierBuilder"
+    },
+    {
+      "name": "ButtonLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel1.ets",
+      "buildFunction": "ButtonLevel1Builder"
+    },
+    {
+      "name": "ButtonLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel2.ets",
+      "buildFunction": "ButtonLevel2Builder"
+    },
+    {
+      "name": "ButtonLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel3.ets",
+      "buildFunction": "ButtonLevel3Builder"
+    },
+    {
+      "name": "ButtonLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel4.ets",
+      "buildFunction": "ButtonLevel4Builder"
+    },
+    {
+      "name": "ButtonLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel5.ets",
+      "buildFunction": "ButtonLevel5Builder"
+    },
+    {
+      "name": "ButtonLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel6.ets",
+      "buildFunction": "ButtonLevel6Builder"
+    },
+    {
+      "name": "ButtonLevel7",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel7.ets",
+      "buildFunction": "ButtonLevel7Builder"
+    },
+    {
+      "name": "ButtonLevel8",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel8.ets",
+      "buildFunction": "ButtonLevel8Builder"
+    },
+    {
+      "name": "ButtonLevel9",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel9.ets",
+      "buildFunction": "ButtonLevel9Builder"
+    },
+    {
+      "name": "ButtonLevel10",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel10.ets",
+      "buildFunction": "ButtonLevel10Builder"
+    },
+    {
+      "name": "ButtonLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel11.ets",
+      "buildFunction": "ButtonLevel11Builder"
+    },
+    {
+      "name": "ToggleIndex",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
+      "buildFunction": "ToggleIndexBuilder"
+    },
+    {
+      "name": "ToggleWithDialog",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleWithDialog.ets",
+      "buildFunction": "ToggleWithDialogBuilder"
+    },
+    {
+      "name": "ToggleUnion",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleUnion.ets",
+      "buildFunction": "ToggleUnionBuilder"
+    },
+    {
+      "name": "ToggleContentModifier",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleContentModifier.ets",
+      "buildFunction": "ToggleContentModifierBuilder"
+    },
+    {
+      "name": "ToggleType",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleType.ets",
+      "buildFunction": "ToggleTypeBuilder"
+    },
+    {
+      "name": "ToggleSwitch",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleSwitch.ets",
+      "buildFunction": "ToggleSwitchBuilder"
+    },
+    {
+      "name": "ToggleColor",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleColor.ets",
+      "buildFunction": "ToggleColorBuilder"
+    },
+    {
+      "name": "ToggleNormal",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleNormal.ets",
+      "buildFunction": "ToggleBuilder"
+    },
+    {
+      "name": "ToggleEnable",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleEnable.ets",
+      "buildFunction": "ToggleEnableBuilder"
+    },
+    {
+      "name": "ToggleMultiTestLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel0.ets",
+      "buildFunction": "ToggleMultiTestLevel0Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel1.ets",
+      "buildFunction": "ToggleMultiTestLevel1Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel2.ets",
+      "buildFunction": "ToggleMultiTestLevel2Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel3.ets",
+      "buildFunction": "ToggleMultiTestLevel3Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel4.ets",
+      "buildFunction": "ToggleMultiTestLevel4Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel5.ets",
+      "buildFunction": "ToggleMultiTestLevel5Builder"
+    },
+    {
+      "name": "CheckboxIndex",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/Index.ets",
+      "buildFunction": "CheckboxIndexBuilder"
+    },
+    {
+      "name": "CheckboxShape",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxShape.ets",
+      "buildFunction": "CheckboxShapeBuilder"
+    },
+    {
+      "name": "CheckboxMark",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxMark.ets",
+      "buildFunction": "CheckboxMarkBuilder"
+    },
+    {
+      "name": "CheckboxCustom",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxCustom.ets",
+      "buildFunction": "CheckboxCustomBuilder"
+    },
+    {
+      "name": "CheckboxIndicator",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxIndicator.ets",
+      "buildFunction": "CheckboxIndicatorBuilder"
+    },
+    {
+      "name": "CheckboxSize",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxSize.ets",
+      "buildFunction": "CheckboxSizeBuilder"
+    },
+    {
+      "name": "CheckboxGroup",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroup.ets",
+      "buildFunction": "CheckboxGroupBuilder"
+    },
+    {
+      "name": "CheckboxChange",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxChange.ets",
+      "buildFunction": "CheckboxChangeBuilder"
+    },
+    {
+      "name": "CheckboxGroupIndicator",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroupIndicator.ets",
+      "buildFunction": "CheckboxGroupIndicatorBuilder"
+    },
+    {
+      "name": "CheckboxGroupCustom",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroupCustom.ets",
+      "buildFunction": "CheckboxGroupCustomBuilder"
+    },
+    {
+      "name": "CheckboxModifier",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxModifier.ets",
+      "buildFunction": "CheckboxModifierBuilder"
+    },
+    {
+      "name": "CheckboxThemeControl",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxThemeControl.ets",
+      "buildFunction": "CheckboxThemeControlBuilder"
+    },
+    {
+      "name": "CheckboxMultiTestLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxMultiTestLevel0.ets",
+      "buildFunction": "CheckboxMultiTestLevel0Builder"
+    },
+    {
+      "name": "CheckboxLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel0.ets",
+      "buildFunction": "CheckboxLevel0Builder"
+    },
+    {
+      "name": "CheckboxLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel1.ets",
+      "buildFunction": "CheckboxLevel1Builder"
+    },
+    {
+      "name": "CheckboxLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel2.ets",
+      "buildFunction": "CheckboxLevel2Builder"
+    },
+    {
+      "name": "CheckboxLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel3.ets",
+      "buildFunction": "CheckboxLevel3Builder"
+    },
+    {
+      "name": "CheckboxLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel4.ets",
+      "buildFunction": "CheckboxLevel4Builder"
+    },
+    {
+      "name": "RatingIndex",
+      "pageSourceFile": "src/main/ets/pages/components/rating/Index.ets",
+      "buildFunction": "RatingIndexBuilder"
+    },
+    {
+      "name": "RatingNormal",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingNormal.ets",
+      "buildFunction": "RatingNormalBuilder"
+    },
+    {
+      "name": "RatingStarStyle",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingStarStyle.ets",
+      "buildFunction": "RatingStarStyleBuilder"
+    },
+    {
+      "name": "RatingCustom",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingCustom.ets",
+      "buildFunction": "RatingCustomBuilder"
+    },
+    {
+      "name": "RatingLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel0.ets",
+      "buildFunction": "RatingLevel0Builder"
+    },
+    {
+      "name": "RatingLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel1.ets",
+      "buildFunction": "RatingLevel1Builder"
+    },
+    {
+      "name": "RatingLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel2.ets",
+      "buildFunction": "RatingLevel2Builder"
+    },
+    {
+      "name": "SliderIndex",
+      "pageSourceFile": "src/main/ets/pages/components/slider/Index.ets",
+      "buildFunction": "SliderIndexBuilder"
+    },
+    {
+      "name": "SliderStyle",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderStyle.ets",
+      "buildFunction": "SliderStyleBuilder"
+    },
+    {
+      "name": "SliderBlockStyle",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderBlockStyle.ets",
+      "buildFunction": "SliderBlockStyleBuilder"
+    },
+    {
+      "name": "SliderCustom",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderCustom.ets",
+      "buildFunction": "SliderCustomBuilder"
+    },
+    {
+      "name": "SliderTips",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderTips.ets",
+      "buildFunction": "SliderTipsBuilder"
+    },
+    {
+      "name": "SliderNormal",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderNormal.ets",
+      "buildFunction": "SliderNormalBuilder"
+    },
+    {
+      "name": "SliderLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel0.ets",
+      "buildFunction": "SliderLevel0Builder"
+    },
+    {
+      "name": "SliderLevel01",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel01.ets",
+      "buildFunction": "SliderLevel01Builder"
+    },
+    {
+      "name": "SliderLevel10",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel10.ets",
+      "buildFunction": "SliderLevel10Builder"
+    },
+    {
+      "name": "SliderLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel11.ets",
+      "buildFunction": "SliderLevel11Builder"
+    },
+    {
+      "name": "SliderLevel12",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel12.ets",
+      "buildFunction": "SliderLevel12Builder"
+    },
+    {
+      "name": "SliderLevel13",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel13.ets",
+      "buildFunction": "SliderLevel13Builder"
+    },
+    {
+      "name": "SliderLevel14",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel14.ets",
+      "buildFunction": "SliderLevel14Builder"
+    },
+    {
+      "name": "SliderLevel15",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel15.ets",
+      "buildFunction": "SliderLevel15Builder"
+    },
+    {
+      "name": "RadioIndex",
+      "pageSourceFile": "src/main/ets/pages/components/radio/Index.ets",
+      "buildFunction": "RadioIndexBuilder"
+    },
+    {
+      "name": "RadioCheckedBackgroundColor",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioCheckedBackgroundColor.ets",
+      "buildFunction": "RadioCheckedBackgroundColorBuilder"
+    },
+    {
+      "name": "RadioSelected",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioSelected.ets",
+      "buildFunction": "RadioSelectedBuilder"
+    },
+    {
+      "name": "RadioCustom",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioCustom.ets",
+      "buildFunction": "RadioCustomBuilder"
+    },
+    {
+      "name": "RadioResponse",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioResponse.ets",
+      "buildFunction": "RadioResponseBuilder"
+    },
+    {
+      "name": "RadioBuild",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioBuild.ets",
+      "buildFunction": "RadioBuildBuilder"
+    },
+    {
+      "name": "RadioLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel1.ets",
+      "buildFunction": "RadioLevel1Builder"
+    },
+    {
+      "name": "RadioLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel2.ets",
+      "buildFunction": "RadioLevel2Builder"
+    },
+    {
+      "name": "RadioLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel3.ets",
+      "buildFunction": "RadioLevel3Builder"
+    },
+    {
+      "name": "RadioLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel4.ets",
+      "buildFunction": "RadioLevel4Builder"
+    },
+    {
+      "name": "FormIndex",
+      "pageSourceFile": "src/main/ets/pages/components/form.ets",
+      "buildFunction": "FormIndexBuilder"
+    }
+  ]
+}

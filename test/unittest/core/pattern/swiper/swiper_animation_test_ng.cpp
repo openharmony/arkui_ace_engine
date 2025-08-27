@@ -86,6 +86,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -140,11 +141,14 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1
     swiperItemInfo.endPos = -1.0f;
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     pattern_->StopSpringAnimationAndFlushImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     pattern_->springAnimationIsRunning_ = true;
     pattern_->StopSpringAnimationAndFlushImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
 }
 
 /**
@@ -200,8 +204,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
     pattern_->PlaySpringAnimation(200.0f);
     // left align because children total size < swiper
     EXPECT_EQ(
-        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
+            ->GetStagingValue(),
         0.0f);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -223,8 +229,10 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
     EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
     pattern_->PlaySpringAnimation(200.0f);
     EXPECT_EQ(
-        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
+            ->GetStagingValue(),
         0.0f);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -563,6 +571,84 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwipeCustomAnimationTest004
+ * @tc.desc: Test check onContentDidScroll info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest004, TestSize.Level1)
+{
+    bool isTrigger = false;
+    float finalPosition = 0.0f;
+    auto onContentDidScroll = [&isTrigger, &finalPosition](
+                                  int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        isTrigger = true;
+        if (index == 0) {
+            finalPosition = position;
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Show next page
+     * @tc.expected: Animation event will be called, and final position is correct.
+     */
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+    pattern_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(isTrigger);
+    EXPECT_LT(finalPosition, 0.0f);
+    EXPECT_GT(finalPosition, -1.0f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_LT(finalPosition, -1.0f + 0.001f);
+}
+
+/**
+ * @tc.name: SwipeCustomAnimationTest005
+ * @tc.desc: Test check onContentDidScroll info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. create swiper.
+     */
+    bool isTrigger = false;
+    float finalPosition = 0.0f;
+    auto onContentDidScroll = [&isTrigger, &finalPosition](
+                                  int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        isTrigger = true;
+        if (index == 0) {
+            finalPosition = position;
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Show next page
+     * @tc.expected: Animation event will be called, and final position is correct.
+     */
+    pattern_->fastCurrentIndex_ = 0;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+    pattern_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(isTrigger);
+    EXPECT_LT(finalPosition, 0.0f);
+    EXPECT_GT(finalPosition, -1.0f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_LT(finalPosition, -1.0f + 0.001f);
+}
+
+/**
  * @tc.name: SwiperPatternSwipeTo001
  * @tc.desc: SwipeTo
  * @tc.type: FUNC
@@ -653,16 +739,19 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      */
     pattern_->ShowPrevious();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     EXPECT_EQ(GetChildX(frameNode_, 2), -480.0f);
     EXPECT_EQ(GetChildX(frameNode_, 3), -240.0f);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
     }
     pattern_->FinishAnimation();
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     // jumped to final position
     EXPECT_EQ(pattern_->currentIndex_, -2);
     EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
@@ -673,14 +762,17 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      */
     pattern_->ShowNext();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
     }
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
@@ -899,6 +991,39 @@ HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowNextAnimation005
+ * @tc.desc: Start property animation with showNext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation005, TestSize.Level1)
+{
+    /**
+     * @tc.expected: Related function is called.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    bool flag = false;
+    /**
+     * @tc.steps: step2. ShowNext and ContentWillScrollResult is false.
+     * @tc.expected: stopIndicatorAnimationFunc need not to be called.
+     */
+    pattern_->stopIndicatorAnimationFunc_ = [&flag](bool ifImmediately) { flag = true; };
+    pattern_->onContentWillScroll_ =
+        std::make_shared<ContentWillScrollEvent>([](const SwiperContentWillScrollResult& result) { return false; });
+    pattern_->ShowNext(true);
+    EXPECT_EQ(flag, false);
+    /**
+     * @tc.steps: step3. ShowNext and ContentWillScrollResult is true.
+     * @tc.expected: stopIndicatorAnimationFunc need to be called.
+     */
+    pattern_->onContentWillScroll_ =
+        std::make_shared<ContentWillScrollEvent>([](const SwiperContentWillScrollResult& result) { return true; });
+    pattern_->ShowNext(true);
+    EXPECT_EQ(flag, true);
+}
+
+/**
  * @tc.name: ShowPreviousAnimation
  * @tc.desc: Start property animation with showPrevious.
  * @tc.type: FUNC
@@ -1103,6 +1228,74 @@ HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation004, TestSize.Level1)
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation005
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation005, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(1);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->swiperController_, nullptr);
+
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    // check ShowPrevious function
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation006
+ * @tc.desc: Start property animation with showNext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Swiper.
+     * @tc.expected: Related function is called.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    bool flag = false;
+    /**
+     * @tc.steps: step2. ShowPrevious and ContentWillScrollResult is false.
+     * @tc.expected: stopIndicatorAnimationFunc need not to be called.
+     */
+    pattern_->stopIndicatorAnimationFunc_ = [&flag](bool ifImmediately) { flag = true; };
+    pattern_->onContentWillScroll_ =
+        std::make_shared<ContentWillScrollEvent>([](const SwiperContentWillScrollResult& result) { return false; });
+    pattern_->ShowPrevious(true);
+    EXPECT_EQ(flag, false);
+    /**
+     * @tc.steps: step3. ShowPrevious and ContentWillScrollResult is true.
+     * @tc.expected: stopIndicatorAnimationFunc need to be called.
+     */
+    pattern_->onContentWillScroll_ =
+        std::make_shared<ContentWillScrollEvent>([](const SwiperContentWillScrollResult& result) { return true; });
+    pattern_->ShowPrevious(true);
+    EXPECT_EQ(flag, true);
 }
 
 /**

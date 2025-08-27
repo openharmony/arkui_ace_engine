@@ -27,13 +27,13 @@
 
 namespace OHOS::Ace::Framework {
 class JsSaveButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsSaveButtonClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsSaveButtonClickFunction, JsFunction);
 public:
     explicit JsSaveButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsSaveButtonClickFunction() override {};
-    void Execute() override
+    void Execute()
     {
         JsFunction::ExecuteJS();
     };
@@ -48,6 +48,11 @@ public:
         SaveButtonIconStyle& icon, int32_t& bg);
     static void Create(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void SetIcon(const JSCallbackInfo& info);
+    static void SetText(const JSCallbackInfo& info);
+    static void SetIconBorderRadius(const JSCallbackInfo& info);
+    static void SetStateEffect(const JSCallbackInfo& info);
+    static void SetTipPosition(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H

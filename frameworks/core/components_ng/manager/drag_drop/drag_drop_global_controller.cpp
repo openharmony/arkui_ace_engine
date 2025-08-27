@@ -77,6 +77,18 @@ void DragDropGlobalController::SetAsyncDragCallback(std::function<void()> asyncD
     asyncDragCallback_ = asyncDragCallbac;
 }
 
+void DragDropGlobalController::SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    callSyncDragEnd_ = callSyncDragEnd;
+}
+
+std::function<void(DragStartRequestStatus)> DragDropGlobalController::GetCallAnsyncEnd()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return callSyncDragEnd_;
+}
+
 std::function<void()> DragDropGlobalController::GetAsyncDragCallback()
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
@@ -153,6 +165,18 @@ void DragDropGlobalController::SetIsOnOnDropPhase(bool isOnOnDropPhase)
     isOnOnDropPhase_ = isOnOnDropPhase;
 }
 
+void DragDropGlobalController::SetEnableDropDisallowedBadge(bool enableDropDisallowedBadge)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    enableDropDisallowedBadge_ = enableDropDisallowedBadge;
+}
+
+bool DragDropGlobalController::GetEnableDropDisallowedBadge() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return enableDropDisallowedBadge_;
+}
+
 bool DragDropGlobalController::RequestDragEndCallback(int32_t requestId,
     DragRet dragResult, std::function<void(const DragRet&)> stopDragCallback)
 {
@@ -211,6 +235,11 @@ bool DragDropGlobalController::IsAlreadyGetAppGlobalDrag() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return isAlreadyGetAppGlobalDrag_;
+}
+
+bool DragDropGlobalController::IsCurrentDrag(int32_t requestId) const
+{
+    return requestId_ == requestId;
 }
 
 } // namespace OHOS::Ace

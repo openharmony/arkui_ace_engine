@@ -95,7 +95,49 @@ public:
     static void Mock(const JSCallbackInfo& info);
 };
 
+class JSPreviewUIExtension : public JSViewAbstract, public JSInteractableView {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void Mock(const JSCallbackInfo& info);
+};
+
 class JSSecurityUIExtension : public JSViewAbstract, public JSInteractableView {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void Mock(const JSCallbackInfo& info);
+};
+
+class JSAbilityComponent : public JSViewAbstract, public JSInteractableView {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& info);
+};
+
+class JSSceneView : public JSViewAbstract {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& info);
+};
+
+class JSEmbeddedComponent : public JSViewAbstract, public JSInteractableView {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& info);
+};
+
+class JSIsolatedComponent : public JSViewAbstract, public JSInteractableView {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& info);
+};
+
+class JSRemoteWindow : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

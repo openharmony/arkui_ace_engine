@@ -14,11 +14,13 @@
  */
 
 #include "stack_base_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void StackBaseTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void StackBaseTestNG::TearDownTestSuite()
@@ -26,19 +28,11 @@ void StackBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void StackBaseTestNG::SetUp() {}
-void StackBaseTestNG::TearDown() {}
-
-RefPtr<FrameNode> StackBaseTestNG::CreateStack(const std::function<void(StackModelNG)>& callback)
+void StackBaseTestNG::SetUp() 
 {
-    StackModelNG model;
-    model.Create();
-    if (callback) {
-        callback(model);
-    }
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ViewStackProcessor::GetInstance()->PopContainer();
-    return AceType::DynamicCast<FrameNode>(element);
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
+
+void StackBaseTestNG::TearDown() {}
 
 } // namespace OHOS::Ace::NG

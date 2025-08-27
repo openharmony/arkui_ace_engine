@@ -44,6 +44,8 @@ public:
 
     void onDraw(DrawingContext& context) override;
     // paint
+    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount,
+        bool isBindIndicator);
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty) override;
     void PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty);
     void PaintUnselectedIndicator(
@@ -202,6 +204,11 @@ public:
         isBindIndicator_ = isBindIndicator;
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -272,6 +279,7 @@ private:
     bool needUpdate_ = true;
     bool isAutoPlay_ = false;
     bool isBindIndicator_ = false;
+    bool isLoop_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

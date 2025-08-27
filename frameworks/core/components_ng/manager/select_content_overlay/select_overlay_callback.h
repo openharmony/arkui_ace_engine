@@ -73,6 +73,7 @@ public:
     ~SelectOverlayCallback() override = default;
     virtual void OnAfterSelectOverlayShow(bool isCreate) {}
     virtual void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) {}
+    virtual void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) {}
 
     virtual void OnOverlayTouchDown(const TouchEventInfo& event) {}
     virtual void OnOverlayTouchUp(const TouchEventInfo& event) {}

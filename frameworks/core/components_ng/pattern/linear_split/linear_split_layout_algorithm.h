@@ -76,6 +76,14 @@ public:
     }
 
 private:
+    void UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset);
+    void DisableLayoutPolicy(const RefPtr<LayoutWrapper>& child);
+    LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF realSize);
+    bool IsChildMatchParent(const RefPtr<LayoutWrapper>& child);
+    OptionalSizeF MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, const SizeF& childTotalSize,
+        const SizeF& childMaxSize);
     void MeasureBeforeAPI10(LayoutWrapper* layoutWrapper);
     void LayoutBeforeAPI10(LayoutWrapper* layoutWrapper);
     std::pair<SizeF, SizeF> MeasureChildren(LayoutWrapper* layoutWrapper);
@@ -106,6 +114,7 @@ private:
     float splitLength_ = 0.0f;
     bool isOverParent_ = false;
     int32_t visibleChildCount_ = 0;
+    std::list<std::pair<RefPtr<LayoutWrapper>, LayoutConstraintF>> layoutPolicyChildren_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearSplitLayoutAlgorithm);
 };

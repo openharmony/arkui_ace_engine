@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -36,6 +37,7 @@ RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
     paintProperty->SetHost(host);
     if (!paintMethod_) {
         paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
+        paintMethod_->SetNeedAnimation(visible_);
     }
     CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -125,7 +127,9 @@ void CheckBoxPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    RegisterVisibleAreaChange();
 }
 
 void CheckBoxPattern::SetBuilderNodeHidden()
@@ -171,13 +175,34 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    InitDefaultMargin();
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value() || toggleMakeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -194,16 +219,19 @@ void CheckBoxPattern::OnModifyDone()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
@@ -438,7 +466,6 @@ void CheckBoxPattern::OnClick()
     }
     paintProperty->UpdateCheckBoxSelect(!isSelected);
     UpdateState();
-    ReportChangeEvent(!isSelected);
 }
 
 void CheckBoxPattern::OnTouchDown()
@@ -502,7 +529,7 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -515,6 +542,22 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(groupNode);
     auto checkboxList = groupManager->GetCheckboxList(group);
     UpdateCheckBoxGroupStatus(groupNode, checkboxList);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+
+void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void CheckBoxPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void CheckBoxPattern::CheckPageNode()
@@ -611,6 +654,8 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
 
 void CheckBoxPattern::StartEnterAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
@@ -631,11 +676,13 @@ void CheckBoxPattern::StartEnterAnimation()
             TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check enter animation");
             renderContext->UpdateOpacity(1);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void CheckBoxPattern::StartExitAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
@@ -648,7 +695,7 @@ void CheckBoxPattern::StartExitAnimation()
             TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check exit animation");
             renderContext->UpdateOpacity(0);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
     const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
@@ -959,7 +1006,6 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
     paintProperty->UpdateCheckBoxSelect(select);
     UpdateState();
     OnModifyDone();
-    ReportChangeEvent(select);
 }
 
 void CheckBoxPattern::FireBuilder()
@@ -1045,16 +1091,16 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto result = false;
     auto checkBoxPaintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_RETURN(checkBoxPaintProperty, false);
-    if (!checkBoxPaintProperty->HasCheckBoxSelectedColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxSelectedColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
         result = true;
     }
-    if (!checkBoxPaintProperty->HasCheckBoxUnSelectedColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxUnSelectedColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
         result = true;
     }
 
-    if (!checkBoxPaintProperty->HasCheckBoxCheckMarkColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxCheckMarkColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
         result = true;
     }
@@ -1109,10 +1155,8 @@ void CheckBoxPattern::SetPrePageIdToLastPageId()
     }
 }
 
-void CheckBoxPattern::OnAttachToMainTree()
+void CheckBoxPattern::UpdateNavIdAndState(const RefPtr<FrameNode>& host)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
@@ -1130,6 +1174,14 @@ void CheckBoxPattern::OnAttachToMainTree()
         groupManager->SetLastNavId(std::nullopt);
         UpdateState();
     }
+}
+
+void CheckBoxPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    UpdateNavIdAndState(host);
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()
@@ -1156,54 +1208,25 @@ RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()
     return groupManager_.Upgrade();
 }
 
-int32_t CheckBoxPattern::ParseCommand(const std::string& command, bool& selectStatus)
+void CheckBoxPattern::RegisterVisibleAreaChange()
 {
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || json->IsNull()) {
-        return RET_FAILED;
-    }
-
-    auto cmdType = json->GetString("cmd");
-    if (cmdType != "selectCheckBox") {
-        return RET_FAILED;
-    }
-
-    selectStatus = json->GetBool("selectStatus", selectStatus);
-    return RET_SUCCESS;
-}
-
-int32_t CheckBoxPattern::OnInjectionEvent(const std::string& command)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, RET_FAILED);
-    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
-    bool currentStatus = paintProperty->GetCheckBoxSelectValue(false);
-    bool selectStatus = currentStatus;
-    auto ret = ParseCommand(command, selectStatus);
-    CHECK_EQUAL_RETURN(ret, RET_FAILED, RET_FAILED);
-    CHECK_EQUAL_RETURN(currentStatus, selectStatus, RET_SUCCESS);
-    auto pattern = host->GetPattern<CheckBoxPattern>();
-    CHECK_NULL_RETURN(pattern, RET_FAILED);
-    pattern->SetCheckBoxSelect(selectStatus);
-    return RET_SUCCESS;
-}
-
-void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
-{
-    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
-        return;
-    }
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("selectStatus", selectStatus);
-    params->Put("cmd", "selectCheckBox");
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("event", params);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto id = host->GetId();
-    json->Put("nodeId", id);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString().c_str());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetNeedAnimation(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void CheckBoxPattern::SetNeedAnimation(bool visible)
+{
+    visible_ = visible;
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->SetNeedAnimation(visible);
 }
 } // namespace OHOS::Ace::NG

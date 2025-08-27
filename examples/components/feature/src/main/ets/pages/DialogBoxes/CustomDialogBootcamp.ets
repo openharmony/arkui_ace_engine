@@ -12,8 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ColorBlock, Drawer, IconBlock, RadioBlock, SliderBlock, useEnabled, useEnabledBase,
-  useEnabledNumber } from 'common'
+import {
+  ColorBlock,
+  Drawer,
+  IconBlock,
+  RadioBlock,
+  SliderBlock,
+  useEnabled,
+  useEnabledBase,
+  useEnabledNumber
+} from 'common'
 import { KeyboardAvoidMode } from '@ohos.arkui.UIContext'
 
 @CustomDialog
@@ -96,8 +104,8 @@ export struct CustomDialogBootcamp {
   @State enableCustomDialogControllerOptionsCustomStyle: boolean = false;
   @State animateParamDuration: number = 1000;
   @State enableAnimateParamDuration: boolean = false;
-  @State animateParamTempo:number = 1
-  @State enableAnimateParamTempo:boolean = false;
+  @State animateParamTempo: number = 1
+  @State enableAnimateParamTempo: boolean = false;
   @State animateParamCurve: Curve = Curve.EaseInOut;
   @State enableAnimateParamCurve: boolean = false;
   @State animateParamDelay: number = 100;
@@ -115,6 +123,7 @@ export struct CustomDialogBootcamp {
   @State animateParamExpectedFrameRateRangeExpected: number = 60;
   @State enableAnimateParamExpectedFrameRateRangeExpected: boolean = false;
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
@@ -186,40 +195,40 @@ export struct CustomDialogBootcamp {
       this.customDialogControllerOptionsGridCount),
     openAnimation: {
       duration: useEnabled(this.enableAnimateParamDuration, this.animateParamDuration),
-      tempo:useEnabled(this.enableAnimateParamTempo,this.animateParamTempo),
-      curve: useEnabled(this.enableAnimateParamCurve,this.animateParamCurve),
-      delay: useEnabled(this.enableAnimateParamDelay,this.animateParamDelay),
-      iterations: useEnabled(this.enableAnimateParamIterations,this.animateParamIterations),
-      playMode: useEnabled(this.enableAnimateParamPlayMode,this.animateParamPlayMode),
-      finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType,this.animateParamFinishCallbackType),
+      tempo: useEnabled(this.enableAnimateParamTempo, this.animateParamTempo),
+      curve: useEnabled(this.enableAnimateParamCurve, this.animateParamCurve),
+      delay: useEnabled(this.enableAnimateParamDelay, this.animateParamDelay),
+      iterations: useEnabled(this.enableAnimateParamIterations, this.animateParamIterations),
+      playMode: useEnabled(this.enableAnimateParamPlayMode, this.animateParamPlayMode),
+      finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType, this.animateParamFinishCallbackType),
       expectedFrameRateRange: {
         min: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMin,
-          this.animateParamExpectedFrameRateRangeMin,30),
+          this.animateParamExpectedFrameRateRangeMin, 30),
         max: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,
-          this.animateParamExpectedFrameRateRangeMax,120),
+          this.animateParamExpectedFrameRateRangeMax, 120),
         expected: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,
-          this.animateParamExpectedFrameRateRangeExpected,60),
+          this.animateParamExpectedFrameRateRangeExpected, 60),
       }
     },
     closeAnimation: {
-      duration: useEnabled(this.enableAnimateParamDuration,this.animateParamDuration),
-      tempo: useEnabled(this.enableAnimateParamTempo,this.animateParamTempo),
-      curve: useEnabled(this.enableAnimateParamCurve,this.animateParamCurve),
-      delay: useEnabled(this.enableAnimateParamDelay,this.animateParamDelay),
-      iterations: useEnabled(this.enableAnimateParamIterations,this.animateParamIterations),
-      playMode: useEnabled(this.enableAnimateParamPlayMode,this.animateParamPlayMode),
-      finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType,this.animateParamFinishCallbackType),
+      duration: useEnabled(this.enableAnimateParamDuration, this.animateParamDuration),
+      tempo: useEnabled(this.enableAnimateParamTempo, this.animateParamTempo),
+      curve: useEnabled(this.enableAnimateParamCurve, this.animateParamCurve),
+      delay: useEnabled(this.enableAnimateParamDelay, this.animateParamDelay),
+      iterations: useEnabled(this.enableAnimateParamIterations, this.animateParamIterations),
+      playMode: useEnabled(this.enableAnimateParamPlayMode, this.animateParamPlayMode),
+      finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType, this.animateParamFinishCallbackType),
       expectedFrameRateRange: {
         min:
         useEnabledNumber(
           this.enableAnimateParamExpectedFrameRateRangeMin,
-          this.animateParamExpectedFrameRateRangeMin,30),
+          this.animateParamExpectedFrameRateRangeMin, 30),
         max:
         useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,
-          this.animateParamExpectedFrameRateRangeMax,120),
+          this.animateParamExpectedFrameRateRangeMax, 120),
         expected:
         useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,
-          this.animateParamExpectedFrameRateRangeExpected,60),
+          this.animateParamExpectedFrameRateRangeExpected, 60),
       }
     },
     isModal: useEnabled(this.enableCustomDialogControllerOptionsIsModal, this.customDialogControllerOptionsIsModal),
@@ -292,7 +301,7 @@ export struct CustomDialogBootcamp {
           title: 'duration',
           isEnabled: $enableAnimateParamDuration,
           value: $animateParamDuration,
-          step:500,
+          step: 500,
           min: 500,
           max: 2000
         })
@@ -310,7 +319,7 @@ export struct CustomDialogBootcamp {
           isEnabled: $enableAnimateParamDelay,
           value: $animateParamDelay,
           min: 0,
-          step:500,
+          step: 500,
           max: 2000
         })
 

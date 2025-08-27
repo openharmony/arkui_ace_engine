@@ -69,4 +69,8 @@ void ImageAnalyzerMgr::UpdateOverlayActiveStatus(void** overlayData, bool status
 void ImageAnalyzerMgr::UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config)
 {
 }
+
+void ImageAnalyzerMgr::UpdateKeyEvent(void** overlayData, void* keyEvent)
+{
+}
 }

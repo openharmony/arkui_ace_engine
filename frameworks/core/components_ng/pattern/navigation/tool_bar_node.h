@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavToolbarNode : public FrameNode {
-    DECLARE_ACE_TYPE(NavToolbarNode, FrameNode)
+    DECLARE_ACE_TYPE(NavToolbarNode, FrameNode);
 public:
     NavToolbarNode(const std::string& tag, int32_t nodeId);
     NavToolbarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
@@ -75,6 +75,7 @@ public:
     {
         return isHideItemText_;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     RefPtr<UINode> toolbarContainerNode_;

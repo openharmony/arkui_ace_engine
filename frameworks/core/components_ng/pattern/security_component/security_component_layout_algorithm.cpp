@@ -812,7 +812,7 @@ bool SecurityComponentLayoutAlgorithm::IsIconOutOfRange(SizeF& iconPoint, SizeF&
 
 bool SecurityComponentLayoutAlgorithm::IsIconOutOfBackground(const NG::BorderRadiusProperty& radius)
 {
-    auto iconPoint = SizeF(left_.width_ + icon_.width_ / HALF, top_.height_ + icon_.width_ / HALF);
+    auto iconPoint = SizeF(left_.width_ + icon_.width_ / HALF, top_.height_ + icon_.height_ / HALF);
     auto iconRadius = icon_.width_ * ICON_RANGE_RATIO / HALF;
     if (GreatNotEqual(iconPoint.Width() + iconRadius, componentWidth_) ||
         GreatNotEqual(iconPoint.Height() + iconRadius, componentHeight_)) {
@@ -852,7 +852,7 @@ bool SecurityComponentLayoutAlgorithm::IsIconOutOfBackground(const NG::BorderRad
 bool SecurityComponentLayoutAlgorithm::GetIconExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<FrameNode>& frameNode)
 {
-    if (LessOrEqual(icon_.width_, 0.0)) {
+    if (LessOrEqual(icon_.width_, 0.0) || LessOrEqual(icon_.height_, 0.0)) {
         return false;
     }
 
@@ -885,8 +885,10 @@ void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrap
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
     std::optional<SizeF> currentTextSize;
-    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
-        frameNode, currentTextSize));
+    if (frameNode->GetTag() != V2::SAVE_BUTTON_ETS_TAG) {
+        securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(
+            securityComponentLayoutProperty, frameNode, currentTextSize));
+    }
     securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
     securityComponentLayoutProperty->UpdateIsIconExceeded(GetIconExceededFlag(securityComponentLayoutProperty,
         frameNode));

@@ -96,7 +96,7 @@ void LayoutWrapperNodeTestNg::TearDownTestSuite()
  * @tc.desc: Test Update.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg001, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg001, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     auto [newNode, newWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_1);
@@ -109,7 +109,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg001, TestSize.Level1)
  * @tc.desc: Test AppendChild.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg002, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg002, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_1);
@@ -123,7 +123,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg002, TestSize.Level1)
  * @tc.desc: Test GetAllChildrenWithBuild.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg003, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg003, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_1);
@@ -143,7 +143,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg003, TestSize.Level1)
  * @tc.desc: Test Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg004, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg004, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
@@ -165,7 +165,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg004, TestSize.Level1)
  * @tc.desc: Test SetLongPredictTask.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg005, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg005, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     wrapper->layoutWrapperBuilder_ = CreateWrapperBuilder();
@@ -180,7 +180,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg005, TestSize.Level1)
  * @tc.desc: Test LayoutOverlay.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg007, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg007, TestSize.Level0)
 {
     auto [node, wrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     auto frameSize = SizeF(100, 200);
@@ -202,7 +202,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg007, TestSize.Level1)
  * @tc.desc: Test GetAllChildrenWithBuild .
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg08, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg08, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create frameNode.
@@ -258,7 +258,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg08, TestSize.Level1)
  * @tc.desc: Test Measure .
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg09, TestSize.Level1)
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg09, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create frameNode.

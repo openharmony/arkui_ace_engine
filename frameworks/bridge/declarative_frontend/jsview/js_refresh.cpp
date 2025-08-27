@@ -20,11 +20,12 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
-#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
@@ -99,6 +100,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
+    JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -123,6 +125,26 @@ void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
     RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
 }
 
+void JSRefresh::SetMaxPullDownDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    float maxPullDownDistance = args->ToNumber<float>();
+    if (std::isnan(maxPullDownDistance)) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    maxPullDownDistance = std::max(maxPullDownDistance, 0.0f);
+    RefreshModel::GetInstance()->SetMaxPullDownDistance(maxPullDownDistance);
+}
+
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -142,38 +164,35 @@ void JSRefresh::JsRefreshOffset(const JSRef<JSVal>& jsVal)
 
 void JSRefresh::Create(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    auto info0 = info[0];
+    if (!info0->IsObject()) {
         return;
     }
-    RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
-    if (!theme) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto refreshing = paramObject->GetProperty("refreshing");
-    auto jsOffset = paramObject->GetProperty("offset");
-    auto friction = paramObject->GetProperty("friction");
-    auto promptText = paramObject->GetProperty("promptText");
+
+    auto paramObject = JSRef<JSObject>::Cast(info0);
+    auto refreshing = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING));
+    auto jsOffset = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET));
+    auto friction = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FRICTION));
+    auto promptText = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::PROMPT_TEXT));
     JSRef<JSVal> changeEventVal;
     RefreshModel::GetInstance()->Create();
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
-        changeEventVal = paramObject->GetProperty("$refreshing");
+        changeEventVal = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::$REFRESHING));
         ParseRefreshingObject(info, changeEventVal);
     } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-        changeEventVal = refreshingObj->GetProperty("changeEvent");
+        changeEventVal = refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CHANGE_EVENT));
         ParseRefreshingObject(info, changeEventVal);
-        RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+        RefreshModel::GetInstance()->SetRefreshing(
+            refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE))->ToBoolean());
     } else {
         RefreshModel::GetInstance()->SetRefreshing(false);
     }
     CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
-            RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-        } else {
+        if (GreatOrEqual(offset.Value(), 0.0) && offset.Unit() != DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
     }
@@ -184,7 +203,15 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     std::string loadingStr = "";
-    if (ParseJsString(promptText, loadingStr)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsString(promptText, loadingStr, resObj)) {
+            RefreshModel::GetInstance()->CreateWithResourceObj(resObj);
+            RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+        } else {
+            RefreshModel::GetInstance()->ResetLoadingText();
+        }
+    } else if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     } else {
         RefreshModel::GetInstance()->ResetLoadingText();
@@ -193,17 +220,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
 {
-    JSRef<JSVal> contentParam = paramObject->GetProperty("refreshingContent");
+    JSRef<JSVal> contentParam = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING_CONTENT));
     if (!contentParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
-    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER_NODE));
     if (!builderNodeParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty(static_cast<int32_t>(ArkUIIndex::NODEPTR));
     if (nodeptr.IsEmpty()) {
         return false;
     }
@@ -224,7 +251,7 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
         return false;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto builder = paramObject->GetProperty("builder");
+    auto builder = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     RefPtr<NG::UINode> customNode;
     if (builder->IsFunction()) {
         {

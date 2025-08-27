@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "../relative_container_base_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 namespace OHOS::Ace::NG {
 
@@ -24,7 +25,7 @@ class RelativeContainerGuidelineTest : public RelativeContainerBaseTestNG {};
  * @tc.desc: Test func CalcGuideline, calculate the position of multiple guidelines based on the size of the container
  * and record them in guidelines_ and recordOffsetMap_.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
@@ -68,7 +69,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level1)
  * @tc.desc: test the case where guidelines are expressed in percentage form use and the container width and height are
  * auto.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(0.0f, DimensionUnit::AUTO));
@@ -130,7 +131,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level1)
  * @tc.desc: test the case where guidelines are expressed in percentage form use and the container width and height are
  * not auto.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
@@ -173,7 +174,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level1)
  * @tc.name: CalcGuidelineOffsetTest1
  * @tc.desc: Test CalcOffsetParam, use guideline.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto relativeContainer = CreateRelativeContainer([this, &row1](RelativeContainerModelNG model) {
@@ -202,5 +203,98 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Leve
     // (300 * 0.1, 400 * 0.1)
     EXPECT_EQ(layoutAlgorithm.recordOffsetMap_["row1"], OffsetF(30, 40))
         << layoutAlgorithm.recordOffsetMap_["row1"].ToString();
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest1
+ * @tc.desc: Test ResObjGuidelineTest1 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    RelativeContainerModelNG relativeContainerModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {};
+    GuidelineInfo guidelineInfo;
+    guidelineInfo.AddResource("relativeContainer.guideLine.position.start", resObj, std::move(updateFunc));
+    EXPECT_EQ(guidelineInfo.resMap_.empty(), false);
+    std::vector<GuidelineInfo> guidelineInfos;
+    guidelineInfos.emplace_back(guidelineInfo);
+    relativeContainerModelNG.SetGuideline(guidelineInfos);
+    auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest2
+ * @tc.desc: Test ResObjGuidelineTest2 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {};
+    GuidelineInfo guidelineInfo;
+    guidelineInfo.AddResource("relativeContainer.guideLine.position.start", resObj, std::move(updateFunc));
+    EXPECT_EQ(guidelineInfo.resMap_.empty(), false);
+    std::vector<GuidelineInfo> guidelineInfos;
+    guidelineInfos.emplace_back(guidelineInfo);
+    RelativeContainerModelNG::SetGuideline(frameNode, guidelineInfos);
+    auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest3
+ * @tc.desc: Test ResObjGuidelineTest3 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level0)
+{
+    g_isConfigChangePerform = false;
+    SystemProperties::ConfigChangePerform();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty1 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty1->HasGuideline(), true);
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty2 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(layoutProperty2->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: SetPositionResObj
+ * @tc.desc: Test SetPositionResObj of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, SetPositionResObj, TestSize.Level0)
+{
+    g_isConfigChangePerform = true;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    GuidelineInfo guidelineInfo;
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.start");
+    guidelineInfo.ReloadResources();
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 1);
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.end");
+    guidelineInfo.ReloadResources();
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

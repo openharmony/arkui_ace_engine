@@ -30,7 +30,7 @@ import { QRCodeBootcamp } from './QRCodeBootcamp';
 import { TextClockBootcamp } from './TextClockBootcamp';
 import { TextTimerBootcamp } from './TextTimerBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
-
+import { MarqueeBootcamp } from './MarqueeBootcamp';
 
 export const informationDisplayRoute: RouteGroup = {
   name: 'InformationDisplay',
@@ -51,45 +51,47 @@ export const informationDisplayRoute: RouteGroup = {
     { name: 'TextClock', label: '文本时钟/TextClock' },
     { name: 'TextTimer', label: '文本计时器/TextTimer' },
     { name: 'AdvancedCounter', label: '计数器/AdvancedCounter' },
-    { name: 'Toast', label: '即时反馈/Toast' }
-
+    { name: 'Toast', label: '即时反馈/Toast' },
+    { name: 'Marquee', label: '跑马灯/Marquee' }
   ]
 };
 
 @Builder
 export function informationDisplayDestination(name: string, route: Route) {
   if (name === 'InformationDisplay/AlphabetIndexer') {
-    AlphabetIndexerBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Badge'){
-    BadgeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Chip'){
-    ChipBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/ChipGroup'){
-    ChipGroupBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/counter'){
-    CounterBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/DataPanel'){
-    DataPanelBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Gauge'){
-    GaugeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/LoadingProgress'){
-    LoadingProgressBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/PatternLock'){
-    PatternLockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Progress'){
-    ProgressLockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Popup'){
-    PopupBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/QRCode'){
-    QRCodeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/TextClock'){
-    TextClockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/TextTimer'){
-    TextTimerBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/AdvancedCounter'){
-    AdvancedCounterBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Toast'){
-    ToastBootcamp({title:route.label})
+    AlphabetIndexerBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Badge') {
+    BadgeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Chip') {
+    ChipBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/ChipGroup') {
+    ChipGroupBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/counter') {
+    CounterBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/DataPanel') {
+    DataPanelBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Gauge') {
+    GaugeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/LoadingProgress') {
+    LoadingProgressBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/PatternLock') {
+    PatternLockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Progress') {
+    ProgressLockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Popup') {
+    PopupBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/QRCode') {
+    QRCodeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/TextClock') {
+    TextClockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/TextTimer') {
+    TextTimerBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/AdvancedCounter') {
+    AdvancedCounterBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Toast') {
+    ToastBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Marquee') {
+    MarqueeBootcamp({ title: route.label })
   }
 
 }

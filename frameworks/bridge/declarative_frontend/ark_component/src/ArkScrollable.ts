@@ -95,6 +95,34 @@ class BackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
+  constructor(value: ScrollBarMargin) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollBarMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start, this.value.end);
+    }
+  }
+}
+
+class OnWillStopDraggingModifier extends ModifierWithKey<(velocity: number) => void> {
+  constructor(value: (velocity: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onWillStopDragging');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStopDragging(node, this.value);
+    }
+  }
+}
+
 class OnReachEndModifier extends ModifierWithKey<() => void> {
     constructor(value: () => void) {
         super(value);
@@ -145,6 +173,14 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     backToTop(value: boolean): this {
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
+      return this;
+    }
+    scrollBarMargin(margin: ScrollBarMargin): T {
+      modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
+      return this;
+    }
+    onWillStopDragging(callback: (velocity: number) => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, callback);
       return this;
     }
 }

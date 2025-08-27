@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "progress_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
@@ -137,7 +138,7 @@ RefPtr<ProgressModifier> ProgressTestNg::CreateProgressModifier()
  * @tc.desc: Test all the pattern of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level0)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     CreateDone();
@@ -163,7 +164,7 @@ HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level1)
  * @tc.desc: Test ProgressLayoutAlgorithm without theme.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of linear progress.
@@ -213,7 +214,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
  * @tc.desc: Test ProgressLayoutAlgorithm strokeWidth and RingDiameter with theme.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create progress layout property and ProgressLayoutAlgorithm.
@@ -240,7 +241,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
  * @tc.desc: Test all the properties of linear progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level0)
 {
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -303,7 +304,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
  * @tc.desc: Test all the properties of linear progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level0)
 {
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -432,7 +433,7 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
  * @tc.desc: Test all the properties of scale progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level0)
 {
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -480,7 +481,7 @@ HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
  * @tc.desc: Test all the properties of Capsule type progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, CapsuleProgressCreator001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, CapsuleProgressCreator001, TestSize.Level0)
 {
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -537,7 +538,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressCreator001, TestSize.Level1)
  * @tc.desc: Test progress_paint_property.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPaintProperty001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPaintProperty001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the frameNode_.
@@ -566,7 +567,7 @@ HWTEST_F(ProgressTestNg, ProgressPaintProperty001, TestSize.Level1)
  * @tc.desc: Test progress mask property
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressMaskPropertyTestNg001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressMaskPropertyTestNg001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the ProgressMaskProperty.Set the properties of ProgressMaskProperty.
@@ -592,7 +593,7 @@ HWTEST_F(ProgressTestNg, ProgressMaskPropertyTestNg001, TestSize.Level1)
  * @tc.desc: Test the RangeInfo Property of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg001, TestSize.Level0)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     CreateDone();
@@ -609,7 +610,7 @@ HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg001, TestSize.Level1
  * @tc.desc: Test the GetText Property of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level0)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     CreateDone();
@@ -622,7 +623,7 @@ HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level1
  * @tc.desc: Test the TouchEvent of progress, TouchType is DOWN.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create capsule progress and set add touchEvent.
@@ -669,7 +670,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
  * @tc.desc: Test the TouchEvent of progress, TouchType is UP.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPattern002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPattern002, TestSize.Level0)
 {
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetBackgroundColor(Color::BLUE);
@@ -688,7 +689,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern002, TestSize.Level1)
  * @tc.desc: Test the TouchEvent of progress, TouchType is CANCEL.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPattern003, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPattern003, TestSize.Level0)
 {
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetBackgroundColor(Color::BLUE);
@@ -707,7 +708,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern003, TestSize.Level1)
  * @tc.desc: Test ToJsonValue of ring progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level0)
 {
     Gradient gradient;
     GradientColor gradientColorEnd;
@@ -744,7 +745,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
  * @tc.desc: Test the measure of Capsule type progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, CapsuleProgressMeasure001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, CapsuleProgressMeasure001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the frameNode_.
@@ -783,7 +784,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure001, TestSize.Level1)
  * @tc.desc: Test the measure of Capsule type progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, CapsuleProgressMeasure002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, CapsuleProgressMeasure002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the frameNode_.
@@ -821,7 +822,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure002, TestSize.Level1)
  * @tc.desc: Test all the properties of Capsule type progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, CapsuleProgressMeasure003, TestSize.Level1)
+HWTEST_F(ProgressTestNg, CapsuleProgressMeasure003, TestSize.Level0)
 {
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -870,7 +871,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure003, TestSize.Level1)
  * @tc.desc: Test function about setting value.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create Progress when Version is VERSION_NINE.
@@ -925,7 +926,7 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
  * @tc.desc: Test the TouchEvent of progress, TouchType is CANCEL.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level0)
 {
     /**
      * @tc.steps:  Create ProgressModifier and set ProgressModifier property.
@@ -967,7 +968,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level1)
  * @tc.desc: Test ProgressLayoutAlgorithm without theme.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm003, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of linear progress.
@@ -1005,7 +1006,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm003, TestSize.Level1)
  * @tc.desc: Test ProgressLayoutAlgorithm without theme.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm004, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of linear progress.
@@ -1058,7 +1059,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm004, TestSize.Level1)
  * @tc.desc: Test ProgressLayoutAlgorithm without theme.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm005, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of linear progress.
@@ -1108,7 +1109,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm005, TestSize.Level1)
  * @tc.desc: SetBuilderFunc and get value
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init Progress node
@@ -1132,7 +1133,7 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
  * @tc.desc: Test ProgressPrivacySensitive change.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the frameNode_.
@@ -1165,7 +1166,7 @@ HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
  * @tc.desc: Test Progress OnLanguageConfigurationUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level0)
 {
     auto pattern = AceType::MakeRefPtr<ProgressPattern>();
     EXPECT_FALSE(pattern == nullptr);
@@ -1198,7 +1199,7 @@ HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level1)
  * @tc.desc: Test function border radius setting value.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the progress model.
@@ -1397,7 +1398,7 @@ HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest003, TestSize.Level1)
  * @tc.desc: Test ResetColor and ResetBackgroundColor of linear progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
@@ -1417,7 +1418,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
  * @tc.desc: Test ResetGradientColor and ResetBackgroundColor of ring progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level0)
 {
     Gradient gradient;
     GradientColor gradientColorEnd;
@@ -1447,7 +1448,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level1)
  * @tc.desc: Test Reset fuction of capsule progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressModelTest003, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressModelTest003, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
@@ -1475,7 +1476,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest003, TestSize.Level1)
  * @tc.desc: Test ResetColor and ResetBackgroundColor of linear progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressModelTest004, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressModelTest004, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1497,7 +1498,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest004, TestSize.Level1)
  * @tc.desc: Test ResetGradientColor and ResetBackgroundColor of ring progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level0)
 {
     Gradient gradient;
     GradientColor gradientColorEnd;
@@ -1529,7 +1530,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level1)
  * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
@@ -1553,7 +1554,7 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
  * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
@@ -1577,7 +1578,7 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
  * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level0)
 {
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
@@ -1606,7 +1607,7 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
  * @tc.desc: Test Builder fuction of ProgressThemeWrapper.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
+HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level0)
 {
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
     ASSERT_NE(themeConstants, nullptr);
@@ -1644,5 +1645,694 @@ HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
     EXPECT_EQ(progressTheme->GetCapsuleSelectColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
     EXPECT_EQ(progressTheme->GetTrackSelectedColor(), colors[TokenColors::BACKGROUND_EMPHASIZE]);
     EXPECT_EQ(progressTheme->GetBorderColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateColorTest001
+ * @tc.desc: Test UpdateColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest001, TestSize.Level0)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    Color testColor(Color::RED);
+    pattern->UpdateColor(testColor, true);
+    
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateColorTest002
+ * @tc.desc: Test UpdateColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest002, TestSize.Level0)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Color testColor(Color::BLACK);
+    pattern->UpdateColor(testColor, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), testColor);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateColorTest003
+ * @tc.desc: Test UpdateColor function without first load or system color change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest003, TestSize.Level0)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    Color initialColor(Color::GREEN);
+    pattern->UpdateColor(initialColor, true);
+    Color newColor(Color::BLUE);
+    pattern->UpdateColor(newColor, false);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetColorValue(), initialColor);
+}
+
+/**
+ * @tc.name: ProgressPatternUpdateGradientColorTest001
+ * @tc.desc: Test UpdateGradientColor function with first load scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternUpdateGradientColorTest001, TestSize.Level0)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradient.AddColor(gradientColorEnd);
+    gradient.AddColor(gradientColorStart);
+    
+    pattern->UpdateGradientColor(gradient, true);
+    
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetBorderWidth
+ * @tc.desc: Test ProgressModelNG SetBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetBorderWidth, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetBorderWidth with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    Dimension tmpWith = 10.0_vp;
+    model.SetBorderWidth(tmpWith);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBorderWidth().value(), tmpWith);
+
+    /**
+     * @tc.case: case2 call to  static function SetBorderWidth.
+     * @tc.expected: it should be as we set.
+     */
+    ProgressModelNG::SetBorderWidth(Referenced::RawPtr(frameNode), STROKE_WIDTH);
+    EXPECT_EQ(paintProperty->GetBorderWidth().value(), STROKE_WIDTH);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetSweepingEffect
+ * @tc.desc: Test ProgressModelNG SetSweepingEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetSweepingEffect, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetSweepingEffect with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    bool enableScanEffect = true;
+    model.SetSweepingEffect(enableScanEffect);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetEnableScanEffect().value(), true);
+
+    /**
+     * @tc.case: case2 call to  static function SetSweepingEffect.
+     * @tc.expected: it should be as we set.
+     */
+    enableScanEffect = false;
+    ProgressModelNG::SetSweepingEffect(Referenced::RawPtr(frameNode), enableScanEffect);
+    EXPECT_EQ(paintProperty->GetEnableScanEffect().value(), false);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetFontSize
+ * @tc.desc: Test ProgressModelNG SetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetFontSize, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    /**
+     * @tc.case: case1 call to  SetFontSize with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    Dimension defaultSize = 10.0_vp;
+    model.SetFontSize(defaultSize);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetTextSize().value(), defaultSize);
+
+    /**
+     * @tc.case: case1 call to  static function SetFontSize.
+     * @tc.expected: it should be as we set.
+     */
+    defaultSize = 6.66_vp;
+    ProgressModelNG::SetFontSize(Referenced::RawPtr(frameNode), defaultSize);
+    EXPECT_EQ(paintProperty->GetTextSize().value(), defaultSize);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetFontColor
+ * @tc.desc: Test ProgressModelNG SetFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetFontColor, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetFontColor with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    Color fontColor = Color(0xffc0c0c1);
+    model.SetFontColor(fontColor);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetTextColor().value(), fontColor);
+
+    /**
+     * @tc.case: case1 call to  static function SetFontColor.
+     * @tc.expected: it should be as we set.
+     */
+    fontColor = Color(0xffc0c0c0);
+    ProgressModelNG::SetFontColor(Referenced::RawPtr(frameNode), fontColor);
+    EXPECT_EQ(paintProperty->GetTextColor().value(), fontColor);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetFontWeight
+ * @tc.desc: Test ProgressModelNG SetFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetFontWeight, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetFontWeight with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    model.SetFontWeight(FontWeight::LIGHTER);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetFontWeight().value(), FontWeight::LIGHTER);
+
+    /**
+     * @tc.case: case1 call to  static function SetFontWeight.
+     * @tc.expected: it should be as we set.
+     */
+    ProgressModelNG::SetFontWeight(Referenced::RawPtr(frameNode), FontWeight::BOLD);
+    EXPECT_EQ(paintProperty->GetFontWeight().value(), FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetFontFamily
+ * @tc.desc: Test ProgressModelNG SetFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetFontFamily, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetFontFamily with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    const std::vector<std::string> fontFamily2 = { "serif", "scans" };
+    model.SetFontFamily(fontFamily2);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetFontFamily().value(), fontFamily2);
+
+    /**
+     * @tc.case: case1 call to  static function SetFontFamily.
+     * @tc.expected: it should be as we set.
+     */
+    const std::vector<std::string> fontFamily = { "serif" };
+    ProgressModelNG::SetFontFamily(Referenced::RawPtr(frameNode), fontFamily);
+    EXPECT_EQ(paintProperty->GetFontFamily().value(), fontFamily);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetItalicFontStyle
+ * @tc.desc: Test ProgressModelNG SetItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetItalicFontStyle, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetItalicFontStyle with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    model.SetItalicFontStyle(Ace::FontStyle::NORMAL);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetItalicFontStyle(), Ace::FontStyle::NORMAL);
+
+    /**
+     * @tc.case: case1 call to  static function SetItalicFontStyle.
+     * @tc.expected: it should be as we set.
+     */
+    ProgressModelNG::SetItalicFontStyle(Referenced::RawPtr(frameNode), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(paintProperty->GetItalicFontStyle(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetRingSweepingEffect
+ * @tc.desc: Test ProgressModelNG SetRingSweepingEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetRingSweepingEffect, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
+
+    /**
+     * @tc.case: case1 call to  SetRingSweepingEffect with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    bool enableRingSweepingEffect = true;
+    model.SetRingSweepingEffect(enableRingSweepingEffect);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetEnableRingScanEffect().value(), true);
+
+    /**
+     * @tc.case: case2 call to  static function SetRingSweepingEffect.
+     * @tc.expected: it should be as we set.
+     */
+    enableRingSweepingEffect = false;
+    ProgressModelNG::SetRingSweepingEffect(Referenced::RawPtr(frameNode), enableRingSweepingEffect);
+    EXPECT_EQ(paintProperty->GetEnableRingScanEffect().value(), false);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetLinearSweepingEffect
+ * @tc.desc: Test ProgressModelNG SetLinearSweepingEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetLinearSweepingEffect, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+
+    /**
+     * @tc.case: case1 call to  SetLinearSweepingEffect with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    bool enableLinearScanEffect = true;
+    model.SetLinearSweepingEffect(enableLinearScanEffect);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetEnableLinearScanEffect().value(), true);
+
+    /**
+     * @tc.case: case2 call to  static function SetLinearSweepingEffect.
+     * @tc.expected: it should be as we set.
+     */
+    enableLinearScanEffect = false;
+    ProgressModelNG::SetLinearSweepingEffect(Referenced::RawPtr(frameNode), enableLinearScanEffect);
+    EXPECT_EQ(paintProperty->GetEnableLinearScanEffect().value(), false);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetSmoothEffect
+ * @tc.desc: Test ProgressModelNG SetSmoothEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetSmoothEffect, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
+
+    /**
+     * @tc.case: case1 call to  enableSmoothEffect with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    bool enableSmoothEffect = true;
+    model.SetSmoothEffect(enableSmoothEffect);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetEnableSmoothEffect().value(), true);
+
+    /**
+     * @tc.case: case2 call to  static function enableSmoothEffect.
+     * @tc.expected: it should be as we set.
+     */
+    enableSmoothEffect = false;
+    ProgressModelNG::SetSmoothEffect(Referenced::RawPtr(frameNode), enableSmoothEffect);
+    EXPECT_EQ(paintProperty->GetEnableSmoothEffect().value(), false);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetBackgroundColor
+ * @tc.desc: Test ProgressModelNG SetBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetBackgroundColor, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetBackgroundColor with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    Color backgroundColorColor = Color(0xffc0c0c1);
+    model.SetBackgroundColor(backgroundColorColor);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColor().value(), backgroundColorColor);
+
+    /**
+     * @tc.case: case1 call to  static function SetBackgroundColor.
+     * @tc.expected: it should be as we set.
+     */
+    backgroundColorColor = Color(0xffc0c0c0);
+    ProgressModelNG::SetBackgroundColor(Referenced::RawPtr(frameNode), backgroundColorColor);
+    EXPECT_EQ(paintProperty->GetBackgroundColor().value(), backgroundColorColor);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetText001
+ * @tc.desc: Test ProgressModelNG SetText
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetText, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance and update property.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    model.SetStrokeWidth(LARG_STROKE_WIDTH);
+    model.SetStrokeRadius(LARG_STROKE_WIDTH / 5.0);
+    model.SetShowText(true);
+    CreateDone();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->Push(frameNode_);
+
+    /**
+     * @tc.case: case1 call to  static function SetText.
+     * @tc.expected: it should be as we set.
+     */
+    std::string text = "hellow world";
+    ProgressModelNG::SetText(Referenced::RawPtr(frameNode_), text);
+    EXPECT_EQ(paintProperty_->GetText().value(), text);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetText002
+ * @tc.desc: Test function about setting value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetText002, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance and update property.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    model.SetStrokeWidth(LARG_STROKE_WIDTH);
+    model.SetStrokeRadius(LARG_STROKE_WIDTH / 5.0);
+    model.SetShowText(true);
+    CreateDone();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->Push(frameNode_);
+    pattern_->SetTextFromUser(true);
+    progressModel.SetValue(10.0);
+    paintProperty_->UpdateMaxValue(100);
+    paintProperty_->UpdateValue(50);
+    paintProperty_->UpdateEnableShowText(true);
+
+    /**
+     * @tc.case: step2 call to  static function SetText and text value is null.
+     * @tc.expected: it should be 50%.
+     */
+    ProgressModelNG::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
+    EXPECT_EQ(paintProperty_->GetTextValue(""), "50%");
+    EXPECT_DOUBLE_EQ(paintProperty_->GetValueValue(0.0), 50);
+}
+
+/**
+ * @tc.name: ProgressPatternOnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternOnColorConfigurationUpdateTest001, TestSize.Level0)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    pattern->OnColorConfigurationUpdate();
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ResetGradientColorSetByUser();
+    paintProperty->ResetCapsuleStyleSetByUser();
+    paintProperty->ResetCapsuleStyleFontColorSetByUser();
+    paintProperty->UpdateProgressType(ProgressType::LINEAR);
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateGradientColorSetByUser(true);
+    paintProperty->UpdateCapsuleStyleSetByUser(true);
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+
+    paintProperty->UpdateGradientColorSetByUser(false);
+    paintProperty->UpdateCapsuleStyleSetByUser(false);
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetCapsuleParseFailedSelectColor();
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetColor(), testColor);
+}
+
+/**
+ * @tc.name: ProgressPatternCreateWithResourceObjTest001
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest001, TestSize.Level0)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    ASSERT_NE(resObj, nullptr);
+
+    for (int i = static_cast<int>(JsProgressResourceType::COLOR); i <= static_cast<int>(JsProgressResourceType::Text);
+         ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObj);
+    }
+    modelNg.CreateWithResourceObj(static_cast<JsProgressResourceType>(100), resObj);
+    modelNg.SetCapsuleStyleFontColor(true);
+    modelNg.SetCapsuleStyle(true);
+    modelNg.SetGradientColorByUser(true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    pattern->OnColorModeChange(colorMode);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    paintProperty->UpdateProgressType(ProgressType::LINEAR);
+    pattern->OnColorModeChange(colorMode);
+    paintProperty->UpdateProgressType(ProgressType::RING);
+    pattern->OnColorModeChange(colorMode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    Color testColor = theme->GetBorderColor();
+    EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleSetByUser());
+    EXPECT_TRUE(paintProperty->GetGradientColorSetByUser());
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleFontColorSetByUser());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: ProgressPatternCreateWithResourceObjTest002
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest002, TestSize.Level0)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10003, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId =
+        AceType::MakeRefPtr<ResourceObject>(-1, 100001, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjBoolId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10005, resObjParamsList, "com.example.test", "entry", 100000);
+    for (int i = static_cast<int>(JsProgressResourceType::LSStrokeWidth);
+         i <= static_cast<int>(JsProgressResourceType::Text); ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObjWithDimensionId);
+    }
+    modelNg.CreateWithResourceObj(JsProgressResourceType::COLOR, resObjId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::RingStatus, resObjWithId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::FontWeight, resObjWithId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::Text, resObjWithId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    for (int i = static_cast<int>(JsProgressResourceType::LSStrokeWidth);
+         i <= static_cast<int>(JsProgressResourceType::Text); ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObjBoolId);
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    pattern->OnColorModeChange(colorMode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    Color testColor = theme->GetBorderColor();
+    EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetCapsuleStyle
+ * @tc.desc: Test ProgressModelNG SetCapsuleStyle &&  SetCapsuleStyleFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetCapsuleStyle, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetCapsuleStyle SetCapsuleStyleFontColor  with  framenode.
+     * @tc.expected: it should be as we set.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    ProgressModelNG::SetCapsuleStyle(Referenced::RawPtr(frameNode), true);
+    ProgressModelNG::SetCapsuleStyleFontColor(Referenced::RawPtr(frameNode), true);
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleSetByUser());
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleFontColorSetByUser());
 }
 } // namespace OHOS::Ace::NG

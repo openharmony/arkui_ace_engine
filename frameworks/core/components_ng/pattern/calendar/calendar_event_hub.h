@@ -31,7 +31,7 @@ using SelectedChangeEvent = std::function<void(const std::string&)>;
 using RequestDataEvent = std::function<void(const std::string&)>;
 
 class CalendarEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CalendarEventHub, EventHub)
+    DECLARE_ACE_TYPE(CalendarEventHub, EventHub);
 
 public:
     CalendarEventHub() = default;

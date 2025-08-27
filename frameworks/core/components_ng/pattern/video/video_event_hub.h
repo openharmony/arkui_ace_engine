@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using VideoEventCallback = std::function<void(const std::string&)>;
 
 class VideoEventHub : public EventHub {
-    DECLARE_ACE_TYPE(VideoEventHub, EventHub)
+    DECLARE_ACE_TYPE(VideoEventHub, EventHub);
 
 public:
     VideoEventHub() = default;
@@ -95,6 +95,22 @@ public:
         auto json = JsonUtil::Create(true);
         json->Put("error", "");
         auto param = json->ToString();
+        if (onError_) {
+            // onError_ may be overwritten in its invoke so we copy it first
+            auto onError = onError_;
+            onError(param);
+        }
+        RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
+    }
+    void FireErrorEvent(int32_t code, const std::string& message)
+    {
+        auto json = JsonUtil::Create(true);
+        const std::string name = "BusinessError";
+        json->Put("code", code);
+        json->Put("name", name.c_str());
+        json->Put("message", message.c_str());
+        auto param = json->ToString();
+
         if (onError_) {
             // onError_ may be overwritten in its invoke so we copy it first
             auto onError = onError_;

@@ -42,7 +42,7 @@ using ChangeEventWithPreIndexPtr = std::shared_ptr<ChangeEventWithPreIndex>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
+    DECLARE_ACE_TYPE(SwiperEventHub, EventHub);
 
 public:
     SwiperEventHub() = default;
@@ -127,6 +127,20 @@ public:
                 event(index);
             });
         }
+    }
+
+    void AddOnScrollStateChangedEvent(const ChangeEventPtr& changeEvent)
+    {
+        scrollStateChangedEvent_ = changeEvent;
+    }
+
+    void FireScrollStateChangedEvent(ScrollState scrollState)
+    {
+        if (!scrollStateChangedEvent_ || !(*scrollStateChangedEvent_)) {
+            return;
+        }
+        auto event = *scrollStateChangedEvent_;
+        event(static_cast<int32_t>(scrollState));
     }
 
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
@@ -334,6 +348,7 @@ private:
     std::list<ChangeEventPtr> changeEvents_;
     std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
+    ChangeEventPtr scrollStateChangedEvent_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
     IndicatorIndexChangeEvent indicatorIndexChangeEvent_;

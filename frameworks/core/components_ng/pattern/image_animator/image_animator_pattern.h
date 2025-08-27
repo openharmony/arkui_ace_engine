@@ -48,6 +48,10 @@ public:
 
     void OnAttachToFrameNode() override;
 
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -68,7 +72,10 @@ public:
         }
         images_ = std::move(images);
         durationTotal_ = 0;
-        for (const auto& childImage : images_) {
+        for (auto& childImage : images_) {
+            if (childImage.duration < 0) {
+                childImage.duration = 0;
+            }
             if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
                 durationTotal_ += childImage.duration;
             }
@@ -155,10 +162,21 @@ public:
         isAutoMonitorInvisibleArea_ = isAutoMonitorInvisibleArea;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
 private:
     std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
     std::string ImagesToString() const;
+    void CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
     void DisablePreAnimatedImageAnimation(uint32_t index);
@@ -179,6 +197,7 @@ private:
     void ResetFormAnimationStartTime();
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
+    void ShowIndex(int32_t index);
     void UpdateBorderRadius();
     void RegisterVisibleAreaChange();
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
@@ -196,6 +215,7 @@ private:
     bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool showingIndexByStoppedOrPaused_ = false;
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;

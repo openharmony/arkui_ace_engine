@@ -390,7 +390,8 @@ std::tuple<float, float, float> CircleDotIndicatorPaintMethod::GetMoveRate()
     float longPointLeftCenterMoveRate = 0.0f;
     float longPointRightCenterMoveRate = 0.0f;
 
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && currentIndex_ != 0) {
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        GreatNotEqual(std::abs(actualTurnPageRate), 0.0f)) {
         blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
             CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
                                        .MoveInternal(1.0 - std::abs(actualTurnPageRate));

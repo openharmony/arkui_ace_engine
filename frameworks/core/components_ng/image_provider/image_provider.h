@@ -20,6 +20,7 @@
 #include <set>
 #include <unordered_map>
 
+#include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/image_provider/image_data.h"
@@ -32,7 +33,8 @@ namespace OHOS::Ace::NG {
 
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& src)>;
-using LoadFailNotifyTask = std::function<void(const ImageSourceInfo& src, const std::string& errorMsg)>;
+using LoadFailNotifyTask =
+    std::function<void(const ImageSourceInfo& src, const std::string& errorMsg, const ImageErrorInfo& errorInfo)>;
 using OnCompleteInDataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 
 struct LoadNotifier {
@@ -66,6 +68,11 @@ struct UriDownLoadConfig {
     bool hasProgressCallback = false;
 };
 
+struct ImageLoadResultInfo {
+    ImageErrorInfo errorInfo;
+    size_t fileSize = 0; // size of file in bytes
+};
+
 class ImageObject;
 
 // load & decode images
@@ -79,7 +86,8 @@ public:
      *    @param ctxWp                ImageLoadingContext that initiates the task, to be stored in the map
      *    @param sync                 if true, run task synchronously
      */
-    static void CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
+    static void CreateImageObject(
+        const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync, bool isSceneBoardWindow);
 
     /** Decode image data and make CanvasImage from ImageObject.
      *
@@ -107,7 +115,8 @@ public:
     // cancel a scheduled background task
     static bool CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
-    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
+    static RefPtr<ImageObject> BuildImageObject(
+        const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data);
 
     static void CacheImageObject(const RefPtr<ImageObject>& obj);
 
@@ -130,7 +139,7 @@ private:
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 
     // helper function to create image object from ImageSourceInfo
-    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
+    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false, bool isSceneBoardWindow = false);
 
     static void DownLoadSuccessCallback(
         const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync = false, int32_t containerId = 0);
@@ -144,8 +153,8 @@ private:
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(
         const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false, int32_t containerId = 0);
-    static void FailCallback(
-        const std::string& key, const std::string& errorMsg, bool sync = false, int32_t containerId = 0);
+    static void FailCallback(const std::string& key, const std::string& errorMsg, const ImageErrorInfo& errorInfo,
+        bool sync = false, int32_t containerId = 0);
 
     struct Task {
         CancelableCallback<void()> bgTask_;

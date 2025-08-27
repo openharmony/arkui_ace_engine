@@ -54,11 +54,11 @@ ACE_EXPORT extern const char ATTRS_COMMON_ENABLE[];
 ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
 // root view
-ACE_EXPORT extern const char ROOT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ROOT_ETS_TAG[];
 // stage view
-ACE_EXPORT extern const char STAGE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
-ACE_EXPORT extern const char PAGE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
 ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
@@ -105,6 +105,7 @@ ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
 // rich editor
 ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
 ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
+ACE_EXPORT extern const char RICH_EDITOR_CONTENT_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
@@ -153,6 +154,8 @@ ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+ACE_EXPORT extern const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char PRIMARY_CONTENT_NODE_ETS_TAG[];
 
 // navRouter view
 ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
@@ -304,7 +307,11 @@ ACE_EXPORT extern const char BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
 
 // common
+#ifdef ACE_STATIC
+ACE_FORCE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+#else
 ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+#endif
 // option
 ACE_EXPORT extern const char OPTION_COMPONENT_TAG[];
 ACE_EXPORT extern const char OPTION_ETS_TAG[];
@@ -377,10 +384,6 @@ ACE_EXPORT extern const char INDEXER_ETS_TAG[];
 // slider
 ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SLIDER_ETS_TAG[];
-
-// sliderTip
-ACE_EXPORT extern const char SLIDER_TIP_NODE_COMPONENT_TAG[];
-ACE_EXPORT extern const char SLIDER_TIP_NODE_ETS_TAG[];
 
 // rating
 ACE_EXPORT extern const char RATING_COMPONENT_TAG[];
@@ -675,5 +678,8 @@ ACE_EXPORT extern const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[];
 
 // LazyVGridLayout
 ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
+
+// UndefinedNode
+ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

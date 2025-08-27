@@ -45,6 +45,7 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
+constexpr int32_t MAX_SVG_NODE_COUNT = 1000;
 
 } // namespace
 
@@ -147,6 +148,9 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
         svgContext_ = AceType::MakeRefPtr<SvgContext>();
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
+    if (GetSvgNodeCount() > MAX_SVG_NODE_COUNT) {
+        root_ = nullptr;
+    }
     if (root_ == nullptr) {
         return false;
     }
@@ -161,6 +165,10 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 
 RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
+    if (GetSvgNodeCount() > MAX_SVG_NODE_COUNT) {
+        LOGE("Svg node count exceeds the limit");
+        return nullptr;
+    }
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
         if (parent == nullptr) {
@@ -192,6 +200,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         svgAnimate_ = true;
     }
+    InCreaseSvgNodeCount();
     return node;
 }
 
@@ -341,19 +350,11 @@ void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset, ImageFi
             LOGW("PaintDirectly containerSize and svgSize is null");
         }
     }
-#ifndef USE_ROSEN_DRAWING
-    canvas->save();
-    canvas->scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
-    canvas->translate(static_cast<float>(tx), static_cast<float>(ty));
-    svgRoot->PaintDirectly(context, offset);
-    canvas->restore();
-#else
     canvas->Save();
     canvas->Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
     canvas->Translate(static_cast<float>(tx), static_cast<float>(ty));
     svgRoot->PaintDirectly(context, offset);
     canvas->Restore();
-#endif
 }
 #endif
 

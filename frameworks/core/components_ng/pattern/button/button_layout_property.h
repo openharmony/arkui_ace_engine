@@ -46,6 +46,7 @@ public:
         value->propFontSize_ = CloneFontSize();
         value->propFontWeight_ = CloneFontWeight();
         value->propFontColor_ = CloneFontColor();
+        value->propFontColorSetByUser_ = CloneFontColorSetByUser();
         value->propFontFamily_ = CloneFontFamily();
         value->propFontStyle_ = CloneFontStyle();
         value->propLabel_ = CloneLabel();
@@ -65,6 +66,7 @@ public:
         ResetFontSize();
         ResetFontWeight();
         ResetFontColor();
+        ResetFontColorSetByUser();
         ResetFontFamily();
         ResetFontStyle();
         ResetLabel();
@@ -81,6 +83,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, Ace::FontWeight, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_NORMAL);

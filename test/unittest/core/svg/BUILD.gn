@@ -17,19 +17,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 config("config_svg_parse_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/graphic/graphic_2d/rosen/modules",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/platform/image_native",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
-    "//third_party/skia",
     "$ace_root",
     "$ace_root/frameworks",
   ]
@@ -99,7 +86,9 @@ ohos_unittest("parse_test_ng") {
       "ACE_ENABLE_GPU",
       "NEW_SKIA",
     ]
-    include_dirs = [ "//third_party/skia" ]
+  }
+  if (ace_engine_feature_enable_upgrade_skia) {
+    defines += [ "USE_NEW_SKIA" ]
   }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -297,6 +286,10 @@ ohos_unittest("svg_context_test_ng") {
 
   defines = [ "USE_ROSEN_DRAWING" ]
 
+  if (ace_engine_feature_enable_upgrade_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   external_deps = [
@@ -371,6 +364,10 @@ ohos_unittest("svg_node_test_ng") {
   ]
 
   defines = [ "USE_ROSEN_DRAWING" ]
+
+  if (ace_engine_feature_enable_upgrade_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 

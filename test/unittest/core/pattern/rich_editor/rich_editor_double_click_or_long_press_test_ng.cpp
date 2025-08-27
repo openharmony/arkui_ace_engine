@@ -310,6 +310,40 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress007
 }
 
 /**
+ * @tc.name: HandleDoubleClickOrLongPress008
+ * @tc.desc: test touch Double Click
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress008, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    AddSpan(TEST_INSERT_VALUE);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->caretVisible_ = true;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.localLocation_ = Offset(0, 0);
+    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->handleLevelMode_ == HandleLevelMode::OVERLAY);
+}
+
+/**
  * @tc.name: HandleLongPress001
  * @tc.desc: test RichEditorPattern HandleLongPress
  * @tc.type: FUNC
@@ -385,6 +419,168 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress004, TestSize.Le
     richEditorPattern->HandleLongPress(info);
     EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
     EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
+}
+
+/**
+ * @tc.name: HandleLongPress005
+ * @tc.desc: test HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    GestureEvent info;
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->touchedFingerCount_ = 0;
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::LONG_PRESSED);
+}
+
+/**
+ * @tc.name: HandleLongPress006
+ * @tc.desc: test HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    GestureEvent info;
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->touchedFingerCount_ = 1;
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    std::list<FingerInfo> fingetList;
+    fingetList.push_back(FingerInfo());
+    info.SetFingerList(fingetList);
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
+}
+
+/**
+ * @tc.name: HandleUserLongPressEvent001
+ * @tc.desc: test HandleUserLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto gestureEventFunc = [](GestureEvent& info) { return true; };
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->onLongPress = std::move(gestureEventFunc);
+    richEditorPattern->spans_.push_back(spanItem);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserLongPressEvent(info);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleUserLongPressEvent002
+ * @tc.desc: test HandleUserLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserLongPressEvent(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: HandleUserLongPressEvent003
+ * @tc.desc: test HandleUserLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserLongPressEvent(info);
+    EXPECT_FALSE(ret);
 }
 
 } // namespace OHOS::Ace::NG

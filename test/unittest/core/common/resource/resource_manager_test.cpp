@@ -151,8 +151,14 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
     key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID));
 
+    /**
+     * @tc.steps: step9. clear all cache.
+     * @tc.expect: cache not have default adapter.
+     */
     ResourceManager::GetInstance().Reset();
     ResourceManager::GetInstance().resourceAdapters_.clear();
+    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -245,7 +251,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ResourceConfiguration resConfig;
-    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    ResourceManager::GetInstance().UpdateResourceConfig("", "", DEFAULT_INSTANCE_ID, resConfig);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 
     /**
@@ -254,7 +260,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ColorMode colorMode = ColorMode::DARK;
-    ResourceManager::GetInstance().UpdateColorMode(colorMode);
+    ResourceManager::GetInstance().UpdateColorMode("", "", DEFAULT_INSTANCE_ID, colorMode);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 }
 } // namespace OHOS::Ace

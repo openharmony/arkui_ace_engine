@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
  * @tc.desc: Test image ColorFilter for jpg is set correctly.
  * @tc.type: FUNC
 */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -89,7 +89,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level1)
  * @tc.desc: Test image ColorFilter for png is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -148,7 +148,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level1)
  * @tc.desc: Test image ColorFilter for web picture is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -207,7 +207,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level1)
  * @tc.desc: Test image ColorFilter for jpg is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -250,7 +250,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level1)
  * @tc.desc: Test image ColorFilter for png is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -293,7 +293,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level1)
  * desc: Test image ColorFilter for svg is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -336,7 +336,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level1)
  * @tc.desc: Test image ColorFilter for web picture is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -382,7 +382,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and FillColor affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -464,7 +464,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and smoothedge affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -544,7 +544,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level1)
  * @tc.desc: Test image ColorFilter is set correctly for alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode without picture.
@@ -603,7 +603,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level1)
  * @tc.desc: Test image ColorFilter is set correctly for picture with web image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with web image and sync mode.
@@ -661,7 +661,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and rendermode affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -741,7 +741,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and ImageFit affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -819,7 +819,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and FillColor affect each other for svg image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with svg image and sync mode.
@@ -888,7 +888,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level1)
  * @tc.desc: Test image ColorFilter is set correctly for picture with png image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with web image and sync mode.
@@ -947,7 +947,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level1)
  * @tc.desc: Test image ColorFilter is set correctly by the methode of GetContentDrawFunction .
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -994,7 +994,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and ImageSourceSize affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1078,7 +1078,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter is set correctly when language changeing
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1122,7 +1122,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and ImageInterpolation affect each other for svg image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with svg image and sync mode.
@@ -1191,7 +1191,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and ImageRepeat affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1271,7 +1271,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and MatchTextDirection affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1351,7 +1351,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and CopyOption affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1431,7 +1431,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level1)
  * @tc.desc: Test whether image ColorFilter and AutoResize affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1627,10 +1627,10 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
     EXPECT_EQ(successEvent.GetComponentHeight(), loadImageSuccessEvent.GetComponentHeight());
     EXPECT_EQ(successEvent.GetLoadingStatus(), loadImageSuccessEvent.GetLoadingStatus());
 
-    LoadImageFailEvent failEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
+    LoadImageFailEvent failEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "", {});
     auto onError = [&failEvent](const LoadImageFailEvent& info) { failEvent = info; };
     ImageModelNG::SetOnError(frameNode, std::move(onError));
-    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
     EXPECT_EQ(failEvent.GetErrorMessage(), loadImageFailEvent.GetErrorMessage());
     EXPECT_EQ(failEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
@@ -1715,12 +1715,59 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
     EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
 }
 
+void ImageModelNGTest001_MixedProperties04(ImageModelNG &image)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    ImageModelNG::SetMatchTextDirection(frameNode, true);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(frameNode), true);
+    ImageModelNG::SetMatchTextDirection(frameNode, false);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(frameNode), false);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(nullptr), false);
+
+    image.SetCopyOption(CopyOptions::Distributed);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(frameNode), CopyOptions::Distributed);
+    ImageModelNG::SetCopyOption(frameNode, CopyOptions::InApp);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(frameNode), CopyOptions::InApp);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(nullptr), CopyOptions::None);
+    ImageModelNG::EnableAnalyzer(frameNode, true);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(frameNode), true);
+    ImageModelNG::EnableAnalyzer(frameNode, false);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(frameNode), false);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(nullptr), false);
+
+    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::HIGH);
+    EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(frameNode), DynamicRangeMode::HIGH);
+    EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(nullptr), DynamicRangeMode::STANDARD);
+
+    ImageModelNG::SetHdrBrightness(frameNode, 0.8f); // 0.8 means brightness of the picture
+    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(frameNode), 0.8f); // 0.8 means brightness of the picture
+    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(nullptr), 1.0f); // 1.0 means default brightness of the picture
+
+    ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::RIGHT);
+    EXPECT_EQ(ImageModelNG::GetOrientation(frameNode), ImageRotateOrientation::RIGHT);
+    EXPECT_EQ(ImageModelNG::GetOrientation(nullptr), ImageRotateOrientation::UP);
+
+    auto pairSize = std::make_pair(Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT));
+    ImageModelNG::SetImageSourceSize(frameNode, pairSize);
+    auto resultSourceSize = ImageModelNG::GetImageSourceSize(frameNode);
+    EXPECT_FLOAT_EQ(resultSourceSize.first.ConvertToPx(),
+        static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()));
+    EXPECT_FLOAT_EQ(resultSourceSize.second.ConvertToPx(),
+        static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx()));
+
+    Matrix4 matrix4DefaultValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    Matrix4 matrix4Value = Matrix4(1.0f, 1.0f, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    ImageModelNG::SetImageMatrix(frameNode, matrix4Value);
+    EXPECT_EQ(ImageModelNG::GetImageMatrix(frameNode), matrix4Value);
+    EXPECT_EQ(ImageModelNG::GetImageMatrix(nullptr), matrix4DefaultValue);
+}
+
 /**
  * @tc.name: ImageModelNGTest001
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1736,6 +1783,7 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level1)
     ImageModelNGTest001_MixedProperties01(image);
     ImageModelNGTest001_MixedProperties02(image);
     ImageModelNGTest001_MixedProperties03(image);
+    ImageModelNGTest001_MixedProperties04(image);
     frameNode->MarkModifyDone();
 }
 
@@ -1744,7 +1792,7 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level1)
  * @tc.desc: Test ImagePattern related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level0)
 {
     CreatePixelMapAnimator(1);
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
@@ -1841,7 +1889,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
-    eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!"));
+    eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!", {}));
     EXPECT_NE(testData, 1);
 
     auto onComplete = [&testData](const LoadImageSuccessEvent& info) { testData = 1; };
@@ -1940,7 +1988,7 @@ void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level1)
+HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -2049,5 +2097,21 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     image.SetDynamicRangeMode(DynamicRangeMode::STANDARD);
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
+}
+
+/**
+ * @tc.name: Matrix 001
+ * @tc.desc: Test Matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, Matrix001, TestSize.Level1)
+{
+    Matrix4 value1 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    Matrix4 value2 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    EXPECT_TRUE(value1 == value2.matrix4x4_);
+    Matrix4 value3 = Matrix4(1.0f, 0, 1.0f, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    double matrix[4][4] = {};
+    value3.CopyMatrix(matrix);
+    EXPECT_TRUE(value3 == matrix);
 }
 } // namespace OHOS::Ace::NG

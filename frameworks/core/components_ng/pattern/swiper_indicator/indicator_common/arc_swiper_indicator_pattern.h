@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_ARC_SWIPER_INDICATOR_PATTERN_H
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_indicator_accessibility_property.h"
 namespace OHOS::Ace::NG {
 enum class SwiperDirection {
     UNKNOWN = 0,
@@ -44,6 +45,10 @@ public:
         isAccessibilityFocusd_ = isAccessibilityFocusd;
     }
 
+    virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ArcSwiperIndicatorAccessibilityProperty>();
+    }
 private:
     bool CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset);
     void CalculateCycle(float angle, float startAngle, const PointF& conter, const PointF& point);

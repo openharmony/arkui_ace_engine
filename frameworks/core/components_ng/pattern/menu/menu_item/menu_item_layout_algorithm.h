@@ -19,6 +19,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -30,12 +31,17 @@ class ACE_EXPORT MenuItemLayoutAlgorithm : public BoxLayoutAlgorithm {
 
 public:
     MenuItemLayoutAlgorithm(bool isOption = false) : isOption_(isOption) {}
+    MenuItemLayoutAlgorithm(bool isOption, bool show)
+        : isOption_(isOption), showDefaultSelectedIcon_(show)
+    {}
     ~MenuItemLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void RemoveParentRestrictionsForFixIdeal(
+        const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint);
     void CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void CheckUserHeight(LayoutWrapper* layoutWrapper);
@@ -48,7 +54,7 @@ private:
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
-    float GetMenuItemVerticalPadding();
+    float GetMenuItemVerticalPadding(LayoutWrapper* layoutWrapper);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     void UpdateIconMargin(LayoutWrapper* layoutWrapper);
     void UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,
@@ -85,6 +91,7 @@ private:
     double iconSize_ = 0.0f;
     bool needExpandContent_ = false;
     bool isOption_ = false;
+    bool showDefaultSelectedIcon_ = false;
     PaddingPropertyF padding_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);

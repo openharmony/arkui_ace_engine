@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
@@ -27,8 +29,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char DC_DEPTH_PREFIX[] = "dcDepth_";
-constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
-constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two worker are not allowed to run at the same time";
+constexpr char PARAM_NAME_DC_EXCEED_MAX_NUM[] = "dcExceedMaxNumInWorker";
+constexpr char PARAM_MSG_DC_EXCEED_MAX_NUM[] = "Dc exceed max num in the worker";
 constexpr char PARAM_NAME_DC_ONLY_ON_SCB[] = "onlyRunOnSCB";
 constexpr char PARAM_MSG_DC_ONLY_ON_SCB[] = "DC only run on SCB";
 constexpr char PARAM_NAME_INTERNAL_ERROR[] = "internalError";
@@ -40,6 +42,8 @@ constexpr char PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE[] = "Not support uIContent 
 constexpr char PARAM_NAME_EXCEED_MAX_NUM[] = "exceedMaxNum";
 constexpr char PARAM_MSG_EXCEED_MAX_NUM[] = "Workers exceed Max Num";
 const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
 
 bool IsDebugDCEnabled()
 {
@@ -48,6 +52,29 @@ bool IsDebugDCEnabled()
 }
 
 int32_t DynamicPattern::dynamicGenerator_ = 0;
+
+class DCAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    DCAccessibilitySAObserverCallback(
+        const WeakPtr<DynamicPattern>& weakPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakUECPattern_(weakPattern) {}
+    ~DCAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto pattern = weakUECPattern_.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (state) {
+            // first time turn on Accessibility, add TransferAccessibilityRectInfo
+            pattern->TransferAccessibilityRectInfo(true);
+        }
+
+        return true;
+    }
+
+private:
+    WeakPtr<DynamicPattern> weakUECPattern_;
+};
 
 DynamicPattern::DynamicPattern()
     : PlatformPattern(AceLogTag::ACE_DYNAMIC_COMPONENT, ++dynamicGenerator_)
@@ -84,14 +111,15 @@ void DynamicPattern::InitializeDynamicComponent(
 
     curDynamicInfo_.entryPoint = entryPoint;
     InitializeRender(runtime);
+    RegisterVisibleAreaChange();
 }
 
 void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
 {
     switch (resultCode) {
-        case DCResultCode::DC_WORKER_HAS_USED_ERROR:
+        case DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER:
             FireOnErrorCallbackOnUI(
-                resultCode, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+                resultCode, PARAM_NAME_DC_EXCEED_MAX_NUM, PARAM_MSG_DC_EXCEED_MAX_NUM);
             break;
         case DCResultCode::DC_ONLY_RUN_ON_SCB:
             FireOnErrorCallbackOnUI(
@@ -150,12 +178,12 @@ DCResultCode DynamicPattern::CheckConstraint()
 bool DynamicPattern::CheckDynamicRendererConstraint(void* runtime)
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
-        HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    if (!dynamicComponentRenderer_->CheckDCMaxConstraintInWorker(runtime)) {
+        HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
         return false;
     }
 
-    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint()) {
+    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint(runtime)) {
         HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
         return false;
     }
@@ -169,7 +197,7 @@ void DynamicPattern::InitializeRender(void* runtime)
     CHECK_NULL_VOID(host);
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
 #if !defined(PREVIEW)
-    DCResultCode code = CheckConstraint();
+    auto code = CheckConstraint();
     if (code != DCResultCode::DC_NO_ERRORS) {
         HandleErrorCallback(code);
         PLATFORM_LOGE("CheckConstraint failed, code: %{public}d.", code);
@@ -212,6 +240,12 @@ void DynamicPattern::InitializeRender(void* runtime)
 void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
 {
     backgroundTransparent_ = backgroundTransparent;
+}
+
+void DynamicPattern::OnAccessibilityParentRectInfoUpdate()
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->OnAccessibilityParentRectInfoUpdate();
 }
 
 void DynamicPattern::FireOnErrorCallbackOnUI(
@@ -306,6 +340,7 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
         dirty->GetFrameRectWithSafeArea(true).GetOffset();
     dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption, parentGlobalOffset);
+    TransferAccessibilityRectInfo(true);
     return false;
 }
 
@@ -356,6 +391,125 @@ void DynamicPattern::RegisterPipelineEvent(int32_t instanceId)
     auto context = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(context);
     context->AddWindowStateChangedCallback(host->GetId());
+    surfacePositionCallBackId_ =
+        context->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->TransferAccessibilityRectInfo();
+        });
+
+    RegisterAccessibilitySAObserverCallback(instanceId);
+    RegisterSingleHandTransformChangedCallback(instanceId);
+}
+
+void DynamicPattern::RegisterAccessibilitySAObserverCallback(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(context);
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (accessibilitySAObserverCallback_ == nullptr) {
+        accessibilitySAObserverCallback_ = std::make_shared<DCAccessibilitySAObserverCallback>(
+            WeakClaim(this), host->GetAccessibilityId());
+    }
+
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+}
+
+void DynamicPattern::UnRegisterAccessibilitySAObserverCallback(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(context);
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(
+        host->GetAccessibilityId());
+}
+
+void DynamicPattern::RegisterSingleHandTransformChangedCallback(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(context);
+    auto uiExtManager = context->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->RegisterSingleHandTransformChangedCallback(host->GetId(),
+        [weak = WeakClaim(this)] () {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->TransferAccessibilityRectInfo();
+        });
+}
+
+void DynamicPattern::UnRegisterSingleHandTransformChangedCallback(int32_t instanceId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(context);
+    auto uiExtManager = context->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->UnregisterSingleHandTransformChangedCallback(host->GetId());
+}
+
+AccessibilityParentRectInfo DynamicPattern::GetAccessibilityRectInfo() const
+{
+    AccessibilityParentRectInfo rectInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rectInfo);
+    auto pipeline = host->GetContextRefPtr();
+    if (pipeline) {
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            return accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
+        }
+    }
+
+    auto rect = host->GetTransformRectRelativeToWindow(true);
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
+    return rectInfo;
+}
+
+void DynamicPattern::TransferAccessibilityRectInfo(bool isForce)
+{
+    if (!(isForce || AceApplicationInfo::GetInstance().IsAccessibilityEnabled())) {
+        return;
+    }
+
+    UpdateAccessibilityParentRectInfo(GetAccessibilityRectInfo());
+}
+
+void DynamicPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
+        return;
+    }
+
+    TransferAccessibilityRectInfo();
+}
+
+bool DynamicPattern::IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) == FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+}
+
+bool DynamicPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_TRANSFORM_CHANGE) == FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
 }
 
 void DynamicPattern::OnDetachContext(PipelineContext *context)
@@ -373,6 +527,9 @@ void DynamicPattern::UnRegisterPipelineEvent(int32_t instanceId)
     auto context = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(host->GetId());
+    context->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
+    UnRegisterAccessibilitySAObserverCallback(instanceId);
+    UnRegisterSingleHandTransformChangedCallback(instanceId);
 }
 
 void DynamicPattern::DumpDynamicRenderer(int32_t depth, bool hasJson)
@@ -506,7 +663,7 @@ void DynamicPattern::ReleasePageEvent() const
     accessibilityManager->ReleasePageEvent(host, true);
 }
 
-void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
+void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
@@ -515,6 +672,7 @@ void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t 
     accessibilityProperty->SetChildWindowId(childWindowId);
     accessibilityProperty->SetChildTreeId(childTreeId);
     ReleasePageEvent();
+    TransferAccessibilityRectInfo(true);
 }
 
 void DynamicPattern::OnAccessibilityDumpChildInfo(
@@ -544,34 +702,62 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
     accessibilityChildTreeCallback_ = nullptr;
 }
 
-void DynamicPattern::OnVisibleChange(bool visible)
+void DynamicPattern::RegisterVisibleAreaChange()
 {
-    PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
-        isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
-    isVisible_ = visible;
-    CHECK_NULL_VOID(dynamicComponentRenderer_);
-    if (isVisible_) {
-        dynamicComponentRenderer_->NotifyForeground();
-    } else {
-        dynamicComponentRenderer_->NotifyBackground();
-    }
+    PLATFORM_LOGI("Register visible area change.");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleVisibleAreaChange(visible, ratio);
+    };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
-void DynamicPattern::OnWindowShow()
+void DynamicPattern::HandleVisibleAreaChange(bool visible, double ratio)
 {
-    PLATFORM_LOGI("The window is being shown and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
-    if (isVisible_) {
+    PLATFORM_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f.", visible, isVisible_, ratio);
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (isVisible_ != curVisible) {
+        isVisible_ = curVisible;
         CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->NotifyForeground();
+        if (isVisible_) {
+            dynamicComponentRenderer_->NotifyForeground();
+        } else {
+            dynamicComponentRenderer_->NotifyBackground();
+        }
     }
+    TransferAccessibilityRectInfo();
 }
 
-void DynamicPattern::OnWindowHide()
+bool DynamicPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    PLATFORM_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
-    if (isVisible_) {
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->NotifyBackground();
+    CHECK_NULL_RETURN(pointerEvent, false);
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return false;
     }
+    auto originAction = pointerEvent->GetPointerAction();
+    if (originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        return false;
+    }
+    return PlatformPattern::HandleTouchEvent(pointerEvent);
+}
+
+void DynamicPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        return;
+    }
+    if (info.GetPullAction() == MouseAction::PULL_MOVE || info.GetPullAction() == MouseAction::PULL_UP) {
+        return;
+    }
+    PlatformPattern::HandleMouseEvent(info);
 }
 } // namespace OHOS::Ace::NG

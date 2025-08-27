@@ -49,7 +49,7 @@ void AvoidInfoManager::RegisterListenerIfNeeded()
                 CHECK_NULL_VOID(mgr);
                 mgr->OnContainerModalInfoChange();
             };
-        TAG_LOGI(AceLogTag::ACE_LAYOUT, "AvoidInfoManager register listener");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "AvoidInfoManager register listener");
         containerModalListenerId_ = ContainerModalViewEnhance::AddButtonsRectChangeListener(
             AceType::RawPtr(pipeline), std::move(containerModalListener));
         // init avoid info
@@ -61,7 +61,7 @@ void AvoidInfoManager::RegisterListenerIfNeeded()
     }
 
     if (!registerUECConsumerCallback_ || !requestAvoidInfoCallback_) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT, "AvoidInfoManager did not set register callback.");
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "AvoidInfoManager did not set register callback.");
         return;
     }
 
@@ -71,7 +71,7 @@ void AvoidInfoManager::RegisterListenerIfNeeded()
         CHECK_NULL_RETURN(mgr, 0);
         return mgr->OnUECAvoidInfoReceived(data);
     };
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "AvoidInfoManager register listener for UEC");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "AvoidInfoManager register listener for UEC");
     registerUECConsumerCallback_(std::move(consumer));
     // request avoid info for first time.
     requestAvoidInfoCallback_();
@@ -84,7 +84,7 @@ void AvoidInfoManager::OnContainerModalInfoChange()
     GetContainerModalAvoidInfo(newInfo);
     bool needNotify = CheckIfNeedNotifyAvoidInfoChange(avoidInfo_, newInfo);
     SetAvoidInfo(newInfo);
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "AvoidInfo change to: %{public}s", newInfo.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "AvoidInfo change to: %{public}s", newInfo.ToString().c_str());
     if (needNotify) {
         OnAvoidInfoChange(newInfo);
     }
@@ -97,7 +97,7 @@ int32_t AvoidInfoManager::OnUECAvoidInfoReceived(const AAFwk::Want& data)
         return -1;
     }
     SetAvoidInfoForUEC(info);
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "[UEC]AvoidInfo change to: %{public}s", info.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "[UEC]AvoidInfo change to: %{public}s", info.ToString().c_str());
     OnAvoidInfoChange(info);
     return 0;
 }
@@ -117,7 +117,7 @@ void AvoidInfoManager::UnregisterListenerIfNeeded()
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "AvoidInfoManager unregister listener");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "AvoidInfoManager unregister listener");
     ContainerModalViewEnhance::RemoveButtonsRectChangeListener(
         AceType::RawPtr(pipeline), containerModalListenerId_);
     hasRegisterListener_ = false;
@@ -194,29 +194,35 @@ void AvoidInfoManager::GetContainerModalAvoidInfoForUEC(const RefPtr<FrameNode>&
     auto context = uecNode->GetContext();
     CHECK_NULL_VOID(context);
     if (context->GetContainerCustomTitleVisible() || !context->GetContainerControlButtonVisible()) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "uec don't need avoid control button");
         return;
     }
-    auto offsetRelativeToWindow = uecNode->GetOffsetRelativeToWindow();
+    auto globalOffset = uecNode->GetPaintRectOffsetNG();
     auto uecGeometryNode = uecNode->GetGeometryNode();
     CHECK_NULL_VOID(uecGeometryNode);
     auto uecRect = uecGeometryNode->GetFrameRect();
-    uecRect.SetOffset(offsetRelativeToWindow);
+    uecRect.SetOffset(globalOffset);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "uec rect: %{public}s", uecRect.ToString().c_str());
     RectF buttonsRect;
     RectF containerModal;
     if (!context->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "failed to get buttonRect");
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "control button rect: %{public}s", buttonsRect.ToString().c_str());
     auto height = context->GetContainerModalTitleHeight();
     if (height <= 0) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "failed to get titleHeight");
         return;
     }
     if (!uecRect.IsIntersectWith(buttonsRect)) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "UEC isn't intersect with control button");
         return;
     }
     info.needAvoid = true;
     info.titleHeight = height;
     info.controlBottonsRect = uecRect.IntersectRectT(buttonsRect);
-    info.controlBottonsRect -= offsetRelativeToWindow;
+    info.controlBottonsRect -= globalOffset;
 }
 
 bool AvoidInfoManager::CheckIfNeedNotifyAvoidInfoChange(

@@ -322,8 +322,8 @@ namespace OHOS::Ace::NG {
     std::map<int32_t, LazyForEachChild>& LazyForEachBuilder::GetItems(
         std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
     {
-        int32_t startIndex = -1;
-        int32_t endIndex = -1;
+        startIndex_ = -1;
+        endIndex_ = -1;
         int32_t lastIndex = -1;
         bool isCertained = false;
 
@@ -343,42 +343,31 @@ namespace OHOS::Ace::NG {
                 continue;
             }
             cachedItems_.try_emplace(index, std::move(node));
-            if (startIndex == -1) {
-                startIndex = index;
+            if (startIndex_ == -1) {
+                startIndex_ = index;
             }
             if (isLoop_) {
                 if (isCertained) {
                     continue;
                 }
                 if (lastIndex > -1 && index - lastIndex > 1) {
-                    startIndex = index;
-                    endIndex = lastIndex;
+                    startIndex_ = index;
+                    endIndex_ = lastIndex;
                     isCertained = true;
                 } else {
-                    endIndex = std::max(endIndex, index);
+                    endIndex_ = std::max(endIndex_, index);
                 }
             } else {
-                endIndex = std::max(endIndex, index);
+                endIndex_ = std::max(endIndex_, index);
             }
             lastIndex = index;
         }
 
         Transit(childList);
 
-        if (startIndex != -1 && endIndex != -1) {
-            startIndex_ = startIndex;
-            endIndex_ = endIndex;
-        }
-
         return cachedItems_;
     }
 
-    /**
-     * Application code normarlly manipulate datasource first then call OnDatasetChange. But there are cases that they
-     * call OnDatasetChange first, then manipulate datasource. So the return of function "GetTotalCount" can both be
-     * total count of current datasource(manipulate datasource first) and original datasource(call OnDatasetChange
-     * first). We need to maintain historicalTotalCount_ to get total count of original datasource.
-     */
     int32_t LazyForEachBuilder::GetTotalCountOfOriginalDataset()
     {
         int32_t totalCount = GetTotalCount();
@@ -417,9 +406,7 @@ namespace OHOS::Ace::NG {
         RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
         RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
         for (auto& [index, node] : expiringTempItem_) {
-            if (node.second) {
-                expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
-            }
+            expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }
         operationList_.clear();
         return std::pair(initialIndex, nodeList_);
@@ -784,9 +771,9 @@ namespace OHOS::Ace::NG {
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::set<int32_t> idleIndexes;
-        // if List contains a mixture of ListItem, LazyForeach, and Foreach...
-        // Then both startIndex_ and endIndex_ can be -1
-        CheckCacheIndex(idleIndexes, count);
+        if (startIndex_ != -1 && endIndex_ != -1) {
+            CheckCacheIndex(idleIndexes, count);
+        }
 
         ProcessCachedIndex(cache, idleIndexes);
 
@@ -874,12 +861,11 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::SetActiveChildRange(int32_t start, int32_t end)
     {
         ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
-        startIndex_ = start;
-        endIndex_ = end;
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
-        for (auto& [index, node] : cachedItems_) {
+        auto tempCachedItems = cachedItems_;
+        for (auto& [index, node] : tempCachedItems) {
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start)));
             if (!isInRange) {
@@ -890,6 +876,7 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(false);
                 }
+                cachedItems_[index] = LazyForEachChild(node.first, nullptr);
                 auto tempNode = node.second;
                 auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 if (!pair.second) {
@@ -900,22 +887,23 @@ namespace OHOS::Ace::NG {
                 continue;
             }
             if (node.second) {
-                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-                    if (frameNode) {
-                        frameNode->SetActive(true);
-                    }
-                    continue;
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode) {
+                    frameNode->SetActive(true);
                 }
-                auto keyIter = expiringItem_.find(node.first);
-                if (keyIter != expiringItem_.end() && keyIter->second.second) {
-                    node.second = keyIter->second.second;
-                    expiringItem_.erase(keyIter);
-                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-                    if (frameNode) {
-                        frameNode->SetActive(true);
-                    }
+                continue;
+            }
+            auto keyIter = expiringItem_.find(node.first);
+            if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                node.second = keyIter->second.second;
+                expiringItem_.erase(keyIter);
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode) {
+                    frameNode->SetActive(true);
                 }
-                needBuild = true;
+                cachedItems_[index] = node;
+            }
+            needBuild = true;
         }
         return needBuild;
     }
@@ -969,7 +957,6 @@ namespace OHOS::Ace::NG {
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
-
         return itemInfo.second;
     }
 
@@ -987,7 +974,7 @@ namespace OHOS::Ace::NG {
                     idleIndexes.emplace((endIndex_ + i) % count);
                 }
             } else {
-                if (endIndex_ + i >= 0 && endIndex_ + i < count) {
+                if (endIndex_ + i < count) {
                     idleIndexes.emplace(endIndex_ + i);
                 }
             }
@@ -1001,7 +988,7 @@ namespace OHOS::Ace::NG {
                     idleIndexes.emplace((startIndex_ - i + count) % count);
                 }
             } else {
-                if (startIndex_ - i >= 0 && startIndex_ - i < count) {
+                if (startIndex_ >= i) {
                     idleIndexes.emplace(startIndex_ - i);
                 }
             }
@@ -1012,7 +999,7 @@ namespace OHOS::Ace::NG {
         std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
-        if (GetSysTimestamp() > deadline) {
+        if (!enablePreBuild_ || GetSysTimestamp() > deadline) {
             if (DeleteExpiringItemImmediately()) {
                 return false;
             }
@@ -1106,6 +1093,39 @@ namespace OHOS::Ace::NG {
             }
         }
         return cachedItems_;
+    }
+
+    /**
+     * Traverse nodes in cachedItems_, expiringItem_ and nodeList_, set the MeasureAnyway and Rerenderable properties
+     * of all children the same value as LazyForEach node, and call NotifyColorModeChange.
+     * When MeasureAnyway is true, perform measure and layout, force an update.
+     * For cachedItems_, nodes are active and will measure and layout anyway, so skip SetMeasureAnyway.
+     */
+    void LazyForEachBuilder::NotifyColorModeChange(uint32_t colorMode, bool rerenderable)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->SetRerenderable(rerenderable);
+            node.second.second->NotifyColorModeChange(colorMode);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->SetMeasureAnyway(rerenderable);
+            node.second.second->SetRerenderable(rerenderable);
+            node.second.second->NotifyColorModeChange(colorMode);
+        }
+        for (const auto& node : nodeList_) {
+            if (node.second == nullptr) {
+                continue;
+            }
+            node.second->SetMeasureAnyway(rerenderable);
+            node.second->SetRerenderable(rerenderable);
+            node.second->NotifyColorModeChange(colorMode);
+        }
     }
 
     void LazyForEachBuilder::SetJSViewActive(bool active)

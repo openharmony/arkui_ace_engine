@@ -24,11 +24,17 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+    const Dimension IMAGE_WIDTH = 50.0_vp;
+    const Dimension IMAGE_HEIGHT = 50.0_vp;
+    const ImageSpanSize TEST_IMAGE_SIZE_1 = { .width = 50.0_vp, .height = 50.0_vp };
+}
 
 class RichEditorStyleTestNg : public RichEditorCommonTestNg {
 public:
@@ -97,7 +103,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle001, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
@@ -123,6 +130,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step1. set typing style
@@ -160,13 +169,13 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level1)
      */
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(INIT_VALUE_1);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
     richEditorPattern->caretPosition_ = 6;
     richEditorPattern->InsertValue(INIT_VALUE_2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 }
 
 /**
@@ -181,6 +190,8 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
 
     /**
      * @tc.steps: step1. add span
@@ -210,11 +221,17 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle003, TestSize.Level1)
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     ImageSpanAttribute imageStyle;
     richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+    auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
+
+    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
+    newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+    ASSERT_NE(newSpan, nullptr);
+    EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
+    EXPECT_EQ(newSpan->GetTextBackgroundStyle().value().groupId, newSpan->groupId_);
 }
 
 /**
@@ -322,7 +339,8 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE);
@@ -358,7 +376,8 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle002, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE_2);
@@ -418,46 +437,6 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HasSameTypingStyle001
- * @tc.desc: test HasSameTypingStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, HasSameTypingStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->InsertValue(TEST_INSERT_VALUE);
-    auto it = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    auto spanItem = it->GetSpanItem();
-
-    spanItem->textStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    auto ret = richEditorPattern->HasSameTypingStyle(it);
-    EXPECT_TRUE(ret);
-
-    spanItem->textStyle_ = TextStyle();
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    ret = richEditorPattern->HasSameTypingStyle(it);
-    EXPECT_FALSE(ret);
-
-    spanItem->textStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = TextStyle();
-    ret = richEditorPattern->HasSameTypingStyle(it);
-    EXPECT_FALSE(ret);
-
-    spanItem->textStyle_ = TextStyle();
-    richEditorPattern->typingTextStyle_ = TextStyle();
-    ret = richEditorPattern->HasSameTypingStyle(it);
-    EXPECT_TRUE(ret);
-
-    spanItem->textStyle_.value().propFontFamilies_.push_back("test1");
-    ret = richEditorPattern->HasSameTypingStyle(it);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: SetTypingStyle002
  * @tc.desc: test Typing Style
  * @tc.type: FUNC
@@ -493,6 +472,81 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle002, TestSize.Level1)
         EXPECT_EQ(pair.second, 0);
     }
     ClearSpan();
+}
+
+/**
+ * @tc.name: SetTypingStyle003
+ * @tc.desc: test SetTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, SetTypingStyle003, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    UpdateSpanStyle typingStyle;
+    TextStyle textStyle;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem);
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    auto layout = richEditorNode_->layoutProperty_;
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
+}
+
+/**
+ * @tc.name: UpdateCaretStyleByTypingStyleTest001
+ * @tc.desc: test SetTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateCaretStyleByTypingStyleTest001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->UpdateCaretStyleByTypingStyle(false);
+    richEditorPattern->UpdateCaretStyleByTypingStyle(true);
+}
+
+/**
+ * @tc.name: HasSameTypingStyle001
+ * @tc.desc: test HasSameTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HasSameTypingStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->InsertValue(TEST_INSERT_VALUE);
+    auto it = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it, nullptr);
+    auto spanItem = it->GetSpanItem();
+
+    spanItem->textStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    auto ret = richEditorPattern->HasSameTypingStyle(it);
+    EXPECT_TRUE(ret);
+
+    spanItem->textStyle_ = TextStyle();
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    ret = richEditorPattern->HasSameTypingStyle(it);
+    EXPECT_FALSE(ret);
+
+    spanItem->textStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = TextStyle();
+    ret = richEditorPattern->HasSameTypingStyle(it);
+    EXPECT_FALSE(ret);
+
+    spanItem->textStyle_ = TextStyle();
+    richEditorPattern->typingTextStyle_ = TextStyle();
+    ret = richEditorPattern->HasSameTypingStyle(it);
+    EXPECT_TRUE(ret);
+
+    spanItem->textStyle_.value().propFontFamilies_.push_back("test1");
+    ret = richEditorPattern->HasSameTypingStyle(it);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -557,80 +611,6 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorPatternTestGetPreviewTextStyle001
- * @tc.desc: test GetPreviewTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, RichEditorPatternTestGetPreviewTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-
-    auto layoutProperty = host->layoutProperty_;
-    host->layoutProperty_ = nullptr;
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-    host->layoutProperty_ = layoutProperty;
-
-    ASSERT_NE(host->layoutProperty_, nullptr);
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-
-    property->UpdatePreviewTextStyle("normal");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-
-    property->UpdatePreviewTextStyle("underline");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
-
-    property->UpdatePreviewTextStyle("unknown");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper001
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code;
-    TextStyle spanStyle;
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    code = KeyCode::KEY_B;
-    spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
-    /**
-     * @tc.steps: step3. change parameters and call function.
-     */
-    spanStyle.SetFontWeight(Ace::FontWeight::NORMAL);
-    code = KeyCode::KEY_I;
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-    /**
-     * @tc.steps: step4. change parameters and call function.
-     */
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
-    code = KeyCode::KEY_U;
-    spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
-}
-
-/**
  * @tc.name: GetChangeSpanStyle002
  * @tc.desc: test GetChangeSpanStyle
  * @tc.type: FUNC
@@ -681,6 +661,194 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle002, TestSize.Level1)
     std::optional<std::u16string> urlAddress;
     richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
+    CHECK_NULL_VOID(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    CHECK_NULL_VOID(firstSpanItem);
+    EXPECT_FALSE(firstSpanItem->urlAddress.has_value());
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper001
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code;
+    TextStyle spanStyle;
+    /**
+     * @tc.steps: step2. change parameters and call function.
+     */
+    code = KeyCode::KEY_B;
+    spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
+    /**
+     * @tc.steps: step3. change parameters and call function.
+     */
+    spanStyle.SetFontWeight(Ace::FontWeight::NORMAL);
+    code = KeyCode::KEY_I;
+    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
+    /**
+     * @tc.steps: step4. change parameters and call function.
+     */
+    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+    code = KeyCode::KEY_U;
+    spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetTextDecorationFirst(), TextDecoration::NONE);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper002
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    KeyCode code = KeyCode::KEY_B;
+    TextStyle spanStyle;
+    spanStyle.fontWeight_ = Ace::FontWeight::BOLD;
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper003
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    KeyCode code = KeyCode::KEY_I;
+    TextStyle spanStyle;
+    spanStyle.propFontStyle_ = OHOS::Ace::FontStyle::ITALIC;
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper004
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    KeyCode code = KeyCode::KEY_U;
+    TextStyle spanStyle;
+    spanStyle.propTextDecoration_ = std::vector<TextDecoration>({TextDecoration::UNDERLINE});
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetTextDecorationFirst(), TextDecoration::NONE);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper005
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper005, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_B;
+    TextStyle style;
+    style.SetFontWeight(Ace::FontWeight::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontWeight(), Ace::FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper006
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper006, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_I;
+    TextStyle style;
+    style.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontStyle(), OHOS::Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper003
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper007, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_U;
+    TextStyle style;
+    style.SetTextDecoration(TextDecoration::NONE);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetTextDecorationFirst(), TextDecoration::UNDERLINE);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper004
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper008, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_HEADSETHOOK;
+    TextStyle style;
+    FontWeight result1 = style.GetFontWeight();
+    TextDecoration result3 = style.GetTextDecorationFirst();
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontWeight(), result1);
+    EXPECT_EQ(style.GetTextDecorationFirst(), result3);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper009
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper009, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code1 = KeyCode::KEY_B;
+    TextStyle style;
+    style.SetFontWeight(Ace::FontWeight::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code1, style);
+    KeyCode code2 = KeyCode::KEY_U;
+    style.SetTextDecoration(TextDecoration::NONE);
+    richEditorPattern->HandleSelectFontStyleWrapper(code2, style);
+    KeyCode code3 = KeyCode::KEY_I;
+    style.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code3, style);
+    EXPECT_EQ(style.GetFontWeight(), Ace::FontWeight::BOLD);
+    EXPECT_EQ(style.GetTextDecorationFirst(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(style.GetFontStyle(), OHOS::Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -719,6 +887,22 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyle001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_SEARCH);
     EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
+}
+
+/**
+ * @tc.name: HandleSelectFontStyle002
+ * @tc.desc: test HandleSelectFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyle002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isSpanStringMode_ = false;
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+    richEditorPattern->HandleSelectFontStyle(code);
+    EXPECT_EQ(richEditorPattern->isSpanStringMode_, false);
 }
 
 /**
@@ -779,100 +963,6 @@ HWTEST_F(RichEditorStyleTestNg, GetImageStyleBySpanItem001, TestSize.Level1)
     richEditorPattern->GetImageStyleBySpanItem(spanItem2);
 
     ASSERT_EQ(spanItem1->options.imageAttribute.has_value(), true);
-}
-
-/**
- * @tc.name: CopyTextSpanLineStyle001
- * @tc.desc: test CopyTextSpanLineStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, CopyTextSpanLineStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    LeadingMargin margin;
-    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
-    source->UpdateLeadingMargin(margin);
-
-    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
-    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
-    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
-}
-
-/**
- * @tc.name: CreateDecorationSpanByTextStyle001
- * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
-    ASSERT_NE(span, nullptr);
-}
-
-/**
- * @tc.name: UpdateImageStyle001
- * @tc.desc: test UpdateImageStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, UpdateImageStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    Dimension width = 50.0_vp;
-    Dimension height = 50.0_vp;
-    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
-    ImageSpanAttribute imageStyle;
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-    ASSERT_EQ(richEditorPattern->updateSpanStyle_.updateImageHeight.has_value(), true);
-}
-
-/**
- * @tc.name: SymbolSpanUpdateStyle001
- * @tc.desc: test SymbolSpanUpdateStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, SymbolSpanUpdateStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 0);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle textStyle;
-
-    bool res = richEditorPattern->SymbolSpanUpdateStyle(spanNode, updateSpanStyle, textStyle);
-    ASSERT_EQ(res, true);
 }
 
 /**
@@ -939,6 +1029,116 @@ HWTEST_F(RichEditorStyleTestNg, GetImageStyleBySpanItem003, TestSize.Level1)
     auto imageSizeOp = spanItem->options.imageAttribute->size;
     auto ret = richEditorPattern->GetImageStyleBySpanItem(spanItem);
     EXPECT_NE(ret.size[RichEditorImageSize::SIZEWIDTH], imageSizeOp->width->ConvertToPx());
+}
+
+/**
+ * @tc.name: CopyTextSpanLineStyle001
+ * @tc.desc: test CopyTextSpanLineStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CopyTextSpanLineStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    LeadingMargin margin;
+    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
+    source->UpdateLeadingMargin(margin);
+
+    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
+    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+
+    margin.size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    margin.pixmap = pixelMap;
+    source->UpdateLeadingMargin(margin);
+    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
+    EXPECT_TRUE(target->HasLeadingMargin());
+    auto leadingMargin = target->GetLeadingMarginValue({});
+    ASSERT_NE(leadingMargin.pixmap, nullptr);
+
+    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
+    EXPECT_TRUE(target->HasLeadingMargin());
+    leadingMargin = target->GetLeadingMarginValue({});
+    EXPECT_EQ(leadingMargin.pixmap, nullptr);
+}
+
+/**
+ * @tc.name: CreateDecorationSpanByTextStyle001
+ * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    RefPtr<DecorationSpan> span = richEditorPattern->styleManager_->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
+    ASSERT_NE(span, nullptr);
+}
+
+/**
+ * @tc.name: UpdateImageStyle001
+ * @tc.desc: test UpdateImageStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateImageStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    Dimension width = 50.0_vp;
+    Dimension height = 50.0_vp;
+    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
+    ImageSpanAttribute imageStyle;
+    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
+    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
+    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
+
+    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
+    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
+    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
+
+    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
+    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
+    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
+
+    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
+    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
+    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
+    ASSERT_EQ(richEditorPattern->updateSpanStyle_.updateImageHeight.has_value(), true);
+}
+
+/**
+ * @tc.name: SymbolSpanUpdateStyle001
+ * @tc.desc: test SymbolSpanUpdateStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, SymbolSpanUpdateStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 0);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle textStyle;
+
+    bool res = richEditorPattern->SymbolSpanUpdateStyle(spanNode, updateSpanStyle, textStyle);
+    ASSERT_EQ(res, true);
 }
 
 /**
@@ -1050,158 +1250,502 @@ HWTEST_F(RichEditorStyleTestNg, SetSelectSpanStyle005, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper002
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: SetSelectSpanStyle006
+ * @tc.desc: test SetSelectSpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper002, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, SetSelectSpanStyle006, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
-    KeyCode code = KeyCode::KEY_B;
-    TextStyle spanStyle;
-    spanStyle.fontWeight_ = Ace::FontWeight::BOLD;
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
+    int32_t start = 1;
+    int32_t end = 4;
+    KeyCode code1 = KeyCode::KEY_B;
+    KeyCode code2 = KeyCode::KEY_I;
+    KeyCode code3 = KeyCode::KEY_U;
+    auto updateSpanStyle = richEditorPattern->GetUpdateSpanStyle();
+    auto fontWeight = updateSpanStyle.updateFontWeight;
+    auto italicFontStyle = updateSpanStyle.updateItalicFontStyle;
+    auto textDecoration = updateSpanStyle.updateTextDecoration;
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code1);
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code1);
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code2);
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code2);
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code3);
+    richEditorPattern->UpdateSelectSpanStyle(start, end, code3);
+    
+    EXPECT_NE(fontWeight, richEditorPattern->GetUpdateSpanStyle().updateFontWeight);
+    EXPECT_NE(italicFontStyle, richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle);
+    EXPECT_NE(textDecoration, richEditorPattern->GetUpdateSpanStyle().updateTextDecoration);
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper003
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: UpdateDecorationStyle001
+ * @tc.desc: test UpdateDecorationStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    KeyCode code = KeyCode::KEY_I;
-    TextStyle spanStyle;
-    spanStyle.propFontStyle_ = OHOS::Ace::FontStyle::ITALIC;
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper004
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    KeyCode code = KeyCode::KEY_U;
-    TextStyle spanStyle;
-    spanStyle.propTextDecoration_ = TextDecoration::UNDERLINE;
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
-}
-
-/**
- * @tc.name: SetTypingStyle003
- * @tc.desc: test SetTypingStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, SetTypingStyle003, TestSize.Level0)
+HWTEST_F(RichEditorStyleTestNg, UpdateDecorationStyle001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle typingStyle;
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+    auto spanItem = spanNode->GetSpanItem();
     TextStyle textStyle;
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    auto layout = richEditorNode_->layoutProperty_;
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecoration = TextDecoration::UNDERLINE;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::SOLID;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationColor = Color::RED;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, false);
 }
 
 /**
- * @tc.name: HandleSelectFontStyle002
- * @tc.desc: test HandleSelectFontStyle
+ * @tc.name: UpdateDecorationStyle002
+ * @tc.desc: test UpdateDecorationStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyle002, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, UpdateDecorationStyle002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+    auto spanItem = spanNode->GetSpanItem();
+    TextStyle textStyle;
+    struct UpdateSpanStyle updateSpanStyle;
+
+    updateSpanStyle.updateTextDecoration = TextDecoration::OVERLINE;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DOTTED;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+
+    updateSpanStyle.updateTextDecorationColor = Color::RED;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, false);
+
+    updateSpanStyle.updateLineThicknessScale = LINE_THICKNESS_SCALE;
+    textStyle.SetLineThicknessScale(updateSpanStyle.updateLineThicknessScale);
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    float spanLineThicknessScale = spanNode->GetLineThicknessScale().value();
+    EXPECT_EQ(spanLineThicknessScale, updateSpanStyle.updateLineThicknessScale);
+}
+
+/**
+ * @tc.name: UpdateDecorationStyle003
+ * @tc.desc: test UpdateDecorationStyle when decoration properties are nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateDecorationStyle003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+    auto spanItem = spanNode->GetSpanItem();
+    TextStyle textStyle;
+    struct UpdateSpanStyle updateSpanStyle;
+
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+    TextDecorationStyle spanDecorationStyle = spanNode->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+    EXPECT_EQ(spanDecorationStyle, TextDecorationStyle::SOLID);
+
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    EXPECT_EQ(spanItem->useThemeDecorationColor, true);
+    Color spanDecorationColor = spanNode->GetTextDecorationColor().value_or(Color::BLACK);
+    EXPECT_EQ(spanDecorationColor, Color::BLACK);
+
+    updateSpanStyle.updateLineThicknessScale = LINE_THICKNESS_SCALE;
+    textStyle.SetLineThicknessScale(updateSpanStyle.updateLineThicknessScale);
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    float spanLineThicknessScale = spanNode->GetLineThicknessScale().value();
+    EXPECT_EQ(spanLineThicknessScale, updateSpanStyle.updateLineThicknessScale);
+}
+
+/**
+ * @tc.name: UpdateDecoration001
+ * @tc.desc: test UpdateDecoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateDecoration001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = false;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyle(code);
-    EXPECT_EQ(richEditorPattern->isSpanStringMode_, false);
+    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle textStyle;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper005
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: test GetSelectedBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper005, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_B;
-    TextStyle style;
-    style.SetFontWeight(Ace::FontWeight::NORMAL);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontWeight(), Ace::FontWeight::BOLD);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->selectedBackgroundColor_.reset();
+    auto ret = richEditorPattern->GetSelectedBackgroundColor();
+    EXPECT_NE(ret.GetValue(), 0);
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper006
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: RichEditorHalfLeading001
+ * @tc.desc: test RichEditor HalfLeading
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper006, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, RichEditorHalfLeading001, TestSize.Level1)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_I;
-    TextStyle style;
-    style.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontStyle(), OHOS::Ace::FontStyle::ITALIC);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+    TextStyle textStyle;
+    textStyle.SetHalfLeading(true);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateHalfLeading = true;
+
+    richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetHalfLeading(), true);
+    ClearSpan();
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper003
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: TextStyle001
+ * @tc.desc: test update span style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper007, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, TextStyle001, TestSize.Level1)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_U;
-    TextStyle style;
-    style.SetTextDecoration(TextDecoration::NONE);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetTextDecoration(), TextDecoration::UNDERLINE);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textStyle.SetTextShadows(SHADOWS);
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
+    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
+    textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
+    textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
+    updateSpanStyle.updateTextShadows = SHADOWS;
+    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE;
+    updateSpanStyle.updateItalicFontStyle = ITALIC_FONT_STYLE_VALUE;
+    updateSpanStyle.updateFontWeight = FONT_WEIGHT_VALUE;
+    updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
+    updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
+    updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(newSpan1->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(newSpan1->GetTextShadow(), SHADOWS);
+    EXPECT_EQ(newSpan1->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(newSpan1->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan1->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper004
- * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.name: UpdateSpanStyle001
+ * @tc.desc: test update span style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper008, TestSize.Level1)
+HWTEST_F(RichEditorStyleTestNg, UpdateSpanStyle001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_HEADSETHOOK;
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test add span
+     */
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 3);
+
+    /**
+     * @tc.steps: step3. test update span
+     */
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    TextStyle textStyle2;
+    textStyle2.SetFontSize(FONT_SIZE_VALUE_2);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE_2;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    ImageSpanAttribute imageStyle;
+
+    /**
+     * @tc.cases: case. call UpdateSpanStyle(), cover branch end < 0
+     * @tc.expected: expect GetFontSize() is equal to FONT_SIZE_VALUE
+     */
+    richEditorController->UpdateSpanStyle(0, -1, textStyle, imageStyle);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
+
+    /**
+     * @tc.cases: case. call UpdateSpanStyle(), update FontSize to FONT_SIZE_VALUE_2, cover branch end > length
+     * @tc.expected: expect GetFontSize() is equal to FONT_SIZE_VALUE_2
+     */
+    richEditorController->UpdateSpanStyle(0, 20, textStyle2, imageStyle);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE_2);
+
+    /**
+     * @tc.cases: case. call UpdateSpanStyle(), update FontSize to FONT_SIZE_VALUE, cover branch start > end
+     * @tc.expected: expect GetFontSize() is equal to FONT_SIZE_VALUE
+     */
+    richEditorController->UpdateSpanStyle(10, 0, textStyle, imageStyle);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
+
+    /**
+     * @tc.cases: case. call UpdateSpanStyle(), update FontSize to FONT_SIZE_VALUE_2, cover branch start == end
+     * @tc.expected: expect GetFontSize() is still equal to FONT_SIZE_VALUE
+     */
+    richEditorController->UpdateSpanStyle(0, 0, textStyle2, imageStyle);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
+
+    /**
+     * @tc.cases: case. call UpdateSpanStyle(), update FontSize to FONT_SIZE_VALUE_2, cover branch start > length
+     * @tc.expected: expect GetFontSize() is still equal to FONT_SIZE_VALUE
+     */
+    richEditorController->UpdateSpanStyle(20, 30, textStyle2, imageStyle);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: UpdateSpanStyle002
+ * @tc.desc: test UpdateImageStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateSpanStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize span properties and add image span
+     */
+    AddImageSpan();
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+
+    /**
+     * @tc.steps: step3. test UpdateImageStyle
+     */
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateImageWidth = IMAGE_WIDTH;
+    updateSpanStyle.updateImageHeight = IMAGE_HEIGHT;
+    updateSpanStyle.updateImageFit = ImageFit::CONTAIN;
+    updateSpanStyle.updateImageVerticalAlign = VerticalAlign::BOTTOM;
+    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
+    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
+    updateSpanStyle.borderRadius = borderRadius;
+    updateSpanStyle.marginProp = marginProp;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+
+    ImageSpanAttribute imageStyle;
+    imageStyle.size = TEST_IMAGE_SIZE_1;
+    imageStyle.verticalAlign = VerticalAlign::BOTTOM;
+    imageStyle.objectFit = ImageFit::CONTAIN;
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
     TextStyle style;
-    FontWeight result1 = style.GetFontWeight();
-    TextDecoration result3 = style.GetTextDecoration();
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontWeight(), result1);
-    EXPECT_EQ(style.GetTextDecoration(), result3);
+    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
+
+    /**
+     * @tc.steps: step4. test image span style
+     */
+    auto host = richEditorPattern->GetContentHost();
+    ASSERT_NE(host, nullptr);
+    auto child = host->GetChildren().begin();
+    auto imageNode = AceType::DynamicCast<FrameNode>(*child);
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, TEST_IMAGE_SIZE_1.GetSize());
+    EXPECT_EQ(imageLayoutProperty->GetVerticalAlignValue(), VerticalAlign::BOTTOM);
+    EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::CONTAIN);
+    EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->left->ToString(), CALC_LENGTH_CALC.ToString());
+
+    auto imageRenderCtx = imageNode->GetRenderContext();
+    ASSERT_NE(imageRenderCtx, nullptr);
+    EXPECT_EQ(imageRenderCtx->GetBorderRadius(), borderRadius);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: UpdateSpanStyle003
+ * @tc.desc: test update span style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateSpanStyle003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textStyle.SetTextShadows(SHADOWS);
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
+    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
+    textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
+    textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    textStyle.SetLineThicknessScale(TEXT_DECORATION_THICKNESS_SCALE);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
+    updateSpanStyle.updateTextShadows = SHADOWS;
+    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE;
+    updateSpanStyle.updateItalicFontStyle = ITALIC_FONT_STYLE_VALUE;
+    updateSpanStyle.updateFontWeight = FONT_WEIGHT_VALUE;
+    updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
+    updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
+    updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
+    EXPECT_EQ(contentNode->GetChildren().size(), 5);
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(3));
+    ASSERT_NE(newSpan2, nullptr);
+    EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(newSpan2->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(newSpan2->GetTextShadow(), SHADOWS);
+    EXPECT_EQ(newSpan2->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(newSpan2->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(newSpan2->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
+}
+
+/**
+ * @tc.name: UpdateParagraphStyle001
+ * @tc.desc: test AddTextSpan with UpdateParagraphStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateParagraphStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add span and initalize UpdateParagraphStyle
+     */
+    AddSpan("test");
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    TextStyle style;
+    options.style = style;
+    struct UpdateParagraphStyle paragraphStyle;
+    paragraphStyle.wordBreak = WordBreak::NORMAL;
+    paragraphStyle.textAlign = TextAlign::END;
+    paragraphStyle.paragraphSpacing = Dimension(10.0f, DimensionUnit::PX);
+    options.paraStyle = paragraphStyle;
+
+    /**
+     * @tc.steps: step3. set userGestureOption
+     */
+    GestureEventFunc callback2 = [](GestureEvent& info) {};
+    options.userGestureOption.onClick = callback2;
+
+    /**
+     * @tc.steps: step4. test AddTextSpan
+     */
+    auto index = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 5);
+    EXPECT_EQ(index, 5);
+    auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    auto textStyle = info.selection_.resultObjects.begin()->textStyle;
+    EXPECT_EQ(textStyle.wordBreak, int(WordBreak::NORMAL));
+    EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
+    EXPECT_NE(textStyle.paragraphSpacing, std::nullopt);
+    EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
 }
 
 }

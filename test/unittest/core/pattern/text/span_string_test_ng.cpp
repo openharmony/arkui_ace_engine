@@ -43,6 +43,7 @@ public:
     static void TearDownTestSuite();
     static ImageSpanOptions GetImageOption(const std::string& src);
     static ImageSpanOptions GetColorFilterImageOption(const std::string& src);
+    static ImageSpanOptions GetImageOptionWithSize(const std::string& src);
 };
 
 void SpanStringTestNg::SetUpTestSuite()
@@ -75,6 +76,25 @@ ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
         .borderRadius = borderRadius,
         .objectFit = ImageFit::COVER,
         .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions option { .image = src, .imageAttribute = attr };
+    return option;
+}
+
+ImageSpanOptions SpanStringTestNg::GetImageOptionWithSize(const std::string& src)
+{
+    ImageSpanSize size { .width = 100.0_vp, .height = 100.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(NUMBER_TEN));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
+    ImageSpanAttribute attr { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM,
+        .size = size };
     ImageSpanOptions option { .image = src, .imageAttribute = attr };
     return option;
 }
@@ -255,8 +275,10 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
-    spanString3->AddSpan(
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
+    std::optional<TextDecorationOptions> options;
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+            Color::RED, TextDecorationStyle::WAVY, options, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
     Shadow textShadow;
@@ -296,8 +318,10 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
-    spanString3->AddSpan(
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
+    std::optional<TextDecorationOptions> options;
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+            Color::RED, TextDecorationStyle::WAVY, options, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     Shadow textShadow;
@@ -1105,6 +1129,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString015, TestSize.Level1)
     SpanParagraphStyle spanParagraphStyle;
     spanParagraphStyle.align = TextAlign::END;
     spanParagraphStyle.maxLines = 4;
+
     spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
     spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
     spanParagraphStyle.textIndent = Dimension(23);
@@ -1326,8 +1351,9 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     EXPECT_EQ(buffer.find("FontSpan"), 0);
 
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
-    auto decorationSpan =
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::RED,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
     decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();
@@ -1762,6 +1788,27 @@ HWTEST_F(SpanStringTestNg, SpanString019, TestSize.Level1)
     spanString->AppendSpanString(spanString);
     spans = spanString->GetSpans(0, spanString->GetLength());
     EXPECT_EQ(spans.size(), 6);
+}
+
+/**
+ * @tc.name: SpanStringTest035
+ * @tc.desc: Test basic properties of ImageAttachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString035, TestSize.Level1)
+{
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    auto imageOption = SpanStringTestNg::GetImageOptionWithSize("src/icon-1.png");
+    auto imageSpan = AceType::MakeRefPtr<SpanString>(imageOption);
+    spanString->AppendSpanString(imageSpan);
+    auto imageSpans = spanString->GetSpans(0, spanString->GetLength(), SpanType::Image);
+    EXPECT_EQ(imageSpans.size(), 1);
+    auto imageSpanInList = AceType::DynamicCast<ImageSpan>(imageSpans.front());
+    ImageSpanAttribute imageAttribute = imageSpanInList->GetImageAttribute().value();
+    ImageSpanSize imageSize = imageAttribute.size.value();
+    EXPECT_EQ(imageSize.width->ConvertToVp(), 100.0);
+    EXPECT_EQ(imageSize.height->ConvertToVp(), 100.0);
 }
 
 /*
@@ -2442,6 +2489,70 @@ HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Tlv012
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv012, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_TEXTSHADOW_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<Shadow> readShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(readShadows.empty());
+}
+
+/**
+ * @tc.name: Tlv013
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv013, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFAMILIES_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<std::string> vec = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+
+/**
+ * @tc.name: Tlv014
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv014, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<TextDecoration> vec = TLVUtil::ReadTextDecorations(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+/**
+ * @tc.name: Tlv015
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv015, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFEATURE_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::list<std::pair<std::string, int32_t>> list = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(list.empty());
+}
+
+/**
  * @tc.name: GetSpanResultObject001
  * @tc.desc: Test GetSpanResultObject
  * @tc.type: FUNC
@@ -2485,4 +2596,117 @@ HWTEST_F(SpanStringTestNg, GetSpanResultObject003, TestSize.Level1)
     auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
     EXPECT_FALSE(resultObject.isInit);
 }
+
+/**
+ * @tc.name: SpanLineThicknessScaleTest001
+ * @tc.desc: Test new attribute of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"SpanLineThicknessScaleTest123");
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DASHED, 5.0f, std::optional<TextDecorationOptions>(), 0, 2));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::BLACK,
+        TextDecorationStyle::DOTTED, 10.0f, std::optional<TextDecorationOptions>(), 0, 3));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(1.0);
+    textShadow.SetOffsetX(2.0);
+    textShadow.SetOffsetY(3.0);
+    vector<Shadow> textShadows { textShadow };
+    spanString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9));
+
+    /**
+     * @tc.steps2: call GetSpans to get spans
+     * @tc.expected: The SpanString should be successfully created
+     */
+    auto firstSpans = spanString->GetSpans(0, 9);
+    EXPECT_NE(firstSpans.size(), 0);
+}
+
+/**
+ * @tc.name: SpanLineThicknessScaleTest002
+ * @tc.desc: Test new attribute of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 9);
+    buffer = fontSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("FontSpan"), 0);
+
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan1 = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}),
+        Color::RED, TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan1));
+    decorationSpan1->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan1->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    auto decorationSpan2 = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+        Color::RED, TextDecorationStyle::DASHED, 6.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan2));
+    decorationSpan2->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan2->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+}
+
+/**
+ * @tc.name: TextLayoutTest001
+ * @tc.desc: Test new attribute of TextLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextLayoutTest001, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::START;
+    spanParagraphStyle.maxLines = 2;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(30);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanString->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto paraSpans = spanString->GetSpans(0, 2, SpanType::ParagraphStyle);
+    EXPECT_EQ(paraSpans.size(), 1);
+    auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(paraSpans[0]);
+    EXPECT_NE(paraSpan, nullptr);
+    EXPECT_EQ(paraSpan->GetStartIndex(), 0);
+    EXPECT_EQ(paraSpan->GetEndIndex(), 1);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().align, TextAlign::START);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().maxLines, 2);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().wordBreak, WordBreak::BREAK_ALL);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textOverflow, TextOverflow::ELLIPSIS);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textIndent, Dimension(30));
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Width().ConvertToVp(), 25);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Height().ConvertToVp(), 26);
+}
+
+
 } // namespace OHOS::Ace::NG

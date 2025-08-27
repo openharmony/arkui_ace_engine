@@ -83,7 +83,7 @@ public:
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override {};
     void SetHeight(const Dimension& value) override;
-    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) override;
     void SetBackBorder() override;
     void SetHoverEffect(HoverEffectType value) override;
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
@@ -92,6 +92,7 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override {};
     void SetPasswordRules(const std::string& passwordRules) override {};
     void SetEnableAutoFill(bool enableAutoFill) override {};
+    void SetEnableAutoFillAnimation(bool enableAutoFill) override {};
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override {};
     void SetCancelIconSize(const CalcDimension& iconSize) override {};
     void SetCanacelIconSrc(
@@ -110,6 +111,8 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
+    void SetEnableAutoSpacing(bool enabled) override {};
+    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

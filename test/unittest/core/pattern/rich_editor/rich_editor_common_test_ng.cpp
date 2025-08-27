@@ -34,6 +34,7 @@ void RichEditorCommonTestNg::AddSpan(const std::u16string& content)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
     SpanModelNG spanModelNG;
     spanModelNG.Create(content);
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
@@ -48,7 +49,7 @@ void RichEditorCommonTestNg::AddSpan(const std::u16string& content)
     spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
     spanModelNG.SetTextShadow(SHADOWS);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
-    spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
+    spanNode->MountToParent(contentNode, contentNode->children_.size());
     richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
     richEditorPattern->childNodes_.push_back(spanNode);
     richEditorPattern->UpdateSpanPosition();
@@ -64,7 +65,9 @@ void RichEditorCommonTestNg::AddImageSpan()
     ASSERT_NE(imageLayoutProperty, nullptr);
     ImageSourceInfo imageInfo(IMAGE_VALUE, BUNDLE_NAME, MODULE_NAME);
     imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
-    imageNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    imageNode->MountToParent(contentNode, contentNode->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     spanItem->content = u" ";
     spanItem->placeholderIndex = 0;
@@ -122,7 +125,9 @@ void RichEditorCommonTestNg::ClearSpan()
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorNode_->children_.clear();
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->children_.clear();
     richEditorPattern->spans_.clear();
     richEditorPattern->caretPosition_ = 0;
 }

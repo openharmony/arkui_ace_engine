@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,9 +72,12 @@ void JSSelect::Create(const JSCallbackInfo& info)
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         size_t size = paramArray->Length();
         std::vector<SelectParam> params(size);
+        std::vector<SelectResObjParam> resObjVec(size);
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
+            RefPtr<ResourceObject> valueResObj;
+            RefPtr<ResourceObject> iconResObj;
             JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
             if (!indexVal->IsObject()) {
                 return;
@@ -86,18 +89,27 @@ void JSSelect::Create(const JSCallbackInfo& info)
             RefPtr<JSSymbolGlyphModifier> selectSymbol = AceType::MakeRefPtr<JSSymbolGlyphModifier>();
             selectSymbol->symbol_ = selectSymbolIcon;
             params[i].symbolModifier = selectSymbol;
-            ParseJsString(selectValue, value);
+            ParseJsString(selectValue, value, valueResObj);
             params[i].text = value;
+            if (valueResObj) {
+                resObjVec[i].valueResObj = valueResObj;
+            }
             if (selectSymbolIcon->IsObject()) {
                 std::function<void(WeakPtr<NG::FrameNode>)> symbolApply = nullptr;
                 JSViewAbstract::SetSymbolOptionApply(info, symbolApply, selectSymbolIcon);
                 params[i].symbolIcon = symbolApply;
             } else {
-                ParseJsMedia(selectIcon, icon);
+                ParseJsMedia(selectIcon, icon, iconResObj);
                 params[i].icon = icon;
+                resObjVec[i].iconResObj = iconResObj;
             }
         }
         SelectModel::GetInstance()->Create(params);
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObjVec.size() > 0) {
+                SelectModel::GetInstance()->CreateWithValueIconResourceObj(resObjVec);
+            }
+        }
     }
 }
 
@@ -141,11 +153,13 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
-    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
     JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
+    JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
+    JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -181,9 +195,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
-
-    bool result = ParseJsInteger<int32_t>(info[0], value);
-
+    RefPtr<ResourceObject> resObj;
+    bool result = ParseJsInteger<int32_t>(info[0], value, resObj);
     if (value < -1) {
         value = -1;
     }
@@ -193,13 +206,16 @@ void JSSelect::Selected(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
         selectedVal = obj->GetProperty("value");
         changeEventVal = obj->GetProperty("$value");
-        ParseJsInteger<int32_t>(selectedVal, value);
+        ParseJsInteger<int32_t>(selectedVal, value, resObj);
     } else if (info.Length() > 1) {
         changeEventVal = info[1];
     }
 
     if (changeEventVal->IsFunction()) {
         ParseSelectedObject(info, changeEventVal);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->CreateWithIntegerResourceObj(resObj);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set selected index %{public}d", value);
     SelectModel::GetInstance()->SetSelected(value);
@@ -229,8 +245,8 @@ void JSSelect::Value(const JSCallbackInfo& info)
     }
 
     std::string value;
-    
-    bool result = ParseJsString(info[0], value);
+    RefPtr<ResourceObject> resObj;
+    bool result = ParseJsString(info[0], value, resObj);
 
     JSRef<JSVal> changeEventVal;
     auto selectedVal = info[0];
@@ -238,13 +254,16 @@ void JSSelect::Value(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
         selectedVal = obj->GetProperty("value");
         changeEventVal = obj->GetProperty("$value");
-        ParseJsString(selectedVal, value);
+        ParseJsString(selectedVal, value, resObj);
     } else if (info.Length() > 1) {
         changeEventVal = info[1];
     }
 
     if (changeEventVal->IsFunction()) {
         ParseValueObject(info, changeEventVal);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->CreateWithStringResourceObj(resObj);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "value set by user");
     SelectModel::GetInstance()->SetValue(value);
@@ -402,12 +421,18 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
     }
 
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool isNormal = false;
+    if (!ParseJsColor(info[0], textColor, resObj)) {
         SelectModel::GetInstance()->ResetFontColor();
-        return;
+    } else {
+        SelectModel::GetInstance()->SetFontColor(textColor);
+        isNormal = true;
     }
-
-    SelectModel::GetInstance()->SetFontColor(textColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetFontColorByUser(isNormal);
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::FONT_COLOR);
+    }
 }
 
 void JSSelect::BackgroundColor(const JSCallbackInfo& info)
@@ -416,10 +441,13 @@ void JSSelect::BackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], backgroundColor, resObj)) {
         backgroundColor = Color::TRANSPARENT;
     }
-
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::BACKGROUND_COLOR);
+    }
     SelectModel::GetInstance()->BackgroundColor(backgroundColor);
 }
 
@@ -429,16 +457,23 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
         return;
     }
     Color bgColor;
-    if (!ParseJsColor(info[0], bgColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
+    if (!ParseJsColor(info[0], bgColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             bgColor = theme->GetSelectedColor();
+            isValidValue = false;
         } else {
             return;
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetSelectedOptionBgColorByUser(isValidValue);
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
     }
     SelectModel::GetInstance()->SetSelectedOptionBgColor(bgColor);
 }
@@ -465,16 +500,23 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
+    if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetSelectedColorText();
+            isValidValue = false;
         } else {
             return;
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetSelectedOptionFontColorByUser(isValidValue);
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
     }
     SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
 }
@@ -485,19 +527,24 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         return;
     }
     Color bgColor;
-    if (!ParseJsColor(info[0], bgColor)) {
-        if (info[0]->IsUndefined() || info[0]->IsNull()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            bgColor = theme->GetBackgroundColor();
-        } else {
+    RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
+    if (!ParseJsColor(info[0], bgColor, resObj)) {
+        if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
             return;
         }
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        bgColor = theme->GetBackgroundColor();
+        isValidValue = false;
     }
-
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetOptionBgColorByUser(isValidValue);
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_BG_COLOR);
+    }
 }
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
@@ -522,16 +569,23 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool isNormal = true;
+    if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetMenuFontColor();
+            isNormal = false;
         } else {
             return;
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetOptionFontColorByUser(isNormal);
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_FONT_COLOR);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
@@ -831,7 +885,8 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color menuBackgroundColor;
-    if (!ParseJsColor(info[0], menuBackgroundColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], menuBackgroundColor, resObj)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             menuBackgroundColor = Color::TRANSPARENT;
         } else {
@@ -841,6 +896,10 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set menu background color %{public}s",
         menuBackgroundColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetMenuBackgroundColorByUser();
+        SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::MENU_BACKGROUND_COLOR);
+    }
 }
 
 void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
@@ -896,12 +955,12 @@ void JSSelect::SetDivider(const JSCallbackInfo& info)
 
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-       
+
         Dimension strokeWidth = defaultStrokeWidth;
         if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
             divider.strokeWidth = strokeWidth;
         }
-        
+
         Color color = defaultColor;
         if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
             divider.color = color;
@@ -988,31 +1047,6 @@ void JSSelect::SetDirection(const std::string& dir)
     SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 
-void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto menuTheme = GetTheme<NG::MenuTheme>();
-    NG::MenuParam menuParam;
-    MenuDefaultParam(menuParam);
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        NG::BorderWidthProperty outlineWidth;
-        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
-        menuParam.outlineWidth = outlineWidth;
-        NG::BorderColorProperty outlineColor;
-        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
-        menuParam.outlineColor = outlineColor;
-    } else {
-        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
-        auto outlineWidthValue = menuOptions->GetProperty("width");
-        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
-        auto outlineColorValue = menuOptions->GetProperty("color");
-        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
-    }
-    SelectModel::GetInstance()->SetMenuOutline(menuParam);
-}
-
 void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
 {
     std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
@@ -1056,5 +1090,55 @@ void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
     }
     JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
     SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuOptionArg = info[0];
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (!menuOptionArg->IsObject()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
+}
+
+void JSSelect::SetShowInSubWindow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowInSubWindow();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowInSubWindow(info[0]->ToBoolean());
+}
+
+void JSSelect::SetShowDefaultSelectedIcon(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        SelectModel::GetInstance()->ResetShowDefaultSelectedIcon();
+        return;
+    }
+    SelectModel::GetInstance()->SetShowDefaultSelectedIcon(info[0]->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

@@ -31,6 +31,16 @@ void FormSpecialStyle::SetIsLockedByAppLock(bool isLockedByAppLock)
     isLockedByAppLock_ = isLockedByAppLock;
 }
 
+bool FormSpecialStyle::IsForbidden() const
+{
+    return isForbiddenByParentControl_;
+}
+
+bool FormSpecialStyle::IsLocked() const
+{
+    return isLockedByAppLock_;
+}
+
 const char* FormSpecialStyle::GetResource()
 {
     auto formStyleAttribution = GetFormStyleAttribution();
@@ -61,7 +71,7 @@ FormOperation FormSpecialStyle::GetOperationToNewFormStyle(const FormSpecialStyl
 
 FormStyleAttribution FormSpecialStyle::GetFormStyleAttribution() const
 {
-    if (isForbiddenByParentControl_) {
+    if (isForbiddenByParentControl_ && !isMultiAppForm_) {
         return FormStyleAttribution::PARENT_CONTROL;
     }
     if (isLockedByAppLock_ && !isMultiAppForm_) {

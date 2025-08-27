@@ -146,7 +146,13 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resObj;
+    bool colorParsed = SystemProperties::ConfigChangePerform() ? ParseJsColor(info[0], textColor, resObj)
+                                                               : ParseJsColor(info[0], textColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModel::GetInstance()->CreateWithTextColorResourceObj(resObj);
+    }
+    if (!colorParsed) {
         TextClockModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -164,16 +170,18 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
-        fontSize = theme->GetTextStyleClock().GetFontSize();
+    RefPtr<ResourceObject> resObj;
+    bool parseSuccess = SystemProperties::ConfigChangePerform() ? ParseJsDimensionFpNG(info[0], fontSize, resObj, false)
+                                                                : ParseJsDimensionFpNG(info[0], fontSize, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModel::GetInstance()->CreateWithFontSizeResourceObj(resObj);
     }
+     auto getDefaultFontSize = [&]() {
+        return theme->GetTextStyleClock().GetFontSize();
+    };
 
-    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextClockTheme>();
-        CHECK_NULL_VOID(theme);
-        fontSize = theme->GetTextStyleClock().GetFontSize();
+    if (!parseSuccess || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        fontSize = getDefaultFontSize();
     }
 
     TextClockModel::GetInstance()->SetFontSize(fontSize);
@@ -187,6 +195,7 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
     RefPtr<TextClockTheme> textTheme = GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(textTheme);
     const auto& fontWeight = info[0];
+    RefPtr<ResourceObject> weightResObj;
     if (fontWeight->IsUndefined()) {
         TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyleClock().GetFontWeight());
         return;
@@ -197,7 +206,10 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         } else {
-            ParseJsString(fontWeight, weight);
+            ParseJsString(fontWeight, weight, weightResObj);
+            if (SystemProperties::ConfigChangePerform()) {
+                TextClockModel::GetInstance()->CreateWithFontWeightResourceObj(weightResObj);
+            }
         }
         TextClockModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
     } else {
@@ -219,10 +231,16 @@ void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        return;
+    RefPtr<ResourceObject> resObj;
+
+    bool parseSuccess = SystemProperties::ConfigChangePerform() ? ParseJsFontFamilies(info[0], fontFamilies, resObj)
+                                                                : ParseJsFontFamilies(info[0], fontFamilies);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModel::GetInstance()->CreateWithFontFamilyResourceObj(resObj);
     }
-    TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+    if (parseSuccess) {
+        TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+    }
 }
 
 void JSTextClock::SetFormat(const JSCallbackInfo& info)
@@ -230,26 +248,45 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             TextClockModel::GetInstance()->SetFormat("");
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
+        if (SystemProperties::ConfigChangePerform()) {
+            TextClockModel::GetInstance()->RemoveResObjByKey("textClockFormat");
+        }
         return;
     }
-
-    auto format = info[0]->ToString();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
-        std::regex pattern(
-            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
-        if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
-            return;
+    std::string format;
+    RefPtr<ResourceObject> resObj;
+    static const std::string TEXT_CLOCK_FORMAT_REGEX =
+            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)";
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseJsString(info[0], format, resObj);
+        TextClockModel::GetInstance()->CreateWithFormatResourceObj(resObj);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            std::regex pattern(TEXT_CLOCK_FORMAT_REGEX);
+            if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
+                TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
+                return;
+            }
         }
-    }
 
-    TextClockModel::GetInstance()->SetFormat(format);
+        TextClockModel::GetInstance()->SetFormat(format);
+    } else {
+        ParseJsString(info[0], format);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            std::regex pattern(TEXT_CLOCK_FORMAT_REGEX);
+            if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
+                TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
+                return;
+            }
+        }
+
+        TextClockModel::GetInstance()->SetFormat(format);
+    }
 }
 
 void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
@@ -261,6 +298,10 @@ void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
     ParseTextShadowFromShadowObject(info[0], shadows);
     if (!shadows.empty()) {
         TextClockModel::GetInstance()->SetTextShadow(shadows);
+    } else {
+        if (SystemProperties::ConfigChangePerform()) {
+            TextClockModel::GetInstance()->RemoveResObjByKey("textClock.shadow");
+        }
     }
 }
 

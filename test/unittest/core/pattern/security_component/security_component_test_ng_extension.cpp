@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "ui/base/geometry/dimension.h"
 
 #define protected public
 #define private public
@@ -71,6 +72,7 @@ const InspectorFilter filter;
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
     constexpr float TEST_FONT_SIZE = 2.0;
+    constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
 
@@ -97,7 +99,7 @@ class TestNode : public UINode {
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -124,7 +126,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -149,7 +151,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest006, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -177,7 +179,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest007, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest007, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -204,7 +206,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest008, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest008, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -234,7 +236,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest009, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest009, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -261,7 +263,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest010, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest010, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -290,7 +292,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest011, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest011, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -317,7 +319,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest012, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest012, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -344,34 +346,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest013, TestSize.Level1)
-{
-    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
-        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-    ASSERT_NE(parentFrameNode, nullptr);
-    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
-        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-    ASSERT_NE(childFrameNode, nullptr);
-    parentFrameNode->AddChild(childFrameNode);
-
-    auto renderContext = parentFrameNode->GetRenderContext();
-    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
-    ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateFrontGrayScale(0.0_vp);
-    std::string message;
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
-    ASSERT_EQ(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f);
-    renderContext->UpdateFrontGrayScale(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
-}
-
-/**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest014
- * @tc.desc: Test security component CheckParentNodesEffect
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest014, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest013, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -390,12 +365,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest015
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest014
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest015, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest014, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -417,12 +392,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest016
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest015
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest016, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest015, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -444,12 +419,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest017
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest016
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest017, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest016, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -479,12 +454,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest018
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest017
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest017, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -511,12 +486,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest019
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest018
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -535,12 +510,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest020
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest019
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -563,12 +538,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest021
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest020
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level0)
 {
     RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -602,12 +577,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest022
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest021
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level0)
 {
     float radius = 0.0;
     float deltaY = 1.0;
@@ -629,12 +604,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest022
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level0)
 {
     RectF parentRect = RectF(0.0, 0.0, 0.0, 0.0);
     RectF rect = RectF(0.0, 0.0, 0.0, 0.0);
@@ -656,12 +631,40 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level0)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    // security component is not completely displayed
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
+    auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
+    RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
+    auto childFrameRect = childRenderContext->GetPaintRectWithTransform();
+    ASSERT_EQ(parentFrameRect.Width(), childFrameRect.Width());
+    ASSERT_EQ(parentFrameRect.Height(), childFrameRect.Height());
+}
+
+/**
  * @tc.name: SecurityComponentCheckGetBorderRadiusTest001
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRadiusTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRadiusTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -708,7 +711,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRadiusTest
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckRectIntersectTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckRectIntersectTest001, TestSize.Level0)
 {
     RectF dest = RectF(0.0f, 0.0f, 5.0f, 5.0f);
     int32_t secNodeId = 0;
@@ -742,7 +745,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckRectIntersectTest00
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentUpdateClipRectTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentUpdateClipRectTest001, TestSize.Level0)
 {
     RectF clipRect = RectF(0.0f, 0.0f, 1.0f, 1.0f);
     RectF paintRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
@@ -788,7 +791,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentUpdateClipRectTest001, T
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound001, TestSize.Level0)
 {
     RectF smallRect(1.0, 1.0, 10.0, 10.0);
     RectF largerRect(1.0, 1.0, 12.0, 12.0);
@@ -803,7 +806,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound00
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSize.Level0)
 {
     RefPtr<SecurityComponentPattern> pattern =
         AceType::MakeRefPtr<SecurityComponentPattern>();
@@ -818,7 +821,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSi
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestSize.Level0)
 {
     RefPtr<SecurityComponentPattern> pattern =
         AceType::MakeRefPtr<SecurityComponentPattern>();
@@ -835,7 +838,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestS
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize.Level0)
 {
     auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false);
     ASSERT_NE(frameNode, nullptr);
@@ -847,7 +850,7 @@ HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode002, TestSize.Level0)
 {
     auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false, 0);
     ASSERT_NE(frameNode, nullptr);
@@ -859,7 +862,7 @@ HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode002, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGGetTextResource001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGGetTextResource001, TestSize.Level0)
 {
     auto scTheme = MockPipelineContext::GetCurrent()->GetThemeManager();
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
@@ -874,7 +877,7 @@ HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGGetTextResource001, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, LocationButtonModelNGGetTextResource001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, LocationButtonModelNGGetTextResource001, TestSize.Level0)
 {
     auto scTheme = MockPipelineContext::GetCurrent()->GetThemeManager();
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
@@ -889,7 +892,7 @@ HWTEST_F(SecurityComponentModelTestNg, LocationButtonModelNGGetTextResource001, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SaveButtonModelNGGetTextResource001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SaveButtonModelNGGetTextResource001, TestSize.Level0)
 {
     auto scTheme = MockPipelineContext::GetCurrent()->GetThemeManager();
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
@@ -904,7 +907,7 @@ HWTEST_F(SecurityComponentModelTestNg, SaveButtonModelNGGetTextResource001, Test
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentProbeInitProbeTask001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentProbeInitProbeTask001, TestSize.Level0)
 {
     SecurityComponentProbe probe;
     std::string compInfo;
@@ -928,7 +931,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentProbeInitProbeTask001, T
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement001, TestSize.Level0)
 {
     IconLayoutElement icon;
     icon.isExist_ = false;
@@ -950,12 +953,59 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutElementIconElement002
+ * @tc.desc: Test security component icon element
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement002, TestSize.Level0)
+{
+    IconLayoutElement icon;
+    icon.isExist_ = false;
+    icon.DoMeasure();
+    icon.isExist_ = true;
+    icon.isSetSize_ = false;
+
+    icon.alpha_ = 0.0f;
+    ASSERT_EQ(icon.ShrinkWidth(1.0f), 1.0f);
+    ASSERT_EQ(icon.ShrinkHeight(1.0f), 1.0f);
+
+    icon.alpha_ = 1.0f;
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 2.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(2.0f), 1.0f);
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 2.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(2.0f), 1.0f);
+
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(1.5f), 0.0f);
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(1.5f), 0.0f);
+
+    icon.minIconSize_ = 0.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(2.0f), 0.0f);
+    icon.minIconSize_ = 0.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(2.0f), 0.0f);
+}
+
+/**
  * @tc.name: SecurityComponentLayoutElementTextElement001
  * @tc.desc: Test security component text element
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement001, TestSize.Level0)
 {
     TextLayoutElement text;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -990,12 +1040,44 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
 }
 
 /**
+ * @tc.name: SecurityComponentChooseExactFontSize001
+ * @tc.desc: Test security component ChooseExactFontSize
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentChooseExactFontSize001, TestSize.Level0)
+{
+    TextLayoutElement text;
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SecurityComponentLayoutProperty> property =
+        AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    RefPtr<TextLayoutProperty> textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geoNode, textProp);
+    property->UpdateSecurityComponentDescription(0);
+    property->UpdateFontSize(Dimension(2.0));
+    text.Init(property, wrapper);
+    ASSERT_TRUE(text.isExist_);
+    ASSERT_TRUE(text.isSetSize_);
+
+    RefPtr<TextLayoutProperty> textProperty =
+        AceType::MakeRefPtr<TextLayoutProperty>();
+    text.minTextSize_ = SizeF(1.0, 1.0);
+    text.ChooseExactFontSize(textProperty, true);
+    textProperty->UpdateFontSize(Dimension(14.0, DimensionUnit::FP));
+    text.ChooseExactFontSize(textProperty, true);
+}
+
+/**
  * @tc.name: SecurityComponentLayoutElementTextElement002
  * @tc.desc: Test security component text element
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement002, TestSize.Level0)
 {
     TextLayoutElement text;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -1038,7 +1120,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnDirtyLayoutWrapperSwap001, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -1069,7 +1151,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnDirtyLayoutWrap
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnKeyEvent001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnKeyEvent001, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     KeyEvent event;
@@ -1097,7 +1179,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnKeyEvent001, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -1115,7 +1197,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, TestSize.Level0)
 {
     RefPtr<SecurityComponentPattern> pattern = AceType::MakeRefPtr<SecurityComponentPattern>();
     auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern);
@@ -1135,7 +1217,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch001, TestSize.Level0)
 {
     // DOWN
     TouchLocationInfo locationInfo(0);
@@ -1175,7 +1257,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch001, TestS
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch002, TestSize.Level0)
 {
     // DOWN
     TouchLocationInfo locationInfo(0);
@@ -1205,7 +1287,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnTouch002, TestS
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent001, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -1233,7 +1315,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent0
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue001, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
@@ -1250,7 +1332,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue001, T
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue002, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode =
@@ -1268,7 +1350,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue002, T
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, TestSize.Level0)
 {
     SecurityComponentPattern pattern;
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0,
@@ -1281,12 +1363,56 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, T
 }
 
 /**
+ * @tc.name: SecurityComponentPatternToJsonValue004
+ * @tc.desc: Test security component ToJsonValueBorderRadius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue004, TestSize.Level0)
+{
+    SecurityComponentPattern pattern;
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = RefPtr(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    pattern.frameNode_ = frameNode;
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateHasCustomPermissionForSecComp(true);
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    
+    SaveButtonModelNG sc;
+    sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetBackgroundBorderRadius(Dimension(3.0));
+    pattern.UpdateIconProperty(frameNode, iconNode);
+
+    auto jsonNode = JsonUtil::Create(true);
+    pattern.ToJsonValue(jsonNode, filter);
+    auto jsonBorderRadius = jsonNode->GetObject("iconBorderRadius");
+    ASSERT_EQ(jsonBorderRadius->GetString("topLeft", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("topRight", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("bottomLeft", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("bottomRight", ""), "3.00px");
+    
+    sc.SetIconBorderRadius(Dimension(-3.0));
+    sc.SetBackgroundBorderRadius(Dimension(-3.0));
+    pattern.UpdateIconProperty(frameNode, iconNode);
+    auto jsonNodeNegative = JsonUtil::Create(true);
+    pattern.ToJsonValue(jsonNodeNegative, filter);
+    auto jsonBorderRadiusNegative = jsonNodeNegative->GetObject("iconBorderRadius");
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("topLeft"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("topRight"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("bottomLeft"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("bottomRight"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+}
+
+/**
  * @tc.name: SecurityComponentLayoutAlgorithmGetChildWrapper001
  * @tc.desc: Test security component GetChildWrapper no exist child
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetChildWrapper001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetChildWrapper001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         0, V2::LOCATION_BUTTON_ETS_TAG);
@@ -1305,7 +1431,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetChildW
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateChildPosition001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateChildPosition001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         0, V2::LOCATION_BUTTON_ETS_TAG);
@@ -1334,7 +1460,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateChi
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1354,7 +1480,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWid
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth002, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1375,7 +1501,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWid
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth003, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1405,7 +1531,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWid
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth004, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1434,7 +1560,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWid
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWidth005, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1465,7 +1591,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkWid
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeWidth001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeWidth001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1500,7 +1626,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeWi
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1520,7 +1646,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHei
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight002, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1542,7 +1668,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHei
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight003, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1573,7 +1699,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHei
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHeight004, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1605,7 +1731,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmShrinkHei
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeHeight001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeHeight001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1640,7 +1766,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmEnlargeHe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdapterWidth001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdapterWidth001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1667,7 +1793,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdapterWi
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdaptHeight001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdaptHeight001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1694,7 +1820,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmAdaptHeig
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVerticalOffset001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVerticalOffset001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1725,7 +1851,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVer
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHorizontalOffset001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHorizontalOffset001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         0, V2::LOCATION_BUTTON_ETS_TAG);
@@ -1762,7 +1888,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHor
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDirection001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDirection001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         0, V2::LOCATION_BUTTON_ETS_TAG);
@@ -1788,12 +1914,126 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDi
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsIconOutOfBackground001
+ * @tc.desc: Test security component IsIconOutOfBackground
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsIconOutOfBackground001, TestSize.Level0)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(AceType::MakeRefPtr<SecurityComponentLayoutProperty>(), iconWrapper);
+    buttonAlgorithm->icon_.height_ = 4.0f;
+    buttonAlgorithm->icon_.width_ = 4.0f;
+    buttonAlgorithm->top_ = PaddingLayoutElement();
+    buttonAlgorithm->top_.Init(true, false, 3.0f, 0.0f);
+    buttonAlgorithm->left_ = PaddingLayoutElement();
+    buttonAlgorithm->left_.Init(true, false, 1.0f, 0.0f);
+
+    BorderRadiusProperty radius;
+    buttonAlgorithm->componentWidth_ = 3.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentWidth_ = 6.0f;
+    buttonAlgorithm->componentHeight_ = 5.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentHeight_ = 10.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsIconOutOfBackground002
+ * @tc.desc: Test security component IsIconOutOfBackground
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsIconOutOfBackground002, TestSize.Level0)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(AceType::MakeRefPtr<SecurityComponentLayoutProperty>(), iconWrapper);
+    buttonAlgorithm->icon_.height_ = 4.0f;
+    buttonAlgorithm->icon_.width_ = 4.0f;
+    buttonAlgorithm->top_ = PaddingLayoutElement();
+    buttonAlgorithm->top_.Init(true, false, 3.0f, 0.0f);
+    buttonAlgorithm->left_ = PaddingLayoutElement();
+    buttonAlgorithm->left_.Init(true, false, 1.0f, 0.0f);
+
+    BorderRadiusProperty radius;
+    buttonAlgorithm->componentWidth_ = 3.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentWidth_ = 6.0f;
+    buttonAlgorithm->componentHeight_ = 5.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentHeight_ = 10.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+}
+
+/**
  * @tc.name: LayoutAlgorithmUpdateCircleButtonConstraint001
  * @tc.desc: Test security component UpdateCircleButtonConstraint
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, LayoutAlgorithmUpdateCircleButtonConstraint001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, LayoutAlgorithmUpdateCircleButtonConstraint001, TestSize.Level0)
 {
     SecurityComponentLayoutAlgorithm buttonAlgorithm;
     buttonAlgorithm.UpdateCircleButtonConstraint();
@@ -1840,7 +2080,7 @@ HWTEST_F(SecurityComponentModelTestNg, LayoutAlgorithmUpdateCircleButtonConstrai
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmFillBlank001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmFillBlank001, TestSize.Level0)
 {
     SecurityComponentLayoutAlgorithm buttonAlgorithm;
     buttonAlgorithm.isNobg_ = true;
@@ -1896,7 +2136,7 @@ void SecurityComponentModelTestNg::InitLayoutAlgorithm(RefPtr<SecurityComponentL
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1938,7 +2178,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -1980,7 +2220,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -2022,7 +2262,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -2071,7 +2311,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001, TestSize.Level0)
 {
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
@@ -2112,5 +2352,158 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTex
     buttonAlgorithm->UpdateTextRectPoint();
     ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 21.0f));
     ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 11.0f));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetBorderRect001
+ * @tc.desc: Test security component GetBorderRect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRect001, TestSize.Level0)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::vector<RectF> borderRects;
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    renderContext->SetBorderWidth(borderWidth);
+    renderContext->SetBorderColor(borderColor);
+    ASSERT_FALSE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderWidth.SetBorderWidth(0.0_vp);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderWidth.SetBorderWidth(2.0_vp);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderColor.SetColor(Color::RED);
+    renderContext->UpdateBorderColor(borderColor);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckForegroundEffect001
+ * @tc.desc: Test security component CheckForegroundEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckForegroundEffect001, TestSize.Level0)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::string message = "";
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    
+    ASSERT_FALSE(SecurityComponentHandler::CheckForegroundEffect(node, message, renderContext, buttonInfo));
+
+    renderContext->UpdateForegroundEffect(1.0f);
+    ASSERT_FALSE(SecurityComponentHandler::CheckForegroundEffect(node, message, renderContext, buttonInfo));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckOverlayText001
+ * @tc.desc: Test security component CheckOverlayText
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckOverlayText001, TestSize.Level0)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::string message = "";
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    
+    ASSERT_FALSE(SecurityComponentHandler::CheckOverlayText(node, message, renderContext, buttonInfo));
+
+    OverlayOptions option;
+    option.content = "test";
+    renderContext->UpdateOverlayText(option);
+    ASSERT_FALSE(SecurityComponentHandler::CheckOverlayText(node, message, renderContext, buttonInfo));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetWindowSceneWindowId001
+ * @tc.desc: Test security component GetWindowSceneWindowId
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetWindowSceneWindowId001, TestSize.Level0)
+{
+    RefPtr<FrameNode> parent = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parent, nullptr);
+    RefPtr<FrameNode> child = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(child, nullptr);
+    parent->AddChild(child);
+    uint32_t windId = 0;
+    
+    ASSERT_FALSE(SecurityComponentHandler::GetWindowSceneWindowId(child, windId));
+
+    parent->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    ASSERT_FALSE(SecurityComponentHandler::GetWindowSceneWindowId(child, windId));
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutElementUpdateUserSetSize001
+ * @tc.desc: Test security component UpdateUserSetSize
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementUpdateUserSetSize001, TestSize.Level0)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+    auto secCompProperty = AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    secCompProperty->UpdateIconStyle(1);
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(secCompProperty, iconWrapper);
+
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, false);
+
+    secCompProperty->UpdateIconSize(Dimension(1.0f));
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize1;
+    calcSize1.SetHeight(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize1);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize2;
+    calcSize2.SetWidth(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize2);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize3;
+    calcSize3.SetWidth(CalcLength(1.0f));
+    calcSize3.SetHeight(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize3);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
 }
 } // namespace OHOS::Ace::NG

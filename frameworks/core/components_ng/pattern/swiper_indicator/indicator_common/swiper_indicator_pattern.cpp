@@ -25,6 +25,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,11 +49,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(indicatorTheme);
-    host->GetRenderContext()->SetClipToBounds(indicatorTheme->GetClipEdge());
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
@@ -538,14 +535,9 @@ void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp();
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         HandleDragEnd(0);
-        isPressed_ = false;
-    } else if (touchType == TouchType::CANCEL) {
         HandleTouchUp();
-        HandleDragEnd(0);
-        isPressed_ = false;
     }
     if (isPressed_) {
         HandleLongDragUpdate(info.GetTouches().front());
@@ -579,8 +571,7 @@ std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEn
     if (IsHorizontalAndRightToLeft()) {
         end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-            swiperPattern->IsSwipeByGroup()) {
+        if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
             start += (1 - swiperPattern->GetDisplayCount());
         }
     }
@@ -746,6 +737,9 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
 {
+    if (!isPressed_) {
+        return;
+    }
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -968,7 +962,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-    if (swiperPattern->RealTotalCount() == displayCount) {
+    if (swiperPattern->RealTotalCount() <= displayCount) {
         return;
     }
     if (CheckIsTouchBottom(info)) {
@@ -976,7 +970,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     }
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
+    if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
         float endAngle = GetEndAngle(center, dragPoint, startAngle);
@@ -1002,8 +996,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-                                swiperPattern->IsSwipeByGroup()
+        int32_t step = (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
 
@@ -1084,19 +1077,19 @@ OffsetF SwiperIndicatorPattern::CalculateAngleOffset(float centerX, float center
     double radians = 0.0;
     OffsetF angleOffset;
     if (GreatOrEqual(angle, 0.0) && LessNotEqual(angle, QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX + cos(radians) * radius);
         angleOffset.SetY(centerY + sin(radians) * radius);
     } else if (GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, HALF_CIRCLE_ANGLE)) {
-        radians = std::abs(HALF_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(HALF_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX - cos(radians) * radius);
         angleOffset.SetY(centerY + sin(radians) * radius);
     } else if (GreatOrEqual(angle, HALF_CIRCLE_ANGLE) && LessNotEqual(angle, THREE_QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle - HALF_CIRCLE_ANGLE) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(angle - HALF_CIRCLE_ANGLE) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX - cos(radians) * radius);
         angleOffset.SetY(centerY - sin(radians) * radius);
     } else if (GreatOrEqual(angle, THREE_QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, FULL_CIRCLE_ANGLE)) {
-        radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(FULL_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX + cos(radians) * radius);
         angleOffset.SetY(centerY - sin(radians) * radius);
     }
@@ -1107,7 +1100,7 @@ OffsetF SwiperIndicatorPattern::CalculateRectLayout(
     double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height)
 {
     OffsetF hotRegionOffset = angleOffset;
-    Dimension oneAngleLength = Dimension(sin(M_PI / HALF_CIRCLE_ANGLE) * radius, DimensionUnit::PX);
+    Dimension oneAngleLength = Dimension(sin(ACE_PI / HALF_CIRCLE_ANGLE) * radius, DimensionUnit::PX);
     // The number 0.5 represents equal division
     if ((GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5) &&
             LessNotEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5 + QUARTER_CIRCLE_ANGLE)) ||
@@ -1381,8 +1374,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-        swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
 

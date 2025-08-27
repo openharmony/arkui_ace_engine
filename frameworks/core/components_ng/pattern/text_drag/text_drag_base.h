@@ -36,7 +36,7 @@ public:
 
     virtual bool IsTextArea() const = 0;
 
-    virtual const RectF& GetTextRect() = 0;
+    virtual const RectF& GetTextRect() const = 0;
     virtual RectF GetTextContentRect(bool isActualText = false) const = 0;
     virtual float GetLineHeight() const = 0;
 
@@ -79,6 +79,14 @@ public:
     virtual OffsetF GetContentOffset()
     {
         return OffsetF(0, 0);
+    }
+
+    virtual void OnDragNodeDetachFromMainTree() {};
+    virtual void ResetAISelected(AIResetSelectionReason reason) {}
+    virtual void ShowAIEntityMenuForCancel() {}
+    virtual bool IsPreviewMenuShow()
+    {
+        return false;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);

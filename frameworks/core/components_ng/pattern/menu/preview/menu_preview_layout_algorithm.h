@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class MenuPreviewLayoutAlgorithm : public LinearLayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuPreviewLayoutAlgorithm, LayoutAlgorithm)
+    DECLARE_ACE_TYPE(MenuPreviewLayoutAlgorithm, LayoutAlgorithm);
 public:
     MenuPreviewLayoutAlgorithm() = default;
     ~MenuPreviewLayoutAlgorithm() override = default;
@@ -34,6 +34,8 @@ public:
 
 private:
     void LayoutHoverScaleImage(const RefPtr<MenuWrapperPattern>& wrapperPattern);
+    void CheckLayoutConstraint(
+        LayoutWrapper* layoutWrapper, const MenuParam& menuParam, const RefPtr<MenuPattern>& menuPattern);
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -642,6 +642,10 @@ export struct GridBootcamp {
   @State scrollBarColor: Color | number | string = '#182431';
   @State enableScrollBarWidth: boolean = false;
   @State scrollBarWidth: number | string = 4;
+  @State enableScrollBarMarginStart: boolean = false;
+  @State scrollBarMarginStart: number = 0;
+  @State enableScrollBarMarginEnd: boolean = false;
+  @State scrollBarMarginEnd: number = 0;
   @State enableCachedCount: boolean = false;
   @State cachedCount: number = 1;
   @State enableEditMode: boolean = false;
@@ -719,6 +723,10 @@ export struct GridBootcamp {
 
   getElements() {
     return Array.from({ length: this.totalCount }, (_: ESObject, index: number) => `${index}`);
+  }
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
 
   build() {
@@ -1312,6 +1320,10 @@ export struct GridBootcamp {
           .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
           .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
           .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .scrollBarMargin({
+            start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+            end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+          })
           .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
           .editMode(useEnabled(this.enableEditMode, this.editMode))
           .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
@@ -2064,6 +2076,10 @@ export struct GridBootcamp {
           .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
           .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
           .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .scrollBarMargin({
+            start: useEnabled(this.enableScrollBarMarginStart, LengthMetrics.vp(this.scrollBarMarginStart)),
+            end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
+          })
           .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
           .editMode(useEnabled(this.enableEditMode, this.editMode))
           .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
@@ -2236,6 +2252,7 @@ export struct GridBootcamp {
   compBackground() {
     Text('123')
   }
+
   @Builder
   Parameters() {
     Scroll(this.scroller) {
@@ -2308,6 +2325,22 @@ export struct GridBootcamp {
           value: $scrollBarWidth,
           min: 1,
           max: 8
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.start',
+          isEnabled: $enableScrollBarMarginStart,
+          value: $scrollBarMarginStart,
+          min: 0,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'scrollBarMargin.end',
+          isEnabled: $enableScrollBarMarginEnd,
+          value: $scrollBarMarginEnd,
+          min: 0,
+          max: 32
         })
 
         SliderBlock({

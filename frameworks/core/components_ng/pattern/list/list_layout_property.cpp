@@ -78,6 +78,7 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         json->PutExtAttr("sticky", "StickyStyle.None", filter);
     }
     ScrollSnapPropToJsonValue(json, filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(true), filter);
 }
 
 void ListLayoutProperty::ScrollSnapPropToJsonValue(

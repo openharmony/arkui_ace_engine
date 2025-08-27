@@ -324,4 +324,230 @@ HWTEST_F(TextFieldPatternTestSeven, SetPreviewText001, TestSize.Level0)
     auto ret = pattern->SetPreviewText(previewValue, range);
     ASSERT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: ProcessThemePadding001
+ * @tc.desc: test testInput text ProcessThemePadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProcessThemePadding001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto themePadding = pattern->IsUnderlineMode()
+        ? pattern->GetUnderlinePadding(textFieldTheme, true, false) : textFieldTheme->GetPadding();
+    ASSERT_EQ(themePadding.Left(), theme->GetPadding().Left());
+}
+
+/**
+ * @tc.name: ProvidePlaceHolderText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProvidePlaceHolderText, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = pattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < placeholder.size()) {
+        count++;
+        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+
+/**
+ * @tc.name: ProvideabilityNameText001
+ * @tc.desc: test provide placeholder information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProvideabilityNameText, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = pattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto abilityName = UtfUtils::Str16ToStr8(textconfig.inputAttribute.abilityName).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < abilityName.size()) {
+        count++;
+        i += (abilityName[i] >= 0xD800 && abilityName[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+
+/**
+ * @tc.name: FireOnWillAttachIME001
+ * @tc.desc: Test TextFieldPattern FireOnWillAttachIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, FireOnWillAttachIME001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+
+    eventHub_->SetOnWillAttachIME(std::move(onWillAttachIME));
+    pattern_->RequestKeyboard(false, true, true);
+
+#if defined(ENABLE_STANDARD_INPUT)
+    EXPECT_EQ(fireOnWillAttachIME, true);
+#else
+    EXPECT_EQ(fireOnWillAttachIME, false);
+#endif
+}
+
+/**
+ * @tc.name: FireOnWillAttachIME002
+ * @tc.desc: Test TextFieldPattern FireOnWillAttachIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, FireOnWillAttachIME002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+
+    eventHub_->SetOnWillAttachIME(std::move(onWillAttachIME));
+    pattern_->FireOnWillAttachIME();
+    EXPECT_EQ(fireOnWillAttachIME, true);
+}
+
+/**
+ * @tc.name: GetIMEClientInfo001
+ * @tc.desc: Test TextFieldPattern GetIMEClientInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, GetIMEClientInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    auto host = pattern_->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    IMEClient iMEClientInfo = pattern_->GetIMEClientInfo();
+    EXPECT_EQ(iMEClientInfo.nodeId, host->GetId());
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText001
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "error");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText002
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", false);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText003
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+        model.SetInputStyle(InputStyle::INLINE);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText004
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+    ASSERT_NE(eventHub_, nullptr);
+    eventHub_->SetEnabled(false);
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
 }

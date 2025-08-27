@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+
+#include <cmath>
+
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
+
+const double ACE_PI = M_PI;
+const double ACE_E = M_E;
 
 // base constants
 const char CLASS_NAME[] = "className";

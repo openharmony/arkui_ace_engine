@@ -20,6 +20,7 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_data.h"
+#include "core/common/resource/resource_object.h"
 #include "frameworks/base/i18n/time_format.h"
 
 namespace OHOS::Ace::NG {
@@ -60,12 +61,29 @@ struct PickerTextStyle {
     std::optional<Dimension> minFontSize;
     std::optional<Dimension> maxFontSize;
     std::optional<Ace::TextOverflow> textOverflow;
+
+    bool textColorSetByUser = false;
+
+    RefPtr<ResourceObject> textColorResObj;
+    RefPtr<ResourceObject> fontSizeResObj;
+    RefPtr<ResourceObject> fontFamilyResObj;
+    RefPtr<ResourceObject> minFontSizeResObj;
+    RefPtr<ResourceObject> maxFontSizeResObj;
 };
+
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
     PickerTextStyle normalTextStyle_;
     PickerTextStyle selectedTextStyle_;
     PickerTextStyle defaultTextStyle_;
+};
+
+struct PickerBackgroundStyle {
+    std::optional<Color> color;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
+    bool textColorSetByUser = false;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> borderRadiusResObj;
 };
 
 // textpicker column kind
@@ -76,11 +94,14 @@ const uint32_t MIXTURE = 0x03;
 struct RangeContent {
     std::string icon_;
     std::string text_;
+    RefPtr<ResourceObject> iconResObj_;
+    RefPtr<ResourceObject> textResObj_;
 };
 
 struct TextCascadePickerOptions {
     std::vector<std::string> rangeResult;
     std::vector<TextCascadePickerOptions> children;
+    RefPtr<ResourceObject> rangeResultResObj;
 };
 
 struct TextCascadePickerOptionsAttr {
@@ -97,6 +118,7 @@ struct CheckboxSettingData {
 struct DatePickerSettingData {
     bool isLunar;
     bool lunarswitch;
+    bool canLoop = true;
     CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;
@@ -117,12 +139,14 @@ struct TextPickerSettingData {
     bool canLoop = true;
     int32_t crownSensitivity;
     PickerTextProperties properties;
+    PickerBackgroundStyle pickerBgStyle;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;
     NG::TextCascadePickerOptionsAttr attr;
     bool isDisableTextStyleAnimation = false;
     bool isEnableHapticFeedback = true;
+    std::vector<Dimension> columnWidths;
 };
 
 struct TimePickerSettingData {

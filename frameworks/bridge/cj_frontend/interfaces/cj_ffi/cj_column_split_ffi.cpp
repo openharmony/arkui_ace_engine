@@ -39,7 +39,7 @@ void FfiOHOSAceFrameworkColumnSplitDivider(DividerParam params)
     Dimension startMarginDime(params.startMargin, static_cast<DimensionUnit>(params.startMarginUnit));
     Dimension endMarginDime(params.endMargin, static_cast<DimensionUnit>(params.endMarginUnit));
 
-    NG::ItemDivider divider;
+    NG::ColumnSplitDivider divider;
     divider.startMargin = startMarginDime;
     divider.endMargin = endMarginDime;
 

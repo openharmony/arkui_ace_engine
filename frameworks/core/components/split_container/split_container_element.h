@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 class SplitContainerElement : public ComponentGroupElement {
-    DECLARE_ACE_TYPE(SplitContainerElement, ComponentGroupElement)
+    DECLARE_ACE_TYPE(SplitContainerElement, ComponentGroupElement);
 
 public:
     SplitContainerElement() = default;

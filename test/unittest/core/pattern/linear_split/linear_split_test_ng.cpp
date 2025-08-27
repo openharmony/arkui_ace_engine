@@ -23,8 +23,10 @@
 #define private public
 #define protected public
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
@@ -56,10 +58,35 @@ class LinearSplitTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    RefPtr<FrameNode> CreateLinearSplit(SplitType splitType, const std::function<void(LinearSplitModelNG)>& callback)
+    {
+        LinearSplitModelNG model;
+        model.Create(splitType);
+        if (callback) {
+            callback(model);
+        }
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
+
+    RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback)
+    {
+        ColumnModelNG model;
+        model.Create(std::nullopt, nullptr, "");
+        if (callback) {
+            callback(model);
+        }
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
 };
 void LinearSplitTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void LinearSplitTestNg::TearDownTestSuite()
@@ -67,12 +94,17 @@ void LinearSplitTestNg::TearDownTestSuite()
     MockPipelineContext::TearDown();
 }
 
+void LinearSplitTestNg::SetUp()
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
 /**
  * @tc.name: LinearSplitCreatorTest001
  * @tc.desc: Test all the property of split
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -102,7 +134,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -162,7 +194,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnModifyDone function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -195,7 +227,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -227,7 +259,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is false.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_10, PLATFORM_VERSION_9 };
     for (int32_t turn = 0; turn < platformVersions.size(); turn++) {
@@ -271,7 +303,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -308,7 +340,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
  * @tc.desc: Test LinearSplit Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level0)
 {
     std::vector<SplitType> splitType = { SplitType::COLUMN_SPLIT, SplitType::ROW_SPLIT };
     for (int turn = 0; turn < splitType.size(); turn++) {
@@ -361,7 +393,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -555,7 +587,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -738,7 +770,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -780,7 +812,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -960,7 +992,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -1151,7 +1183,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
  * @tc.desc: Test FRC callback
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -1171,5 +1203,149 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
     linearSplitPattern->isDragedMoving_ = true;
     auto info = GestureEvent();
     linearSplitPattern->HandlePanEnd(info);
+}
+
+/**
+ * @tc.name: MeasureSelfByLayoutPolicyTest01
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level0)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    SizeF childTotalSize(100, 200);
+    SizeF childMaxSize(150, 250);
+    LayoutConstraintF layoutConstraint = {.parentIdealSize = {300, 350}};
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    auto selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(300, 350)) << selfSize.ToString();
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+    
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(100, 250));
+
+    algorithm.splitType_ = SplitType::COLUMN_SPLIT;
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(150, 200));
+
+    layoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(50), CalcLength(50)));
+    selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), childTotalSize, childMaxSize);
+    EXPECT_EQ(selfSize, OptionalSizeF(50, 50));
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeArea001
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level0)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    RefPtr<FrameNode> column;
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this, &column](LinearSplitModelNG model) {
+        column = CreateColumn([this](ColumnModelNG model) {
+        });
+    });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(350.0f, DimensionUnit::PX)));
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdateSafeAreaPadding(padding);
+    auto childLayoutProperty = column->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->CreateLayoutTask();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 350.0f))  << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 0.0f))  << column->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeArea002
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level0)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    RefPtr<FrameNode> column;
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT,
+        [this, &column](LinearSplitModelNG model) { column = CreateColumn([this](ColumnModelNG model) {}); });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(300.0f, DimensionUnit::PX)));
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdateSafeAreaPadding(padding);
+    auto childLayoutProperty = column->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->CreateLayoutTask();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
+        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 100.0f))
+        << column->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: RegisterResObj
+ * @tc.desc: Test RegisterResObj of linear_split
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level0)
+{
+    g_isConfigChangePerform = true;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::ColumnSplitDivider divider;
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.startMargin");
+    divider.ReloadResources();
+    EXPECT_EQ(divider.resMap_.size(), 1);
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.endMargin");
+    divider.ReloadResources();
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(divider.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

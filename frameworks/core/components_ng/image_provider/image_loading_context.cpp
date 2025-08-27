@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -30,10 +30,10 @@
 
 namespace OHOS::Ace::NG {
 
-ImageLoadingContext::ImageLoadingContext(
-    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
+ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
+    bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
-      imageDfxConfig_(imageDfxConfig)
+      isSceneBoardWindow_(isSceneBoardWindow), imageDfxConfig_(imageDfxConfig)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);
@@ -105,7 +105,7 @@ void ImageLoadingContext::OnLoadSuccess()
 void ImageLoadingContext::OnLoadFail()
 {
     if (notifiers_.onLoadFail_) {
-        notifiers_.onLoadFail_(src_, errorMsg_);
+        notifiers_.onLoadFail_(src_, errorMsg_, errorInfo_);
     }
 }
 
@@ -133,13 +133,13 @@ void ImageLoadingContext::OnDataLoading()
 {
     auto obj = ImageProvider::QueryImageObjectFromCache(src_);
     if (obj) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit cache, not need create object", src_.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s obj hit cache", src_.GetSrc().c_str());
         DataReadyCallback(obj);
         return;
     }
     src_.SetContainerId(containerId_);
     src_.SetImageDfxConfig(GetImageDfxConfig());
-    ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
+    ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_, isSceneBoardWindow_);
 }
 
 bool ImageLoadingContext::Downloadable()
@@ -187,7 +187,9 @@ void ImageLoadingContext::OnMakeCanvasImage()
     }
 
     // step4: [MakeCanvasImage] according to [targetSize]
+    src_.SetImageHdr(GetIsHdrDecoderNeed());
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
+    imageObj_->SetImageSourceInfoHdr(GetIsHdrDecoderNeed());
     imageObj_->SetImageDfxConfig(imageDfxConfig_);
     imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
@@ -229,11 +231,12 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
-void ImageLoadingContext::FailCallback(const std::string& errorMsg)
+void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo)
 {
+    errorInfo_ = errorInfo;
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadFail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "fail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
         errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
@@ -345,7 +348,8 @@ SizeF ImageLoadingContext::GetImageSize() const
     CHECK_NULL_RETURN(imageObj_, SizeF(-1.0, -1.0));
     auto imageSize = imageObj_->GetImageSize();
     auto orientation = imageObj_->GetOrientation();
-    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT ||
+        orientation == ImageRotateOrientation::LEFT_MIRRORED || orientation == ImageRotateOrientation::RIGHT_MIRRORED) {
         return { imageSize.Height(), imageSize.Width() };
     }
     return imageSize;
@@ -397,8 +401,7 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
     CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Invalid SourceSize, using image size.");
         return std::nullopt;
     }
     return { *sourceSizePtr_ };
@@ -448,4 +451,15 @@ int32_t ImageLoadingContext::GetFrameCount() const
     return imageObj_ ? imageObj_->GetFrameCount() : 0;
 }
 
+std::string ImageLoadingContext::GetImageSizeInfo() const
+{
+    if (!imageObj_) {
+        return "[imageObj=null]";
+    }
+
+    std::ostringstream oss;
+    oss << "[fileSize=" << imageObj_->GetImageFileSize()
+        << ", dataSize=" << imageObj_->GetImageDataSize() << "]";
+    return oss.str();
+}
 } // namespace OHOS::Ace::NG

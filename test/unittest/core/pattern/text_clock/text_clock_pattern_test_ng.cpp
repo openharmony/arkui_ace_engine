@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -835,5 +836,284 @@ HWTEST_F(TextClockPatternTestNG, TextClockCheckDateTimeElement001, TestSize.Leve
     auto res6 = pattern->CheckDateTimeElement(curDateTime, 's', 5, true);
     std::string checkRes6 = "07";
     EXPECT_EQ(res6, checkRes6);
+}
+
+/**
+ * @tc.name: TextClockUpdateFontSize001
+ * @tc.desc: Test UpdateTextClockFontSize of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateTextClockFontSize function.
+     * @tc.expected: step3. check fontSize property updated.
+     */
+    const double fontSizeValue = 20.0;
+    CalcDimension fontSize(fontSizeValue, DimensionUnit::VP);
+    pattern->UpdateTextClockFontSize(fontSize);
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
+}
+
+/**
+ * @tc.name: TextClockUpdateFontFamily002
+ * @tc.desc: Test UpdateTextClockFontFamily of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateTextClockFontFamily function.
+     * @tc.expected: step3. check fontFamily property updated.
+     */
+    std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
+    pattern->UpdateTextClockFontFamily(fontFamilies);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), fontFamilies);
+
+    /**
+     * @tc.steps: step4. Execute font family update operation
+     * @tc.expected: Font specifications should be correctly applied
+     */
+    std::vector<std::string> typefaceOptions = {"Roboto", "Helvetica Neue"};
+    pattern->UpdateTextClockFontFamily(typefaceOptions);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), typefaceOptions);
+}
+
+/**
+ * @tc.name: TextClockOnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextClockTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    pattern->OnColorConfigurationUpdate();
+    pattern->UpdateTextClockColor(Color::RED, true);
+
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->ResetTextColorSetByUser();
+    pattern->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdateTextColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdateTextColorSetByUser(false);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    auto theme = pipeline->GetTheme<TextClockTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetTextStyleClock().GetTextColor();
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+
+    pattern->UpdateTextClockColor(Color::RED, true);
+    EXPECT_EQ(layoutProperty->GetTextColor(), Color::RED);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockSetTextShadow001
+ * @tc.desc: Test model ng  SetTextShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockSetTextShadow001, TestSize.Level1)
+{
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    textClockModel.SetFontColorByUser(frameNode, false);
+
+    g_isConfigChangePerform = false;
+    Shadow shadow;
+    shadow.SetBlurRadius(10);
+    shadow.SetOffsetX(10);
+    shadow.SetOffsetY(10);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    setShadows.emplace_back(shadow);
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+    g_isConfigChangePerform = true;
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
+}
+
+/**
+ * @tc.name: TextClockCreateWithResourceObj001
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    ASSERT_NE(resObj, nullptr);
+    textClockModel.CreateWithTextColorResourceObj(resObj);
+    textClockModel.CreateWithFontSizeResourceObj(resObj);
+    textClockModel.CreateWithFontFamilyResourceObj(resObj);
+    textClockModel.CreateWithFontWeightResourceObj(resObj);
+    textClockModel.CreateWithFormatResourceObj(resObj);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto fontSize = theme->GetTextStyle().GetFontSize();
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockCreateWithResourceObj002
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj002, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10003, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId =
+        AceType::MakeRefPtr<ResourceObject>(-1, 100001, resObjParamsList, "com.example.test", "entry", 100000);
+    textClockModel.CreateWithTextColorResourceObj(resObjId);
+    textClockModel.CreateWithFontSizeResourceObj(resObjWithDimensionId);
+    textClockModel.CreateWithFontFamilyResourceObj(resObjWithId);
+    textClockModel.CreateWithFontWeightResourceObj(resObjWithId);
+    textClockModel.CreateWithFormatResourceObj(resObjWithId);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    textClockModel.CreateWithFontSizeResourceObj(resObjWithId);
+    frameNode->SetRerenderable(false);
+    pattern->OnColorModeChange(colorMode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto fontSize = theme->GetTextStyle().GetFontSize();
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockMultiThread001
+ * @tc.desc: Test MultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockMultiThread001, TestSize.Level1)
+{
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    textClockModel.SetFontColorByUser(frameNode, false);
+
+    g_isConfigChangePerform = false;
+    Shadow shadow;
+    shadow.SetBlurRadius(20);
+    shadow.SetOffsetX(100);
+    shadow.SetOffsetY(100);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    setShadows.emplace_back(shadow);
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+    g_isConfigChangePerform = true;
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
 }
 } // namespace OHOS::Ace::NG

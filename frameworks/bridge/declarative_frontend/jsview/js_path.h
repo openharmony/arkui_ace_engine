@@ -26,7 +26,7 @@ class JSPath : public JSShapeAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void SetCommands(const std::string& commands);
+    static void SetCommands(const JSCallbackInfo& info);
 
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSPath* obj);

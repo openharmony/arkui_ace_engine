@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/particle_property_animation.h"
+#include "core/common/resource/resource_object.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_PARTICLE_COUNT = 5;
@@ -33,7 +34,7 @@ enum ACE_EXPORT UpdaterType { NONE_UPDATER = 0, RANDOM, CURVE };
 
 enum ACE_EXPORT ParticleType { POINT = 0, IMAGE };
 
-enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE };
+enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE, ANNULUS };
 
 enum ACE_EXPORT DistributionType { UNIFORM = 0, GAUSSIAN };
 
@@ -82,6 +83,16 @@ public:
         return size_;
     }
 
+    void SetSizeX(Dimension& sizeX)
+    {
+        size_.first = sizeX;
+    }
+
+    void SetSizeY(Dimension& sizeY)
+    {
+        size_.second = sizeY;
+    }
+
     void SetSize(std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
@@ -114,7 +125,38 @@ public:
         return str;
     }
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ImageParticleParameter&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        EmitterResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : EmitterResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = EmitterResMap_.find(key);
+        if (iter != EmitterResMap_.end()) {
+            EmitterResMap_.erase(iter);
+        }
+    }
+
 private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ImageParticleParameter&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> EmitterResMap_;
     std::string imageSource_;
     std::pair<Dimension, Dimension> size_;
     std::optional<ImageFit> imageFit_;
@@ -232,6 +274,142 @@ private:
     std::optional<int64_t> lifeTimeRange_;
 };
 
+struct ParticleAnnulusRegion {
+    ParticleAnnulusRegion(std::pair<CalcDimension, CalcDimension> centerValue, CalcDimension innerRadiusValue,
+        CalcDimension outerRadiusValue, float startAngleValue, float endAngleValue)
+        : center_(centerValue), innerRadius_(innerRadiusValue),
+          outerRadius_(outerRadiusValue), startAngle_(startAngleValue), endAngle_(endAngleValue) {}
+
+    bool operator==(const ParticleAnnulusRegion& others) const
+    {
+        return (center_ == others.center_) && (innerRadius_ == others.innerRadius_) &&
+        (outerRadius_ == others.outerRadius_) && (startAngle_ == others.startAngle_) &&
+        (endAngle_ == others.endAngle_);
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("center: [")
+            .append(center_.first.ToString())
+            .append(",")
+            .append(center_.second.ToString())
+            .append("]");
+        str.append("innerRadius: [")
+            .append(std::to_string(innerRadius_.ConvertToPx()))
+            .append("]");
+        str.append("outerRadius: [")
+            .append(std::to_string(outerRadius_.ConvertToPx()))
+            .append("]");
+        str.append("startAngle: [")
+            .append(std::to_string(startAngle_))
+            .append("]");
+        str.append("endAngle: [")
+            .append(std::to_string(endAngle_))
+            .append("]");
+        return str;
+    }
+
+    std::pair<CalcDimension, CalcDimension> GetCenter() const
+    {
+        return center_;
+    }
+
+    void SetCenter(const std::pair<CalcDimension, CalcDimension>& center)
+    {
+        center_ = center;
+    }
+
+    void SetCenterX(CalcDimension& centerX)
+    {
+        center_.first = centerX;
+    }
+
+    void SetCenterY(CalcDimension& centerY)
+    {
+        center_.second = centerY;
+    }
+
+    CalcDimension GetInnerRadius() const
+    {
+        return innerRadius_;
+    }
+
+    void SetInnerRadius(const CalcDimension& innerRadius)
+    {
+        innerRadius_ = innerRadius;
+    }
+
+    CalcDimension GetOuterRadius() const
+    {
+        return outerRadius_;
+    }
+
+    void SetOuterRadius(const CalcDimension& outerRadius)
+    {
+        outerRadius_ = outerRadius;
+    }
+
+    float GetStartAngle() const
+    {
+        return startAngle_;
+    }
+
+    void SetStartAngle(float startAngle)
+    {
+        startAngle_ = startAngle;
+    }
+
+    float GetEndAngle() const
+    {
+        return endAngle_;
+    }
+
+    void SetEndAngle(float endAngle)
+    {
+        endAngle_ = endAngle;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ParticleAnnulusRegion&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        AnnulusResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : AnnulusResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = AnnulusResMap_.find(key);
+        if (iter != AnnulusResMap_.end()) {
+            AnnulusResMap_.erase(iter);
+        }
+    }
+
+private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ParticleAnnulusRegion&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> AnnulusResMap_;
+
+    std::pair<CalcDimension, CalcDimension> center_;
+    CalcDimension innerRadius_;
+    CalcDimension outerRadius_;
+    float startAngle_;
+    float endAngle_;
+};
+
 struct EmitterOption {
 public:
     const Particle& GetParticle() const
@@ -257,6 +435,16 @@ public:
         position_ = point;
     }
 
+    void SetPositionX(Dimension& pointX)
+    {
+        position_->first = pointX;
+    }
+
+    void SetPositionY(Dimension& pointY)
+    {
+        position_->second = pointY;
+    }
+
     const std::optional<std::pair<Dimension, Dimension>>& GetPosition() const
     {
         return position_;
@@ -265,6 +453,16 @@ public:
     void SetSize(std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
+    }
+
+    void SetSizeX(Dimension& sizeX)
+    {
+        size_->first = sizeX;
+    }
+
+    void SetSizeY(Dimension& sizeY)
+    {
+        size_->second = sizeY;
     }
 
     const std::optional<std::pair<Dimension, Dimension>>& GetSize() const
@@ -282,10 +480,21 @@ public:
         return shape_;
     }
 
+    void SetAnnulusRegion(ParticleAnnulusRegion& annulusRegion)
+    {
+        annulusRegion_ = annulusRegion;
+    }
+
+    const std::optional<ParticleAnnulusRegion>& GetAnnulusRegion() const
+    {
+        return annulusRegion_;
+    }
+
     bool operator==(const EmitterOption& other) const
     {
         return particle_ == other.GetParticle() && emitterRate_ == other.GetEmitterRate() &&
-               position_ == other.GetPosition() && size_ == other.GetSize() && shape_ == other.GetShape();
+               position_ == other.GetPosition() && size_ == other.GetSize() &&
+               shape_ == other.GetShape() && annulusRegion_ == other.GetAnnulusRegion();
     }
 
     std::string ToString() const
@@ -316,15 +525,50 @@ public:
         str.append("shape: [")
             .append(shape_.has_value() ? std::to_string(static_cast<int32_t>(shape_.value())) : "NA")
             .append("]");
+        str.append("annulusRegion: [")
+            .append(annulusRegion_.has_value() ? annulusRegion_->ToString() : "NA")
+            .append("]");
         return str;
+    }
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, EmitterOption&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        EmitterResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : EmitterResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = EmitterResMap_.find(key);
+        if (iter != EmitterResMap_.end()) {
+            EmitterResMap_.erase(iter);
+        }
     }
 
 private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, EmitterOption&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> EmitterResMap_;
+
     Particle particle_;
     std::optional<int32_t> emitterRate_;
     std::optional<std::pair<Dimension, Dimension>> position_;
     std::optional<std::pair<Dimension, Dimension>> size_;
     std::optional<ParticleEmitterShape> shape_;
+    std::optional<ParticleAnnulusRegion> annulusRegion_;
 };
 
 struct ParticleFloatPropertyUpdaterConfig {
@@ -674,6 +918,17 @@ public:
     {
         range_ = range;
     }
+
+    void SetRangeFirst(Color& rangeFirst)
+    {
+        range_.first = rangeFirst;
+    }
+
+    void SetRangeSecond(Color& rangeSecond)
+    {
+        range_.second = rangeSecond;
+    }
+
     const std::optional<DistributionType>& GetDistribution() const
     {
         return distribution_;
@@ -708,8 +963,37 @@ public:
         str.append("config: [").append(updater_.has_value() ? updater_->ToString() : "NA").append("]");
         return str;
     }
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ParticleColorPropertyOption&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        particleColorResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : particleColorResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = particleColorResMap_.find(key);
+        if (iter != particleColorResMap_.end()) {
+            particleColorResMap_.erase(iter);
+        }
+    }
 
 private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ParticleColorPropertyOption&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> particleColorResMap_;
     std::pair<Color, Color> range_;
     std::optional<DistributionType> distribution_;
     std::optional<ParticleColorPropertyUpdater> updater_;

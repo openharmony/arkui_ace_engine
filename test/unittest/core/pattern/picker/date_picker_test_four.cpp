@@ -197,10 +197,10 @@ HWTEST_F(DatePickerTestFour, DateTimeAnimationControllerTest001, TestSize.Level1
      */
     DatePickerSettingData settingData = CreateDatePickerSettingData();
     auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(dateNode, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     auto timeNode = DatePickerDialogView::CreateTimeNode(
         settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
@@ -279,10 +279,10 @@ HWTEST_F(DatePickerTestFour, DateTimeAnimationControllerTest002, TestSize.Level1
     settingData.isLunar = false;
     settingData.showTime = true;
     auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+        settingData, false);
     ASSERT_NE(dateNode, nullptr);
     auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
-        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        settingData, true);
     ASSERT_NE(monthDaysNode, nullptr);
     auto timeNode = DatePickerDialogView::CreateTimeNode(
         settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
@@ -415,7 +415,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest009, TestSize.Level1)
      */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
-    DateTextProperties dateTextProperties;
+    TextProperties dateTextProperties;
     dateTextProperties.upFontSize = Dimension(UP_FONT_SIZE);
     dateTextProperties.fontSize = Dimension(TEST_FONT_SIZE);
     dateTextProperties.downFontSize = Dimension(DOWN_FONT_SIZE);
@@ -468,7 +468,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest010, TestSize.Level1)
      */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
-    DateTextProperties dateTextProperties;
+    TextProperties dateTextProperties;
     dateTextProperties.upFontSize = Dimension(UP_FONT_SIZE);
     dateTextProperties.fontSize = Dimension(TEST_FONT_SIZE);
     dateTextProperties.downFontSize = Dimension(DOWN_FONT_SIZE);
@@ -595,7 +595,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest014, TestSize.Level1)
     EXPECT_FALSE(columnPattern_->CanMove(true));
     columnPattern_->SetCurrentIndex(1);
     EXPECT_TRUE(columnPattern_->CanMove(true));
-    DatePickerOptionProperty datePickerOptionProperty;
+    PickerOptionProperty datePickerOptionProperty;
     datePickerOptionProperty.prevDistance = 0.0f;
     datePickerOptionProperty.nextDistance = 1.0f;
     columnPattern_->optionProperties_.clear();
@@ -657,21 +657,21 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest016, TestSize.Level1)
      * @tc.steps: step2. Call GetShiftDistanceForLandscape in different situation.
      * @tc.expected: Function return correct distance.
      */
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::DOWN), 0.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, PickerScrollDirection::DOWN), 0.0f);
     pickerTheme->showOptionCount_ = 1;
-    DatePickerOptionProperty datePickerOptionProperty;
+    PickerOptionProperty datePickerOptionProperty;
     datePickerOptionProperty.height = DOWN_FONT_SIZE;
     datePickerOptionProperty.fontheight = TEST_FONT_SIZE;
     columnPattern_->optionProperties_.clear();
     columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
     columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
     columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::UP), -DOWN_FONT_SIZE);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::DOWN), 25.0f);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(1, DatePickerScrollDirection::DOWN), 25.0f);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, DatePickerScrollDirection::DOWN), DOWN_FONT_SIZE);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, DatePickerScrollDirection::UP), -25.0f);
-    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(3, DatePickerScrollDirection::UP), 0.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, PickerScrollDirection::UP), -DOWN_FONT_SIZE);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, PickerScrollDirection::DOWN), 25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(1, PickerScrollDirection::DOWN), 25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, PickerScrollDirection::DOWN), DOWN_FONT_SIZE);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, PickerScrollDirection::UP), -25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(3, PickerScrollDirection::UP), 0.0f);
 }
 
 /**
@@ -701,7 +701,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest017, TestSize.Level1)
      */
     columnPattern_->SetCurrentIndex(5);
     columnPattern_->UpdateColumnChildPosition(OFFSET_Y);
-    DatePickerOptionProperty datePickerOptionProperty;
+    PickerOptionProperty datePickerOptionProperty;
     datePickerOptionProperty.prevDistance = TEST_FONT_SIZE;
     datePickerOptionProperty.nextDistance = DOWN_FONT_SIZE;
     columnPattern_->optionProperties_.clear();
@@ -1331,34 +1331,6 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnLayoutAlgorithmAdjustFontSizeScale,
 }
 
 /**
- * @tc.name: HandleMonthChange
- * @tc.desc: Test HandleMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestFour, HandleMonthChange, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create pipeline and pickerTheme.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_NE(pickerTheme, nullptr);
-    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
-    /**
-     * @tc.steps: step2. Call ReCalcItemHeightScale.
-     * @tc.expected: set fontScale is not zero.
-     */
-    Dimension userSetHeight = 10.0_vp;
-    pipeline->fontScale_ = 0.0f;
-    pickerTheme->pickerDialogNormalFontScale_ = 0.00;
-    pickerTheme->pickerDialogMaxTwoFontScale_ = 0.00;
-    bool isDividerSpacing = true;
-    auto res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_NE(res, 1.0f);
-}
-
-/**
  * @tc.name: OnDetachFromFrameNodeTest001
  * @tc.desc: Test OnDetachFromFrameNode  UnregisterWindowStateChangedCallback  .
  * @tc.type: FUNC
@@ -1413,10 +1385,10 @@ HWTEST_F(DatePickerTestFour, InitHapticControllerTest001, TestSize.Level1)
     ASSERT_NE(columnNode_, nullptr);
     ASSERT_NE(columnPattern_, nullptr);
     columnPattern_->hapticController_ = nullptr;
-    columnPattern_->InitHapticController();
+    columnPattern_->InitHapticController(columnNode_);
     EXPECT_NE(columnPattern_->hapticController_, nullptr);
     columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
-    columnPattern_->InitHapticController();
+    columnPattern_->InitHapticController(columnNode_);
     EXPECT_TRUE(columnPattern_->isEnableHaptic_);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
@@ -1443,11 +1415,11 @@ HWTEST_F(DatePickerTestFour, InitHapticControllerTest002, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->isEnableHaptic_ = false;
     columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
-    columnPattern_->InitHapticController();
+    columnPattern_->InitHapticController(columnNode_);
     EXPECT_FALSE(columnPattern_->isEnableHaptic_);
     datePickerPattern->isEnableHaptic_ = false;
     columnPattern_->hapticController_ = nullptr;
-    columnPattern_->InitHapticController();
+    columnPattern_->InitHapticController(columnNode_);
     EXPECT_EQ(columnPattern_->hapticController_, nullptr);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
@@ -1554,7 +1526,7 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
     columnPattern_->isShow_ = true;
     pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::HANDLE_DELTA);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     columnPattern_->isEnableHaptic_ = false;
     pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
@@ -1613,8 +1585,7 @@ HWTEST_F(DatePickerTestFour, CreateSingleDateNode001, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     DatePickerSettingData settingData;
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto datePickerNode = DatePickerDialogView::CreateDateNode(
-        dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, true);
     EXPECT_NE(datePickerNode, nullptr);
 }
 

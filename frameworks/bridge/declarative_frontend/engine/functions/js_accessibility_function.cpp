@@ -15,6 +15,9 @@
 
 #include "js_accessibility_function.h"
 
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_touch_function.h"
+
 namespace OHOS::Ace::Framework {
 
 AccessibilityActionInterceptResult JsAccessibilityActionInterceptFunction::Execute(AccessibilityInterfaceAction action)
@@ -26,6 +29,12 @@ AccessibilityActionInterceptResult JsAccessibilityActionInterceptFunction::Execu
         returnValue = static_cast<AccessibilityActionInterceptResult>(jsValue->ToNumber<int32_t>());
     }
     return returnValue;
+}
+
+void JsAccessibilityHoverTransparentFunction::Execute(TouchEventInfo& info)
+{
+    JSRef<JSVal> param = JsTouchFunction::CreateJSEventInfo(info);
+    JsFunction::ExecuteJS(1, &param);
 }
 
 } // namespace OHOS::Ace::Framework

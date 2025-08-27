@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -32,9 +29,6 @@ class SpanFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
-  constructor(value: string | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -49,9 +43,6 @@ class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
 }
 class SpanLineHeightModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -66,9 +57,6 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontStyleModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -82,9 +70,6 @@ class SpanFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 class SpanTextCaseModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -171,9 +156,6 @@ class SpanTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -186,8 +168,8 @@ class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SpanLetterSpacingModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanLetterSpacingModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity = Symbol('spanLetterSpacing');
@@ -213,9 +195,6 @@ class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
   }
 }
 class SpanFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity = Symbol('spanFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -229,13 +208,9 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-      isResourceEqual(this.stageValue.size, this.value.size)) ||
-      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size)) &&
-      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-        isResourceEqual(this.stageValue.family, this.value.family)) ||
-        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+    if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+        this.stageValue.size === this.value.size) &&
+      ((!isResource(this.stageValue.family) && !isResource(this.value.family) &&
           this.stageValue.family === this.value.family))) {
       return false;
     } else {
@@ -260,17 +235,15 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
     }
   }
 }
-class SpanFontWeightModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanFontWeightModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity = Symbol('spanfontweight');
@@ -340,6 +313,20 @@ class SpanAccessibilityLevelModifier extends ModifierWithKey<string> {
   }
 }
 
+class SpanOnHoverModifier extends ModifierWithKey<(isHover?: boolean, event?: HoverEvent) => void> {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('spanOnHover');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetOnHover(node);
+    } else {
+      getUINativeModule().span.setOnHover(node, this.value);
+    }
+  }
+}
+
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -347,6 +334,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _weakPtr: JsPointerClass;
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
+  _needDiff: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiersWithKeys = new Map();
@@ -355,8 +343,9 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._classType = classType;
     this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
+    this._needDiff = true;
   }
-  initialize(value: Object[]) {
+  initialize(value: Object[]): this {
     modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
     return this;
   }
@@ -524,7 +513,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SpanOnHoverModifier.identity, SpanOnHoverModifier, event);
+    return this;
   }
 
   hoverEffect(value: HoverEffect): this {
@@ -658,11 +648,15 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  rotate(value: RotateOptions): this {
+  rotate(value: RotateOptions | RotateAngleOptions): this {
     throw new Error('Method not implemented.');
   }
 
   transform(value: object): this {
+    throw new Error('Method not implemented.');
+  }
+
+  transform3D(value: object): this {
     throw new Error('Method not implemented.');
   }
 
@@ -768,6 +762,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this {
     throw new Error('Method not implemented.');
   }
 
@@ -976,7 +974,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): SpanAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
     return this;
   }
@@ -984,7 +982,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value);
     return this;
   }
-  letterSpacing(value: number | string): SpanAttribute {
+  letterSpacing(value: number | string | Resource): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }

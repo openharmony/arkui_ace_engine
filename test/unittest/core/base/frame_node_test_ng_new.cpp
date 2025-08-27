@@ -1794,10 +1794,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    std::string value;
+    std::string getValue;
     /**
      * @tc.steps: step2. set isCNode true
-     * @tc.expected: expect result updateFlag is false.
+     * @tc.expected: expect result is false.
      */
     frameNode->setIsCNode(true);
     std::function<bool()> func = []() -> bool { return true; };
@@ -1805,12 +1805,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty, TestSize.Level1)
         return "getFuncA";
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
-    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", value);
-    EXPECT_EQ(updateFlagValue, false);
+    bool result = frameNode->GetCapiCustomProperty("key", getValue);
+    EXPECT_EQ(result, false);
 
     /**
      * @tc.steps: step3. set isCNode false and func true.
-     * @tc.expected: expect result updateFlag is true.
+     * @tc.expected: expect result1 is false.
      */
     frameNode->setIsCNode(false);
     func = []() -> bool { return true; };
@@ -1819,14 +1819,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty, TestSize.Level1)
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
     frameNode->setIsCNode(true);
-    std::string flagValue;
-    bool updateFlagValue1 = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
-    EXPECT_EQ(updateFlagValue1, true);
-    EXPECT_EQ(flagValue, "1");
+    bool result1 = frameNode->GetCapiCustomProperty("key", getValue);
+    EXPECT_EQ(result1, false);
 
     /**
      * @tc.steps: step4. set isCNode false and func false.
-     * @tc.expected: expect result updateFlag is false.
+     * @tc.expected: expect result2 is false.
      */
     frameNode->setIsCNode(false);
     func = []() -> bool { return false; };
@@ -1835,22 +1833,21 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty, TestSize.Level1)
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
     frameNode->setIsCNode(true);
-    std::string flagValue1;
-    bool updateFlagValue2 = frameNode->GetCapiCustomProperty("updateFlag", flagValue1);
-    EXPECT_EQ(updateFlagValue2, true);
+    bool result2 = frameNode->GetCapiCustomProperty("key", getValue);
+    EXPECT_EQ(result2, false);
 
     /**
      * @tc.steps: step5. set getCustomProperty_ value getFuncA.
-     * @tc.expected: expect result value getFuncA.
+     * @tc.expected: expect result3 value getFuncA.
      */
     func = []() -> bool { return true; };
     getFuncA = [](const std::string& key) -> std::string {
         return "getFuncA";
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
-    std::string getValue;
-    bool result = frameNode->GetJSCustomProperty("key", getValue);
-    EXPECT_EQ(result, true);
+    frameNode->SetCustomPropertyMapFlagByKey("key");
+    bool result3 = frameNode->GetJSCustomProperty("key", getValue);
+    EXPECT_EQ(result3, true);
     EXPECT_EQ(getValue, "getFuncA");
 }
 
@@ -1893,8 +1890,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty001, TestSize.Level1)
     bool updateFlagValue1 = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
     auto jsonValueIsCNode = JsonUtil::Create(true);
     frameNode->ToJsonValue(jsonValueIsCNode, filter);
-    EXPECT_EQ(updateFlagValue1, true);
-    EXPECT_EQ(flagValue, "1");
+    EXPECT_EQ(updateFlagValue1, false);
     EXPECT_NE(jsonValueIsCNode->GetString("customProperty"), "getFuncBFromJS");
 
     /**
@@ -1905,7 +1901,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty001, TestSize.Level1)
     frameNode->setIsCNode(false);
     frameNode->AddCustomProperty("key", "value1");
     bool result = frameNode->GetCapiCustomProperty("key", flagValue);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
     result = frameNode->GetCustomPropertyByKey("key", flagValue);
     EXPECT_EQ(result, true);
     EXPECT_EQ(flagValue, "value1");
@@ -2795,55 +2791,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirty003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeGeometryNodeToJsonValue
- * @tc.desc: Test method GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGeometryNodeToJsonValue, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create value.
-     */
-    auto value = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps: step2. construct parameters.
-     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 2, AceType::MakeRefPtr<Pattern>());
-    InspectorFilter filter;
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
-     */
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    frameNode->layoutProperty_ = layoutProperty;
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
-     */
-    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_->calcLayoutConstraint_, nullptr);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch selfIdealSize has value.
-     */
-    std::optional<CalcLength> len = CalcLength("auto");
-    frameNode->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->renderContext_, nullptr);
-}
-
-/**
  * @tc.name: FrameNodeDumpSimplifyCommonInfo
  * @tc.desc: Test DumpSimplifyCommonInfo.
  * @tc.type: FUNC
@@ -2861,7 +2808,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
      * @tc.steps: step2. create json.
      * @tc.expected: expect is nullptr.
      */
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     EXPECT_NE(json, nullptr);
 
     /**
@@ -2904,69 +2851,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
     const auto& valueParentLayout = json->GetValue("ParentLayoutConstraint");
     bool hasKeyParentLayout = !(valueParentLayout->IsNull());
     EXPECT_FALSE(hasKeyParentLayout);
-}
-
-/**
- * @tc.name: FrameNodeDumpSimplifySafeAreaInfo
- * @tc.desc: Test DumpSimplifySafeAreaInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifySafeAreaInfo, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     * @tc.expected: expect is nullptr.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    EXPECT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. create json.
-     * @tc.expected: expect is nullptr.
-     */
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
-    EXPECT_NE(json, nullptr);
-
-    /**
-     * @tc.steps: step3. test DumpSimplifySafeAreaInfo.
-     * @tc.expected: expect is FALSE.
-     */
-    frameNode->DumpSimplifySafeAreaInfo(json);
-    const auto& valueExpandOpts = json->GetValue("SafeAreaExpandOpts");
-    bool hasvalueExpandOpts = !(valueExpandOpts->IsNull());
-    EXPECT_FALSE(hasvalueExpandOpts);
-
-    const auto& valueInsets = json->GetValue("SafeAreaInsets");
-    bool hasKeyInsets = !(valueInsets->IsNull());
-    EXPECT_FALSE(hasKeyInsets);
-
-    const auto& valueSelfAdjust = json->GetValue("SelfAdjust");
-    bool hasKeySelfAdjust = !(valueSelfAdjust->IsNull());
-    EXPECT_FALSE(hasKeySelfAdjust);
-
-    const auto& valueParentSelfAdjust = json->GetValue("ParentSelfAdjust");
-    bool hasKeyParentSelfAdjust = !(valueParentSelfAdjust->IsNull());
-    EXPECT_FALSE(hasKeyParentSelfAdjust);
-
-    const auto& valueIgnore = json->GetValue("IgnoreSafeArea");
-    bool hasKeyIgnore = !(valueIgnore->IsNull());
-    EXPECT_FALSE(hasKeyIgnore);
-
-    const auto& valueAvoidWindow = json->GetValue("IsNeedAvoidWindow");
-    bool hasKeyAvoidWindow = !(valueAvoidWindow->IsNull());
-    EXPECT_FALSE(hasKeyAvoidWindow);
-
-    const auto& valueIsFullScreen = json->GetValue("IsFullScreen");
-    bool hasKeyIsFullScreen = !(valueIsFullScreen->IsNull());
-    EXPECT_FALSE(hasKeyIsFullScreen);
-
-    const auto& valueIsKeyboard = json->GetValue("IsKeyboardAvoidMode");
-    bool hasKeyIsKeyboard = !(valueIsKeyboard->IsNull());
-    EXPECT_FALSE(hasKeyIsKeyboard);
-
-    const auto& valueIsUseCutout = json->GetValue("IsUseCutout");
-    bool hasKeyIsUseCutout = !(valueIsUseCutout->IsNull());
-    EXPECT_FALSE(hasKeyIsUseCutout);
 }
 
 /**
@@ -3085,10 +2969,191 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty002, TestSize.Level1)
      */
     const std::string key  = "testKey";
     std::string value = "testValue";
+    frameNode->SetCustomPropertyMapFlagByKey("testKey");
     auto hasKey = frameNode->GetJSCustomProperty(key, value);
 
     EXPECT_TRUE(hasKey);
     EXPECT_EQ(value, "test");
+}
+
+/**
+ * @tc.name: FrameNodeOnRecycle001
+ * @tc.desc: Test OnRecycle when accessibility not enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set infoInstance.
+     * @tc.expected: expect is not nullptr.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+
+    /**
+     * @tc.steps: step3. change accessibilityProperty.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    /**
+     * @tc.steps: step4. change renderContext.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateAccessibilityFocus(true);
+
+    /**
+     * @tc.steps: step5. test OnRecycle.
+     * @tc.expected: expect not focused
+     */
+    frameNode->OnRecycle();
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityFocusState());
+    EXPECT_TRUE(renderContext->GetAccessibilityFocus().value_or(false));
+}
+
+/**
+ * @tc.name: FrameNodeOnRecycle002
+ * @tc.desc: Test OnRecycle when accessibility not focus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set infoInstance.
+     * @tc.expected: expect is not nullptr.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+
+    /**
+     * @tc.steps: step3. change accessibilityProperty.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(false);
+
+    /**
+     * @tc.steps: step4. change renderContext.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateAccessibilityFocus(true);
+
+    /**
+     * @tc.steps: step5. test OnRecycle.
+     * @tc.expected: expect not focused
+     */
+    frameNode->OnRecycle();
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+    EXPECT_TRUE(renderContext->GetAccessibilityFocus().value_or(false));
+}
+
+/**
+ * @tc.name: FrameNodeOnRecycle003
+ * @tc.desc: Test OnRecycle when renderContext not accessibilityFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set infoInstance.
+     * @tc.expected: expect is not nullptr.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+
+    /**
+     * @tc.steps: step3. change accessibilityProperty.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    /**
+     * @tc.steps: step4. change renderContext.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateAccessibilityFocus(false);
+
+    /**
+     * @tc.steps: step5. test OnRecycle.
+     * @tc.expected: expect not focused
+     */
+    frameNode->OnRecycle();
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+    EXPECT_FALSE(renderContext->GetAccessibilityFocus().value_or(false));
+}
+
+/**
+ * @tc.name: FrameNodeOnRecycle004
+ * @tc.desc: Test OnRecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set infoInstance.
+     * @tc.expected: expect is not nullptr.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+
+    /**
+     * @tc.steps: step3. change accessibilityProperty.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    /**
+     * @tc.steps: step4. change renderContext.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateAccessibilityFocus(true);
+
+    /**
+     * @tc.steps: step5. test OnRecycle.
+     * @tc.expected: expect not focused
+     */
+    frameNode->OnRecycle();
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+    EXPECT_FALSE(renderContext->GetAccessibilityFocus().value_or(false));
 }
 
 /**
@@ -3139,5 +3204,320 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty002, TestSize.Level1)
     bool result = frameNode->GetCapiCustomProperty("key", value);
     EXPECT_TRUE(result);
     EXPECT_EQ(value, "value");
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest001
+ * @tc.desc: Test UpdateIgnoreCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest001, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->UpdateIgnoreCount(2);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest002
+ * @tc.desc: Test UpdateIgnoreCount when MountToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest002, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+
+    node->UpdateIgnoreCount(2);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->MountToParent(parent);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest003
+ * @tc.desc: Test UpdateIgnoreCount when RemoveChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest003, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+    node->UpdateIgnoreCount(2);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    parent->RemoveChild(node);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    parent->TraverseForIgnore();
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest004
+ * @tc.desc: Test UpdateIgnoreCount when SetActive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest004, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+    node->UpdateIgnoreCount(2);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    node->SetActive(false);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->SetActive(true);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: TestPreMeasure
+ * @tc.desc: Test PreMeasure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TestPreMeasure, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetIgnoreLayoutProcess(true);
+    frameNode->SetHasPreMeasured();
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+}
+
+/**
+ * @tc.name: FrameNodeSetCustomPropertyMapFlagByKey001
+ * @tc.desc: Test SetCustomPropertyMapFlagByKey.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetCustomPropertyMapFlagByKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetCustomPropertyMapFlagByKey.
+     * @tc.expected: expect result true, value empty and flag 0.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->SetCustomPropertyMapFlagByKey("key");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key", value);
+    std::string flagValue = frameNode->customPropertyMap_["key"][1];
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value, "");
+    EXPECT_EQ(flagValue, "0");
+
+    /**
+     * @tc.steps: step2. SetCustomPropertyMapFlagByKey.
+     * @tc.expected: expect result true, value not empty and flag right.
+     */
+    frameNode->AddCustomProperty("key1", "value1");
+    std::string value1;
+    bool result1 = frameNode->GetCapiCustomProperty("key1", value1);
+    std::string flagValue1 = frameNode->customPropertyMap_["key1"][1];
+    EXPECT_TRUE(result1);
+    EXPECT_EQ(value1, "value1");
+    EXPECT_EQ(flagValue1, "1");
+    frameNode->SetCustomPropertyMapFlagByKey("key1");
+    result1 = frameNode->GetCapiCustomProperty("key1", value1);
+    flagValue1 = frameNode->customPropertyMap_["key1"][1];
+    EXPECT_TRUE(result1);
+    EXPECT_EQ(value1, "value1");
+    EXPECT_EQ(flagValue1, "0");
+}
+
+/**
+ * @tc.name: FrameNodeIsJsCustomPropertyUpdated001
+ * @tc.desc: Test IsJsCustomPropertyUpdated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. customPropertyMap_ is empty, test IsJsCustomPropertyUpdated.
+     * @tc.expected: expect result true.
+     */
+    bool result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. frameNode has one customProperty and flag 1.
+     * @tc.expected: expect result true.
+     */
+    frameNode->AddCustomProperty("key", "value");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. frameNode has another customProperty and flag 0.
+     * @tc.expected: expect result false.
+     */
+    frameNode->AddCustomProperty("key1", "value1");
+    frameNode->SetCustomPropertyMapFlagByKey("key1");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground001
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. do not set the BuilderBackgroundFlag.
+     * @tc.expected: do nothing.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(0);
+    frameNode->UpdateBackground();
+    EXPECT_NE(frameNode->builderFunc_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground002
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. set the BuilderBackgroundFlag to false.
+     * @tc.expected: UpdateCustomBackground function is called.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(1);
+    mockRenderContext->UpdateBuilderBackgroundFlag(false);
+    frameNode->UpdateBackground();
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground003
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. set the BuilderBackgroundFlag to true.
+     * @tc.expected: frameNode->builderFunc_ is nullptr.
+     */
+    mockRenderContext->UpdateBuilderBackgroundFlag(true);
+    frameNode->UpdateBackground();
+    EXPECT_EQ(frameNode->builderFunc_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground004
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step4. set the BuilderBackgroundFlag to true while frameNode->builderFunc_ is nullptr.
+     * @tc.expected: do nothing.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(0);
+    mockRenderContext->UpdateBuilderBackgroundFlag(true);
+    frameNode->builderFunc_ = nullptr;
+    frameNode->backgroundNode_ = nullptr;
+    frameNode->UpdateBackground();
+    EXPECT_EQ(frameNode->backgroundNode_, nullptr);
+}
+
+/**
+ * @tc.name: AttachContext010
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, AttachContext010, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->GetOrCreateGestureEventHub();
+    SystemProperties::multiInstanceEnabled_ = true;
+    node->isDeleteRsNode_ = false;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    node->AttachContext(AceType::RawPtr(context));
+    SystemProperties::multiInstanceEnabled_ = false;
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
 }
 } // namespace OHOS::Ace::NG

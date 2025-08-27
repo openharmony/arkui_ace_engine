@@ -244,6 +244,15 @@ void* CustomNodeBase::FireThisFunc()
     return nullptr;
 }
 
+void CustomNodeBase::FireClearAllRecycleFunc()
+{
+    if (clearAllRecycleFunc_) {
+        ACE_SCOPED_TRACE("CustomNode:FireClearAllRecycleFunc %s", GetJSViewName().c_str());
+        RecycleManager::ClearAll();
+        clearAllRecycleFunc_();
+    }
+}
+
 std::string CustomNodeBase::FireOnDumpInspectorFunc()
 {
     if (onDumpInspectorFunc_) {
@@ -287,7 +296,6 @@ void CustomNodeBase::FireRecycleSelf()
 void CustomNodeBase::FireRecycleRenderFunc()
 {
     if (recycleRenderFunc_) {
-        ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
         auto node = AceType::DynamicCast<UINode>(Claim(this));
         recycleInfo_.Reuse();
         RecycleManager::Pop(node->GetId());
@@ -309,6 +317,21 @@ void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std:
 void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 {
     onDumpInspectorFunc_ = func;
+}
+
+void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)
+{
+    clearAllRecycleFunc_ = func;
+}
+
+void CustomNodeBase::SetReuseId(const std::string& reuseId)
+{
+    reuseId_ = reuseId;
+}
+
+const std::string& CustomNodeBase::GetReuseId() const
+{
+    return reuseId_;
 }
 
 void CustomNodeBase::SetOnRecycleFunc(std::function<void()>&& func)

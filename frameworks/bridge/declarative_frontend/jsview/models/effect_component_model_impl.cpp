@@ -20,4 +20,14 @@ void EffectComponentModelImpl::Create()
 {
     // empty implementation
 }
+
+void EffectComponentModelImpl::Create(NG::EffectLayer independentLayer)
+{
+    // empty implementation
+}
+
+void EffectComponentModelImpl::AlwaysSnapshot(bool enable)
+{
+    // empty implementation
+}
 } // namespace OHOS::Ace::Framework

@@ -43,6 +43,7 @@ ohos_unittest("ui_content_test") {
     "ability_runtime:abilitykit_native",
     "cJSON:cjson",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "image_framework:image",
     "input:libmmi-client",
@@ -54,338 +55,6 @@ ohos_unittest("ui_content_test") {
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-}
-
-ohos_unittest("form_render_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
-    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_test.cpp",
-    "form_renderer_dispatcher_proxy_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = [
-    "$ace_root/test/unittest:ace_base",
-    "$ace_root/test/unittest:ace_components_base",
-    "$ace_root/test/unittest:ace_components_event",
-    "$ace_root/test/unittest:ace_components_gestures",
-    "$ace_root/test/unittest:ace_components_layout",
-    "$ace_root/test/unittest:ace_components_manager",
-    "$ace_root/test/unittest:ace_components_mock",
-    "$ace_root/test/unittest:ace_components_pattern",
-    "$ace_root/test/unittest:ace_components_property",
-    "$ace_root/test/unittest:ace_components_render",
-    "$ace_root/test/unittest:ace_components_syntax",
-    "$ace_root/test/unittest:ace_core_animation",
-    "$ace_root/test/unittest:ace_core_extra",
-    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
-    "$ace_root/test/unittest:ace_unittest_log",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "window_manager:libwm",
-  ]
-}
-
-ohos_unittest("form_render_group_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_engine_helper.cpp",
-    "$ace_root/test/mock/base/mock_frame_report.cpp",
-    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
-    "$ace_root/test/mock/base/mock_ressched_report.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
-    "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
-    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
-    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
-    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_group_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = [
-    "$ace_root/test/unittest:ace_base",
-    "$ace_root/test/unittest:ace_components_base",
-    "$ace_root/test/unittest:ace_components_event",
-    "$ace_root/test/unittest:ace_components_gestures",
-    "$ace_root/test/unittest:ace_components_layout",
-    "$ace_root/test/unittest:ace_components_manager",
-    "$ace_root/test/unittest:ace_components_pattern",
-    "$ace_root/test/unittest:ace_components_property",
-    "$ace_root/test/unittest:ace_components_render",
-    "$ace_root/test/unittest:ace_components_syntax",
-    "$ace_root/test/unittest:ace_core_animation",
-    "$ace_root/test/unittest:ace_core_extra",
-    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/unittest:ace_unittest_trace",
-  ]
-
-  external_deps = [
-    "ability_base:configuration",
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "window_manager:libwm",
-  ]
-}
-
-ohos_unittest("form_render_delegate_proxy_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_proxy_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-  ]
-}
-
-ohos_unittest("form_render_delegate_stub_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_stub_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-  ]
-}
-
-ohos_unittest("form_render_dispatcher_stub_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_engine_helper.cpp",
-    "$ace_root/test/mock/base/mock_frame_report.cpp",
-    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
-    "$ace_root/test/mock/base/mock_ressched_report.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
-    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
-    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
-    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
-    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "form_render_dispatcher_stub_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "window_manager:libwm",
-  ]
-}
-
-ohos_unittest("form_render_delegate_impl_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "form_render_delegate_impl_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-  ]
-}
-
-ohos_unittest("form_render_dispatcher_impl_test") {
-  module_out_path = interface_test_output_path
-  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
-  sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "form_render_dispatcher_impl_test.cpp",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
-    "googletest:gmock_main",
-    "graphic_2d:librender_service_client",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "window_manager:libwm",
-  ]
 }
 
 ohos_unittest("drawable_descriptor_test") {
@@ -412,6 +81,7 @@ ohos_unittest("drawable_descriptor_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
@@ -506,6 +176,7 @@ ohos_unittest("node_component_snapshot_test") {
     "$ace_root/interfaces/native/node/node_component_snapshot.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -546,6 +217,7 @@ ohos_unittest("node_component_snapshot_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
@@ -567,17 +239,18 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
     "$ace_root/interfaces/native/node/native_impl.cpp",
     "$ace_root/interfaces/native/node/native_node_extented.cpp",
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "native_gesture_test.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
   ]
@@ -612,15 +285,13 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/test/unittest:ace_core_extra",
   ]
 
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "graphic_2d:native_drawing_ndk",
     "hilog:libhilog",
     "image_framework:image",
@@ -644,6 +315,7 @@ ohos_unittest("native_key_event_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -684,6 +356,7 @@ ohos_unittest("native_key_event_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
@@ -693,7 +366,7 @@ ohos_unittest("native_key_event_test") {
   ]
 }
 
-ohos_unittest("ui_input_event_test") {
+ohos_unittest("ui_input_event_test_coverage") {
   module_out_path = interface_test_output_path
 
   sources = [
@@ -706,9 +379,11 @@ ohos_unittest("ui_input_event_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "ui_input_event_first_test.cpp",
     "ui_input_event_test.cpp",
     "ui_input_event_test_one.cpp",
   ]
@@ -747,68 +422,7 @@ ohos_unittest("ui_input_event_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-    "image_framework:image",
-    "image_framework:image_native",
-    "napi:ace_napi",
-    "resource_management:global_resmgr",
-  ]
-}
-
-ohos_unittest("ui_input_event_first_test") {
-  module_out_path = interface_test_output_path
-
-  sources = [
-    "$ace_root/interfaces/native/event/ui_input_event.cpp",
-    "$ace_root/interfaces/native/node/animate_impl.cpp",
-    "$ace_root/interfaces/native/node/dialog_model.cpp",
-    "$ace_root/interfaces/native/node/event_converter.cpp",
-    "$ace_root/interfaces/native/node/gesture_impl.cpp",
-    "$ace_root/interfaces/native/node/native_impl.cpp",
-    "$ace_root/interfaces/native/node/native_node_napi.cpp",
-    "$ace_root/interfaces/native/node/node_extened.cpp",
-    "$ace_root/interfaces/native/node/node_model.cpp",
-    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
-    "$ace_root/interfaces/native/node/node_transition.cpp",
-    "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "ui_input_event_first_test.cpp",
-  ]
-
-  configs = [
-    "$ace_root/test/unittest:ace_unittest_config",
-    ":c_api_configs",
-  ]
-
-  include_dirs = [
-    "$ace_root/frameworks/core/interfaces/arkoala",
-    "$ace_root/frameworks/",
-    "$ace_root/interfaces/native/",
-    "$ace_root/interfaces/native/node",
-    "$ace_root",
-  ]
-
-  deps = [
-    "$ace_root/test/unittest:ace_base",
-    "$ace_root/test/unittest:ace_components_base",
-    "$ace_root/test/unittest:ace_components_event",
-    "$ace_root/test/unittest:ace_components_gestures",
-    "$ace_root/test/unittest:ace_components_layout",
-    "$ace_root/test/unittest:ace_components_manager",
-    "$ace_root/test/unittest:ace_components_mock",
-    "$ace_root/test/unittest:ace_components_pattern",
-    "$ace_root/test/unittest:ace_components_property",
-    "$ace_root/test/unittest:ace_components_render",
-    "$ace_root/test/unittest:ace_components_syntax",
-    "$ace_root/test/unittest:ace_core_animation",
-    "$ace_root/test/unittest:ace_core_extra",
-  ]
-
-  external_deps = [
-    "cJSON:cjson",
-    "c_utils:utils",
-    "googletest:gmock_main",
-    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
@@ -831,6 +445,7 @@ ohos_unittest("drag_and_drop_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -866,15 +481,12 @@ ohos_unittest("drag_and_drop_test") {
     "$ace_root/test/unittest:ace_core_extra",
   ]
 
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -882,6 +494,7 @@ ohos_unittest("drag_and_drop_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "udmf:udmf_client",
+    "udmf:libudmf",
   ]
 }
 
@@ -901,6 +514,7 @@ ohos_unittest("node_transition_test") {
     "$ace_root/interfaces/native/node/node_animate.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -922,17 +536,12 @@ ohos_unittest("node_transition_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -956,6 +565,7 @@ ohos_unittest("animate_impl_test") {
     "$ace_root/interfaces/native/node/node_animate.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -978,17 +588,12 @@ ohos_unittest("animate_impl_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1012,6 +617,7 @@ ohos_unittest("dialog_model_test") {
     "$ace_root/interfaces/native/node/node_animate.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -1034,17 +640,12 @@ ohos_unittest("dialog_model_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1069,6 +670,7 @@ ohos_unittest("node_extened_test") {
     "$ace_root/interfaces/native/node/node_animate.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -1091,17 +693,12 @@ ohos_unittest("node_extened_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1126,6 +723,7 @@ ohos_unittest("node_animate_test") {
     "$ace_root/interfaces/native/node/node_animate.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -1147,17 +745,12 @@ ohos_unittest("node_animate_test") {
     "$ace_root",
   ]
 
-  deps = []
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -1207,6 +800,7 @@ ohos_unittest("js_drawable_descriptor_test") {
     "c_utils:utils",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
@@ -1251,6 +845,145 @@ ohos_unittest("xcomponent_controller_test") {
   ]
 }
 
+ohos_unittest("native_render_node_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/node/animate_impl.cpp",
+    "$ace_root/interfaces/native/node/dialog_model.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/native_node_extented.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/node_utils.cpp",
+    "$ace_root/interfaces/native/node/progress_option.cpp",
+    "$ace_root/interfaces/native/node/render_node.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "native_render_node_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
+    "googletest:gmock_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:native_drawing_ndk",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
+ohos_unittest("native_render_node_property_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/node/animate_impl.cpp",
+    "$ace_root/interfaces/native/node/dialog_model.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/native_node_extented.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/node_utils.cpp",
+    "$ace_root/interfaces/native/node/progress_option.cpp",
+    "$ace_root/interfaces/native/node/render_node.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "native_render_node_property_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
+    "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:native_drawing_ndk",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
@@ -1260,16 +993,11 @@ group("interfaces_unittest") {
     ":drag_and_drop_test",
     ":drawable_descriptor_test",
     ":extension_custom_node_test_ng",
-    ":form_render_delegate_impl_test",
-    ":form_render_delegate_proxy_test",
-    ":form_render_delegate_stub_test",
-    ":form_render_dispatcher_impl_test",
-    ":form_render_dispatcher_stub_test",
-    ":form_render_group_test",
-    ":form_render_test",
     ":js_drawable_descriptor_test",
     ":native_key_event_test",
     ":native_node_napi_test",
+    ":native_render_node_property_test",
+    ":native_render_node_test",
     ":navigation_controller_test",
     ":node_animate_test",
     ":node_component_snapshot_test",
@@ -1277,10 +1005,14 @@ group("interfaces_unittest") {
     ":node_transition_test",
     ":ui_content_test",
     ":ui_event_test",
-    ":ui_input_event_first_test",
-    ":ui_input_event_test",
+    ":ui_input_event_test_coverage",
     ":viewport_config_test",
     ":xcomponent_controller_test",
+    "ace_gesture:ace_native_gesture_test",
     "ace_kit:ace_kit_test",
+    "ace_ui_input_event:ui_input_event_test",
+    "ace_key_event:key_event_test",
+    "napi:arkui_napi_test",
+    "form_render:ace_form_render_test",
   ]
 }

@@ -58,7 +58,7 @@ class TestSceneAdapter : public Render3D::ISceneAdapter {
     }
     std::shared_ptr<Render3D::TextureLayer> CreateTextureLayer()
     {
-        return std::make_shared<Render3D::TextureLayer>();
+        return std::make_shared<Render3D::TextureLayer>(key_++);
     }
     void OnWindowChange(const Render3D::WindowChangeInfo& windowChangeInfo)
     {
@@ -76,6 +76,8 @@ class TestSceneAdapter : public Render3D::ISceneAdapter {
     {
         return true;
     }
+private:
+    uint32_t key_ = 0;
 };
 
 class ModelTestNg : public testing::Test {

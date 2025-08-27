@@ -1,0 +1,108 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "Select_Option_1",
+      "value": "选项一"
+    },
+    {
+      "name": "Select_Option_2",
+      "value": "选项二"
+    },
+    {
+      "name": "Select_Option_3",
+      "value": "选项三"
+    },
+    {
+      "name": "Select_Option_4",
+      "value": "选项四"
+    },
+    {
+      "name": "Select_Option_5",
+      "value": "选项五"
+    },
+    {
+      "name": "Select_Option_6",
+      "value": "选项六"
+    },
+    {
+      "name": "Select_Option_7",
+      "value": "选项七"
+    },
+    {
+      "name": "Select_Option_8",
+      "value": "选项八"
+    },
+    {
+      "name": "Select_Option_9",
+      "value": "选项九"
+    },
+    {
+      "name": "rTrackThickness",
+      "value": "40"
+    },
+    {
+      "name": "rBorderWidth",
+      "value": "4"
+    },
+    {
+      "name": "rBorderRadius",
+      "value": "10"
+    },
+    {
+      "name": "rWidth",
+      "value": "20"
+    },
+    {
+      "name": "rHeight",
+      "value": "20"
+    },
+    {
+      "name": "rStepSize",
+      "value": "2"
+    },
+    {
+      "name": "Empty_string",
+      "value": " "
+    },
+    {
+      "name": "Long_string",
+      "value": "labelbjahfnipb[jtg跑【阿金葡萄球菌混凝土群殴【jhtoqephjnpkfqajnbprqeoonjy"
+    },
+    {
+      "name": "Size100",
+      "value": "100lpx"
+    },
+    {
+      "name": "Color4169E1",
+      "value": "#4169E1"
+    },
+    {
+      "name": "string_long",
+      "value": "displayPriority:设置当前组件在布局容器中显示的优先级，当父容器空间不足时，低优先级的组件会被隐藏。小数点后的数字不作优先级区分，即区间为[x, x + 1)内的数字视为相同优先级。例如：1.0与1.9为同一优先级。"
+    },
+    {
+      "name": "minFontSize",
+      "value": "18"
+    },
+    {
+      "name": "maxFontSize",
+      "value": "30"
+    },
+    {
+      "name": "Test_Values",
+      "value": "50.00vp"
+    }
+  ]
+}

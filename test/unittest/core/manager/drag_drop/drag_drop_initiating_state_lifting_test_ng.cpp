@@ -27,6 +27,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float POINT_X = 100.0f;
+constexpr float POINT_Y = 100.0f;
+constexpr float SCALE_NUMBER = 0.95;
+}
 struct DragDropInitiatingStateLiftingTestCase : public DragDropInitiatingStateTestCase {
     bool isMenuShow = false;
     bool isTextDraggable = false;
@@ -52,6 +57,13 @@ struct CheckDoShowPreviewTestCase {
           isBindMenu(isBindMenu), isMenuShow(isMenuShow), isDragPreviewEnabled(isDragPreviewEnabled),
           exceptResult(exceptResult)
     {}
+};
+
+struct HandlePreDragStatusTestCase {
+    bool isNeedGather = false;
+    bool defaultAnimationBeforeLifting = false;
+    PreDragStatus preDragStatus = PreDragStatus::ACTION_DETECTING_STATUS;
+    bool exceptResult = false;
 };
 
 const std::vector<DragDropInitiatingStateLiftingTestCase> DRAG_DROP_INITIATING_STATE_LIFTING_IMAGE_TEST_CASES = {
@@ -172,6 +184,17 @@ const std::vector<CheckDoShowPreviewTestCase> DRAG_DROP_INITIATING_CHECK_DO_SHOW
     CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, false, false),
 };
 
+const std::vector<HandlePreDragStatusTestCase> DRAG_DROP_INITIATING_HANDLE_PRE_DRAG_STATUS_TEST_CASES = {
+    { false, false, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { false, false, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { false, true, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { false, true, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { true, false, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { true, false, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { true, true, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { true, true, PreDragStatus::PREVIEW_LIFT_FINISHED, true },
+};
+
 void DragDropInitiatingStateLiftingTestNG::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -182,6 +205,7 @@ void DragDropInitiatingStateLiftingTestNG::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(false);
 }
 
 /**
@@ -348,9 +372,552 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         dragDropManager->dragDropState_ = testCase.dragDropMgrState;
         dragDropManager->isDragNodeNeedClean_ = testCase.isDragNodeNeedClean;
         DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
-        frameNode->previewOption_.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        dragPreviewOption.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
+        frameNode->SetDragPreviewOptions(dragPreviewOption);
         gestureEventHub->bindMenuStatus_.isBindLongPressMenu = testCase.isBindMenu;
         EXPECT_EQ(liftingState->CheckDoShowPreview(frameNode), testCase.exceptResult);
     }
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG004
+ * @tc.desc: Test HandlePreDragStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG004, TestSize.Level1)
+{
+    for (const auto& testCase : DRAG_DROP_INITIATING_HANDLE_PRE_DRAG_STATUS_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create DragDropEventActuator.
+         */
+        auto eventHub = AceType::MakeRefPtr<EventHub>();
+        ASSERT_NE(eventHub, nullptr);
+        auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+        ASSERT_NE(gestureEventHub, nullptr);
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        ASSERT_NE(frameNode, nullptr);
+        eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+        auto dragDropEventActuator =
+            AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+        ASSERT_NE(dragDropEventActuator, nullptr);
+        auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+        ASSERT_NE(handler, nullptr);
+        auto machine = handler->initiatingFlow_;
+        ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
+        auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+        ASSERT_NE(state, nullptr);
+        auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+        ASSERT_NE(liftingState, nullptr);
+
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        auto& params = machine->GetDragDropInitiatingParams();
+        params.isNeedGather = testCase.isNeedGather;
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        dragPreviewOption.defaultAnimationBeforeLifting = testCase.defaultAnimationBeforeLifting;
+        frameNode->SetDragPreviewOptions(dragPreviewOption);
+        liftingState->HandlePreDragStatus(testCase.preDragStatus);
+        auto type = frameNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE);
+        EXPECT_EQ(type == VisibleType::VISIBLE, testCase.exceptResult);
+    }
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG005
+ * @tc.desc: Test CollectTouchTarget function when frameNode is image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+    gestureEventHub->SetIsTextDraggable(true);
+
+    auto info = GestureEvent();
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::LIFTING);
+    info.CopyConvertInfoFrom(ConvertInfo { UIInputEventType::AXIS, UIInputEventType::TOUCH });
+    liftingState->HandleReStartDrag(info);
+    EXPECT_EQ(static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::LIFTING);
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG006
+ * @tc.desc: Test DoDragDampingAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+     * @tc.steps: step2. set dragDropManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->dampingOverflowCount_ = 1;
+    dragDropManager->dragTotalMovePosition_ = OffsetF(1.0f, 1.0f);
+
+    /**
+     * @tc.steps: step3. execute DoDragDampingAnimation.
+     */
+    int32_t pointerId = 1;
+    Point point(POINT_X, POINT_Y);
+
+    liftingState->DoDragDampingAnimation(point, pointerId);
+    EXPECT_EQ(dragDropManager->dragMovePosition_, OffsetF(0.0f, 0.0f));
+
+    dragDropManager->dragDropState_ = DragDropMgrState::IDLE;
+    dragDropManager->currentPointerId_ = pointerId;
+    liftingState->DoDragDampingAnimation(point, pointerId);
+    EXPECT_NE(dragDropManager->dragMovePosition_, OffsetF(0.0f, 0.0f));
+
+    dragDropManager->dampingOverflowCount_ = 0;
+    liftingState->DoDragDampingAnimation(point, pointerId);
+    EXPECT_NE(dragDropManager->dragMovePosition_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG007
+ * @tc.desc: Test SetScaleAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+     * @tc.steps: step2. create pixelMapNode.
+     */
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode, nullptr);
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(childNode, nullptr);
+    columnNode->AddChild(childNode);
+    manager->pixmapColumnNodeWeak_ = columnNode;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    dragDropManager->currentPointerId_ = 0;
+    dragDropManager->draggingPressedState_ = true;
+
+    /**
+     * @tc.steps: step3. execute SetScaleAnimation.
+     */
+    liftingState->SetScaleAnimation(0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG008
+ * @tc.desc: Test SetPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(pixelMap, nullptr);
+    gestureEventHub->SetPixelMap(pixelMap);
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+     * @tc.steps: step2. create pixelmap.
+     */
+    gestureEventHub->pixelMap_ = pixelMap;
+
+    /**
+     * @tc.steps: step3. execute SetPixelMap.
+     */
+    liftingState->SetPixelMap();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->GetHasPixelMap(), false);
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG009
+ * @tc.desc: Test ShowPixelMapAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG009, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create DragDropEventActuator.
+    */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDragPreviewOptions({.defaultAnimationBeforeLifting = true });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.isNeedGather = true;
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+    * @tc.steps: step2. create imageNode.
+    */
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    imageContext->UpdateTransformScale({ 1.0f, 1.0f });
+    /**
+    * @tc.steps: step3. execute ShowPixelMapAnimation.
+    */
+    liftingState->ShowPixelMapAnimation(imageNode, frameNode);
+    auto scale = imageContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    EXPECT_EQ(scale.x, SCALE_NUMBER);
+    EXPECT_EQ(scale.y, SCALE_NUMBER);
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG010
+ * @tc.desc: Test SetGatherAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG010, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create DragDropEventActuator.
+    */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.isNeedGather = true;
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+     * @tc.steps: step2. create pixelMapNode and copyNode.
+     */
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode, nullptr);
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(childNode, nullptr);
+    columnNode->AddChild(childNode);
+    manager->pixmapColumnNodeWeak_ = columnNode;
+
+    auto copyNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(copyNode, nullptr);
+    manager->dragNodeCopyWeak_ = copyNode;
+
+    /**
+     * @tc.steps: step3. execute SetGatherAnimation.
+     */
+    liftingState->SetGatherAnimation(pipeline);
+    auto dragCopyNode = manager->GetDragNodeCopy();
+    ASSERT_NE(dragCopyNode, nullptr);
+    auto renderContext = dragCopyNode->GetRenderContext();
+    auto opacity = renderContext->GetOpacityValue();
+    EXPECT_EQ(opacity, 0.0f);
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG011
+ * @tc.desc: Test SetTextAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG011, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create DragDropEventActuator.
+    */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode =
+        AceType::MakeRefPtr<FrameNode>(V2::SEARCH_Field_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.isNeedGather = true;
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    /**
+     * @tc.steps: step2. execute SetTextAnimation.
+     */
+    auto pattern = frameNode->GetPattern<TextBase>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->showSelect_, true);
+
+    liftingState->SetTextAnimation();
+    EXPECT_EQ(pattern->showSelect_, true);
+
+    auto textBase = frameNode->GetPattern<TextBase>();
+    ASSERT_NE(textBase, nullptr);
+    textBase->textSelector_.Update(3, 4);
+    liftingState->SetTextAnimation();
+    EXPECT_EQ(pattern->showSelect_, true);
+}
+
+/**
+ * @tc.name: CheckDoShowPreviewTestNG001
+ * @tc.desc: Test CheckDoShowPreview function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, CheckDoShowPreviewTestNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    dragDropManager->isDragNodeNeedClean_ = true;
+    EXPECT_FALSE(liftingState->CheckDoShowPreview(frameNode));
+}
+
+/**
+ * @tc.name: CheckStatusForPanActionBeginTestNG001
+ * @tc.desc: Test CheckStatusForPanActionBegin function expect IsDragNodeNeedClean.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, CheckStatusForPanActionBeginTestNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateBase>(state);
+    ASSERT_NE(liftingState, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    dragDropManager->isDragNodeNeedClean_ = true;
+    GestureEvent info;
+    EXPECT_FALSE(liftingState->CheckStatusForPanActionBegin(frameNode, info));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG012
+ * @tc.desc: Test Init function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+ 
+    /**
+     * @tc.steps: step2. test lifting state init with IsAllowedDrag is false.
+     */
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
+    frameNode->SetDraggable(true);
+    overlayManager->SetHasPixelMap(false);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade(), nullptr);
 }
 } // namespace OHOS::Ace::NG

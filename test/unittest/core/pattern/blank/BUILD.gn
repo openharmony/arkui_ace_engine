@@ -15,5 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("blank_test_ng") {
   type = "new"
-  sources = [ "blank_test_ng.cpp" ]
+  module_name = "Component-layout"
+  module_output = ""
+  sources = [ 
+    "blank_test_ng.cpp",
+    "blank_new_test_ng.cpp",
+  ]
 }

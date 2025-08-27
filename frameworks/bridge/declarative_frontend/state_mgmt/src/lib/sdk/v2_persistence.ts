@@ -229,7 +229,7 @@ class AppStorageV2Impl extends StorageHelper {
 }
 
 class PersistenceV2Impl extends StorageHelper {
-  public static readonly MIN_PERSISTENCE_ID = 0x1010000000000;
+  public static readonly MIN_PERSISTENCE_ID = 0x1020000000000;
   public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
 
   private static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not support! Can only use the class object in Persistence';
@@ -374,7 +374,7 @@ class PersistenceV2Impl extends StorageHelper {
     } catch (err) {
       if (this.cb_ && typeof this.cb_ === 'function') {
         this.cb_('', PersistError.Unknown, `fail to get all persisted keys`);
-        return [];
+        return;
       }
       throw new Error(err);
     }

@@ -31,7 +31,7 @@ constexpr float SWITCH_ERROR_RADIUS = -1.0f;
 constexpr double NUM_TWO = 2.0;
 } // namespace
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod);
 public:
     SwitchPaintMethod() = default;
 
@@ -164,7 +164,9 @@ public:
             actualTrackRadius = size.Width() / 2.0; // 2.0f is used to calculate half of the width.
         }
         switchModifier_->SetActualTrackRadius(actualTrackRadius);
-        switchModifier_->UpdateAnimatableProperty();
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        switchModifier_->UpdateAnimatableProperty(renderContext->GetHost());
         UpdateBoundsRect(paintWrapper, pointRadius, actualTrackRadius);
         paintWrapper->FlushContentModifier();
     }
@@ -236,6 +238,7 @@ private:
     bool isSelect_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
+    Color focusColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     bool showHoverEffect_ = true;
     bool useContentModifier_ = false;

@@ -43,6 +43,7 @@ public:
     void HandleOnDragStart(RefPtr<FrameNode> frameNode, const GestureEvent& info);
     void HandleTouchEvent(const TouchEvent& touchEvent) override;
     void HandlePanOnActionEnd(const GestureEvent& info) override;
+    void HandlePanOnActionCancel(const GestureEvent& info) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_INITIATING_STATE_READY_H

@@ -33,6 +33,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DomStorageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MixedMode, MixedModeContent);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
@@ -40,12 +41,15 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DarkMode, WebDarkMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioResumeInterval, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverviewModeAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabled, bool);
+    using WebDebuggingConfigType = std::tuple<bool, int32_t>;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabledAndPort,
+        WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
@@ -72,6 +76,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MetaViewport, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
@@ -83,7 +88,9 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
 };
 
 } // namespace OHOS::Ace::NG

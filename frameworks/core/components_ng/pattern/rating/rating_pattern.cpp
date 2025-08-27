@@ -134,7 +134,8 @@ DataReadyNotifyTask RatingPattern::CreateDataReadyCallback(int32_t imageFlag)
 
 LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 {
-    auto task = [weak = WeakClaim(this), imageFlag](const ImageSourceInfo& sourceInfo, const std::string& msg) {
+    auto task = [weak = WeakClaim(this), imageFlag](
+                    const ImageSourceInfo& sourceInfo, const std::string& msg, const ImageErrorInfo& /* errorInfo */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // check image info has changed or not
@@ -251,7 +252,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     }
     auto&& ratingGroup = ratingLayoutProperty->GetOrCreateRatingPropertyGroup();
     CHECK_NULL_RETURN(ratingGroup, nullptr);
-    ratingModifier_->SetIndicator(ratingGroup->GetIndicatorValue());
+    ratingModifier_->SetIndicator(ratingGroup->HasIndicator() ? ratingGroup->GetIndicatorValue() : false);
     ratingModifier_->SetImageInfoFromTheme(isForegroundImageInfoFromTheme_ &&
         isSecondaryImageInfoFromTheme_ && isBackgroundImageInfoFromTheme_);
     ratingModifier_->SetUseContentModifier(UseContentModifier());
@@ -359,7 +360,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     ratingScore = (ratingScore < 0.0) ? 0.0 : ratingScore;
     const double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
     // step3.2: Determine whether the old and new ratingScores are same or not.
-    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue(0.0);
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
@@ -399,9 +400,9 @@ void RatingPattern::FireChangeEvent()
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     std::stringstream ss;
-    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue(0.0);
     ratingEventHub->FireChangeEvent(ss.str());
-    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
@@ -696,7 +697,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
     if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
-    ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetIsFocus(isFocus, GetHost());
     ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -716,7 +717,7 @@ void RatingPattern::OnBlurEvent()
     RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -968,6 +969,19 @@ void RatingPattern::OnModifyDone()
     if (IsNeedFocusStyle()) {
         LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     }
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->InitEvent();
+        }
+    };
+    pipeline->AddBuildFinishCallBack(callback);
+}
+
+void RatingPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1112,7 +1126,8 @@ void RatingPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -1120,11 +1135,14 @@ void RatingPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
-    host->RemoveChildAtIndex(0);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+    if (ratingModifier_) {
+        ratingModifier_->SetUseContentModifier(UseContentModifier());
+    }
 }
 
 RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
@@ -1147,5 +1165,30 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
     return (makeFunc_.value())(ratingConfiguration);
+}
+
+void RatingPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    LoadForeground(layoutProperty, ratingTheme, iconTheme);
+    LoadSecondary(layoutProperty, ratingTheme, iconTheme);
+    LoadBackground(layoutProperty, ratingTheme, iconTheme);
+    if (IsNeedFocusStyle()) {
+        LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
+    }
 }
 } // namespace OHOS::Ace::NG

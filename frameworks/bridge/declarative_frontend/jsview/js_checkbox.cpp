@@ -35,6 +35,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+const Dimension CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 
 CheckBoxModel* CheckBoxModel::GetInstance()
@@ -102,6 +103,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
+    JSClass<JSCheckbox>::StaticMethod("margin", &JSCheckbox::JsMargin);
     JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckbox>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -251,11 +253,15 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-    CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
@@ -264,12 +270,15 @@ void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    if (!ParseJsColor(info[0], unSelectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], unSelectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetUnSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
     }
-
-    CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::UN_SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
@@ -280,10 +289,11 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<CheckboxTheme>();
+    auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
     if (!info[0]->IsObject()) {
         CheckBoxModel::GetInstance()->ResetCheckMarkColor();
         CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
         return;
     }
 
@@ -309,7 +319,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(defaultStroke);
     }
 }
 
@@ -322,6 +332,12 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
     bool flag = GetOldPadding(info, oldPadding);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+}
+
+void JSCheckbox::JsMargin(const JSCallbackInfo& info)
+{
+    CheckBoxModel::GetInstance()->SetIsUserSetMargin(true);
+    JSViewAbstract::JsMargin(info);
 }
 
 bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)

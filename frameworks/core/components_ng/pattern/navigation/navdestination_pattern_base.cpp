@@ -17,6 +17,9 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -310,7 +313,10 @@ void NavDestinationPatternBase::StartAnimation(
     if (needRunToolBarAnimation) {
         OnToolBarAnimationStart();
     }
-    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto animation = AnimationUtils::StartAnimation(
+        option, propertyCallback, finishCallback, nullptr /* repeatCallback */, hostNode->GetContextRefPtr());
     barAnimations_.emplace(nextBarAnimationId_, animation);
     nextBarAnimationId_++;
 }
@@ -427,5 +433,70 @@ bool NavDestinationPatternBase::CustomizeExpandSafeArea()
     auto host = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
     CHECK_NULL_RETURN(host, false);
     return host->CustomizeExpandSafeArea();
+}
+
+void NavDestinationPatternBase::OnColorConfigurationUpdate()
+{
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
+}
+
+void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    if (touchListener_ || !navManager->IsForceSplitSupported()) {
+        return;
+    }
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetNavigationNode());
+        CHECK_NULL_VOID(navNode);
+        auto navPattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navPattern);
+        if (!navPattern->IsForceSplitSuccess()) {
+            return;
+        }
+        if (navPattern->IsForceSplitUseNavBar()) {
+            auto navBar = AceType::DynamicCast<NavBarNode>(host);
+            navPattern->SetIsHomeNodeTouched(navBar != nullptr);
+            return;
+        }
+        auto dest = AceType::DynamicCast<NavDestinationGroupNode>(host);
+        navPattern->SetIsHomeNodeTouched(dest && dest->GetNavDestinationType() == NavDestinationType::HOME);
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    if (!touchListener_ || !navManager->IsForceSplitSupported()) {
+        return;
+    }
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->RemoveTouchEvent(touchListener_);
+    touchListener_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,6 +65,13 @@ constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out pr
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 } // namespace
+
+static bool IsDispatchExtensionDataToHostWindow(uint32_t customId)
+{
+    auto businessCode = static_cast<UIContentBusinessCode>(customId);
+    return (businessCode >= UIContentBusinessCode::WINDOW_CODE_BEGIN &&
+        businessCode <= UIContentBusinessCode::WINDOW_CODE_END);
+}
 
 class SecurityUIExtensionLifecycleListener : public Rosen::ILifecycleListener {
 public:
@@ -701,20 +710,54 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
         displayArea_.ToString().c_str(), persistentId, reason);
-    if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (auto temp = transaction_.lock()) {
-            transaction = temp;
-            transaction_.reset();
-        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-            transaction = transactionController->GetRSTransaction();
-        }
-        if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-        }
+
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
+    auto window = pipeline->GetWindow();
+    if (window) {
+        rsUIDirector = window->GetRSUIDirector();
     }
-    session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-        reason, "NotifyDisplayArea", transaction);
+    bool isNeedSyncTransaction = reason == Rosen::SizeChangeReason::ROTATION ||
+        reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
+    if (!rsUIDirector) {
+        if (isNeedSyncTransaction) {
+            if (auto temp = transaction_.lock()) {
+                transaction = temp;
+                transaction_.reset();
+            } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+                transaction = transactionController->GetRSTransaction();
+            }
+            if (transaction && parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
+        }
+        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+            std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+            reason, "NotifyDisplayArea", transaction);
+    } else {
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        if (isNeedSyncTransaction) {
+            if (auto temp = transaction_.lock()) {
+                transaction = temp;
+                transaction_.reset();
+            } else if (pipeline && rsUIContext) {
+                auto transactionController = rsUIContext->GetSyncTransactionHandler();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            } else {
+                auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            }
+            if (transaction && parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
+        }
+        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+            std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+            reason, "NotifyDisplayArea", transaction);
+    }
 }
 
 void SecuritySessionWrapperImpl::NotifySizeChangeReason(
@@ -723,7 +766,8 @@ void SecuritySessionWrapperImpl::NotifySizeChangeReason(
     CHECK_NULL_VOID(session_);
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
-    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
+    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION ||
+        type == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         transaction_ = rsTransaction;
     }
 }
@@ -865,15 +909,38 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
     return true;
 }
 
-void SecuritySessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data)
+void SecuritySessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+    int32_t callSessionId = GetSessionId();
+    CHECK_NULL_VOID(taskExecutor_);
+    auto instanceId = GetInstanceIdFromHost();
+    taskExecutor_->PostTask(
+        [instanceId, weak = hostPattern_, customId, data, callSessionId]() {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "Sec DispatchExtensionDataToHostWindow: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            container->DispatchExtensionDataToHostWindow(customId, data, callSessionId);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDispatchExtensionSecDataToHostWindow");
+}
+
+void SecuritySessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, const AAFwk::Want& data)
 {
     PLATFORM_LOGI("PostBusinessDataConsumeAsync, businessCode=%{public}u.", customId);
     int32_t callSessionId = GetSessionId();
     CHECK_NULL_VOID(taskExecutor_);
     auto instanceId = GetInstanceIdFromHost();
-    AAFwk::Want businessData = data;
     taskExecutor_->PostTask(
-        [instanceId, weak = hostPattern_, customId, businessData, callSessionId]() {
+        [instanceId, weak = hostPattern_, customId, data, callSessionId]() {
             ContainerScope scope(instanceId);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -883,20 +950,19 @@ void SecuritySessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId,
                     callSessionId, pattern->GetSessionId());
                 return;
             }
-            pattern->OnUIExtBusinessReceive(static_cast<UIContentBusinessCode>(customId), businessData);
+            pattern->OnUIExtBusinessReceive(static_cast<UIContentBusinessCode>(customId), data);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeAsync");
 }
 void SecuritySessionWrapperImpl::PostBusinessDataConsumeSyncReply(
-    uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+    uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
 {
     PLATFORM_LOGI("PostBusinessDataConsumeSyncReply, businessCode=%{public}u.", customId);
     int32_t callSessionId = GetSessionId();
     CHECK_NULL_VOID(taskExecutor_);
     auto instanceId = GetInstanceIdFromHost();
-    AAFwk::Want businessData = data;
     taskExecutor_->PostSyncTask(
-        [instanceId, weak = hostPattern_, customId, businessData, &reply, callSessionId]() {
+        [instanceId, weak = hostPattern_, customId, data, &reply, callSessionId]() {
             ContainerScope scope(instanceId);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -907,7 +973,7 @@ void SecuritySessionWrapperImpl::PostBusinessDataConsumeSyncReply(
                 return;
             }
             pattern->OnUIExtBusinessReceiveReply(
-                static_cast<UIContentBusinessCode>(customId), businessData, reply);
+                static_cast<UIContentBusinessCode>(customId), data, reply);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeSyncReply");
 }
@@ -925,14 +991,18 @@ bool SecuritySessionWrapperImpl::RegisterDataConsumer()
         auto instanceId = sessionWrapper->GetInstanceIdFromHost();
         ContainerScope scope(instanceId);
         if (id != subSystemId) {
-            return 0;
+            return false;
+        }
+        if (IsDispatchExtensionDataToHostWindow(customId)) {
+            sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+            return true;
         }
         if (reply.has_value()) {
-            sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+            sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
         } else {
-            sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+            sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
         }
-        return 0;
+        return false;
     };
     auto result = dataHandler->RegisterDataConsumer(subSystemId, std::move(callback));
     if (result != Rosen::DataHandlerErr::OK) {

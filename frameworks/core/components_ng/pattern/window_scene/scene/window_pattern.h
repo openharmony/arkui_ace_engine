@@ -79,12 +79,19 @@ protected:
     void CreateBlankWindow(RefPtr<FrameNode>& window);
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
-    void ClearImageCache(const ImageSourceInfo& sourceInfo);
+    void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow);
+    bool AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const RefPtr<NG::FrameNode>& host);
 
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, bool allowTransition = false);
+    
+    ImageRotateOrientation TransformOrientationForMatchSnapshot(uint32_t lastRotation, uint32_t windowRotation);
+    ImageRotateOrientation TransformOrientationForDisMatchSnapshot(uint32_t lastRotation, uint32_t windowRotation,
+        uint32_t snapshotRotation);
+    uint32_t TransformOrientation(uint32_t lastRotation, uint32_t windowRotation, uint32_t count);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -97,6 +104,8 @@ protected:
     virtual void OnAddSnapshot() {}
     virtual void OnRemoveSnapshot() {}
     virtual void OnAppRemoveStartingWindow() {}
+    virtual void OnUpdateSnapshotWindow() {}
+    virtual void OnPreLoadStartingWindowFinished() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;
@@ -124,8 +133,13 @@ private:
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndAddStartingWindowAboveLocked();
+    void HideStartingWindow();
+    void AddBackgroundColorDelayed();
+    CancelableCallback<void()> interruptStartingTask_;
+    CancelableCallback<void()> addBackgroundColorTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    bool needAddBackgroundColor_ = true;
     friend class LifecycleListener;
     friend class WindowEventProcess;
 

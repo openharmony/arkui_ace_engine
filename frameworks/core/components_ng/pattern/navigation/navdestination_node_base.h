@@ -21,6 +21,7 @@
 
 #include "core/animation/page_transition_common.h"
 #include "core/common/display_info.h"
+#include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -30,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 class NavDestinationNodeBase : public GroupNode {
-    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode)
+    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode);
 public:
     NavDestinationNodeBase(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern) {}
@@ -207,7 +208,6 @@ public:
     {
         return orientation_;
     }
-    std::optional<Orientation> GetEffectiveOrientation();
     void SetPreOrientation(const std::optional<Orientation>& ori)
     {
         preOrientation_ = ori;
@@ -306,6 +306,34 @@ public:
         return isSizeMatchNavigation_;
     }
 
+    void SetNavDestinationType(NavDestinationType type)
+    {
+        destType_ = type;
+    }
+    NavDestinationType GetNavDestinationType() const
+    {
+        return destType_;
+    }
+
+    virtual void SystemTransitionPushStart(bool transitionIn) {}
+    virtual void SystemTransitionPushEnd(bool transitionIn) {}
+    virtual void SystemTransitionPushFinish(bool transitionIn, int32_t animationId = -1) {}
+
+    virtual void SystemTransitionPopStart(bool transitionIn) {}
+    virtual void SystemTransitionPopEnd(bool transitionIn) {}
+    virtual bool SystemTransitionPopFinish(int32_t animationId = -1, bool isNeedCleanContent = true)
+    {
+        return true;
+    }
+    void SetIsHomeDestination(bool isHome)
+    {
+        isHomeDestination_ = isHome;
+    }
+    bool IsHomeDestination() const
+    {
+        return isHomeDestination_;
+    }
+
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
     RectF CalcHalfClipRectForTransition(const SizeF& frameSize);
@@ -318,10 +346,11 @@ protected:
     // Dialog
     TranslateOptions CalcContentTranslateForDialog(const SizeF& frameSize);
     // slide
-    OffsetF CalcTranslateForSlideTransition(const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd);
+    OffsetF CalcTranslateForSlideTransition(const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd);
 
     OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
 
+    bool isHomeDestination_ = false;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> menu_;
     RefPtr<UINode> toolbarMenu_;
@@ -351,6 +380,7 @@ protected:
     std::optional<bool> navigationIndicatorConfig_;
     std::optional<bool> preNavigationIndicatorConfig_;
     bool isSizeMatchNavigation_ = true;
+    NavDestinationType destType_ = NavDestinationType::DETAIL;
 };
 } // namespace OHOS::Ace::NG
 

@@ -21,6 +21,9 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MULTIPLE_FACTOR = 2.0f;
+} //namespace
 void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
@@ -33,6 +36,22 @@ void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
     menuPattern->RecordItemsAndGroups();
 }
 
+void MenuItemGroupLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+}
+
 void MenuItemGroupLayoutAlgorithm::MeasureChildren(
     LayoutWrapper* layoutWrapper, float& maxChildrenWidth, SizeF& menuItemGroupSize)
 {
@@ -42,6 +61,7 @@ void MenuItemGroupLayoutAlgorithm::MeasureChildren(
     CHECK_NULL_VOID(layoutConstraint);
 
     auto childConstraint = props->CreateChildConstraint();
+    RemoveParentRestrictionsForFixIdeal(props, childConstraint);
     childConstraint.minSize = layoutConstraint->minSize;
 
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
@@ -113,6 +133,52 @@ void MenuItemGroupLayoutAlgorithm::MeasureMenuItems(
     }
 }
 
+bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(
+    LayoutWrapper* layoutWrapper, const SizeF& menuItemGroupSize)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (!layoutProperty) {
+        return false;
+    }
+
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (!layoutPolicyProperty.has_value()) {
+        return false;
+    }
+
+    auto& layoutPolicy = layoutPolicyProperty.value();
+    if (!(layoutPolicy.IsWrap() || layoutPolicy.IsMatch())) {
+        return false;
+    }
+
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    auto parentIdealWidth = layoutConstraint->parentIdealSize.Width();
+    auto parentIdealHeight = layoutConstraint->parentIdealSize.Height();
+
+    float maxWidth = menuItemGroupSize.Width();
+    float maxHeight = menuItemGroupSize.Height();
+    bool isParentIdealWidth = parentIdealWidth.has_value();
+    bool isParentIdealHeight = parentIdealHeight.has_value();
+
+    if (isParentIdealWidth) {
+        if (layoutPolicy.IsWidthMatch()) {
+            maxWidth = parentIdealWidth.value();
+        } else if (layoutPolicy.IsWidthWrap()) {
+            maxWidth = std::min(parentIdealWidth.value(), menuItemGroupSize.Width());
+        }
+    }
+
+    if (isParentIdealHeight) {
+        if (layoutPolicy.IsHeightMatch()) {
+            maxHeight = parentIdealHeight.value();
+        } else if (layoutPolicy.IsHeightWrap()) {
+            maxHeight = std::min(parentIdealHeight.value(), menuItemGroupSize.Height());
+        }
+    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeT(maxWidth, maxHeight));
+    return true;
+}
+
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -139,6 +205,12 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float footerPadding = needFooterPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
+
+    if (UpdateLayoutSizeBasedOnPolicy(layoutWrapper, menuItemGroupSize)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
+    }
+
     if (menuItemGroupSize != layoutWrapper->GetGeometryNode()->GetFrameSize()) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -176,7 +248,9 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
     CHECK_NULL_VOID(wrapper);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -197,7 +271,9 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto groupHeight = size.Height();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -287,7 +363,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
     auto pattern = host->GetPattern<MenuItemGroupPattern>();
     pattern->UpdateMenuItemIconInfo();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -303,7 +379,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
         }
     } else {
         if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
-            margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+            margin.left = CalcLength(iconWidth * MULTIPLE_FACTOR + iconContentPadding * MULTIPLE_FACTOR);
         } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
             margin.left = CalcLength(iconWidth + iconContentPadding);
         } else {

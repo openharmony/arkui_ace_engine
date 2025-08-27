@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "interfaces/inner_api/ace_kit/include/ui/resource/resource_object.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "refresh_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -34,6 +36,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenHandleDrag001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -93,6 +96,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenHandleDrag002, TestSize.Level1)
     model.SetOnRefreshing(std::move(onRefreshingEvent));
     model.SetOnStateChange(std::move(onStateChangeEvent));
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -153,6 +157,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenHandleDrag003, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
     pattern_->HandleDragCancel();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 }
 
 /**
@@ -167,6 +172,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenCustomHandleDrag001, TestSize.Level1)
     model.SetCustomBuilder(CreateCustomNode());
     model.SetIsCustomBuilderExist(true);
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -228,6 +234,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenCustomHandleDrag002, TestSize.Level1)
     model.SetCustomBuilder(CreateCustomNode());
     model.SetIsCustomBuilderExist(true);
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -278,6 +285,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenCustomHandleDrag003, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Set isRefreshing_
@@ -309,6 +317,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -369,6 +378,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag002, TestSize.Level1)
     model.SetOnRefreshing(std::move(onRefreshingEvent));
     model.SetOnStateChange(std::move(onStateChangeEvent));
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -426,6 +436,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag003, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_EQ(pattern_->GetTriggerRefreshDisTance().ConvertToPx(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Test refresh action
@@ -452,6 +463,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag004, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
@@ -474,6 +486,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag005, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Set isRefreshing_
@@ -507,6 +520,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenCustomHandleDrag001, TestSize.Level1)
     model.SetCustomBuilder(CreateCustomNode());
     model.SetIsCustomBuilderExist(true);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -569,6 +583,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenCustomHandleDrag002, TestSize.Level1)
     model.SetCustomBuilder(CreateCustomNode());
     model.SetIsCustomBuilderExist(true);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -620,6 +635,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -683,14 +699,15 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag002, TestSize.Level1)
     model.SetOnStateChange(std::move(onStateChangeEvent));
     model.SetOnOffsetChange(std::move(onOffsetChangeEvent));
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
      * @tc.expected: Nothing changed
      */
     pattern_->HandleDragStart();
-    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
-    EXPECT_EQ(offset, 0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
 
     /**
      * @tc.steps: step2. HandleDragUpdate, the delta less than or equal TRIGGER_LOADING_DISTANCE
@@ -741,6 +758,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag003, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetRefreshOffset(Dimension(refreshOffset));
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -794,6 +812,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag004, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetPullToRefresh(false); // will not refresh
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -841,6 +860,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag005, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetPullDownRatio(pullDownRatio);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -895,6 +915,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDragUpdate001, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetPullDownRatio(pullDownRatio);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragUpdate in the forward direction
@@ -925,6 +946,7 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDragEnd001, TestSize.Level1)
     model.SetPullDownRatio(pullDownRatio);
     CreateDone();
     auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -971,6 +993,7 @@ HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest001, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetPullDownRatio(1);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -1016,6 +1039,7 @@ HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest002, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetPullDownRatio(1);
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -1058,5 +1082,37 @@ HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
     EXPECT_FALSE(pattern_->isRefreshing_);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjTest001
+ * @tc.desc: Verify RefreshModelNG::CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, CreateWithResourceObjTest001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObj(resObj);
+    auto pipeline = pattern_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    pattern_->OnColorModeChange(colorMode);
+    auto layoutProperty = pattern_->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetLoadingText().has_value());
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "testString";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObj(resObjWithString);
+    colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(layoutProperty->GetLoadingText().has_value());
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

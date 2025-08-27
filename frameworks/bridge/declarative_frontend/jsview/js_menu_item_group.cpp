@@ -19,9 +19,17 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 
 namespace OHOS::Ace::Framework {
-void JSMenuItemGroup::ParseHeader(const JSRef<JSObject>& object)
+void JSMenuItemGroup::Create(const JSCallbackInfo& info)
 {
-    auto headerProp = object->GetProperty("header");
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    NG::MenuItemGroupView::Create();
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto headerProp = obj->GetProperty("header");
     if (!headerProp.IsEmpty()) {
         if (headerProp->IsFunction()) {
             RefPtr<NG::UINode> header;
@@ -35,18 +43,12 @@ void JSMenuItemGroup::ParseHeader(const JSRef<JSObject>& object)
             }
             NG::MenuItemGroupView::SetHeader(header);
         } else {
-            std::string headerStr;
-            if (!ParseJsString(headerProp, headerStr)) {
+            if (!ParseJsHeaderString(headerProp)) {
                 return;
             }
-            NG::MenuItemGroupView::SetHeader(headerStr);
         }
     }
-}
-
-void JSMenuItemGroup::ParseFooter(const JSRef<JSObject>& object)
-{
-    auto footerProp = object->GetProperty("footer");
+    auto footerProp = obj->GetProperty("footer");
     if (!footerProp.IsEmpty()) {
         if (footerProp->IsFunction()) {
             RefPtr<NG::UINode> footer;
@@ -60,27 +62,40 @@ void JSMenuItemGroup::ParseFooter(const JSRef<JSObject>& object)
             }
             NG::MenuItemGroupView::SetFooter(footer);
         } else {
-            std::string footerStr;
-            if (!ParseJsString(footerProp, footerStr)) {
+            if (!ParseJsFooterString(footerProp)) {
                 return;
             }
-            NG::MenuItemGroupView::SetFooter(footerStr);
         }
+        return;
     }
 }
 
-void JSMenuItemGroup::Create(const JSCallbackInfo& info)
+bool JSMenuItemGroup::ParseJsHeaderString(const JSRef<JSVal>& headerProp)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuItemGroupView::Create();
-        if (info.Length() < 1 || !info[0]->IsObject()) {
-            return;
-        }
-        auto obj = JSRef<JSObject>::Cast(info[0]);
-        ParseHeader(obj);
-        ParseFooter(obj);
-        return;
+    std::string headerStr;
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsString(headerProp, headerStr, resObj)) {
+        return false;
     }
+    NG::MenuItemGroupView::SetHeader(headerStr);
+    if (SystemProperties::ConfigChangePerform()) {
+        NG::MenuItemGroupView::CreateWithStringResourceObj(resObj, NG::MenuItemGroupStringType::HEADER);
+    }
+    return true;
+}
+
+bool JSMenuItemGroup::ParseJsFooterString(const JSRef<JSVal>& footerProp)
+{
+    std::string footerStr;
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsString(footerProp, footerStr, resObj)) {
+        return false;
+    }
+    NG::MenuItemGroupView::SetFooter(footerStr);
+    if (SystemProperties::ConfigChangePerform()) {
+        NG::MenuItemGroupView::CreateWithStringResourceObj(resObj, NG::MenuItemGroupStringType::FOOTER);
+    }
+    return true;
 }
 
 void JSMenuItemGroup::JSBind(BindingTarget globalObj)

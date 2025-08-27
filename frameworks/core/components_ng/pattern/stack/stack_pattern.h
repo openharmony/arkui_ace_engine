@@ -51,8 +51,22 @@ public:
 
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
-        return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true,
-            ScopeType::OTHERS);
+        return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true, ScopeType::OTHERS);
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG

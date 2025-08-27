@@ -35,7 +35,7 @@ const char* GetAnimationInterfaceName(AnimationInterface interfaceName)
     return g_animationInterfaceNames[static_cast<int32_t>(interfaceName)];
 }
 
-int32_t GetAnimationFinshCount()
+int32_t GetAnimationFinishCount()
 {
     return g_animationCount++;
 }

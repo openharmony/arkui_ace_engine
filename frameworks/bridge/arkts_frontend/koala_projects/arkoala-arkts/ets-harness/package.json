@@ -1,0 +1,42 @@
+{
+    "name": "@koalaui/ets-harness",
+    "version": "1.5.8+devel",
+    "description": "",
+    "main": "./build/lib/src/launcher.js",
+    "types": "./build/lib/src/launcher.d.ts",
+    "files": [
+        "build/lib/**/*.js",
+        "build/lib/**/*.d.ts"
+    ],
+    "scripts": {
+        "clean": "rimraf build",
+        "compile": "npm run compile:all",
+        "compile:plugin": "cd ../../arkoala/ets-plugin && npm run compile",
+        "compile:ets": "npm run compile:plugin && cd src/ets && ets-tsc -p ./etsconfig.json",
+        "compile:unmemoize": "ets-tsc -p ./tsconfig-unmemoize.json",
+        "compile:loader": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js",
+        "compile:abc": "fast-arktsc --input-files ./arktsconfig.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name ets-harness && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+        "compile:all": "npm run compile:ets && npm run compile:unmemoize && npm run compile:loader && npm run compile:abc",
+        "test:compile": "npm run compile:all && cp -r build/ets-harness.abc ../build/",
+        "run:pure": "ACE_LIBRARY_PATH=../build PANDA_HOME=../../incremental/tools/panda/node_modules/@panda/sdk bash ../../incremental/tools/panda/arkts/ark build/ets-harness.abc --ark-boot-files ../build/arkoala.abc:../../incremental/harness/build/harness.abc --ark-entry-point @koalaui.ets-harness.build.unmemoized.src.loader.ETSGLOBAL::main",
+        "run": "ACE_LIBRARY_PATH=../build PANDA_HOME=../../incremental/tools/panda/node_modules/@panda/sdk mocha ../build/index.js panda:EtsHarness",
+        "test:run": "npm run test:compile && npm run run"
+    },
+    "keywords": [],
+    "dependencies": {
+        "@koalaui/common": "file:../../incremental/common",
+        "@koalaui/compat": "file:../../incremental/compat",
+        "@koalaui/harness": "file:../../incremental/harness"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.1",
+        "@types/mocha": "^9.1.0",
+        "@typescript-eslint/eslint-plugin": "^5.20.0",
+        "@typescript-eslint/parser": "^5.20.0",
+        "chai": "^4.3.6",
+        "eslint": "^8.13.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
+        "mocha": "^9.2.2",
+        "source-map-support": "^0.5.21"
+    }
+}

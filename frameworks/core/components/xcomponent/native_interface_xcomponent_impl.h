@@ -51,6 +51,14 @@ struct OH_NativeXComponent_KeyEvent {
         OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
     int64_t deviceId {};
     int64_t timestamp {};
+    uint64_t modifierKeyStates = 0;
+    bool isNumLockOn = false;
+    bool isCapsLockOn = false;
+    bool isScrollLockOn = false;
+};
+
+struct OH_NativeXComponent_ExtraMouseEventInfo {
+    uint64_t modifierKeyStates = 0;
 };
 
 using OnTouchIntercept_Callback = HitTestMode (*)(OH_NativeXComponent*, ArkUI_UIInputEvent*);
@@ -445,6 +453,16 @@ public:
         return true;
     }
 
+    void SetExtraMouseEventInfo(const OH_NativeXComponent_ExtraMouseEventInfo extraMouseEventInfo)
+    {
+        extraMouseEventInfo_ = extraMouseEventInfo;
+    }
+
+    OH_NativeXComponent_ExtraMouseEventInfo* GetExtraMouseEventInfo()
+    {
+        return &extraMouseEventInfo_;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -476,6 +494,7 @@ private:
     bool needSoftKeyboard_ = false;
     std::pair<int32_t, OH_NativeXComponent_EventSourceType> curSourceType_ { -1,
         OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN };
+    OH_NativeXComponent_ExtraMouseEventInfo extraMouseEventInfo_;
 };
 } // namespace OHOS::Ace
 
@@ -518,6 +537,9 @@ struct OH_NativeXComponent {
         HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
     int32_t GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
     int32_t GetAccessibilityProvider(ArkUI_AccessibilityProvider** handle);
+    int32_t GetExtraMouseEventInfo(OH_NativeXComponent_ExtraMouseEventInfo** extraMouseEventInfo);
+    int32_t GetMouseEventModifierKetStates(
+        OH_NativeXComponent_ExtraMouseEventInfo* extraMouseEventInfo, uint64_t* keys);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

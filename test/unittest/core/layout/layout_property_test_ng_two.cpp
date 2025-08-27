@@ -25,6 +25,9 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components/common/properties/alignment.h"
 
 #undef private
 #undef protected
@@ -34,7 +37,51 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+LayoutConstraintF layoutConstraintF = {
+    .minSize = {1, 1},
+    .maxSize = {10, 10},
+    .percentReference = {5, 5},
+    .parentIdealSize = {2, 2},
+};
+constexpr Dimension WIDTH = 1.0_vp;
+constexpr Dimension HEIGHT = 2.0_vp;
+const CalcSize CALC_SIZE = {CalcLength(WIDTH), CalcLength(HEIGHT)};
 } // namespace
+
+struct OverlayOptionsTestCase {
+    Alignment align = Alignment::TOP_LEFT;
+    TextDirection direction = TextDirection::LTR;
+    OffsetF expectedResult = OffsetF();
+};
+
+const std::vector<OverlayOptionsTestCase> OVERLAY_OPTIONS_TEST_CASES = {
+    { Alignment::TOP_LEFT, TextDirection::LTR, OffsetF(0.0f, 0.0f) },
+    { Alignment::TOP_LEFT, TextDirection::RTL, OffsetF(50.0f, 0.0f) },
+
+    { Alignment::TOP_CENTER, TextDirection::LTR, OffsetF(25.0f, 0.0f) },
+    { Alignment::TOP_CENTER, TextDirection::RTL, OffsetF(25.0f, 0.0f) },
+
+    { Alignment::TOP_RIGHT, TextDirection::LTR, OffsetF(50.0f, 0.0f) },
+    { Alignment::TOP_RIGHT, TextDirection::RTL, OffsetF(0.0f, 0.0f) },
+
+    { Alignment::CENTER_LEFT, TextDirection::LTR, OffsetF(0.0f, 25.0f) },
+    { Alignment::CENTER_LEFT, TextDirection::RTL, OffsetF(50.0f, 25.0f) },
+
+    { Alignment::CENTER, TextDirection::LTR, OffsetF(25.0f, 25.0f) },
+    { Alignment::CENTER, TextDirection::RTL, OffsetF(25.0f, 25.0f) },
+
+    { Alignment::CENTER_RIGHT, TextDirection::LTR, OffsetF(50.0f, 25.0f) },
+    { Alignment::CENTER_RIGHT, TextDirection::RTL, OffsetF(0.0f, 25.0f) },
+
+    { Alignment::BOTTOM_LEFT, TextDirection::LTR, OffsetF(0.0f, 50.0f) },
+    { Alignment::BOTTOM_LEFT, TextDirection::RTL, OffsetF(50.0f, 50.0f) },
+
+    { Alignment::BOTTOM_CENTER, TextDirection::LTR, OffsetF(25.0f, 50.0f) },
+    { Alignment::BOTTOM_CENTER, TextDirection::RTL, OffsetF(25.0f, 50.0f) },
+
+    { Alignment::BOTTOM_RIGHT, TextDirection::LTR, OffsetF(50.0f, 50.0f) },
+    { Alignment::BOTTOM_RIGHT, TextDirection::RTL, OffsetF(0.0f, 50.0f) },
+};
 
 class LayoutPropertyTestNgTwo : public testing::Test {
 public:
@@ -53,7 +100,7 @@ public:
  * @tc.desc: Test CheckLocalizedBorderImageOutset when borderImageStart_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -80,7 +127,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset001, TestSize.L
  * @tc.desc: Test CheckLocalizedBorderImageOutset when borderImageEnd_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -107,7 +154,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset002, TestSize.L
  * @tc.desc: Test CheckLocalizedBorderImageOutset When neither borderImageStart_ nor borderImageEnd_ has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -129,7 +176,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset003, TestSize.L
  * @tc.desc: Test CheckLocalizedBorderImageWidth when borderImageStart_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -156,7 +203,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth001, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageWidth when borderImageEnd_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -183,7 +230,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth002, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageWidth When neither borderImageStart_ nor borderImageEnd_ has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -205,7 +252,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth003, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageSlice when borderImageStart_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -232,7 +279,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice001, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageSlice when borderImageEnd_ has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -259,7 +306,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice002, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageSlice When neither borderImageStart_ nor borderImageEnd_ has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -281,7 +328,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice003, TestSize.Le
  * @tc.desc: Test CheckLocalizedEdgeColors when startColor has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -309,7 +356,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors001, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedEdgeColors when endColor,topColor,bottomColor all have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -340,7 +387,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors002, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedEdgeColors When neither startColor nor endColor has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -362,7 +409,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors003, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedEdgeWidths when startDimen,topDimen,bottomDimen,leftDimen all have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -394,7 +441,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths001, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedEdgeWidths when endDimen,rightDimen have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -424,7 +471,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths002, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedEdgeWidths When neither startDimen nor endDimen has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -446,7 +493,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeWidths003, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedMargin when start,top,bottom,left have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -476,7 +523,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin001, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedMargin when end,right have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -504,7 +551,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin002, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedMargin When neither start nor end has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -526,7 +573,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedMargin003, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedPadding when start,top,bottom,left have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -556,7 +603,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding001, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedPadding when end,right have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -584,7 +631,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding002, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedPadding When neither start nor end has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -606,7 +653,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedPadding003, TestSize.Level1)
  * @tc.desc: Test LocalizedPaddingOrMarginChange
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, LocalizedPaddingOrMarginChange001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, LocalizedPaddingOrMarginChange001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
@@ -629,7 +676,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, LocalizedPaddingOrMarginChange001, TestSize.Le
  * @tc.desc: Test CheckLocalizedOuterBorderColor when startColor has value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -657,7 +704,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor001, TestSize.Le
  * @tc.desc: Test CheckLocalizedOuterBorderColor when endColor,topColor,bottomColor have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -688,7 +735,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor002, TestSize.Le
  * @tc.desc: Test CheckLocalizedOuterBorderColor When neither startColor nor endColor has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -712,7 +759,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedOuterBorderColor003, TestSize.Le
  * radiusBottomStart,radiusBottomEnd have values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -745,7 +792,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses001, TestSize.Leve
  * radiusBottomStart,radiusBottomEnd have no values
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -769,7 +816,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses002, TestSize.Leve
  * radiusBottomStart,radiusBottomEnd has a value
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses003, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses003, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -815,7 +862,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderRadiuses003, TestSize.Leve
  * @tc.desc: Test CheckOffsetLocalizedEdges
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -852,7 +899,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
  * @tc.desc: Test CheckOffsetLocalizedEdges
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -876,7 +923,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges002, TestSize.Level1)
  * @tc.desc: Test CheckPositionLocalizedEdges
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -913,7 +960,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level
  * @tc.desc: Test CheckPositionLocalizedEdges
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges002, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges002, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -937,7 +984,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges002, TestSize.Level
  * @tc.desc: Test ConstraintEqual when preContentConstraint is nullopt
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, ConstraintEqual001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, ConstraintEqual001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
@@ -955,7 +1002,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, ConstraintEqual001, TestSize.Level1)
  * @tc.desc: Test UpdateAllGeometryTransition
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, UpdateAllGeometryTransition001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateAllGeometryTransition001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
@@ -973,7 +1020,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateAllGeometryTransition001, TestSize.Level
  * @tc.desc: Test FromJson
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, FromJson001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, FromJson001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
@@ -987,33 +1034,11 @@ HWTEST_F(LayoutPropertyTestNgTwo, FromJson001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSafeAreaPadding001
- * @tc.desc: Test UpdateSafeAreaPadding
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, UpdateSafeAreaPadding001, TestSize.Level1)
-{
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
-    layoutProperty->SetHost(frameNodeHost);
-
-    PaddingProperty paddingProperty;
-    layoutProperty->ResetSafeAreaPadding();
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
-    EXPECT_TRUE(layoutProperty->GetSafeAreaPaddingProperty());
-
-    paddingProperty.start = std::make_optional<CalcLength>(5.0);
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
-    layoutProperty->ResetSafeAreaPadding();
-    EXPECT_FALSE(layoutProperty->GetSafeAreaPaddingProperty());
-}
-
-/**
  * @tc.name: PixelRoundToJsonValue001
  * @tc.desc: Test PixelRoundToJsonValue
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, PixelRoundToJsonValue001, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, PixelRoundToJsonValue001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     const std::string VALUE = "PixelRoundCalcPolicy.FORCE_CEIL";
@@ -1048,7 +1073,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, PixelRoundToJsonValue001, TestSize.Level1)
  * @tc.desc: Test CheckLocalizedBorderImageSlice when Api is 12 and 14
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice004, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice004, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -1085,7 +1110,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice004, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageWidth when Api is 12 and 14
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth004, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth004, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -1121,7 +1146,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth004, TestSize.Le
  * @tc.desc: Test CheckLocalizedBorderImageOutset when Api is 12 and 14
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.Level1)
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -1150,5 +1175,433 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.L
     borderImage1->SetEdgeWidth(BorderImageDirection::START, widthDimension);
     layoutProperty->CheckLocalizedBorderImageOutset(textDirection);
     EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageOutset(), outsetDimension);
+}
+
+/**
+ * @tc.name: UpdateLocalizedAlignment001
+ * @tc.desc: Test cast to UpdateLocalizedAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->positionProperty_);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->UpdateLocalizedAlignment("bottom_end");
+    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align1, "bottom_end");
+}
+
+/**
+ * @tc.name: UpdateIsMirrorable001
+ * @tc.desc: Test cast to UpdateIsMirrorable
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable, true);
+
+    layoutProperty->UpdateIsMirrorable(false);
+    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable1, false);
+}
+
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint001, TestSize.Level0)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty and constraint.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty constraint;
+    constraint.maxSize = CALC_SIZE;
+    constraint.minSize = CALC_SIZE;
+    constraint.selfIdealSize = CALC_SIZE;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    auto frameNode = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto customMeasureLayoutNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, V2::TEXT_ETS_TAG);
+    ASSERT_NE(customMeasureLayoutNode, nullptr);
+    frameNode->parent_ = customMeasureLayoutNode;
+    layoutProperty->SetHost(frameNode);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->UpdateLayoutConstraint(std::move(layoutConstraintF));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value(), CALC_SIZE);
+}
+
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level0)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty and constraint.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty constraint;
+    constraint.maxSize = CALC_SIZE;
+    constraint.minSize = CALC_SIZE;
+    constraint.selfIdealSize = CALC_SIZE;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(1.0);
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    auto frameNode = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto customMeasureLayoutNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, V2::TEXT_ETS_TAG);
+    ASSERT_NE(customMeasureLayoutNode, nullptr);
+    frameNode->parent_ = customMeasureLayoutNode;
+    layoutProperty->SetHost(frameNode);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->UpdateLayoutConstraint(std::move(layoutConstraintF));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value(), CALC_SIZE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value(), CALC_SIZE);
+}
+
+/**
+ * @tc.name: CheckBackgroundLayoutSafeAreaEdges001
+ * @tc.desc: Test CheckBackgroundLayoutSafeAreaEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
+ * @tc.name: CheckIgnoreLayoutSafeArea
+ * @tc.desc: Test CheckIgnoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckIgnoreLayoutSafeArea, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_->rawEdges = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_->rawEdges = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckIgnoreLayoutSafeArea(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->ignoreLayoutSafeAreaOpts_->edges, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
+ * @tc.name: TestIsIgnoreOptsValid
+ * @tc.desc: Test IsIgnoreOptsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestIsIgnoreOptsValid, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    EXPECT_EQ(layoutProperty->IsIgnoreOptsValid(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsIgnoreOptsValid(), true);
+}
+
+/**
+ * @tc.name: TestIsExpandConstraintNeeded
+ * @tc.desc: Test IsExpandConstraintNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->layoutPolicy_ = NG::LayoutPolicyProperty();
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_HORIZONTAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
+    EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+}
+
+/**
+ * @tc.name: TestMirrorOffset
+ * @tc.desc: Test PaddingPropertyT MirrorOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestMirrorOffset, TestSize.Level0)
+{
+    PaddingPropertyF edges = {
+        .left = 10.0f,
+        .right = 20.0f,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    OffsetF expectedRes(-20.0f, 30.0f);
+    EXPECT_EQ(edges.MirrorOffset(), expectedRes);
+}
+
+/**
+ * @tc.name: TestGenIgnoreOpts
+ * @tc.desc: Test GenIgnoreOpts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestGenIgnoreOpts, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    IgnoreLayoutSafeAreaOpts expectedRes = {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
+        .edges = NG::LAYOUT_SAFE_AREA_TYPE_NONE
+    };
+    EXPECT_EQ(layoutProperty->GenIgnoreOpts(), expectedRes);
+    layoutProperty->ignoreLayoutSafeAreaOpts_=std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type=LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges=LAYOUT_SAFE_AREA_EDGE_ALL;
+    expectedRes = {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    EXPECT_EQ(layoutProperty->GenIgnoreOpts(), expectedRes);
+}
+
+/**
+ * @tc.name: ExpandConstraintWithSafeAreaTest001
+ * @tc.desc: Test ExpandConstraintWithSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, ExpandConstraintWithSafeAreaTest001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), false);
+    layoutProperty->SetHost(frameNodeHost);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    frameNodeHost->SetIgnoreLayoutProcess(true);
+    frameNodeHost->SetRootMeasureNode(true);
+    frameNodeHost->SetEscapeDelayForIgnore(true);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    auto parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    frameNodeHost->MountToParent(parent);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    EXPECT_EQ(frameNodeHost->GetIgnoreLayoutProcess(), true);
+}
+
+/**
+ * @tc.name: TestConvertSafeAreaPadding
+ * @tc.desc: Test ConvertWithResidueToPaddingPropertyF
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestConvertSafeAreaPadding, TestSize.Level0)
+{
+    std::unique_ptr<PaddingProperty> safeAreaPadding = std::make_unique<PaddingProperty>();
+    *safeAreaPadding = {
+        .left = CalcLength(50, DimensionUnit::VP),
+        .right = CalcLength(50, DimensionUnit::VP),
+        .top = CalcLength(50, DimensionUnit::VP),
+        .bottom = CalcLength(50, DimensionUnit::VP)
+    };
+    ScaleProperty scaleProperty = {
+        .vpScale = 3.25,
+        .fpScale = 1.0,
+        .lpxScale = 1.0
+    };
+    PaddingPropertyF fract = {
+        .left = 0.4f + 0.4f,
+        .right = 0.4f + 0.4f,
+        .top = 0.4f + 0.4f,
+        .bottom = 0.4f + 0.4f
+    };
+    PaddingPropertyF expectedRes = {
+        .left = 163.0f,
+        .right = 163.0f,
+        .top = 163.0f,
+        .bottom = 163.0f
+    };
+    auto res = ConvertWithResidueToPaddingPropertyF(safeAreaPadding, scaleProperty, fract);
+    EXPECT_EQ(res, expectedRes);
+}
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest01
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(90, 90))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(10, 10))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest02
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.steps: step2. layoutProperty update new calcConstraint
+     */
+    userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")),
+        .maxSize = CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(80, 80))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(20, 20))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
+
+/**
+ * @tc.name: GetAlignPositionWithDirectionTest001
+ * @tc.desc: GetAlignPositionWithDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, GetAlignPositionWithDirectionTest001, TestSize.Level1)
+{
+    const SizeF parentSize(100.0f, 100.0f);
+    const SizeF childSize(50.0f, 50.0f);
+    for (const auto& testCase : OVERLAY_OPTIONS_TEST_CASES) {
+        /**
+        * @tc.steps: step1. call GetAlignPositionWithDirection function.
+        * @tc.expected: step1. offset equals expectedResult.
+        */
+        auto offset = Alignment::GetAlignPositionWithDirection(parentSize, childSize,
+            testCase.align, testCase.direction);
+        EXPECT_EQ(offset, testCase.expectedResult);
+    }
 }
 }

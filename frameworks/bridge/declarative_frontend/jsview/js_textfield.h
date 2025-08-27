@@ -25,11 +25,14 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::Framework {
 
 class JSTextField : public JSViewAbstract {
 public:
+    static bool ParseText(const JSRef<JSObject>& textValue, std::optional<std::u16string>& value,
+    JSRef<JSVal>& changeEventVal, std::u16string& text, RefPtr<ResourceObject>& textObject);
     static void CreateTextInput(const JSCallbackInfo& info);
     static void CreateTextArea(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
@@ -61,7 +64,7 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static Edge GetOldPadding(const JSCallbackInfo& info);
-    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info, bool& hasRegist);
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
@@ -81,6 +84,10 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void SetOnChange(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
+    static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
     static void SetOnContentScroll(const JSCallbackInfo& info);
@@ -116,6 +123,7 @@ public:
 
     static void SetPasswordRules(const JSCallbackInfo& info);
     static void SetEnableAutoFill(const JSCallbackInfo& info);
+    static void SetEnableAutoFillAnimation(const JSCallbackInfo& info);
     static void ShowPasswordText(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
@@ -139,14 +147,20 @@ public:
     static void SetCapitalizationMode(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
-    static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
+    static void SetOnWillAttachIME(const JSCallbackInfo& info);
+    static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
+    static void ParseOnIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
+    static void ParseOffIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
+    static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
+    static void UnregisterResource(const std::string& key);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
     static void SetCancelDefaultIcon();
-    static void ResetCancelIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
+    static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
 };
 
 } // namespace OHOS::Ace::Framework

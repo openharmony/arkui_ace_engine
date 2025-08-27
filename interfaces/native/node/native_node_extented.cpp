@@ -36,7 +36,9 @@ constexpr float DEFAULT_SIZE_18 = 18.0f;
 constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+
 constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
+constexpr int EXPECTED_UPDATE_INTERVAL_MIN_VALUE = 100;
 constexpr float DEFAULT_VISIBLE_RATIO_MIN = 0.0f;
 constexpr float DEFAULT_VISIBLE_RATIO_MAX = 1.0f;
 
@@ -148,10 +150,10 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
     if (!event || !info || !event->event) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    info->optionsX = event->event->numberData[0].f32;
-    info->optionsLineTop = event->event->numberData[1].f32;
-    info->optionsLineBottom = event->event->numberData[2].f32;
-    info->optionsBaseLine = event->event->numberData[3].f32;
+    info->optionsX = event->event->numberData[0].f32; // 0: x offset
+    info->optionsLineTop = event->event->numberData[1].f32; // 1: LineTop value
+    info->optionsLineBottom = event->event->numberData[2].f32; // 2: LineBottom value
+    info->optionsBaseLine = event->event->numberData[3].f32; // 3: BaseLine value
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1126,7 +1128,7 @@ const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
 {
     ArkUI_VisibleAreaEventOptions* options = new ArkUI_VisibleAreaEventOptions;
-    options->expectedUpdateInterval = 1000;
+    options->expectedUpdateInterval = EXPECTED_UPDATE_INTERVAL_VALUE;
     return options;
 }
 
@@ -1161,6 +1163,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
     if (value < 0) {
         value = EXPECTED_UPDATE_INTERVAL_VALUE;
     }
+    if (value >= 0 && value < EXPECTED_UPDATE_INTERVAL_MIN_VALUE) {
+        value = EXPECTED_UPDATE_INTERVAL_MIN_VALUE;
+    }
     option->expectedUpdateInterval = value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1190,6 +1195,89 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_Visible
         return -1;
     }
     return option->expectedUpdateInterval;
+}
+
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Create()
+{
+    ArkUI_PositionEdges* edges = new ArkUI_PositionEdges{ { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f } };
+    return edges;
+}
+
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Copy(const ArkUI_PositionEdges* edges)
+{
+    CHECK_NULL_RETURN(edges, nullptr);
+    ArkUI_PositionEdges* positionEdges = new ArkUI_PositionEdges { { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f } };
+    positionEdges->top = edges->top;
+    positionEdges->left = edges->left;
+    positionEdges->bottom = edges->bottom;
+    positionEdges->right = edges->right;
+    return positionEdges;
+}
+
+void OH_ArkUI_PositionEdges_Dispose(ArkUI_PositionEdges* edges)
+{
+    delete edges;
+    edges = nullptr;
+}
+
+void OH_ArkUI_PositionEdges_SetTop(ArkUI_PositionEdges* edges, float value)
+{
+    CHECK_NULL_VOID(edges);
+    edges->top = { 1, value };
+}
+
+int32_t OH_ArkUI_PositionEdges_GetTop(ArkUI_PositionEdges* edges, float* value)
+{
+    if (!edges || !edges->top.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = edges->top.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PositionEdges_SetLeft(ArkUI_PositionEdges* edges, float value)
+{
+    CHECK_NULL_VOID(edges);
+    edges->left = { 1, value };
+}
+
+int32_t OH_ArkUI_PositionEdges_GetLeft(ArkUI_PositionEdges* edges, float* value)
+{
+    if (!edges || !edges->left.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = edges->left.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PositionEdges_SetBottom(ArkUI_PositionEdges* edges, float value)
+{
+    CHECK_NULL_VOID(edges);
+    edges->bottom = { 1, value };
+}
+
+int32_t OH_ArkUI_PositionEdges_GetBottom(ArkUI_PositionEdges* edges, float* value)
+{
+    if (!edges || !edges->bottom.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = edges->bottom.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value)
+{
+    CHECK_NULL_VOID(edges);
+    edges->right = { 1, value };
+}
+
+int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value)
+{
+    if (!edges || !edges->right.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = edges->right.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 #ifdef __cplusplus
 };

@@ -28,7 +28,6 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -43,7 +42,6 @@
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
-#include "core/common/page_viewport_config.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
@@ -56,6 +54,11 @@
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -72,7 +75,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
-using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 
 class PipelineBase;
 
@@ -86,14 +89,6 @@ public:
     virtual void Initialize() = 0;
 
     virtual void Destroy() = 0;
-
-    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
-
-    virtual const std::string& GetAppRunningUniqueId() const
-    {
-        static const std::string res;
-        return res;
-    }
 
     virtual bool IsKeyboard()
     {
@@ -218,24 +213,6 @@ public:
     {
         return displayOrientation_;
     }
-    virtual RefPtr<PageViewportConfig> GetCurrentViewportConfig() const
-    {
-        return nullptr;
-    }
-    virtual RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
-        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
-    {
-        return nullptr;
-    }
-    virtual void SetRequestedOrientation(
-        Orientation orientation, bool needAnimation = true) {}
-    virtual Orientation GetRequestedOrientation()
-    {
-        return Orientation::UNSPECIFIED;
-    }
-    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
-    virtual bool IsFullScreenWindow() const { return true; }
-    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
@@ -373,13 +350,14 @@ public:
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
-    static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
     static ColorMode CurrentColorMode();
+    static std::string CurrentBundleName();
 
     void SetUseNewPipeline()
     {
@@ -674,6 +652,7 @@ public:
     }
 
     virtual void TerminateUIExtension() {}
+    virtual void RequestAtomicServiceTerminate() {}
     virtual bool UIExtensionIsHalfScreen()
     {
         return false;
@@ -724,8 +703,17 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
 
-    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
+
+    virtual Rect GetUIExtensionHostWindowRect()
     {
         return Rect();
     }
@@ -783,7 +771,25 @@ public:
         return Rect();
     }
 
+    virtual Rect GetFoldExpandAvailableRect() const
+    {
+        return Rect();
+    }
+
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
+
+    virtual void UpdateColorMode(uint32_t colorMode) {};
+
+    virtual void TriggerModuleSerializer() {};
+
+    virtual sptr<IRemoteObject> GetToken();
+
+    // Get the subFrontend of container
+    virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
+    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
+
+    virtual bool IsArkTsFrontEnd() const { return false; }
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

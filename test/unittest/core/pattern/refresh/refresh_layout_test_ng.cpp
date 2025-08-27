@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "refresh_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
@@ -34,6 +36,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode001, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     CreateDone();
     EXPECT_NE(pattern_->progressChild_, nullptr);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Add custom
@@ -104,6 +107,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode002, TestSize.Level1)
     EXPECT_EQ(pattern_->customBuilder_, nullptr);
     EXPECT_NE(pattern_->progressChild_, nullptr);
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Add custom
@@ -137,6 +141,7 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode003, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->progressChild_, nullptr);
     EXPECT_EQ(pattern_->customBuilder_, builder);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Remove custom when isRefreshing
@@ -165,6 +170,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshing001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Set to refreshing
@@ -195,6 +201,7 @@ HWTEST_F(RefreshLayoutTestNg, OnKeyEvent001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. KeyCode::KEY_UNKNOWN
@@ -222,6 +229,7 @@ HWTEST_F(RefreshLayoutTestNg, OnKeyEvent002, TestSize.Level1)
     RefreshModelNG model = CreateRefresh();
     model.SetOnRefreshing(std::move(onRefreshing));
     CreateDone();
+    EXPECT_FALSE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. KeyCode::KEY_F5
@@ -257,6 +265,9 @@ HWTEST_F(RefreshLayoutTestNg, GetTargetOffset001, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
     pattern_->HandleDragEnd(0.f);
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
+    EXPECT_FALSE(pattern_->isHigherVersion_);
+    auto algorithm = AceType::DynamicCast<RefreshLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->isHighVersion_);
 }
 
 /**
@@ -269,6 +280,7 @@ HWTEST_F(RefreshLayoutTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateRefresh();
     CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Set to refreshing
@@ -301,6 +313,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshOffset01, TestSize.Level1)
     model.SetRefreshOffset(Dimension(10.f));
     CreateDone();
     EXPECT_EQ(pattern_->refreshOffset_, Dimension(10.f));
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step1. Illegal arg
@@ -332,6 +345,7 @@ HWTEST_F(RefreshLayoutTestNg, SetPullDownRatio001, TestSize.Level1)
     model.SetPullDownRatio(std::nullopt);
     CreateDone();
     EXPECT_EQ(pattern_->CalculatePullDownRatio(), 1.f);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     model.SetPullDownRatio(AceType::RawPtr(frameNode_), 0.f);
     EXPECT_EQ(pattern_->CalculatePullDownRatio(), 0.f);
@@ -356,6 +370,7 @@ HWTEST_F(RefreshLayoutTestNg, Layout001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetTag(), "Refresh");
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 32, 32)));
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     auto loadingProgress = GetChildFrameNode(frameNode_, 0);
     EXPECT_EQ(loadingProgress->GetTag(), "LoadingProgress");
@@ -375,6 +390,7 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText001, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     layoutProperty_->ResetLoadingText();
     frameNode_->MarkModifyDone();
@@ -399,6 +415,7 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_EQ(pattern_->GetTriggerRefreshDisTance().ConvertToPx(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
 
     /**
      * @tc.steps: step2. Test refresh action
@@ -414,5 +431,244 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
     pattern_->HandleDragEnd(0.f);
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("loadingText");
+    CreateDone();
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+    EXPECT_TRUE(pattern_->hasLoadingText_);
+
+    pattern_->OnColorConfigurationUpdate();
+    auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    EXPECT_EQ(progressPaintProperty->GetColorValue(Color::WHITE), Color::BLACK);
+    auto textLayoutProperty = pattern_->loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance001
+ * @tc.desc: Test does not set SetMaxPullDownDistance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is Infinity
+     * @tc.expected: The GetMaxPullDownDistance method returns infinity
+     */
+    float value = std::numeric_limits<float>::infinity();
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), value);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance002
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from GetMaxPullDownDistance method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 100.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(100.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is 100.0f
+     * @tc.expected: The GetMaxPullDownDistance method returns 100.0f
+     */
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), 100.0f);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance003
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from layoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 200.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(200.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test layoutProperty maxpulldowndistance is 200.0f
+     * @tc.expected: The layoutProperty maxpulldowndistance property returns 200.0f
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxPullDownDistance().value(), 200.0f);
+}
+
+/**
+ * @tc.name: CustomBuilderNodeVisibility001
+ * @tc.desc: Test CustomBuilderNode's visibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetCustomBuilder
+     * @tc.expected: custom node exists, and default visibility is visible.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->progressChild_, nullptr);
+    EXPECT_EQ(pattern_->customBuilder_, builder);
+    auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step2.  start Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step3.  end Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step4.  user has setted visibility and  start Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5.  user has setted visibility and  end Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: BeginAndEndTrailingTrace001
+ * @tc.desc: Test BeginTrailingTrace and EndTrailingTrace function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, BeginAndEndTrailingTrace001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+
+    pattern_->BeginTrailingTrace();
+    EXPECT_TRUE(pattern_->hasBeginTrailingTrace_);
+    pattern_->EndTrailingTrace();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+}
+
+/**
+ * @tc.name: ResetAnimation001
+ * @tc.desc: Test ResetAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, ResetAnimation001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    pattern_->scrollOffset_ = 100.0f;
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->animation_, nullptr);
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), 100.0f);
+    pattern_->QuickStartFresh();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_NE(pattern_->animation_, nullptr);
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), pattern_->refreshOffset_.ConvertToPx());
+}
+
+/**
+ * @tc.name: TestInitChildNode001
+ * @tc.desc: Test InitChildNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create with loadingText
+     * @tc.expected: loadingText node exists.
+     */
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("loadingText");
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+    EXPECT_NE(pattern_->progressChild_, nullptr);
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. refresh don't set accessibilityLevel
+     * @tc.expected: progress node and loadingText node don't have accessibilityLevel.
+     */
+    auto refreshAccessibilityProperty = frameNode_->GetAccessibilityProperty<NG::RefreshAccessibilityProperty>();
+    EXPECT_NE(refreshAccessibilityProperty, nullptr);
+    EXPECT_FALSE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    auto progressAccessibilityProperty = pattern_->progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(progressAccessibilityProperty, nullptr);
+    EXPECT_FALSE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    auto textAccessibilityProperty = pattern_->loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(textAccessibilityProperty, nullptr);
+    EXPECT_FALSE(textAccessibilityProperty->accessibilityLevel_.has_value());
+
+    /**
+     * @tc.steps: step3. refresh sets accessibilityLevel
+     * @tc.expected: progress node and loadingText node have accessibilityLevel.
+     */
+    refreshAccessibilityProperty->SetAccessibilityLevel("no");
+    EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");
+    pattern_->InitChildNode(frameNode_);
+    EXPECT_TRUE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(progressAccessibilityProperty->accessibilityLevel_.value(), "no");
+    EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(textAccessibilityProperty->accessibilityLevel_.value(), "no");
 }
 } // namespace OHOS::Ace::NG

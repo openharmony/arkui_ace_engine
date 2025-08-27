@@ -30,6 +30,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -80,8 +81,8 @@ const Color BLUE = Color(0xff0000ff);
 const SafeAreaExpandOpts safeAreaExpandOpts = SafeAreaExpandOpts();
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 
-const BackgroundImageSize BACKGROUNDSIZE { BackgroundImageSizeType::AUTO, 1.0 };
-const BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
+BackgroundImageSize BACKGROUNDSIZE { BackgroundImageSizeType::AUTO, 1.0 };
+BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
     BackgroundImagePositionType::PERCENT, 0.0 };
 
 constexpr char TAG_ROOT[] = "root";

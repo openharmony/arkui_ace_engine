@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 
 #include "base/i18n/localization.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
@@ -48,7 +50,7 @@ void AddSafeIntervalBetweenToolbarItem(
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         if (count == ONE_TOOLBAR_ITEM && toolbarItemSize != ONE_TOOLBAR_ITEM) {
             margin.right = CalcLength(theme->GetToolbarItemMargin());
         } else if (!needMoreButton && (count == toolbarItemSize) && (toolbarItemSize != ONE_TOOLBAR_ITEM)) {
@@ -93,7 +95,7 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     CHECK_NULL_RETURN(theme, nullptr);
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         textLayoutProperty->UpdateLineHeight(theme->GetToolBarItemFontSize());
     }
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
@@ -160,6 +162,7 @@ void RegisterToolbarHotZoneEvent(const RefPtr<FrameNode>& buttonNode, const RefP
             return;
         }
         auto barItemNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(barItemNode);
         auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = barItemNode->GetPattern<BarItemPattern>();
@@ -207,10 +210,12 @@ void UpdateToolbarItemNodeWithConfiguration(
     const RefPtr<FrameNode>& buttonNode, bool enableStatus, bool hideItemText)
 {
     barItemNode->SetBarItemUsedInToolbarConfiguration(true);
-    if (barItem.text.has_value() && !barItem.text.value().empty() && !hideItemText) {
+    if (barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateToolbarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
-        barItemNode->AddChild(textNode);
+        if (!hideItemText) {
+            barItemNode->AddChild(textNode);
+        }
     }
     if ((barItem.icon.has_value() && !barItem.icon.value().empty())
         || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)) {
@@ -324,7 +329,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
@@ -395,7 +400,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
@@ -429,16 +434,18 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     return toolBarItemNode;
 }
 
-void BuildToolbarMoreMenuNodeAction(
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const RefPtr<FrameNode>& buttonNode)
+void BuildToolbarMoreMenuNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, 
+    const RefPtr<FrameNode>& buttonNode, const MenuParam& menuParam)
 {
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context),
+                            id = barItemNode->GetId(),                                     
+                            param = menuParam,
+                            weakMenu = WeakPtr<FrameNode>(barMenuNode),
+                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -475,6 +482,16 @@ void BuildToolbarMoreMenuNodeAction(
             imgOffset.SetX(imgOffset.GetX());
         }
         imgOffset.SetY(imgOffset.GetY() - imageSize.Height());
+        
+        if (param.isShowInSubWindow) {
+            auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+            if (wrapperPattern && wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                //if on hide animation, avoid displaying the menu again
+                return;
+            }
+            SubwindowManager::GetInstance()->ShowMenuNG(menu, param, barItemNode, imgOffset);
+            return;
+        }
         overlayManager->ShowMenu(id, imgOffset, menu);
     };
     eventHub->SetItemAction(clickCallback);
@@ -493,6 +510,11 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     BuildToolbarMoreItemNode(barItemNode, itemNodeParam.enabled, itemNodeParam.hideText);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        menuParam.isShowInSubWindow = true;
+        menuParam.placement = Placement::TOP_LEFT;
+    }
+    
     if (barNode.nodeBase) {
         auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(barNode.nodeBase->GetToolBarNode());
         CHECK_NULL_RETURN(toolbarNode, false);
@@ -510,7 +532,7 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
         std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
     auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
     CHECK_NULL_RETURN(toolBarItemNode, false);
-    BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);
+    BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode, menuParam);
 
     // set Navigation/NavDestination toolBar "more" button InspectorId
     NavigationTitleUtil::SetInnerChildId(toolBarItemNode, fieldProperty.field,
@@ -685,7 +707,34 @@ void NavigationToolbarUtil::SetToolbarOptions(
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
     CHECK_NULL_VOID(toolBarPattern);
-    toolBarPattern->SetToolbarOptions(std::move(opt));
+    toolBarPattern->SetToolbarOptions(opt);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto updateFunc = [weakNodeBase = AceType::WeakClaim(AceType::RawPtr(nodeBase)),
+                          weakToolBarPattern = AceType::WeakClaim(AceType::RawPtr(toolBarPattern)),
+                          opt](const RefPtr<ResourceObject>& resObj) mutable {
+        opt.bgOptions.ReloadResources();
+        if (opt.bgOptions.blurStyleOption.has_value()) {
+            opt.bgOptions.blurStyleOption->ReloadResources();
+        }
+        if (opt.bgOptions.effectOption.has_value()) {
+            opt.bgOptions.effectOption->ReloadResources();
+        }
+        auto toolBarPattern = weakToolBarPattern.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+
+        toolBarPattern->SetToolbarOptions(opt);
+        auto nodeBase = weakNodeBase.Upgrade();
+        CHECK_NULL_VOID(nodeBase);
+        nodeBase->MarkModifyDone();
+        nodeBase->MarkDirtyNode();
+    };
+    CHECK_NULL_VOID(nodeBase);
+    auto pattern = nodeBase->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("navigation.navigationToolbarOptions", resObj, std::move(updateFunc));
 }
 
 void NavigationToolbarUtil::SetToolbarMoreButtonOptions(

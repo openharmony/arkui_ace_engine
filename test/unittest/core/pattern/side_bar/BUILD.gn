@@ -18,6 +18,7 @@ ace_unittest("side_bar_test_ng") {
   sources = [
     "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
+    "side_bar_pattern_test_two_ng.cpp",
     "side_bar_view_test_ng.cpp",
   ]
 }

@@ -35,7 +35,10 @@ class BuilderNodeFinalizationRegisterProxy {
 class FrameNodeFinalizationRegisterProxy {
   constructor() {
     this.finalizationRegistry_ = new FinalizationRegistry((heldValue: number) => {
-      FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+      if (!FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(heldValue)?.deref()) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+      }
+      FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
     });
   }
   public static register(target: FrameNode, heldValue: number) {
@@ -45,6 +48,7 @@ class FrameNodeFinalizationRegisterProxy {
   public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
   public static ElementIdToOwningFrameNode_ = new Map<number, WeakRef<FrameNode>>();
   public static FrameNodeInMainTree_ = new Map<number, FrameNode>();
+  public static rootFrameNodeIdToBuilderNode_ = new Map<number, WeakRef<FrameNode>>();
   private finalizationRegistry_: FinalizationRegistry;
 }
 
@@ -53,14 +57,17 @@ class NodeControllerRegisterProxy {
   public static __NodeControllerMap__ = new Map<number, NodeController>();
 }
 
-globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number,nodeController:NodeController ) {
+globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number, nodeController:NodeController): void {
   NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
-}
+};
 
-globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number) {
-  let nodeController: NodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
-  nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-  NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number): void {
+  let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
+  if (nodeController) {
+    nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+    nodeController._nodeContainerId._value = -1;
+    NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+  }
 }
 
 globalThis.__viewPuStack__ = new Array<ViewPU>();
@@ -74,4 +81,4 @@ globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent: 
     globalThis.__viewPuStack__?.push(_BuilderNodeView);
   }
   return (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
-}
+};

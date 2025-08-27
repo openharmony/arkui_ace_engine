@@ -25,6 +25,11 @@
 
 namespace OHOS::Ace::Framework {
 
+struct HomePathInfo {
+    std::string name;
+    JSRef<JSVal> param;
+};
+
 struct NavPathInfoUINode {
     NavPathInfoUINode(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& uiNode, int32_t index)
     {
@@ -40,7 +45,7 @@ struct NavPathInfoUINode {
 };
 
 class JSRouteInfo : public NG::RouteInfo {
-    DECLARE_ACE_TYPE(JSRouteInfo, NG::RouteInfo)
+    DECLARE_ACE_TYPE(JSRouteInfo, NG::RouteInfo);
 public:
     JSRouteInfo() = default;
     ~JSRouteInfo() override = default;
@@ -56,7 +61,7 @@ protected:
 };
 
 class JSNavigationStack : public NG::NavigationStack {
-    DECLARE_ACE_TYPE(JSNavigationStack, NG::NavigationStack)
+    DECLARE_ACE_TYPE(JSNavigationStack, NG::NavigationStack);
 public:
     JSNavigationStack() = default;
     ~JSNavigationStack() override = default;
@@ -115,6 +120,7 @@ public:
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
     std::string GetStringifyParamByIndex(int32_t index) const override;
+    std::string GetSerializedParamSafely(int32_t index) const override;
     void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
@@ -129,6 +135,16 @@ public:
     uint64_t GetNavDestinationIdInt(int32_t index) override;
     bool GetIsForceSet(int32_t index) override;
     void ResetIsForceSetFlag(int32_t index) override;
+    void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
+    void CallPushDestinationInner(const NG::NavdestinationRecoveryInfo& navdestinationsInfo) override;
+
+    void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
+
+    void SetHomePathInfo(HomePathInfo&& pathInfo)
+    {
+        homePathInfo_ = std::move(pathInfo);
+    }
+    bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -137,8 +153,8 @@ protected:
     std::function<void()> onStateChangedCallback_;
 
 private:
-    JSRef<JSArray> GetJsPathArray();
-    JSRef<JSObject> GetJsPathInfo(int32_t index);
+    JSRef<JSArray> GetJsPathArray() const;
+    JSRef<JSObject> GetJsPathInfo(int32_t index) const;
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
@@ -170,9 +186,15 @@ private:
 
     bool RemoveDestinationIfNeeded(const JSRef<JSObject>& param, int32_t errorCode, int32_t index);
 
+    bool ExecutePopCallbackInStack(const JSRef<JSVal>& param);
     bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, const JSRef<JSVal>& param);
+    void ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param);
+
 private:
     JSRef<JSObject> thisObj_;
+
+    std::optional<HomePathInfo> homePathInfo_;
+    WeakPtr<NG::NavDestinationGroupNode> homeDestinationNode_;
 };
 } // namespace OHOS::Ace::Framework
 

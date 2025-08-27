@@ -33,10 +33,19 @@ public:
     RefPtr<RenderNode> CreateRender(
         const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true) override;
     void AppendChild(const RefPtr<SvgNode>& child) override;
+    bool ProcessIteratively(const LayoutParam& layoutParam, std::stack<SvgCreateRenderInfo>& createRenderTaskSt,
+        SvgCreateRenderInfo& svgCreateRenderInfo) override;
+    bool BeforeChildrenProcessed(SvgCreateRenderInfo& svgCreateRenderInfo) override;
+    void AfterChildrenProcessed(const LayoutParam& layoutParam, SvgCreateRenderInfo& svgCreateRenderInfo) override;
 
     void Inherit(const RefPtr<SvgBaseDeclaration>& parent) override
     {
         component_->Inherit(parent);
+    }
+
+    bool IsCreateRenderRecursive() const override
+    {
+        return true;
     }
 
     RefPtr<Component> GetComponent() const override
@@ -44,11 +53,7 @@ public:
         return component_;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSPath AsPath(const Size& viewPort) const override;
-#endif
 
 private:
     RefPtr<SvgGComponent> component_;

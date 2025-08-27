@@ -146,6 +146,14 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return promise;
     }
+
+    getWithRange(start, end, isStartRect, options)
+    {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getWithRange(start, end, isStartRect, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -203,6 +211,12 @@ class DragController {
         JSViewAbstract.cancelDataLoading(key);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    enableDropDisallowedBadge(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.enableDropDisallowedBadge(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -218,6 +232,16 @@ class UIObserver {
     off(...args) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_observer.off(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    addGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.addGlobalGestureListener(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeGlobalGestureListener(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer?.removeGlobalGestureListener(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -246,6 +270,13 @@ class MeasureUtils {
         let sizeOption = this.ohos_measureUtils.measureTextSize(options);
         __JSScopeUtil__.restoreInstanceId();
         return sizeOption;
+    }
+
+    getParagraphs(styledString, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let paraArr = TextLayout.getParagraphs(styledString, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return paraArr;
     }
 }
 
@@ -835,6 +866,24 @@ class UIContext {
         }
         __JSScopeUtil__.restoreInstanceId();
     }
+        
+    isAvailable() {
+        return __availableInstanceIds__.has(this.instanceId_);
+    }
+
+    setKeyboardAppearanceConfig(uniqueId, config) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByUniqueId(uniqueId);
+        Context.setKeyboardAppearanceConfig(nodePtr, config);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setCacheRange(frameNode, range) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = frameNode.getNodePtr();
+        getUINativeModule().list.setCacheRange(nodePtr, range);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -966,6 +1015,16 @@ class FocusController {
             __JSScopeUtil__.restoreInstanceId();
             return result;
         }
+    }
+
+    isActive() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_focusController.isActive();
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
     }
 
     setAutoFocusTransfer(value) {
@@ -1643,6 +1702,16 @@ class TextMenuController {
         TextMenu.setMenuOptions(textMenuOptions);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    static disableSystemServiceMenuItems(disable) {
+        let controller = globalThis.requireNapi('arkui.textMenuController');
+        controller.disableSystemServiceMenuItems(disable);
+    }
+
+    static disableMenuItems(items) {
+        let controller = globalThis.requireNapi('arkui.textMenuController');
+        controller.disableMenuItems(items);
+    }
 }
 
 /**
@@ -1679,4 +1748,22 @@ function __checkRegexValid__(pattern) {
     } finally {
         return result;
     }
+}
+
+const __availableInstanceIds__ = new Set();
+
+/**
+ * add available instanceId
+ * @param instanceId instanceId to add
+ */
+function __addAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.add(instanceId);
+}
+
+/**
+ * remove available instanceId
+ * @param instanceId instanceId to remove
+ */
+function __removeAvailableInstanceId__(instanceId) {
+    __availableInstanceIds__.delete(instanceId);
 }

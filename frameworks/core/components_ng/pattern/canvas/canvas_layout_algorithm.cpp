@@ -15,13 +15,14 @@
 
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> CanvasLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    std::optional<SizeF> canvasSize = contentConstraint.maxSize;
+    SizeF canvasSize = contentConstraint.maxSize;
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, canvasSize);
     auto pattern = host->GetPattern<CanvasPattern>();
@@ -29,6 +30,7 @@ std::optional<SizeF> CanvasLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.IsValid()) {
         canvasSize = contentConstraint.selfIdealSize.ConvertToSizeT();
     }
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, canvasSize);
     pattern->SetCanvasSize(canvasSize);
     return canvasSize;
 }

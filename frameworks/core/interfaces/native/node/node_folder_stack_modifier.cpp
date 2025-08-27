@@ -45,6 +45,44 @@ void ResetAutoHalfFold(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     FolderStackModelNG::SetAutoHalfFold(frameNode, true);
 }
+
+void SetOnFolderStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFolderStateChange = reinterpret_cast<std::function<void(const NG::FolderEventInfo&)>*>(callback);
+        FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(*onFolderStateChange));
+    } else {
+        FolderStackModelNG::SetOnFolderStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnFolderStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FolderStackModelNG::SetOnFolderStateChange(frameNode, nullptr);
+}
+
+void SetOnHoverStatusChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onHoverStatusChange = reinterpret_cast<std::function<void(const NG::FolderEventInfo&)>*>(callback);
+        FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(*onHoverStatusChange));
+    } else {
+        FolderStackModelNG::SetOnHoverStatusChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnHoverStatusChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FolderStackModelNG::SetOnHoverStatusChange(frameNode, nullptr);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIFolderStackModifier* GetFolderStackModifier()
@@ -55,6 +93,10 @@ const ArkUIFolderStackModifier* GetFolderStackModifier()
         .resetEnableAnimation = ResetEnableAnimation,
         .setAutoHalfFold = SetAutoHalfFold,
         .resetAutoHalfFold = ResetAutoHalfFold,
+        .setOnFolderStateChange = SetOnFolderStateChange,
+        .resetOnFolderStateChange = ResetOnFolderStateChange,
+        .setOnHoverStatusChange = SetOnHoverStatusChange,
+        .resetOnHoverStatusChange = ResetOnHoverStatusChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

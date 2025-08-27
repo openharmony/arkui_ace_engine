@@ -238,6 +238,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
 }
 
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{}
+
 void SessionWrapperImpl::NotifySizeChangeReason(
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -256,14 +259,12 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
 void SessionWrapperImpl::OnReleaseDone()
 {}
 
-void SessionWrapperImpl::OnExtensionDetachToDisplay()
-{}
-
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
 
-int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
+int32_t SessionWrapperImpl::SendDataSync(
+    const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
     return 1;
 }
@@ -296,4 +297,8 @@ bool SessionWrapperImpl::SendBusinessData(
 void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 
 void SessionWrapperImpl::ReDispatchWantParams() {}
+
+void SessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+}
 } // namespace OHOS::Ace::NG

@@ -37,7 +37,7 @@ public:
 
         RefPtr<NavigationBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<NavigationBarTheme> theme = AceType::Claim(new NavigationBarTheme());
+            RefPtr<NavigationBarTheme> theme = AceType::MakeRefPtr<NavigationBarTheme>();
             InitTheme(theme, themeConstants);
             return theme;
         }
@@ -135,8 +135,10 @@ public:
             theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));
             theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-                SetToolBarTheme(pattern, theme);
                 SetNavigationTokenTheme(pattern, theme);
+            }
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
+                SetToolBarTheme(pattern, theme);
             }
             ParsePatternContinue(themeConstants, theme);
         }

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class PixelMapPreview : public PixelMap {
-    DECLARE_ACE_TYPE(PixelMapPreview, PixelMap)
+    DECLARE_ACE_TYPE(PixelMapPreview, PixelMap);
 
 public:
     explicit PixelMapPreview(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(std::move(pixmap)) {}
@@ -49,10 +49,11 @@ public:
     }
     bool EncodeTlv(std::vector<uint8_t>& buff) override;
     uint32_t WritePixels(const WritePixelsOptions& opts) override;
-    bool GetIsWideColorGamut() const override
+    uint32_t GetInnerColorGamut() const override
     {
-        return false;
+        return 0;
     }
+    void SetMemoryName(std::string pixelMapName) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

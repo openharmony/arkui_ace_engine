@@ -79,6 +79,14 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, targetId, userData);
     }
 
+    if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT) {
+        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT, targetId, userData);
+    }
+
+    if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND) {
+        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND, targetId, userData);
+    }
+
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW) {
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW, targetId, userData);
     }
@@ -136,6 +144,14 @@ void UnregisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType 
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW) {
         NodeRemoveExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
+    }
+
+    if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT) {
+        NodeRemoveExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT);
+    }
+
+    if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND) {
+        NodeRemoveExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND);
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW) {

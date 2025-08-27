@@ -113,7 +113,7 @@ enum class FocusPriority : int32_t {
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusPaintParam, AceType)
+    DECLARE_ACE_TYPE(FocusPaintParam, AceType);
 
 public:
     FocusPaintParam() = default;
@@ -179,7 +179,7 @@ private:
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusPattern, AceType)
+    DECLARE_ACE_TYPE(FocusPattern, AceType);
 
 public:
     FocusPattern() = default;
@@ -318,8 +318,8 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
-    DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
+class ACE_FORCE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
+    DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState);
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : FocusState(eventHub, type), FocusEventHandler(), focusable_(focusable)
@@ -518,6 +518,7 @@ public:
     bool TriggerFocusScroll();
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest = false);
+    RefPtr<FocusHub> GetFocusNodeFromSubWindow(const std::string& id);
     RefPtr<FocusView> GetFirstChildFocusView();
 
     bool IsFocusableByTab();
@@ -604,8 +605,6 @@ public:
     /* Manipulation on node-tree is forbidden in operation. */
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
     bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
-    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
-        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -802,6 +801,12 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_TAB) == MASK_FOCUS_STEP_TAB;
     }
 
+    static inline bool IsHomeOrEndStep(FocusStep step)
+    {
+        return step == FocusStep::UP_END || step == FocusStep::LEFT_END || step == FocusStep::DOWN_END ||
+               step == FocusStep::RIGHT_END;
+    }
+
     static inline FocusStep GetRealFocusStepByTab(FocusStep moveStep, bool isRtl = false)
     {
         if (isRtl) {
@@ -883,6 +888,15 @@ public:
     {
         FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
     }
+
+    RefPtr<FocusHub> GetHeadOrTailChild(bool isHead, bool isHomeOrEnd = false);
+    RefPtr<FocusHub> FindHeadOrTailDescendantFocus(bool isHead, bool isHomeOrEnd = false);
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -911,6 +925,8 @@ protected:
         // Need update: void RenderNode::MoveWhenOutOfViewPort(bool hasEffect)
         OnFocus();
     }
+
+    void HandleAccessibilityEvent();
 
 private:
     friend class FocusView;

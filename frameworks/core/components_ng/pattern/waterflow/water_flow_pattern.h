@@ -84,6 +84,16 @@ public:
 
     void ResetLayoutInfo();
 
+    bool GetItemStart() const
+    {
+        return layoutInfo_->itemStart_;
+    }
+
+    bool GetItemEnd() const
+    {
+        return layoutInfo_->itemEnd_;
+    }
+
     int32_t GetBeginIndex() const
     {
         return layoutInfo_->startIndex_;
@@ -96,7 +106,7 @@ public:
 
     int32_t GetChildrenCount() const;
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -layoutInfo_->Offset();
     }
@@ -207,6 +217,19 @@ public:
     }
 
     SizeF GetChildrenExpandedSize() override;
+
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
+
+    void InvalidatedOffset()
+    {
+        layoutInfo_->InvalidatedOffset();
+    }
+
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

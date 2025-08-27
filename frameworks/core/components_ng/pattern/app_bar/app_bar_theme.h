@@ -43,7 +43,7 @@ public:
         ~Builder() = default;
         RefPtr<AppBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants)
         {
-            RefPtr<AppBarTheme> theme = AceType::Claim(new AppBarTheme());
+            RefPtr<AppBarTheme> theme = AceType::MakeRefPtr<AppBarTheme>();
             if (!themeConstants) {
                 LOGE("Build AppBarTheme error, themeConstants is null!");
                 return theme;

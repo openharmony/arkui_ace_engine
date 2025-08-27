@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,11 +41,13 @@ public:
         value->propCachedCount_ = CloneCachedCount();
         value->propShowCachedItems_ = CloneShowCachedItems();
         value->propGridDirection_ = CloneGridDirection();
+        value->propFocusWrapMode_ = CloneFocusWrapMode();
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propLayoutOptions_ = CloneLayoutOptions();
+        value->propSyncLoad_ = CloneSyncLoad();
         return value;
     }
 
@@ -59,11 +61,13 @@ public:
         ResetCachedCount();
         ResetShowCachedItems();
         ResetGridDirection();
+        ResetFocusWrapMode();
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
         ResetScrollEnabled();
         ResetLayoutOptions();
+        ResetSyncLoad();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -121,6 +125,9 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(FocusWrapMode, FocusWrapMode);
+    void OnFocusWrapModeUpdate(FocusWrapMode /* focusWrapMode */) const {}
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MaxCount, int32_t);
     void OnMaxCountUpdate(int32_t /* maxCount */) const
     {
@@ -144,6 +151,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AlignItems, GridItemAlignment);
     void OnAlignItemsUpdate(GridItemAlignment /* alignItems */) const
@@ -163,6 +171,7 @@ private:
     void ResetPositionFlags() const;
     std::string GetBarStateString() const;
     std::string GetGridDirectionStr() const;
+    std::string GetFocusWrapModeStr() const;
     Color GetBarColor() const;
     Dimension GetBarWidth() const;
 

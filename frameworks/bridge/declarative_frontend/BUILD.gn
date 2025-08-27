@@ -40,25 +40,23 @@ template("declarative_frontend") {
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_factory.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     } else {
       sources = [
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_factory.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     }
 
-    if (ace_engine_feature_enable_split_mode &&
-        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
-      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
-    }
-
-    if (ace_engine_feature_enable_split_mode &&
-        defined(vendor_configs.ace_engine_advanced_split_mode_bridge)) {
-      sources += vendor_configs.ace_engine_advanced_split_mode_bridge
-    } else {
-      sources += [ "ng/page_router_manager_factory.cpp" ]
+    if (ace_engine_feature_enable_split_mode) {
+      sources += [
+        "ng/force_split/parallel_page_router_manager.cpp",
+      ]
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -74,6 +72,12 @@ template("declarative_frontend") {
     ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
+    }
+    if (!build_ohos_sdk) {
+      external_deps += [
+        "c_utils:utils",
+        "ipc:ipc_core",
+      ]
     }
   }
 }
@@ -222,10 +226,16 @@ template("declarative_js_engine") {
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
       "engine/functions/js_accessibility_function.cpp",
+      "engine/functions/js_animation_on_finish_function.cpp",
       "engine/functions/js_animator_function.cpp",
+      "engine/functions/js_cited_event_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
+      "engine/functions/js_common_event_function.cpp",
+      "engine/functions/js_common_gesture_function.cpp",
+      "engine/functions/js_common_utils.cpp",
       "engine/functions/js_drag_function.cpp",
+      "engine/functions/js_event_function.cpp",
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
@@ -246,7 +256,9 @@ template("declarative_js_engine") {
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
+      "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_webview_function.cpp",
+      "engine/functions/js_xcomponent_onload_function.cpp",
       "engine/js_types.cpp",
       "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",
@@ -256,6 +268,7 @@ template("declarative_js_engine") {
       "jsview/canvas/js_canvas_path.cpp",
       "jsview/canvas/js_canvas_pattern.cpp",
       "jsview/canvas/js_canvas_renderer.cpp",
+      "jsview/canvas/js_canvas_util.cpp",
       "jsview/canvas/js_drawing_rendering_context.cpp",
       "jsview/canvas/js_matrix2d.cpp",
       "jsview/canvas/js_offscreen_canvas.cpp",
@@ -377,6 +390,7 @@ template("declarative_js_engine") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
+      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
@@ -386,6 +400,8 @@ template("declarative_js_engine") {
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_state_mgmt_profiler.cpp",
+      "jsview/js_stepper.cpp",
+      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
@@ -421,9 +437,11 @@ template("declarative_js_engine") {
       "sharedata/js_share_data.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
+      "style_string/js_text_layout.cpp",
       "view_stack_processor.cpp",
 
       # ark_theme
+      "ark_theme/theme_apply/js_theme.cpp",
       "ark_theme/theme_apply/js_with_theme.cpp",
 
       # Models implemenations for classic fw
@@ -489,6 +507,7 @@ template("declarative_js_engine") {
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
+      "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/side_bar_container_model_impl.cpp",
@@ -496,6 +515,8 @@ template("declarative_js_engine") {
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
+      "jsview/models/stepper_item_model_impl.cpp",
+      "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
       "jsview/models/tab_content_model_impl.cpp",
       "jsview/models/tabs_model_impl.cpp",
@@ -515,15 +536,7 @@ template("declarative_js_engine") {
     ]
 
     if (!ace_engine_feature_wearable) {
-      sources += [
-        "jsview/js_folder_stack.cpp",
-        "jsview/js_select.cpp",
-        "jsview/js_stepper.cpp",
-        "jsview/js_stepper_item.cpp",
-        "jsview/models/select_model_impl.cpp",
-        "jsview/models/stepper_item_model_impl.cpp",
-        "jsview/models/stepper_model_impl.cpp",
-      ]
+      sources += [ "jsview/js_folder_stack.cpp" ]
     }
 
     if (ace_engine_feature_enable_digital_crown) {
@@ -538,6 +551,9 @@ template("declarative_js_engine") {
     }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (!build_ohos_sdk) {
+      external_deps += [ "graphic_2d:text_napi_impl" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -601,6 +617,7 @@ template("declarative_js_engine") {
       ]
 
       external_deps += [
+        "bundle_framework:appexecfwk_base",
         "input:libmmi-client",
         "window_manager:scene_session",
       ]
@@ -622,6 +639,9 @@ template("declarative_js_engine") {
           "jsview/models/web_model_impl.cpp",
         ]
       }
+      external_deps += [
+        "webview:libarkweb_utils",
+      ]
     }
 
     if (defined(config.form_components_support) &&
@@ -788,10 +808,16 @@ template("declarative_js_engine_ng") {
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
       "engine/functions/js_accessibility_function.cpp",
+      "engine/functions/js_animation_on_finish_function.cpp",
       "engine/functions/js_animator_function.cpp",
+      "engine/functions/js_cited_event_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
+      "engine/functions/js_common_event_function.cpp",
+      "engine/functions/js_common_gesture_function.cpp",
+      "engine/functions/js_common_utils.cpp",
       "engine/functions/js_drag_function.cpp",
+      "engine/functions/js_event_function.cpp",
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
@@ -812,7 +838,9 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
+      "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_webview_function.cpp",
+      "engine/functions/js_xcomponent_onload_function.cpp",
       "engine/js_types.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_environment.cpp",
@@ -833,6 +861,7 @@ template("declarative_js_engine_ng") {
       "jsview/canvas/js_canvas_path.cpp",
       "jsview/canvas/js_canvas_pattern.cpp",
       "jsview/canvas/js_canvas_renderer.cpp",
+      "jsview/canvas/js_canvas_util.cpp",
       "jsview/canvas/js_drawing_rendering_context.cpp",
       "jsview/canvas/js_matrix2d.cpp",
       "jsview/canvas/js_offscreen_canvas.cpp",
@@ -947,6 +976,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
+      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_side_bar.cpp",
@@ -954,6 +984,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_stepper.cpp",
+      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
@@ -984,18 +1016,15 @@ template("declarative_js_engine_ng") {
       "jsview/text_menu/js_text_menu.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
+      "style_string/js_text_layout.cpp",
 
       # ark_theme
+      "ark_theme/theme_apply/js_theme.cpp",
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
 
     if (!ace_engine_feature_wearable) {
-      sources += [
-        "jsview/js_folder_stack.cpp",
-        "jsview/js_select.cpp",
-        "jsview/js_stepper.cpp",
-        "jsview/js_stepper_item.cpp",
-      ]
+      sources += [ "jsview/js_folder_stack.cpp" ]
     }
 
     if (ace_engine_feature_enable_digital_crown) {
@@ -1006,7 +1035,7 @@ template("declarative_js_engine_ng") {
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
 
-    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    external_deps = ["graphic_2d:drawing_napi_impl", "graphic_2d:text_napi_impl"]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -1064,6 +1093,7 @@ template("declarative_js_engine_ng") {
       ]
 
       external_deps += [
+        "bundle_framework:appexecfwk_base",
         "input:libmmi-client",
         "window_manager:scene_session",
       ]
@@ -1085,6 +1115,9 @@ template("declarative_js_engine_ng") {
         "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
+      ]
+      external_deps += [
+        "webview:libarkweb_utils",
       ]
     }
 
@@ -1142,7 +1175,6 @@ template("declarative_js_engine_ng") {
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
-        "jsview/menu/js_context_menu.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]

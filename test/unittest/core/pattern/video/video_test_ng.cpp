@@ -96,6 +96,8 @@ const std::string VIDEO_UPDATE_EVENT = "update";
 const std::string VIDEO_FULLSCREEN_EVENT = "fullScreen";
 const std::string EXTRA_INFO_KEY = "extraInfo";
 const std::string VIDEO_ERROR_ID = "";
+const int32_t VIDEO_CODE = 1;
+const std::string VIDEO_MESSAGE = "message";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
 const std::string VIDEO_STOP_EVENT = "stop";
 const std::string JSON_VALUE_FALSE = "false";
@@ -1163,6 +1165,9 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
     eventHub->SetOnError(std::move(errorCallback));
     pattern->OnError(VIDEO_ERROR_ID);
     EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
+    result = "";
+    pattern->OnError(VIDEO_CODE, VIDEO_MESSAGE);
+    EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
 }
 
 /**
@@ -1391,5 +1396,75 @@ HWTEST_F(VideoTestNg, CallVideoPatternAdjustVolumeFunc, TestSize.Level1)
     pattern->currentVolume_ = 1.0f;
     pattern->AdjustVolume(step);
     EXPECT_EQ(pattern->currentVolume_, 1);
+}
+
+/**
+ * @tc.name: Test VideoPattern SetVideoController
+ * @tc.desc: Test VideoPattern SetVideoController() func
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternSetVideoControllerFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: Create Video successfully
+     */
+    testProperty.videoController = nullptr;
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call SetVideoController
+     * @tc.expected: SetVideoController successfully
+     */
+    auto videoControllerInit = AceType::MakeRefPtr<VideoControllerV2>();
+    pattern->SetVideoController(videoControllerInit);
+    EXPECT_EQ(pattern->GetVideoController(), videoControllerInit);
+
+    /**
+     * @tc.steps: step3. call SetVideoController to update videoController
+     * @tc.expected: VideoController is not updated.
+     */
+    auto videoControllerUpdate = AceType::MakeRefPtr<VideoControllerV2>();
+    pattern->SetVideoController(videoControllerUpdate);
+    EXPECT_NE(pattern->GetVideoController(), videoControllerUpdate);
+}
+
+/**
+ * @tc.name: Test VideoFullScreenPattern SetVideoController.
+ * @tc.desc: Test VideoFullScreenPattern SetVideoController() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoFullScreenPatternSetVideoControllerFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Video frame node.
+     * @tc.expected: create Video frame node successfully.
+     */
+    testProperty.videoController = nullptr;
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. get VideoFullScreenPattern.
+     * @tc.expected: get VideoFullScreenPattern successfully.
+     */
+    pattern->FullScreen();
+    auto fullScreenNode = pattern->GetFullScreenNode();
+    ASSERT_TRUE(fullScreenNode);
+    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+    ASSERT_TRUE(fullScreenPattern);
+
+    /**
+     * @tc.steps: step3. call SetVideoController for VideoFullScreenPattern.
+     * @tc.expected: js controller is not registered.
+     */
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    fullScreenPattern->SetVideoController(videoController);
+    EXPECT_EQ(videoController->controllers_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

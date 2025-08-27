@@ -30,7 +30,7 @@ public:
  */
 HWTEST_F(PatternLockTestNg, PatternLockModifierTest001, TestSize.Level1)
 {
-    PatternLockModifier patternlockModifier;
+    PatternLockModifier patternlockModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 100.0f, 100.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -48,7 +48,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest001, TestSize.Level1)
  */
 HWTEST_F(PatternLockTestNg, PatternLockModifierTest002, TestSize.Level1)
 {
-    auto modifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto modifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     modifier->SetSideLength(36.0);
     int32_t x = 1;
     int32_t y = 1;
@@ -70,7 +70,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest003, TestSize.Level1)
      * @tc.case: case1. PatternLock's choosePoint count = 0.
      */
     std::vector<PatternLockCell> vecCell;
-    auto patternlockModifier1 = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier1 = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier1->SetChoosePoint(vecCell);
     EXPECT_CALL(canvas, Save()).Times(0);
     EXPECT_CALL(canvas, Restore()).Times(0);
@@ -79,7 +79,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest003, TestSize.Level1)
      * @tc.case: case2. pathStrokeWidth_ <= 0.
      */
     std::vector<PatternLockCell> vecCell2 = { PatternLockCell(0, 1), PatternLockCell(0, 2) };
-    auto patternlockModifier2 = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier2 = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier2->SetChoosePoint(vecCell2);
     patternlockModifier2->SetPathStrokeWidth(0.0);
     EXPECT_CALL(canvas, Save()).Times(0);
@@ -89,7 +89,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest003, TestSize.Level1)
      * @tc.case: case3. isMoveEventValid_ is flase.
      */
     std::vector<PatternLockCell> vecCell3 = { PatternLockCell(0, 1), PatternLockCell(0, 2), PatternLockCell(1, 2) };
-    auto patternlockModifier3 = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier3 = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier3->SetChoosePoint(vecCell3);
     patternlockModifier3->SetPathStrokeWidth(Dimension(10.0).ConvertToPx());
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
@@ -104,7 +104,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest003, TestSize.Level1)
      */
     std::vector<PatternLockCell> vecCell4 = { PatternLockCell(0, 1), PatternLockCell(0, 2), PatternLockCell(1, 2),
         PatternLockCell(2, 2) };
-    auto patternlockModifier4 = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier4 = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier4->SetChoosePoint(vecCell4);
     patternlockModifier4->SetPathStrokeWidth(Dimension(10.0).ConvertToPx());
     patternlockModifier4->SetIsMoveEventValid(true);
@@ -128,7 +128,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest004, TestSize.Level1)
     Testing::MockCanvas canvas;
     OffsetF offset;
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0), PatternLockCell(0, 2), PatternLockCell(1, 2) };
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier->SetChoosePoint(vecCell);
     patternlockModifier->SetSideLength(SIDE_LENGH);
     /**
@@ -184,7 +184,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest005, TestSize.Level1)
     Testing::MockCanvas canvas;
     OffsetF offset;
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0), PatternLockCell(0, 2), PatternLockCell(1, 2) };
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier->SetChoosePoint(vecCell);
     patternlockModifier->SetSideLength(SIDE_LENGH);
     /**
@@ -234,7 +234,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
     patternlockModifier->SetChoosePoint(vecCell);
     /**
@@ -282,7 +282,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
     patternlockModifier->SetChoosePoint(vecCell);
     /**
@@ -304,7 +304,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     /**
      * @tc.steps: step2. call PaintLightRing func
      * @tc.expected:Related function is called.
@@ -326,7 +326,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
     patternlockModifier->SetChoosePoint(vecCell);
     patternlockModifier->sideLength_->Set(SIDE_LENGTH.Value());
@@ -370,7 +370,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest010, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     /**
      * @tc.steps: step2. call SetHoverColor func
      */
@@ -408,7 +408,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest011, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     /**
      * @tc.steps: step2. call SetContentOffset func
      * @tc.expected:the value of offset_ is updated
@@ -444,7 +444,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest012, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
     patternlockModifier->SetChoosePoint(vecCell);
     /**
@@ -473,7 +473,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest013, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier and Set SideLength.
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     patternlockModifier->SetBackgroundCircleRadiusScale(
         DEFAULT_BACKGROUND_CIRCLE_RADIUS.Value() / DEFAULT_CIRCLE_RADIUS.Value());
     patternlockModifier->SetSideLength(275);
@@ -504,7 +504,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest014, TestSize.Level1)
     /**
      * @tc.steps: step1. Create patternlockModifier and Set SideLength.
      */
-    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     std::vector<PatternLockCell> vecCell = { PatternLockCell(1, 1) };
     patternlockModifier->SetChoosePoint(vecCell);
     patternlockModifier->SetBackgroundCircleRadiusScale(

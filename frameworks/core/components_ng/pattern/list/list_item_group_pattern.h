@@ -38,6 +38,7 @@ struct ListItemGroupPaintInfo {
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
     int32_t totalItemCount = 0;
+    float listContentSize = FLT_MAX;
 };
 
 enum ListItemGroupArea {
@@ -84,6 +85,19 @@ public:
         return false;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& groupFocus, FocusStep step, WeakPtr<FocusHub>& target);
+
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarIndexInGroup);
+
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -100,6 +114,12 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
+
     void AddHeader(const RefPtr<NG::UINode>& header)
     {
         auto host = GetHost();
@@ -107,6 +127,17 @@ public:
         auto prevHeader = header_.Upgrade();
         if (!prevHeader) {
             host->AddChild(header, 0);
+            // Initialize headerIndex_, itemStartIndex_
+            if (headerIndex_ == -1) {
+                auto count = header->FrameCount();
+                if (count > 0) {
+                    headerIndex_ = 0;
+                    itemStartIndex_ += count;
+                }
+                if (footerIndex_ >= 0) {
+                    footerIndex_ = footerIndex_ + count;
+                }
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (header != prevHeader) {
@@ -129,6 +160,14 @@ public:
             } else {
                 host->AddChild(footer, 0);
             }
+            // Initialize itemStartIndex_, footerIndex_
+            if (footerIndex_ == -1) {
+                int32_t count = footer->FrameCount();
+                if (count > 0) {
+                    footerIndex_ = itemStartIndex_;
+                    itemStartIndex_ += count;
+                }
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (footer != prevFooter) {
@@ -148,6 +187,8 @@ public:
             host->RemoveChild(prevHeader);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             header_ = nullptr;
+            headerIndex_ = -1;
+            itemStartIndex_ = 0;
             isHeaderComponentContentExist_ = false;
         }
     }
@@ -161,6 +202,8 @@ public:
             host->RemoveChild(prevFooter);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             footer_ = nullptr;
+            footerIndex_ = -1;
+            footerCount_ = 0;
             isFooterComponentContentExist_ = false;
         }
     }
@@ -295,6 +338,7 @@ public:
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
+    bool IsInViewport(int32_t index) const;
 
     void ClearItemPosition();
     void ClearCachedItemPosition();
@@ -325,9 +369,34 @@ public:
         return footer_.Upgrade();
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdateDefaultColor();
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    bool ChildTentativelyLayouted() override
+    {
+        return true;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
@@ -335,6 +404,32 @@ private:
     float GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const;
     bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
+
+    void HandleForwardStep(
+        const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    void HandleBackwardStep(
+        const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool HandleCrossAxisRightOrDownStep(
+        bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool HandleCrossAxisLeftOrUpStep(bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+
+    bool GetCurrentFocusIndices(
+        const RefPtr<FrameNode>& curFrame, const RefPtr<Pattern>& curPattern, int32_t& curIndexInGroup);
+    bool IsListVertical() const;
+    void AdjustFocusStepForRtl(FocusStep& step, bool isVertical);
+    bool DetermineSingleLaneStep(
+        FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
+    bool DetermineMultiLaneStep(FocusStep step, bool isVertical, const RefPtr<FrameNode>& curFrame,
+        int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool IsIndexInValidRange(int32_t index, int32_t maxIndex);
+    bool IsFocusMovementBlock(int32_t nextIndex, int32_t curIndex, int32_t maxIndex) const;
+    WeakPtr<FocusHub> FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup, int32_t curGroupIndexInList,
+        int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode, FocusStep step);
+    void AdjustMountTreeSequence(int32_t footerCount);
+    void MappingPropertiesFromLayoutAlgorithm(const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm);
+    const ListItemGroupInfo* GetPosition(int32_t index) const;
+    bool NextPositionBlocksMove(
+        const ListItemGroupInfo* curPos, const ListItemGroupInfo* nextPos, bool isVertical) const;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
@@ -350,6 +445,7 @@ private:
     int32_t itemStartIndex_ = 0;
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
+    int32_t footerCount_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
     int32_t itemDisplayStartIndex_ = -1;
@@ -376,8 +472,10 @@ private:
     float endFooterPos_ = 0.0f;
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
-    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
+    float listContentSize_ = 0.0f;
     bool isStackFromEnd_ = false;
+    bool prevMeasureBreak_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG
 

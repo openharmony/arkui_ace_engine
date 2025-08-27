@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -918,6 +919,463 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusWrapMode001
+ * @tc.desc: Test GetNextFocusNode func in the rule grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode001, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [4], [5], [6], [7]
+     * 2: [8], [9]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::DEFAULT);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 3
+     */
+    int32_t currentIndex = 3;
+    EXPECT_FALSE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step3. Set the focusWrapMode property to allow directional key wrapping
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. Press the right arrow key from the node with index 3
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusWrapMode002
+ * @tc.desc: Test GetNextFocusNode func in the rule grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode002, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [4], [5], [6], [7]
+     * 2: [8], [9]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::DEFAULT);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the left arrow key from the node with index 4
+     */
+    int32_t currentIndex = 4;
+    EXPECT_FALSE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step3. Set the focusWrapMode property to allow directional key wrapping
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. Press the left arrow key from the node with index 4
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
+}
+
+/**
+ * @tc.name: FocusWrapMode003
+ * @tc.desc: Test GetNextFocusNode func in the irregular grid for line wrapping and focusing scenes with directional
+ * keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode003, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [1], [2]
+     * 1: [3], [1], [1], [4]
+     * 2: [5], [6]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 0, 0, 0);
+    CreateFocusableBigItem(0, 1, 1, 2);
+    CreateFocusableBigItem(0, 0, 3, 3);
+    CreateFocusableBigItem(1, 1, 0, 0);
+    CreateFocusableBigItem(1, 1, 3, 3);
+    CreateFocusableBigItem(2, 2, 0, 0);
+    CreateFocusableBigItem(2, 2, 1, 1);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 0
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+
+    /**
+     * @tc.steps: step3. Press the right arrow key from the node with index 1
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Press the right arrow key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 1 
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+}
+
+/**
+ * @tc.name: FocusWrapMode004
+ * @tc.desc: Test GetNextFocusNode func in the irregular grid for line wrapping and focusing scenes with directional
+ * keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode004, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [4], [5], [6], [3]
+     * 2: [7]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 0, 0, 0);
+    CreateFocusableBigItem(0, 0, 1, 1);
+    CreateFocusableBigItem(0, 0, 2, 2);
+    CreateFocusableBigItem(0, 1, 3, 3);
+    CreateFocusableBigItem(1, 1, 0, 0);
+    CreateFocusableBigItem(1, 1, 1, 1);
+    CreateFocusableBigItem(1, 1, 2, 2);
+    CreateFocusableBigItem(2, 2, 0, 0);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 0
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+
+    /**
+     * @tc.steps: step3. Press the right arrow key from the node with index 1
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Press the right arrow key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
+
+    /**
+     * @tc.steps: step7. Press the right arrow key from the node with index 5
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+
+    /**
+     * @tc.steps: step8. Press the right arrow key from the node with index 6
+     */
+    currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step9. Press the right arrow key from the node with index 3 
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusWrapMode005
+ * @tc.desc: Test GetNextFocusNode func in the irregular grid for line wrapping and focusing scenes with directional
+ * keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode005, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [4], [5], [6], [7]
+     * 2: [4], [8]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 0, 0, 0);
+    CreateFocusableBigItem(0, 0, 1, 1);
+    CreateFocusableBigItem(0, 0, 2, 2);
+    CreateFocusableBigItem(0, 0, 3, 3);
+    CreateFocusableBigItem(1, 2, 0, 0);
+    CreateFocusableBigItem(1, 1, 1, 1);
+    CreateFocusableBigItem(1, 1, 2, 2);
+    CreateFocusableBigItem(1, 1, 3, 3);
+    CreateFocusableBigItem(2, 2, 1, 1);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 0
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+
+    /**
+     * @tc.steps: step3. Press the right arrow key from the node with index 1
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Press the right arrow key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
+
+    /**
+     * @tc.steps: step7. Press the right arrow key from the node with index 5
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+
+    /**
+     * @tc.steps: step8. Press the right arrow key from the node with index 6
+     */
+    currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
+
+    /**
+     * @tc.steps: step9. Press the right arrow key from the node with index 7
+     */
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusWrapMode006
+ * @tc.desc: Test GetNextFocusNode func in the rule grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode006, TestSize.Level1)
+{
+    /**
+     * 0: [3], [2], [1], [0]
+     * 1: [7], [6], [5], [4]
+     * 2: [9], [8]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetIsRTL(TextDirection::RTL);
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to non wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::DEFAULT);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 5
+     */
+    int32_t currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step3. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step4. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the node with index 5
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
+}
+
+/**
+ * @tc.name: FocusWrapMode007
+ * @tc.desc: Test GetNextFocusNode func in irregular grid for line wrapping and focusing scenes with directional keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode007, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [0], [4], [5], [6]
+     * 2: [7]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 1, 0, 0);
+    CreateFocusableBigItem(0, 0, 1, 1);
+    CreateFocusableBigItem(0, 0, 2, 2);
+    CreateFocusableBigItem(0, 0, 3, 3);
+    CreateFocusableBigItem(1, 1, 1, 1);
+    CreateFocusableBigItem(1, 1, 2, 2);
+    CreateFocusableBigItem(1, 1, 3, 3);
+    CreateFocusableBigItem(2, 2, 0, 0);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the node with index 6
+     */
+    int32_t currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
+
+    /**
+     * @tc.steps: step3. Press the left arrow key from the node with index 7
+     */
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 6));
+}
+
+/**
+ * @tc.name: FocusWrapMode008
+ * @tc.desc: Test the tab key focusing rule of GetNextFocusNode func in horizontal layout RTL mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode008, TestSize.Level1)
+{
+    /**
+     * 0: [9], [6], [3], [0]
+     * 1:      [7], [4], [1]
+     * 2:      [8], [5], [2]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetIsRTL(TextDirection::RTL);
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Press the tab key from the node with index 1
+     */
+    int32_t currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step2. Press the tab key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+
+    /**
+     * @tc.steps: step3. Press the shift+tab key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Press the up key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step5. Press the up key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
+
+    /**
+     * @tc.steps: step6. Press the down key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+}
+
+/**
  * @tc.name: Focus001
  * @tc.desc: Test Foucus
  * @tc.type: FUNC
@@ -1338,5 +1796,113 @@ HWTEST_F(GridCommonTestNg, FireDrag004, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(0, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(GetItemRect(2), Rect(0, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(GetItemRect(3), Rect(120, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    resObj->id_ = 0;
+    resObj->type_ = static_cast<int32_t>(ResourceType::INTEGER);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    GridModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    GridModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    GridModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    resObj->id_ = 0;
+    resObj->type_ = static_cast<int32_t>(ResourceType::INTEGER);
+
+    GridModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    GridModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 }
 } // namespace OHOS::Ace::NG

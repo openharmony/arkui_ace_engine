@@ -18,10 +18,15 @@
 namespace OHOS::Ace {
 namespace MockSystemProperties {
 extern bool g_isSuperFoldDisplayDevice;
+extern bool g_isCompatibleInputTransEnabled;
+extern bool g_isTransformEnabled;
 }
 // unit test globals
-extern bool g_irregularGrid;
 extern bool g_segmentedWaterflow;
+extern bool g_isNeedSymbol;
+extern bool g_isResourceDecoupling;
+extern bool g_isConfigChangePerform;
+extern bool g_isMultiInstanceEnabled;
 
 class APIVersionGuard final {
 public:

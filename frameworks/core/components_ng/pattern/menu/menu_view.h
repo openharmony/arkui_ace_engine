@@ -21,16 +21,30 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
 
+enum class MenuHoverScaleStatus {
+    DISABLE = 0,
+    NONE,
+    READY,
+    HOVER,
+    INTERRUPT,
+    MENU_SHOW,
+};
+
 class ACE_EXPORT MenuView {
 struct OptionValueInfo {
-    std::string value;
+    bool optionsHasIcon = false;
+
+    std::string content;
     bool isPasteOption = false;
+    bool isAIMenuOption = false;
 };
 
 public:
@@ -57,13 +71,12 @@ public:
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, const MenuType& type);
-    static void UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam);
 
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
         const RefPtr<FrameNode>& child = nullptr);
-    static RefPtr<FrameNode> CreateText(
-        const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag = false);
+    static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
+        bool autoWrapFlag = false, bool isAIMenuOption = false);
     static void CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
         const std::function<void()>& onClickFunc, const std::string& icon = "");
     static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag = false);
@@ -71,9 +84,23 @@ public:
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
     static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
-    static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data);
     static void SetHasCustomOutline(
         const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& menuNode);
+    static void TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event);
+    static void TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point);
+    static void ShowMenuTargetScaleToOrigin(
+        const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern);
+    static void UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern);
+    static void ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImageStackNode,
+        const RefPtr<FrameNode>& previewNode, const RefPtr<RenderContext>& imageContext,
+        const RefPtr<MenuWrapperPattern>& wrapperPattern);
+    static bool CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPattern>& wrapperPattern,
+        const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<FrameNode>& hoverImageStackNode);
+    static void SetMenuHoverScaleStatus(int32_t targetId, MenuHoverScaleStatus status);
+    static void RemoveMenuHoverScaleStatus(int32_t targetId);
+    static MenuHoverScaleStatus GetMenuHoverScaleStatus(int32_t targetId);
 
 private:
     static void UpdateMenuPaintProperty(
@@ -88,10 +115,10 @@ private:
     static void CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& posNode,
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode);
     static RefPtr<FrameNode> Create(int32_t index);
-    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
+    static RefPtr<FrameNode> CreateMenuOption(const OptionValueInfo& value,
         const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
-    static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+    static void CreateOption(const OptionValueInfo& value, const std::string& icon,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
@@ -111,6 +138,9 @@ private:
     static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
         std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
         std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuOutlineWithArrow(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
+    static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

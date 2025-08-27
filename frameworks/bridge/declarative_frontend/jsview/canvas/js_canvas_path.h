@@ -35,6 +35,7 @@ public:
     void JsPath2DBezierCurveTo(const JSCallbackInfo& args);
     void JsPath2DEllipse(const JSCallbackInfo& args);
     void JsPath2DRect(const JSCallbackInfo& args);
+    void JsPath2DRoundRect(const JSCallbackInfo& args);
     void JsPath2DClosePath(const JSCallbackInfo& args);
     RefPtr<CanvasPath2D> GetCanvasPath2d() const
     {

@@ -22,9 +22,13 @@ namespace OHOS::Ace {
 class MockImageLoader : public ImageLoader {
 public:
     MOCK_METHOD(std::shared_ptr<RSData>, LoadImageData,
-        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
+        (const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
+            const WeakPtr<PipelineBase>& context),
+        (override));
     MOCK_METHOD(RefPtr<NG::ImageData>, LoadDecodedImageData,
-        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
+        (const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
+            const WeakPtr<PipelineBase>& context),
+        (override));
 };
 // unit test globals
 extern std::vector<std::thread> g_threads;

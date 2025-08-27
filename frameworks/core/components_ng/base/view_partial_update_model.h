@@ -50,6 +50,7 @@ struct NodeInfoPU {
     std::function<void(bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
+    std::function<void()> clearAllRecycleFunc;
     std::function<void*()> getThisFunc;
     std::function<void()> recycleFunc;
     std::function<void(void*)> reuseFunc;

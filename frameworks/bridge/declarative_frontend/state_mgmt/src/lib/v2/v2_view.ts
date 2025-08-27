@@ -48,6 +48,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
     private monitorIdsDelayedUpdate: Set<number> = new Set();
+    private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
@@ -60,6 +61,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this);
+        if (parent instanceof ViewPU) {
+            stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
+            ObserveV2.getObserve().isParentChildOptimizable_ = false;
+        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
@@ -337,6 +342,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.parent_.removeChild(this);
         }
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
+        // if memory watch register the callback func, then report such information to memory watch
+        // when custom node destroyed
+        if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
+            ArkUIObjectFinalizationRegisterProxy.call(new WeakRef(this),
+                `${this.debugInfo__()} is in the process of destruction`);
+        }
     }
 
     public initialRenderView(): void {
@@ -363,6 +374,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
         this.monitorIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_.clear()
         ObserveV2.getObserve().resetMonitorValues();
     }
 
@@ -387,7 +399,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
-        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc: PrebuildFunc = () => {
               this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
             };
@@ -628,7 +640,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.monitorIdsDelayedUpdate.add(watchId);
     }
 
-    public addDelayedComputedIds(watchId: number) {
+    public addDelayedMonitorIdsForAddMonitor(watchId: number): void  {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIdsForAddMonitor called for watchId: ${watchId}`);
+        this.monitorIdsDelayedUpdateForAddMonitor_.add(watchId);
+    }
+
+    public addDelayedComputedIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
         this.computedIdsDelayedUpdate.add(watchId);
     }
@@ -648,12 +665,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
             }
         }
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView: IView | undefined = child.deref();
-            if (childView) {
-                childView.setActiveInternal(active, isReuse);
-            }
-        }
+        // Propagate state to all child View
+        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+        // Propagate state to all child BuilderNode
+        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
         stateMgmtProfiler.end();
     }
 
@@ -667,6 +682,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
+        if (this.monitorIdsDelayedUpdateForAddMonitor_.size) {
+            ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitor_);
+        }
+        if (ObserveV2.getObserve().monitorFuncsToRun_.size) {
+            const monitorFuncs = ObserveV2.getObserve().monitorFuncsToRun_;
+            ObserveV2.getObserve().monitorFuncsToRun_ = new Set<number>();
+            ObserveV2.getObserve().runMonitorFunctionsForAddMonitor(monitorFuncs)
+        } 
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
           if(this.dirtDescendantElementIds_.size === 0) {
@@ -681,17 +704,19 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_.clear();
         this.computedIdsDelayedUpdate.clear();
         stateMgmtProfiler.end();
     }
 
     /*
-      findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+      findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
       if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
       function needed for mixed @Component and @ComponentV2 parent child hierarchies.
     */
-    public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-        return this.getParent()?.findProvidePU(providedPropName);
+    public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+        return this.getParent()?.findProvidePU__(providedPropName) ||
+          (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
     }
 
     get localStorage_(): LocalStorage {
@@ -778,29 +803,40 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return retVaL;
     }
 
+    public __getDecoratorPropertyName__V2View__Internal(): [string, any][] {
+        const meta = this[ObserveV2.V2_DECO_META];
+        const metaMethod = this[ObserveV2.V2_DECO_METHOD_META];
+        let propertyVariableNames: [string, any][] = [];
+        if (!meta && !metaMethod) {
+            return propertyVariableNames;
+        }
+        if (meta) {
+            propertyVariableNames = Object.entries(meta);
+        }
+        if (metaMethod) {
+            propertyVariableNames = [...propertyVariableNames, ...Object.entries(metaMethod)]
+        }
+        return propertyVariableNames;
+    }
 
     public debugInfoStateVars(): string {
         let retVal: string = `|--${this.constructor.name}[${this.id__()}]\n`;
-        let meta = this[ObserveV2.V2_DECO_META];
-        if (!meta) {
+        const propertyVariableNames: [string, any][] = this.__getDecoratorPropertyName__V2View__Internal();
+
+        if (propertyVariableNames.length === 0) {
             retVal += ' No State Variables';
             return retVal;
         }
-        Object.getOwnPropertyNames(meta)
-            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
-            .forEach((varName) => {
-                const prop: any = Reflect.get(meta, varName);
-                if ('deco' in prop) {
-                    retVal += ` ${prop.deco}`; // main decorator
-                }
-                if ('deco2' in prop) {
-                    retVal += ` ${prop.deco2}`; // sub decorator like @Once
-                }
-                if ('aliasName' in prop) {
-                    retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
-                }
+
+        propertyVariableNames
+            .filter((entry) => !entry[0].startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX))
+            .forEach((entry) => {
+                const prop: any = entry[1];
+                const varName: string = entry[0];
+                retVal += ObserveV2.getObserve().parseDecorator(prop);
                 retVal += ` varName: ${varName}`;
-                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
+
+                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS]?.[varName];
                 if (dependentElmtIds) {
                     retVal += `\n  |--DependentElements:`;
                     dependentElmtIds.forEach((elmtId) => {

@@ -22,24 +22,17 @@
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
 #include "frameworks/core/components/svg/render_svg_base.h"
 
-#ifndef USE_ROSEN_DRAWING
-class SkCanvas;
-#endif
 namespace OHOS::Ace {
 
 class RenderSvgMask : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgMask, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgMask, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate) override;
-#ifndef USE_ROSEN_DRAWING
-    virtual void PaintMaskLayer(SkCanvas* canvas, const Offset& offset, const Rect& paintRect) {}
-#else
     virtual void PaintMaskLayer(RSCanvas* canvas, const Offset& offset, const Rect& paintRect) {}
-#endif
     virtual void PaintMaskLayer(RenderContext& context, const Offset& offset, const Rect& paintRect) {}
 
     bool IsDefaultMaskUnits() const

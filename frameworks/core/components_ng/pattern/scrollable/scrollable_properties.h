@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
 
 namespace OHOS::Ace {
@@ -33,12 +34,6 @@ constexpr float DEFAULT_SCROLL_TO_DAMPING = 33.0f;
 constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
 // for add item and scrollEdge(Edge.Bottom) in one layout
 constexpr int32_t LAST_ITEM = -1;
-
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
 
 enum class NestedScrollMode {
     SELF_ONLY = 0,
@@ -110,15 +105,6 @@ struct ScrollFrameInfo {
     }
 };
 
-struct ScrollFrameResult {
-    Dimension offset;
-
-    bool operator==(const ScrollFrameResult& scrollRes) const
-    {
-        return offset == scrollRes.offset;
-    }
-};
-
 struct ScrollSnapOptions {
     int32_t snapAlign;
     int32_t enableSnapToStart;
@@ -185,6 +171,26 @@ struct NestedScrollOptionsExt {
                ", scrollDown: " + std::to_string(static_cast<int32_t>(scrollDown)) +
                ", scrollLeft: " + std::to_string(static_cast<int32_t>(scrollLeft)) +
                ", scrollRight: " + std::to_string(static_cast<int32_t>(scrollRight));
+    }
+};
+
+struct ScrollBarMargin {
+    Dimension start_;
+    Dimension end_;
+
+    bool operator==(const ScrollBarMargin& other) const
+    {
+        return this->start_ == other.start_ && this->end_ == other.end_;
+    }
+
+    bool operator!=(const ScrollBarMargin& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::string ToString() const
+    {
+        return "ScrollBarMargin start: " + start_.ToString() + ", end: " + end_.ToString();
     }
 };
 
@@ -467,6 +473,7 @@ constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMAT
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
 using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
+using OnScrollerAreaChangeEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -476,20 +483,28 @@ using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
+using OnWillStopDraggingEvent = std::function<void(Dimension)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
+using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
+using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
+    ScrollFrameResult&, ScrollState, ScrollSource)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
+    GestureEventFunc onPanActionEndEvent;
     OnReachEvent onReachStartEvent;
     OnReachEvent onReachEndEvent;
     OnScrollStartEvent onScrollStartEvent;
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
+    OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
+    OnWillScrollEventEx onWillScrollEventEx;
+    TwoDimensionOnWillScrollEvent twoDimensionOnWillScrollEvent;
 };
 } // namespace OHOS::Ace
 

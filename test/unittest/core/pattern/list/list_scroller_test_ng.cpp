@@ -474,6 +474,48 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndexTwice001
+ * @tc.desc: Test the state after calling ScrollToIndex twice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndexTwice001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Create the List
+     * @tc.expected: Create the List successfully and index range is 0-3
+     */
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::VERTICAL);
+    CreateListItems(12);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->GetEndIndex(), 3);
+
+    /**
+     * @tc.cases: ScrollToIndex with the 7 index and then ScrollToIndex with the 0 index
+     * @tc.expected: targetIndex_ is 7, and then changed to 0
+     */
+    pattern_->ScrollToIndex(7, true, ScrollAlign::START);
+    EXPECT_EQ(pattern_->targetIndex_.value_or(-1), 7);
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    EXPECT_EQ(pattern_->targetIndex_.value_or(-1), -1);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->GetEndIndex(), 3);
+
+    /**
+     * @tc.cases: ScrollToIndex with the 1 index and then ScrollToIndex with the 0 index
+     * @tc.expected: targetIndex_ invalid, but aniamte state change from true to false
+     */
+    pattern_->ScrollToIndex(1, true, ScrollAlign::START);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    EXPECT_EQ(pattern_->targetIndex_.value_or(-1), -1);
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    EXPECT_FALSE(pattern_->AnimateRunning());
+    EXPECT_EQ(pattern_->targetIndex_.value_or(-1), -1);
+}
+
+/**
  * @tc.name: JumpToItemInGroup001
  * @tc.desc: Test JumpToItemInGroup
  * @tc.type: FUNC

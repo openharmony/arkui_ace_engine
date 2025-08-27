@@ -14,12 +14,15 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/text/text_emoji_processor.h"
 #include <cstdint>
 
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
+constexpr size_t UTF16_SURROGATE_PAIR_LENGTH = 2;
+constexpr size_t UTF16_SINGLE_CHAR_LENGTH = 1;
 }; // namespace
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
@@ -239,6 +242,80 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
     return result;
 }
 
+std::u16string TextBase::TruncateText(const std::u16string& text, const size_t& length) const
+{
+    const size_t maxLength = length;
+    size_t charCount = 0;
+    size_t byteIndex = 0;
+
+    while (byteIndex < text.size() && charCount < maxLength) {
+        charCount++;
+        byteIndex += (text[byteIndex] >= 0xD800 && text[byteIndex] <= 0xDBFF) ?
+            UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+
+    if (charCount >= maxLength) {
+        return text.substr(0, byteIndex);
+    }
+    return text;
+}
+
+size_t TextBase::CountUtf16Chars(const std::u16string& s)
+{
+    size_t charCount = 0;
+    size_t i = 0;
+    while (i < s.size()) {
+        charCount++;
+        i += (s[i] >= 0xD800 && s[i] <= 0xDBFF) ? UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+    return charCount;
+}
+
+LayoutCalPolicy TextBase::GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal)
+{
+    CHECK_NULL_RETURN(layoutWrapper, LayoutCalPolicy::NO_MATCH);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicyProperty, LayoutCalPolicy::NO_MATCH);
+    if (isHorizontal) {
+        CHECK_NULL_RETURN(layoutPolicyProperty->widthLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+        return layoutPolicyProperty->widthLayoutPolicy_.value();
+    }
+    CHECK_NULL_RETURN(layoutPolicyProperty->heightLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+    return layoutPolicyProperty->heightLayoutPolicy_.value();
+}
+
+float TextBase::GetConstraintMaxLength(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal)
+{
+    auto layoutCalPolicy = GetLayoutCalPolicy(layoutWrapper, isHorizontal);
+    if (layoutCalPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        return isHorizontal ? constraint.parentIdealSize.Width().value_or(constraint.maxSize.Width())
+                            : constraint.parentIdealSize.Height().value_or(constraint.maxSize.Height());
+    }
+    return isHorizontal ? constraint.maxSize.Width() : constraint.maxSize.Height();
+}
+
+std::optional<float> TextBase::GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth)
+{
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    const auto& layoutCalcConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(layoutCalcConstraint, std::nullopt);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, std::nullopt);
+    auto calcLayoutConstraintMaxMinSize = isMax ? layoutCalcConstraint->maxSize : layoutCalcConstraint->minSize;
+    CHECK_NULL_RETURN(calcLayoutConstraintMaxMinSize, std::nullopt);
+    auto optionalCalcLength =
+        isWidth ? calcLayoutConstraintMaxMinSize->Width() : calcLayoutConstraintMaxMinSize->Height();
+    auto percentLength =
+        isWidth ? layoutConstraint->percentReference.Width() : layoutConstraint->percentReference.Height();
+    CHECK_NULL_RETURN(optionalCalcLength, std::nullopt);
+    return ConvertToPx(optionalCalcLength, ScaleProperty::CreateScaleProperty(), percentLength);
+}
+
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
     if (!isStarted_ || info.GetChangedTouches().empty()) {
@@ -276,5 +353,42 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
     OnTextGestureSelectionUpdate(start, end, info);
+}
+
+std::pair<std::string, std::string> TextBase::DetectTextDiff(const std::string& latestContent)
+{
+    const std::string& beforeText = textCache_;
+    std::string addedText;
+    std::string removedText;
+    size_t prefixLen = 0;
+    size_t minLength = std::min(beforeText.length(), latestContent.length());
+    while (prefixLen < minLength && beforeText[prefixLen] == latestContent[prefixLen]) {
+        prefixLen++;
+    }
+    while (prefixLen > 0 && ((beforeText[prefixLen] & 0xC0) == 0x80)) {
+        prefixLen--;
+    }
+    size_t suffixLen = 0;
+    size_t remainBefore = beforeText.length() - prefixLen;
+    size_t remainAfter = latestContent.length() - prefixLen;
+    size_t minSuffix = std::min(remainBefore, remainAfter);
+    while (suffixLen < minSuffix &&
+        beforeText[beforeText.length() - 1 - suffixLen] == latestContent[latestContent.length() - 1 - suffixLen]) {
+        suffixLen++;
+    }
+    while (suffixLen > 0 && ((beforeText[beforeText.size() - suffixLen] & 0xC0) == 0x80)) {
+        suffixLen--;
+    }
+    size_t removeStart = prefixLen;
+    size_t removeEnd = beforeText.length() - suffixLen;
+    if (removeEnd > removeStart) {
+        removedText = beforeText.substr(removeStart, removeEnd - removeStart);
+    }
+    size_t addStart = prefixLen;
+    size_t addEnd = latestContent.length() - suffixLen;
+    if (addEnd > addStart) {
+        addedText = latestContent.substr(addStart, addEnd - addStart);
+    }
+    return {std::move(addedText), std::move(removedText)};
 }
 }

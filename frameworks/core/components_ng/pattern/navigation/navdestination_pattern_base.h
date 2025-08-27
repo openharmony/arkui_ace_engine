@@ -48,9 +48,9 @@ public:
     }
 
     void SetToolBarStyle(const std::optional<BarStyle>& barStyle);
-    void SetMenuOptions(NavigationMenuOptions&& opt)
+    void SetMenuOptions(NavigationMenuOptions& opt)
     {
-        menuOptions_ = std::move(opt);
+        menuOptions_ = opt;
     }
 
     NavigationMenuOptions GetMenuOptions() const
@@ -228,6 +228,9 @@ public:
     {
         return currHideToolBar_;
     }
+
+    void OnColorConfigurationUpdate() override;
+
     void HideOrShowToolBarImmediately(const RefPtr<NavDestinationNodeBase>& hostNode, bool hide);
     void OnToolBarAnimationFinish();
     void OnTitleBarAnimationFinish();
@@ -285,6 +288,10 @@ public:
     {
         return false;
     }
+    virtual bool IsNeedHandleScroll() const
+    {
+        return false;
+    }
     virtual float GetTitleBarHeightLessThanMaxBarHeight() const
     {
         return 0.0f;
@@ -292,6 +299,15 @@ public:
     virtual bool CanCoordScrollUp(float offset) const
     {
         return false;
+    }
+
+    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
+    }
+    RefPtr<UINode> GetNavigationNode()
+    {
+        return navigationNode_.Upgrade();
     }
 protected:
     void AbortBarAnimation();
@@ -304,6 +320,8 @@ protected:
     void UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
     bool CustomizeExpandSafeArea() override;
+    void InitOnTouchEvent(const RefPtr<FrameNode>& host);
+    void RemoveOnTouchEvent(FrameNode* frameNode);
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
@@ -329,6 +347,9 @@ protected:
     std::unordered_map<int32_t, std::shared_ptr<AnimationUtils::Animation>> barAnimations_;
     std::optional<int32_t> preWidth_;
     NavigationMenuOptions menuOptions_;
+
+    WeakPtr<UINode> navigationNode_;
+    RefPtr<TouchEventImpl> touchListener_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

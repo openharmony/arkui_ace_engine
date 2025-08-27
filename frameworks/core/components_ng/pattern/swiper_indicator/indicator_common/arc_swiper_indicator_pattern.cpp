@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -154,13 +155,13 @@ float ArcSwiperIndicatorPattern::GetAngleWithPoint(const PointF& conter, const P
     } else if (NearEqual(centerX, pointX) && pointY < centerY) {
         angle = HALF_CIRCLE_ANGLE;
     } else if (pointX > centerX && pointY > centerY) {
-        angle = atan((pointY - centerY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / M_PI - QUARTER_CIRCLE_ANGLE;
+        angle = atan((pointY - centerY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / ACE_PI - QUARTER_CIRCLE_ANGLE;
     } else if (pointX < centerX && pointY > centerY) {
-        angle = QUARTER_CIRCLE_ANGLE - atan((pointY - centerY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / M_PI;
+        angle = QUARTER_CIRCLE_ANGLE - atan((pointY - centerY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / ACE_PI;
     } else if (pointX < centerX && pointY < centerY) {
-        angle = QUARTER_CIRCLE_ANGLE + atan((centerY - pointY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / M_PI;
+        angle = QUARTER_CIRCLE_ANGLE + atan((centerY - pointY) / (centerX - pointX)) * HALF_CIRCLE_ANGLE / ACE_PI;
     } else {
-        angle = -QUARTER_CIRCLE_ANGLE - atan((centerY - pointY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / M_PI;
+        angle = -QUARTER_CIRCLE_ANGLE - atan((centerY - pointY) / (pointX - centerX)) * HALF_CIRCLE_ANGLE / ACE_PI;
     }
 
     return ConvertAngleWithArcDirection(arcDirection, angle);

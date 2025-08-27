@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_THEME_THEME_FACTORY_H
 
 #include "ui/view/theme/theme_style.h"
+#include "ui/view/frame_node.h"
 
 namespace OHOS::Ace::Kit {
 
 class ACE_FORCE_EXPORT ThemeFactory {
 public:
     static bool CreateTheme(Ace::ThemeType type, BuildFunc func);
+    static bool CreateCustomTheme(Ace::ThemeType type, BuildThemeWrapperFunc func);
 
     static RefPtr<ThemeStyle> GetThemeStyle(const std::string& patternName,
         std::optional<std::string> bundleName = std::nullopt,
@@ -35,6 +37,16 @@ public:
     {
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
+
+    static RefPtr<Ace::Theme> GetTheme(Ace::ThemeType type, int32_t themeScopeId);
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        return AceType::DynamicCast<T>(GetTheme(T::TypeId(), themeScopeId));
+    }
+
+    static int32_t GetThemeScopeId(RefPtr<FrameNode>& node);
 };
 
 } // namespace OHOS::Ace::Kit

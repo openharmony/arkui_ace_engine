@@ -39,7 +39,7 @@ public:
 
         RefPtr<ToggleTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ToggleTheme> theme = AceType::Claim(new ToggleTheme());
+            RefPtr<ToggleTheme> theme = AceType::MakeRefPtr<ToggleTheme>();
             if (!themeConstants) {
                 return theme;
             }

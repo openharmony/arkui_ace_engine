@@ -1902,4 +1902,111 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest035, TestSize.Le
     gesture->CleanRedundanceScope();
     EXPECT_EQ(id, 1);
 }
+
+/**
+ * @tc.name: SetRecognizerDelayStatusTest001
+ * @tc.desc: Test GestureReferee SetRecognizerDelayStatus function
+ */
+HWTEST_F(GestureRefereeTestNg, SetRecognizerDelayStatusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureReferee.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->eventManager_ = eventManager;
+    ASSERT_NE(context->eventManager_, nullptr);
+    auto gestureReferee = context->eventManager_->refereeNG_;
+    ASSERT_NE(gestureReferee, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetRecognizerDelayStatus function
+     * @tc.steps: expected equalSetRecognizerDelayStatus success.
+     */
+    gestureReferee->recognizerDelayStatus_ = RecognizerDelayStatus::START;
+    gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
+    EXPECT_EQ(gestureReferee->recognizerDelayStatus_, RecognizerDelayStatus::NONE);
+    gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::START);
+    EXPECT_EQ(gestureReferee->recognizerDelayStatus_, RecognizerDelayStatus::START);
+    gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::END);
+    EXPECT_EQ(gestureReferee->recognizerDelayStatus_, RecognizerDelayStatus::END);
+}
+
+/**
+ * @tc.name: SetRecognizerDelayStatusTest002
+ * @tc.desc: Test GestureReferee RecallOnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, SetRecognizerDelayStatusTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureReferee.
+     */
+    GestureReferee gestureReferee;
+
+    /**
+     * @tc.steps: step2. call RecallOnAcceptGesture function
+     * @tc.steps: expected RecallOnAcceptGesture success.
+     */
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    ASSERT_NE(panRecognizer, nullptr);
+    gestureReferee.delayRecognizer_ = panRecognizer;
+    gestureReferee.recognizerDelayStatus_ = RecognizerDelayStatus::START;
+    gestureReferee.RecallOnAcceptGesture();
+    EXPECT_NE(gestureReferee.delayRecognizer_.Upgrade(), panRecognizer);
+    gestureReferee.delayRecognizer_ = panRecognizer;
+    gestureReferee.recognizerDelayStatus_ = RecognizerDelayStatus::NONE;
+    gestureReferee.RecallOnAcceptGesture();
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    gestureReferee.recognizerDelayStatus_ = RecognizerDelayStatus::START;
+    panRecognizer->refereeState_ = RefereeState::READY;
+    gestureReferee.HandleAcceptDisposal(panRecognizer);
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: SetRecognizerDelayStatusTest003
+ * @tc.desc: Test GestureReferee HandleAcceptDisposal function
+ */
+HWTEST_F(GestureRefereeTestNg, SetRecognizerDelayStatusTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureReferee.
+     */
+    GestureReferee gestureReferee;
+
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    ASSERT_NE(panRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleAcceptDisposal and compare result
+     * @tc.steps: expected compare equal.
+     */
+    gestureReferee.recognizerDelayStatus_ = RecognizerDelayStatus::START;
+    panRecognizer->refereeState_ = RefereeState::READY;
+    gestureReferee.HandleAcceptDisposal(panRecognizer);
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    gestureReferee.gestureScopes_[100000] = AceType::MakeRefPtr<GestureScope>(100000);
+    gestureReferee.gestureScopes_[100001] = AceType::MakeRefPtr<GestureScope>(100001);
+    gestureReferee.gestureScopes_[100001]->recognizers_.insert(
+        gestureReferee.gestureScopes_[100001]->recognizers_.end(), panRecognizer);
+    gestureReferee.HandleAcceptDisposal(panRecognizer);
+    EXPECT_NE(gestureReferee.delayRecognizer_.Upgrade(), panRecognizer);
+    gestureReferee.gestureScopes_[0] = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0]->recognizers_.insert(
+        gestureReferee.gestureScopes_[0]->recognizers_.end(), panRecognizer);
+    gestureReferee.gestureScopes_[1] = AceType::MakeRefPtr<GestureScope>(1);
+    gestureReferee.HandleAcceptDisposal(panRecognizer);
+    EXPECT_EQ(gestureReferee.delayRecognizer_.Upgrade(), panRecognizer);
+}
 } // namespace OHOS::Ace::NG

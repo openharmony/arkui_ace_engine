@@ -19,6 +19,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
+}
 
 bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent)
 {
@@ -46,6 +49,127 @@ bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& t
             break;
     }
     return result;
+}
+
+bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    touchEvent.postEventNodeId = uiNode->GetId();
+    touchEvent.id += PASS_THROUGH_EVENT_ID;
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    touchEvent.passThrough = true;
+    passThroughResult_ = false;
+    if (touchEvent.type != TouchType::MOVE) {
+        if (!CheckTouchEvent(uiNode, touchEvent)) {
+            return false;
+        }
+        postInputEventAction_.push_back({ uiNode, touchEvent });
+    }
+    // Check if there's a pending drag cancel operation
+    if (!eventManager->IsDragCancelPending()) {
+        // Normal touch event processing: dispatch the touch event through the pipeline context
+        // for standard event handling and gesture recognition
+        targetNode_ = frameNode;
+        pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+        targetNode_.Reset();
+    } else {
+        // Abnormal state handling: when drag cancel is pending, use specialized event validation
+        // to check and clean up invalid touch events (e.g., UP/CANCEL without corresponding DOWN)
+        eventManager->CheckUpEvent(touchEvent);
+    }
+    touchEvent.passThrough = false;
+    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
+        ClearPostInputActions(uiNode, touchEvent.id);
+    }
+    return passThroughResult_;
+}
+
+bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    mouseEvent.id += PASS_THROUGH_EVENT_ID;
+    mouseEvent.postEventNodeId = uiNode->GetId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    targetNode_ = frameNode;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    mouseEvent.passThrough = true;
+    passThroughResult_ = false;
+    pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+    mouseEvent.passThrough = false;
+    targetNode_.Reset();
+    return passThroughResult_;
+}
+
+bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    axisEvent.id += PASS_THROUGH_EVENT_ID;
+    axisEvent.postEventNodeId = uiNode->GetId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    axisEvent.passThrough = true;
+    passThroughResult_ = false;
+    pipelineContext->OnAxisEvent(axisEvent, frameNode);
+    axisEvent.passThrough = false;
+    return passThroughResult_;
+}
+
+bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    bool hasDown = false;
+    bool hasUpOrCancel = false;
+    for (const auto& item : postInputEventAction_) {
+        if (item.targetNode != targetNode || item.touchEvent.id != touchEvent.id) {
+            continue;
+        }
+        if (item.touchEvent.type == TouchType::DOWN) {
+            hasDown = true;
+        }
+        if (item.touchEvent.type == TouchType::UP || item.touchEvent.type == TouchType::CANCEL) {
+            hasUpOrCancel = true;
+        }
+    }
+    switch (touchEvent.type) {
+        case TouchType::DOWN:
+            if (hasDown && !hasUpOrCancel) {
+                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                    "CheckTouchEvent: duplicate DOWN event detected for id=%{public}d, dropping this event",
+                    touchEvent.id);
+                return false;
+            }
+            if (hasUpOrCancel) {
+                ClearPostInputActions(targetNode, touchEvent.id);
+            }
+            return true;
+        case TouchType::UP:
+        case TouchType::CANCEL:
+            return hasDown && !hasUpOrCancel;
+        default:
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "CheckTouchEvent: unsupported touch type=%{public}d, id=%{public}d",
+                static_cast<int>(touchEvent.type), touchEvent.id);
+            return false;
+    }
+}
+
+void PostEventManager::ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id)
+{
+    for (auto item = postInputEventAction_.begin(); item != postInputEventAction_.end();) {
+        if (item->targetNode == targetNode && item->touchEvent.id == id) {
+            item = postInputEventAction_.erase(item);
+        } else {
+            ++item;
+        }
+    }
 }
 
 bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
@@ -189,5 +313,15 @@ bool PostEventManager::CheckPointValidity(const TouchEvent& touchEvent)
     return !std::any_of(postEventAction_.begin(), postEventAction_.end(), [touchEvent](const auto& actionItem) {
         return actionItem.touchEvent.id == touchEvent.id && actionItem.touchEvent.time == touchEvent.time;
     });
+}
+
+void PostEventManager::SetPassThroughResult(bool passThroughResult)
+{
+    passThroughResult_ = passThroughResult;
+}
+
+RefPtr<FrameNode> PostEventManager::GetPostTargetNode()
+{
+    return targetNode_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

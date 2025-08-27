@@ -48,11 +48,11 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
         !gestureHub->GetTextDraggable()) {
         DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
     }
-
     AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
     if (params.isNeedGather) {
+        HideGatherNode();
         DragDropFuncWrapper::ResetNode(frameNode);
     }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
@@ -181,12 +181,15 @@ void DragDropInitiatingStateIdle::StartPreDragStatusCallback(const TouchEvent& t
     auto frameNode = params.frameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto&& preDragStatusCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms..");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms");
         auto frameNode = weakNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         if (!gestureHub->GetTextDraggable()) {
+            auto dragdropEvent = gestureHub->GetDragEventActuator();
+            CHECK_NULL_VOID(dragdropEvent);
+            dragdropEvent->SetExecTimerCallback(true);
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
         }
     };
@@ -215,11 +218,11 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     if (touchEvent.sourceType != SourceType::MOUSE) {
         if (DragDropFuncWrapper::IsTextCategoryComponent(frameNode->GetTag())) {
             StartCreateTextThumbnailPixelMap();
-        } else {
+        } else if (IsAllowedDrag()) {
             StartCreateSnapshotTask(touchEvent.id);
+            StartGatherTask();
         }
         StartPreDragDetectingStartTask();
-        StartGatherTask();
         StartPreDragStatusCallback(touchEvent);
     } else {
         auto pipeline = frameNode->GetContextRefPtr();
@@ -285,5 +288,23 @@ void DragDropInitiatingStateIdle::AsyncDragEnd()
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
         FireCustomerOnDragEnd();
     }
+}
+
+void DragDropInitiatingStateIdle::HideGatherNode()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    if (!params.hasGatherNode) {
+        return;
+    }
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePreviewBadgeNode();
+    manager->RemoveGatherNodeWithAnimation();
 }
 } // namespace OHOS::Ace::NG

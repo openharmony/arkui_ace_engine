@@ -25,6 +25,12 @@ export struct AlertDialogBootcamp {
   @State oneButton: boolean = true;
   @State twoButton: boolean = false;
   @State threeButton: boolean = false;
+  @State alertDialogParamTitle: string = '';
+  @State enableAlertDialogParamTitle: boolean = false;
+  @State alertDialogParamSubtitle: string = '';
+  @State enableAlertDialogParamSubtitle: boolean = false;
+  @State alertDialogParamMessage: string = '';
+  @State enableAlertDialogParamMessage: boolean = false;
   @State alertDialogParamAutoCancel: boolean = true;
   @State enableAlertDialogParamAutoCancel: boolean = false;
   @State alertDialogParamAlignment: DialogAlignment = DialogAlignment.Default;
@@ -156,8 +162,9 @@ export struct AlertDialogBootcamp {
           .onClick(() => {
             AlertDialog.show(
               {
-                title: 'title',
-                message: 'text',
+                title: useEnabled(this.enableAlertDialogParamTitle, this.alertDialogParamTitle),
+                subtitle: useEnabled(this.enableAlertDialogParamSubtitle, this.alertDialogParamSubtitle),
+                message: useEnabled(this.enableAlertDialogParamMessage, this.alertDialogParamMessage),
                 autoCancel: useEnabled(this.enableAlertDialogParamAutoCancel, this.alertDialogParamAutoCancel),
                 alignment: useEnabled(this.enableAlertDialogParamAlignment, this.alertDialogParamAlignment),
                 offset: {
@@ -242,8 +249,9 @@ export struct AlertDialogBootcamp {
             this.threeButton = false;
             AlertDialog.show(
               {
-                title: 'title',
-                message: 'text',
+                title: useEnabled(this.enableAlertDialogParamTitle, this.alertDialogParamTitle),
+                subtitle: useEnabled(this.enableAlertDialogParamSubtitle, this.alertDialogParamSubtitle),
+                message: useEnabled(this.enableAlertDialogParamMessage, this.alertDialogParamMessage),
                 autoCancel: useEnabled(this.enableAlertDialogParamAutoCancel, this.alertDialogParamAutoCancel),
                 alignment: useEnabled(this.enableAlertDialogParamAlignment, this.alertDialogParamAlignment),
                 offset: {
@@ -341,8 +349,9 @@ export struct AlertDialogBootcamp {
           .onClick(() => {
             AlertDialog.show(
               {
-                title: 'title',
-                message: 'text',
+                title: useEnabled(this.enableAlertDialogParamTitle, this.alertDialogParamTitle),
+                subtitle: useEnabled(this.enableAlertDialogParamSubtitle, this.alertDialogParamSubtitle),
+                message: useEnabled(this.enableAlertDialogParamMessage, this.alertDialogParamMessage),
                 autoCancel: useEnabled(this.enableAlertDialogParamAutoCancel, this.alertDialogParamAutoCancel),
                 alignment: useEnabled(this.enableAlertDialogParamAlignment, this.alertDialogParamAlignment),
                 offset: {
@@ -449,6 +458,45 @@ export struct AlertDialogBootcamp {
   Parameters() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
+        RadioBlock({
+          title: 'title',
+          isEnabled: $enableAlertDialogParamTitle,
+          value: $alertDialogParamTitle,
+          dataSource: [
+            { label: 'title', value: 'title' },
+            { label: 'oneLine', value: 'title:一二三四五六七八九十' },
+            { label: 'twoLine', value: 'title:一二三四五六七八九十一二三四五六七八九十' },
+            { label: 'threeLine', value: 'title:一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十' +
+              '一二三四五六七八九十一二三四五六七八九十' }
+          ]
+        })
+
+        RadioBlock({
+          title: 'subtitle',
+          isEnabled: $enableAlertDialogParamSubtitle,
+          value: $alertDialogParamSubtitle,
+          dataSource: [
+            { label: 'subtitle', value: 'subtitle' },
+            { label: 'oneLine', value: 'subtitle:一二三四五六七八九十' },
+            { label: 'twoLine', value: 'subtitle:一二三四五六七八九十一二三四五六七八九十一二三四五六' },
+            { label: 'threeLine', value: 'subtitle:一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十' +
+              '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十' }
+          ]
+        })
+
+        RadioBlock({
+          title: 'message',
+          isEnabled: $enableAlertDialogParamMessage,
+          value: $alertDialogParamMessage,
+          dataSource: [
+            { label: 'message', value: 'message' },
+            { label: 'oneLine', value: 'message:一二三四五六七八九十' },
+            { label: 'twoLine', value: 'message:一二三四五六七八九十一二三四五六七八' },
+            { label: 'threeLine', value: 'message:一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十' +
+              '一二三四五六七八九十一二三四五六七八九十' }
+          ]
+        })
+
         RadioBlock({
           title: 'autoCancel',
           isEnabled: $enableAlertDialogParamAutoCancel,

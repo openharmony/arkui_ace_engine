@@ -17,16 +17,9 @@
 
 namespace OHOS::Ace {
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
-{
-    imageFilter = SkImageFilters::Offset(dx_, dy_, imageFilter);
-}
-#else
 void RosenRenderSvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const
 {
     imageFilter = RSRecordingImageFilter::CreateOffsetImageFilter(dx_, dy_, imageFilter);
 }
-#endif
 
 } // namespace OHOS::Ace

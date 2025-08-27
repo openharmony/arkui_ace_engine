@@ -44,7 +44,7 @@ constexpr Dimension LANDSCAPE_BOTTOM_SECURITY = 24.0_vp;
 constexpr Dimension PREVIEW_INNER_SECURITY = 24.0_vp;
 } // namespace
 class ACE_EXPORT MenuPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(MenuPaintProperty, PaintProperty);
 
 public:
     MenuPaintProperty() = default;

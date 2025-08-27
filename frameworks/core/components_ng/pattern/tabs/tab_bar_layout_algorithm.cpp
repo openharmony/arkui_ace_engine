@@ -156,7 +156,12 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->SetActiveChildRange(visibleItemPosition_.begin()->first, visibleItemPosition_.rbegin()->first);
     }
     if (defaultHeight_ || maxHeight_) {
-        auto frameHeight = std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f) + verticalPadding_);
+        auto frameHeight = 0.0f;
+        if (isBarAdaptiveHeight_ && isNoMinHeightLimit_) {
+            frameHeight = maxHeight_.value_or(0.0f) + verticalPadding_;
+        } else {
+            frameHeight = std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f) + verticalPadding_);
+        }
         frameSize.SetHeight(std::clamp(frameHeight, constraint->minSize.Height(), constraint->maxSize.Height()));
     }
     CheckBorderAndPadding(frameSize, padding);
@@ -365,6 +370,24 @@ bool TabBarLayoutAlgorithm::GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper)
     return isBarAdaptiveHeight;
 }
 
+bool TabBarLayoutAlgorithm::GetNoMinHeightLimit(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto isNoMinHeightLimit = layoutProperty->GetNoMinHeightLimit().value_or(false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, isNoMinHeightLimit);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, isNoMinHeightLimit);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, isNoMinHeightLimit);
+    if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
+        GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
+        isNoMinHeightLimit = true;
+    }
+    return isNoMinHeightLimit;
+}
+
 LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layoutWrapper, SizeF& frameSize)
 {
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -379,6 +402,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     if (axis_ == Axis::HORIZONTAL) {
         isBarAdaptiveHeight_ = GetBarAdaptiveHeight(layoutWrapper);
+        isNoMinHeightLimit_ = GetNoMinHeightLimit(layoutWrapper);
         childLayoutConstraint.maxSize.SetWidth(Infinity<float>());
         if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
             childLayoutConstraint.minSize.SetWidth(tabTheme->GetSubTabBarMinWidth().ConvertToPx());
@@ -714,7 +738,11 @@ void TabBarLayoutAlgorithm::MeasureItemSecond(LayoutWrapper* layoutWrapper, Layo
 
     visibleChildrenMainSize_ = scrollMargin_ * TWO;
     if (isBarAdaptiveHeight_) {
-        frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f) - verticalPadding_, maxHeight_.value_or(0.0f)));
+        if (isNoMinHeightLimit_) {
+            frameSize.SetHeight(maxHeight_.value_or(0.0f));
+        } else {
+            frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f) - verticalPadding_, maxHeight_.value_or(0.0f)));
+        }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
         childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
     }

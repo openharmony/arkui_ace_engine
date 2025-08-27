@@ -57,7 +57,7 @@ enum class SubwindowType {
 };
 
 class ACE_EXPORT Subwindow : public AceType {
-    DECLARE_ACE_TYPE(Subwindow, AceType)
+    DECLARE_ACE_TYPE(Subwindow, AceType);
 
 public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
@@ -65,6 +65,7 @@ public:
     virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
     virtual void ResizeWindowForMenu() = 0;
+    virtual bool SetFollowParentWindowLayoutEnabled(bool enable) = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
@@ -254,7 +255,23 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
+    virtual void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) = 0;
+    virtual bool NeedFollowParentWindowLayout() = 0;
+    virtual void AddFollowParentWindowLayoutNode(int32_t nodeId) = 0;
+    virtual void RemoveFollowParentWindowLayoutNode(int32_t nodeId) = 0;
+    virtual void SetNodeId(int32_t nodeId) = 0;
+    virtual int32_t GetNodeId() const = 0;
+    virtual void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) = 0;
 
+#if defined(ACE_STATIC)
+    virtual void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
+    virtual void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void OpenCustomDialogStatic(DialogProperties &dialogProps,
+        std::function<void(int32_t)> &&callback) = 0;
+#endif
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;

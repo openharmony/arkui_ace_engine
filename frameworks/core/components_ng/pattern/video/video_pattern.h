@@ -46,6 +46,16 @@ public:
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<VideoEventHub>();
@@ -222,6 +232,8 @@ public:
 
     void OnError(const std::string& errorId);
 
+    void OnError(int32_t code, const std::string& message);
+
     void OnResolutionChange() const;
 
     void OnStartRenderFrameCb();
@@ -258,7 +270,6 @@ public:
     {
         return isPrepared_;
     }
-
     static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
         const std::string& videoSrc, int32_t instanceId);
 
@@ -273,6 +284,9 @@ public:
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
+
+    void SetVideoController(const RefPtr<VideoControllerV2>& videoController);
+    RefPtr<VideoControllerV2> GetVideoController();
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
@@ -359,7 +373,7 @@ private:
     void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
-    void FireError();
+    void FireError(int32_t code, const std::string& message);
 
     HiddenChangeEvent CreateHiddenChangeEvent();
 

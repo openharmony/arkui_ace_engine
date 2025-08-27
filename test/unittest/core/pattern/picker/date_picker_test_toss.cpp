@@ -14,16 +14,41 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/unittest/core/pattern/test_ng.h"
-#include "core/components_ng/pattern/picker/toss_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-
 #define private public
+#define protected public
+#include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 class TestableTossAnimationController : public TossAnimationController {
 public:
     void TestCreatePropertyCallback()
@@ -63,6 +88,23 @@ private:
 
 // Test fixture. Renamed to DatePickerTestThree to match the HWTEST_F macro.
 class DatePickerTestToss : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    bool CompareOptionProperties(std::vector<PickerOptionProperty> option1, std::vector<PickerOptionProperty> option2)
+    {
+        int32_t size = option1.size();
+        for (int32_t i = 0; i < size; i++) {
+            if (option1[i].height != option2[i].height ||
+                option1[i].fontheight != option2[i].fontheight ||
+                option1[i].prevDistance != option2[i].prevDistance ||
+                option1[i].nextDistance != option2[i].nextDistance) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 protected:
     void SetUp() override
     {
@@ -71,11 +113,37 @@ protected:
         controller_ = column_->GetToss();
         controller_->SetColumn(column_);
         ASSERT_NE(controller_, nullptr);
+
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            return GetTheme(type);
+        });
+        EXPECT_CALL(*themeManager, GetTheme(_, _))
+            .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    }
+
+    void TearDown()
+    {
+        MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
+        ViewStackProcessor::GetInstance()->ClearStack();
     }
 
     RefPtr<DummyDatePickerColumnPattern> column_;
     RefPtr<TossAnimationController> controller_;
 };
+
+void DatePickerTestToss::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+}
+
+void DatePickerTestToss::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
 
 /**
 @tc.name: TossAnimationControllerSetStartTest
@@ -128,8 +196,8 @@ HWTEST_F(DatePickerTestToss, TossAnimationControllerPlayValidVelocityTest, TestS
     controller_->timeStart_ = 1.f;
     column_->SetMainVelocity(4500.f);
     controller_->SetColumn(column_);
-    EXPECT_FALSE(controller_->Play());
-    EXPECT_EQ(controller_->speed_, 0.f);
+    EXPECT_TRUE(controller_->Play());
+    EXPECT_EQ(controller_->speed_, 4.5);
 }
 
 /**
@@ -260,4 +328,183 @@ HWTEST_F(DatePickerTestToss, TossAnimationControllerStartSpringMotionNullTest, T
     ctrl->StartSpringMotion();
 }
 
+/**
+@tc.name: TestFlushCurrentOptionsNormalCase
+@tc.desc: Test FlushCurrentOptions with normal parameters.
+@tc.type: FUNC
+*/
+HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
+{
+    bool isDown = true;
+    bool isUpateTextContentOnly = false;
+    bool isUpdateAnimationProperties = true;
+    bool isTossPlaying = false;
+    /**
+     * @tc.steps: step1. Create DatePicker and get columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->MarkModifyDone();
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto initOptionProperties = columnPattern->optionProperties_;
+    /*
+    @tc.steps: step2. FlushCurrentOptions with parameters1.
+    */
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    auto optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step3. FlushCurrentOptions with parameters2.
+    */
+    isDown = false;
+    isUpateTextContentOnly = true;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = true;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+
+    /*
+    @tc.steps: step4. FlushCurrentOptions with parameters3.
+    */
+    isDown = true;
+    isUpateTextContentOnly = false;
+    isUpdateAnimationProperties = false;
+    isTossPlaying = false;
+    columnPattern->FlushCurrentOptions(isDown, isUpateTextContentOnly, isUpdateAnimationProperties, isTossPlaying);
+    optionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
+}
+
+/**
+ * @tc.name: DatePickerPatternDirty000
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    DirtySwapConfig dirtySwapConfig;
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    /**
+     * @tc.step: step2. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is true.
+     */
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = false;
+    EXPECT_TRUE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    /**
+     * @tc.step: step3. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is false.
+     */
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = true;
+    EXPECT_FALSE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+}
+
+/**
+ * @tc.name: GetDisappearTextStyle001
+ * @tc.desc: Test DatePickerModelNG GetDisappearTextStyle by frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, GetDisappearTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. call SetDisappearTextStyle & getDisappearTextStyle.
+     * @tc.expected: the result of fontStyle & textColor is equal to preset value.
+     */
+    NG::PickerTextStyle textStyle;
+    textStyle.fontStyle = Ace::FontStyle::ITALIC;
+    textStyle.textColor = Color::WHITE;
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+    auto curTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
+    EXPECT_EQ(curTextStyle.fontStyle.value(), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(curTextStyle.textColor.value(), Color::WHITE);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<PickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToMainTreeMultiThread();
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromMainTreeMultiThread();
+
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
 } // namespace OHOS::Ace::NG

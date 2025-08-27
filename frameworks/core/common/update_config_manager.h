@@ -62,6 +62,11 @@ public:
         }
     }
 
+    void CancelUselessTaskLocked()
+    {
+        currentTask_.updateTask.Cancel();
+    }
+
     void UpdatePromiseConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
         int32_t taskId, const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {
@@ -103,6 +108,37 @@ public:
         return aceConfig_.config_ == other;
     }
 
+    void StoreInfo(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    {
+        info_ = info;
+    }
+
+    bool IsInfoEqual(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    {
+        if (!info_) {
+            if (info) {
+                return false;
+            }
+            return true;
+        }
+        if (!info) {
+            return false;
+        }
+        auto rect_ = info_->rect_;
+        auto rect = info->rect_;
+        if (info_->textFieldPositionY_ != info->textFieldPositionY_) {
+            return false;
+        }
+        if (info_->textFieldHeight_ != info->textFieldHeight_) {
+            return false;
+        }
+        if (rect_.posX_ != rect.posX_ || rect_.posY_ != rect.posY_ ||
+            rect_.width_ != rect.width_ || rect_.height_ != rect.height_) {
+            return false;
+        }
+        return true;
+    }
+
     int32_t MakeTaskId()
     {
         return nextTaskId_.fetch_add(1);
@@ -120,11 +156,6 @@ private:
         taskExecutor->PostTask(currentTask_.updateTask, type, taskName);
     }
 
-    void CancelUselessTaskLocked()
-    {
-        currentTask_.updateTask.Cancel();
-    }
-
     std::mutex updateTaskMutex_;
 
     UpdateTask currentTask_;
@@ -132,6 +163,8 @@ private:
     std::atomic<int32_t> nextTaskId_ = 0;
 
     T aceConfig_;
+
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info_ = nullptr;
 };
 } // OHOS::Ace
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_COMMON_UPDATE_CONFIG_MANAGER_H

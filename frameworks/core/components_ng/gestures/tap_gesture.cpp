@@ -18,7 +18,6 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 namespace OHOS::Ace::NG {
-
 RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(

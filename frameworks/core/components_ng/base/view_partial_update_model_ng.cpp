@@ -85,6 +85,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
     customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
     customNode->SetOnDumpInspectorFunc(std::move(info.onDumpInspectorFunc));
+    customNode->SetClearAllRecycleFunc(std::move(info.clearAllRecycleFunc));
     customNode->SetOnRecycleFunc(std::move(info.recycleFunc));
     customNode->SetOnReuseFunc(std::move(info.reuseFunc));
     return customNode;
@@ -94,7 +95,10 @@ bool ViewPartialUpdateModelNG::MarkNeedUpdate(const WeakPtr<AceType>& node)
 {
     auto weakNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
     auto customNode = weakNode.Upgrade();
-    CHECK_NULL_RETURN(customNode, false);
+    if (!customNode) {
+        LOGW("customNode invalid");
+        return false;
+    }
     customNode->MarkNeedUpdate();
     return true;
 }

@@ -1306,4 +1306,58 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / 4 * 3 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / 4 * 3);
 }
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureFixedMode003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode003, TestSize.Level1)
+{
+    auto childCount = 3;
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < childCount; index++) {
+        CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    }
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+
+    /**
+     * @tc.steps: steps2. Set axis to horizontal, init bottomTabBarStyle.
+    */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    for (int32_t index = 0; index < childCount; index++) {
+        tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, index);
+        BottomTabBarStyle bottomTabBarStyle;
+        bottomTabBarStyle.symmetricExtensible = true;
+        tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, index);
+    }
+    auto child1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto child2 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto child3 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(2));
+
+    /**
+     * @tc.steps: steps3. Set barAdaptiveHeight and noMinHeightLimit to true.
+     * @tc.expected: steps3. Verify height of child node.
+     */
+    tabBarLayoutProperty_->UpdateBarAdaptiveHeight(true);
+    tabBarLayoutProperty_->UpdateNoMinHeightLimit(true);
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(10.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(20.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child3), CalcLength(30.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 30.0f);
+    /**
+     * @tc.steps: steps4. Set noMinHeightLimit to false.
+     * @tc.expected: steps3. Verify height of child node.
+    */
+    tabBarLayoutProperty_->UpdateNoMinHeightLimit(false);
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(40.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(20.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child3), CalcLength(30.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 56.0f);
+}
 } // namespace OHOS::Ace::NG

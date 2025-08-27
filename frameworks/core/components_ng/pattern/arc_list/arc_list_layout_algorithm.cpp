@@ -53,11 +53,12 @@ static constexpr double SCALE_FACTOR_B = -0.012414818053443355;
 static constexpr double SCALE_FACTOR_C = -0.0015925017083441295;
 static constexpr double SCALE_FACTOR_D = 3.0809306290456454E-06;
 static constexpr double SCALE_FACTOR_E = 100.0;
+static constexpr float OFFSET_THRESHOLD = 348.5f;
 } // namespace
 
 float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {
-    float offset = fabs(pos);
+    float offset = fmin(fabs(pos), OFFSET_THRESHOLD);
     float ratio = static_cast<float>((SCALE_FACTOR_A +
                                     SCALE_FACTOR_B * offset +
                                     SCALE_FACTOR_C * pow(offset, 2) + // 2:平方
@@ -135,8 +136,13 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
-            if (midIndex > 0 || GreatNotEqual(startPos, GetHeaderAreaSize())) {
-                startPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            float tmpStartPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            if (midIndex > 0) {
+                startPos = tmpStartPos;
+            } else if (GreatNotEqual(startPos, GetHeaderAreaSize())) {
+                startPos = std::max(tmpStartPos, GetHeaderAreaSize());
+            } else if (GreatNotEqual(tmpStartPos, GetHeaderAreaSize())) {
+                startPos = std::max(GetHeaderAreaSize(), (contentMainSize_ - midItemHeight) / FLOAT_TWO);
             }
             if (childrenSize_) {
                 posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
@@ -428,6 +434,7 @@ void ArcListLayoutAlgorithm::MeasureHeader(LayoutWrapper* layoutWrapper)
     }
 
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto headerLayoutConstraint = layoutProperty->CreateChildConstraint();
     headerLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
 
@@ -455,7 +462,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
         startHeaderPos_ = itemDispStartPos - headerMainSize_;
         if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
-            headerOffset_ = GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
+            headerOffset_ = CalculateHeaderOffset(layoutWrapper, info);
         }
         startHeaderPos_ -= headerOffset_;
         if (GreatNotEqual(startHeaderPos_, -TRANSPARENCY_DIST)) {
@@ -485,11 +492,34 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
     if (frameNode) {
-        frameNode->MarkAndCheckNewOpIncNode();
+        frameNode->MarkAndCheckNewOpIncNode(axis_);
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
             renderContext->UpdateOpacity(transparency);
         }
+    }
+}
+
+float ArcListLayoutAlgorithm::CalculateHeaderOffset(LayoutWrapper* layoutWrapper, const ListItemInfo& info)
+{
+    auto firstItemWrapper = GetListItem(layoutWrapper, 0);
+    if (firstItemWrapper) {
+        // Calculate the start position of the first item in the middle of the ArcList.
+        auto listItemLayoutProperty =
+            AceType::DynamicCast<ArcListItemLayoutProperty>(firstItemWrapper->GetLayoutProperty());
+        auto autoScale = listItemLayoutProperty ? listItemLayoutProperty->GetAutoScale().value_or(true) : true;
+        auto scale = autoScale ? GetNearScale(0.0f) : 1.0f;
+        auto itemHeight = (info.endPos - info.startPos) * scale;
+        auto itemDispStartPosInCenter = (contentMainSize_ - itemHeight) / FLOAT_TWO;
+
+        // Calculate the start position of the header when the first item in the middle of the ArcList.
+        auto headerStartPosInTop = itemDispStartPosInCenter - headerMainSize_;
+        headerStartPosInTop =
+            GreatNotEqual(headerStartPosInTop, HEADER_DIST) ? HEADER_DIST : headerStartPosInTop;
+
+        return itemDispStartPosInCenter - (headerStartPosInTop + headerMainSize_);
+    } else {
+        return GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
     }
 }
 
@@ -499,7 +529,7 @@ bool ArcListLayoutAlgorithm::CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWr
     CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<ArcListPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    if (!pattern->IsScrollableStopped()) {
+    if (!pattern->IsScrollableStopped() || pattern->IsOutOfBoundary()) {
         return false;
     }
 

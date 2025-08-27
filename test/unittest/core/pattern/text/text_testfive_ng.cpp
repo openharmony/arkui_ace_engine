@@ -24,6 +24,7 @@
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
@@ -803,20 +804,20 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::RTL);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
@@ -1059,6 +1060,40 @@ HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleLevelModeChanged002
+ * @tc.desc: test text_select_overlay.cpp OnHandleLevelModeChanged function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
  * @tc.name: CreateParagraph001
  * @tc.desc: test text_layout_algorithm.cpp CreateParagraph function
  * @tc.type: FUNC
@@ -1086,6 +1121,7 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
@@ -1531,6 +1567,9 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
     frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     textSelectOverlay->OnAncestorNodeChanged(frameNodeChangeInfoFlag);
     EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+    auto viewPort = textSelectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1684,6 +1723,25 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedMenuShare002
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    pattern->textForDisplay_ = TEXT_U16CONTENT;
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
  * @tc.name: HandleOnShare001
  * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
  * @tc.type: FUNC
@@ -1725,7 +1783,7 @@ HWTEST_F(TextTestFiveNg, GetSpanParagraphStyle001, TestSize.Level1)
     spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
     spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
-    textLayoutAlgorithm->GetSpanParagraphStyle(nullptr, spanItem, pStyle);
+    ParagraphUtil::GetSpanParagraphStyle(nullptr, spanItem, pStyle);
     EXPECT_EQ(pStyle.maxLines, 1024);
     EXPECT_EQ(pStyle.ellipsisMode, EllipsisMode::HEAD);
     EXPECT_EQ(pStyle.lineBreakStrategy, LineBreakStrategy::GREEDY);
@@ -1942,6 +2000,7 @@ HWTEST_F(TextTestFiveNg, UpdateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(spanItem->UpdateParagraph(frameNode, paragraph, true), -1);
@@ -2288,13 +2347,14 @@ HWTEST_F(TextTestFiveNg, EncodeTlv002, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     spanItem->fontStyle->UpdateTextShadow({ textShadow });
     spanItem->fontStyle->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    spanItem->fontStyle->UpdateSuperscript(SuperscriptStyle::SUBSCRIPT);
     spanItem->fontStyle->UpdateFontWeight(Ace::FontWeight::W200);
     std::vector<std::string> fontFamilies;
     fontFamilies.emplace_back("Arial");
     fontFamilies.emplace_back("Calibri");
     spanItem->fontStyle->UpdateFontFamily(fontFamilies);
     spanItem->fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    spanItem->fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    spanItem->fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     spanItem->fontStyle->UpdateTextDecorationColor(Color::WHITE);
     spanItem->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     spanItem->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -2480,6 +2540,7 @@ HWTEST_F(TextTestFiveNg, InitClickEvent001, TestSize.Level1)
 
     textPattern->textDetectEnable_ = true;
     textPattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::CONTINUE);
@@ -2510,6 +2571,7 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
 
     textPattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
 
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     auto func = textPattern->dataDetectorAdapter_->onClickMenu_;
     ASSERT_NE(func, nullptr);
 
@@ -2627,6 +2689,58 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     textPattern->dragNode_ = nullptr;
     func(Offset(0, 1));
     EXPECT_NE(textPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateRectForSymbolShadow001
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 1, 1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
+}
+
+/**
+ * @tc.name: UpdateRectForSymbolShadow002
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow002, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, -1, -1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
 }
 
 /**
@@ -3145,7 +3259,7 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle001, TestSize.Level1)
     fontFamilies.emplace_back("Calibri");
     fontStyle->UpdateFontFamily(fontFamilies);
     fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     fontStyle->UpdateTextDecorationColor(Color::WHITE);
     fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -3187,9 +3301,11 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle002, TestSize.Level1)
     textLineStyle->UpdateTextIndent(Dimension(40, DimensionUnit::PX));
     textLineStyle->UpdateWordBreak(WordBreak::NORMAL);
     textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+    textLineStyle->UpdateIsOnlyBetweenLines(true);
 
     UseSelfStyle(nullptr, textLineStyle, textStyle);
     EXPECT_EQ(textStyle.GetLineSpacing(), Dimension(1.0, DimensionUnit::PX));
+    EXPECT_EQ(textStyle.GetIsOnlyBetweenLines(), true);
 }
 
 /**
@@ -3209,7 +3325,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
@@ -3229,7 +3345,7 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
 
 /**
  * @tc.name: UnRegisterAfterLayoutCallback001
- * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
@@ -3244,7 +3360,7 @@ HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
 
 /**
  * @tc.name: TextShiftMultipleSelection001
- * @tc.desc: test text_pattern.cpp shift multiple selection function
+ * @tc.desc: test text_pattern.cpp shift multiple selection function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
@@ -3268,5 +3384,76 @@ HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
     pattern->ResetSelection();
 
     EXPECT_EQ(pattern->IsSelected(), false);
+}
+
+/**
+ * @tc.name: TextEnableAutoSpacing
+ * @tc.desc: Test the enable or disable the EnableAutoSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetEnableAutoSpacing(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);
+    /**
+     * @tc.expected: Set EnableAutoSpacing False.
+     */
+    TextModelNG::SetEnableAutoSpacing(frameNode, false);
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);
+}
+
+/**
+ * @tc.name: TextParagraphVerticalAlign
+ * @tc.desc: Test the setting for paragragph vertical align attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextParagraphVerticalAlign, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create text node and set textVerticalAlign value.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetTextVerticalAlign(TextVerticalAlign::BASELINE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.expected: Get textVerticalAlign value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetTextVerticalAlign(), TextVerticalAlign::BASELINE);
+    EXPECT_EQ(TextModelNG::GetTextVerticalAlign(frameNode), TextVerticalAlign::BASELINE);
+    /**
+     * @tc.expected: Set textVerticalAlign TextVerticalAlign::CENTER.
+     */
+    TextModelNG::SetTextVerticalAlign(frameNode, TextVerticalAlign::CENTER);
+    /**
+     * @tc.expected: Get textVerticalAlign value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetTextVerticalAlign(), TextVerticalAlign::CENTER);
+    EXPECT_EQ(TextModelNG::GetTextVerticalAlign(frameNode), TextVerticalAlign::CENTER);
 }
 } // namespace OHOS::Ace::NG

@@ -69,6 +69,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         return;
     }
     json->PutExtAttr("index", std::to_string(GetIndex()).c_str(), filter);
+    json->PutExtAttr("animationCurve", GetAnimationCurveStr(TabBarPhysicalCurve).c_str(), filter);
     json->PutExtAttr("animationDuration", GetAnimationDuration(), filter);
     if (GetTabBarMode() == TabBarMode::SCROLLABLE) {
         auto optionsJson = JsonUtil::Create(true);
@@ -109,15 +110,6 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     json->PutExtAttr("barGridAlign", barGridAlignJson, filter);
 }
 
-void TabsNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
-{
-    FrameNode::ToTreeJson(json, config);
-    if (config.contentOnly) {
-        return;
-    }
-    json->Put(TreeKey::SCROLLABLE, Scrollable());
-}
-
 bool TabsNode::Scrollable() const
 {
     if (!swiperId_.has_value()) {
@@ -128,6 +120,26 @@ bool TabsNode::Scrollable() const
     auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, true);
     return !props->GetDisableSwipe().value_or(false);
+}
+
+const RefPtr<Curve> TabsNode::GetAnimationCurve(const RefPtr<Curve>& defaultCurve) const
+{
+    if (!swiperId_.has_value()) {
+        return defaultCurve;
+    }
+    auto swiperNode = GetFrameNode(V2::SWIPER_ETS_TAG, swiperId_.value());
+    CHECK_NULL_RETURN(swiperNode, defaultCurve);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, defaultCurve);
+    auto curve = swiperPaintProperty->GetCurve().value_or(nullptr);
+    CHECK_NULL_RETURN(curve, defaultCurve);
+    return curve;
+}
+
+std::string TabsNode::GetAnimationCurveStr(const RefPtr<Curve>& defaultCurve) const
+{
+    auto curve = GetAnimationCurve(defaultCurve);
+    return curve ? curve->ToString() : "null";
 }
 
 int32_t TabsNode::GetAnimationDuration() const

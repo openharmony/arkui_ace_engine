@@ -25,17 +25,24 @@
 
 namespace OHOS::Ace {
 class ImageSourceOhos : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourceOhos, ImageSource)
+    DECLARE_ACE_TYPE(ImageSourceOhos, ImageSource);
 public:
     explicit ImageSourceOhos(std::unique_ptr<Media::ImageSource>&& source) : imageSource_(std::move(source)) {}
 
     std::string GetProperty(const std::string& key) override;
-    RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE,
-        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) override;
-    RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size,
-        AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false,
-        PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) override;
+    RefPtr<PixelMap> CreatePixelMap(
+        const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) override;
+    RefPtr<PixelMap> CreatePixelMap(
+        uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) override;
     RefPtr<PixelMap> CreatePixelMap() override;
+#if defined(ACE_STATIC)
+    /**
+     * Only for ArkTS 1.2
+     *
+     * @param options: DecodeOptions media decode options
+     **/
+    RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options) override;
+#endif
     Size GetImageSize() override;
     uint32_t GetFrameCount() override;
     std::string GetEncodedFormat() override;

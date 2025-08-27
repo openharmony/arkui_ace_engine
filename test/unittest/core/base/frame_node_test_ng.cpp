@@ -14,6 +14,11 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 #include "gtest/gtest.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +33,19 @@ void FrameNodeTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
+
+class TestAICaller : public AICallerHelper {
+public:
+    TestAICaller() = default;
+    ~TestAICaller() override = default;
+    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    {
+        if (funcName.compare("Success") == 0) {
+            return true;
+        }
+        return false;
+    }
+};
 
 /**
  * @tc.name: FrameNodeTestNg001
@@ -401,7 +419,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
-    FRAME_NODE->GetPaintRectOffsetToStage();
+    FRAME_NODE->GetPaintRectOffsetToPage();
 
     float x = 1.0;
     float y = 1.0;
@@ -770,6 +788,37 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_CreateRenderTask0017
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to CreateRenderTask
+     * @tc.expected: expect The isRenderDirtyMarked_ is false.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isRenderDirtyMarked_ = true;
+    frameNode->isObservedByDrawChildren_ = true;
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateRenderTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateRenderTask(true).value()();
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_UpdateLayoutPropertyFlag0018
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -950,25 +999,83 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
+class MockFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
+
+public:
+    static RefPtr<MockFrameNode> CreateMockFrameNode(
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    {
+        auto frameNode = AceType::MakeRefPtr<MockFrameNode>(tag, nodeId, pattern);
+        ElementRegister::GetInstance()->AddUINode(frameNode);
+        frameNode->InitializePatternAndContext();
+        return frameNode;
+    }
+
+    MockFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+    ~MockFrameNode() override = default;
+
+    MOCK_METHOD(bool, IsOutOfTouchTestRegion, (const PointF&, const TouchEvent&, std::vector<RectF>*));
+    MOCK_METHOD(void, CollectSelfAxisResult,
+        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&,
+            bool));
+};
+
+using NiceMockFrameNode = NiceMock<MockFrameNode>;
+
 /**
  * @tc.name: FrameNodeTestNg_AxisTest0027
- * @tc.desc: Test frame node method
+ * @tc.desc: Test AxisTest
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. callback AxisTest.
-     * @tc.expected: expect inputEventHub_ is run not null.
+     * @tc.steps: step1. construct tree
      */
-    const PointF globalPoint;
-    const PointF parentLocalPoint;
-    const PointF parentRevertPoint;
+    auto stackNode = NiceMockFrameNode::CreateMockFrameNode(
+        "stackNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    auto node1 = NiceMockFrameNode::CreateMockFrameNode(
+        "node1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    auto node2 = NiceMockFrameNode::CreateMockFrameNode(
+        "node2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    stackNode->frameChildren_.emplace(node1);
+    stackNode->frameChildren_.emplace(node2);
+
+    std::vector<RefPtr<MockFrameNode>> nodes = { stackNode, node1, node2 };
+    for (auto& item : nodes) {
+        item->isActive_ = true;
+        const auto& inputEventHub = item->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+        inputEventHub->SetAxisEvent([&item](AxisInfo& info) {});
+        ON_CALL((*item), CollectSelfAxisResult(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
+                             testing::_, testing::_, testing::_))
+            .WillByDefault(
+                testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
+                                    AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&, bool) {
+                    axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
+                }));
+        ON_CALL((*item), IsOutOfTouchTestRegion(testing::_, testing::_, testing::_))
+            .WillByDefault(
+                testing::Invoke([](const PointF&, const TouchEvent&, std::vector<RectF>*) { return false; }));
+    }
+    node2->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    const PointF globalPoint, parentLocalPoint, parentRevertPoint;
     TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
-    FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>()->inputEventHub_, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger AxisTest.
+     * @tc.expected: expect the order of axis test sequence is correct.
+     */
+    stackNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    std::string expectSeq = node2->GetHostTag() + node1->GetHostTag() + stackNode->GetHostTag();
+    std::string triggerSeq;
+    for (auto& item : onAxisResult) {
+        triggerSeq.append(item->GetFrameName());
+    }
+    EXPECT_EQ(triggerSeq, expectSeq);
 }
 
 /**
@@ -1417,55 +1524,6 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
 }
 
 /**
- * @tc.name: FrameNodeTouchTest047
- * @tc.desc: Test method GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct parameters.
-     */
-    std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps: step2. construct parameters.
-     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
-     */
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
-     */
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    FRAME_NODE2->layoutProperty_ = layoutProperty;
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
-     */
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch selfIdealSize has value.
-     */
-    std::optional<CalcLength> len = CalcLength("auto");
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
-
-    FRAME_NODE2->layoutProperty_ = nullptr;
-}
-
-/**
  * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback048
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -1532,7 +1590,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
     GET_PARENT->AddChild(GET_CHILD1);
     GET_PARENT->AddChild(GET_CHILD2);
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
     EXPECT_FALSE(GET_PARENT->GetSuggestOpIncActivatedOnce());
 
     /**
@@ -1542,10 +1600,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     GET_PARENT->suggestOpIncByte_ = 7;
     GET_CHILD1->SetSuggestOpIncActivatedOnce();
     GET_PARENT->SetSuggestOpIncActivatedOnce();
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
     EXPECT_TRUE(GET_PARENT->GetSuggestOpIncActivatedOnce());
     GET_CHILD1->suggestOpIncByte_ = 1;
-    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    GET_CHILD1->MarkAndCheckNewOpIncNode(Axis::VERTICAL);
 }
 
 /**
@@ -1569,14 +1627,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest051, TestSize.Level1)
      * @tc.expected: expect result value.
      */
     frameNode->geometryNode_->SetFrameSize(SizeF(20, 20));
-    auto result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
-    EXPECT_EQ(result, 3);
-    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
+    auto result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
+    EXPECT_EQ(result, 0);
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
     EXPECT_EQ(result, 2);
     SystemProperties::debugEnabled_ = true;
     frameNode->suggestOpIncByte_ = 0;
-    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
-    EXPECT_EQ(result, 3);
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1, Axis::VERTICAL);
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -1597,17 +1655,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback052, TestSize
      * @tc.steps2: call the function IsOpIncValidNode.
      * @tc.expected: Value returned as expected.
      */
-    auto result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
-    EXPECT_EQ(result, 2);
+    auto result = FRAME_NODE2->IsOpIncValidNode(boundary, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 
     FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
-    result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
-    EXPECT_EQ(result, 3);
+    result = FRAME_NODE2->IsOpIncValidNode(boundary, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 
     SizeF boundary1(40, 40);
     FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
-    result = FRAME_NODE2->IsOpIncValidNode(boundary1, childNumber);
-    EXPECT_EQ(result, 2);
+    result = FRAME_NODE2->IsOpIncValidNode(boundary1, Axis::VERTICAL, childNumber);
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -1691,7 +1749,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodePredict001, TestSize.Level1)
 
 /**
  * @tc.name: FrameNodeSetJSCustomProperty055
- * @tc.desc: Test SetJSCustomProperty isCNode true, expect result updateFlag is false.
+ * @tc.desc: Test SetJSCustomProperty isCNode true, expect result is false.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty055, TestSize.Level1)
@@ -1702,8 +1760,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty055, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. set isCNode true
-     * @tc.expected: expect result updateFlag is false.
+     * @tc.steps: step2. set isCNode true.
+     * @tc.expected: expect result is false.
      */
     frameNode->setIsCNode(true);
     std::function<bool()> func = []() -> bool { return true; };
@@ -1711,14 +1769,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty055, TestSize.Level1)
         return "getFuncA";
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
-    std::string value;
-    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", value);
-    EXPECT_EQ(updateFlagValue, false);
+    std::string getValue;
+    bool result = frameNode->GetCapiCustomProperty("key", getValue);
+    EXPECT_EQ(result, false);
 }
 
 /**
  * @tc.name: FrameNodeSetJSCustomProperty056
- * @tc.desc: Test SetJSCustomProperty isCNode false and func true, expect result updateFlag is true.
+ * @tc.desc: Test SetJSCustomProperty isCNode false, expect result is false.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty056, TestSize.Level1)
@@ -1729,8 +1787,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty056, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. set isCNode false and func true.
-     * @tc.expected: expect result updateFlag is true.
+     * @tc.steps: step2. set isCNode false.
+     * @tc.expected: expect result is false.
      */
     frameNode->setIsCNode(false);
     std::function<bool()> func = []() -> bool { return true; };
@@ -1739,38 +1797,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty056, TestSize.Level1)
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
     frameNode->setIsCNode(true);
-    std::string flagValue;
-    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
-    EXPECT_EQ(updateFlagValue, true);
-    EXPECT_EQ(flagValue, "1");
-}
-
-/**
- * @tc.name: FrameNodeSetJSCustomProperty057
- * @tc.desc: Test SetJSCustomProperty isCNode false and func false, expect result updateFlag is false.
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty057, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-
-    /**
-     * @tc.steps: step2. set isCNode false and func false.
-     * @tc.expected: expect result updateFlag is false.
-     */
-    frameNode->setIsCNode(false);
-    std::function<bool()> func = []() -> bool { return false; };
-    std::function<std::string(const std::string&)> getFuncA = [](const std::string& key) -> std::string {
-        return "getFuncA";
-    };
-    frameNode->SetJSCustomProperty(func, getFuncA);
-    frameNode->setIsCNode(true);
-    std::string flagValue;
-    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
-    EXPECT_EQ(updateFlagValue, false);
+    std::string getValue;
+    bool result = frameNode->GetCapiCustomProperty("key", getValue);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -1794,6 +1823,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty058, TestSize.Level1)
         return "getFuncA";
     };
     frameNode->SetJSCustomProperty(func, getFuncA);
+    frameNode->SetCustomPropertyMapFlagByKey("key");
     std::string getValue;
     bool result = frameNode->GetJSCustomProperty("key", getValue);
     EXPECT_EQ(result, true);
@@ -1818,6 +1848,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty059, TestSize.Level1)
      */
     std::function<bool()> func = []() -> bool { return true; };
     frameNode->SetJSCustomProperty(func, nullptr);
+    frameNode->SetCustomPropertyMapFlagByKey("key");
     std::string getValue;
     bool result = frameNode->GetJSCustomProperty("key", getValue);
     EXPECT_EQ(result, false);
@@ -2149,14 +2180,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg084, TestSize.Level1)
     bool result = frameNode->GetCapiCustomProperty("key1", value);
     EXPECT_EQ(result, true);
     EXPECT_EQ(value, "value1");
-
-    /**
-     * @tc.steps: step2. setIsCNode false
-     * @tc.expect: frameNode call AddCustomProperty
-    */
-    frameNode->setIsCNode(false);
-    result = frameNode->GetCapiCustomProperty("key1", value);
-    EXPECT_EQ(result, false);
 }
 
 /**
@@ -2335,8 +2358,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg098, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeGetOrCreate
- * @tc.desc: Test FrameNodeGetOrCreate.
+ * @tc.name: FrameNodeGetOrCreate001
+ * @tc.desc: Test FrameNodeGetOrCreate001.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
@@ -2380,6 +2403,60 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeGetOrCreate002
+ * @tc.desc: Test FrameNodeGetOrCreate002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNodeWithTree("Row", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode1, nullptr);
+    EXPECT_EQ(frameNode1->GetId(), 1);
+    /**
+     * @tc.steps: step2. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("Row", 2, []() { return AceType::MakeRefPtr<Pattern>(); });
+
+    EXPECT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), 2);
+    frameNode1->AddChild(frameNode2, 1, true);
+    /**
+     * @tc.steps: step3. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode("Row", 3, []() { return AceType::MakeRefPtr<Pattern>(); });
+    EXPECT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), 2);
+    frameNode2->AddChild(frameNode2, 1, true);
+
+    /**
+     * @tc.steps: step4. test GetFrameNodeOnly
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode4 = FrameNode::GetFrameNodeOnly("Row", 3);
+    EXPECT_NE(frameNode4, nullptr);
+    /**
+     * @tc.steps: step5. test GetFrameNodeChildByIndex
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode5 = frameNode1->GetFrameNodeChildByIndex(0);
+    EXPECT_NE(frameNode5, nullptr);
+    auto frameNode6 = frameNode2->GetFrameNodeChildByIndex(0);
+    EXPECT_EQ(frameNode6, nullptr);
+    /**
+     * @tc.steps: step6. test FrameCount
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameCount = frameNode1->FrameCount();
+    EXPECT_EQ(frameCount, 1);
+}
+
+/**
  * @tc.name: FrameNodeTestNG089
  * @tc.desc: Test DumpSimplifyCommonInfo.
  * @tc.type: FUNC
@@ -2388,23 +2465,353 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNG089, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     const NG::RectF rect = { 10.0f, 20.0f, 30.0f, 40.0f };
-    frameNode->geometryNode_->frame_.rect_ = rect;
-    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
-    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
-    frameNode->layoutProperty_->SetLayoutRect(rect);
-    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-    frameNode->layoutProperty_->padding_ = std::make_unique<PaddingProperty>();
+    frameNode->GetGeometryNode()->frame_.rect_ = rect;
+    frameNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    frameNode->GetLayoutProperty()->SetLayoutRect(rect);
+    frameNode->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    frameNode->GetLayoutProperty()->padding_ = std::make_unique<PaddingProperty>();
     LayoutConstraintF constraint;
-    constraint.selfIdealSize.width_ = 20.0f;
-    constraint.selfIdealSize.height_ = 30.0f;
-    frameNode->layoutProperty_->contentConstraint_ = constraint;
+    constraint.selfIdealSize.SetHeight(30.0f);
+    constraint.selfIdealSize.SetWidth(20.0f);
+    frameNode->GetLayoutProperty()->contentConstraint_ = constraint;
     LayoutConstraintF layoutConstraint;
-    layoutConstraint.percentReference.width_ = 10.0;
-    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraint);
+    layoutConstraint.percentReference.SetWidth(10.0f);
+    frameNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     frameNode->DumpInfo(json);
     std::string res = json->ToString();
 
     EXPECT_EQ(res.length() < 9000, true);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG300
+ * @tc.desc: Test GetPatternTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG300, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("one", 1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create pattern_.
+     * @tc.expected: make sure pattern_ is not nullptr.
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    frameNode->pattern_ = textPattern;
+    auto res = frameNode->GetPatternTypeName();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG301
+ * @tc.desc: Test GetLayoutPropertyTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG301, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create layoutProperty_ is nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    frameNode->layoutProperty_ = nullptr;
+    auto res = frameNode->GetLayoutPropertyTypeName();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG302
+ * @tc.desc: Test GetLayoutPropertyTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG302, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create layoutProperty_ is nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    auto res = frameNode->GetLayoutPropertyTypeName();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG303
+ * @tc.desc: Test GetLayoutPropertyTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG303, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create layoutProperty_ is nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    BorderWidthProperty overCountBorderWidth;
+    overCountBorderWidth.SetBorderWidth(Dimension(10, DimensionUnit::VP));
+    frameNode->layoutProperty_->UpdateBorderWidth(overCountBorderWidth);
+    auto res = frameNode->GetLayoutPropertyTypeName();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG304
+ * @tc.desc: Test GetPaintPropertyTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG304, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create paintProperty_ is nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    frameNode->paintProperty_ = nullptr;
+    auto res = frameNode->GetPaintPropertyTypeName();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG305
+ * @tc.desc: Test GetPaintPropertyTypeName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG305, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create paintProperty_ is nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    auto res = frameNode->GetPaintPropertyTypeName();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG306
+ * @tc.desc: Test GetKitNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG306, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create kitNode_ is nullptr.
+     * @tc.expected: expect is nullptr.
+     */
+    frameNode->kitNode_ = nullptr;
+    auto res = frameNode->GetKitNode();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG307
+ * @tc.desc: Test GetKitNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG307, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create kitNode_ is nullptr.
+     * @tc.expected: expect is nullptr.
+     */
+    auto kitNode = frameNode->GetKitNode();
+    auto kitNodeToFrameNode = AceType::DynamicCast<Kit::FrameNodeImpl>(kitNode);
+    frameNode->SetKitNode(kitNodeToFrameNode);
+    auto res = frameNode->GetKitNode();
+    EXPECT_EQ(res, kitNodeToFrameNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG308
+ * @tc.desc: Test GetKitNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG308, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create kitNode_ is not nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    int32_t nodeId = 1;
+    auto kitNode = NG::ColumnModelNG::CreateFrameNode(nodeId);
+    auto kitNodeToFrameNode = AceType::DynamicCast<Kit::FrameNodeImpl>(kitNode);
+    frameNode->SetKitNode(kitNodeToFrameNode);
+    auto res = frameNode->GetKitNode();
+    EXPECT_EQ(res, kitNodeToFrameNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG309
+ * @tc.desc: Test GetKitNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG309, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create geometryNode_ is nullptr.
+     * @tc.expected: expect is nullptr.
+     */
+    auto geometryNode= nullptr;
+    frameNode->SetGeometryNode(geometryNode);
+    auto res = frameNode->GetGeometryNode();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNG310
+ * @tc.desc: Test GetKitNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG310, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create geometryNode_ is nullptr.
+     * @tc.expected: expect is nullptr.
+     */
+    auto geometryNode= AceType::MakeRefPtr<GeometryNode>();
+    frameNode->SetGeometryNode(geometryNode);
+    auto res = frameNode->GetGeometryNode();
+    EXPECT_NE(res, nullptr);
+    EXPECT_EQ(res, geometryNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg311
+ * @tc.desc: Test OnAttachAdapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode1 =
+        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), false);
+    auto pattern_ = frameNode->GetPattern();
+    EXPECT_NE(pattern_, nullptr);
+    bool result = pattern_->OnAttachAdapter(frameNode, childNode1);
+    EXPECT_EQ(result, false);
+    pattern_ = nullptr;
+}
+
+/**
+ * @tc.name: FrameNodeTestNg312
+ * @tc.desc: Test CallAIFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps2: create AI helper
+     */
+    auto myAICaller = std::make_shared<TestAICaller>();
+
+    /**
+     * @tc.steps3: call ai function without set
+     * @tc.excepted: step3 return AI_CALLER_INVALID means AI helper not setted.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("Success", ""), AI_CALLER_INVALID);
+
+    /**
+     * @tc.steps4: set ai helper instance.
+     * @tc.excepted: step4 AI helper not null and setted success.
+     */
+    frameNode->SetAICallerHelper(myAICaller);
+    EXPECT_EQ(frameNode->aiCallerHelper_, myAICaller);
+
+    /**
+     * @tc.steps5: call ai function success after set.
+     * @tc.excepted: step5 ai function called success.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("Success", "params1: 1"), AI_CALL_SUCCESS);
+
+    /**
+     * @tc.steps6: call invalid function after set.
+     * @tc.excepted: step6 ai function not found and return AI_CALL_FUNCNAME_INVALID.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("OTHERFunction", "params1: 1"), AI_CALL_FUNCNAME_INVALID);
 }
 } // namespace OHOS::Ace::NG

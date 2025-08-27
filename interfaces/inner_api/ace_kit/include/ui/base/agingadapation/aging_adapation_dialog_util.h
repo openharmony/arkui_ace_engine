@@ -27,12 +27,13 @@ namespace OHOS::Ace::Kit {
 enum class IconNodeType {
     SYMBOL = 0,
     IMAGE,
+    TEXT
 };
 
 class ACE_FORCE_EXPORT AgingAdapationDialogUtil {
 public:
     static RefPtr<FrameNode> ShowLongPressDialog(
-        const std::string& message, const int32_t iconNodeId, const IconNodeType type);
+        const std::string& message, const int32_t iconNodeId, const IconNodeType type, bool isWithDialogTheme = false);
     static float GetDialogBigFontSizeScale();
     static float GetDialogLargeFontSizeScale();
     static float GetDialogMaxFontSizeScale();

@@ -20,3 +20,8 @@ ace_unittest("stage_test_ng") {
     "stage_test_ng.cpp",
   ]
 }
+
+ace_unittest("force_split_stage_test_ng") {
+  type = "new"
+  sources = [ "force_split_stage_test_ng.cpp" ]
+}

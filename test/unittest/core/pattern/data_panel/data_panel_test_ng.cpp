@@ -88,7 +88,7 @@ public:
 };
 
 class DataPanelTheme : public Theme {
-    DECLARE_ACE_TYPE(DataPanelTheme, Theme)
+    DECLARE_ACE_TYPE(DataPanelTheme, Theme);
 public:
     DataPanelTheme()
     {
@@ -117,6 +117,10 @@ void DataPanelTestNg::SetUpTestCase()
 {
     MockContainer::SetUp();
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
 }
 
 void DataPanelTestNg::TearDownTestCase()
@@ -146,7 +150,7 @@ void DataPanelTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const
  * @tc.desc: Test DataPanel Create
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -179,7 +183,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel SetEffect
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest002, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and set effct.
@@ -389,7 +393,7 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest004, TestSize.Level1)
  * @tc.desc: Test DataPanel isAtomicNode
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest004, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest004, TestSize.Level0)
 {
     DataPanelModelNG dataPanel;
     dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
@@ -404,7 +408,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest004, TestSize.Level1)
  * @tc.desc: Test the line datapanel .
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest005, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapanel model and initialize dataPanelType to LINE.
@@ -437,7 +441,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest005, TestSize.Level1)
  * @tc.desc: Test the line datapanel .
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest006, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapanel model and initialize dataPanelType to LINE.
@@ -470,7 +474,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest006, TestSize.Level1)
  * @tc.desc: Test the line datapanel .
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest007, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get framenode.
@@ -585,7 +589,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest005, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod SetTrackBackground
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest006, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest006, TestSize.Level0)
 {
     DataPanelModelNG dataPanelModelNG;
     dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
@@ -611,7 +615,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest006, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod SetStrokeWidth
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest007, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest007, TestSize.Level0)
 {
     DataPanelModelNG dataPanelModelNG;
     dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
@@ -662,7 +666,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest007, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod SetValueColors Normal
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest008, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest008, TestSize.Level0)
 {
     DataPanelModelNG dataPanelModelNG;
     dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
@@ -694,7 +698,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest008, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod SetValueColors Normal2
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest009, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest009, TestSize.Level0)
 {
     DataPanelModelNG dataPanelModelNG;
     dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
@@ -802,14 +806,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest010, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -843,14 +847,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintBackground
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -864,14 +868,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintSpace
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -887,7 +891,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
 }
@@ -897,14 +901,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintColorSegment
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -932,7 +936,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
 }
@@ -942,14 +946,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintTrackBackground
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
@@ -963,7 +967,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level0)
 {
     /**
      * case 1:defaultThickness >= radius
@@ -973,7 +977,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DataPanelTheme>()));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -991,7 +995,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level0)
 {
     /**
      * case 2: totalvalue = 20
@@ -1003,7 +1007,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1039,7 +1043,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1096,7 +1100,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
 {
     /**
      * case 1: maxValue = 100, totalValue = 110
@@ -1108,7 +1112,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     
@@ -1151,7 +1155,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintCircle
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
 {
     /**
      * case 1: value1 nearZero, value2 nearMax
@@ -1163,7 +1167,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     
@@ -1206,7 +1210,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level0)
 {
     /**
      * case 1:sum of value = max ,max > 0
@@ -1218,7 +1222,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1263,7 +1267,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level0)
 {
     /**
      * case 2:sum of value != max, max < 0
@@ -1275,7 +1279,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1294,7 +1298,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level0)
 {
     /**
      * case 3:one of value nearequael 0 and > 0
@@ -1306,7 +1310,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1336,7 +1340,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1383,7 +1387,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     /**
      * @tc.case: case. layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
 }
@@ -1393,7 +1397,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
  * @tc.desc: Test DataPanel PaintMethod UpdateDate
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1403,7 +1407,7 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
     /**
      * @tc.cases: case. cover branch isEffect_.
      */
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     dataPanelModifier.isEffect_->Set(true);
     dataPanelModifier.date_->Set(0.0f);
     dataPanelModifier.UpdateDate();
@@ -1420,7 +1424,7 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod OnDraw
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. statement dataPanelModifier.
@@ -1429,7 +1433,7 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. construct context and call onDraw().
@@ -1459,7 +1463,7 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
  * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. statement dataPanelModifier.
@@ -1468,7 +1472,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Lev
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test positive sequence gradientColor.
@@ -1500,7 +1504,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Lev
  * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. statement dataPanelModifier.
@@ -1509,7 +1513,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Lev
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test Reverse GradientColor.
@@ -1541,7 +1545,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Lev
  * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. statement dataPanelModifier.
@@ -1550,7 +1554,7 @@ HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test the setting of Shadow attribute.
@@ -1663,7 +1667,7 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateContentModifierTest001, TestSize.Level1
  * @tc.desc: Test line DataPanel's default Border Radius
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode, renderContext, pipeline and select theme.
@@ -1714,7 +1718,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
  * @tc.desc: Test line DataPanel's Customized Border Radius
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode, renderContext, pipeline and select theme.
@@ -1773,7 +1777,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
  * @tc.desc: Test DataPanel SetEffect
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest003, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and set effct.
@@ -1798,7 +1802,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest003, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when type is line
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest004, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1831,7 +1835,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest004, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when values is longer than max length
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest005, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1864,7 +1868,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest005, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when values has a single value
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest006, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1897,7 +1901,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest006, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when values length is the maximum supported display length
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest007, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1930,7 +1934,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest007, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when values length is 9
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest008, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1963,7 +1967,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest008, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when max is default value
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest009, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -1996,7 +2000,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest009, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when max is a infinite value
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0010, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -2029,7 +2033,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0010, TestSize.Level1)
  * @tc.desc: Test DataPanel Create when max is a infinite value
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0011, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and get frameNode.
@@ -2062,7 +2066,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0011, TestSize.Level1)
  * @tc.desc: Test DataPanel SetEffect
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest012, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and set effct.
@@ -2087,7 +2091,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest012, TestSize.Level1)
  * @tc.desc: Test DataPanel SetEffect
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest013, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and set effct when type is line.
@@ -2112,7 +2116,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest013, TestSize.Level1)
  * @tc.desc: Test DataPanel SetEffect
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest014, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create datapnel and set effct when type is line.
@@ -2322,9 +2326,9 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest006, TestSize.Level1)
  * @tc.desc: Test DataPanel PaintMethod GetPaintPath
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level1)
+HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
 {
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 50.0f, 50.0f };
     // test Solid color when the valueColors >0 and valueColors <=9

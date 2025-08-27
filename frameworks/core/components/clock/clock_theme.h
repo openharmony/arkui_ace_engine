@@ -39,7 +39,7 @@ public:
 
         RefPtr<ClockTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ClockTheme> theme = AceType::Claim(new ClockTheme());
+            RefPtr<ClockTheme> theme = AceType::MakeRefPtr<ClockTheme>();
             if (!themeConstants) {
                 return theme;
             }

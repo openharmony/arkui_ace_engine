@@ -158,6 +158,22 @@ static const std::unordered_set<std::string> stringAttrs = {
     "common_cancel_text",
     "common_ok_text",
     "textoverlay_paste",
+    "text_overlay_menu_more_accessibility_text",
+    "text_overlay_menu_back_accessibility_text",
+    "general_ai_menu_address",
+    "general_ai_menu_date",
+    "general_ai_menu_email",
+    "general_ai_menu_phone_number",
+    "general_ai_menu_url",
+    "menu_animation_curve",
+    "general_ai_preview_menu_address_open_map_app",
+    "general_ai_preview_menu_url_open_browser_app",
+    "general_ai_preview_menu_date_install_calendar_app",
+    "general_ai_preview_menu_address_install_map_app",
+    "general_ai_preview_menu_display_failed",
+    "textfield_show_password",
+    "textfield_hide_password",
+    "general_ai_ask_celia",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

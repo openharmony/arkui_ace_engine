@@ -47,6 +47,17 @@ public:
     }
     ~LongPressGesture() override = default;
 
+#ifdef ARKUI_CAPI_UNITTEST
+    bool GetRepeat()
+    {
+        return repeat_;
+    }
+
+    int32_t GetDuration()
+    {
+        return duration_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

@@ -16,16 +16,17 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_RESOURCE_RESOURCE_PARSER_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_RESOURCE_RESOURCE_PARSER_H
 
+#include <memory>
 #include <string>
 
 #include "ui/properties/color.h"
-#include "ui/base/geometry/dimension.h"
+#include "ui/base/geometry/calc_dimension.h"
 #include "ui/resource/resource_info.h"
 
 namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT ResourceParser {
 public:
-    static bool GetDimension(const ResourceInfo& resourceInfo, Ace::Dimension& dimension);
+    static bool GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDimension& dimension);
     static bool GetColor(const ResourceInfo& resourceInfo, Ace::Color& color);
     static bool GetString(const ResourceInfo& resourceInfo, std::string& str);
     static bool GetMediaPath(const ResourceInfo& resourceInfo, std::string& mediaPath);
@@ -36,6 +37,7 @@ public:
     static bool GetIntArray(const ResourceInfo& resourceInfo, std::vector<uint32_t>& intArray);
     static bool GetStringArray(const ResourceInfo& resourceInfo, std::vector<std::string>& strArray);
     static bool GetSymbol(const ResourceInfo& resourceInfo, uint32_t& symbolRes);
+    static bool GetMediaData(const ResourceInfo& resourceInfo, size_t& len, std::unique_ptr<uint8_t[]>& dest);
 };
 } // namespace OHOS::Ace::Kit
 

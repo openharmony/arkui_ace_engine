@@ -56,6 +56,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Vertical");
     EXPECT_TRUE(json->GetBool("editMode"));
     EXPECT_TRUE(json->GetBool("chainAnimation"));
+    EXPECT_TRUE(json->GetBool("syncLoad"));
     EXPECT_EQ(json->GetString("divider"), "");
     EXPECT_EQ(json->GetString("lanes"), "3");
     EXPECT_EQ(Dimension::FromString(json->GetString("laneMinLength")), Dimension(40));
@@ -75,6 +76,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     model.SetSticky(V2::StickyStyle::FOOTER);
     model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetDivider(ITEM_DIVIDER);
+    model.SetSyncLoad(false);
     CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
@@ -82,6 +84,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.End");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Footer");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.CENTER");
+    EXPECT_FALSE(json->GetBool("syncLoad"));
     auto dividerJson = json->GetObject("divider");
     EXPECT_EQ(Dimension::FromString(dividerJson->GetString("strokeWidth")), Dimension(STROKE_WIDTH));
     EXPECT_EQ(Dimension::FromString(dividerJson->GetString("startMargin")), Dimension(10));
@@ -1753,7 +1756,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      */
     auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    groupPattern->NotifyDataChange(2, 1);
+    groupPattern->NotifyDataChange(1, 1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
     EXPECT_EQ(pattern_->currentOffset_, 0);
@@ -1764,7 +1767,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      */
     UpdateCurrentOffset(-160);
     EXPECT_EQ(pattern_->currentOffset_, 160);
-    groupPattern->NotifyDataChange(2, 1);
+    groupPattern->NotifyDataChange(1, 1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
     EXPECT_EQ(pattern_->currentOffset_, 260);
@@ -1773,7 +1776,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
      * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
      * @tc.expected: Current index is 1, currentOffset = 260
      */
-    groupPattern->NotifyDataChange(2, -1);
+    groupPattern->NotifyDataChange(1, -1);
     FlushUITasks();
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
     EXPECT_EQ(pattern_->currentOffset_, 160);
@@ -1817,8 +1820,8 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition008, TestSize.Level1)
      */
     auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    groupPattern->NotifyDataChange(2, -1);
-    groupNode->RemoveChildAtIndex(2);
+    groupPattern->NotifyDataChange(1, -1);
+    groupNode->RemoveChildAtIndex(1);
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 75);
 }

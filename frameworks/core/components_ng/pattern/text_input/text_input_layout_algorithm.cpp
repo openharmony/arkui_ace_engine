@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -35,6 +37,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    isInlineFocus_ = isInlineStyle && pattern->HasFocus();
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
@@ -136,6 +139,8 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.Constrain(frameSizeConstraint.minSize, frameSizeConstraint.maxSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    MeasureAutoFillIcon(layoutWrapper);
+    MeasureCounterWithPolicy(layoutWrapper, responseAreaWidth + pattern->GetHorizontalPaddingAndBorderSum());
 }
 
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -208,6 +213,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (pattern->IsShowError()) {
         TextFieldLayoutAlgorithm::ErrorLayout(layoutWrapper);
     }
+    LayoutAutoFillIcon(layoutWrapper);
 }
 
 void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPositionParams &params,
@@ -283,16 +289,24 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isPasswordType = pattern->IsInPasswordMode();
     auto disableTextAlign = false;
-    auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    auto fontSize =
+        textStyle.GetFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
-
-    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), content,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
-    } else {
-        CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
+    auto autofillController = pattern->GetOrCreateAutoFillController();
+    CHECK_NULL_RETURN(autofillController, false);
+    auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
+    if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
+        CreateAutoFillParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured(),
             pattern->GetNakedCharPosition(), paragraphData);
+        autofillController->SetAutoFillOriginTextColor(textStyle.GetTextColor());
+    } else {
+        if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
+            CreateParagraph(textStyle, pattern->GetDragContents(), content,
+                isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
+        } else {
+            CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
+                pattern->GetNakedCharPosition(), paragraphData);
+        }
     }
     return true;
 }
@@ -308,34 +322,117 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     auto responseArea = pattern->GetResponseArea();
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     float childWidth = 0.0f;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, contentConstraint);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, contentConstraint);
-    float contentButtonPadding = 0.0f;
-    auto contentHoverPadding = textFieldTheme->GetContentHoverPadding().ConvertToPx();
     if (responseArea) {
         auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
         childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
-        contentButtonPadding = responseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
     }
     if (cleanNodeResponseArea) {
         auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
         childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
-        contentButtonPadding = cleanNodeResponseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
-    }
-
-    if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        contentButtonPadding = 0.0f;
     }
 
     auto newLayoutConstraint = contentConstraint;
     newLayoutConstraint.maxSize.SetWidth(std::max(newLayoutConstraint.maxSize.Width() - childWidth, 0.0f));
     newLayoutConstraint.minSize.SetWidth(std::max(newLayoutConstraint.minSize.Width() - childWidth, 0.0f));
     if (newLayoutConstraint.selfIdealSize.Width()) {
-        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth -
-            contentButtonPadding);
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
     }
     return newLayoutConstraint;
+}
+
+void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldlayoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(textFieldlayoutProperty);
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
+    CHECK_NULL_VOID(autofillController);
+    auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
+    auto autoFillIcon =  weakAutoFillIcon.Upgrade();
+    CHECK_NULL_VOID(autoFillIcon);
+    auto autoFillIconIndex = frameNode->GetChildIndex(autoFillIcon);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(autoFillIconIndex);
+    CHECK_NULL_VOID(childWrapper);
+    auto iconGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(iconGeometryNode);
+    auto iconLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(iconLayoutProperty);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto iconSize = iconLayoutProperty->GetFontSize().value_or(textFieldTheme->GetAutoFillIconSize());
+    auto iconHeight = iconSize.ConvertToPx();
+    CalcSize iconCalcSize;
+    iconCalcSize.SetWidth(CalcLength(iconHeight));
+    iconCalcSize.SetHeight(CalcLength(iconHeight));
+    iconLayoutProperty->UpdateUserDefinedIdealSize(iconCalcSize);
+    auto childLayoutConstraint = textFieldlayoutProperty->CreateChildConstraint();
+    childWrapper->Measure(childLayoutConstraint);
+    autoFillIconSizeMeasure_ = iconGeometryNode->GetFrameSize();
+}
+
+void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldlayoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(textFieldlayoutProperty);
+    auto isRTL = textFieldlayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto textFieldGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(textFieldGeometryNode);
+    auto textFieldSize = textFieldGeometryNode->GetFrameSize();
+    auto textFieldFrameWidth = textFieldSize.Width();
+    auto textFieldFrameHeight = textFieldSize.Height();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
+    CHECK_NULL_VOID(autofillController);
+    auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
+    auto autoFillIcon =  weakAutoFillIcon.Upgrade();
+    CHECK_NULL_VOID(autoFillIcon);
+    auto autoFillIconIndex = frameNode->GetChildIndex(autoFillIcon);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(autoFillIconIndex);
+    CHECK_NULL_VOID(childWrapper);
+    auto iconGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(iconGeometryNode);
+    auto iconFrameWidth = autoFillIconSizeMeasure_.Width();
+    auto iconFrameHeight = autoFillIconSizeMeasure_.Height();
+
+    auto padding = textFieldlayoutProperty->CreatePaddingAndBorder();
+    auto leftOffset = padding.left.value_or(0.0f);
+    auto rightOffset = padding.right.value_or(0.0f);
+    float iconHorizontalOffset = isRTL ? textFieldFrameWidth - iconFrameWidth - rightOffset : leftOffset;
+    // Vertically center-align text
+    auto half = 2.0f;
+    float iconVerticalOffset = textRect_.Top() + textRect_.Height() / half - autoFillIconSizeMeasure_.Height() / half;
+    // Vertically center-align textinput
+    if (GreatOrEqual(iconFrameHeight, textFieldFrameHeight)) {
+        iconVerticalOffset = -(iconFrameHeight - textFieldFrameHeight) / half;
+    } else if (LessNotEqual(iconVerticalOffset, 0.0f)) {
+        iconVerticalOffset = 0.0f;
+    } else if (GreatNotEqual(iconVerticalOffset + iconFrameHeight, textFieldFrameHeight)) {
+        iconVerticalOffset = iconVerticalOffset - (iconVerticalOffset + iconFrameHeight - textFieldFrameHeight);
+    }
+
+    OffsetF iconOffset(iconHorizontalOffset, iconVerticalOffset);
+    iconGeometryNode->SetMarginFrameOffset(iconOffset);
+    childWrapper->Layout();
+}
+
+void TextInputLayoutAlgorithm::MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthLayoutPolicy != LayoutCalPolicy::NO_MATCH) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        auto counterWidth = frameSize.Width() - nonContentWidth;
+        CounterNodeMeasure(counterWidth, layoutWrapper);
+    }
 }
 } // namespace OHOS::Ace::NG

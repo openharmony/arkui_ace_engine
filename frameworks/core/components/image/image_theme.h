@@ -18,7 +18,6 @@
 
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -39,12 +38,11 @@ public:
 
         RefPtr<ImageTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ImageTheme> theme = AceType::Claim(new ImageTheme());
+            RefPtr<ImageTheme> theme = AceType::MakeRefPtr<ImageTheme>();
             if (!themeConstants) {
                 return theme;
             }
             auto themeStyle = themeConstants->GetThemeStyle();
-            theme->fillColor_ = themeConstants->GetColor(THEME_IMAGE_FILL_COLOR);
             ParsePattern(themeConstants, theme);
             return theme;
         }

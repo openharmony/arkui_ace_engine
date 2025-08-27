@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
@@ -61,6 +62,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
 
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
@@ -70,6 +72,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     tossAnimationController_->SetPipelineContext(context);
     tossAnimationController_->SetColumn(AceType::WeakClaim(this));
     overscroller_.SetColumn(AceType::WeakClaim(this));
@@ -83,10 +86,26 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 
 void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
     if (hapticController_) {
         hapticController_->Stop();
     }
     UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void TextPickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void TextPickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -107,7 +126,9 @@ bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
 
 void TextPickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
@@ -118,8 +139,6 @@ void TextPickerColumnPattern::OnModifyDone()
     InitSelectorButtonProperties(theme);
     InitMouseAndPressEvent();
     SetAccessibilityAction();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (optionProperties_.size() <= 0) {
         dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
@@ -341,6 +360,11 @@ int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
     return GetShowOptionCount() / 2;
 }
 
+void TextPickerColumnPattern::StopHaptic()
+{
+    stopHaptic_ = true;
+}
+
 RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
 {
     auto toss = GetToss();
@@ -351,6 +375,11 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
         auto isToss = pattern->GetTossStatus();
         if (info.GetTouches().empty()) {
             return;
+        }
+        if (info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->stopHaptic_ = true;
+        } else {
+            pattern->stopHaptic_ = false;
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss) {
@@ -526,17 +555,21 @@ void TextPickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     AnimationOption option = AnimationOption();
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
         if (picker) {
             picker->SetButtonBackgroundColor(pressColor);
         }
-    });
+    }, nullptr, nullptr, context);
 }
 
 uint32_t TextPickerColumnPattern::GetShowOptionCount() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto context = host->GetContext();
     CHECK_NULL_RETURN(context, 0);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
@@ -956,6 +989,20 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    
+    if (textPickerLayoutProperty->GetDisappearMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDisappearMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetDisappearMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDisappearMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetDisappearTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetDisappearTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetDisappearTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -982,6 +1029,20 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    
+    if (textPickerLayoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -1017,6 +1078,20 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+
+    if (textPickerLayoutProperty->GetSelectedMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetSelectedMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetSelectedMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetSelectedMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetSelectedTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetSelectedTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetSelectedTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -1136,7 +1211,9 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateTextOverflow(isTextFadeOut_ ? TextOverflow::MARQUEE : TextOverflow::CLIP);
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    }
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 
@@ -1372,6 +1449,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
+        StopHapticController();
         return;
     }
     toss->SetEnd(offsetY);
@@ -1385,6 +1463,7 @@ void TextPickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
+        isHapticPlayOnce_ = false;
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
@@ -1461,11 +1540,13 @@ void TextPickerColumnPattern::CreateAnimation(double from, double to)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
     scrollProperty_->Set(from);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->scrollProperty_->Set(to);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void TextPickerColumnPattern::CreateReboundAnimation(double from, double to)
@@ -1840,11 +1921,10 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     offsetCurSet_ = 0.0;
 
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
+        if (isEnableHaptic_ && !isHapticPlayOnce_ && !stopHaptic_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
-    StopHapticController();
     // the abs of drag delta is less than jump interval.
     dragDelta = GetDragDeltaLessThanJumpInterval(offsetY, dragDelta, useRebound, shiftDistance);
 
@@ -1860,6 +1940,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
+            StopHapticController();
         }
     }
     SpringCurveTailEndProcess(useRebound, stopMove);
@@ -1918,6 +1999,19 @@ bool TextPickerColumnPattern::NotLoopOptions() const
     return !canLoop;
 }
 
+void TextPickerColumnPattern::HandleAccessibilityTextChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
 bool TextPickerColumnPattern::InnerHandleScroll(
     bool isDown, bool isUpdatePropertiesOnly, bool isUpdateAnimationProperties)
 {
@@ -1940,7 +2034,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_ && isEnableHaptic_) {
+    if (hapticController_ && isEnableHaptic_ && !stopHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpdatePropertiesOnly, isUpdateAnimationProperties);
@@ -1948,7 +2042,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     HandleEventCallback(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+
+    HandleAccessibilityTextChange();
     return true;
 }
 
@@ -1993,8 +2088,29 @@ void TextPickerColumnPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetAccessibilityCustomRole("TextPicker");
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [weakPtr = WeakClaim(this), accessibilityPtr = WeakClaim(RawPtr(accessibilityProperty))]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        if (pattern->CanMove(true)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+        if (pattern->CanMove(false)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    });
+
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2035,6 +2151,8 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
             yOffset_ = 0.0;
         }
 
+        StopHapticController();
+        isHapticPlayOnce_ = true;
         int32_t index = static_cast<int32_t>(currentIndex_) + step;
         auto overFirst = index < 0 && step < 0;
         auto overLast =
@@ -2216,7 +2334,9 @@ void TextPickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pi
 void TextPickerColumnPattern::InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex,
                                                           TextPickerOptionProperty &prop)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
 

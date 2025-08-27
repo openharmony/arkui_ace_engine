@@ -81,6 +81,55 @@ union DebugFlags {
     } bits_;
 };
 
+struct WidthLayoutBreakPoint {
+    double widthVPXS_ = 320.0;
+    double widthVPSM_ = 600.0;
+    double widthVPMD_ = 840.0;
+    double widthVPLG_ = 1440.0;
+    double widthVPXL_ = -1.0;  // 默认不生效
+    WidthLayoutBreakPoint() = default;
+    WidthLayoutBreakPoint(
+        double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG, double widthVPXL = -1.0)
+        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG),
+          widthVPXL_(widthVPXL)
+    {}
+    WidthLayoutBreakPoint(std::vector<double> breakPoints)
+        : widthVPXS_(breakPoints.size() > 0 ? breakPoints[0] : -1.0), // XS与SM临界值
+          widthVPSM_(breakPoints.size() > 1 ? breakPoints[1] : -1.0), // SM与MD临界值
+          widthVPMD_(breakPoints.size() > 2 ? breakPoints[2] : -1.0), // MD与LG临界值
+          widthVPLG_(breakPoints.size() > 3 ? breakPoints[3] : -1.0), // LG与XL临界值
+          widthVPXL_(breakPoints.size() > 4 ? breakPoints[4] : -1.0) // XL与XXL临界值
+    {}
+    bool operator==(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator==(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator!=(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
+    bool operator!=(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
+};
+
+struct HeightLayoutBreakPoint {
+    double heightVPRATIOSM_ = 0.8;
+    double heightVPRATIOMD_ = 1.2;
+    HeightLayoutBreakPoint() = default;
+    HeightLayoutBreakPoint(double heightVPRATIOSM, double heightVPRATIOMD)
+        : heightVPRATIOSM_(heightVPRATIOSM), heightVPRATIOMD_(heightVPRATIOMD) {}
+};
+
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -118,6 +167,10 @@ public:
      * check SystemCapability.
      */
     static bool IsSyscapExist(const char* cap);
+    /*
+     * check ApiVersion.
+     */
+    static bool IsApiVersionGreaterOrEqual(int majorVersion, int minorVersion, int patchVersion);
 
     /**
      * Set type of current device.
@@ -392,6 +445,11 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetDynamicDetectionTraceEnabled()
+    {
+        return dynamicDetectionTraceEnable_;
+    }
+
     static bool GetCacheNavigationNodeEnable();
 
     static bool GetAccessibilityEnabled()
@@ -402,6 +460,11 @@ public:
     static uint32_t GetCanvasDebugMode()
     {
         return canvasDebugMode_;
+    }
+
+    static uint32_t GetSafeRefactorMode()
+    {
+        return safeRefactorMode_;
     }
 
     static bool GetDebugEnabled();
@@ -489,6 +552,22 @@ public:
     {
         return isDeviceAccess_;
     }
+
+    static void SetConfigDeviceType(const std::string& type)
+    {
+        configDeviceType_ = type;
+    }
+
+    static const std::string& GetConfigDeviceType()
+    {
+        return configDeviceType_;
+    }
+
+    static float GetScrollCoefficients();
+
+    static bool GetTransformEnabled();
+
+    static bool GetCompatibleInputTransEnabled();
 
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
@@ -578,6 +657,12 @@ public:
 
     static bool GetResourceDecoupling();
 
+    static bool IsPCMode();
+
+    static bool ConfigChangePerform();
+
+    static void SetConfigChangePerform();
+
     static int32_t GetJankFrameThreshold();
 
     static bool GetTitleStyleEnabled();
@@ -600,6 +685,10 @@ public:
     static bool GetGridCacheEnabled();
 
     static bool GetGridIrregularLayoutEnabled();
+
+    static bool GetForceSplitIgnoreOrientationEnabled();
+
+    static std::optional<bool> GetArkUIHookEnabled();
 
     static bool WaterFlowUseSegmentedLayout();
 
@@ -664,6 +753,12 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static int32_t GetVelocityTrackerPointNumber();
+
+    static bool IsVelocityWithinTimeWindow();
+
+    static bool IsVelocityWithoutUpPoint();
+
     static bool IsSmallFoldProduct();
 
     static bool IsBigFoldProduct();
@@ -682,12 +777,11 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
-    static bool GetAsyncInitializeEnabled()
-    {
-        return asyncInitializeEnabled_.load();
-    }
-
     static bool IsNeedSymbol();
+
+    static bool GetMultiInstanceEnabled();
+
+    static void SetMultiInstanceEnabled(bool enabled);
 
     static bool GetTaskPriorityAdjustmentEnable()
     {
@@ -700,8 +794,45 @@ public:
     static bool IsSuperFoldDisplayDevice();
 
     static bool IsPageTransitionFreeze();
+    static bool IsForcibleLandscapeEnabled();
+
+    static bool IsSoftPageTransition();
 
     static bool IsFormSkeletonBlurEnabled();
+
+    static int32_t getFormSharedImageCacheThreshold();
+
+    static bool IsWhiteBlockEnabled();
+    static bool IsWhiteBlockIdleChange();
+    static int32_t GetWhiteBlockIndexValue();
+    static int32_t GetWhiteBlockCacheCountValue();
+
+    static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
+    {
+        return widthLayoutBreakpoints_;
+    }
+
+    static HeightLayoutBreakPoint GetHeightLayoutBreakpoints()
+    {
+        return heightLayoutBreakpoints_;
+    }
+
+    static bool IsSyncLoadEnabled()
+    {
+        return syncLoadEnabled_;
+    }
+
+    static int32_t GetPreviewStatus();
+
+    static bool GetDebugThreadSafeNodeEnabled()
+    {
+        return debugThreadSafeNodeEnable_;
+    }
+
+    static bool GetPrebuildInMultiFrameEnabled()
+    {
+        return prebuildInMultiFrameEnabled_;
+    }
 
 private:
     static bool opincEnabled_;
@@ -710,6 +841,7 @@ private:
     static std::atomic<bool> layoutTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool dynamicDetectionTraceEnable_;
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool measureDebugTraceEnable_;
@@ -721,6 +853,7 @@ private:
     static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
+    static uint32_t safeRefactorMode_;
     static bool isRound_;
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;
@@ -746,6 +879,10 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static std::string configDeviceType_;
+    static bool transformEnabled_;
+    static bool compatibleInputTransEnabled_;
+    static float scrollCoefficients_;
     static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
@@ -764,13 +901,16 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
+    static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
+    static bool forceSplitIgnoreOrientationEnabled_;
+    static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
+    static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
-    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
@@ -779,16 +919,31 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static int32_t velocityTrackerPointNumber_ ;
+    static bool isVelocityWithinTimeWindow_;
+    static bool isVelocityWithoutUpPoint_;
     static float fontScale_;
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
     static double scrollableDistance_;
     static bool taskPriorityAdjustmentEnable_;
+    static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static bool forcibleLandscapeEnabled_;
+    static bool softPagetransition_;
     static bool formSkeletonBlurEnabled_;
+    static int32_t formSharedImageCacheThreshold_;
+    static WidthLayoutBreakPoint widthLayoutBreakpoints_;
+    static HeightLayoutBreakPoint heightLayoutBreakpoints_;
+    static bool syncLoadEnabled_;
+    static bool whiteBlockEnabled_;
+    static int32_t previewStatus_;
+    static bool debugThreadSafeNodeEnable_;
+    static bool prebuildInMultiFrameEnabled_;
+    static bool isPCMode_;
 };
 
 } // namespace OHOS::Ace

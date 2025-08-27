@@ -144,6 +144,10 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithm001, TestSize.Level1)
     geometryNode->SetFrameSize(frameSize);
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
+    SizeF frameSize2(300, 300);
+    geometryNode->SetFrameSize(frameSize2);
+    renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
 }
 
 /**
@@ -315,10 +319,11 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest006, TestSize.Level1)
     layoutWrapper->cachedList_.push_back(childLayoutWrapperTwo);
     childLayoutWrapperTwo->GetLayoutProperty()->UpdateParentLayoutConstraint(layoutConstraintF);
     layoutWrapper->cachedList_.push_back(childLayoutWrapperThree);
+    childLayoutWrapperThree->layoutProperty_ = nullptr;
     layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
         CalcSize(CalcLength(1.0), CalcLength(0.0));
     renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[1.00 x 0.00]");
 }
-}
+} // namespace OHOS::Ace::NG

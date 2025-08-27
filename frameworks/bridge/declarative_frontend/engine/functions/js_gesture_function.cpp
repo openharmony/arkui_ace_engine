@@ -18,9 +18,10 @@
 
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
 
 namespace OHOS::Ace::Framework {
-
+using namespace OHOS::Ace::Framework::CommonUtils;
 void JsGestureFunction::Execute()
 {
     JsFunction::Execute();
@@ -65,6 +66,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     gestureInfoObj->SetPropertyObject("fingerList", CreateFingerListArray(info));
+    gestureInfoObj->SetPropertyObject("fingerInfos", CreateFingerInfosArray(info));
     gestureInfoObj->SetProperty<double>("deviceId", info.GetDeviceId());
 
     auto target = CreateEventTargetObject(info);
@@ -72,6 +74,11 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
     gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
     gestureInfoObj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
+    if (info.GetGestureTypeName() == GestureTypeName::TAP_GESTURE) {
+        if (!info.GetFingerList().empty()) {
+            gestureInfoObj->SetPropertyObject("tapLocation", GetTapLocation(info.GetFingerList().back()));
+        }
+    }
     gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
     return gestureInfoObj;
 }
@@ -101,12 +108,38 @@ JSRef<JSArray> JsGestureFunction::CreateFingerListArray(const GestureEvent& info
     return fingerArr;
 }
 
+JSRef<JSArray> JsGestureFunction::CreateFingerInfosArray(const GestureEvent& info)
+{
+    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
+    const std::list<FingerInfo>& fingerList = info.GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    std::vector<JSRef<JSObject>> validFingers;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            validFingers.emplace_back(element);
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    for (size_t i = 0; i < validFingers.size(); ++i) {
+        fingerArr->SetValueAt(i, validFingers[i]);
+    }
+    auto idx = validFingers.size();
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        fingerArr->SetValueAt(idx++, element);
+    }
+    return fingerArr;
+}
+
 JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo)
 {
     JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation  = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation  = fingerInfo.globalDisplayLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
     fingerInfoObj->SetProperty<int32_t>("hand", fingerInfo.operatingHand_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -115,6 +148,10 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     return fingerInfoObj;
 }
 

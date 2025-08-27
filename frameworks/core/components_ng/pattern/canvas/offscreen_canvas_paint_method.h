@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 using setColorFunc = std::function<void (const std::string&)>;
 
 class OffscreenCanvasPaintMethod : public CustomPaintPaintMethod {
-    DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod)
+    DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod);
 public:
     OffscreenCanvasPaintMethod() = default;
     OffscreenCanvasPaintMethod(int32_t width, int32_t height);

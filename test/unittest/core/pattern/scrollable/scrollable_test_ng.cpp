@@ -67,12 +67,14 @@ void ScrollableTestNg::TearDownTestSuite()
 void ScrollableTestNg::SetUp()
 {
     InitNestedScrolls();
+    MockPipelineContext::SetUp();
 }
 
 void ScrollableTestNg::TearDown()
 {
     scroll_.Reset();
     mockScroll_.Reset();
+    MockPipelineContext::TearDown();
 }
 
 void ScrollableTestNg::InitNestedScrolls()
@@ -380,41 +382,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity007, TestSize.Level1)
      */
     bool res = scrollPn->HandleScrollVelocity(-1.1f);
     EXPECT_TRUE(res);
-}
-
-/**
- * @tc.name: IsReverse001
- * @tc.desc: Test nested IsReverse for IsAtBottom
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, IsReverse001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Set the parameter scrollable to be nullptr
-     * @tc.expected: Scrollable is nullptr
-     */
-    EXPECT_CALL(*scrollPn, IsAtBottom).WillRepeatedly(Return(false));
-    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
-    auto scrollable =
-        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
-    scrollPn->scrollableEvent_->SetScrollable(scrollable);
-    EXPECT_NE(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
-
-    /**
-     * @tc.steps: step3. Call the IsReverse method
-     * @tc.expected: The result is false
-     */
-    bool res = scrollPn->IsReverse();
-    EXPECT_NE(res, true);
 }
 
 /**
@@ -1282,6 +1249,80 @@ HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEdgeEffect001
+ * @tc.desc: Test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step2. set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step3. set EdgeEffect to None.
+     * @tc.expected: spring animation is stopped.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::NONE);
+    EXPECT_FALSE(scrollable->IsSpringMotionRunning());
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: isOverScroll_ is true.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    scrollPn->SetCanStayOverScroll(true);
+    scrollPn->ScrollTo(1.0f);
+    EXPECT_TRUE(scrollPn->GetIsOverScroll());
+}
+
+/**
+ * @tc.name: HandleOverScroll001
+ * @tc.desc: Test HandleOverScroll001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleOverScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: isOverScroll_ is true.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    scrollPn->SetIsOverScroll(true);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::AXIS;
+    info.sourceTool_ = SourceTool::TOUCHPAD;
+    scrollable->HandleDragEnd(info);
+    EXPECT_FALSE(scrollPn->GetIsOverScroll());
+}
+
+/**
  * @tc.name: HandleClickScroll001
  * @tc.desc: Test scrolling when clicking on the scroll bar
  * @tc.type: FUNC
@@ -1337,6 +1378,7 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
@@ -1380,7 +1422,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
     scrollPn->InitScrollBarMouseEvent();
     // /**
@@ -1429,7 +1471,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
     auto gestureHub = scroll_->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
-    
+
     /**
      * @tc.steps: step2. execute the InitMouseEbent.
      * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
@@ -1442,36 +1484,96 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetEdgeEffect001
- * @tc.desc: Test SetEdgeEffect
+ * @tc.name: OnTouchTestDone001
+ * @tc.desc: Test OnTouchTestDone
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
+HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
-     * @tc.expected: spring animation is running.
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
      */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
-    auto scrollableEvent = scrollPn->GetScrollableEvent();
-    auto scrollable = scrollableEvent->GetScrollable();
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(clickRecognizer);
+    RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+    activeRecognizers.emplace_back(longPressRecognizer);
+    RefPtr<NGGestureRecognizer> tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    tapRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    tapRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+    activeRecognizers.emplace_back(tapRecognizer);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    activeRecognizers.emplace_back(panRecognizer);
+
+    /**
+     * @tc.steps: step2. currentVelocity_ is less than 200 and state_ is IDLE.
+     * @tc.expected: isHitTestBlock_ is false.
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_FALSE(scrollablePattern->isHitTestBlock_);
+    EXPECT_FALSE(clickRecognizer->IsPreventBegin());
+    EXPECT_FALSE(longPressRecognizer->IsPreventBegin());
+    EXPECT_FALSE(tapRecognizer->IsPreventBegin());
+    EXPECT_FALSE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step3. currentVelocity_ is greater than 200 and state_ is SPRING.
+     * @tc.expected: isHitTestBlock_ is true.
+     */
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
     scrollable->state_ = Scrollable::AnimationState::SPRING;
-    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_TRUE(clickRecognizer->IsPreventBegin());
+    EXPECT_TRUE(longPressRecognizer->IsPreventBegin());
+    EXPECT_TRUE(tapRecognizer->IsPreventBegin());
+    EXPECT_FALSE(panRecognizer->IsPreventBegin());
+}
 
-    /**
-     * @tc.steps: step2. set EdgeEffect to Spring.
-     * @tc.expected: spring animation is running.
-     */
-    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
-    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+/**
+ * @tc.name: onScrollerAreaChangeEventTest001
+ * @tc.desc: Test onScrollerAreaChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, onScrollerAreaChangeEventTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
+    scrollPn->parent_ = mockPn;
 
-    /**
-     * @tc.steps: step3. set EdgeEffect to None.
-     * @tc.expected: spring animation is stopped.
-     */
-    scrollPn->SetEdgeEffect(EdgeEffect::NONE);
-    EXPECT_FALSE(scrollable->IsSpringMotionRunning());
+    bool isChange = false;
+    OnScrollerAreaChangeEvent onScrollerAreaChange = [&isChange](Dimension dimension, ScrollSource state,
+        bool isAtTop, bool isAtBottom) {
+        isChange = true;
+    };
+    ScrollerObserver obs;
+    obs.onScrollerAreaChangeEvent = onScrollerAreaChange;
+    auto obserserMgr = AceType::MakeRefPtr<Ace::ScrollerObserverManager>();
+    ASSERT_NE(obserserMgr, nullptr);
+    obserserMgr->AddObserver(obs, 0);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
+    ASSERT_NE(positionController, nullptr);
+    positionController->SetObserverManager(obserserMgr);
+    scrollPn->SetPositionController(positionController);
+    scrollPn->FireObserverOnScrollerAreaChange(0.0);
+    EXPECT_EQ(isChange, true);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

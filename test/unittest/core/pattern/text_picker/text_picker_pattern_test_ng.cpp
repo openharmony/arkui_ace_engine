@@ -457,7 +457,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
      */
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
- 
+
      /**
       * @tc.cases: case4. down KeyEvent.
       */
@@ -469,7 +469,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
      */
     KeyEvent keyEventMoveHome(KeyCode::KEY_MOVE_HOME, KeyAction::DOWN);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventMoveHome));
- 
+
      /**
       * @tc.cases: case6. move end KeyEvent.
       */
@@ -1972,22 +1972,30 @@ HWTEST_F(TextPickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
     KeyCode code = KeyCode::KEY_UNKNOWN;
 
     code = KeyCode::KEY_DPAD_UP;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(0, false));
+    EXPECT_TRUE(textPickerColumnPattern->stopHaptic_);
 
     code = KeyCode::KEY_DPAD_DOWN;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(1, false));
+    EXPECT_TRUE(textPickerColumnPattern->stopHaptic_);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
 
     code = KeyCode::KEY_DPAD_LEFT;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, -1);
+    EXPECT_FALSE(textPickerColumnPattern->stopHaptic_);
 
     code = KeyCode::KEY_DPAD_RIGHT;
+    textPickerColumnPattern->stopHaptic_ = false;
     textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, 0);
+    EXPECT_FALSE(textPickerColumnPattern->stopHaptic_);
 }
 
 /**
@@ -2115,6 +2123,7 @@ HWTEST_F(TextPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(textPickerPattern_, nullptr);
 
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -2125,9 +2134,10 @@ HWTEST_F(TextPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     auto contentRowNode = textPickerPattern_->contentRowNode_.Upgrade();
     ASSERT_NE(contentRowNode, nullptr);
 
+    EXPECT_TRUE(frameNode_->needCallChildrenUpdate_);
     textPickerPattern_->OnColorConfigurationUpdate();
+    EXPECT_TRUE(frameNode_->needCallChildrenUpdate_);
     context->SetMinPlatformVersion(minApiVersion);
-    ASSERT_NE(frameNode_, nullptr);
     auto pickerProperty = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetColor(), Color::BLACK);
@@ -2191,5 +2201,103 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest018, TestSize.Level1)
     crownEvent.action = OHOS::Ace::CrownAction::END;
     EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
 #endif
+}
+
+/**
+ * @tc.name: TextPickerPatternTest019
+ * @tc.desc: Test GetColumnWidthSumForFirstIndexColumns
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+
+    auto columnNodeGeometryNode = columnNode_->GetGeometryNode();
+    ASSERT_NE(columnNodeGeometryNode, nullptr);
+    columnNodeGeometryNode->SetFrameSize(SizeF(20.0f, 1.0f));
+    auto columnNodeNextGeometryNode = columnNodeNext_->GetGeometryNode();
+    ASSERT_NE(columnNodeNextGeometryNode, nullptr);
+    columnNodeNextGeometryNode->SetFrameSize(SizeF(30.0f, 1.0f));
+
+    int32_t childCount = static_cast<int32_t>(frameNode_->GetChildren().size());
+    EXPECT_EQ(childCount, 2);
+
+    textPickerPattern_->focusKeyID_ = 0;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    float sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(0);
+    EXPECT_FLOAT_EQ(sum, 0);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(0);
+    EXPECT_FLOAT_EQ(sum, 30);
+
+    textPickerPattern_->focusKeyID_ = 1;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
+    EXPECT_FLOAT_EQ(sum, 20);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
+    EXPECT_FLOAT_EQ(sum, 0);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest020
+ * @tc.desc: Test CalculateColumnSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest020, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+
+    int32_t index = 0;
+    float childCount = 1.0f;
+    SizeF pickerContentSize = SizeF(0.0f, 200.0f);
+    auto columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 2.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 90.0f);
+
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 1.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest021
+ * @tc.desc: Test GetColumnWidthsStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest021, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    auto columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "0.00px,0.00px");
+
+    auto host = textPickerPattern_->GetHost();
+    auto children = host->GetChildren();
+    for (auto iter = children.begin(); iter != children.end(); iter++) {
+        ASSERT_NE(*iter, nullptr);
+        auto stackNode = AceType::DynamicCast<FrameNode>(*iter);
+        host->RemoveChildAndReturnIndex(stackNode);
+    }
+    columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "");
 }
 } // namespace OHOS::Ace::NG

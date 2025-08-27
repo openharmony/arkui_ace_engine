@@ -31,6 +31,8 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void SetOnClickEvent(std::function<void()>&& onClick) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const RadioColorType radioColorType) override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -90,7 +90,12 @@ public:
     virtual void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) {};
     virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
     virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
-    virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) {};
+    /**
+     * @description: Report web editing area focus/blur/textChange event
+     * @param type The type of event (focus, blur, or textChange), defaults to empty string
+     */
+    virtual void ReportWebInputEvent(
+        int64_t accessibilityId, const std::string& data, const std::string& type = "") {};
     virtual void NotifyAllWebPattern(bool isRegister) {};
     virtual void NotifySendCommandPattern(int32_t id, const std::string& command) {};
     virtual int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) { return 11; };
@@ -122,7 +127,14 @@ public:
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
-    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
+    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
+        int32_t instanceId) {};
+    virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
+    virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
+        std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
+        return currentTranslateManager;
+    };
     virtual void GetWebViewLanguage() {};
     virtual void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};
@@ -138,15 +150,18 @@ public:
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
+    virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
 #endif
     virtual void GetVisibleInspectorTree() {};
 
-    virtual bool IsHasReportObject()
-    {
-        return false;
-    };
+    virtual void RegisterPipeLineExeAppAIFunction(
+        std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
+    virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
+    virtual void SendExeAppAIFunctionResult(uint32_t result) {};
 protected:
+    UiSessionManager() = default;
+    virtual ~UiSessionManager() = default;
+
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -166,10 +181,13 @@ protected:
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
-    std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
-    static std::shared_mutex translateManagerMutex_;
+    std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
+    std::shared_mutex translateManagerMutex_;
+    std::function<int32_t()> getInstanceIdCallback_;
+    std::shared_mutex getInstanceIdCallbackMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
+    std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

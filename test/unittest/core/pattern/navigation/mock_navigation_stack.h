@@ -32,7 +32,7 @@ struct MockReplace {
 constexpr char UNDEFINED_ID[] = "undefined";
 
 class MockNavPathInfo : public NavPathInfo {
-    DECLARE_ACE_TYPE(MockNavPathInfo, NavPathInfo)
+    DECLARE_ACE_TYPE(MockNavPathInfo, NavPathInfo);
 public:
     MockNavPathInfo() = default;
     explicit MockNavPathInfo(const std::string& name) : NG::NavPathInfo(name) {}
@@ -69,13 +69,6 @@ public:
 private:
     std::function<void()> onPop_;
     std::string navDestinationId_ = UNDEFINED_ID;
-};
-
-enum LaunchMode {
-    STANDARD = 0,
-    MOVE_TO_TOP_SINGLETON,
-    POP_TO_TOP_SINGLETON,
-    NEW_INSTANCE,
 };
 
 using NavigationInterceptionEvent = std::function<void(const RefPtr<NavDestinationContext>,
@@ -234,6 +227,8 @@ public:
     void ResetIsForceSetFlag(int32_t index);
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
     void SetRecoveryFromReplaceDestination(int32_t index, bool value);
+
+    MOCK_METHOD2(CreateHomeDestination, bool(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node));
 
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:

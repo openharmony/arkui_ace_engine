@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_ng/pattern/tabs/tab_content_node.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -89,7 +91,7 @@ public:
 
     void CheckTabAnimateMode()
     {
-        if (!shallowBuilder_ || !firstTimeLayout_) {
+        if (!shallowBuilder_ || !(firstTimeLayout_ || secondTimeLayout_)) {
             return;
         }
 
@@ -134,23 +136,26 @@ public:
             return;
         }
         host->Clean();
-        firstTimeLayout_ = true;
+        secondTimeLayout_ = true;
         CHECK_NULL_VOID(shallowBuilder_);
         shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
     }
 
     void BeforeCreateLayoutWrapper() override
     {
-        if (firstTimeLayout_) {
+        if (firstTimeLayout_ || secondTimeLayout_) {
             CheckTabAnimateMode();
         }
 
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else if (firstTimeLayout_ && shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
+            if (secondTimeLayout_) {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        } else if ((firstTimeLayout_ || secondTimeLayout_) && shallowBuilder_ &&
+                   shallowBuilder_->IsExecuteDeepRenderDone()) {
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
@@ -168,6 +173,7 @@ public:
             });
         }
         firstTimeLayout_ = false;
+        secondTimeLayout_ = false;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -200,6 +206,16 @@ public:
     const TabBarParam& GetTabBarParam() const
     {
         return tabBarParam_;
+    }
+
+    void UpdateTabBarParamText(const std::string &text)
+    {
+        tabBarParam_.SetText(text);
+    }
+
+    void UpdateTabBarParamIcon(const std::string &icon)
+    {
+        tabBarParam_.SetIcon(icon);
     }
 
     void SetCustomTabBar(FrameNode* node)
@@ -385,6 +401,121 @@ public:
         }
     }
 
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        Pattern::OnColorModeChange(colorMode);
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetHost());
+        CHECK_NULL_VOID(tabContentNode);
+        tabContentNode->UpdataTabBarItem();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(theme);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto layout = tabsNode->GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        auto tabContentPattern = tabsNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_VOID(tabContentPattern);
+        if (!layout->HasIndicatorColorSetByUser() ||
+            (layout->HasIndicatorColorSetByUser() && !layout->GetIndicatorColorSetByUserValue())) {
+            auto currentIndicator = tabContentPattern->GetIndicatorStyle();
+            currentIndicator.color = theme->GetActiveIndicatorColor();
+            tabContentPattern->SetIndicatorStyle(currentIndicator);
+        }
+        if (!layout->HasLabelSelectedColorSetByUser() ||
+            (layout->HasLabelSelectedColorSetByUser() && !layout->GetLabelSelectedColorSetByUserValue())) {
+            auto currentLabelStyle = tabContentPattern->GetLabelStyle();
+            currentLabelStyle.selectedColor = theme->GetSubTabTextOnColor();
+            tabContentPattern->SetLabelStyle(currentLabelStyle);
+        }
+        if (!layout->HasLabelUnselectedColorSetByUser() ||
+            (layout->HasLabelUnselectedColorSetByUser() && !layout->GetLabelUnselectedColorSetByUserValue())) {
+            auto currentLabelStyle = tabContentPattern->GetLabelStyle();
+            currentLabelStyle.unselectedColor = theme->GetSubTabTextOffColor();
+            tabContentPattern->SetLabelStyle(currentLabelStyle);
+        }
+        if (!layout->HasIconSelectedColorSetByUser() ||
+            (layout->HasIconSelectedColorSetByUser() && !layout->GetIconSelectedColorSetByUserValue())) {
+            auto currentIconStyle = tabContentPattern->GetIconStyle();
+            currentIconStyle.selectedColor = theme->GetBottomTabTextOn();
+            tabContentPattern->SetIconStyle(currentIconStyle);
+        }
+        if (!layout->HasIconUnselectedColorSetByUser() ||
+            (layout->HasIconUnselectedColorSetByUser() && !layout->GetIconUnselectedColorSetByUserValue())) {
+            auto currentIconStyle = tabContentPattern->GetIconStyle();
+            currentIconStyle.unselectedColor = theme->GetBottomTabTextOff();
+            tabContentPattern->SetIconStyle(currentIconStyle);
+        }
+    }
+
+    Axis GetAxis() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, Axis::HORIZONTAL);
+        auto swiperNode = host->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_RETURN(swiperNode, Axis::HORIZONTAL);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, Axis::HORIZONTAL);
+        return swiperPattern->GetDirection();
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override
+    {
+        bool isVertical = GetAxis() == Axis::VERTICAL;
+        if (needRotate) {
+            isVertical = !isVertical;
+        }
+        if (isVertical) {
+            safeAreaPadding.top = std::nullopt;
+            safeAreaPadding.bottom = std::nullopt;
+        } else {
+            safeAreaPadding.left = std::nullopt;
+            safeAreaPadding.right = std::nullopt;
+        }
+        return safeAreaPadding;
+    }
+
+    bool ChildTentativelyLayouted() override
+    {
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (host->IsScrollableAxisInsensitive()) {
+            return false;
+        }
+        auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(
+            false, { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL
+                                                          : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto frameRect = geometryNode->GetFrameRect();
+        totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromSwiper, frameRect));
+        return true;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -400,6 +531,7 @@ private:
     TabBarSymbol symbol_;
 
     bool firstTimeLayout_ = true;
+    bool secondTimeLayout_ = false;
     bool useLocalizedPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);

@@ -1,0 +1,14 @@
+/** @memo */
+function entry3(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("6___key_id_DIRNAME/property.test.ts" as __memo_id_type));
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    const w = new W();
+    w.prop(__memo_context, __memo_id + ("5___key_id_DIRNAME/property.test.ts" as __memo_id_type));
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

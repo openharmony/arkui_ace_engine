@@ -17,6 +17,9 @@
 
 #include "core/components_ng/render/drawing.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
+#ifdef USE_NEW_SKIA
+#include "include/codec/SkCodecAnimation.h"
+#endif
 
 namespace OHOS::Ace {
 

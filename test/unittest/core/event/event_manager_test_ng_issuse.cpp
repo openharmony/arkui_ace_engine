@@ -68,11 +68,6 @@ public:
         EventManagerTestNg::TearDownTestSuite();
     }
 };
-struct MockMouseEvent {
-    MouseAction action;
-    MouseButton button;
-    bool expectedResult;
-};
 
 class APIVersionGuard final {
 public:
@@ -107,8 +102,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest001, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
@@ -161,8 +156,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest002, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
@@ -215,8 +210,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest003, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
@@ -280,8 +275,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest004, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
@@ -348,11 +343,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest005, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
     const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(mouseEventTarget2);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(mouseEventTarget2);
 
     MouseEvent event;
     event.action = MouseAction::PULL_DOWN;
@@ -403,10 +398,10 @@ HWTEST_F(EventManagerTestNg, MouseEventTest006, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG.
@@ -440,11 +435,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest007, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
     const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
-    eventManager->pressMouseTestResultsMap_[MouseButton::RIGHT_BUTTON].emplace_back(mouseEventTarget2);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::RIGHT_BUTTON}].emplace_back(mouseEventTarget2);
 
     MouseEvent event;
     event.action = MouseAction::RELEASE;
@@ -493,11 +488,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest008, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
     const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
-    eventManager->pressMouseTestResultsMap_[MouseButton::MIDDLE_BUTTON].emplace_back(mouseEventTarget2);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::MIDDLE_BUTTON}].emplace_back(mouseEventTarget2);
 
     MouseEvent event;
     event.action = MouseAction::MOVE;
@@ -550,12 +545,12 @@ HWTEST_F(EventManagerTestNg, MouseEventTest009, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
 
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
     const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget2->SetCallback(onMouse2);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(mouseEventTarget2);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(mouseEventTarget2);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG.
@@ -597,8 +592,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest010, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
 
     const OnMouseEventFunc onMousePress = [](MouseInfo& info) -> bool {
         info.SetStopPropagation(false);
@@ -640,7 +635,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest011, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG.
@@ -678,7 +673,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest012, TestSize.Level1)
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     mouseEventTarget->SetCallback(onMouse);
-    eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(mouseEventTarget);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG.
@@ -782,7 +777,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1)
 
 /**
  * @tc.name: DispatchAxisEventIssueTest1
- * @tc.desc: Test DispatchAxisEventNG, axisTestResults_ is deleted each time it is dispatched.
+ * @tc.desc: Test DispatchAxisEventNG, axisTestResultsMap_[event.id] is deleted each time it is dispatched.
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
@@ -795,8 +790,8 @@ HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     /**
-     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
-     * @tc.expected: eventManager->axisTestResults_ is empty
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResultsMap_[event.id] not empty
+     * @tc.expected: eventManager->axisTestResultsMap_[event.id] is empty
      */
     auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
     auto onAxisCallback = [](AxisInfo&) -> void {};
@@ -805,9 +800,9 @@ HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
     event.horizontalAxis = 0;
     event.verticalAxis = 0;
     event.pinchAxisScale = 0;
-    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->axisTestResultsMap_[event.id].push_back(axisEventTarget);
     eventManager->DispatchAxisEventNG(event);
-    EXPECT_TRUE(eventManager->axisTestResults_.empty());
+    EXPECT_TRUE(eventManager->axisTestResultsMap_[event.id].empty());
 }
 
 /**
@@ -824,7 +819,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest001, TestSize.Level1)
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
     mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
     MouseInfo mouseInfo;
     const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) { mouseInfo = info; };
@@ -876,7 +871,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->currMouseTestResultsMap_[0].push_back(mouseEventTarget);
     mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
     mouseEventTarget->AttachFrameNode(FRAME_NODE_2);
     MouseInfo mouseInfo;
@@ -919,14 +914,14 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ non-intersect.
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResultsMap_[0] non-intersect.
      */
     eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
@@ -986,14 +981,14 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ non-intersect.
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResultsMap_[0] non-intersect.
      */
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[1]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
@@ -1046,18 +1041,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ intersect.
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResultsMap_[0] intersect.
      */
     eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[3]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1116,18 +1111,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ intersect.
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResultsMap_[0] intersect.
      */
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[3]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[2]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[3]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1179,18 +1174,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResultsMap_[0].
      */
     eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[3]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1251,18 +1246,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResultsMap_[0].
      */
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[3]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[2]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[3]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1315,18 +1310,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResultsMap_[0].
      */
     eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
     eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[0]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1387,18 +1382,18 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
     };
 
     /**
-     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
-     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResultsMap_[0].
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResultsMap_[0].
      */
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
-    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[{0, MouseButton::LEFT_BUTTON}].emplace_back(testCases[2]);
 
-    eventManager->currMouseTestResults_.emplace_back(testCases[0]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
-    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[3]);
+    eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[4]);
 
     const std::vector<MockMouseEvent> mockMouseEvents = {
         { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
@@ -1456,7 +1451,7 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
 
     /**
      * @tc.steps: step2. Inject mock mouse event contains MouseButton and MouseAction == MouseAction::PRESS.
-     * @tc.expected: currMouseTestResults_ equals to pressMouseTestResults_.
+     * @tc.expected: currMouseTestResultsMap_[0] equals to pressMouseTestResults_.
      */
     for (auto mockMouseEvent : mockMouseEvents) {
         MouseEvent event;
@@ -1476,13 +1471,13 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         auto eventManager = AceType::MakeRefPtr<EventManager>();
         ASSERT_NE(eventManager, nullptr);
 
-        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
 
         eventManager->DispatchMouseEventNG(event);
         EXPECT_EQ(
-            eventManager->pressMouseTestResults_ == eventManager->currMouseTestResults_, mockMouseEvent.expectedResult);
+            eventManager->pressMouseTestResults_ == eventManager->currMouseTestResultsMap_[0], mockMouseEvent.expectedResult);
     }
 }
 
@@ -1515,7 +1510,7 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
 
     /**
      * @tc.steps: step2. Inject mock mouse event contains MouseButton and MouseAction == MouseAction::PRESS.
-     * @tc.expected: currMouseTestResults_ equals to pressMouseTestResultsMap_[button]
+     * @tc.expected: currMouseTestResultsMap_[0] equals to pressMouseTestResultsMap_[button]
      */
     for (auto mockMouseEvent : mockMouseEvents) {
         MouseEvent event;
@@ -1535,19 +1530,21 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         auto eventManager = AceType::MakeRefPtr<EventManager>();
         ASSERT_NE(eventManager, nullptr);
 
-        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
 
         eventManager->DispatchMouseEventNG(event);
-        EXPECT_EQ(eventManager->pressMouseTestResultsMap_[event.button] == eventManager->currMouseTestResults_,
+        PressMouseInfo key { 0, event.button };
+        EXPECT_EQ(eventManager->pressMouseTestResultsMap_[key] == eventManager->currMouseTestResultsMap_[0],
             mockMouseEvent.expectedResult);
     }
 }
 
 /**
  * @tc.name: EventManagerDispatchMouseEventNGTest011
- * @tc.desc: DispatchMouseEventNG only work for five kinds(press/release/move/window_enter/window_leave) mouse action.
+ * @tc.desc: DispatchMouseEventNG only work for six kinds(press/release/move/window_enter/window_leave/cancel) mouse
+ * action.
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest011, TestSize.Level1)
@@ -1594,9 +1591,9 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         auto eventManager = AceType::MakeRefPtr<EventManager>();
         ASSERT_NE(eventManager, nullptr);
 
-        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
-        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[0]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[1]);
+        eventManager->currMouseTestResultsMap_[0].emplace_back(testCases[2]);
 
         auto result = eventManager->DispatchMouseEventNG(event);
         EXPECT_EQ(result, mockMouseEvent.expectedResult) << static_cast<int32_t>(event.action);
@@ -1647,5 +1644,38 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, GetOrRefreshMatrixFromCacheNGTest
     EXPECT_EQ(cacheMatrixInfo.paintRectWithTransform.Width(), 10);
     EXPECT_EQ(node->isTransformNotChanged_, true);
     MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: DispatchTouchEventAndCheck
+ * @tc.desc: Test DispatchTouchEventAndCheck func
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, DispatchTouchEventAndCheckTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::NONE }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->OnPending();
+    touchTestResults.push_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+    TouchEvent event;
+    event.id = resultId;
+    event.type = TouchType::DOWN;
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(resultId);
+    ASSERT_NE(scope, nullptr);
+    ASSERT_NE(eventManager->refereeNG_, nullptr);
+    scope->AddMember(panRecognizer);
+    eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(resultId, scope));
+    eventManager->DispatchTouchEventAndCheck(event, false);
+    EXPECT_EQ(panRecognizer->GetRefereeState(), RefereeState::FAIL);
 }
 } // namespace OHOS::Ace::NG

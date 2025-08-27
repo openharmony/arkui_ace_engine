@@ -29,6 +29,8 @@ public:
 
     float GetScrollOffSet() const override;
 
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ScrollableAccessibilityProperty);
 };

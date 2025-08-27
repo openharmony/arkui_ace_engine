@@ -27,7 +27,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
@@ -40,6 +40,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_search.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -172,7 +174,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, tokenOut,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -183,6 +187,10 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
             return;
         }
         context->PrepareCloseImplicitAnimation();
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::CloseImplicitAnimation(context);
+        }
     });
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(previousOption);
@@ -230,7 +238,9 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             "param is [option:%{public}s]", option.ToString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, &option, tokenOut,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -241,6 +251,10 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             return;
         }
         context->PrepareOpenImplicitAnimation();
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
+        }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
     FlushDirtyNodesWhenExist(pipelineContext, option, count,
@@ -339,14 +353,14 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     AnimationOption option;
     if (onFinish->IsFunction()) {
-        count = GetAnimationFinshCount();
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        count = GetAnimationFinishCount();
+        auto jsFunc = AceType::MakeRefPtr<JsAnimationOnFinishFunction>(JSRef<JSFunc>::Cast(onFinish));
         std::function<void()> onFinishEvent = [execCtx = executionContext, func = std::move(jsFunc),
                             id = Container::CurrentIdSafely()]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
+            func->Execute(false);
             func = nullptr;
         };
         option.SetOnFinishEvent(onFinishEvent);
@@ -642,6 +656,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     PrintAnimationInfo(option, AnimationInterface::ANIMATION, std::nullopt);
     AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
         option.GetCurve()->ToString().c_str(), option.GetIteration());
+    option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
     JankFrameReport::GetInstance().ReportJSAnimation();
 }
@@ -735,9 +750,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     RefPtr<Curve> debugCurve = Curves::FAST_OUT_LINEAR_IN;
     auto isDebugAnim = option.GetDuration() == DEBUG_DURATION && debugCurve->IsEqual(option.GetCurve());
     if (onFinish->IsFunction()) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        auto jsFunc = AceType::MakeRefPtr<JsAnimationOnFinishFunction>(JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
                             iterations, isDebugAnim]() mutable {
@@ -750,7 +765,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish, cnt:%{public}d", count.value());
-            func->ExecuteJS(0, nullptr, isDebugAnim);
+            func->Execute(isDebugAnim);
             if (isDebugAnim) {
                 TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish after ExecuteJS, cnt:%{public}d", count.value());
             }
@@ -765,6 +780,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     option.SetOnFinishEvent(onFinishEvent);
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -859,6 +876,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     AceScopedTrace trace("KeyframeAnimateTo iteration:%d, delay:%d",
                          overallAnimationOption.GetIteration(), overallAnimationOption.GetDelay());
     PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, count);
+    overallAnimationOption.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "when call keyframeAnimateTo, node stack is not empty, not suitable for keyframeAnimateTo."
@@ -1269,15 +1287,21 @@ void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
     }
     NG::MenuParam menuParam;
     if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        NG::MenuParam menuParamOpen;
+        //Get current param config
+        auto result = GetMenuParam(menuParamOpen, menuContentNode);
+        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(info, result);
+            return;
+        }
         if (isPartialUpdate) {
-            auto result = GetMenuParam(menuParam, menuContentNode);
-            if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
-                ReturnPromise(info, result);
-                return;
-            }
+            menuParam = menuParamOpen;
         }
         auto menuObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
         JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
+        //Updating these parameters is not supported
+        menuParam.isShowInSubWindow = menuParamOpen.isShowInSubWindow;
+        menuParam.previewMode = menuParamOpen.previewMode;
     } else {
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
@@ -1349,6 +1373,25 @@ void JSViewContext::SetEnableSwipeBack(const JSCallbackInfo& info)
     pipelineContext->SetEnableSwipeBack(info[0]->ToBoolean());
 }
 
+void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    auto nodeTag = frameNode->GetTag();
+    if (nodeTag == V2::TEXTINPUT_ETS_TAG) {
+        JSTextField::SetKeyboardAppearanceConfig(info);
+    } else if (nodeTag == V2::SEARCH_ETS_TAG) {
+        JSSearch::SetKeyboardAppearanceConfig(info);
+    }
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1374,6 +1417,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
+    JSClass<JSViewContext>::StaticMethod("setKeyboardAppearanceConfig", JSViewContext::JSSetKeyboardAppearanceConfig);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

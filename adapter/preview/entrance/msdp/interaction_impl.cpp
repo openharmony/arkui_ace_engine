@@ -28,7 +28,7 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return -1;
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
     return -1;
 }
@@ -75,7 +75,9 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
     return -1;
 }
 
-int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
+    std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+    int32_t& version, int64_t& totalSize)
 {
     return -1;
 }
@@ -121,4 +123,19 @@ int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
 }
 
 void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime) {}
+
+int32_t  InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
+{
+    return -1;
+}
+
+int32_t InteractionImpl::EnableInternalDropAnimation(const std::string& animationInfo)
+{
+    return -1;
+}
+
+bool InteractionImpl::IsDragStart() const
+{
+    return false;
+}
 } // namespace OHOS::Ace

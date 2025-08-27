@@ -27,6 +27,8 @@ struct CJSubmitEvent {
     bool keepEditable;
 };
 
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldEditMenuOptions(
+    CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetHeight(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSize(
     double width, uint32_t widthUnit, double height, uint32_t heightUnit);
@@ -116,7 +118,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldCancelButton(
     int32_t style, double size, int32_t unit, uint32_t color, const char* src);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     void (*callback)(const char* value, int32_t offset, const char* text));
-CJ_EXPORT void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent));
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTINPUT_FFI_H

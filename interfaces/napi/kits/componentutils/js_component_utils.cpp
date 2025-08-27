@@ -18,6 +18,8 @@
 
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
+#include "napi/native_api.h"
+
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
@@ -96,14 +98,6 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     const int m32 = 14;
     const int m33 = 15;
 
-    napi_create_object(env, &obj);
-    napi_create_object(env, &size);
-    napi_create_object(env, &localOffset);
-    napi_create_object(env, &windowOffset);
-    napi_create_object(env, &screenOffset);
-    napi_create_object(env, &translate);
-    napi_create_object(env, &scale);
-    napi_create_object(env, &rotate);
     napi_create_array(env, &transform);
 
     napi_create_double(env, rectangle.size.Width(), &width);
@@ -163,36 +157,49 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     napi_set_element(env, transform, m32, matrix4[m23]);
     napi_set_element(env, transform, m33, matrix4[m33]);
 
-    napi_set_named_property(env, obj, "size", size);
-    napi_set_named_property(env, size, "width", width);
-    napi_set_named_property(env, size, "height", height);
-    napi_set_named_property(env, obj, "localOffset", localOffset);
-    napi_set_named_property(env, localOffset, "x", localOffsetX);
-    napi_set_named_property(env, localOffset, "y", localOffsetY);
-    napi_set_named_property(env, obj, "windowOffset", windowOffset);
-    napi_set_named_property(env, windowOffset, "x", windowOffsetX);
-    napi_set_named_property(env, windowOffset, "y", windowOffsetY);
-    napi_set_named_property(env, obj, "screenOffset", screenOffset);
-    napi_set_named_property(env, screenOffset, "x", screenOffsetX);
-    napi_set_named_property(env, screenOffset, "y", screenOffsetY);
-    napi_set_named_property(env, obj, "translate", translate);
-    napi_set_named_property(env, translate, "x", translateX);
-    napi_set_named_property(env, translate, "y", translateY);
-    napi_set_named_property(env, translate, "z", translateZ);
-    napi_set_named_property(env, obj, "scale", scale);
-    napi_set_named_property(env, scale, "x", scaleX);
-    napi_set_named_property(env, scale, "y", scaleY);
-    napi_set_named_property(env, scale, "z", scaleZ);
-    napi_set_named_property(env, scale, "centerX", scaleCenterX);
-    napi_set_named_property(env, scale, "centerY", scaleCenterY);
-    napi_set_named_property(env, obj, "rotate", rotate);
-    napi_set_named_property(env, rotate, "x", rotateX);
-    napi_set_named_property(env, rotate, "y", rotateY);
-    napi_set_named_property(env, rotate, "z", rotateZ);
-    napi_set_named_property(env, rotate, "angle", rotateAngle);
-    napi_set_named_property(env, rotate, "centerX", rotateCenterX);
-    napi_set_named_property(env, rotate, "centerY", rotateCenterY);
-    napi_set_named_property(env, obj, "transform", transform);
+    constexpr size_t kTwoPropties = 2;
+    std::array<const char*, kTwoPropties> sizePropKey = { "width", "height" };
+    std::array<napi_value, kTwoPropties> sizePropValue = { width, height };
+    napi_create_object_with_named_properties(env, &size, kTwoPropties, sizePropKey.data(), sizePropValue.data());
+
+    std::array<const char*, kTwoPropties> localOffsetPropKey = { "x", "y" };
+    std::array<napi_value, kTwoPropties> localOffsetPropValue = { localOffsetX, localOffsetY };
+    napi_create_object_with_named_properties(env, &localOffset, kTwoPropties,
+                                             localOffsetPropKey.data(), localOffsetPropValue.data());
+
+    // same key with local offset { "x", "y" }
+    std::array<napi_value, kTwoPropties> windowOffsetPropValue = { windowOffsetX, windowOffsetY };
+    napi_create_object_with_named_properties(env, &windowOffset, kTwoPropties,
+                                             localOffsetPropKey.data(), windowOffsetPropValue.data());
+
+    // same key with local offset { "x", "y" }
+    std::array<napi_value, kTwoPropties> screenOffsetPropValue = { screenOffsetX, screenOffsetY };
+    napi_create_object_with_named_properties(env, &screenOffset, kTwoPropties,
+                                             localOffsetPropKey.data(), screenOffsetPropValue.data());
+
+    constexpr size_t kThreePropties = 3;
+    std::array<const char*, kThreePropties> translatePropKey = { "x", "y", "z" };
+    std::array<napi_value, kThreePropties> translatePropValue = { translateX, translateY, translateZ };
+    napi_create_object_with_named_properties(env, &translate, kThreePropties,
+                                             translatePropKey.data(), translatePropValue.data());
+
+    constexpr size_t kFivePropties = 5;
+    std::array<const char*, kFivePropties> scalePropKey = { "x", "y", "z", "centerX", "centerY" };
+    std::array<napi_value, kFivePropties> scalePropValue = { scaleX, scaleY, scaleZ, scaleCenterX, scaleCenterY };
+    napi_create_object_with_named_properties(env, &scale, kFivePropties, scalePropKey.data(), scalePropValue.data());
+
+    constexpr size_t kSixPropties = 6;
+    std::array<const char*, kSixPropties> rotatePropKey = { "x", "y", "z", "angle", "centerX", "centerY" };
+    std::array<napi_value, kSixPropties> rotatePropValue = { rotateX, rotateY, rotateZ, rotateAngle,
+                                                             rotateCenterX, rotateCenterY };
+    napi_create_object_with_named_properties(env, &rotate, kSixPropties, rotatePropKey.data(), rotatePropValue.data());
+
+    constexpr size_t kEightPropties = 8;
+    std::array<const char*, kEightPropties> objPropKey = { "size", "localOffset", "windowOffset", "screenOffset",
+                                                           "translate", "scale", "rotate", "transform" };
+    std::array<napi_value, kEightPropties> objPropValue = { size, localOffset, windowOffset, screenOffset,
+                                                            translate, scale, rotate, transform };
+    napi_create_object_with_named_properties(env, &obj, kEightPropties, objPropKey.data(), objPropValue.data());
 
     return obj;
 }

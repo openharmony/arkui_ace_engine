@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
@@ -33,6 +34,48 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Column: the space value is illegal due to space is less than zero");
+    }
+}
+
+void ColumnModelNG::Create(const RefPtr<ResourceObject>& spaceResObj, AlignDeclaration*, const std::string&)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COLUMN_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, FlexDirection, FlexDirection::COLUMN);
+
+    CHECK_NULL_VOID(spaceResObj);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+        const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string columnString = pattern->GetResCacheMapByKey("column.space");
+        CalcDimension value;
+        if (columnString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("column.space", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(columnString);
+        }
+        if (GreatOrEqual(value.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    pattern->AddResObj("column.space", spaceResObj, std::move(updateFunc));
+    CalcDimension value;
+    ResourceParseUtils::ParseResDimensionVp(spaceResObj, value);
+    if (GreatOrEqual(value.Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value);
     }
 }
 
@@ -46,6 +89,39 @@ void ColumnModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension
     }
 }
 
+void ColumnModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string columnString = pattern->GetResCacheMapByKey("column.space");
+        CalcDimension value;
+        if (columnString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("column.space", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(columnString);
+        }
+        if (GreatOrEqual(value.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, frameNode);
+        }
+    };
+    pattern->AddResObj("column.space", spaceResObj, std::move(updateFunc));
+    CalcDimension value;
+    ResourceParseUtils::ParseResDimensionVp(spaceResObj, value);
+    if (GreatOrEqual(value.Value(), 0.0)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+    }
+}
+
 RefPtr<FrameNode> ColumnModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
@@ -55,6 +131,17 @@ RefPtr<FrameNode> ColumnModelNG::CreateFrameNode(int32_t nodeId)
         castLinearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
     }
     return frameNode;
+}
+
+void ColumnModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)

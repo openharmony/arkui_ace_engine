@@ -37,7 +37,6 @@ public:
     virtual void FinishRender(std::list<int32_t>& removedElmtId) = 0;
 
     virtual void MoveChild(uint32_t fromIndex) = 0;
-
     virtual void CreateNewChildStart(const std::string& key) = 0;
     virtual void CreateNewChildFinish(const std::string& key) = 0;
     virtual void AfterAddChild() = 0;

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,14 +27,20 @@ template("ace_osal_ohos_source_set") {
         vendor_configs.use_ext_surface) {
       defines += [ "EXT_SURFACE_ENABLE" ]
     }
+    if (ace_engine_feature_enable_upgrade_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
-        "imf:inputmethod_client",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
+      if (defined(config.enable_standard_input) &&
+          config.enable_standard_input) {
+        external_deps += [ "imf:inputmethod_client" ]
+      }
       configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
@@ -53,6 +59,7 @@ template("ace_osal_ohos_source_set") {
       "ai_write_adapter.cpp",
       "anr_thread.cpp",
       "app_bar_helper_impl.cpp",
+      "cpu_boost.cpp",
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
@@ -63,11 +70,14 @@ template("ace_osal_ohos_source_set") {
       "drawable_descriptor_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
+      "feature_param.cpp",
       "frame_report.cpp",
       "image_analyzer_adapter_impl.cpp",
       "image_analyzer_loader.cpp",
       "image_analyzer_manager.cpp",
       "image_analyzer_mgr.cpp",
+      "image_perf_ohos.cpp",
+      "input_compatible_manager.cpp",
       "input_method_manager_ohos.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
@@ -80,6 +90,7 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "system_properties_multi_thread.cpp",
       "text_share_adapter.cpp",
       "text_share_loader.cpp",
       "text_share_mgr.cpp",
@@ -98,6 +109,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",
+      "hiview:libperfmonitor",
       "i18n:intl_util",
       "init:libbegetutil",
     ]
@@ -132,6 +144,7 @@ template("ace_osal_ohos_source_set") {
           resourceschedule_ffrt_support) {
         sources += [ "long_frame_report_impl.cpp" ]
         external_deps += [ "ffrt:libffrt" ]
+        defines += [ "FFRT_CPUBOOST_EN" ]
       }
 
       external_deps += [
@@ -147,6 +160,7 @@ template("ace_osal_ohos_source_set") {
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [
+          "accessibility/accessibility_hidumper_osal.cpp",
           "js_accessibility_manager.cpp",
           "js_third_accessibility_hover_ng.cpp",
           "js_third_provider_interaction_operation.cpp",
@@ -172,6 +186,7 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [
       "background_task_helper_ohos.cpp",
+      "device_config.cpp",
       "display_manager_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
       "drawing_lattice_ohos.cpp",
@@ -193,6 +208,7 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
       "ability_runtime:connect_server_manager",
+      "ability_runtime:napi_common",
       "ability_runtime:wantagent_innerkits",
       "app_file_service:fileuri_native",
       "background_task_mgr:bgtaskmgr_innerkits",

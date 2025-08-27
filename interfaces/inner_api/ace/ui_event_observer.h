@@ -25,16 +25,22 @@
 
 namespace OHOS::Ace {
 using OnInspectorTreeResult = std::function<void(const std::shared_ptr<std::string>)>;
+using UICommandResult = std::function<void(const std::shared_ptr<std::string>)>;
 
 enum class InspectorInfoType: int32_t {
     CONTENT = 0,
     WINDOW_ID,
     WEB_LANG,
+    PAGE_PARAM,
 };
 
 enum class InspectorPageType: int32_t {
     FOCUS = 0,
     FOREGROUND,
+};
+
+struct ACE_FORCE_EXPORT UICommandParams {
+    std::string params;
 };
 
 struct ACE_FORCE_EXPORT TreeParams {
@@ -50,12 +56,18 @@ struct ACE_FORCE_EXPORT TreeParams {
     InspectorPageType inspectorType { InspectorPageType::FOCUS };
     InspectorInfoType infoType { InspectorInfoType::CONTENT };
     int32_t webId = 0;
+    bool enableCacheNode = false;
+    bool webAccessibility = false;
 };
 
 class ACE_FORCE_EXPORT UIEventObserver {
 public:
     virtual ~UIEventObserver() = default;
     virtual void NotifyUIEvent(int32_t eventType, const std::unordered_map<std::string, std::string>& eventParams) = 0;
+
+    virtual void NotifyUIEvent(
+        int32_t eventType, const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
+    {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H

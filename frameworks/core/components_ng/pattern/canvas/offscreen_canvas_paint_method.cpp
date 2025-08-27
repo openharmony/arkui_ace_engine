@@ -16,7 +16,11 @@
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 
 #ifndef ACE_UNITTEST
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
@@ -218,7 +222,11 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
         return UNSUPPORTED;
     }
     SkString info(len);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(result->data(), result->size(), info.data());
+#else
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 #else
     return UNSUPPORTED;

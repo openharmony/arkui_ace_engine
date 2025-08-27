@@ -20,12 +20,18 @@
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
+
+#ifndef IS_RELEASE_VERSION
+constexpr int32_t SINGLE_FRAME_TIME_NANOSEC = 16600000;
+constexpr int32_t NANO_TO_MICRO = 1000;
+#endif
 } // namespace
 uint64_t UITaskScheduler::frameId_ = 0;
 
@@ -47,6 +53,12 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     dirtyLayoutNodes_.emplace_back(dirty);
+}
+
+void UITaskScheduler::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+{
+    CHECK_RUN_ON(UI);
+    ignoreLayoutSafeAreaBundles_.emplace_back(std::move(bundle));
 }
 
 void UITaskScheduler::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
@@ -136,6 +148,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
     // Priority task creation
     int64_t time = 0;
+#ifndef IS_RELEASE_VERSION
+    int64_t duration = 0;
+#endif
     for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -147,7 +162,15 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
+#ifndef IS_RELEASE_VERSION
+        duration += time;
+#endif
     }
+
+    while (!ignoreLayoutSafeAreaBundles_.empty()) {
+        FlushPostponedLayoutTask(forceUseMainThread);
+    }
+
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
@@ -157,6 +180,32 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
+#ifndef IS_RELEASE_VERSION
+    if (duration > SINGLE_FRAME_TIME_NANOSEC) {
+        PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
+    }
+#endif
+}
+
+void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
+{
+    auto ignoreLayoutSafeAreaBundles = std::move(ignoreLayoutSafeAreaBundles_);
+    for (auto&& bundle = ignoreLayoutSafeAreaBundles.rbegin(); bundle != ignoreLayoutSafeAreaBundles.rend();
+        ++bundle) {
+        for (auto&& node : bundle->first) {
+            if (!node || node->IsInDestroying()) {
+                continue;
+            }
+            node->CreateLayoutTask(forceUseMainThread, LayoutType::MEASURE_FOR_IGNORE);
+        }
+        auto&& container = bundle->second;
+        if (!container || container->IsInDestroying()) {
+            continue;
+        }
+        if (!container->PostponedTaskForIgnore()) {
+            container->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
+        }
+    }
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
@@ -165,6 +214,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     int64_t time = 0;
@@ -409,6 +459,16 @@ void UITaskScheduler::FlushAfterLayoutTask()
     FlushPersistAfterLayoutTask();
 }
 
+void UITaskScheduler::FlushAfterModifierTask()
+{
+    decltype(afterModifierTasks_) tasks(std::move(afterModifierTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
 void UITaskScheduler::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
     decltype(afterLayoutCallbacksInImplicitAnimationTask_) tasks(
@@ -437,6 +497,11 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
 void UITaskScheduler::AddAfterRenderTask(std::function<void()>&& task)
 {
     afterRenderTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::AddAfterModifierTask(std::function<void()>&& task)
+{
+    afterModifierTasks_.emplace_back(std::move(task));
 }
 
 void UITaskScheduler::FlushAfterRenderTask()

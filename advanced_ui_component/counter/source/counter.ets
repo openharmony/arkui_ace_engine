@@ -18,6 +18,7 @@ import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
 import { intl } from '@kit.LocalizationKit';
 import i18n from '@ohos.i18n';
+import {systemDateTime} from '@kit.BasicServicesKit';
 
 export enum CounterType {
   LIST = 0,
@@ -257,9 +258,9 @@ export struct CounterComponent {
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
-  private initFlag = true;
-  private increaseStr: string = getContext().resourceManager.getStringSync(125834852);
-  private reduceStr: string = getContext().resourceManager.getStringSync(125834853);
+  private initFlag: boolean = true;
+  private increaseStrCache: string | undefined = undefined;
+  private reduceStrCache: string | undefined = undefined;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -281,7 +282,18 @@ export struct CounterComponent {
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
-    let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
+    let dateFormatYear: Intl.DateTimeFormat | undefined;
+    try {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, {
+        year: 'numeric',
+        timeZone: systemDateTime.getTimezoneSync(),
+      });
+    } catch (error) {
+      console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatYear) {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, { year: 'numeric' });
+    }
     let formattedDateYear = dateFormatYear.format(date);
     return this.getDate(formattedDateYear);
   }
@@ -291,46 +303,60 @@ export struct CounterComponent {
     let localeID = locale.toString();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
-    let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
+    let dateFormatMonth: Intl.DateTimeFormat | undefined;
+    try {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long',
+        timeZone: systemDateTime.getTimezoneSync()});
+    } catch(error) {
+      console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatMonth) {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long'});
+    }
     let formattedDateMonth = dateFormatMonth.format(date);
     return this.getDate(formattedDateMonth);
   }
 
   getDateDay(value: number): string {
-    let dateDayMap = new Map([
-      [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
-      [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
-      [3, getContext().resourceManager.getStringByNameSync('Third_counter_accessibility_text')],
-      [4, getContext().resourceManager.getStringByNameSync('Fourth_counter_accessibility_text')],
-      [5, getContext().resourceManager.getStringByNameSync('Fifth_counter_accessibility_text')],
-      [6, getContext().resourceManager.getStringByNameSync('Sixth_counter_accessibility_text')],
-      [7, getContext().resourceManager.getStringByNameSync('Seventh_counter_accessibility_text')],
-      [8, getContext().resourceManager.getStringByNameSync('Eighth_counter_accessibility_text')],
-      [9, getContext().resourceManager.getStringByNameSync('Ninth_counter_accessibility_text')],
-      [10, getContext().resourceManager.getStringByNameSync('Tenth_counter_accessibility_text')],
-      [11, getContext().resourceManager.getStringByNameSync('Eleventh_counter_accessibility_text')],
-      [12, getContext().resourceManager.getStringByNameSync('Twelfth_counter_accessibility_text')],
-      [13, getContext().resourceManager.getStringByNameSync('Thirteenth_counter_accessibility_text')],
-      [14, getContext().resourceManager.getStringByNameSync('Fourteenth_counter_accessibility_text')],
-      [15, getContext().resourceManager.getStringByNameSync('Fifteenth_counter_accessibility_text')],
-      [16, getContext().resourceManager.getStringByNameSync('Sixteenth_counter_accessibility_text')],
-      [17, getContext().resourceManager.getStringByNameSync('Seventeenth_counter_accessibility_text')],
-      [18, getContext().resourceManager.getStringByNameSync('Eighteenth_counter_accessibility_text')],
-      [19, getContext().resourceManager.getStringByNameSync('Nineteenth_counter_accessibility_text')],
-      [20, getContext().resourceManager.getStringByNameSync('Twentieth_counter_accessibility_text')],
-      [21, getContext().resourceManager.getStringByNameSync('TwentyFirst_counter_accessibility_text')],
-      [22, getContext().resourceManager.getStringByNameSync('TwentySecond_counter_accessibility_text')],
-      [23, getContext().resourceManager.getStringByNameSync('TwentyThird_counter_accessibility_text')],
-      [24, getContext().resourceManager.getStringByNameSync('TwentyFourth_counter_accessibility_text')],
-      [25, getContext().resourceManager.getStringByNameSync('TwentyFifth_counter_accessibility_text')],
-      [26, getContext().resourceManager.getStringByNameSync('TwentySixth_counter_accessibility_text')],
-      [27, getContext().resourceManager.getStringByNameSync('TwentySeventh_counter_accessibility_text')],
-      [28, getContext().resourceManager.getStringByNameSync('TwentyEighth_counter_accessibility_text')],
-      [29, getContext().resourceManager.getStringByNameSync('TwentyNinth_counter_accessibility_text')],
-      [30, getContext().resourceManager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
-      [31, getContext().resourceManager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
-    ]);
-    return this.getDate(dateDayMap.get(this.day));
+    try {
+      let dateDayMap = new Map([
+        [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
+        [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
+        [3, getContext().resourceManager.getStringByNameSync('Third_counter_accessibility_text')],
+        [4, getContext().resourceManager.getStringByNameSync('Fourth_counter_accessibility_text')],
+        [5, getContext().resourceManager.getStringByNameSync('Fifth_counter_accessibility_text')],
+        [6, getContext().resourceManager.getStringByNameSync('Sixth_counter_accessibility_text')],
+        [7, getContext().resourceManager.getStringByNameSync('Seventh_counter_accessibility_text')],
+        [8, getContext().resourceManager.getStringByNameSync('Eighth_counter_accessibility_text')],
+        [9, getContext().resourceManager.getStringByNameSync('Ninth_counter_accessibility_text')],
+        [10, getContext().resourceManager.getStringByNameSync('Tenth_counter_accessibility_text')],
+        [11, getContext().resourceManager.getStringByNameSync('Eleventh_counter_accessibility_text')],
+        [12, getContext().resourceManager.getStringByNameSync('Twelfth_counter_accessibility_text')],
+        [13, getContext().resourceManager.getStringByNameSync('Thirteenth_counter_accessibility_text')],
+        [14, getContext().resourceManager.getStringByNameSync('Fourteenth_counter_accessibility_text')],
+        [15, getContext().resourceManager.getStringByNameSync('Fifteenth_counter_accessibility_text')],
+        [16, getContext().resourceManager.getStringByNameSync('Sixteenth_counter_accessibility_text')],
+        [17, getContext().resourceManager.getStringByNameSync('Seventeenth_counter_accessibility_text')],
+        [18, getContext().resourceManager.getStringByNameSync('Eighteenth_counter_accessibility_text')],
+        [19, getContext().resourceManager.getStringByNameSync('Nineteenth_counter_accessibility_text')],
+        [20, getContext().resourceManager.getStringByNameSync('Twentieth_counter_accessibility_text')],
+        [21, getContext().resourceManager.getStringByNameSync('TwentyFirst_counter_accessibility_text')],
+        [22, getContext().resourceManager.getStringByNameSync('TwentySecond_counter_accessibility_text')],
+        [23, getContext().resourceManager.getStringByNameSync('TwentyThird_counter_accessibility_text')],
+        [24, getContext().resourceManager.getStringByNameSync('TwentyFourth_counter_accessibility_text')],
+        [25, getContext().resourceManager.getStringByNameSync('TwentyFifth_counter_accessibility_text')],
+        [26, getContext().resourceManager.getStringByNameSync('TwentySixth_counter_accessibility_text')],
+        [27, getContext().resourceManager.getStringByNameSync('TwentySeventh_counter_accessibility_text')],
+        [28, getContext().resourceManager.getStringByNameSync('TwentyEighth_counter_accessibility_text')],
+        [29, getContext().resourceManager.getStringByNameSync('TwentyNinth_counter_accessibility_text')],
+        [30, getContext().resourceManager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
+        [31, getContext().resourceManager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
+      ]);
+      return this.getDate(dateDayMap.get(this.day));
+    } catch (error) {
+      console.log(`Accessility getDate fail. message: ${error.message}, code: ${error.code}`);
+      return '';
+    }
   }
 
   convertNumberToString(value: number) {
@@ -1224,6 +1250,20 @@ export struct CounterComponent {
     }
   }
 
+  private getIncreaseStr(): string {
+    if (this.increaseStrCache === undefined) {
+      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    }
+    return this.increaseStrCache;
+  }
+
+  private getReduceStr(): string {
+    if (this.reduceStrCache === undefined) {
+      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    }
+    return this.reduceStrCache;
+  }
+
   build() {
     if (this.type === CounterType.LIST) {
       RelativeContainer() {
@@ -1251,7 +1291,8 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1401,7 +1442,8 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1539,7 +1581,8 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -1687,7 +1730,8 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -2133,7 +2177,7 @@ export struct CounterComponent {
 
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2233,7 +2277,7 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)

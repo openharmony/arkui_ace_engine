@@ -881,4 +881,21 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0037, TestSize.Level1)
      */
     EXPECT_EQ(len, layeredDrawableDescriptor.len_);
 }
+
+/**
+ * @tc.name: DrawableDescTestItem001
+ * @tc.desc: test DrawableItem's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTestItem001, TestSize.Level1)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    const char* item = "i:1";
+    Napi::DrawableItem resItem;
+    Global::Resource::RState state(Global::Resource::INVALID_FORMAT);
+    EXPECT_EQ(resItem.state_, state);
+    resItem = drawable.PreGetDrawableItem(resourceMgr, item);
+    EXPECT_EQ(resItem.len_, 0);
+}
 } // namespace OHOS::Ace

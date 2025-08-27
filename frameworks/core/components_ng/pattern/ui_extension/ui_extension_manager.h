@@ -52,6 +52,7 @@ constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
 using UIExtBusinessDataSendCallback = std::function<std::optional<AAFwk::Want>(WeakPtr<FrameNode>)>;
 using UIExtBusinessDataConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using UIExtBusinessDataConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
+using SingleHandTransformChangedCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
 
 using UIExtBusinessSendToHostReplyFunc = std::function<bool(uint32_t, const AAFwk::Want&, AAFwk::Want&)>;
 using UIExtBusinessSendToHostFunc = std::function<bool(uint32_t, const AAFwk::Want&, BusinessDataSendType)>;
@@ -135,6 +136,10 @@ public:
 
     void DumpUIExt();
 
+    void RegisterSingleHandTransformChangedCallback(int32_t nodeId, std::function<void()>&& callback);
+    void UnregisterSingleHandTransformChangedCallback(int32_t nodeId);
+    void HandleSingleHandTransformChangedCallback();
+
     // host send data to provider
     void RegisterBusinessDataSendCallback(
             UIContentBusinessCode code, BusinessDataSendType type, const UIExtBusinessDataSendCallback& callback,
@@ -171,6 +176,8 @@ public:
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
+        const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId);
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;
@@ -197,6 +204,7 @@ private:
     std::map<UIContentBusinessCode, UIExtBusinessDataConsumeReplyCallback> businessDataConsumeReplyCallbacks_;
     UIExtBusinessSendToHostReplyFunc businessSendToHostReplyFunc_;
     UIExtBusinessSendToHostFunc businessSendToHostFunc_;
+    SingleHandTransformChangedCallbackMap singleHandTransformChangedCallbackMap_;
 
     int32_t instanceId_ = -1;
     WeakPtr<PipelineContext> pipeline_;

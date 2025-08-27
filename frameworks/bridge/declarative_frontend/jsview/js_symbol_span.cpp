@@ -31,6 +31,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/symbol_span_model.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
@@ -58,10 +59,16 @@ void JSSymbolSpan::SetFontSize(const JSCallbackInfo& info)
     auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+
+    RefPtr<ResourceObject> resObj;
+    UnregisterSpanResource("fontSize");
+    if (!ParseJsDimensionFpNG(info[0], fontSize, resObj, false)) {
         fontSize = theme->GetTextStyle().GetFontSize();
         SymbolSpanModel::GetInstance()->SetFontSize(fontSize);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
     }
     if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
@@ -78,6 +85,22 @@ void JSSymbolSpan::SetFontWeight(const std::string& value)
 void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)
 {
     std::vector<Color> symbolColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterSpanResource("symbolColor");
+        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
+        bool ret = ParseJsSymbolColor(info[0], symbolColor, true, resObjArr);
+        if (!resObjArr.empty()) {
+            auto spanNode = AceType::DynamicCast<NG::SpanNode>(
+                NG::ViewStackProcessor::GetInstance()->GetMainElementNode());
+            CHECK_NULL_VOID(spanNode);
+            spanNode->RegisterSymbolFontColorResource("symbolColor",
+                symbolColor, resObjArr);
+        }
+        if (ret) {
+            SymbolSpanModel::GetInstance()->SetFontColor(symbolColor);
+        }
+        return;
+    }
     if (!ParseJsSymbolColor(info[0], symbolColor)) {
         return;
     }
@@ -130,5 +153,26 @@ void JSSymbolSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSymbolSpan>::StaticMethod("renderingStrategy", &JSSymbolSpan::SetSymbolRenderingStrategy, opt);
     JSClass<JSSymbolSpan>::StaticMethod("effectStrategy", &JSSymbolSpan::SetSymbolEffect, opt);
     JSClass<JSSymbolSpan>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+template<typename T>
+void JSSymbolSpan::RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+{
+    auto uiNode = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(uiNode);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+    if (spanNode) {
+        spanNode->RegisterResource<T>(key, resObj, value);
+    }
+}
+
+void JSSymbolSpan::UnregisterSpanResource(const std::string& key)
+{
+    auto uiNode = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(uiNode);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+    if (spanNode) {
+        spanNode->UnregisterResource(key);
+    }
 }
 } // namespace OHOS::Ace::Framework

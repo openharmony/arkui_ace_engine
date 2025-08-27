@@ -58,6 +58,29 @@ struct TouchHandleState {
     int32_t edge_height = 0;
 };
 
+struct MenuAvoidStrategyMember {
+    LayoutWrapper* layoutWrapper = nullptr;
+    std::shared_ptr<SelectOverlayInfo> info;
+    bool hasKeyboard = false;
+    RectF upPaint;
+    RectF downPaint;
+    double topArea = 0.0;
+    double bottomArea = 0.0;
+    double selectionTop = 0.0;
+    double selectionBottom = 0.0;
+    double keyboardInsetStart = 0.0;
+    double keyboardHeight = 0.0;
+    double avoidFromText = 0.0;
+    double avoidPositionX = 0.0;
+    double avoidPositionY = 0.0;
+    double defaultAvoidY = 0.0;
+    double menuHeight = 0.0;
+    double menuWidth = 0.0;
+    OffsetF windowOffset;
+};
+
+struct InitStrategyTools;
+
 enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 }
 
@@ -77,6 +100,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
+    void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     // Check whether the handle status is valid.
@@ -125,6 +149,7 @@ public:
     {
         isShowHandle_ = isShowHandle;
     }
+    void HandleOnAskCelia();
 
     // override BaseTextSelectOverlay
     bool PreProcessOverlay(const OverlayRequest& request) override;
@@ -145,6 +170,7 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
@@ -155,11 +181,30 @@ public:
     void OnHandleReverse(bool isReverse) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void OnAfterSelectOverlayShow(bool isCreated) override;
+    void OnHandleIsHidden() override;
     // override SelectOverlayCallback end
+    void DetectSelectedText(const std::string& text);
+    void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
+    void UpdateSingleHandleVisible(bool isVisible);
+    bool IsSingleHandle();
+    void SetTouchHandleExistState(bool touchHandleExist);
+    double GetBottomWithKeyboard(double bottom);
+    void SetComputeMenuOffset(SelectOverlayInfo &info_);
+    bool ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &menuOffset, const RectF &menuRect,
+        OffsetF &windowOffset, std::shared_ptr<SelectOverlayInfo> &info);
+    bool InitMenuAvoidStrategyMember(MenuAvoidStrategyMember& member);
+    void InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void InitMenuAvoidStrategyAboutKeyboard(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
 private:
     void UpdateSelectMenuOptions();
+    void UpdateIsSelectAll();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
+    bool isSelectAll_ = false;
     SelectOverlayInfo webSelectInfo_;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
@@ -176,6 +221,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebSelectOverlay);
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    bool canShowAIMenu_ = false;
+    TextDataDetectType aiMenuType_ = TextDataDetectType::INVALID;
+    std::string aiMenucontent_;
 };
 } // namespace OHOS::Ace::NG
 

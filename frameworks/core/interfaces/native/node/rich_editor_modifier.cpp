@@ -372,15 +372,18 @@ void ResetRichEditorEnablePreviewText(ArkUINodeHandle node)
 }
 
 
-void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback,
+    void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback);
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
     NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
     NG::OnMenuItemClickCallback* onMenuItemClick
         = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    NG::OnPrepareMenuCallback* onPrepareMenu = reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback);
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu),
+        std::move(*onMenuItemClick), std::move(*onPrepareMenu));
 }
 
 void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
@@ -389,7 +392,9 @@ void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
 }
 
 void SetRichEditorOnWillChange(ArkUINodeHandle node, void* callback)
@@ -621,6 +626,81 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
+void SetRichEditorOnDidIMEInput(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto OnDidIMEInput = reinterpret_cast<std::function<void(TextRange)>*>(callback);
+        RichEditorModelNG::SetOnDidIMEInput(frameNode, std::move(*OnDidIMEInput));
+    } else {
+        RichEditorModelNG::SetOnDidIMEInput(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnDidIMEInput(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnDidIMEInput(frameNode, nullptr);
+}
+
+void SetRichEditorEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, true);
+}
+
+void SetRichEditorEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableAutoSpacing(frameNode, value);
+}
+ 
+void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
+}
+ 
+void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool enable = (undoStyleValue == static_cast<int32_t>(UndoStyle::KEEP_STYLE));
+    RichEditorModelNG::SetSupportStyledUndo(frameNode, enable);
+}
+ 
+void ResetRichEditorUndoStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
+}
+
+void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, Color(color));
+}
+ 
+void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
+}
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -684,6 +764,16 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
         .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
+        .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
+        .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
+        .setRichEditorEnableHapticFeedback = SetRichEditorEnableHapticFeedback,
+        .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
+        .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
+        .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
+        .setRichEditorUndoStyle = SetRichEditorUndoStyle,
+        .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
+        .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
+        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

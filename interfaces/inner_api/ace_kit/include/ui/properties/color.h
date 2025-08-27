@@ -45,6 +45,11 @@ union ColorParam {
     uint32_t value;
 };
 
+enum ColorSpace {
+    SRGB = 0,
+    DISPLAY_P3 = 1,
+};
+
 // A color value present by 32 bit.
 class ACE_FORCE_EXPORT Color {
 public:
@@ -52,6 +57,9 @@ public:
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}
     constexpr explicit Color(uint32_t value, uint32_t resId)
         : colorValue_(ColorParam { .value = value }), resourceId_(resId) {}
+    constexpr explicit Color(uint32_t value, ColorSpace colorSpace)
+        : colorValue_(ColorParam { .value = value }), colorSpace_(colorSpace)
+    {}
     ~Color() = default;
 
     static Color FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
@@ -92,6 +100,16 @@ public:
         return colorValue_.value;
     }
 
+    void SetColorSpace(ColorSpace colorSpace)
+    {
+        colorSpace_ = colorSpace;
+    }
+
+    ColorSpace GetColorSpace() const
+    {
+        return colorSpace_;
+    }
+
     void SetResourceId(uint32_t id)
     {
         resourceId_ = id;
@@ -126,7 +144,7 @@ public:
 
     bool operator==(const Color& color) const
     {
-        return colorValue_.value == color.GetValue();
+        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
     }
 
     bool operator!=(const Color& color) const
@@ -143,6 +161,7 @@ public:
     Color operator/(double value) const;
 
     std::string ColorToString() const;
+    std::string ToSvgFillColorKey() const;
 
     static Color ColorFromString(const std::string& str);
     static bool MatchColorHexString(const std::string& colorStr);
@@ -173,6 +192,7 @@ private:
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
     uint32_t resourceId_ = 0;
+    ColorSpace colorSpace_ = ColorSpace::SRGB;
 };
 
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 typedef struct {
@@ -30,6 +31,7 @@ typedef struct {
 
 typedef std::function<void(bool)> ProfilerStatusCallback;
 typedef std::function<void(FrameNodeInfo)> RsProfilerNodeMountCallback;
+using PixelMapPair = std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>;
 
 class LayoutInspector {
 public:
@@ -43,7 +45,11 @@ public:
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
     static void RegisterConnectCallback();
-    static void ProcessMessages(const std::string& message);
+    static std::pair<uint32_t, int32_t> ProcessMessages(const std::string& message);
+
+    static void CreateContainer3DLayoutInfo(RefPtr<Container>& container);
+    static void Create3DLayoutInfoByWinId(uint32_t windId);
+    static void SendInspctorAbilities();
 
     // state profiler
     static bool GetStateProfilerStatus();
@@ -62,6 +68,12 @@ public:
     using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 private:
+    static void SendEmpty3DSnapJson();
+    static std::vector<PixelMapPair> Filter3DSnapshot(const std::vector<PixelMapPair>& snapinfos);
+    static void Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node);
+    static void BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::unique_ptr<JsonValue>& message);
+    static int64_t RsNodeIdToFrameNodeId(uint64_t rsNodeId);
     static bool stateProfilerStatus_;
     static bool layoutInspectorStatus_;
     static NG::InspectorTreeMap recNodeInfos_;

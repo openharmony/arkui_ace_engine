@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsAccessibilityActionInterceptFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsAccessibilityActionInterceptFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsAccessibilityActionInterceptFunction, JsFunction);
 
 public:
     explicit JsAccessibilityActionInterceptFunction(const JSRef<JSFunc>& jsFunction)
@@ -28,12 +28,29 @@ public:
 
     ~JsAccessibilityActionInterceptFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }
 
     AccessibilityActionInterceptResult Execute(AccessibilityInterfaceAction action);
+};
+
+class JsAccessibilityHoverTransparentFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsAccessibilityHoverTransparentFunction, JsFunction);
+
+public:
+    explicit JsAccessibilityHoverTransparentFunction(const JSRef<JSFunc>& jsFunction)
+        : JsFunction(JSRef<JSObject>(), jsFunction) {}
+
+    ~JsAccessibilityHoverTransparentFunction() override = default;
+
+    void Execute()
+    {
+        ExecuteJS();
+    }
+
+    void Execute(TouchEventInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

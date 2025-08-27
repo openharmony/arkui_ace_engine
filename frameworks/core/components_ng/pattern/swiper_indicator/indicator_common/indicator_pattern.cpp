@@ -535,10 +535,43 @@ bool IndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
 void IndicatorPattern::HandleDragEnd(double dragVelocity)
 {
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::HandleDragEnd(dragVelocity);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SetTouchBottomType(TouchBottomType::NONE);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+RectF IndicatorPattern::CalcBoundsRect() const
+{
+    RectF boundsRect;
+    if (GetDotIndicatorModifier()) {
+        boundsRect = GetDotIndicatorModifier()->GetBoundsRect();
+    }
+    return boundsRect;
+}
+
+void IndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    SwiperIndicatorPattern::InitTouchEvent(gestureHub);
+    auto stopAnimationCb = [weak = WeakClaim(this)](bool ifImmediately) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (pattern->GetDotIndicatorModifier()) {
+                pattern->GetDotIndicatorModifier()->StopAnimation(ifImmediately);
+            }
+            if (pattern->GetOverlengthDotIndicatorModifier()) {
+                pattern->GetOverlengthDotIndicatorModifier()->StopAnimation(ifImmediately);
+            }
+        }
+    };
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
 }
 
 void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
@@ -604,5 +637,40 @@ std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
     }
     return { start, end };
+}
+
+void IndicatorPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("colorVal")) {
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+    }
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+    }
+}
+
+void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
+{
+    UpdateDefaultColor();
+    Pattern::OnColorModeChange(colorMode);
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty();
+    } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        SaveDigitIndicatorProperty();
+        UpdateDigitalIndicator();
+    }
 }
 } // namespace OHOS::Ace::NG

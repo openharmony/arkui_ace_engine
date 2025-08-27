@@ -189,6 +189,33 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(id);
 }
 
+void UIExtensionManager::RegisterSingleHandTransformChangedCallback(
+    int32_t nodeId, std::function<void()>&& callback)
+{
+    if (callback == nullptr) {
+        return;
+    }
+
+    singleHandTransformChangedCallbackMap_[nodeId] = std::move(callback);
+}
+
+void UIExtensionManager::UnregisterSingleHandTransformChangedCallback(int32_t nodeId)
+{
+    singleHandTransformChangedCallbackMap_.erase(nodeId);
+}
+
+void UIExtensionManager::HandleSingleHandTransformChangedCallback()
+{
+    SingleHandTransformChangedCallbackMap callbackMap;
+    std::swap(callbackMap, singleHandTransformChangedCallbackMap_);
+    for (const auto& iter : callbackMap) {
+        if (iter.second) {
+            iter.second();
+        }
+    }
+    std::swap(callbackMap, singleHandTransformChangedCallbackMap_);
+}
+
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
 {
     std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
@@ -247,12 +274,16 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
     }
     // keyboardHeight is 0, broadcast it.
     bool ret = false;
-    for (const auto& it : aliveUIExtensions_) {
-        auto uiExtension = it.second.Upgrade();
-        if (uiExtension) {
-            auto session = uiExtension->GetSessionWrapper();
-            if (session && session->IsSessionValid()) {
-                ret |= session->NotifyOccupiedAreaChangeInfo(info);
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+
+        for (const auto& it : aliveUIExtensions_) {
+            auto uiExtension = it.second.Upgrade();
+            if (uiExtension) {
+                auto session = uiExtension->GetSessionWrapper();
+                if (session && session->IsSessionValid()) {
+                    ret |= session->NotifyOccupiedAreaChangeInfo(info);
+                }
             }
         }
     }
@@ -306,7 +337,7 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
         }
 
         uint64_t displayId = 0;
-        auto instanceId = uiExtension->GetInstanceIdFromHost();
+        auto instanceId = uiExtension->GetInstanceId();
         auto container = Platform::AceContainer::GetContainer(instanceId);
         if (container) {
             displayId = container->GetCurrentDisplayId();
@@ -387,7 +418,7 @@ bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
         ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
     }
     decltype(aliveSecurityUIExtensions_) tempAliveSecurityUIExtensions(aliveSecurityUIExtensions_);
-    for (const auto& pattern : aliveSecurityUIExtensions_) {
+    for (const auto& pattern : tempAliveSecurityUIExtensions) {
         auto uiExtension = pattern.second.Upgrade();
         CHECK_NULL_CONTINUE(uiExtension);
         auto frameNode = uiExtension->GetHost();
@@ -505,7 +536,7 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
 void UIExtensionManager::SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode)
 {
     auto it = aliveUIExtensions_.find(nodeId);
-    if(it == aliveUIExtensions_.end()) {
+    if (it == aliveUIExtensions_.end()) {
         return;
     }
     auto uiExtension = it->second.Upgrade();
@@ -520,16 +551,7 @@ void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>
 {
     AAFwk::Want data;
     data.SetParam("requestPageMode", std::string("yes"));
-    AAFwk::Want reply;
-    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, data, reply);
-    if (reply.HasParameter("pageMode")) {
-        auto pageMode = reply.GetStringParam("pageMode");
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UEA received a reply, pageMode: %{public}s.", pageMode.c_str());
-        auto accessibilityManager = pipeline->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        accessibilityManager->UpdatePageMode(pageMode);
-    }
+    SendBusinessToHost(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST, data, BusinessDataSendType::ASYNC);
 }
 
 void UIExtensionManager::TransferAccessibilityRectInfo()
@@ -549,6 +571,8 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
             uiExtension->TransferAccessibilityRectInfo();
         }
     }
+
+    HandleSingleHandTransformChangedCallback();
 }
 
 void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
@@ -564,6 +588,28 @@ void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, cons
     for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+}
+
+void UIExtensionManager::UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
+    const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId)
+{
+    CHECK_RUN_ON(UI);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto persistentId = uiExtension->GetSessionId();
+        if (persistentIds.find(persistentId) != persistentIds.end()) {
             uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
         }
     }
@@ -591,7 +637,7 @@ void UIExtensionManager::RegisterListenerIfNeeded()
             CHECK_NULL_VOID(mgr);
             mgr->NotifyUECProviderIfNeedded();
         };
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager register listener");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtensionManager register listener");
     containerModalListenerId_ = ContainerModalViewEnhance::AddButtonsRectChangeListener(
         AceType::RawPtr(pipeline), std::move(containerModalListener));
     hasRegisterListener_ = true;
@@ -613,7 +659,7 @@ void UIExtensionManager::UnregisterListenerIfNeeded()
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager unregister listener");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtensionManager unregister listener");
     ContainerModalViewEnhance::RemoveButtonsRectChangeListener(
         AceType::RawPtr(pipeline), containerModalListenerId_);
     hasRegisterListener_ = false;
@@ -642,7 +688,8 @@ void UIExtensionManager::NotifyUECProviderIfNeedded()
         if (needNotify) {
             AAFwk::Want avoidInfoWant;
             avoidInfoMgr->BuildAvoidInfo(newAvoidInfo, avoidInfoWant);
-            TAG_LOGI(AceLogTag::ACE_LAYOUT, "UECManager send AvoidInfo: %{public}s", newAvoidInfo.ToString().c_str());
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UECManager send AvoidInfo: %{public}s",
+                newAvoidInfo.ToString().c_str());
             uecPattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
                 std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         }

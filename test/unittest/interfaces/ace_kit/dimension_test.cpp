@@ -14,6 +14,11 @@
  */
 
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
 
@@ -21,7 +26,25 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::Kit {
-class DimensionTest : public testing::Test {};
+class DimensionTest : public testing::Test {
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
+
+        MockContainer::Current()->pipelineContext_->dipScale_ = 3.0f;
+        MockContainer::Current()->pipelineContext_->followSystem_ = true;
+        MockContainer::Current()->pipelineContext_->maxAppFontScale_ = 3.0f;
+        MockContainer::Current()->pipelineContext_->fontScale_ = 3.0f;
+        MockContainer::Current()->pipelineContext_->designWidthScale_ = 4.0f;
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::Current()->pipelineContext_ = nullptr;
+        NG::MockPipelineContext::TearDown();
+    }
+};
 
 /**
  * @tc.name: DimensionTest001
@@ -156,5 +179,217 @@ HWTEST_F(DimensionTest, DimensionTest009, TestSize.Level1)
     auto dimension = Dimension::FromString("1px");
     EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
     EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+}
+
+/**
+ * @tc.name: DimensionTest010
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest010, TestSize.Level1)
+{
+    auto dimension = Dimension::FromString("1vp");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::VP);
+    auto value = dimension.ConvertToPx(3);
+    EXPECT_TRUE(NearEqual(value, 3));
+
+    dimension = Dimension::FromString("1fp");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::FP);
+    value = dimension.ConvertToPx(3);
+    EXPECT_TRUE(NearEqual(value, 3));
+
+    dimension = Dimension::FromString("1px");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+    value = dimension.ConvertToPx(3);
+    EXPECT_TRUE(NearEqual(value, 1));
+}
+
+/**
+ * @tc.name: DimensionTest011
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest011, TestSize.Level1)
+{
+    auto dimension = Dimension::FromString("1vp");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::VP);
+    auto value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension::FromString("3px");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 3.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(3, DimensionUnit::NONE);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 3.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::NONE);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension::FromString("3fp");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 3.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::FP);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 9));
+
+    dimension = Dimension::FromString("3lpx");
+    EXPECT_TRUE(NearEqual(dimension.Value(), 3.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::LPX);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 4));
+
+    dimension = Dimension(1.0f, DimensionUnit::CALC);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::CALC);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 0.0f));
+
+    dimension = Dimension(1.0f, DimensionUnit::INVALID);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::INVALID);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 0.0f));
+
+    dimension = Dimension(50, DimensionUnit::PERCENT);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 50));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PERCENT);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 0.0f));
+
+    dimension = Dimension(1.0f, DimensionUnit::AUTO);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::AUTO);
+    value = dimension.ConvertToVp();
+    EXPECT_TRUE(NearEqual(value, 0.0f));
+}
+
+/**
+ * @tc.name: DimensionTest012
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest012, TestSize.Level1)
+{
+    auto dimension = Dimension(1.0f, DimensionUnit::PX);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+    auto value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(1.0f, DimensionUnit::NONE);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::NONE);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(1.0f, DimensionUnit::VP);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::VP);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 3));
+
+    dimension = Dimension(1.0f, DimensionUnit::FP);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::FP);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 9));
+
+    dimension = Dimension(1.0f, DimensionUnit::LPX);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::LPX);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 4));
+
+    dimension = Dimension(1.0f, DimensionUnit::INVALID);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::INVALID);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(50, DimensionUnit::PERCENT);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 50));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PERCENT);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(50, DimensionUnit::AUTO);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 50));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::AUTO);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(50, DimensionUnit::CALC);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 50));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::CALC);
+    value = dimension.ConvertToPx();
+    EXPECT_TRUE(NearEqual(value, 0));
+}
+
+/**
+ * @tc.name: DimensionTest013
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest013, TestSize.Level1)
+{
+    auto dimension = Dimension(1.0f, DimensionUnit::FP);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 1.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::FP);
+    auto value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(9.0f, DimensionUnit::NONE);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::NONE);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(9.0f, DimensionUnit::PX);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 1));
+
+    dimension = Dimension(9.0f, DimensionUnit::VP);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::VP);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 3));
+
+    dimension = Dimension(9.0f, DimensionUnit::LPX);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::LPX);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 4));
+
+    dimension = Dimension(9.0f, DimensionUnit::INVALID);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::INVALID);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(9.0f, DimensionUnit::PERCENT);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PERCENT);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(9.0f, DimensionUnit::AUTO);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::AUTO);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 0));
+
+    dimension = Dimension(9.0f, DimensionUnit::CALC);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 9.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::CALC);
+    value = dimension.ConvertToFp();
+    EXPECT_TRUE(NearEqual(value, 0));
 }
 } // namespace OHOS::Ace::Kit

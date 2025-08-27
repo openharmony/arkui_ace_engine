@@ -113,6 +113,15 @@ public:
         }
 
         paintRect.SetRect(columnPaintRect);
+        SetFocusRectRadius(paintRect, radius, padding, *tabTheme);
+    }
+
+    void SetFocusRectRadius(RoundRect& paintRect, BorderRadiusProperty& radius, Dimension& padding, TabTheme& tabTheme)
+    {
+        auto focusBorderWidth = tabTheme.GetActiveIndicatorWidth();
+        if (focusBorderWidth > 0.0_vp && padding > focusBorderWidth) {
+            padding -= focusBorderWidth;
+        }
         paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
             static_cast<float>(radius.radiusTopLeft->ConvertToPx() + padding.ConvertToPx()),
             static_cast<float>(radius.radiusTopLeft->ConvertToPx() + padding.ConvertToPx()));

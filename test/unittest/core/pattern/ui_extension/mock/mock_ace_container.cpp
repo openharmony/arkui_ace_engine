@@ -112,17 +112,6 @@ bool AceContainer::IsKeyboard()
     return true;
 }
 
-void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
-{
-    return;
-}
-
-const std::string& AceContainer::GetAppRunningUniqueId() const
-{
-    static const std::string res;
-    return res;
-}
-
 void AceContainer::DestroyView() {}
 
 void AceContainer::Dispatch(const std::string& group, std::vector<uint8_t>&& data,
@@ -245,6 +234,7 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 void AceContainer::TerminateUIExtension() {}
+void AceContainer::RequestAtomicServiceTerminate() {}
 bool AceContainer::UIExtensionIsHalfScreen()
 {
     return false;
@@ -290,6 +280,11 @@ Rect AceContainer::GetDisplayAvailableRect() const
     return Rect();
 }
 
+Rect AceContainer::GetFoldExpandAvailableRect() const
+{
+    return Rect();
+}
+
 bool AceContainer::IsCrossAxisWindow()
 {
     return false;
@@ -297,34 +292,14 @@ bool AceContainer::IsCrossAxisWindow()
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
-RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
-{
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
-    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
-{
-    return nullptr;
-}
-
-void AceContainer::SetRequestedOrientation(
-    Orientation orientation, bool needAnimation)
+void AceContainer::DispatchExtensionDataToHostWindow(
+    uint32_t code, const AAFwk::Want& data, int32_t persistentId)
 {
 }
 
-Orientation AceContainer::GetRequestedOrientation()
-{
-    return Orientation::UNSPECIFIED;
-}
+void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 
-bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
-{
-    return false;
-}
+void AceContainer::TriggerModuleSerializer() {}
 
-bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
-{
-    return true;
-}
+void AceContainer::SetIsFormRender(bool isFormRender) {}
 } // namespace OHOS::Ace::NG

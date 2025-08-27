@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -33,6 +34,16 @@ namespace OHOS::Ace::NG {
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
 constexpr int32_t HALF = 2;
+const std::string ASK_CELIA_TAG = "askCelia";
+
+namespace {
+struct InitStrategyTools {
+    RefPtr<PipelineContext> pipeline = nullptr;
+    RefPtr<TextOverlayTheme> theme = nullptr;
+    RefPtr<SafeAreaManager> safeAreaManager = nullptr;
+    RefPtr<GeometryNode> geometryNode = nullptr;
+};
+}
 
 bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
@@ -56,6 +67,9 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
         pattern->ShowMagnifier(static_cast<int>(pattern->touchPointX), static_cast<int>(pattern->touchPointY));
         return false;
     }
+    if (overlayType == INSERT_OVERLAY && !IS_CALLING_FROM_M114()) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
     selectTemporarilyHidden_ = false;
     selectTemporarilyHiddenByScroll_ = false;
     SelectOverlayInfo selectInfo;
@@ -65,6 +79,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
         return false;
     }
     SetMenuOptions(selectInfo, params, callback);
+    SetComputeMenuOffset(selectInfo);
     RegisterSelectOverlayEvent(selectInfo);
     selectInfo.ancestorViewPort = pattern->GetViewPort();
     if (selectInfo.isNewAvoid) {
@@ -82,6 +97,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
     ProcessOverlay({ .animation = true });
+    SetTouchHandleExistState(true);
     return true;
 }
 
@@ -108,25 +124,30 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
     if (!isShowHandle_) {
         if (overlayType == INSERT_OVERLAY) {
-            SelectOverlayInfo selectInfo;
-            selectInfo.isSingleHandle = true;
-            selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
-            CheckHandles(selectInfo.firstHandle, insertHandle_);
-            selectInfo.secondHandle.isShow = false;
-            selectInfo.menuInfo.menuDisable = true;
-            selectInfo.menuInfo.menuIsShow = false;
-            selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
-            RegisterSelectOverlayEvent(selectInfo);
-            selectInfo.isHandleLineShow = false;
-            isShowHandle_ = true;
-            webSelectInfo_ = selectInfo;
-            ProcessOverlay({ .animation = true });
+            if (IS_CALLING_FROM_M114()) {
+                SelectOverlayInfo selectInfo;
+                selectInfo.isSingleHandle = true;
+                selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+                CheckHandles(selectInfo.firstHandle, insertHandle_);
+                selectInfo.secondHandle.isShow = false;
+                selectInfo.menuInfo.menuDisable = true;
+                selectInfo.menuInfo.menuIsShow = false;
+                selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+                SetEditMenuOptions(selectInfo);
+                RegisterSelectOverlayEvent(selectInfo);
+                selectInfo.isHandleLineShow = false;
+                isShowHandle_ = true;
+                webSelectInfo_ = selectInfo;
+                ProcessOverlay({ .animation = true });
+            } else {
+                CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+            }
             return;
         }
     } else {
         if (overlayType == INSERT_OVERLAY) {
             if (!selectOverlayDragging_) {
-                UpdateTouchHandleForOverlay(false);
+                UpdateTouchHandleForOverlay(true);
             }
         } else {
             UpdateSelectHandleInfo();
@@ -144,6 +165,28 @@ void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         CHECK_NULL_VOID(overlay);
         overlay->OnOverlayClick(info, isFirst);
     };
+}
+
+void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern && !(pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_)) {
+        selectInfo.menuOptionItems = pattern->menuOptionParam_;
+    }
+    if (pattern && pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_) {
+        selectInfo.onCreateCallback.onCreateMenuCallback = pattern->onCreateMenuCallback_;
+        selectInfo.onCreateCallback.onMenuItemClick = pattern->onMenuItemClick_;
+        if (pattern->onPrepareMenuCallback_) {
+            selectInfo.onCreateCallback.onPrepareMenuCallback = pattern->onPrepareMenuCallback_;
+            selectInfo.menuInfo.hasOnPrepareMenuCallback = true;
+        }
+        auto textRange = [](int32_t& start, int32_t& end) {
+            start = -1;
+            end = -1;
+        };
+        selectInfo.onCreateCallback.textRangeCallback = textRange;
+    }
 }
 
 bool WebSelectOverlay::IsSelectHandleReverse()
@@ -275,7 +318,7 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
         }
         webSelectInfo_.handleReverse = false;
         if (SelectOverlayIsOn()) {
-            UpdateSelectMenuOptions();
+            UpdateIsSelectAll();
             UpdateAllHandlesOffset();
         } else {
             ProcessOverlay({ .animation = true });
@@ -323,6 +366,8 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
+    bool detectFlag = !isSelectAll_;
+
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -332,6 +377,14 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showSearch = false;
         selectInfo.menuInfo.showTranslate = false;
     }
+    selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
+        (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
+    // should be the last
+    canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+                     (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+    canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
+    DetectSelectedText(detectFlag ? value : std::string());
 }
 
 void WebSelectOverlay::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
@@ -491,6 +544,10 @@ void WebSelectOverlay::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInf
     if (pattern && pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_) {
         selectInfo.onCreateCallback.onCreateMenuCallback = pattern->onCreateMenuCallback_;
         selectInfo.onCreateCallback.onMenuItemClick = pattern->onMenuItemClick_;
+        if (pattern->onPrepareMenuCallback_) {
+            selectInfo.onCreateCallback.onPrepareMenuCallback = pattern->onPrepareMenuCallback_;
+            selectInfo.menuInfo.hasOnPrepareMenuCallback = true;
+        }
         auto textRange = [](int32_t& start, int32_t& end) {
             start = -1;
             end = -1;
@@ -549,7 +606,7 @@ RectF WebSelectOverlay::ComputeClippedSelectionBounds(
     RectF frameRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
     auto visibleTop = visibleInnerRect.Top();
-    auto visibleBottom = visibleInnerRect.Bottom();
+    auto visibleBottom = GetBottomWithKeyboard(visibleInnerRect.Bottom());
     isNewAvoid = true;
     if (LessOrEqual(visibleBottom, selectY + viewPortY + offset.GetY()) ||
         LessOrEqual(selectY + selectHeight + offset.GetY(), visibleTop)) {
@@ -700,6 +757,7 @@ void WebSelectOverlay::SelectCancel()
 {
     CHECK_NULL_VOID(quickMenuCallback_);
     quickMenuCallback_->Cancel();
+    isSelectAll_ = false;
     insertHandle_ = nullptr;
     startSelectionHandle_ = nullptr;
     endSelectionHandle_ = nullptr;
@@ -741,6 +799,7 @@ bool WebSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableSubWindowMenu(true);
     SetMenuTranslateIsSupport(true);
     SetIsSupportMenuSearch(true);
+    CheckEnableContainerModal();
     pipeline->AddOnAreaChangeNode(host->GetId());
     return true;
 }
@@ -788,9 +847,14 @@ bool WebSelectOverlay::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchH
 
 void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnMenuItemAction menu option id %{public}d", id);
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
+    if (id == OptionMenuActionId::PASTE || id == OptionMenuActionId::CUT) {
+        isSelectAll_ = false;
+    }
     if (!quickMenuCallback_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnMenuItemAction failed callback is null");
         pattern->CloseSelectOverlay();
         return;
     }
@@ -798,7 +862,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::COPY:
             quickMenuCallback_->Continue(
                 OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            pattern->CloseSelectOverlay();
+            ChangeVisibilityOfQuickMenu();
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
@@ -813,24 +877,71 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SELECT_ALL:
             quickMenuCallback_->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            isSelectAll_ = true;
             break;
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
             pattern->CloseSelectOverlay();
             SelectCancel();
-            return;
+            break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             pattern->CloseSelectOverlay();
             SelectCancel();
-            return;
+            break;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->GetHandleInfo(webSelectInfo_);
+            pattern->HandleOnAIWrite();
+            SelectCancel();
+            break;
         case OptionMenuActionId::DISAPPEAR:
             pattern->CloseSelectOverlay();
             SelectCancel();
+            break;
+        case OptionMenuActionId::AI_MENU_OPTION:
+            if (auto adapter = pattern->webDataDetectorAdapter_) {
+                adapter->OnClickAISelectMenuOption(aiMenuType_, aiMenucontent_);
+            }
+            pattern->CloseSelectOverlay();
+            SelectCancel();
+            break;
+        case OptionMenuActionId::ASK_CELIA:
+            HandleOnAskCelia();
+            break;
         default:
-            TAG_LOGI(AceLogTag::ACE_WEB, "Unsupported menu option id %{public}d", id);
             break;
     }
+}
+
+void WebSelectOverlay::HandleOnAskCelia()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto vectorStringFunc = pattern->textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
+    if (vectorStringFunc == pattern->textDetectResult_.menuOptionAndAction.end() || vectorStringFunc->second.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed no askCelia option.");
+    } else {
+        auto funcVariant = vectorStringFunc->second.begin()->second;
+        if (std::holds_alternative<std::function<void(int, std::string)>>(funcVariant)) {
+            auto func = std::get<std::function<void(int, std::string)>>(funcVariant);
+            if (func) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleOnAskCelia execute.");
+                func(true, GetSelectedText());
+            } else {
+                TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option is null.");
+            }
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option type error.");
+        }
+    }
+    pattern->CloseSelectOverlay();
+    SelectCancel();
+    return;
+}
+
+void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo)
+{
+    OnMenuItemAction(id, type);
 }
 
 void WebSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
@@ -878,17 +989,24 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
     if (pattern->IsOverlayCreating()) {
         pattern->UpdateImageOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
     }
+    aiMenuType_ = TextDataDetectType::INVALID;
+    webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     pattern->WebOverlayRequestFocus();
 }
 
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
+    isSelectAll_ = false;
     selectOverlayDragging_ = false;
+    webSelectInfo_.menuInfo.showCopyAll = true;
+    UpdateSelectMenuOptions();
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
+    DetectSelectedText(GetSelectedText());
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = rect.GetX() - pattern->webOffset_.GetX();
@@ -919,6 +1037,7 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->CloseSelectOverlay();
         SelectCancel();
     }
+    UpdateSingleHandleVisible(true);
 }
 
 void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -934,7 +1053,11 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    aiMenuType_ = TextDataDetectType::INVALID;
+    webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     StopListenSelectOverlayParentScroll(host);
+    SetTouchHandleExistState(false);
 }
 
 void WebSelectOverlay::AfterCloseOverlay()
@@ -1025,7 +1148,10 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     selectInfo.onClick = webSelectInfo_.onClick;
     selectInfo.enableHandleLevel = true;
     selectInfo.enableSubWindowMenu = true;
-    selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
+    if (IS_CALLING_FROM_M114()) {
+        selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
+    }
+    selectInfo.computeMenuOffset = webSelectInfo_.computeMenuOffset;
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(
@@ -1040,6 +1166,12 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
         if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() && IsNeedMenuShare())) {
             info->menuInfo.showShare = !info->menuInfo.showShare;
+            manager->NotifyUpdateToolBar(true);
+        }
+        if (info->menuInfo.aiMenuOptionType != aiMenuType_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectOverlay::OnHandleMarkInfoChange aiMenuOptionType change.");
+            info->menuInfo.aiMenuOptionType = aiMenuType_;
+            info->menuInfo.isAskCeliaEnabled = canShowAIMenu_ && (aiMenuType_ == TextDataDetectType::INVALID);
             manager->NotifyUpdateToolBar(true);
         }
     }
@@ -1065,6 +1197,9 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
 {
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (isSelectAll_) {
+        isSelectAll_ = false;
+    }
     if (!queryWord.empty()) {
         webSelectInfo_.menuInfo.showSearch = true;
         webSelectInfo_.menuInfo.showTranslate = true;
@@ -1075,9 +1210,241 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowSearch is %{public}d", webSelectInfo_.menuInfo.showSearch);
     TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowTranslate is %{public}d",
         webSelectInfo_.menuInfo.showTranslate);
-    OnUpdateMenuInfo(webSelectInfo_.menuInfo, DIRTY_FIRST_HANDLE);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
+}
+
+void WebSelectOverlay::DetectSelectedText(const std::string& text)
+{
+    if (!canShowAIMenu_) {
+        return;
+    }
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto adapter = pattern->webDataDetectorAdapter_;
+    CHECK_NULL_VOID(adapter);
+    aiMenuType_ = TextDataDetectType::INVALID;
+    webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    adapter->DetectSelectedText(text);
+}
+
+void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::string& content)
+{
+    TAG_LOGI(
+        AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu type: %{public}d", static_cast<int32_t>(type));
+    aiMenuType_ = type;
+    aiMenucontent_ = content;
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_ && (aiMenuType_ == TextDataDetectType::INVALID);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
+}
+
+void WebSelectOverlay::UpdateIsSelectAll()
+{
+    if (isSelectAll_) {
+        isSelectAll_ = false;
+    }
+}
+
+void WebSelectOverlay::UpdateSingleHandleVisible(bool isVisible)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsSingleHandle()) {
+        pattern->UpdateSingleHandleVisible(isVisible);
+    }
+}
+
+bool WebSelectOverlay::IsSingleHandle()
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    return overlayType == INSERT_OVERLAY;
+}
+
+void WebSelectOverlay::OnHandleIsHidden()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSingleHandleVisible(false);
+    SetTouchHandleExistState(false);
+}
+
+void WebSelectOverlay::SetTouchHandleExistState(bool touchHandleExist)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTouchHandleExistState(touchHandleExist);
+}
+
+double WebSelectOverlay::GetBottomWithKeyboard(double bottom)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_RETURN(pattern, bottom);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, bottom);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, bottom);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, bottom);
+    auto keyboardInset = safeAreaManager->GetKeyboardWebInset();
+    auto keyboardPosition =
+        GreatNotEqual(static_cast<double>(keyboardInset.Length()), 0.0f) ? keyboardInset.start : bottom;
+    return GreatNotEqual(keyboardPosition, bottom) ? bottom : keyboardPosition;
+}
+
+void WebSelectOverlay::SetComputeMenuOffset(SelectOverlayInfo &info)
+{
+    info.computeMenuOffset = [weak = AceType::WeakClaim(this)](LayoutWrapper *layoutWrapper,
+                                 OffsetF &menuOffset,
+                                 const RectF &menuRect,
+                                 OffsetF &windowOffset,
+                                 std::shared_ptr<SelectOverlayInfo> &info) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, false);
+        return overlay->ComputeMenuOffset(layoutWrapper, menuOffset, menuRect, windowOffset, info);
+    };
+}
+
+bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &menuOffset, const RectF &menuRect,
+    OffsetF &windowOffset, std::shared_ptr<SelectOverlayInfo> &info)
+{
+    CHECK_NULL_RETURN(info, false);
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (info->isSingleHandle || info->isNewAvoid) {
+        return false;
+    }
+    MenuAvoidStrategyMember member;
+    member.layoutWrapper = layoutWrapper;
+    member.windowOffset = windowOffset;
+    member.menuHeight = menuRect.Height();
+    member.menuWidth = menuRect.Width();
+    member.info = info;
+    bool initSuccess = InitMenuAvoidStrategyMember(member);
+    if (initSuccess) {
+        MenuAvoidStrategy(menuOffset, member);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool WebSelectOverlay::InitMenuAvoidStrategyMember(MenuAvoidStrategyMember& member)
+{
+    InitStrategyTools tools;
+    tools.pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(tools.pipeline, false);
+    tools.theme = tools.pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(tools.theme, false);
+    tools.safeAreaManager = tools.pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(tools.safeAreaManager, false);
+    tools.geometryNode = member.layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(tools.geometryNode, false);
+
+    InitMenuAvoidStrategyAboutParam(member, tools);
+    InitMenuAvoidStrategyAboutKeyboard(member, tools);
+    InitMenuAvoidStrategyAboutTop(member, tools);
+    InitMenuAvoidStrategyAboutBottom(member, tools);
+    InitMenuAvoidStrategyAboutPosition(member, tools);
+
+    return true;
+}
+
+void WebSelectOverlay::InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
+{
+    auto& theme = tools.theme;
+
+    member.defaultAvoidY = theme->GetDefaultMenuPositionY();
+    member.avoidFromText = theme->GetMenuSpacingWithText().ConvertToPx() +
+                                theme->GetHandleDiameter().ConvertToPx() +
+                                theme->GetHandleDiameterStrokeWidth().ConvertToPx() / 2.0f;
+}
+
+void WebSelectOverlay::InitMenuAvoidStrategyAboutKeyboard(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
+{
+    auto& safeAreaManager = tools.safeAreaManager;
+    auto keyboardInset = safeAreaManager->GetKeyboardInset().Combine(safeAreaManager->GetKeyboardWebInset());
+
+    member.keyboardInsetStart = static_cast<double>(keyboardInset.start);
+    member.keyboardHeight = static_cast<double>(keyboardInset.Length());
+    member.hasKeyboard = GreatNotEqual(keyboardInset.Length(), 0.0f);
+}
+
+void WebSelectOverlay::InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
+{
+    auto& info = member.info;
+    SelectHandleInfo upHandle = info->handleReverse ? info->secondHandle : info->firstHandle;
+    auto topArea = static_cast<double>(tools.safeAreaManager->GetSystemSafeArea().top_.Length());
+    auto rootTop = static_cast<double>(tools.pipeline->GetRootRect().Top());
+
+    member.upPaint = upHandle.GetPaintRect() - tools.geometryNode->GetFrameOffset() + member.windowOffset;
+    member.topArea = GreatNotEqual(rootTop, topArea) ? rootTop : topArea;
+    member.selectionTop = upHandle.isShow ? member.upPaint.Top() : member.topArea;
+}
+
+void WebSelectOverlay::InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
+{
+    auto info = member.info;
+    SelectHandleInfo downHandle = info->handleReverse ? info->firstHandle : info->secondHandle;
+    auto downPaint = downHandle.GetPaintRect() - tools.geometryNode->GetFrameOffset() + member.windowOffset;
+    auto handleBottom = static_cast<double>(downPaint.Bottom());
+    bool hasKeyboard = member.hasKeyboard;
+    auto frameHeight = tools.geometryNode->GetFrameRect().Height();
+    auto keyboardStart = member.keyboardInsetStart;
+    auto defaultY = member.defaultAvoidY;
+
+    auto bottomArea = tools.safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
+    bottomArea = hasKeyboard ? keyboardStart - defaultY : bottomArea;
+    bottomArea = GreatNotEqual(bottomArea, 0.0f) ? bottomArea : tools.pipeline->GetRootRect().Bottom();
+    bottomArea = GreatNotEqual(bottomArea, frameHeight) ? frameHeight : bottomArea;
+
+    auto handleIsShow = hasKeyboard ? (LessOrEqual(handleBottom, keyboardStart) ? true : false) : downHandle.isShow;
+    auto selectionBottom = handleIsShow ? handleBottom : bottomArea;
+    selectionBottom = NearEqual(selectionBottom, keyboardStart - defaultY) ? keyboardStart : selectionBottom;
+
+    member.downPaint = downPaint;
+    member.bottomArea = bottomArea;
+    member.selectionBottom = selectionBottom;
+}
+
+void WebSelectOverlay::InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
+{
+    auto selectArea = member.info->selectArea + member.windowOffset;
+    auto defaultAvoidY = member.defaultAvoidY;
+    auto midPosition = (member.selectionTop + member.selectionBottom - member.menuHeight) / 2.0f;
+    auto avoidPositionY = member.bottomArea - member.menuHeight;
+    avoidPositionY = GreatNotEqual(midPosition, avoidPositionY) ? avoidPositionY : midPosition;
+
+    member.avoidPositionX = (selectArea.Left() + selectArea.Right() - member.menuWidth) / 2.0f;
+    member.avoidPositionY = GreatNotEqual(avoidPositionY, defaultAvoidY) ? avoidPositionY : defaultAvoidY;
+}
+
+void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
+{
+    if (GreatNotEqual(menuOffset.GetY(), member.upPaint.Top())) {
+        menuOffset.SetY(member.downPaint.Bottom() + member.avoidFromText);
+    }
+    double menuHeight = member.menuHeight;
+    double menuTop = menuOffset.GetY();
+    double menuBottom = menuTop + menuHeight;
+    if (GreatNotEqual(menuBottom, member.bottomArea)) {
+        menuOffset.SetY(member.avoidPositionY);
+        menuTop = menuOffset.GetY();
+        menuBottom = menuTop + menuHeight;
+    }
+    if (GreatNotEqual(member.upPaint.Top(), menuTop)) {
+        double finalY = member.upPaint.Top() - member.avoidFromText - menuHeight;
+        finalY = GreatNotEqual(menuTop, finalY) ? finalY : menuTop;
+        menuOffset.SetY(finalY);
+    } else if (GreatNotEqual(menuBottom, member.downPaint.Bottom())) {
+        double finalY = member.downPaint.Bottom() + member.avoidFromText;
+        finalY = GreatNotEqual(finalY, menuTop) ? finalY : menuTop;
+        menuOffset.SetY(finalY);
+    } else {
+        menuOffset.SetY(member.avoidPositionY);
+    }
+    menuOffset.SetX(member.avoidPositionX);
 }
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,7 @@ using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
 class DatePickerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(DatePickerEventHub, EventHub)
+    DECLARE_ACE_TYPE(DatePickerEventHub, EventHub);
 
 public:
     DatePickerEventHub() = default;
@@ -60,11 +60,6 @@ public:
     void SetDialogChange(DialogEvent&& onChange)
     {
         dialogChangeEvent_ = std::move(onChange);
-    }
-
-    bool HasSetDialogChange() const
-    {
-        return (dialogChangeEvent_ != nullptr) || (dialogDateChangeEvent_ != nullptr);
     }
 
     void FireDialogChangeEvent(const std::string& info) const

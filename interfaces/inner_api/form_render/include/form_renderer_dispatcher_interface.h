@@ -51,6 +51,7 @@ public:
      * @param allowUpdate The allowUpdate.
      */
     virtual void SetAllowUpdate(bool allowUpdate) = 0;
+    virtual void SetMultiInstanceEnabled(bool isMultiInstanceEnabled) = 0;
 
     virtual void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) = 0;
@@ -73,7 +74,8 @@ public:
         ACCESSIBILITY_CHILD_TREE_DEREGISTER,
         ACCESSIBILITY_DUMP_CHILD_INFO,
         ACCESSIBILITY_TRANSFER_HOVER_EVENT,
-        NOTIFY_DUMP_INFO
+        NOTIFY_DUMP_INFO,
+        SET_MULTI_INSTANCE_ENABLED
     };
 };
 }  // namespace Ace

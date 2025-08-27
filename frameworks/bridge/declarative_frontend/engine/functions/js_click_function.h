@@ -28,26 +28,26 @@ namespace OHOS::Ace::Framework {
 #define HAND_LEFT 1
 #define HAND_RIGHT 2
 class JsClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsClickFunction, JsFunction);
 
 public:
     explicit JsClickFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsClickFunction() override {};
-    void Execute() override;
+    void Execute();
     void Execute(const ClickInfo& info);
     void Execute(GestureEvent& info);
     void Execute(MouseInfo& info);
 };
 
 class JsWeakClickFunction : public JsWeakFunction {
-    DECLARE_ACE_TYPE(JsWeakClickFunction, JsWeakFunction)
+    DECLARE_ACE_TYPE(JsWeakClickFunction, JsWeakFunction);
 
 public:
     explicit JsWeakClickFunction(const JSRef<JSFunc>& jsFunction) : JsWeakFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsWeakClickFunction() override {};
-    void Execute() override;
+    void Execute();
     void Execute(const ClickInfo& info);
     void Execute(GestureEvent& info);
     void Execute(MouseInfo& info);

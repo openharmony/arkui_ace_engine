@@ -30,7 +30,7 @@ class GestureEventHub;
 class PanRecognizer;
 
 class PanEvent : public virtual AceType {
-    DECLARE_ACE_TYPE(PanEvent, AceType)
+    DECLARE_ACE_TYPE(PanEvent, AceType);
 public:
     PanEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
         GestureEventNoParameter&& actionCancel)
@@ -67,12 +67,14 @@ private:
 };
 
 class ACE_FORCE_EXPORT PanEventActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator);
 public:
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
         float distance);
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
         PanDistanceMap distanceMap);
+    PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
+        const PanDistanceMapDimension& distanceMap);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)

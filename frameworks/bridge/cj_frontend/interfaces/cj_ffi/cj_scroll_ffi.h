@@ -33,13 +33,17 @@ class ACE_EXPORT NativeNGScroller : public OHOS::FFI::FFIData {
 public:
     NativeNGScroller();
 
-    void ScrollTo(const Dimension& xOffset, const Dimension& yOffset, double duration, const RefPtr<Curve>& curve,
-        bool smooth, bool canOverscroll);
-    void ScrollEdge(ScrollEdgeType edge, float velocity);
+    void ScrollTo(const Dimension& xOffset, const Dimension& yOffset, double duration, const RefPtr<Curve>& curve);
+    void ScrollEdge(ScrollEdgeType edge);
+    void ScrollPage(bool next);
+    void ScrollToIndex(int32_t index, bool smooth, int32_t align);
+    void ScrollToWithAnimationOptions(const Dimension& xOffset, const Dimension& yOffset, double duration,
+        const RefPtr<Curve>& curve, bool smooth, bool canOverscroll);
+    void ScrollEdgeWithVelocity(ScrollEdgeType edge, float velocity);
     void ScrollFling(double velocity);
-    void ScrollPage(bool next, bool animation);
+    void ScrollPageWithAniamtion(bool next, bool animation);
     void ScrollBy(const Dimension& xOffset, const Dimension& yOffset);
-    void ScrollToIndex(int32_t index, bool smooth, int32_t align, double offset, int32_t unit);
+    void ScrollToIndexWithUnit(int32_t index, bool smooth, int32_t align, double offset, int32_t unit);
     Offset CurrentOffset();
     bool IsAtEnd();
     Rect GetItemRect(int32_t index);
@@ -108,17 +112,22 @@ CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollStop(void (*callback)());
 CJ_EXPORT int64_t FfiOHOSAceFrameworkScrollerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollTo(
     int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToByCurve(
+    int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit, double duration, const char* curve);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToAnimation(
     int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit, bool smooth);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToAnimationOptions(int64_t selfID, double xOffset, int32_t xUnit,
     double yOffset, int32_t yUnit, double duration, const char* curve, bool canOverScroll);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollBy(
     int64_t selfID, double xOffset, int32_t xUnit, double yOffset, int32_t yUnit);
-CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollEdge(int64_t selfID, int32_t edge, float velocity);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollEdge(int64_t selfID, int32_t edge);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToIndex(int64_t selfID, int32_t index, bool smooth, int32_t align);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollPage(int64_t selfID, bool next);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollEdgeWithVelocity(int64_t selfID, int32_t edge, float velocity);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollFling(int64_t selfID, double velocity);
-CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToIndex(
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollToIndexWithUnit(
     int64_t selfID, int32_t index, bool smooth, int32_t align, double offset, int32_t unit);
-CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollPage(int64_t selfID, bool next, bool animation);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollerScrollPageWithAnimation(int64_t selfID, bool next, bool animation);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollSetOnScrollFrameBegin(double (*callback)(double offset, int32_t state));
 CJ_EXPORT CJOffset FfiOHOSAceFrameworkScrollerCurrentOffset(int64_t selfID);
 CJ_EXPORT bool FfiOHOSAceFrameworkScrollerIsAtEnd(int64_t selfID);

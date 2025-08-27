@@ -67,6 +67,7 @@ public:
     void SendWebText(int32_t nodeId, std::string res) override;
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void ClearAshmem(sptr<Ashmem>& optMem);
+    void SendExeAppAIFunctionResult(uint32_t result) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

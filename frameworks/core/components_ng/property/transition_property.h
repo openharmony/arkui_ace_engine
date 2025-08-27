@@ -21,11 +21,12 @@
 #include <optional>
 #include <sstream>
 #include <string>
-
+#include <functional>
 #include "base/geometry/calc_dimension.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
+#include "core/common/resource/resource_object.h"
 
 
 namespace OHOS::Ace::NG {
@@ -34,6 +35,30 @@ struct TranslateOptions {
     CalcDimension x;
     CalcDimension y;
     CalcDimension z;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NG::TranslateOptions&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::TranslateOptions&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
     TranslateOptions() = default;
     TranslateOptions(const CalcDimension& x, const CalcDimension& y, const CalcDimension& z) : x(x), y(y), z(z) {}
     // for inner construct, default unit is PX
@@ -68,22 +93,30 @@ struct ScaleOptions {
                centerX.ToString() + "," + centerY.ToString() + "]";
     }
 };
-struct RotateOptions {
-    float xDirection = 0.0f;
-    float yDirection = 0.0f;
-    float zDirection = 0.0f;
-    // angle in degree unit
-    float angle = 0.0f;
+struct BaseRotateOptions {
     CalcDimension centerX;
     CalcDimension centerY;
     CalcDimension centerZ;
     // camera distance value
     float perspective = 0.0f;
+    BaseRotateOptions(const CalcDimension& centerX, const CalcDimension& centerY,
+        const CalcDimension& centerZ, float perspective)
+        : centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
+    BaseRotateOptions() = default;
+};
+struct RotateOptions : BaseRotateOptions {
+    float xDirection = 0.0f;
+    float yDirection = 0.0f;
+    float zDirection = 0.0f;
+    // angle in degree unit
+    float angle = 0.0f;
 
     RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const CalcDimension& centerX,
         const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
-        const float perspective = 0.0f) : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection),
-        angle(angle), centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
+        float perspective = 0.0f)
+        : BaseRotateOptions(centerX, centerY, centerZ, perspective), xDirection(xDirection), yDirection(yDirection),
+          zDirection(zDirection), angle(angle)
+    {}
     RotateOptions() = default;
     bool operator==(const RotateOptions& other) const
     {
@@ -100,6 +133,17 @@ struct RotateOptions {
                std::to_string(perspective) + "]";
     }
 };
+struct RotateAngleOptions : BaseRotateOptions {
+    float angleX = 0.0f;
+    float angleY = 0.0f;
+    float angleZ = 0.0f;
+    RotateAngleOptions(float angleX, float angleY, float angleZ, const CalcDimension& centerX,
+        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
+        float perspective = 0.0f)
+        : BaseRotateOptions(centerX, centerY, centerZ, perspective), angleX(angleX), angleY(angleY), angleZ(angleZ)
+    {}
+};
+
 struct TransitionOptions {
     TransitionType Type = TransitionType::ALL;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Opacity, float);
@@ -174,6 +218,9 @@ public:
     }
     void SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
     {
+        if (option) {
+            option->SetAnimationInterface(AnimationInterface::TRANSITION);
+        }
         animationOption_ = option;
     }
     virtual std::string ToString() = 0;

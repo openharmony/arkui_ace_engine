@@ -31,7 +31,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     accessibilityHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     penHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     penHoverMoveEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
-    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
+    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
 }
 
 void InputEventActuator::OnCollectMouseEvent(
@@ -70,11 +70,43 @@ void InputEventActuator::OnCollectMouseEvent(
     result.emplace_back(mouseEventTarget_);
 }
 
+void InputEventActuator::OnCollectMouseEventForTips(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (inputEvents_.empty()) {
+        return;
+    }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(inputEventHub);
+    auto frameNode = inputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    auto onMouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
+            if (callback && callback->GetIstips() && callback->GetTipsFollowCursor()) {
+                (*callback)(info);
+            }
+        }
+    };
+    mouseEventTarget_->AttachFrameNode(frameNode);
+    mouseEventTarget_->SetCallback(onMouseCallback);
+    mouseEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    mouseEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(mouseEventTarget_);
+}
+
 void InputEventActuator::OnCollectHoverEvent(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
+    }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    if (inputEventHub && inputEventHub->GetFrameNode()) {
+        hoverEventTarget_->AttachFrameNode(inputEventHub->GetFrameNode());
     }
 
     auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
@@ -107,6 +139,10 @@ void InputEventActuator::OnCollectHoverEventForTips(
 {
     if (inputEvents_.empty()) {
         return;
+    }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    if (inputEventHub && inputEventHub->GetFrameNode()) {
+        hoverEventTarget_->AttachFrameNode(inputEventHub->GetFrameNode());
     }
 
     auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {

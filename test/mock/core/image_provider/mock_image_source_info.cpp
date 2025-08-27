@@ -55,11 +55,6 @@ bool ImageSourceInfo::IsSVGSource(const std::string& src, SrcType srcType, Inter
             resourceId < InternalResource::ResourceId::SVG_END);
 }
 
-bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
-{
-    return false;
-}
-
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
 {
     return uri.size() > URL_LENGTH ? true : false;
@@ -118,8 +113,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
 ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName, Dimension width,
     Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
     : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
-      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
-      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), srcType_(ResolveSrcType())
 {
     isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
 }
@@ -128,8 +122,7 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
     const RefPtr<PixelMap>& pixmap)
     : bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
-      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
-      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), srcType_(ResolveSrcType())
 {
     isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
 }
@@ -214,11 +207,6 @@ bool ImageSourceInfo::IsValid() const
     return true;
 }
 
-bool ImageSourceInfo::IsPng() const
-{
-    return isPng_;
-}
-
 bool ImageSourceInfo::IsSvg() const
 {
     return isSvg_;
@@ -285,6 +273,16 @@ void ImageSourceInfo::SetContainerId(int32_t containerId)
 int32_t ImageSourceInfo::GetContainerId() const
 {
     return containerId_;
+}
+
+void ImageSourceInfo::SetImageHdr(bool isHdr)
+{
+    isHdr_ = isHdr;
+}
+
+bool ImageSourceInfo::IsImageHdr() const
+{
+    return isHdr_;
 }
 
 bool ImageSourceInfo::SupportObjCache() const

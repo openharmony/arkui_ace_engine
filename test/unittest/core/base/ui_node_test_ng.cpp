@@ -22,10 +22,13 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "core/common/builder_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -34,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,6 +54,8 @@ const RefPtr<FrameNode> FIVE = FrameNode::CreateFrameNode("five", 5, AceType::Ma
 const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::MakeRefPtr<Pattern>());
 const int32_t TEST_ID_ONE = 21;
 const int32_t TEST_ID_TWO = 22;
+constexpr size_t SIZE_ZERO = 0;
+constexpr size_t SIZE_ONE = 1;
 } // namespace
 
 class TestNode : public UINode {
@@ -1137,6 +1143,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
     ZERO->onMainTree_ = true;
     ZERO->context_ = AceType::RawPtr(context);
     ZERO->DoAddChild(it, ONE, false);
+    EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
     ZERO->onMainTree_ = false;
@@ -1171,6 +1178,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg042, TestSize.Level1)
      */
     parent->RemoveDisappearingChild(child);
     child->isDisappearing_ = true;
+    parent->RemoveDisappearingChild(child);
+    child = nullptr;
     parent->RemoveDisappearingChild(child);
     EXPECT_EQ(parent->disappearingChildren_.size(), 1);
 }
@@ -1289,6 +1298,49 @@ HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo002, TestSize.Level1)
      */
     std::string rusult = parent->UINode::GetCurrentCustomNodeInfo();
     EXPECT_EQ(rusult, "");
+}
+
+/**
+ * @tc.name: GetFilePath001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "abc");
+}
+
+/**
+ * @tc.name: GetFilePath002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "a/b/c");
 }
 
 /**
@@ -1485,7 +1537,6 @@ HWTEST_F(UINodeTestNg, DumpTreeById001, TestSize.Level1)
     child->tag_ = V2::COMMON_VIEW_ETS_TAG;
     child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
     parent->AddChild(child);
-
     /**
      * @tc.steps: step2. call DumpTreeById
      * @tc.expected: cover branch GetDumpFile is nullptr and result is false
@@ -2369,6 +2420,68 @@ HWTEST_F(UINodeTestNg, UINodeTestNg071, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UINodeTestNg072
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg072, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode node and construct params
+     */
+    ZERO->hostPageId_ = 0;
+    ZERO->SetInDestroying();
+    EXPECT_NE(ZERO->OnRemoveFromParent(false), false);
+    ZERO->SetDestroying(false);
+    ZERO->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestNg073
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), false);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    parent->AddChild(child);
+    std::list<RefPtr<UINode>> nodes;
+
+    /**
+     * @tc.steps: step2. call GetFirstBuilderNode
+     * @tc.expected: child isRootBuilderNode_ is true, nodes size is 1
+     */
+    child->SetIsRootBuilderNode(true);
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
+
+    child->SetIsRootBuilderNode(false);
+    auto son = FrameNode::CreateFrameNode(
+        "son", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    child->AddChild(son);
+    son->SetIsRootBuilderNode(true);
+    child->tag_ = V2::NODE_CONTAINER_ETS_TAG;
+    nodes.clear();
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+    child->tag_ = V2::JS_NODE_SLOT_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
+}
+
+/**
  * @tc.name: GetPerformanceCheckData004
  * @tc.desc: Test ui node method GetPerformanceCheckData
  * @tc.type: FUNC
@@ -2688,6 +2801,9 @@ HWTEST_F(UINodeTestNg, AddFunc_API03, TestSize.Level1)
     ONE->AddChild(testNode2, 1, false);
     EXPECT_EQ(ONE->children_.size(), 3);
     ONE->isDestroyingState_ = true;
+    auto context = MockPipelineContext::GetCurrent();
+    ONE->AttachContext(AceType::RawPtr(context), true);
+
 
     /**
      * @tc.steps: step2. observe the changes in the number of children after removal.
@@ -2792,6 +2908,8 @@ HWTEST_F(UINodeTestNg, AddFunc_API07, TestSize.Level1)
      * @tc.steps: step2. set the variables to meet the conditional values and test the function.
      */
     testNode->isDestroyingState_ = true;
+    auto context = MockPipelineContext::GetCurrent();
+    testNode->AttachContext(AceType::RawPtr(context), true);
     bool res = testNode->OnRemoveFromParent(true);
     EXPECT_EQ(res, false);
     testNode->isDestroyingState_ = false;
@@ -2982,7 +3100,7 @@ HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     testNode->AddChild(ONE, 1, false);
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
     testNode->AddDisappearingChild(child);
@@ -3355,7 +3473,7 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo004, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
     ASSERT_NE(frameNode, nullptr);
     GestureEventFunc tapEventFunc;
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
     EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
@@ -3401,5 +3519,145 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
     EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: UINodeTestNg049
+ * @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) { testId = newId; });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    g_isMultiInstanceEnabled = true;
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
+}
+
+/**
+ * @tc.name: AddChildOPTTest001
+ * @tc.desc: Test AddChild optimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
+{
+    ONE->Clean();
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildBefore(testNode, testNode2);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildAfter(testNode2, testNode);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+}
+
+/**
+ * @tc.name: FindTopNavDestination001
+ * @tc.desc: Test FindTopNavDestination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FindTopNavDestination001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(firstNode);
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    firstNode->AddChild(navigationGroupNode);
+ 
+    /**
+     * @tc.steps2: make some NavDestinationNode.
+     */
+    auto navDestinationNode1 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 21, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode2 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode3 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode4 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 24, AceType::MakeRefPtr<Pattern>(), true);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", navDestinationNode1));
+    navPathList.emplace_back(std::make_pair("pageTwo", navDestinationNode2));
+    navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
+    navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+ 
+    RefPtr<FrameNode> topNavNode;
+    stageNode->FindTopNavDestination(topNavNode);
+    ASSERT_NE(topNavNode, nullptr);
+    EXPECT_EQ(topNavNode, navDestinationNode4);
+}
+
+/**
+ * @tc.name: UINodeTestNg074
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg074, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: step1. create node with darkMode
+     * @tc.expected: node isDarkMethod_ is true
+     */
+    MockContainer::SetUp();
+    EXPECT_FALSE(ONE->isDarkMode_);
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    auto lightNode = FrameNode::CreateFrameNode("lightNode", 1000, AceType::MakeRefPtr<Pattern>());
+    EXPECT_TRUE(lightNode->isDarkMode_);
+
+    /**
+     * @tc.steps2: step1. create node with lightMode
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    auto darkNode = FrameNode::CreateFrameNode("darkNode", 1001, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(darkNode->isDarkMode_);
+
+    /**
+     * @tc.steps3: step1. create node with no container
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::TearDown();
+    auto noContainerNode = FrameNode::CreateFrameNode("noContainerNode", 1002, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(noContainerNode->isDarkMode_);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

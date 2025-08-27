@@ -16,7 +16,8 @@
 #include "frameworks/core/components_ng/render/adapter/rosen_window.h"
 
 namespace OHOS::Ace::NG {
-RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
+RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
+    RefPtr<TaskExecutor> taskExecutor, int32_t id, bool isGlobalPipeline)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id) {}
 
 void RosenWindow::Init() {}
@@ -39,7 +40,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
 
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
-void RosenWindow::FlushTasks() {}
+void RosenWindow::FlushTasks(std::function<void()> callback) {}
 
 float RosenWindow::GetRefreshRate() const
 {
@@ -59,7 +60,7 @@ std::string RosenWindow::GetWindowName() const
     return "";
 }
 
-void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 uint32_t RosenWindow::GetStatusBarHeight() const
 {

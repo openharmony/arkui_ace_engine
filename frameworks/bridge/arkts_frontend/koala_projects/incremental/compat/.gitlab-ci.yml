@@ -1,0 +1,49 @@
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+build compat:
+    stage: build
+    interruptible: true
+    extends: .linux-vm-shell-task
+    needs:
+        - install node modules (arkoala)
+        - install node modules (arkoala-arkts)
+        - install node modules (incremental)
+        - install node modules (interop)
+    before_script:
+        - !reference [.setup, script]
+        - cd incremental/compat
+    script:
+        - npm run compile:all
+    artifacts:
+        expire_in: 2 days
+        paths:
+            - incremental/compat/build
+
+pack compat:
+  extends:
+    - .npm-pack
+    - .linux-vm-shell-task
+  variables:
+    PACKAGE_DIR: incremental/compat
+  needs:
+    - build compat
+
+publish compat:
+  extends: 
+    - .npm-publish
+    - .linux-vm-shell-task
+  variables:
+    PACKAGE_DIR: incremental/compat
+  dependencies:
+    - build compat

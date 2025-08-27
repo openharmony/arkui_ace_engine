@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
@@ -31,6 +32,7 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -39,6 +41,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "frameworks/core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
@@ -66,7 +69,7 @@ typedef struct WindowsSurfaceInfoTag {
 typedef NWeb::NativeArkWebOnJavaScriptProxyCallback NativeMethodCallback;
 
 class WebMessagePortOhos : public WebMessagePort {
-    DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
+    DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort);
 
 public:
     WebMessagePortOhos(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
@@ -85,10 +88,10 @@ private:
 };
 
 class ConsoleLogOhos : public WebConsoleLog {
-    DECLARE_ACE_TYPE(ConsoleLogOhos, WebConsoleLog)
+    DECLARE_ACE_TYPE(ConsoleLogOhos, WebConsoleLog);
 
 public:
-    ConsoleLogOhos(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) : message_(message) {}
+    explicit ConsoleLogOhos(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) : message_(message) {}
 
     int GetLineNumber() override;
 
@@ -103,10 +106,10 @@ private:
 };
 
 class ResultOhos : public Result {
-    DECLARE_ACE_TYPE(ResultOhos, Result)
+    DECLARE_ACE_TYPE(ResultOhos, Result);
 
 public:
-    ResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result) : result_(result) {}
+    explicit ResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result) : result_(result) {}
 
     void Confirm() override;
     void Confirm(const std::string& message) override;
@@ -117,7 +120,7 @@ private:
 };
 
 class FullScreenExitHandlerOhos : public FullScreenExitHandler {
-    DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
+    DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler);
 
 public:
     FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler,
@@ -129,10 +132,10 @@ private:
 };
 
 class WebCustomKeyboardHandlerOhos : public WebCustomKeyboardHandler {
-    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler)
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler);
 
 public:
-    WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
+    explicit WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
     keyboardHandler_(keyboardHandler) {}
 
     void InsertText(const std::string &text) override
@@ -175,10 +178,10 @@ private:
 };
 
 class AuthResultOhos : public AuthResult {
-    DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
+    DECLARE_ACE_TYPE(AuthResultOhos, AuthResult);
 
 public:
-    AuthResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result) : result_(result) {}
+    explicit AuthResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result) : result_(result) {}
 
     bool Confirm(std::string& userName, std::string& pwd) override;
     bool IsHttpAuthInfoSaved() override;
@@ -189,10 +192,10 @@ private:
 };
 
 class SslErrorResultOhos : public SslErrorResult {
-    DECLARE_ACE_TYPE(SslErrorResultOhos, SslErrorResult)
+    DECLARE_ACE_TYPE(SslErrorResultOhos, SslErrorResult);
 
 public:
-    SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
+    explicit SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
     void HandleCancel() override;
@@ -202,20 +205,20 @@ private:
 };
 
 class AllSslErrorResultOhos : public AllSslErrorResult {
-    DECLARE_ACE_TYPE(AllSslErrorResultOhos, AllSslErrorResult)
+    DECLARE_ACE_TYPE(AllSslErrorResultOhos, AllSslErrorResult);
 
 public:
-    AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
+    explicit AllSslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result) : result_(result) {}
 
     void HandleConfirm() override;
-    void HandleCancel() override;
+    void HandleCancel(bool abortLoading) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSAllSslErrorResult> result_;
 };
 
 class SslSelectCertResultOhos : public SslSelectCertResult {
-    DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
+    DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult);
 
 public:
     explicit SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
@@ -231,10 +234,10 @@ private:
 };
 
 class FileSelectorParamOhos : public WebFileSelectorParam {
-    DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
+    DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam);
 
 public:
-    FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param) : param_(param) {}
+    explicit FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param) : param_(param) {}
 
     std::string GetTitle() override;
     int GetMode() override;
@@ -248,22 +251,26 @@ private:
 };
 
 class FileSelectorResultOhos : public FileSelectorResult {
-    DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
+    DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult);
 
 public:
-    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback) : callback_(callback) {}
+    FileSelectorResultOhos(
+        std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback, const WeakPtr<WebDelegate>& delegate)
+        : callback_(callback), delegate_(delegate)
+    {}
 
     void HandleFileList(std::vector<std::string>& result) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback_;
+    WeakPtr<WebDelegate> delegate_;
 };
 
 class ContextMenuParamOhos : public WebContextMenuParam {
-    DECLARE_ACE_TYPE(ContextMenuParamOhos, WebContextMenuParam)
+    DECLARE_ACE_TYPE(ContextMenuParamOhos, WebContextMenuParam);
 
 public:
-    ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param) : param_(param) {}
+    explicit ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param) : param_(param) {}
 
     int32_t GetXCoord() const override;
     int32_t GetYCoord() const override;
@@ -278,16 +285,18 @@ public:
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
     void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
+    bool IsAILink() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
 };
 
 class ContextMenuResultOhos : public ContextMenuResult {
-    DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult)
+    DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult);
 
 public:
-    ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback) : callback_(callback) {}
+    explicit ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
+        : callback_(callback) {}
 
     void Cancel() const override;
     void CopyImage() const override;
@@ -295,13 +304,16 @@ public:
     void Paste() const override;
     void Cut() const override;
     void SelectAll() const override;
+    void Undo() const override;
+    void Redo() const override;
+    void PasteAndMatchStyle() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
 };
 
 class WebGeolocationOhos : public WebGeolocation {
-    DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
+    DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation);
 
 public:
     WebGeolocationOhos(
@@ -317,10 +329,11 @@ private:
 };
 
 class WebPermissionRequestOhos : public WebPermissionRequest {
-    DECLARE_ACE_TYPE(WebPermissionRequestOhos, WebPermissionRequest)
+    DECLARE_ACE_TYPE(WebPermissionRequestOhos, WebPermissionRequest);
 
 public:
-    WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request) : request_(request) {}
+    explicit WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
+        : request_(request) {}
 
     void Deny() const override;
 
@@ -365,10 +378,10 @@ private:
 };
 
 class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
-    DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
+    DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest);
 
 public:
-    WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
+    explicit WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
         : request_(request) {
         config_ = std::make_shared<NWebScreenCaptureConfigImpl>();
     }
@@ -390,7 +403,7 @@ private:
 };
 
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
-    DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
+    DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler);
 
 public:
     WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler, int32_t parentNWebId)
@@ -410,9 +423,9 @@ private:
 };
 
 class WebAppLinkCallbackOhos : public WebAppLinkCallback {
-    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback)
+    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback);
 public:
-    WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
+    explicit WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
         : callback_(callback) {}
 
     void ContinueLoad() override
@@ -434,10 +447,11 @@ private:
 };
 
 class DataResubmittedOhos : public DataResubmitted {
-    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
+    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted);
 
 public:
-    DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
+    explicit DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
+        : handler_(handler) {}
     void Resend() override;
     void Cancel() override;
 
@@ -446,7 +460,7 @@ private:
 };
 
 class FaviconReceivedOhos : public WebFaviconReceived {
-    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived)
+    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived);
 
 public:
     FaviconReceivedOhos(
@@ -455,19 +469,28 @@ public:
         size_t height,
         OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType)
-        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)
+        {
+            SetPixelMap();
+        }
     const void* GetData() override;
     size_t GetWidth() override;
     size_t GetHeight() override;
     int GetColorType() override;
     int GetAlphaType() override;
+    Media::PixelFormat GetMediaPixelFormat() override;
+    Media::AlphaType GetMediaAlphaType() override;
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
 
 private:
+    void SetPixelMap() override;
+
     const void* data_ = nullptr;
     size_t width_ = 0;
     size_t height_ = 0;
     OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
     OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+    std::shared_ptr<Media::PixelMap> pixelMap_;
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
@@ -551,6 +574,70 @@ private:
     double y_ = 0;
 };
 
+class NWebStylusTouchPointInfoImpl : public OHOS::NWeb::NWebStylusTouchPointInfo {
+public:
+    NWebStylusTouchPointInfoImpl(int id, double x, double y, float force, float tiltX, float tiltY, float rollAngle,
+        int32_t width, int32_t height, OHOS::NWeb::SourceTool sourceTool)
+        : id_(id), x_(x), y_(y), force_(force), tiltX_(tiltX), tiltY_(tiltY), rollAngle_(rollAngle), width_(width),
+          height_(height), sourceTool_(sourceTool)
+    {}
+
+    ~NWebStylusTouchPointInfoImpl() = default;
+
+    int GetId() override
+    {
+        return id_;
+    }
+    double GetX() override
+    {
+        return x_;
+    }
+    double GetY() override
+    {
+        return y_;
+    }
+    float GetForce() override
+    {
+        return force_;
+    }
+    float GetTiltX() override
+    {
+        return tiltX_;
+    }
+    float GetTiltY() override
+    {
+        return tiltY_;
+    }
+    float GetRollAngle() override
+    {
+        return rollAngle_;
+    }
+    int32_t GetWidth() override
+    {
+        return width_;
+    }
+    int32_t GetHeight() override
+    {
+        return height_;
+    }
+    OHOS::NWeb::SourceTool GetSourceTool() override
+    {
+        return sourceTool_;
+    }
+
+private:
+    int id_ = 0;
+    double x_ = 0;
+    double y_ = 0;
+    float force_ = 0.0f;
+    float tiltX_ = 0.0f;
+    float tiltY_ = 0.0f;
+    float rollAngle_ = 0.0f;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+    OHOS::NWeb::SourceTool sourceTool_ = OHOS::NWeb::SourceTool::UNKNOWN;
+};
+
 class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
 public:
     explicit NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
@@ -585,14 +672,39 @@ public:
     explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
         : result_(result) {}
 
+    explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> mouseResult)
+        : mouseResult_(mouseResult) {}
+
     void SetGestureEventResult(bool result) override;
     void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
+    void SetIsMouseToTouch(bool isMouseToTouch) { isMouseToTouch_ = isMouseToTouch; };
+    bool IsMouseToTouch() { return isMouseToTouch_; };
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
+    std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> mouseResult_;
+    bool sendTask_ = false;
+    bool eventResult_ = false;
+    bool isMouseToTouch_ = false;
+};
+
+class MouseEventResultOhos : public MouseEventResult {
+    DECLARE_ACE_TYPE(MouseEventResultOhos, MouseEventResult);
+
+public:
+    explicit MouseEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> result)
+        : result_(result) {}
+
+    void SetMouseEventResult(bool result, bool stopPropagation) override;
+    bool HasSendTask() { return sendTask_; }
+    void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> result_;
     bool sendTask_ = false;
     bool eventResult_ = false;
 };
@@ -603,7 +715,8 @@ public:
         : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
     WeakPtr<PipelineBase> context_;
@@ -823,11 +936,13 @@ public:
     void UpdateForceDarkAccess(const bool& access);
     void UpdateAudioResumeInterval(const int32_t& resumeInterval);
     void UpdateAudioExclusive(const bool& audioExclusive);
+    void UpdateAudioSessionType(const WebAudioSessionType& audioSessionType);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
@@ -852,6 +967,9 @@ public:
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
+    void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
+    void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
+    void UpdateGestureFocusMode(const GestureFocusMode& mode);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -868,6 +986,13 @@ public:
     void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleStylusTouchDown(const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info,
+        bool from_overlay = false);
+    void HandleStylusTouchUp(const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info,
+        bool from_overlay = false);
+    void HandleStylusTouchMove(
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>>& stylus_touch_point_infos,
+        bool from_overlay = false);
     void HandleTouchMove(const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> &touch_point_infos,
                          bool fromOverlay = false);
     void HandleTouchCancel();
@@ -893,6 +1018,7 @@ public:
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
     void ChangeVisibilityOfQuickMenu();
+    bool ChangeVisibilityOfQuickMenuV2();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -923,10 +1049,12 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void HandleAccessibilityHoverEvent(
+        const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -934,13 +1062,18 @@ public:
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
+    std::string OnOverrideErrorPage(
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> webResourceRequest,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     bool IsEmptyOnInterceptRequest();
     void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
+    void SetPageFinishedState(const bool& state);
+    bool GetPageFinishedState();
     void OnProgressChanged(int param);
-    void OnReceivedTitle(const std::string& param);
+    void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
@@ -1006,6 +1139,7 @@ public:
     NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
@@ -1023,12 +1157,17 @@ public:
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnScrollStart(const float x, const float y);
+    void EnableSecurityLayer(bool isNeedSecurityLayer);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();
+    std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
+    std::string GetHtmlElementIdBySurfaceId(const std::string& surfaceId);
+    int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
+    void OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     bool IsCurrentFocus();
@@ -1052,6 +1191,8 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
+    MouseInfo TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent>& mouseEvent);
+    bool SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEventInfo &touchEventInfo);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
@@ -1060,6 +1201,7 @@ public:
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1115,6 +1257,7 @@ public:
     void Backward();
     bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+    bool OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
@@ -1124,6 +1267,10 @@ public:
 
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
+
+    std::string GetAllTextInfo() const;
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
@@ -1158,6 +1305,8 @@ public:
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
+    void OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
+
     void OnCursorUpdate(double x, double y, double width, double height);
 
     void CloseCustomKeyboard()
@@ -1191,9 +1340,14 @@ public:
 
     bool IsActivePolicyDisable();
 
+    OHOS::NWeb::WebDestroyMode GetWebDestroyMode();
+
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
+    void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+        std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+        bool isAync, const std::string& permission, bool isNeedRefresh);
 
     void RegisterWebWindowFocusChangedListener();
 
@@ -1205,6 +1359,51 @@ public:
 
     void SetNativeInnerWeb(bool isInnerWeb);
 
+    void ResetStateOfDataDetectorJS();
+    void RunDataDetectorJS();
+    void SetDataDetectorEnable(bool enable);
+    void OnDataDetectorSelectText();
+    void OnDataDetectorCopy(const std::vector<std::string>& recordMix);
+    int GetLastHitTestResult();
+    int GetHitTestResult();
+
+    void RemoveSnapshotFrameNode(int removeDelayTime);
+    void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
+    void SetVisibility(bool isVisible);
+    void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
+    double ResizeWidth() const;
+    double ResizeHeight() const;
+
+    void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
+    void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
+    void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
+    void OnLoadStarted(const std::string& param);
+    void OnLoadFinished(const std::string& param);
+    void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
+    bool IsFileSelectorShow() { return isFileSelectorShow_; }
+
+
+    bool ShowMagnifier();
+    bool HideMagnifier();
+    void UpdateSingleHandleVisible(bool isVisible);
+    void SetTouchHandleExistState(bool touchHandleExist);
+
+    void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
+        double borderRadiusBottomRight);
+
+    void SetViewportScaleState();
+
+    void OnPdfScrollAtBottom(const std::string& url);
+    void OnPdfLoadEvent(int32_t result, const std::string& url);
+
+    bool HasOnNativeEmbedGestureEventV2()
+    {
+#ifdef OHOS_STANDARD_SYSTEM
+        return static_cast<bool>(OnNativeEmbedGestureEventV2_);
+#else
+        return false;
+#endif
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1219,9 +1418,9 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
-    void TextBlurReportByBlurEvent(int64_t accessibilityId);
+    void AccessibilityReleasePageEvent();
+    void AccessibilitySendPageChange();
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1237,8 +1436,8 @@ private:
     bool ZoomIn();
     bool ZoomOut();
     int ConverToWebHitTestType(int hitType);
-    int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
+    int GetProgress();
     int GetPageHeight();
     std::string GetTitle();
     std::string GetDefaultUserAgent();
@@ -1292,6 +1491,10 @@ private:
     NG::SafeAreaInsets GetCombinedSafeArea();
     void OnSafeInsetsChange();
     void EnableHardware();
+    void HandleNativeMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+        const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
+    void HandleNativeMouseToTouch(const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+        const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1305,12 +1508,15 @@ private:
     EventCallback onPageFinished_;
     EventCallback onPageError_;
     EventCallback onMessage_;
+    EventCallback onLoadStarted_;
+    EventCallback onLoadFinished_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ { State::WAITINGFORSIZE };
+    bool isPageFinished_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
@@ -1336,6 +1542,7 @@ private:
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
+    EventCallbackV2 onActivateContentV2_;
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
@@ -1351,12 +1558,15 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedVisibilityChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
+    EventCallbackV2 OnNativeEmbedMouseEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    EventCallbackV2 onLoadStartedV2_;
+    EventCallbackV2 onLoadFinishedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1405,6 +1615,7 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::shared_mutex embedDataInfoMutex_;
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
@@ -1429,6 +1640,13 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+
+    // data detector js state
+    bool initDataDetectorJS_ = false;
+    bool isFileSelectorShow_ = false;
+    double density_ = 0.0;
+
+    bool isVisible_ = false;
 #endif
 };
 

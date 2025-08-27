@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "ui/base/utils/utils.h"
+
+#include "base/log/dump_log.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -24,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -159,6 +161,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     ToJsonValueForCapsuleStyleOptions(json, filter);
     json->PutExtAttr("enableSmoothEffect",
         paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("privacySensitive", paintProperty->GetIsSensitive().value_or(false)? "true": "false", filter);
 }
 
 void ProgressPattern::InitFocusEvent()
@@ -853,11 +856,103 @@ void ProgressPattern::ReportProgressEvent()
     auto progressPaintProperty = host->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     auto value = progressPaintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    if (!progressPaintProperty->GetMaxValue().has_value()) {
+        return;
+    }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
-    if (value >= maxValue) {
+    if (LessOrEqual(maxValue, value) && LessNotEqual(reportLastValue_, maxValue)) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
-        TAG_LOGI(AceLogTag::ACE_PROGRESS, "nodeId:[%{public}d] Progress reportComponentChangeEvent onProgress",
-            GetHost()->GetId());
+    }
+    reportLastValue_ = value;
+}
+
+void ProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateColor(color);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void ProgressPattern::UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateGradientColor(gradient);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void ProgressPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ProgressPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetGradientColorSetByUserValue(false)) {
+        Color colorVal;
+        Color endColor;
+        Color beginColor;
+        NG::Gradient gradient;
+        endColor = theme->GetRingProgressEndSideColor();
+        beginColor = theme->GetRingProgressBeginSideColor();
+        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                                 : theme->GetTrackParseFailedSelectedColor();
+        NG::GradientColor endSideColor;
+        NG::GradientColor beginSideColor;
+        endSideColor.SetLinearColor(LinearColor(endColor));
+        endSideColor.SetDimension(Dimension(0.0f));
+        beginSideColor.SetLinearColor(LinearColor(beginColor));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        pops->UpdateGradientColor(gradient);
+        pops->UpdateColor(colorVal);
+    }
+    if (pops->GetCapsuleStyleSetByUserValue(false) && !pops->GetCapsuleStyleFontColorSetByUserValue(false)) {
+        auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        pops->UpdateTextColor(theme->GetTextColor());
     }
 }
 } // namespace OHOS::Ace::NG

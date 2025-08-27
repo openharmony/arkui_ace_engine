@@ -46,6 +46,8 @@ public:
         OnReset();
     }
 
+    void SetHeightPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
+    void SetWidthPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
     virtual std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/)
     {
@@ -71,6 +73,11 @@ public:
         return MAIN_TASK;
     }
 
+    virtual bool MeasureInNextFrame() const
+    {
+        return false;
+    }
+
     void SetHasMeasured(bool measured)
     {
         hasMeasured_ = measured;
@@ -81,9 +88,20 @@ public:
         return hasMeasured_;
     }
 
+    void SetNeedPostponeForIgnore(bool needed = true)
+    {
+        postponeForIgnore_ = needed;
+    }
+
+    bool GetNeedPostponeForIgnore() const
+    {
+        return postponeForIgnore_;
+    }
+
 protected:
     virtual void OnReset() {}
     bool hasMeasured_ = false;
+    bool postponeForIgnore_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithm);
 };
@@ -139,6 +157,11 @@ public:
     bool SkipLayout() override
     {
         return skipLayout_;
+    }
+
+    bool MeasureInNextFrame() const override
+    {
+        return layoutAlgorithm_ && layoutAlgorithm_->MeasureInNextFrame();
     }
 
     const RefPtr<LayoutAlgorithm>& GetLayoutAlgorithm() const

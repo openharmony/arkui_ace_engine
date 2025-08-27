@@ -22,6 +22,10 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
+namespace OHOS::Ace::NG {
+enum class NodeRenderState;
+}
+
 namespace OHOS::Ace::Napi {
 class UIObserverListener {
 public:
@@ -37,7 +41,7 @@ public:
     }
     void OnNavigationStateChange(const NG::NavDestinationInfo& info);
     void OnScrollEventStateChange(
-        const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset);
+        const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset, Ace::Axis axis);
     void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo);
     void OnDensityChange(double density);
     void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
@@ -46,7 +50,11 @@ public:
         const RefPtr<NG::FrameNode> frameNode);
     void OnPanGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::PanRecognizer>& current,
         const RefPtr<NG::FrameNode> frameNode);
+    void OnGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+        const RefPtr<NG::NGGestureRecognizer>& current, const RefPtr<NG::FrameNode> frameNode,
+        NG::GestureActionPhase phase);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
+    void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
@@ -55,6 +63,7 @@ private:
     napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
+    napi_value GetFrameNodeObject(const RefPtr<NG::FrameNode>& frameNode);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     void AddBaseEventInfo(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
@@ -62,11 +71,12 @@ private:
     void AddGestureEventInfoTwo(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddGestureEventInfoThree(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddGestureEventInfoFour(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
+    void AddTapLocationInfo(napi_value objTapGestureEventInfo, const GestureEvent& gestureEventInfo);
     void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger);
-    void AddGestureRecognizerInfo(napi_value objValueGestureRecognizer, const RefPtr<NG::PanRecognizer>& current);
     void AddTargetObject(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;

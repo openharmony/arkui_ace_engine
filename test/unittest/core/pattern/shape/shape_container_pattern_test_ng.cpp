@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
+#include "test/mock/base/mock_pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -61,7 +62,8 @@ class ShapeContainerPatternTestNg : public BaseShapePatternTestNg {
 public:
     RefPtr<FrameNode> CreadFrameNode() override
     {
-        return nullptr;
+        ShapeModelNG().Create();
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     }
 
     void Draw(RefPtr<FrameNode> frameNode) override {}
@@ -281,5 +283,246 @@ HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerModifier, TestSize.Level1)
     DrawingContext context = { rsCanvas, 1.f, 1.f };
     contentModifier->onDraw(context);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: IsEnableMatchParentTest
+ * @tc.desc: check ShapeContainerPattern IsEnableMatchParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, IsEnableMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    shapeModel01.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableMatchParent's return value.
+     * @tc.expected: Function IsEnableMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
+
+/**
+ * @tc.name: IsEnableChildrenMatchParentTest
+ * @tc.desc: Test IsEnableChildrenMatchParent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, IsEnableChildrenMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    shapeModel01.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableChildrenMatchParent's return value.
+     * @tc.expected: Function IsEnableChildrenMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableChildrenMatchParent());
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize001
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureLayoutPolicySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, MeasureLayoutPolicySize001, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    /**
+     * @tc.steps1: layoutProperty is null
+     * @tc.expected: the size is (300, 600)
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    LayoutConstraintF constrain;
+    constrain.maxSize = SizeF(1000, 1000);
+    constrain.minSize = SizeF(300, 600);
+    auto layoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    SizeF size = SizeF(100.0, 100.0);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(300, 600));
+
+    /**
+     * @tc.steps2: LayoutPolicyProperty does not have value
+     * @tc.expected: the size is (300, 600)
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->layoutPolicy_.reset();
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    size = SizeF(100.0, 100.0);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(300, 600));
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize002
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureLayoutPolicySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, MeasureLayoutPolicySize002, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    /**
+     * @tc.steps1: Width and Height are NO_MATCH
+     * @tc.expected: the size is (400, 600)
+     */
+    LayoutConstraintF constrain;
+    constrain.maxSize = SizeF(1000, 1000);
+    constrain.minSize = SizeF(300, 600);
+    constrain.parentIdealSize = OptionalSizeF(500, 500);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto layoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    SizeF size = SizeF(400, 400);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(400, 600));
+    /**
+     * @tc.steps2: Width and Height are MATCH_PARENT
+     * @tc.expected: the size is (500, 500)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    size = SizeF(400, 400);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(500, 500));
+    /**
+     * @tc.steps3: Width and Height are MATCH_PARENT and parentIdealSize is null
+     * @tc.expected: the size is (400, 600)
+     */
+    size = SizeF(400, 400);
+    constrain.parentIdealSize.Reset();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(400, 600));
+    /**
+     * @tc.steps4: Width and Height are default
+     * @tc.expected: the size is (400, 600)
+     */
+    size = SizeF(400, 400);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy(4), true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy(4), false);
+    layoutAlgorithm->MeasureLayoutPolicySize(constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(400, 600));
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize003
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureLayoutPolicySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, MeasureLayoutPolicySize003, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    /**
+     * @tc.steps1: Width and Height are WRAP_CONTENT
+     * @tc.expected: the size is (400, 600)
+     */
+    LayoutConstraintF constrain;
+    constrain.maxSize = SizeF(1000, 1000);
+    constrain.minSize = SizeF(300, 600);
+    constrain.parentIdealSize = OptionalSizeF(500, 500);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto layoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    SizeF size = SizeF(400, 400);
+    layoutAlgorithm->MeasureLayoutPolicySize(
+        constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(400, 600));
+    /**
+     * @tc.steps2: Width and Height are FIX_AT_IDEAL_SIZE and paintProperty is null
+     * @tc.expected: the size is (400, 400)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    size = SizeF(400, 400);
+    layoutAlgorithm->MeasureLayoutPolicySize(
+        constrain, AceType::RawPtr(layoutWrapper), nullptr, size);
+    EXPECT_EQ(size, SizeF(400, 400));
+    /**
+     * @tc.steps3: Width and Height are FIX_AT_IDEAL_SIZE and pixelmap is null
+     * @tc.expected: the size is (400, 400)
+     */
+    auto pixelMapInfo = ImageSourceInfo();
+    paintProperty->UpdatePixelMapInfo(pixelMapInfo);
+    pixelMapInfo.pixmap_ = nullptr;
+    layoutAlgorithm->MeasureLayoutPolicySize(
+        constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(400, 400));
+
+    /**
+     * @tc.steps4: Width and Height are FIX_AT_IDEAL_SIZE and pixelmap size is (600, 600)
+     * @tc.expected: the size is (600, 600)
+     */
+    RefPtr<MockPixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
+    pixelMapInfo = ImageSourceInfo(pixMap);
+    paintProperty->UpdatePixelMapInfo(pixelMapInfo);
+    EXPECT_CALL(*pixMap.GetRawPtr(), GetWidth()).Times(1).WillOnce(Return(600));
+    EXPECT_CALL(*pixMap.GetRawPtr(), GetHeight()).Times(1).WillOnce(Return(600));
+    layoutAlgorithm->MeasureLayoutPolicySize(
+        constrain, AceType::RawPtr(layoutWrapper), paintProperty, size);
+    EXPECT_EQ(size, SizeF(600, 600));
+}
+
+/**
+ * @tc.name: Paint001
+ * @tc.desc: set stroke and draw
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeTest, TestSize.Level1)
+{
+    CheckStroke(true);
 }
 } // namespace OHOS::Ace::NG

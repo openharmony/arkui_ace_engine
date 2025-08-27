@@ -54,8 +54,9 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   maxLabel(value: string): this {
     throw new Error('Method not implemented.');
   }
-  showSteps(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
+  showSteps(value: boolean, options?: SliderShowStepOptions): this {
+    let stepOptions = new ArkSliderStepOptions(value, options);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, stepOptions);
     return this;
   }
   showTips(value: boolean, content?: any): this {
@@ -109,6 +110,16 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   }
   minResponsiveDistance(value: number): this {
     modifierWithKey(this._modifiersWithKeys, MinResponsiveDistanceModifier.identity, MinResponsiveDistanceModifier, value);
+    return this;
+  }
+  prefix(value: KNode, options: SliderCustomContentOptions): this {
+    let prefix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, PrefixModifier.identity, PrefixModifier, prefix);
+    return this;
+  }
+  suffix(value: KNode, options: SliderCustomContentOptions): this {
+    let suffix = new ArkPrefixOrSuffix(value, options);
+    modifierWithKey(this._modifiersWithKeys, SuffixModifier.identity, SuffixModifier, suffix);
     return this;
   }
   contentModifier(value: ContentModifier<SliderConfiguration>): this {
@@ -236,6 +247,48 @@ class StepSizeModifier extends ModifierWithKey<Length> {
   }
 }
 
+class PrefixModifier extends ModifierWithKey<ArkPrefixOrSuffix> {
+  options:SliderCustomContentOptions;
+  constructor(value: ArkPrefixOrSuffix) {
+    super(value);
+    this.options = value.options;
+  }
+  static identity: Symbol = Symbol('sliderPrefix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetPrefix(node);
+    } else {
+      getUINativeModule().slider.setPrefix(node, this.value.value, this.options.text, 
+        this.options.description, this.options.level, this.options.group);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SuffixModifier extends ModifierWithKey<ArkPrefixOrSuffix> {
+  options:SliderCustomContentOptions;
+  constructor(value: ArkPrefixOrSuffix) {
+    super(value);
+    this.options = value.options;
+  }
+  static identity: Symbol = Symbol('sliderSuffix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetSuffix(node);
+    } else {
+      getUINativeModule().slider.setSuffix(node, this.value.value, this.options.text, 
+        this.options.description, this.options.level, this.options.group);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
   constructor(value: SizeOptions) {
     super(value);
@@ -246,14 +299,6 @@ class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
       getUINativeModule().slider.resetBlockSize(node);
     } else {
       getUINativeModule().slider.setBlockSize(node, this.value!.width, this.value!.height);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue.height) && isResource(this.value.height) && isResource(this.stageValue.width) && isResource(this.value.width)) {
-      return !(isResourceEqual(this.stageValue.height, this.value.height) && isResourceEqual(this.stageValue.width, this.value.width));
-    } else {
-      return true;
     }
   }
 }
@@ -294,8 +339,8 @@ class StepColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class OnChangeModifier extends ModifierWithKey<(value:number,mode:SliderChangeMode) => void> {
-  constructor(value: (value:number,mode:SliderChangeMode) => void) {
+class OnChangeModifier extends ModifierWithKey<(value:number, mode:SliderChangeMode) => void> {
+  constructor(value: (value:number, mode:SliderChangeMode) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('sliderOnChange');
@@ -398,8 +443,8 @@ class SelectColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class ShowStepsModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class ShowStepsModifier extends ModifierWithKey<ArkSliderStepOptions> {
+  constructor(value: ArkSliderStepOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('sliderShowSteps');
@@ -407,11 +452,29 @@ class ShowStepsModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().slider.resetShowSteps(node);
     } else {
-      getUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.setShowSteps(node, this.value.showSteps, this.value.stepOptions);
     }
   }
   checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
+    let isShowStepsDiff = this.stageValue.showSteps !== this.value.showSteps;
+    let isStepOptionsDiff = false;
+    if ((this.stageValue.stepOptions === null) || (this.stageValue.stepOptions === undefined)) {
+      isStepOptionsDiff = (this.value.stepOptions !== null) && (this.value.stepOptions !== undefined);
+    } else if ((this.value.stepOptions === null) || (this.value.stepOptions === undefined)) {
+      isStepOptionsDiff = true;
+    } else if (this.stageValue.stepOptions.stepsAccessibility.size !==
+      this.value.stepOptions.stepsAccessibility.size) {
+      isStepOptionsDiff = true;
+    } else {
+      for (const [key, val] of this.stageValue.stepOptions.stepsAccessibility) {
+        if (!this.value.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsDiff = true;
+        } else if (!isBaseOrResourceEqual(this.value.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsDiff = true;
+        }
+      }
+    }
+    return isShowStepsDiff || isStepOptionsDiff;
   }
 }
 

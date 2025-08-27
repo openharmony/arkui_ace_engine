@@ -27,6 +27,7 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class SelectContentOverlayPattern;
 
 struct LegacyManagerCallbacks {
     std::function<void(bool, bool)> closeCallback;
@@ -86,11 +87,12 @@ public:
     RefPtr<Pattern> GetMenuPattern();
     RefPtr<Pattern> GetHandlePattern();
     RefPtr<FrameNode> GetHandleOverlayNode();
-    void NotifyUpdateToolBar(bool itemChanged);
+    void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation = false);
     void SwitchToHandleMode(HandleLevelMode mode, bool forceChange = true);
     float GetHandleDiameter();
-    void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
+    void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point, bool passThrough = false);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
+    void UpdateViewPort();
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
     void MarkHandleDirtyNode(PropertyChangeFlag flag);
@@ -104,6 +106,8 @@ public:
     bool IsSelectOverlaySubWindowMenu();
     void FocusFirstFocusableChildInMenu();
     void NotifyAccessibilityOwner();
+    void UpdateIsSingleHandle(bool isSingleHandle);
+    static bool IsPasteOption(const RefPtr<UINode>& node);
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -141,6 +145,9 @@ private:
     void MountMenuNodeToSubWindow(const RefPtr<FrameNode>& overlayNode, bool animation, NodeType nodeType);
     bool IsEnableSubWindowMenu();
     void UpdateRightClickSubWindowMenuProps(const RefPtr<FrameNode>& overlayNode);
+    std::function<void(std::string)> MakeMenuCallbackWithInfo
+        (OptionMenuActionId actionId, const SelectOverlayInfo& info);
+    void HandleDirtyViewPort(RefPtr<SelectContentOverlayPattern>& menuPattern);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

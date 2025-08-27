@@ -51,6 +51,7 @@ public:
 
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
+    static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
 };
 
 } // namespace OHOS::Ace::Framework

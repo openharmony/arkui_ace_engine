@@ -23,11 +23,14 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -40,8 +43,6 @@ constexpr int32_t ALPHA_INDEX = 3;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-std::unordered_map<int32_t, std::shared_ptr<Pattern>> JSCanvasRenderer::pattern_;
-unsigned int JSCanvasRenderer::patternCount_ = 0;
 namespace {
 
 const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolder", "100", "200", "300", "400", "500",
@@ -261,7 +262,7 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     double density = GetDensity();
     auto gradient = std::make_shared<Gradient>();
     gradient->SetType(GradientType::CONIC);
-    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * ACE_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     JSRef<JSObject> pasteObj = createGradientObj(gradient);
@@ -417,8 +418,7 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
-        int32_t id = jSCanvasPattern->GetId();
-        renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+        renderingContext2DModel_->SetFillPattern(jSCanvasPattern->GetPattern());
     }
 }
 
@@ -454,8 +454,7 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
-        int32_t id = jSCanvasPattern->GetId();
-        renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+        renderingContext2DModel_->SetStrokePattern(jSCanvasPattern->GetPattern());
     }
 }
 
@@ -653,15 +652,10 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         auto pixelMap = jsImage->GetPixelMap();
         pattern->SetPixelMap(pixelMap);
 #endif
-        pattern_[patternCount_] = pattern;
-
         JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();
         obj->SetProperty("__type", "pattern");
         auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
-        canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
-        canvasPattern->SetId(patternCount_);
-        canvasPattern->SetUnit(GetUnit());
-        patternCount_++;
+        canvasPattern->SetPattern(pattern);
         info.SetReturnValue(obj);
     }
 }
@@ -1242,6 +1236,7 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
         info.GetDoubleArg(2, param.radius, isJudgeSpecialValue_) && // Index2: the 3rd arg.
         info.GetDoubleArg(3, param.startAngle, isJudgeSpecialValue_) && // Index3: the 4th arg.
         info.GetDoubleArg(4, param.endAngle, isJudgeSpecialValue_)) { // Index4: the 5th arg.
+
         info.GetBooleanArg(5, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
         param.x *= density;
@@ -1263,6 +1258,7 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
         info.GetDoubleArg(4, param.rotation, isJudgeSpecialValue_) && // Index4: the 5th arg.
         info.GetDoubleArg(5, param.startAngle, isJudgeSpecialValue_) && // Index5: the 6th arg.
         info.GetDoubleArg(6, param.endAngle, isJudgeSpecialValue_)) { // Index6: the 7th arg.
+
         info.GetBooleanArg(7, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
         param.x *= density;
@@ -1346,6 +1342,18 @@ void JSCanvasRenderer::JsRect(const JSCallbackInfo& info)
         info.GetDoubleArg(3, height, isJudgeSpecialValue_)) { // Index3: the 4th arg.
         renderingContext2DModel_->AddRect(Rect(x, y, width, height) * GetDensity());
     }
+}
+
+// roundRect(x: number, y: number, width: number, height: number, radius: number|Array<number>): void
+void JSCanvasRenderer::JsRoundRect(const JSCallbackInfo& info)
+{
+    Rect rect;
+    std::vector<double> radii;
+    double density = GetDensity();
+    if (!ParseRoundRect(info, rect, radii, density, isJudgeSpecialValue_)) {
+        return;
+    }
+    renderingContext2DModel_->AddRoundRect(rect * density, radii);
 }
 
 // beginPath(): void
@@ -1505,46 +1513,6 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
     renderingContext2DModel_->SetLineDash(lineDash);
 }
 
-Pattern JSCanvasRenderer::GetPattern(unsigned int id)
-{
-    if (id < 0 || id >= pattern_.size()) {
-        return Pattern();
-    }
-    return *(pattern_[id].get());
-}
-
-std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Pattern>();
-    }
-    return pattern_[id];
-}
-
-std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Pattern>();
-    }
-    return pattern_[id];
-}
-
-void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
-{
-    if (id >= 0 && id <= patternCount_) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            renderingContext2DModel_->SetTransform(pattern_[id], transform);
-        } else {
-            pattern_[id]->SetScaleX(transform.scaleX);
-            pattern_[id]->SetScaleY(transform.scaleY);
-            pattern_[id]->SetSkewX(transform.skewX);
-            pattern_[id]->SetSkewY(transform.skewY);
-            pattern_[id]->SetTranslateX(transform.translateX);
-            pattern_[id]->SetTranslateY(transform.translateY);
-        }
-    }
-}
-
 // textAlign: CanvasTextAlign
 void JSCanvasRenderer::JsSetTextAlign(const JSCallbackInfo& info)
 {
@@ -1689,10 +1657,10 @@ bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_RETURN(fontManager, false);
-    auto fontNames = fontManager->GetFontNames();
-    return std::find(fontNames.begin(), fontNames.end(), fontName) != fontNames.end();
+    CHECK_NULL_RETURN(pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY), false);
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    return (fontCollection && fontCollection->GetFontMgr() &&
+            fontCollection->GetFontMgr()->MatchFamilyStyle(fontName.c_str(), {}));
 }
 
 bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)

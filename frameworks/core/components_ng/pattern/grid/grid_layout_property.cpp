@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,28 +54,15 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
     json->PutExtAttr("editMode", propEditable_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("layoutDirection", GetGridDirectionStr().c_str(), filter);
+    json->PutExtAttr("focusWrapMode", GetFocusWrapModeStr().c_str(), filter);
     json->PutExtAttr("maxCount", propMaxCount_.value_or(Infinity<int32_t>()), filter);
     json->PutExtAttr("minCount", propMinCount_.value_or(1), filter);
     json->PutExtAttr("cellLength", propCellLength_.value_or(0), filter);
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
     json->PutExtAttr("gridLayoutOptions", propLayoutOptions_.has_value() ? "true" : "false", filter);
-    auto regularSizeArray = JsonUtil::CreateArray();
-    auto irregularIndexesArray = JsonUtil::CreateArray();
-    auto layoutOptions = GetLayoutOptions();
-    if (layoutOptions) {
-        auto regularSize = layoutOptions.value().regularSize;
-        regularSizeArray->Put("", regularSize.rows);
-        regularSizeArray->Put("", regularSize.columns);
-
-        auto irregularIndexes = layoutOptions.value().irregularIndexes;
-        for (auto item : irregularIndexes) {
-            irregularIndexesArray->Put("", item);
-        }
-    }
-    json->PutExtAttr("regularSize", regularSizeArray, filter);
-    json->PutExtAttr("irregularIndexes", irregularIndexesArray, filter);
     json->PutExtAttr("alignItems", GetAlignItems().value_or(GridItemAlignment::DEFAULT) ==
         GridItemAlignment::DEFAULT ? "GridItemAlignment.Default" : "GridItemAlignment.Stretch", filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(true), filter);
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const
@@ -95,6 +82,20 @@ std::string GridLayoutProperty::GetGridDirectionStr() const
             break;
     }
     return "GridDirection.Row";
+}
+
+std::string GridLayoutProperty::GetFocusWrapModeStr() const
+{
+    auto focusWrapMode = propFocusWrapMode_.value_or(FocusWrapMode::DEFAULT);
+    switch (focusWrapMode) {
+        case FocusWrapMode::DEFAULT:
+            return "FocusWrapMode.DEFAULT";
+        case FocusWrapMode::WRAP_WITH_ARROW:
+            return "FocusWrapMode.WRAP_WITH_ARROW";
+        default:
+            break;
+    }
+    return "FocusWrapMode.DEFAULT";
 }
 
 void GridLayoutProperty::OnColumnsGapUpdate(const Dimension& /* columnsGap */) const

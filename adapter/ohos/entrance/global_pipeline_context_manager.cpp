@@ -80,7 +80,7 @@ RefPtr<NG::PipelineContext> GlobalPipelineContextManager::CreateGlobalPipelineCo
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
 #endif
 
-    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, instanceId);
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, instanceId, true);
     auto pipelineContext =
         AceType::MakeRefPtr<NG::PipelineContext>(window, taskExecutor, assetManagerImpl, nullptr, frontend, instanceId);
     AddGlobalPipelineContext(name, pipelineContext);

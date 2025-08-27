@@ -292,7 +292,14 @@ HWTEST_F(ScrollableTestNg, GetPaintPropertyDumpInfo002, TestSize.Level1)
     DumpLog::GetInstance().description_.clear();
     RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     ASSERT_NE(scrollablePattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<PaintProperty> paintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    frameNode->paintProperty_ = paintProperty;
+    scrollablePattern->frameNode_ = frameNode;
     scrollablePattern->GetPaintPropertyDumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 2);
+    EXPECT_EQ(DumpLog::GetInstance().description_[0], "innerScrollBarState: OFF\n");
     EXPECT_EQ(DumpLog::GetInstance().description_[1], "scrollBarWidth: None\n");
 }
 

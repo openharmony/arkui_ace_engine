@@ -34,7 +34,6 @@
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_mem.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
@@ -123,7 +122,7 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo004, Te
 
     Ace::Gradient gradient;
     gradient.SetType(Ace::GradientType::LINEAR);
-    EXPECT_EQ(paintMethod->MakeConicGradient(gradient), nullptr);
+    EXPECT_EQ(paintMethod->MakeConicGradient(gradient, nullptr), nullptr);
 }
 
 /**
@@ -798,5 +797,76 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo026, Te
     paintMethod->SetSepiaFilter("A");
     paintMethod->SetFilterParam("sepia(90)");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo027
+ * @tc.desc: Test the function 'AddRoundRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo027, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    Rect rect(0, 0, 100, 100);
+    std::vector<double> radii = { 10, 10, 10 };
+    paintMethod->isPathChanged_ = false;
+    paintMethod->AddRoundRect(rect, radii);
+    EXPECT_FALSE(paintMethod->isPathChanged_);
+
+    radii = { 10, 10, 10, 10 };
+    paintMethod->isPathChanged_ = false;
+    paintMethod->AddRoundRect(rect, radii);
+    EXPECT_TRUE(paintMethod->isPathChanged_);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo028
+ * @tc.desc: Test the function 'Path2DRoundRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo028, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    PathArgs args;
+    args.para1 = 0;
+    args.para2 = 0;
+    args.para3 = 100;
+    args.para4 = 100;
+    args.para5 = 10;
+    args.para6 = 20;
+    args.para7 = 30;
+    args.para8 = 40;
+    paintMethod->isPath2dChanged_ = false;
+    paintMethod->Path2DRoundRect(args);
+    EXPECT_TRUE(paintMethod->isPath2dChanged_);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo029
+ * @tc.desc: Test the function 'UpdatePaintShader' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo029, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::Gradient gradient;
+    gradient.type_ = Ace::GradientType::LINEAR;
+    Color colorRed = Color::RED;
+    colorRed.SetColorSpace(ColorSpace::DISPLAY_P3);
+    OHOS::Ace::GradientColor gradientColorRed(colorRed);
+    gradient.colors_.emplace_back(gradientColorRed);
+    Color colorBlue = Color ::BLUE;
+    colorBlue.SetColorSpace(ColorSpace::DISPLAY_P3);
+    OHOS::Ace::GradientColor gradientColorBlue(colorBlue);
+    gradient.colors_.emplace_back(gradientColorBlue);
+    paintMethod->UpdatePaintShader(nullptr, nullptr, gradient);
+    ColorSpace beginColorSpace = gradient.GetColors().front().GetColor().GetColorSpace();
+    ColorSpace backColorSpace = gradient.GetColors().back().GetColor().GetColorSpace();
+    EXPECT_TRUE(beginColorSpace == backColorSpace);
 }
 } // namespace OHOS::Ace::NG

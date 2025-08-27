@@ -34,13 +34,14 @@ const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = { TextInputAction::UNSPE
     TextInputAction::PREVIOUS, TextInputAction::NEW_LINE };
 const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextInputType::NUMBER,
     TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD, TextInputType::PHONE, TextInputType::USER_NAME,
-    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL };
+    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL,
+    TextInputType::ONE_TIME_CODE };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
 {
-    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
-        (const std::u16string& value) -> void {
+    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)](
+                                                           const std::u16string& value) -> void {
         const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
         lambda(valueStr.c_str());
     };
@@ -422,7 +423,7 @@ void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value)
     if (value <= 0) {
         value = DEFAULTMAXLINES;
     }
-    TextFieldModel::GetInstance()->SetMaxLines(value);
+    TextFieldModel::GetInstance()->SetMaxViewLines(static_cast<uint32_t>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value)
@@ -495,7 +496,7 @@ void FfiOHOSAceFrameworkTextFieldSetShowError(const char* errorText)
         isVisible = true;
     }
 
-    TextFieldModel::GetInstance()->SetShowError(UtfUtils::Str8ToStr16(error), isVisible);
+    TextFieldModel::GetInstance()->SetShowError(UtfUtils::Str8DebugToStr16(error), isVisible);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowPasswordIcon(bool isShow)
@@ -623,8 +624,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [func = FormatCharFunction(callback)](
-                        const ChangeValueInfo& info) { func(info.value); };
+    auto onChange = [func = FormatCharFunction(callback)](const ChangeValueInfo& info) { func(info.value); };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
@@ -723,7 +723,7 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
-void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
+void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
@@ -747,5 +747,14 @@ void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(bool (*callback)(int32_t valu
         }
     };
     TextFieldModel::GetInstance()->SetOnSubmit(task);
+}
+
+void FfiOHOSAceFrameworkTextFieldEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 }

@@ -55,6 +55,26 @@ void FocusManagerTestNg::TearDownTestCase()
     MockContainer::TearDown();
 }
 
+struct HandleFocusCanBeActiveTestCase {
+    bool initialActive = false;
+    bool focusCanBeActive = false;
+    bool setActiveByUser = false;
+    bool parameterSwitch = false;
+    bool exceptResult = false;
+};
+
+const std::vector<HandleFocusCanBeActiveTestCase> FOCUS_ACTIVE_SUPPORT_HIERARCHY_PARAMETER_TEST_CASE = {
+    { false, false, true, false, false },
+    { false, false, true, true, false },
+    { false, true, true, false, true },
+    { false, true, true, true, false },
+    { true, false, false, false, false },
+    { true, false, true, false, true },
+    { true, true, false, false, false },
+    { true, true, true, false, true },
+    { true, true, true, true, false },
+};
+
 /**
  * @tc.name: FocusManagerTest001
  * @tc.desc: Create FocusManager
@@ -707,6 +727,54 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest019, TestSize.Level1)
     focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
     EXPECT_EQ(focusManager->GetIsFocusActive(), false);
     EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+
+    /**
+     * @tc.steps: step6. sendKeyEvent dwon and joystick direction.
+     * expected: active and button1 focus
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), true);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), true);
+
+    /**
+     * @tc.steps: step7. sendKeyEvent up and joystick direction.
+     * expected: unactive and button1 blur
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    event.code = KeyCode::KEY_DPAD_UP;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::UP;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+
+    /**
+     * @tc.steps: step8. sendKeyEvent dwon and joystick space.
+     * expected: unactive and button1 blur
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_SPACE };
+    event.code = KeyCode::KEY_SPACE;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
 }
 
 /**
@@ -796,5 +864,181 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest020, TestSize.Level1)
     appTheme->focusActiveByTab_ = true;
     focusManager->SetIsFocusActive(true, FocusActiveReason::KEY_TAB);
     EXPECT_TRUE(focusManager->isFocusActive_);
+}
+
+/**
+ * @tc.name: FocusManagerTest021
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest021, TestSize.Level1)
+{
+    for (const auto& testCase : FOCUS_ACTIVE_SUPPORT_HIERARCHY_PARAMETER_TEST_CASE) {
+        auto context = PipelineContext::GetCurrentContext();
+        ASSERT_NE(context, nullptr);
+        auto focusManager = context->GetOrCreateFocusManager();
+        ASSERT_NE(focusManager, nullptr);
+        focusManager->isFocusActive_ = testCase.initialActive;
+        SystemProperties::focusCanBeActive_.store(testCase.focusCanBeActive);
+        focusManager->SetIsFocusActive(testCase.setActiveByUser, FocusActiveReason::USE_API);
+        if (testCase.parameterSwitch && testCase.focusCanBeActive) {
+            focusManager->SetIsFocusActive(false, FocusActiveReason::USE_API);
+        }
+        EXPECT_EQ(focusManager->isFocusActive_, testCase.exceptResult);
+    }
+}
+
+/**
+ * @tc.name: FocusManagerTest022
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest022, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::ANCESTOR_EVENT);
+    auto keyProcessingMode = focusManager->GetKeyProcessingMode();
+    EXPECT_EQ(keyProcessingMode, KeyProcessingMode::ANCESTOR_EVENT);
+}
+
+/**
+ * @tc.name: FocusManagerTest023
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest023, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::FOCUS_NAVIGATION);
+    auto keyProcessingMode = focusManager->GetKeyProcessingMode();
+    EXPECT_EQ(keyProcessingMode, KeyProcessingMode::FOCUS_NAVIGATION);
+}
+
+/**
+ * @tc.name: FocusManagerTest021
+ * @tc.desc: SyncWindowsFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, properties.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+
+    /**
+     * @tc.steps2: Call the function SyncWindowsFocus.
+     * @tc.expected: Test the stability of this function.
+     */
+    focusManager->isFocusActive_= true;
+    focusManager->SyncWindowsFocus(false, FocusActiveReason::KEY_TAB);
+    EXPECT_FALSE(focusManager->isFocusActive_);
+}
+
+/**
+ * @tc.name: FocusManagerTest025
+ * @tc.desc: Test that focus scroll is triggered after screen rotation to ensure focused node is visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current pipeline context and create FocusManager.
+     * @tc.expected: FocusManager is created successfully and isNeedTriggerScroll_ is nullopt initially.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(pipeline);
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isNeedTriggerScroll_ = std::nullopt;
+    EXPECT_EQ(focusManager->isNeedTriggerScroll_, std::nullopt);
+
+    /**
+     * @tc.steps2: Simulate a screen rotation via surfaceChangedCallbackMap_.
+     * @tc.expected: isNeedTriggerScroll_ is set to true, indicating a scroll should be triggered.
+     */
+    for (const auto& [id, callback] : pipeline->surfaceChangedCallbackMap_) {
+        if (callback) {
+            callback(1080, 1920, 1080, 720, WindowSizeChangeReason::ROTATION);
+        }
+    }
+    EXPECT_EQ(focusManager->isNeedTriggerScroll_, true);
+}
+
+/**
+ * @tc.name: FocusManagerTest026
+ * @tc.desc: Test that activating main window pipeline also activates all child pipelines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current MockPipelineContext and retrieve FocusManager.
+     * @tc.expected: FocusManager is created and initially inactive.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    focusManager->isFocusActive_ = false;
+
+    /**
+     * @tc.steps2: Call SetIsFocusActive(true) to activate main window pipeline.
+     * @tc.expected: isFocusActive_ becomes true, indicating activation is successful.
+     */
+    focusManager->SetIsFocusActive(true, FocusActiveReason::USE_API, false);
+    EXPECT_TRUE(focusManager->isFocusActive_);
+}
+
+/**
+ * @tc.name: FocusManagerTest027
+ * @tc.desc: Test that focusGuard is executed when window gains focus and is destroyed at the end of its lifecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get the current pipeline context and its FocusManager.
+     * @tc.expected: FocusManager is created successfully.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+
+    /**
+     * @tc.steps2: Create root node and page node with corresponding FocusHub.
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+
+    /**
+     * @tc.steps3: Add pageNode to rootNode and trigger page focus show.
+     */
+    rootNode->AddChild(pageNode);
+    pagePattern->FocusViewShow();
+    context->FlushFocusView();
+
+    /**
+     * @tc.steps4: Simulate window focus and check internal focusGuard-related flags.
+     * @tc.expected: isSwitchingFocus_ is set temporarily, and then reset; endReason_ is set.
+     */
+    focusManager->WindowFocus(true);
+
+    EXPECT_TRUE(focusManager->isSwitchingFocus_.has_value());
+    EXPECT_FALSE(focusManager->isSwitchingFocus_.value());
+    EXPECT_TRUE(focusManager->endReason_.has_value());
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -63,6 +64,7 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;
+    virtual void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) {}
     virtual void SetAlignItems(GridItemAlignment itemAlign) = 0;
     virtual void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) = 0;
     virtual void SetOnScrollBarUpdate(
@@ -82,6 +84,9 @@ public:
     virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
+    virtual void SetSyncLoad(bool syncLoad) {}
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

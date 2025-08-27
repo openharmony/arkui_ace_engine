@@ -1,0 +1,72 @@
+{
+  "float": [
+    {
+      "name": "TextWith",
+      "value": "500"
+    },
+    {
+      "name": "TextHeight",
+      "value": "200"
+    },
+    {
+      "name": "TextFontSize",
+      "value": "32"
+    },
+    {
+      "name": "TextMinFontScale",
+      "value": "1.0"
+    },
+    {
+      "name": "TextMaxFontScale",
+      "value": "1.0"
+    },
+    {
+      "name": "TextShadowRadius",
+      "value": "1"
+    },
+    {
+      "name": "TextShadowOffsetX",
+      "value": "0"
+    },
+    {
+      "name": "TextShadowOffsetY",
+      "value": "50"
+    },
+    {
+      "name": "TextIndent",
+      "value": "50"
+    },
+    {
+      "name": "TextLineHeight",
+      "value": "50"
+    },
+    {
+      "name": "TextLineSpacing",
+      "value": "50"
+    },
+    {
+      "name": "TextMinFontSize",
+      "value": "4"
+    },
+    {
+      "name": "TextMaxFontSize",
+      "value": "32"
+    },
+    {
+      "name": "TextBaselineOffset",
+      "value": "50"
+    },
+    {
+      "name": "ModeNumber5_20",
+      "value": "20"
+    },
+    {
+      "name": "ModeNumber20_50",
+      "value": "50"
+    },
+    {
+      "name": "ModeWeight400_900",
+      "value": "900"
+    }
+  ]
+}

@@ -1390,7 +1390,6 @@ export struct RowBootcamp {
     }.width('100%').padding({ top: 5 })
   }
 
-
   @Builder
   popupBuilder() {
     Row() {

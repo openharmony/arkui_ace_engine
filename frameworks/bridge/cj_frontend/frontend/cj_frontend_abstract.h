@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT CJFrontendAbstract : public Frontend {
-    DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend)
+    DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend);
 public:
     // page lifecycle
     bool OnBackPressed() override;
@@ -59,6 +59,7 @@ public:
     void ReplacePage(const std::string& url, const std::string& params) override;
     void PushPage(const std::string& url, const std::string& params) override;
     void Back(const std::string& uri, const std::string& params);
+    void Replace(const std::string& url, const std::string& params, CJPageRouterAbstract::RouterMode modeValue);
     void CallRouterBack() override;
 
     std::string GetParams() const
@@ -238,6 +239,11 @@ public:
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
     void OnLayoutCompleted(const std::string& componentId) override {}
     void OnDrawCompleted(const std::string& componentId) override {}
+    void OnDrawChildrenCompleted(const std::string& componentId) override {}
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return false;
+    }
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return nullptr;

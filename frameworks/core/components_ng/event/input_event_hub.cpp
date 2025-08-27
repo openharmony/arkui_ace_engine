@@ -57,6 +57,9 @@ bool InputEventHub::ProcessTipsMouseTestHit(const OffsetF& coordinateOffset, Tou
     if (hoverEventActuator_) {
         hoverEventActuator_->OnCollectHoverEventForTips(coordinateOffset, getEventTargetImpl, result);
     }
+    if (mouseEventActuator_) {
+        mouseEventActuator_->OnCollectMouseEventForTips(coordinateOffset, getEventTargetImpl, result);
+    }
     return false;
 }
 

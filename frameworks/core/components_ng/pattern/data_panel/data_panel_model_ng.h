@@ -38,6 +38,8 @@ public:
     void SetTrackBackground(const Color& trackBackgroundColor) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
+    void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
+    void SetValueColorsSetByUser(bool value) override;
 
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
@@ -45,6 +47,8 @@ public:
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
+    static void CreateWithResourceObj(FrameNode* frameNode, DataPanelResourceType colorType,
+        const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

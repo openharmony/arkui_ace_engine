@@ -16,7 +16,7 @@
 #include "interaction_impl.h"
 
 #include "interaction_manager.h"
-#include "start_drag_listener_impl.h"
+#include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
@@ -47,9 +47,9 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
-    return InteractionManager::GetInstance()->SetDragWindowVisible(visible);
+    return InteractionManager::GetInstance()->SetDragWindowVisible(visible, false, rSTransaction);
 }
 
 int32_t InteractionImpl::SetMouseDragMonitorState(bool state)
@@ -69,9 +69,10 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         }
     };
     Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
-    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.toolType,
-    dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow,
-    dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
+    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
+    dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
+    dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
+    dragData.summaryFormat, dragData.version, dragData.totalSize };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -82,6 +83,15 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     }
     return InteractionManager::GetInstance()->StartDrag(msdpDragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));
+}
+
+int32_t InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
+{
+    Msdp::DeviceStatus::DragBundleInfo msdpDragBundleInfo;
+    auto ret = InteractionManager::GetInstance()->GetDragBundleInfo(msdpDragBundleInfo);
+    dragBundleInfo.bundleName = msdpDragBundleInfo.bundleName;
+    dragBundleInfo.isRemoteDev = msdpDragBundleInfo.isCrossDevice;
+    return ret;
 }
 
 int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style, const int32_t eventId)
@@ -125,9 +135,21 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
 }
 
-int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
+    std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+    int32_t& version, int64_t& totalSize)
 {
-    return InteractionManager::GetInstance()->GetDragSummary(summary);
+    Msdp::DeviceStatus::DragSummaryInfo dragSummary;
+    auto ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummary);
+    if (ret != 0) {
+        return ret;
+    }
+    summary = dragSummary.summarys;
+    detailedSummary = dragSummary.detailedSummarys;
+    summaryFormat = dragSummary.summaryFormat;
+    version = dragSummary.version;
+    totalSize = dragSummary.totalSize;
+    return ret;
 }
 
 int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
@@ -135,14 +157,14 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
-int32_t InteractionImpl::EnterTextEditorArea(bool enable)
-{
-    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
-}
-
 int32_t InteractionImpl::AddPrivilege()
 {
     return InteractionManager::GetInstance()->AddPrivilege();
+}
+
+int32_t InteractionImpl::EnterTextEditorArea(bool enable)
+{
+    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
 }
 
 int32_t InteractionImpl::RegisterCoordinationListener(std::function<void()> dragOutCallback)
@@ -181,6 +203,11 @@ int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
 void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
 {
     InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
+}
+
+int32_t InteractionImpl::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    return InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
 }
 
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
@@ -307,4 +334,8 @@ OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior d
     }
 }
 
+bool InteractionImpl::IsDragStart() const
+{
+    return InteractionManager::GetInstance()->IsDragStart();
+}
 } // namespace OHOS::Ace

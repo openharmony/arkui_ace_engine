@@ -95,6 +95,18 @@ export struct SelectTitleBar {
   @State selectMaxWidth: number = 0;
   @State fontSize: number = 1;
 
+  getStringByNameSync(contextName: string): string {
+    let uiContext: string = '';
+    try {
+      uiContext = getContext()?.resourceManager?.getStringByNameSync(contextName);
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
+    return uiContext;
+  }
+
   build() {
     Flex({
       justifyContent: FlexAlign.SpaceBetween,
@@ -106,7 +118,7 @@ export struct SelectTitleBar {
             value: '',
             symbolStyle: new SymbolGlyphModifier(PUBLIC_BACK),
             isEnabled: true,
-            label: getContext()?.resourceManager?.getStringByNameSync('icon_back'),
+            label: this.getStringByNameSync('icon_back'),
             action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
@@ -218,8 +230,8 @@ export struct SelectTitleBar {
       this.messageDesc =
         resourceManager?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
   }
@@ -289,8 +301,8 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
@@ -501,7 +513,7 @@ struct ImageMenuItem {
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'Ace', `Faild to isFollowingSystemFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.fontSize = this.decideFontScale();
   }
@@ -535,13 +547,25 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_BACK) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.value === PUBLIC_MORE) {
-      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -590,7 +614,7 @@ struct ImageMenuItem {
       }
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -688,7 +712,7 @@ struct ImageMenuItem {
       }
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -874,14 +898,20 @@ struct SelectTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar getMainWindowSync,code: ${code},message:${message}`);
     }
   }
 }

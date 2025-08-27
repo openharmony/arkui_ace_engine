@@ -90,8 +90,11 @@ public:
     static void SetBarState(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
+    static void SetUndoStyle(const JSCallbackInfo& info);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
@@ -123,8 +126,17 @@ public:
     void GetCaretOffset(const JSCallbackInfo& args);
     void GetCaretRect(const JSCallbackInfo& args);
     void SetTypingStyle(const JSCallbackInfo& info);
+    void SetTypingParagraphStyle(const JSCallbackInfo& info);
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    bool IsPixelMap(const JSRef<JSVal>& jsValue);
+    static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseParagraphSpacing(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseTextVerticalAlign(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseLineBreakStrategyParagraphStyle(
+        const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
         struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
     void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
@@ -229,20 +241,13 @@ private:
         UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseUserMouseOption(
         const JSCallbackInfo& args, UserMouseOptions& mouseOption, const std::string& spanType);
-    bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
-    bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
-    static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
-    static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
-    static void ParseParagraphSpacing(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool CheckImageSource(std::string assetSrc);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;
-    static void ParseLineBreakStrategyParagraphStyle(
-        const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
 };
 
 class JSRichEditorStyledStringController final : public JSRichEditorBaseController {

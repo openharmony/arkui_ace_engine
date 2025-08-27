@@ -252,19 +252,20 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
     // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@Observed class ${BaseClass?.name}': no @Track property inside. Is this intended? Check our application.`);
+    stateMgmtConsole.debug(`'@ObservedV2 class ${BaseClass?.name}': no @Trace property inside. Is this intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
   const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
-  if (count > 5) {
-    stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
-    BaseClass.prototype[ObserveV2.ID_REFS] = {};
-  }
+
   const observedClass =  class extends BaseClass {
     constructor(...args) {
       super(...args);
+      if (count > 5) {
+        stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
+        (this as any)[ObserveV2.ID_REFS] = {};
+      }
       AsyncAddComputedV2.addComputed(this, BaseClass.name);
       AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
     }

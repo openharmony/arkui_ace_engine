@@ -69,8 +69,8 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {
@@ -165,26 +165,28 @@ private:
         const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom);
     Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);
     Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
     double GetTextMaxHeight();
     double GetTextMaxWidth();
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
+    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom);
-    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverChangedCallbackId_;
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
-    Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
+    Dimension defaultBottom_;
     bool expandDisplay_ = false;
     Rect uiExtensionHostWindowRect_;
     Dimension limitPos_;
+    int32_t rowKeyboardCallbackId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

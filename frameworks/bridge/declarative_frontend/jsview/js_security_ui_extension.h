@@ -69,5 +69,14 @@ private:
     SecurityCallbackFuncPairList onAsyncOnCallbackList_;
     std::mutex callbackLisLock_;
 };
+
+class JSPreviewUIExtension {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void OnError(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SECURITY_UI_EXTENSION_H

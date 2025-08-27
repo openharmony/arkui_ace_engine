@@ -55,8 +55,10 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode) override {};
     void SetMaintainVisibleContentPosition(bool enabled) override {};
     void SetStackFromEnd(bool enabled) override {};
+    void SetSyncLoad(bool enabled) override {};
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -73,6 +75,7 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetDividerColorByUser(bool isByUser) override {};
 
     DisplayMode GetDisplayMode() const override
     {

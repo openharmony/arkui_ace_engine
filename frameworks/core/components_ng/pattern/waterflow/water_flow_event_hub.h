@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 
 class WaterFlowEventHub : public ScrollableEventHub {
-    DECLARE_ACE_TYPE(WaterFlowEventHub, ScrollableEventHub)
+    DECLARE_ACE_TYPE(WaterFlowEventHub, ScrollableEventHub);
 
 public:
     void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)

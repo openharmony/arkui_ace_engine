@@ -31,7 +31,8 @@ DynamicComponentRendererImpl::DynamicComponentRendererImpl(
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
-void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) {}
+void DynamicComponentRendererImpl::SetAdaptiveSize(
+    bool adaptiveWidth, bool adaptiveHeight) {}
 
 void DynamicComponentRendererImpl::CreateContent() {}
 
@@ -51,7 +52,7 @@ void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType)
 
 bool DynamicComponentRendererImpl::IsRestrictedWorkerThread() { return false; }
 
-bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker) { return false; }
+bool DynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(void *worker) { return false; }
 
 void DynamicComponentRendererImpl::AddWorkerUsing(void *worker) {}
 
@@ -107,12 +108,14 @@ void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>&
 
 void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent) {}
 
+void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate() {}
+
 bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
 {
     return true;
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint() { return true; }
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker) { return true; }
 
 void DynamicComponentRendererImpl::OnDestroyContent() {}
 

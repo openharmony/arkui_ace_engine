@@ -15,5 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("linear_split_test_ng") {
   type = "new"
+  module_name = "Component-layout"
+  module_output = ""
   sources = [ "linear_split_test_ng.cpp" ]
 }

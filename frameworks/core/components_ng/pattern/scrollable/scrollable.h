@@ -57,12 +57,12 @@ struct ScrollResult {
 };
 
 struct SlidInfo {
-    double gestureVelocity;
-    double velocityScale;
-    double gain;
-    double maxFlingVelocity;
-    double slipFactor;
-    double friction;
+    double gestureVelocity {0.0};
+    double velocityScale {0.0};
+    double gain {0.0};
+    double maxFlingVelocity {0.0};
+    double slipFactor {0.0};
+    double friction {0.0};
 };
 
 using ScrollEventCallback = std::function<void()>;
@@ -83,6 +83,7 @@ using IsReverseCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
 using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
+using OnWillStopDraggingCallback = std::function<void(float velocity)>;
 
 class FrameNode;
 class PipelineContext;
@@ -200,9 +201,11 @@ public:
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
+    void HandleExtDragUpdate();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
+    void HandleExtScroll();
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
     void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
@@ -221,6 +224,14 @@ public:
     bool CanOverScroll() const
     {
         return canOverScroll_;
+    }
+    void SetCanStayOverScroll(bool value)
+    {
+        canStayOverScroll_ = value;
+    }
+    bool CanStayOverScroll() const
+    {
+        return canStayOverScroll_;
     }
 
     void ProcessScrollMotionStop();
@@ -284,6 +295,16 @@ public:
     const DragCancelRefreshCallback& GetDragCancelCallback() const
     {
         return dragCancelCallback_;
+    }
+
+    const OnWillStopDraggingCallback& GetOnWillStopDraggingEndCallback() const
+    {
+        return onWillStopDraggingCallback_;
+    }
+
+    void SetOnWillStopDraggingCallback(const OnWillStopDraggingCallback& onWillStopDraggingCallback)
+    {
+        onWillStopDraggingCallback_ = onWillStopDraggingCallback;
     }
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
@@ -391,6 +412,10 @@ public:
     void SetOverScrollCallback(std::function<bool(float)>&& func)
     {
         overScrollCallback_ = std::move(func);
+    }
+    void SetHandleExtScrollCallback(std::function<void(void)>&& func)
+    {
+        handleExtScrollCallback_ = std::move(func);
     }
     void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
@@ -572,10 +597,19 @@ public:
         snapDirection_ = SnapDirection::NONE;
     }
 
+    /**
+     * @brief Checks if the scroll event is caused by a mouse wheel.
+     */
+    static inline bool IsMouseWheelScroll(const GestureEvent& info)
+    {
+        return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
     void SetOnActionUpdate();
+    void SetOnActionExtUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
     void SetPanEndCallback();
@@ -593,7 +627,6 @@ private:
     void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
-    void InitFriction(double friction);
     void CalcOverScrollVelocity();
     double CalcNextStep(double position, double mainDelta);
 
@@ -607,14 +640,6 @@ private:
     void UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end);
     void StartVibrateFeedback();
 #endif
-
-    /**
-     * @brief Checks if the scroll event is caused by a mouse wheel.
-     *
-     * @param info The GestureEvent containing the scroll event information.
-     * @return true if the scroll event is caused by a mouse wheel, false otherwise.
-     */
-    static inline bool IsMouseWheelScroll(const GestureEvent& info);
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEndCallback_;
@@ -630,6 +655,7 @@ private:
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
     GetSnapTypeCallback getSnapTypeCallback_;
+    OnWillStopDraggingCallback onWillStopDraggingCallback_;
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
@@ -676,15 +702,19 @@ private:
     std::function<void(const std::optional<float>&)> onScrollEndRec_;
     // ScrollablePattern::RemainVelocityToChild
     RemainVelocityCallback remainVelocityCallback_;
+    // ScrollablePattern::HandleExtScroll
+    std::function<void(void)> handleExtScrollCallback_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
+    bool canStayOverScroll_ = false;
 
     // scrollSnap
     bool needScrollSnapChange_ = false;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
+    GestureEventFunc actionEnd_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
     FixScrollParamCallback fixScrollParamCallback_;

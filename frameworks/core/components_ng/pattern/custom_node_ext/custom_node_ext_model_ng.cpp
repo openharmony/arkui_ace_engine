@@ -36,6 +36,11 @@ RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag)
     return frameNode;
 }
 
+RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag, int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<CustomNodeExtPattern>());
+}
+
 void CustomNodeExtModelNG::SetMeasureCallback(
     FrameNode* frameNode, std::function<void(LayoutConstraintF constraints)>&& onMeasure)
 {
@@ -94,6 +99,74 @@ void CustomNodeExtModelNG::SetOnModifyDoneCallback(FrameNode* frameNode, std::fu
     pattern->SetOnModifyDoneCallback(std::move(onModifyDone));
 }
 
+void CustomNodeExtModelNG::SetOnWindowFocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowFocused)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowFocusedCallback(std::move(onWindowFocused));
+}
+
+void CustomNodeExtModelNG::SetOnWindowUnfocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowUnfocused)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowUnfocusedCallback(std::move(onWindowUnfocused));
+}
+
+void CustomNodeExtModelNG::SetOnWindowActivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowActivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowActivatedCallback(std::move(onWindowActivated));
+}
+
+void CustomNodeExtModelNG::SetOnWindowDeactivatedCallback(
+    FrameNode* frameNode, std::function<void()>&& onWindowDeactivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowDeactivatedCallback(std::move(onWindowDeactivated));
+}
+
+void CustomNodeExtModelNG::SetOnAttachToMainTreeCallback(
+    FrameNode* frameNode, std::function<void()>&& onAttachToMainTree)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnAttachToMainTreeCallback(std::move(onAttachToMainTree));
+}
+
+void CustomNodeExtModelNG::SetOnDetachFromMainTreeCallback(
+    FrameNode* frameNode, std::function<void()>&& onDetachFromMainTree)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnDetachFromMainTreeCallback(std::move(onDetachFromMainTree));
+}
+
+void CustomNodeExtModelNG::SetOnAvoidInfoChangeCallback(
+    FrameNode* frameNode, std::function<void()>&& onAvoidInfoChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnAvoidInfoChangeCallback(std::move(onAvoidInfoChange));
+}
+
+void CustomNodeExtModelNG::SetIsNeedRegisterAvoidInfoChangeListener(FrameNode* frameNode, bool isRegister)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsNeedRegisterAvoidInfoChangeListener(isRegister);
+}
+
 void CustomNodeExtModelNG::SetOnDirtyLayoutWrapperSwap(
     FrameNode* frameNode, std::function<void(const DirtySwapConfig& config)>&& onDirtySwap)
 {
@@ -109,5 +182,23 @@ void CustomNodeExtModelNG::SetIsAtomic(FrameNode* frameNode, bool isAtomic)
     auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsAtomic(isAtomic);
+}
+
+void CustomNodeExtModelNG::SetBeforeCreateLayoutWrapperCallback(
+    FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBeforeCreateLayoutWrapperCallback(std::move(beforeCreateLayoutWrapper));
+}
+
+void CustomNodeExtModelNG::SetOnWindowSizeChangedCallback(FrameNode* frameNode,
+    std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>&& onWindowSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowSizeChangedCallback(std::move(onWindowSizeChanged));
 }
 } // OHOS::Ace::NG

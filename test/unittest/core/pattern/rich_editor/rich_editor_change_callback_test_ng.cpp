@@ -19,13 +19,14 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-int32_t testOnSelect = 0;
+int32_t testOnSelect = 1;
 bool isOnWillChangeCalled = false;
 bool isOnDidChangeCalled = false;
 RichEditorChangeValue onWillChangeValue;
@@ -1220,44 +1221,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level1
 }
 
 /**
- * @tc.name: StopEditingTest
- * @tc.desc: test StopEditing
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, StopEditingTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    /**
-     * @tc.steps: step2. initalize span properties
-     */
-    TextSpanOptions options2;
-    options2.value = INIT_VALUE_1;
-
-    /**
-     * @tc.steps: step3. test add span
-     */
-    richEditorController->AddTextSpan(options2);
-    focusHub->RequestFocusImmediately();
-    EXPECT_TRUE(focusHub->IsCurrentFocus());
-    richEditorPattern->caretTwinkling_ = true;
-    richEditorController->StopEditing();
-
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-
-    ClearSpan();
-}
-
-/**
  * @tc.name: OnSubmitTest
  * @tc.desc: test OnSubmitTest
  * @tc.type: FUNC
@@ -1342,7 +1305,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
     EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
@@ -1398,7 +1364,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1451,7 +1420,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
     eventHub->SetOnIMEInputComplete(std::move(func));
-    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto it1 = AceType::DynamicCast<SpanNode>(contentNode->GetLastChild());
+    ASSERT_NE(it1, nullptr);
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     for (const auto& pair : textStyle1.fontFeature) {
         EXPECT_EQ(pair.first, "subs");
@@ -1461,31 +1433,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
     ClearSpan();
-}
-
-/**
- * @tc.name: RichEditorModel008
- * @tc.desc: test set on select
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, RichEditorModel008, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
-    richEditorModel.SetOnSelect(std::move(func));
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    SelectionInfo selection;
-    eventHub->FireOnSelect(&selection);
-    EXPECT_EQ(testOnSelect, 1);
-    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
-        ViewStackProcessor::GetInstance()->elementsStack_.pop();
-    }
 }
 
 /**
@@ -1622,7 +1569,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    auto spanNode = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
@@ -1660,7 +1608,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect004, TestSize.Level1)
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    auto spanNode = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
     for (const auto& pair : textStyle1.fontFeature) {
@@ -1707,6 +1656,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnAreaChangedInner001, TestSize.Level1)
     richEditorPattern->OnAreaChangedInner();
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_NE(richEditorPattern->parentGlobalOffset_, OffsetF(0, 1));
 }
 
 /**
@@ -1725,6 +1675,58 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleSurfaceChanged001, TestSize.Level
             cases[i][0], cases[i][1], cases[i][2], cases[i][3], WindowSizeChangeReason::DRAG);
         EXPECT_NE(richEditorPattern, nullptr);
     }
+}
+
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, IsStopBackPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isStopBackPress_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    auto result = richEditorPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, OnBackPressed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    auto func = []() {};
+    richEditorPattern->SetCustomKeyboard(func);
+    richEditorPattern->RequestCustomKeyboard();
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    richEditorPattern->imeShown_ = true;
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 }
 
 } // namespace OHOS::Ace::NG

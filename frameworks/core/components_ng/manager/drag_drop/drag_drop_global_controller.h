@@ -47,6 +47,8 @@ public:
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
+    void SetEnableDropDisallowedBadge(bool enableDisallowStatusShowing);
+    bool GetEnableDropDisallowedBadge() const;
     void UpdateDragFilterShowingStatus(bool isShowing);
     bool IsDragFilterShowing() const;
     bool IsOnOnDropPhase();
@@ -56,11 +58,6 @@ public:
     int32_t NotifyDragResult(int32_t requestId, int32_t result);
     int32_t NotifyDragEndPendingDone(int32_t requestId);
 
-    // app global drag
-    void SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled);
-    bool IsAppGlobalDragEnabled() const;
-    bool IsAlreadyGetAppGlobalDrag() const;
-
     void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus);
 
     DragStartRequestStatus GetDragStartRequestStatus();
@@ -68,6 +65,16 @@ public:
     void SetAsyncDragCallback(std::function<void()> asyncDragCallbac);
 
     std::function<void()> GetAsyncDragCallback();
+
+    void SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd);
+
+    std::function<void(DragStartRequestStatus)> GetCallAnsyncEnd();
+    // app global drag
+    void SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled);
+    bool IsAppGlobalDragEnabled() const;
+    bool IsAlreadyGetAppGlobalDrag() const;
+    bool IsCurrentDrag(int32_t requestId) const;
+
 private:
     DragDropGlobalController() = default;
 
@@ -82,9 +89,7 @@ private:
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 
     bool isDragFilterShowing_ = false;
-
-    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
-    std::function<void()> asyncDragCallback_;
+    std::function<void(DragStartRequestStatus)> callSyncDragEnd_;
 
     // use for async on drop
     bool isOnOnDropPhase_ = false;
@@ -95,6 +100,10 @@ private:
     // app global drag
     bool isAppGlobalDragEnabled_ = false;
     bool isAlreadyGetAppGlobalDrag_ = false;
+
+    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
+    std::function<void()> asyncDragCallback_;
+    bool enableDropDisallowedBadge_ = false;
 };
 
 } // namespace OHOS::Ace::NG

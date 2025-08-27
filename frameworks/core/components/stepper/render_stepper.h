@@ -82,7 +82,7 @@ using OnEventFunc = std::function<void(const std::string&)>;
 using OnReturnEventFunc = std::function<void(const std::string&, std::string&)>;
 
 class RenderStepper : public RenderNode {
-    DECLARE_ACE_TYPE(RenderStepper, RenderNode)
+    DECLARE_ACE_TYPE(RenderStepper, RenderNode);
 
 public:
     static RefPtr<RenderNode> Create();

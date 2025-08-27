@@ -1330,10 +1330,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
     pattern_->currentIndex_ = 0;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
@@ -1345,7 +1341,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     pattern_->HandleTouchBottomLoop();
     EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1429,6 +1424,41 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
     isTrigger = false;
     ChangeIndex(3);
     EXPECT_TRUE(isTrigger);
+}
+
+/**
+ * @tc.name: OnIndexChange003
+ * @tc.desc: OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    bool isTrigger = false;
+    auto onChangeEvent = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChangeEvent(std::move(onChangeEvent));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->oldIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(false);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+    /**
+     * @tc.steps: step3. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->fastAnimationChange_ = true;
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(false);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
 }
 
 /**
@@ -1641,7 +1671,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     panEvent->actionUpdate_(info);
@@ -1669,7 +1700,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     // axis update event will flip page, and isFirstAxisAction_ will be marked
@@ -1726,6 +1758,70 @@ HWTEST_F(SwiperEventTestNg, OnUnselected001, TestSize.Level1)
      */
     pattern_->FireUnselectedEvent(3, 4);
     EXPECT_EQ(pattern_->unselectedIndex_, 3);
+}
+
+/**
+ * @tc.name: onScrollStateChanged001
+ * @tc.desc: Test onScrollStateChanged event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, onScrollStateChanged001, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onScrollStateChanged = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    info.SetMainVelocity(-1000.0f);
+    info.SetMainDelta(0.0f);
+    HandleDragEnd(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: onScrollStateChanged002
+ * @tc.desc: Test onScrollStateChanged event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, onScrollStateChanged002, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onScrollStateChanged = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    info.SetMainDelta(0.0f);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    HandleDragEnd(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
 }
 
 /**
@@ -2050,5 +2146,58 @@ HWTEST_F(SwiperEventTestNg, FireSelectedEvent001, TestSize.Level1)
      */
     pattern_->FireSelectedEvent(3, 4);
     EXPECT_EQ(pattern_->selectedIndex_, 4);
+}
+
+/**
+ * @tc.name: FireSelectedEvent002
+ * @tc.desc: Test FireSelectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, FireSelectedEvent002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->selectedIndex_ = 2;
+    pattern_->jumpOnChange_ = true;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 2);
+
+    pattern_->jumpOnChange_ = false;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 3);
+}
+
+/**
+ * @tc.name: OnIndexChange002
+ * @tc.desc: Test OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->oldIndex_ = 3;
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(3);
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(true);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(true);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
 }
 } // namespace OHOS::Ace::NG

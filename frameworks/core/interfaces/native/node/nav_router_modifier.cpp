@@ -31,6 +31,25 @@ void ResetNavRouteMode(ArkUINodeHandle node)
     NavRouterModelNG::SetNavRouteMode(frameNode, 0);
 }
 
+void SetOnStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStateChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        NavRouterModelNG::SetOnStateChange(frameNode, std::move(*onStateChange));
+    } else {
+        NavRouterModelNG::SetOnStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavRouterModelNG::SetOnStateChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUINavRouterModifier* GetNavRouterModifier()
 {
@@ -38,6 +57,8 @@ const ArkUINavRouterModifier* GetNavRouterModifier()
     static const ArkUINavRouterModifier modifier = {
         .setNavRouteMode = SetNavRouteMode,
         .resetNavRouteMode = ResetNavRouteMode,
+        .setOnStateChange = SetOnStateChange,
+        .resetOnStateChange = ResetOnStateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

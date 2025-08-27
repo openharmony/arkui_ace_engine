@@ -59,7 +59,7 @@ public:
 
     virtual std::vector<RectF> GetRects(int32_t start, int32_t end,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
-    ParagraphManager::ParagraphInfo GetParagrahInfo(int32_t position) const;
+    ParagraphManager::ParagraphInfo GetParagraphInfo(int32_t position) const;
     std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(
@@ -71,6 +71,7 @@ public:
             bool needLineHighest = true) const;
     OffsetF ComputeCursorInfoByClick(int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
     bool IsSelectLineHeadAndUseLeadingMargin(int32_t start) const;
+    void LayoutParagraphs(float maxWidth);
 
     void AddParagraph(ParagraphInfo&& info)
     {
@@ -101,6 +102,8 @@ public:
     std::pair<size_t, size_t> GetEllipsisTextRange();
     TextLineMetrics GetLineMetrics(size_t lineNumber);
     bool IsIndexAtParagraphEnd(int32_t index);
+    bool DidExceedMaxLinesInner() const;
+    std::string GetDumpInfo() const;
 
 protected:
     std::vector<ParagraphInfo> paragraphs_;

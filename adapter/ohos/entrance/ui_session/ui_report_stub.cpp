@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 
+#include "pixel_map.h"
+
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
@@ -78,7 +80,7 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case SEND_IMAGES: {
             std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> result;
             int32_t size = data.ReadInt32();
-            for (int i = 0; i < size; i++) {
+            for (int32_t i = 0; i < size; i++) {
                 int32_t nodeId = data.ReadInt32();
                 sptr<Ashmem> ashMem = data.ReadAshmem();
                 if (ashMem == nullptr) {
@@ -111,6 +113,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case SEND_CURRENT_PAGE_NAME: {
             std::string result = data.ReadString();
             SendCurrentPageName(result);
+            break;
+        }
+        case SEND_EXE_APP_AI_FUNCTION_RESULT: {
+            uint32_t result = data.ReadUint32();
+            SendExeAppAIFunctionResult(result);
             break;
         }
         default: {
@@ -242,6 +249,11 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
     ComponentChangeEventCallback_ = nullptr;
 }
 
+void UiReportStub::UnregisterWebUnfocusEventCallback()
+{
+    unfocusEvent_ = nullptr;
+}
+
 void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
     if (getWebViewCurrentLanguageCallback_) {
@@ -281,6 +293,18 @@ void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)
     if (optMem != nullptr) {
         optMem->UnmapAshmem();
         optMem->CloseAshmem();
+    }
+}
+
+void UiReportStub::RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback)
+{
+    exeAppAIFunctionCallback_ = std::move(finishCallback);
+}
+
+void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
+{
+    if (exeAppAIFunctionCallback_) {
+        exeAppAIFunctionCallback_(result);
     }
 }
 } // namespace OHOS::Ace

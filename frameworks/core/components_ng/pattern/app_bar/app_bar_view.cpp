@@ -35,11 +35,15 @@
 #include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG {
+std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)>
+    AppBarView::appBarNodeBuilder_ = nullptr;
 namespace {
 
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
+constexpr int32_t INVALID_LISTENER_ID = -1;
+constexpr int32_t MENU_BAR_AY_Z_INDEX = -2;
 
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
@@ -55,11 +59,17 @@ void AssembleUiExtensionParams(
     auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
     params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
     params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-    params.try_emplace("module", Container::Current()->GetModuleName());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    params.try_emplace("module", container->GetModuleName());
     if (missionId != -1) {
         params.try_emplace("missionId", std::to_string(missionId));
     }
-
+    auto frontend = container->GetFrontend();
+    if (frontend) {
+        auto info = frontend->GetTopNavDestinationInfo(false, true);
+        params.try_emplace("TopNavPathInfo", info);
+    }
     if (firstTry) {
         params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
         appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
@@ -71,11 +81,37 @@ void AssembleUiExtensionParams(
 #endif
 } // namespace
 
+void AppBarView::SetOnBackPressedConsumed()
+{
+    auto atomicService = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atomicService);
+    auto atomicServicePattern = atomicService->GetPattern<NG::AtomicServicePattern>();
+    CHECK_NULL_VOID(atomicServicePattern);
+    atomicServicePattern->SetOnBackPressedConsumed();
+}
+
+RefPtr<Pattern> AppBarView::GetAtomicServicePattern()
+{
+    auto atomicService = atomicService_.Upgrade();
+    CHECK_NULL_RETURN(atomicService, nullptr);
+    return atomicService->GetPattern<NG::AtomicServicePattern>();
+}
+
+void AppBarView::RegistAppBarNodeBuilder(
+    std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder)
+{
+    appBarNodeBuilder_ = appBarNodeBuilder;
+}
+
 RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
 {
     auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<AtomicServicePattern>());
     // add children
+    if (appBarNodeBuilder_) {
+        // app bar builder for cj frontend
+        return appBarNodeBuilder_(this, stage);
+    }
     contentStage_ = stage;
     atomicService_ = atom;
     BindJSContainer();
@@ -122,9 +158,23 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     auto stageNodeWrapper = AceType::DynamicCast<FrameNode>(stageNodeWrapperNode);
     CHECK_NULL_VOID(stageNodeWrapper);
     CHECK_NULL_VOID(appbar->contentStage_);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->BeforeCreateLayoutWrapper();
+    InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
-    stageNodeWrapper->MarkDirtyNode();
+    stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+}
+
+void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityZIndex(MENU_BAR_AY_Z_INDEX);
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
@@ -434,10 +484,16 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     CHECK_NULL_RETURN(atom, std::nullopt);
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto menuBarRow = pattern->GetMenuBarRow();
+    CHECK_NULL_RETURN(menuBarRow, std::nullopt);
+    auto rowGeometryNode = menuBarRow->GetGeometryNode();
+    CHECK_NULL_RETURN(rowGeometryNode, std::nullopt);
     auto menuBar = pattern->GetMenuBar();
     CHECK_NULL_RETURN(menuBar, std::nullopt);
-    auto size = menuBar->GetGeometryNode()->GetMarginFrameSize();
-    auto offset = menuBar->GetGeometryNode()->GetMarginFrameOffset();
+    auto geometryNode = menuBar->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    auto size = geometryNode->GetMarginFrameSize();
+    auto offset = geometryNode->GetMarginFrameOffset();
     auto parent = menuBar->GetParent();
     while (parent) {
         auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -448,14 +504,21 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     }
     auto atomRect = atom->GetGeometryNode()->GetFrameRect();
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto left = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto right = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    auto defalutLeft = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
+    auto defalutRight = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    auto left = defalutLeft;
+    auto right = defalutRight;
+    if (rowGeometryNode->GetMargin()) {
+        left = rowGeometryNode->GetMargin()->left.value_or(defalutLeft);
+        right = rowGeometryNode->GetMargin()->right.value_or(defalutRight);
+    }
     if (LessOrEqual(offset.GetX(), 0.0) && atomRect.Width() > 0) {
         auto width = Dimension(ATOMIC_SERVICE_MENU_BAR_WIDTH, DimensionUnit::VP).ConvertToPx();
         offset.SetX(isRtl ? (right) : (atomRect.Width() - width - left));
     } else {
-        size.AddWidth((left + right));
-        offset.AddX(isRtl ? 0 : -left);
+        auto addEnd = isRtl ? left : right;
+        size.AddWidth((defalutLeft + addEnd));
+        offset.AddX(isRtl ? -addEnd : -defalutLeft);
     }
     return RectF(offset, size);
 }
@@ -505,5 +568,52 @@ void AppBarView::OnCloseClick()
         CHECK_NULL_VOID(windowManager);
         windowManager->WindowPerformBack();
     }
+}
+
+void AppBarView::RequestAtomicServiceTerminate()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar RequestAtomicServiceTerminate");
+    if (container->IsUIExtensionWindow()) {
+        container->RequestAtomicServiceTerminate();
+    } else {
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+}
+
+int32_t AppBarView::AddRectChangeListener(
+    const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener)
+{
+    CHECK_NULL_RETURN(pipelineContext, INVALID_LISTENER_ID);
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, INVALID_LISTENER_ID);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_RETURN(appbar, INVALID_LISTENER_ID);
+    auto atom = appbar->atomicService_.Upgrade();
+    CHECK_NULL_RETURN(atom, INVALID_LISTENER_ID);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_RETURN(pattern, INVALID_LISTENER_ID);
+    return pattern->AddRectChangeListener(std::move(listener));
+}
+
+void AppBarView::RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_VOID(appbar);
+    auto atom = appbar->atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveRectChangeListener(id);
 }
 } // namespace OHOS::Ace::NG

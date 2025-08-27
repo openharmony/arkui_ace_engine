@@ -66,6 +66,21 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    void UpdateTrackBackground(const Color& color, bool isFirstLoad = false);
+    void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
+    void OnColorModeChange(uint32_t colorMode) override;
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;

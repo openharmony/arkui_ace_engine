@@ -636,11 +636,12 @@ HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
      * @tc.expected: Check if return true.
      */
     bool isHover = true;
+    HoverInfo hoverInfo;
 
     /**
      * @tc.steps: step3. mock mouse hover.
      */
-    pattern_->hoverEvent_->operator()(isHover);
+    pattern_->hoverEvent_->operator()(isHover, hoverInfo);
     EXPECT_TRUE(pattern_->isOnHover_);
 
     FlushLayoutTask(frameNode_);
@@ -650,7 +651,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
      * @tc.steps: step4. mock mouse not hover.
      */
     isHover = false;
-    pattern_->hoverEvent_->operator()(isHover);
+    pattern_->hoverEvent_->operator()(isHover, hoverInfo);
     EXPECT_FALSE(pattern_->isOnHover_);
 }
 
@@ -1518,14 +1519,14 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    auto frameNode1 = TextFieldModelNG::CreateFrameNode(ID, u"", u"", false);
+    auto frameNode1 = TextFieldModelNG::CreateTextInputNode(ID, u"", u"");
     EXPECT_NE(frameNode1, nullptr);
  
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
      */
-    auto frameNode2 = TextFieldModelNG::CreateFrameNode(ID, u"", HELLO_TEXT_U16, true);
+    auto frameNode2 = TextFieldModelNG::CreateTextAreaNode(ID, u"", HELLO_TEXT_U16);
     EXPECT_NE(frameNode2, nullptr);
 }
  
@@ -1890,11 +1891,12 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CaretStyle caretStyle;
+        caretStyle.caretWidth = 3.0_vp;
         model.SetCaretStyle(frameNode, caretStyle);
     });
     auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty2, nullptr);
-    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(0.0f)), 3.0_vp);
 }
 
 /**
@@ -1913,6 +1915,7 @@ HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
         model.SetTextFieldText(frameNode, HELLO_TEXT_U16);
         auto textValue = pattern->GetTextValue();
         EXPECT_EQ(textValue, HELLO_TEXT);
+        EXPECT_TRUE(pattern->isTextChangedAtCreation_);
     });
 }
 } // namespace OHOS::Ace::NG

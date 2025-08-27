@@ -97,6 +97,7 @@ ACE_EXPORT extern const char CLEAR_TIMEOUT[];
 ACE_EXPORT extern const char CLEAR_INTERVAL[];
 ACE_EXPORT extern const char SET_INTERVAL[];
 ACE_EXPORT extern const char CAN_IUSE[];
+ACE_EXPORT extern const char IS_API_VERSION_GREATER_OR_EQUAL[];
 
 // for app
 ACE_EXPORT extern const char APP_GET_INFO[];

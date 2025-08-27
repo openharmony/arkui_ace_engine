@@ -53,6 +53,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
     if (!childLayoutProperty || !childLayoutProperty->GetCalcLayoutConstraint()) {
         layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     }
+    layoutConstraint.parentIdealSize = OptionalSizeF(colLen, rowLen);
     return layoutConstraint;
 }
 
@@ -322,9 +323,15 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ++itemIndex;
     }
     info_.endIndex_ = itemIndex - 1;
-    info_.startMainLineIndex_ = 0;
-    auto iter = info_.gridMatrix_.rbegin();
-    info_.endMainLineIndex_ = (iter == info_.gridMatrix_.rend() ? -1 : iter->first);
+    UpdateGridLayoutInfo();
+}
+
+void GridLayoutAlgorithm::UpdateGridLayoutInfo()
+{
+    auto startIter = info_.gridMatrix_.begin();
+    info_.startMainLineIndex_ = (startIter == info_.gridMatrix_.end() ? 0 : startIter->first);
+    auto endIter = info_.gridMatrix_.rbegin();
+    info_.endMainLineIndex_ = (endIter == info_.gridMatrix_.rend() ? -1 : endIter->first);
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

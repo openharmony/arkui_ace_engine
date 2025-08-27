@@ -41,7 +41,7 @@ public:
     static void UnRegisterScrollEventCallback(int64_t callbackId);
     static void UnRegisterScrollEventCallback(const std::string& id, int64_t callbackId);
     static void HandleScrollEventStateChange(
-        const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset);
+        const std::string& id, int32_t uniqueId, Ace::NG::ScrollEventType eventType, float offset, Ace::Axis axis);
 
     static void RegisterTabContentUpdateCallback(int64_t callbackId);
     static void RegisterTabContentUpdateCallback(const std::string& id, int64_t callbackId);

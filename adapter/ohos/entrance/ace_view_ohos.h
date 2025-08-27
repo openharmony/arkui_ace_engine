@@ -93,7 +93,7 @@ public:
 
     bool ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    bool ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    void ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isInjected = false);
 
     bool ProcessRotationEvent(float rotationValue);
@@ -235,6 +235,11 @@ private:
         }
     }
 
+    bool ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const MouseEvent& event,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess);
+    bool ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected);
+
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
     AxisEventCallback axisEventCallback_;
@@ -266,6 +271,8 @@ private:
     std::unordered_map<int32_t, TouchPointInfo> touchPointInfoMap_;
 
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
+
+    OHOS::Ace::PointerEvent axisFakePntEvt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewOhos);
 };

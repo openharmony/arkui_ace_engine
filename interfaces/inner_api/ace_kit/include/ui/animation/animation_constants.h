@@ -95,13 +95,32 @@ enum class FinishCallbackType {
     LOGICALLY = 1
 };
 
-enum class AnimationInterface : int32_t {
-    ANIMATION = 0,
+enum class AnimationInterface : int8_t {
+    UNKNOWN = -1,
+    ANIMATION,
     ANIMATE_TO,
     ANIMATE_TO_IMMEDIATELY,
     KEYFRAME_ANIMATE_TO,
+    TRANSITION,
+    SHARED_TRANSITION,
+    PAGE_TRANSITION,
 };
 
+enum class AnimationPropertyType : int32_t {
+    ROTATION = 0,
+    TRANSLATION,
+    SCALE,
+    OPACITY,
+};
+
+enum class CancelAnimationStatus : int32_t {
+    SUCCESS = 0,
+    NULL_ANIMATOR,
+    NO_OPEN_CLOSURE,
+    INCORRECT_PARAM_TYPE,
+    EMPTY_PENDING_SYNC_LIST,
+    TASK_EXECUTION_FAILURE,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_CONSTANTS_H

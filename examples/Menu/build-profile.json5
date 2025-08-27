@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001A12ACFB4480AAD89226350F28E5E47B21128FC9670E13BB0019F8B6D297CEC1F2D4731041D3FF",
+          "profile": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.p12",
+          "storePassword": "0000001A4E1CD51E41FE5D1FFA8E7A03263264694EAA5D5192C5290797F968557C574E830E2E09E08F93"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.3(15)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

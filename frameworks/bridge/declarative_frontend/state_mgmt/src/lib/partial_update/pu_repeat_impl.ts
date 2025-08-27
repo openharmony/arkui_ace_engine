@@ -44,6 +44,10 @@ class __RepeatImpl<T> {
         isInitialRender ? this.initialRender() : this.reRender();
     }
 
+    public getKey2Item(): Map<string, __RepeatItemInfo<T>> {
+        return this.key2Item_;
+    }
+
     private genKeys(): Map<string, __RepeatItemInfo<T>> {
         const key2Item = new Map<string, __RepeatItemInfo<T>>();
         this.arr_.forEach((item, index) => {
@@ -146,6 +150,10 @@ class __RepeatImpl<T> {
         // keep  this.id2item_. by removing all entries for remaining
         // deleted items
         deletedKeysAndIndex.forEach(delItem => {
+            if (delItem && delItem.repeatItem && ('aboutToBeDeleted' in delItem.repeatItem)) {
+                // delete repeatItem property
+                delItem.repeatItem.aboutToBeDeleted();
+            }
             this.key2Item_.delete(delItem!.key);
         });
 

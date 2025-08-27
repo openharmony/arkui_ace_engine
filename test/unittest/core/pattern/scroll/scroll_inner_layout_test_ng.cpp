@@ -126,7 +126,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, AdaptAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerLayoutTestNg, Opacity001, TestSize.Level1)
 {
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     CreateScroll();
     CreateContent();
@@ -179,7 +179,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect001, TestSize.Level1)
     float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(208, 0, DEFAULT_TOUCH_WIDTH, activeBarHeight)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(232, 0, DEFAULT_ACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(236, 0, NORMAL_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(232, 0, DEFAULT_ACTIVE_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(236, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -231,7 +231,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect003, TestSize.Level1)
         IsEqual(scrollBar_->touchRegion_, Rect(0, 0, DEFAULT_TOUCH_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
     EXPECT_TRUE(
         IsEqual(scrollBar_->hoverRegion_, Rect(0, 0, DEFAULT_ACTIVE_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, NORMAL_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, DEFAULT_ACTIVE_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -282,7 +282,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect005, TestSize.Level1)
     float activeBarWidth = WIDTH * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(0, 368, activeBarWidth, DEFAULT_TOUCH_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(0, 392, activeBarWidth, DEFAULT_ACTIVE_WIDTH)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 396, WIDTH, NORMAL_WIDTH)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 392, WIDTH, DEFAULT_ACTIVE_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 396, activeBarWidth, NORMAL_WIDTH)));
 
     /**
@@ -318,6 +318,37 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarRect007
+ * @tc.desc: Test scrollBar rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect007, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollBarWidth(Dimension(BAR_WIDTH));
+    CreateContent();
+    CreateScrollDone();
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
+    EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(230, 0, BAR_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
+
+    /**
+     * @tc.steps: step1. Scroll some distance
+     * @tc.expected: The ScrollBar rect has changed
+     */
+    scrollBar_->padding_ = Edge(4.0, 0, 4.0, 4.0);
+    ScrollTo(ITEM_MAIN_SIZE);
+    float offsetY = ITEM_MAIN_SIZE * ratio;
+    EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(226, 0, BAR_WIDTH, HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(226, offsetY, BAR_WIDTH, activeBarHeight)));
+}
+
+/**
  * @tc.name: ScrollBarWidth001
  * @tc.desc: Test scrollbar diff width
  * @tc.type: FUNC
@@ -332,7 +363,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(scrollBar_->barRect_.Width(), NORMAL_WIDTH);
+    EXPECT_EQ(scrollBar_->barRect_.Width(), DEFAULT_ACTIVE_WIDTH);
 
     /**
      * @tc.steps: step2. Set scrollBar width less than scrollBar height
@@ -572,5 +603,201 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar002, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.On");
     pattern_->TriggerModifyDone();
     EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->GetOpacity(), 255);
+}
+
+/**
+ * @tc.name: SetBarRegion001
+ * @tc.desc: Test SetBarRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegion001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. PositionMode::LEFT
+     * @tc.expected: the height of scrollBar is 280.0
+     */
+    double width = 300.0;
+    double height = 300.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(width, height);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), height);
+    double marginStartLeft = 10.0;
+    double marginEndLeft = 10.0;
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension(marginStartLeft);
+    scrollBarMargin.end_ = Dimension(marginEndLeft);
+    scrollBar_->scrollBarMargin_ = scrollBarMargin;
+    scrollBar_->SetPositionMode(PositionMode::LEFT);
+    scrollBar_->SetNormalWidth(Dimension(1));
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    double expectedValueLeft = 280.0;
+    EXPECT_EQ(scrollBar_->barRect_.Height(), expectedValueLeft);
+
+    /**
+     * @tc.steps: step2. PositionMode::RIGHT
+     * @tc.expected: the height of scrollBar is 238.0
+     */
+    double radius = 13.0;
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar_->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetNormalWidth(Dimension(0));
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    double expectedValueRight = 238.0;
+    EXPECT_EQ(scrollBar_->barRect_.Height(), expectedValueRight);
+
+    /**
+     * @tc.steps: step3. PositionMode::BOTTOM
+     * @tc.expected: the height of scrollBar is 223.0
+     */
+    double marginStartBottom = 15.0;
+    double marginEndBottom = 20.0;
+    scrollBar_->scrollBarMargin_->start_ = Dimension(marginStartBottom);
+    scrollBar_->scrollBarMargin_->end_ = Dimension(marginEndBottom);
+    borderRadiusProperty.radiusBottomLeft = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->CalcReservedHeight();
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    double expectedValueBottom = 223.0;
+    EXPECT_EQ(scrollBar_->barRect_.Width(), expectedValueBottom);
+
+    scrollBar_->scrollBarMargin_.reset();
+}
+
+/**
+ * @tc.name: SetRectTrickRegion001
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. PositionMode::LEFT
+     * @tc.expected: the active of scrollBar is 80.0
+     */
+    double length = 300.0;
+    double marginStartLeft = 110.0;
+    double marginEndLeft = 110.0;
+    double estimatedHeight = 300.0;
+    double minHeight = 79.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(length, length);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), estimatedHeight);
+
+    scrollBar_->minHeight_ = Dimension(minHeight);
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension(marginStartLeft);
+    scrollBarMargin.end_ = Dimension(marginEndLeft);
+    scrollBar_->scrollBarMargin_ = scrollBarMargin;
+    scrollBar_->SetPositionMode(PositionMode::LEFT);
+    scrollBar_->SetNormalWidth(Dimension(1));
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 80.0);
+
+    /**
+     * @tc.steps: step2. PositionMode::RIGHT
+     * @tc.expected: the active of scrollBar is 0.0
+     */
+    double marginStartRight = 120.0;
+    double marginEndRight = 120.0;
+    double radius = 13.0;
+    scrollBar_->scrollBarMargin_->start_ = Dimension(marginStartRight);
+    scrollBar_->scrollBarMargin_->end_ = Dimension(marginEndRight);
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar_->SetPadding(Edge(1, 1, 1, 1));
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetNormalWidth(Dimension(0));
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 0.0);
+
+    /**
+     * @tc.steps: step3. PositionMode::BOTTOM
+     * @tc.expected: the active of scrollBar is 223.0
+     */
+    double marginStartBottom = 15.0;
+    double marginEndBottom = 20.0;
+    scrollBar_->scrollBarMargin_->start_ = Dimension(marginStartBottom);
+    scrollBar_->scrollBarMargin_->end_ = Dimension(marginEndBottom);
+    borderRadiusProperty.radiusBottomLeft = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->CalcReservedHeight();
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    double expectedValueBottom = 223.0;
+    EXPECT_EQ(scrollBar_->activeRect_.Width(), expectedValueBottom);
+
+    scrollBar_->scrollBarMargin_.reset();
+}
+
+/**
+ * @tc.name: SetRectTrickRegion002
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion002, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. marginStartLeft and marginEndLeft = 110.0
+     * @tc.expected: the scrollBar_->needAdaptAnimation_ is true
+     */
+    double length = 300.0;
+    double marginStartLeft = 110.0;
+    double marginEndLeft = 110.0;
+    double estimatedHeight = 500.0;
+    double minHeight = 79.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(length, length);
+    scrollBar_->minHeight_ = Dimension(minHeight);
+    scrollBar_->outBoundary_ = 0.0;
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension(marginStartLeft);
+    scrollBarMargin.end_ = Dimension(marginEndLeft);
+    scrollBar_->scrollBarMargin_ = scrollBarMargin;
+    scrollBar_->SetPositionMode(PositionMode::LEFT);
+    scrollBar_->normalWidthUpdate_ = false;
+    scrollBar_->positionModeUpdate_ = false;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+
+    EXPECT_EQ(scrollBar_->needAdaptAnimation_, true);
+
+    /**
+     * @tc.steps: step2. marginStartLeft and marginEndLeft = 150.0
+     * @tc.expected: the scrollBar_->needAdaptAnimation_ is false
+     */
+    marginStartLeft = 150.0;
+    marginEndLeft = 150.0;
+    double radius = 13.0;
+    scrollBar_->scrollBarMargin_->start_ = Dimension(marginStartLeft);
+    scrollBar_->scrollBarMargin_->end_ = Dimension(marginEndLeft);
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
+    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
+    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+
+    EXPECT_EQ(scrollBar_->needAdaptAnimation_, false);
 }
 } // namespace OHOS::Ace::NG

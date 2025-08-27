@@ -130,6 +130,7 @@ bool ParallelRecognizer::HandleEvent(const AxisEvent& event)
     for (const auto& recognizer : recognizers_) {
         if (recognizer) {
             recognizer->HandleEvent(event);
+            AddGestureProcedure(event, recognizer);
         }
     }
     return true;
