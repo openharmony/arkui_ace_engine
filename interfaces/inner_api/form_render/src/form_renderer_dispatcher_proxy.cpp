@@ -19,6 +19,9 @@
 
 namespace OHOS {
 namespace Ace {
+namespace {
+    constexpr int32_t MAX_DATA_SIZE = 0x00ffffff;
+}
 FormRendererDispatcherProxy::FormRendererDispatcherProxy(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<IFormRendererDispatcher>(impl) {}
 
@@ -50,7 +53,7 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
 
     int32_t size = 0;
     reply.ReadInt32(size);
-    if (size < 0) {
+    if (size < 0 || size > MAX_DATA_SIZE) {
         HILOG_ERROR("Serialized gesture size is not valid!");
     } else {
         auto buffer = static_cast<const char*>(reply.ReadRawData(size));
