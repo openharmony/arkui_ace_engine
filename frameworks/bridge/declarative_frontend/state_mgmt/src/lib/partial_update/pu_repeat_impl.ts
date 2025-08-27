@@ -33,16 +33,14 @@ class __RepeatImpl<T> {
 
     /**/
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
-        if (this.arr_ !== config.arr) {
-            this.arr_ = config.arr;
-            isInitialRender = true;
-        }
+        this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.ttypeGenFunc_ = config.ttypeGenFunc;
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
         this.itemDragEventHandler = config.itemDragEventHandler;
+
         isInitialRender ? this.initialRender() : this.reRender();
     }
 
