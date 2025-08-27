@@ -42,7 +42,6 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     }
     InitializeParam(host);
     auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
-
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         realSize_ = LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
         return realSize_;
