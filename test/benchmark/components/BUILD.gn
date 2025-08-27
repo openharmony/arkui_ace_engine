@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_benchmarktest("ace_components") {
   module_out_path = "ace_engine/benchmark"
-  sources = [ "grid_test.cpp" ]
+  sources = [ "grid_benchmark.cpp" ]
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -34,7 +34,11 @@ ohos_benchmarktest("ace_components") {
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
   ]
-  external_deps = [ "benchmark:benchmark" ]
+  external_deps = [
+    "benchmark:benchmark",
+    "googletest:gmock",
+    "googletest:gtest",
+  ]
 
   include_dirs = [
     "$ace_root",

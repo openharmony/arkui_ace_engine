@@ -25,8 +25,8 @@ group("benchmark") {
   deps = []
 
   deps += [
-    "ace_baseline(${host_toolchain})",
-    "components:components",
+    ":ace_baseline",
+    "components:ace_components",
   ]
 }
 
@@ -35,7 +35,7 @@ group("benchmark_linux") {
   deps = []
 
   deps += [
-    "ace_baseline(${host_toolchain})",
-    "components:components(${host_toolchain})",
+    ":ace_baseline(${host_toolchain})",
+    "components:ace_components(${host_toolchain})",
   ]
 }
