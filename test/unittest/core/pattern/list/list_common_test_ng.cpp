@@ -375,7 +375,7 @@ int32_t ListCommonTestNg::FindFocusNodeIndexInGroup(
             focusIndex = index;
         }
     }
-    if (groupIndexInList != -1 && focusNode != nullptr) {
+    if (groupIndexInList != -1 && focusNode != nullptr && groupItemNum != 0) {
         focusIndex = focusIndex % groupItemNum;
     }
     return focusIndex;

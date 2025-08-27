@@ -436,7 +436,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     float expectOffset = HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
-    auto footerIndex  = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footerIndex  = 1 + GROUP_ITEM_NUMBER; // HeaderCount + GroupItemNumber
     EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), GROUP_HEADER_LEN);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_MAIN_SIZE);
