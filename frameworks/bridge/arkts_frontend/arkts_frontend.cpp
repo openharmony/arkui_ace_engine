@@ -367,6 +367,11 @@ void* ArktsFrontend::GetEnv()
     return ArktsAniUtils::GetAniEnv(vm_);
 }
 
+ani_vm *ArktsFrontend::GetVM()
+{
+    return vm_;
+}
+
 void* ArktsFrontend::PushExtender(
     const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
 {
