@@ -392,8 +392,8 @@ private:
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     bool isGreatWrapperWidth_ = false;
-    double foldCreaseTop_ = 0.0f;
-    double foldCreaseBottom_ = 0.0f;
+    double foldCreaseTop_ = 0.0;
+    double foldCreaseBottom_ = 0.0;
     bool isHalfFoldHover_ = false;
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;
