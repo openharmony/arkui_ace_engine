@@ -1215,6 +1215,40 @@ HWTEST_F(AppBarTestNg, RectChangeListener003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestAppBgColorCallBack030
+ * @tc.desc: Test AppBgColorCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppBgColorCallBack030, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetAppBgColor(Color::RED);
+
+    bool isExecute = false;
+    auto callback = [&isExecute](const std::string& name, const std::string& value) mutable {
+        isExecute = true;
+    };
+
+    custom->SetCustomCallback(std::move(callback));
+    pattern->AppBgColorCallBack();
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
  * @tc.name: TestGetAppBarRect003
  * @tc.desc: Test GetAppBarRect
  * @tc.type: FUNC
