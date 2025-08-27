@@ -47,6 +47,7 @@ public:
     static void AddCustomRender(FrameNode* frameNode,
                                 const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender);
     static void AddShaderImageTexture(FrameNode* frameNode, const std::string& path);
+    static void SetModelSource(FrameNode* frameNode, const std::string& value);
     static void SetBackground(FrameNode* frameNode, const std::string& value);
     static void SetShader(FrameNode* frameNode, const std::string& path);
     static void SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width);

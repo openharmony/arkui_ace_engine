@@ -19,6 +19,7 @@
 #include "animation/animation_ani_impl.h"
 #include "canvas/canvas_module.h"
 #include "common/common_module.h"
+#include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
@@ -1150,7 +1151,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
-        }
+        },
+        ani_native_function {
+            "_Component3D_SetScene",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetScene)
+        },
+        ani_native_function {
+            "_Component3D_SetWidget",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

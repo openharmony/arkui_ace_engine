@@ -15527,47 +15527,7 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
-    writeSceneOptions(value: SceneOptions): void {
-        let valueSerializer : Serializer = this
-        const value_scene  = value.scene
-        let value_scene_type : int32 = RuntimeType.UNDEFINED
-        value_scene_type = runtimeType(value_scene)
-        valueSerializer.writeInt8(value_scene_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_scene_type)) {
-            const value_scene_value  = value_scene!
-            let value_scene_value_type : int32 = RuntimeType.UNDEFINED
-            value_scene_value_type = runtimeType(value_scene_value)
-            if ((RuntimeType.STRING == value_scene_value_type) || (RuntimeType.OBJECT == value_scene_value_type)) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_scene_value_0  = value_scene_value as ResourceStr
-                let value_scene_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_scene_value_0_type = runtimeType(value_scene_value_0)
-                if (RuntimeType.STRING == value_scene_value_0_type) {
-                    valueSerializer.writeInt8(0 as int32)
-                    const value_scene_value_0_0  = value_scene_value_0 as string
-                    valueSerializer.writeString(value_scene_value_0_0)
-                }
-                else if (RuntimeType.OBJECT == value_scene_value_0_type) {
-                    valueSerializer.writeInt8(1 as int32)
-                    const value_scene_value_0_1  = value_scene_value_0 as Resource
-                    valueSerializer.writeResource(value_scene_value_0_1)
-                }
-            }
-            else if (TypeChecker.isScene(value_scene_value)) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_scene_value_1  = value_scene_value as Scene
-                valueSerializer.writeScene(value_scene_value_1)
-            }
-        }
-        const value_modelType  = value.modelType
-        let value_modelType_type : int32 = RuntimeType.UNDEFINED
-        value_modelType_type = runtimeType(value_modelType)
-        valueSerializer.writeInt8(value_modelType_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_modelType_type)) {
-            const value_modelType_value  = (value_modelType as ModelType)
-            valueSerializer.writeInt32(TypeChecker.ModelType_ToNumeric(value_modelType_value))
-        }
-    }
+    writeSceneOptions(value: SceneOptions): void {}
     writeScrollOptions(value: ScrollOptions): void {
         let valueSerializer : Serializer = this
         const value_xOffset  = value.xOffset

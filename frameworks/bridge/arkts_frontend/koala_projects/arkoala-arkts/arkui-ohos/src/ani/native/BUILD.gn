@@ -69,6 +69,10 @@ ohos_shared_library("arkoala_native_ani") {
     "node_adapter/node_adapter_module.cpp",
   ]
 
+  if (defined(model_component_support) && model_component_support) {
+    sources += [ "component3d/component3d_module_methods.cpp" ]
+  }
+
   external_deps = [
     "graphic_2d:drawing_ani",
     "hilog:libhilog",
@@ -81,6 +85,10 @@ ohos_shared_library("arkoala_native_ani") {
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
   ]
+
+  if (defined(model_component_support) && model_component_support) {
+    external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+  }
 
   configs = [ "$ace_root:ace_config" ]
   defines = []

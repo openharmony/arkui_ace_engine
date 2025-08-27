@@ -666,6 +666,11 @@ struct ArkUIAniForEachNodeModifier {
     ani_long (*constructForEachNode)(ani_int);
 };
 
+struct ArkUIAniComponent3DModifier {
+    void (*setScene)(ArkUINodeHandle node, void* scene, int32_t modelType);
+    void (*setWidget)(ArkUINodeHandle node, const std::string& scenePath, int32_t modelType);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -698,6 +703,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
     const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
+    const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
