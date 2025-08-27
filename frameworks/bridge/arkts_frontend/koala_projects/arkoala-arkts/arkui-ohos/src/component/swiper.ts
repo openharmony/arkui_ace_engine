@@ -895,6 +895,7 @@ export interface SwiperAttribute extends CommonMethod {
     vertical(value: boolean | undefined): this
     itemSpace(value: number | string | undefined): this
     displayMode(value: SwiperDisplayMode | undefined): this
+    cachedCount(count: number | undefined): this
     cachedCount(count: number | undefined, isShown?: boolean): this
     effectMode(value: EdgeEffect | undefined): this
     disableSwipe(value: boolean | undefined): this
@@ -974,6 +975,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
         return this
     }
     public displayMode(value: SwiperDisplayMode | undefined): this {
+        return this
+    }
+    public cachedCount(count: number | undefined): this {
         return this
     }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
@@ -1158,22 +1162,20 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
+    public cachedCount(count: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const value_casted = count as (number | undefined)
+            this.getPeer()?.cachedCount0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
         if (this.checkPriority("cachedCount")) {
-            const count_type = runtimeType(count)
-            const isShown_type = runtimeType(isShown)
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == isShown_type)) {
-                const value_casted = count as (number | undefined)
-                this.getPeer()?.cachedCount0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == isShown_type) || (RuntimeType.UNDEFINED == isShown_type))) {
-                const count_casted = count as (number | undefined)
-                const isShown_casted = isShown as (boolean | undefined)
-                this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const count_casted = count as (number | undefined)
+            const isShown_casted = isShown as (boolean | undefined)
+            this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
+            return this
         }
         return this
     }
