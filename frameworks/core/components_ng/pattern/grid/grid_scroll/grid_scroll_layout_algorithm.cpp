@@ -64,7 +64,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
         isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         if (isMainFix) {
-            frameSize_.SetMainSize(Infinity<float>(), axis);
+            frameSize_.SetMainSize(LayoutInfinity<float>(), axis);
         }
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
             gridLayoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
@@ -1707,8 +1707,8 @@ void GridScrollLayoutAlgorithm::CalculateLineHeightForLargeItem(int32_t lineInde
 LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSize, float crossSize,
     const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const
 {
-    float itemMainSize =
-        gridLayoutProperty->IsConfiguredScrollable() ? Infinity<float>() : mainSize / static_cast<float>(mainCount_);
+    float itemMainSize = gridLayoutProperty->IsConfiguredScrollable() ? LayoutInfinity<float>()
+                                                                      : mainSize / static_cast<float>(mainCount_);
 
     auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
     float itemCrossSize = GridUtils::GetCrossGap(gridLayoutProperty, frameSize, axis_) * (crossSpan - 1);

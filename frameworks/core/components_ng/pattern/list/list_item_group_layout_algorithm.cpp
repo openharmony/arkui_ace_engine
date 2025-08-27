@@ -298,7 +298,7 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
-    headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    headerFooterLayoutConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     RefPtr<LayoutWrapper> headerWrapper = headerIndex_ >= 0 ?
         layoutWrapper->GetOrCreateChildByIndex(headerIndex_) : nullptr;
     RefPtr<LayoutWrapper> footerWrapper = footerIndex_ >= 0 ?
@@ -358,7 +358,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     auto crossSizeOptional = selfIdealSize.CrossSize(axis_);
     if (crossSizeOptional.has_value()) {
         float crossSize = crossSizeOptional.value();
@@ -551,8 +551,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         return;
     }
     if (targetIndex_) {
-        startPos_ = -Infinity<float>();
-        endPos_ = Infinity<float>();
+        startPos_ = -LayoutInfinity<float>();
+        endPos_ = LayoutInfinity<float>();
         targetIndex_ = isStackFromEnd_ ? totalItemCount_ - targetIndex_.value() - 1 : targetIndex_.value();
     }
     if (jumpIndex_.has_value()) {

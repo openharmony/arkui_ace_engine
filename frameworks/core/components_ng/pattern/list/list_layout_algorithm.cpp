@@ -52,7 +52,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis);
     auto crossSize = selfIdealSize.CrossSize(axis);
     if (crossSize.has_value()) {
         contentConstraint.maxSize.SetCrossSize(crossSize.value(), axis);
@@ -146,7 +146,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             // use parent max size first.
             auto parentMaxSize = contentConstraint.maxSize;
-            contentMainSize_ = isMainFix ? Infinity<float>() : GetMainAxisSize(parentMaxSize, axis_);
+            contentMainSize_ = isMainFix ? LayoutInfinity<float>() : GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

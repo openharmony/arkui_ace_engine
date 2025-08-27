@@ -637,10 +637,10 @@ protected:
     PositionMap cachedItemPosition_;
     PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
-    float currentOffset_ = 0.0f;
-    float adjustOffset_ = 0.0f;
-    float totalOffset_ = 0.0f;
-    float currentDelta_ = 0.0f;
+    double currentOffset_ = 0.0;
+    double adjustOffset_ = 0.0;
+    double totalOffset_ = 0.0;
+    double currentDelta_ = 0.0;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     std::optional<float> layoutEndMainPos_;

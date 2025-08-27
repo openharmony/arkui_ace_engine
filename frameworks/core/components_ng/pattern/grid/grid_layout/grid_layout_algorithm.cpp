@@ -254,7 +254,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = info_.axis_;
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
-    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
+    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), LayoutInfinity<float>())) {
         idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
         TAG_LOGI(AceLogTag::ACE_GRID, "size of main axis value is infinity, use percent reference");
     }

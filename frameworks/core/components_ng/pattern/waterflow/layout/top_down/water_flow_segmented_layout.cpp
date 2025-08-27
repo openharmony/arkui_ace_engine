@@ -531,7 +531,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     if (itemsCrossSize_[seg].size() == 1 && item->GetLayoutProperty()->GetNeedLazyLayout()) {
         ViewPosReference ref {
             .viewPosStart = 0,
-            .viewPosEnd = info_->duringPositionCalc_ ? Infinity<float>() : mainSize_ + info_->expandHeight_,
+            .viewPosEnd = info_->duringPositionCalc_ ? LayoutInfinity<float>() : mainSize_ + info_->expandHeight_,
             .referencePos = position.second + info_->currentOffset_,
             .referenceEdge = ReferenceEdge::START,
             .axis = axis_,

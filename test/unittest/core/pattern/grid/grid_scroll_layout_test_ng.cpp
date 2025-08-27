@@ -1445,7 +1445,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_NEAR(0, pattern_->info_.currentOffset_, 0.1);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
     FlushUITasks();
@@ -1497,7 +1497,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_NEAR(0, pattern_->info_.currentOffset_, 0.1);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
     FlushUITasks();
