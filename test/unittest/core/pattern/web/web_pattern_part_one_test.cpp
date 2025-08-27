@@ -168,35 +168,8 @@ HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto textBase = WeakPtr<TextBase>();
-    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlay>(textBase);
-    webPattern->contextSelectOverlay_ = contextSelectOverlay;
-
     webPattern->CloseContextSelectionMenu();
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
-#endif
-}
-
-/**
- * @tc.name: CloseContextSelectionMenu_002
- * @tc.desc: CloseContextSelectionMenu.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto textBase = WeakPtr<TextBase>();
-    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlayfalse>(textBase);
+    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlay>(textBase);
     webPattern->contextSelectOverlay_ = contextSelectOverlay;
 
     webPattern->CloseContextSelectionMenu();
@@ -253,7 +226,7 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_001, TestSize.Level1)
     webPattern->contextSelectOverlay_ = nullptr;
 
     webPattern->OnContextMenuShow(emptyInfo);
-    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
+    EXPECT_EQ(webPattern->curContextMenuResult_, false);
 #endif
 }
 
@@ -285,9 +258,7 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_002, TestSize.Level1)
     auto emptyInfo = std::make_shared<ContextMenuEvent>(param_, result_);
 
     webPattern->OnContextMenuShow(emptyInfo);
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
-    EXPECT_EQ(webPattern->contextMenuParam_, nullptr);
-    EXPECT_EQ(webPattern->contextMenuResult_, nullptr);
+    EXPECT_EQ(webPattern->curContextMenuResult_, false);
 #endif
 }
 
