@@ -123,6 +123,7 @@ void DialogPattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
     InitHostWindowRect();
     auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
         auto pattern = weak.Upgrade();
@@ -144,6 +145,14 @@ void DialogPattern::RegisterHoverModeChangeCallback()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
+        auto window = context->GetWindow();
+        CHECK_NULL_VOID(window);
+        if (window->IsHide()) {
+            TAG_LOGD(
+                AceLogTag::ACE_DIALOG, "Set needRefreshOnWindowShow to true for dialog/%{public}d.", host->GetId());
+            pattern->SetNeedRefreshOnWindowShow(true);
+            return;
+        }
         AnimationOption optionPosition;
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
         optionPosition.SetCurve(motion);
@@ -161,12 +170,24 @@ void DialogPattern::RegisterHoverModeChangeCallback()
     UpdateHoverModeChangedCallbackId(hoverModeCallId);
 }
 
+void DialogPattern::OnWindowShow()
+{
+    if (refreshOnWindowShow_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "Refresh dialog/%{public}d layout in the foreground.", host->GetId());
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        refreshOnWindowShow_ = false;
+    }
+}
+
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }

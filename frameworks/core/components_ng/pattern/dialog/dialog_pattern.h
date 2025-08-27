@@ -356,6 +356,11 @@ public:
         transitionNodeCount_++;
     }
 
+    void SetNeedRefreshOnWindowShow(bool refreshOnWindowShow)
+    {
+        refreshOnWindowShow_ = refreshOnWindowShow;
+    }
+
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
 
@@ -445,6 +450,7 @@ private:
     void OnDetachFromMainTree() override;
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void OnWindowShow() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -489,6 +495,7 @@ private:
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
     bool isDialogDisposed_ = false;
+    bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
 };
 } // namespace OHOS::Ace::NG
