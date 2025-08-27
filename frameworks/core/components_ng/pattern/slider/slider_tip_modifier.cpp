@@ -64,8 +64,7 @@ constexpr Dimension SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE = 28.0_vp;
 
 } // namespace
 
-SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc,
-    std::function<void()> onFinishEventTipSize)
+SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc)
     : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
@@ -73,8 +72,7 @@ SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> 
       opacityScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_OPACITY_MIN_SCALE)),
       content_(AceType::MakeRefPtr<PropertyString>("")), bubbleVertex_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       sliderGlobalOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
-      getBubbleVertexFunc_(std::move(getBubbleVertexFunc)),
-      onFinishEventTipSize_(std::move(onFinishEventTipSize))
+      getBubbleVertexFunc_(std::move(getBubbleVertexFunc))
 {
     AttachProperty(tipFlag_);
     AttachProperty(contentOffset_);
@@ -386,7 +384,7 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
 
 void SliderTipModifier::onDraw(DrawingContext& context)
 {
-    if ((!tipFlag_->Get()) || (tipFlag_->Get() && GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE))) {
+    if (tipFlag_->Get() || GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE)) {
         BuildParagraph();
         UpdateBubbleSize();
         PaintTip(context);
@@ -434,7 +432,7 @@ void SliderTipModifier::SetBubbleDisappearAnimation(const RefPtr<FrameNode>& hos
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->opacityScale_->Set(BUBBLE_OPACITY_MIN_SCALE);
-    }, onFinishEventTipSize_, nullptr, host->GetContextRefPtr());
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void SliderTipModifier::SetTipFlag(bool flag, const RefPtr<FrameNode>& host)
