@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new TextOverlayThemeWrapper());
+            auto wrapper = AceType::MakeRefPtr<TextOverlayThemeWrapper>();
             auto theme = AceType::DynamicCast<TextOverlayTheme>(wrapper);
             if (!themeConstants) {
                 LOGW("Build AppTheme error, themeConstants is null!");
