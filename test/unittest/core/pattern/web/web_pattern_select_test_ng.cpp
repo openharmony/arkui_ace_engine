@@ -694,7 +694,6 @@ HWTEST_F(WebPatternSelectTestNg, OnTooltip_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->tooltipId_ = 0;
-    ASSERT_EQ(webPattern->tooltipId_, 0);
     std::string tooltip = "";
     webPattern->OnTooltip(tooltip);
     ASSERT_NE(webPattern->tooltipId_, -1);
@@ -751,7 +750,6 @@ HWTEST_F(WebPatternSelectTestNg, OnPopupSize_002, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     int32_t x = 1, y = 2, width = 1, height = 1;
     webPattern->renderContextForPopupSurface_ = nullptr;
-    ASSERT_EQ(webPattern->renderContextForPopupSurface_, nullptr);
     webPattern->OnPopupSize(x, y, width, height);
 #endif
 }
@@ -806,7 +804,6 @@ HWTEST_F(WebPatternSelectTestNg, OnPopupShow_002, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     bool show = false;
     webPattern->renderContextForPopupSurface_ = nullptr;
-    ASSERT_EQ(webPattern->renderContextForPopupSurface_, nullptr);
     webPattern->OnPopupShow(show);
 #endif
 }

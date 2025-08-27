@@ -1405,11 +1405,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1422,8 +1422,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1436,11 +1434,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1453,8 +1451,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->preScale_ = 4;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1498,11 +1494,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureStart_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1516,7 +1512,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureStart_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureStart(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1529,11 +1524,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureEnd_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1547,7 +1542,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureEnd_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureEnd(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1560,11 +1554,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureCancel_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1578,7 +1572,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureCancel_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureCancel(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 

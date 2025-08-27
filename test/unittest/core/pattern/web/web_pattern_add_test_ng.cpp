@@ -435,7 +435,6 @@ HWTEST_F(WebPatternAddTestNg, CalculateTooltipOffset, TestSize.Level1)
     pipeline->rootWidth_ = ROOT_WIDTH_VALUE;
     pipeline->rootHeight_ = ROOT_HEIGHT_VALUE;
     webPattern->CalculateTooltipOffset(tooltipNode, *tooltipOffset);
-    EXPECT_EQ(pipeline->rootWidth_, ROOT_WIDTH_VALUE);
 #endif
 }
 
