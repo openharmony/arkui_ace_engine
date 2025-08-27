@@ -258,6 +258,9 @@ export class SubTabBarStyle {
     constructor(content: ResourceStr | ComponentContent) {
         this._content = content
     }
+    constructor(content: ResourceStr) {
+        this._content = content
+    }
     public static of(content: ResourceStr | ResourceStr | ComponentContent): SubTabBarStyle {
         return new SubTabBarStyle(content)
     }
