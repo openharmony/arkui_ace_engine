@@ -5994,6 +5994,7 @@ void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t element
 
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, rootNode);
+    commonProperty.checkEmbedNode = false;
     int64_t nodeId = elementId;
     if (elementId == -1) {
         nodeId = rootNode->GetAccessibilityId();
