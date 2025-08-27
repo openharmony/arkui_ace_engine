@@ -1374,7 +1374,7 @@ export function SwiperImpl(
         content_?.()
     })
 }
-export class Indicator {
+export class Indicator<T> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1389,32 +1389,32 @@ export class Indicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length): T {
         this._left = value
-        return this
+        return this as Object as T
     }
-    top(value: Length): this {
+    top(value: Length): T {
         this._top = value
-        return this
+        return this as Object as T
     }
-    right(value: Length): this {
+    right(value: Length): T {
         this._right = value
-        return this
+        return this as Object as T
     }
-    bottom(value: Length): this {
+    bottom(value: Length): T {
         this._bottom = value
-        return this
+        return this as Object as T
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics): T {
         this._start = value
-        return this
+        return this as Object as T
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics): T {
         this._end = value
-        return this
+        return this as Object as T
     }
 }
-export class DotIndicator {
+export class DotIndicator extends Indicator<DotIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1431,6 +1431,7 @@ export class DotIndicator {
     _maxDisplayCount?: number | undefined
     _space?: LengthMetrics | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()
@@ -1499,7 +1500,7 @@ export class DotIndicator {
         return this
     }
 }
-export class DigitIndicator {
+export class DigitIndicator extends Indicator<DigitIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1511,6 +1512,7 @@ export class DigitIndicator {
     _digitFont?: Font | undefined
     _selectedDigitFont?: Font | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()
