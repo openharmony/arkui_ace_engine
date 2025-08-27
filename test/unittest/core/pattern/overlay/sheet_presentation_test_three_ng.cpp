@@ -1866,6 +1866,9 @@ HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight002, TestSize.Lev
 
     bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
     ASSERT_TRUE(isNeedChangeScrollHeight);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_FALSE(isNeedChangeScrollHeight);
     auto keyboardHeight = 500.0f;
     sheetPattern->SetKeyboardHeight(keyboardHeight);
     isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);

@@ -3798,7 +3798,7 @@ bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
     if (it == sheetDetentHeight_.end()) {
         return false;
     }
-    if (IsAvoidingKeyboard()) {
+    if (IsAvoidingKeyboard() || !IsSheetBottomStyle()) {
         return false;
     }
     float lowestDetentHeight = *it;
