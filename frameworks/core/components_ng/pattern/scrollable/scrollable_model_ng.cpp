@@ -381,6 +381,7 @@ void ScrollableModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScroll
 
 void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     const double invalidValue = -1.; // allow pattern to set proper default value

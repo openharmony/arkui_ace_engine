@@ -2103,6 +2103,10 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 }
             }
             auto currentIndex = info_.endIndex_ + 1;
+            auto currentLineHeight = info_.lineHeightMap_.find(currentLine);
+            if (currentLineHeight != info_.lineHeightMap_.end()) {
+                cellAveLength_ = currentLineHeight->second;
+            }
             for (uint32_t i = line->second.size(); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
                 CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);

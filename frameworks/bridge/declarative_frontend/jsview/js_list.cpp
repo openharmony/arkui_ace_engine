@@ -916,6 +916,7 @@ void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
     JSClass<JSList>::StaticMethod("create", &JSList::Create);
+
     JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
     JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
     JSClass<JSList>::StaticMethod("clip", &JSScrollable::JsClip);
@@ -955,6 +956,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
     JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
+
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -979,9 +981,9 @@ void JSListScroller::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListScroller>::Declare("ListScroller");
     JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
-    JSClass<JSListScroller>::CustomMethod("scrollToItemInGroup", &JSListScroller::ScrollToItemInGroup);
     JSClass<JSListScroller>::CustomMethod("closeAllSwipeActions", &JSListScroller::CloseAllSwipeActions);
     JSClass<JSListScroller>::CustomMethod("getVisibleListContentInfo", &JSListScroller::GetVisibleListContentInfo);
+    JSClass<JSListScroller>::CustomMethod("scrollToItemInGroup", &JSListScroller::ScrollToItemInGroup);
     JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
         JSListScroller::Destructor);
 }

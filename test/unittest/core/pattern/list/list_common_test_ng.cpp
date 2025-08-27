@@ -4715,7 +4715,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-
     std::vector<ResourceObjectParams> params;
     resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
     resMaxObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);

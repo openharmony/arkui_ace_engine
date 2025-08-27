@@ -36,8 +36,3 @@ ace_unittest("scroll_test_ng") {
     "scroll_zoom_test.cpp",
   ]
 }
-
-group("scroll_pattern_linux_test") {
-  testonly = true
-  deps = [ ":scroll_test_ng(${host_toolchain})" ]
-}
