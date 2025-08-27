@@ -67,7 +67,9 @@ void TextModelImpl::SetTextColor(const Color& value)
 }
 
 void TextModelImpl::SetTextShadow(const std::vector<Shadow>& value) {}
+
 void TextModelImpl::SetTextCaretColor(const Color& value) {}
+
 void TextModelImpl::SetSelectedBackgroundColor(const Color& value) {}
 
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
@@ -212,9 +214,9 @@ void TextModelImpl::SetLetterSpacing(const Dimension& value)
 
 void TextModelImpl::SetLineSpacing(const Dimension& value) {}
 
-void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
-
 void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
+
+void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
 
 void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
 
