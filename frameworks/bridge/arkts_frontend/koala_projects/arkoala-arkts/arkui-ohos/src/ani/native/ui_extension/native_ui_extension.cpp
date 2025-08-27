@@ -79,7 +79,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
     std::array methods = {
         ani_native_function {
             "_Uiextension_Set_Option",
-            nullptr, reinterpret_cast<void *>(SetUiextensionWant)},
+            nullptr, reinterpret_cast<void *>(SetUiextensionOption)},
         ani_native_function {
             "_Uiextension_Set_Want",
             nullptr, reinterpret_cast<void *>(SetUiextensionWant)},
@@ -197,7 +197,6 @@ ani_status NativeUiExtension::SetUiextensionOption(
         "SetUiextensionOption isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d,"
         "isWindowModeFollowHost: %{public}d, placeholderMap size: %{public}d",
         isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
-
 #ifdef WINDOW_SCENE_SUPPORTED
     bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
     NG::UIExtensionAdapter::UpdateUecConfig(frameNode, isTransferringCaller, densityDpi);
@@ -259,25 +258,24 @@ ani_status NativeUiExtension::SetOnResult(
     ani_ref onResultRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onResultGlobalRef;
     env->GlobalReference_Create(onResultRef, &onResultGlobalRef);
-    auto onResultCallback = [env, onResultGlobalRef] (int32_t code, const AAFwk::Want& want) {
-        ani_vm* vm = nullptr;
-        env->GetVM(&vm);
-        auto onResultAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onResultGlobalRef);
-        auto onResultCallback = [onResultAniReadyCallbackInfo] (int32_t code, const AAFwk::Want& want) {
-            if (onResultAniReadyCallbackInfo == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onResultAniReadyCallbackInfo is nullptr");
-                return;
-            }
-    
-            ani_ref onResultGlobalRef = onResultAniReadyCallbackInfo->GetOnGlobalRef();
-            ani_env* env = onResultAniReadyCallbackInfo->GetEnvRef();
-            if (onResultGlobalRef == nullptr || env == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onResultGlobalRef or env is nullptr");
-                return;
-            }
-    
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onResultAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onResultGlobalRef);
+    auto onResultCallback = [onResultAniReadyCallbackInfo] (int32_t code, const AAFwk::Want& want) {
+        if (onResultAniReadyCallbackInfo == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onResultAniReadyCallbackInfo is nullptr");
+            return;
+        }
+
+        ani_ref onResultGlobalRef = onResultAniReadyCallbackInfo->GetOnGlobalRef();
+        ani_env* env = onResultAniReadyCallbackInfo->GetEnvRef();
+        if (onResultGlobalRef == nullptr || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onResultGlobalRef or env is nullptr");
+            return;
+        }
+
         auto fnObj = reinterpret_cast<ani_fn_object>(onResultGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
@@ -430,25 +428,24 @@ ani_status NativeUiExtension::SetOnError(
     ani_ref onErrorRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onErrorGlobalRef;
     env->GlobalReference_Create(onErrorRef, &onErrorGlobalRef);
-    auto onErrorCallback = [env, onErrorGlobalRef] (
-        ani_vm* vm = nullptr;
-        env->GetVM(&vm);
-        auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
-        auto onErrorCallback = [onErrorAniReadyCallbackInfo] (
-            int32_t code, const std::string& name, const std::string& message) {
-            if (onErrorAniReadyCallbackInfo == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onErrorAniReadyCallbackInfo is nullptr");
-                return;
-            }
-    
-            ani_ref onErrorGlobalRef = onErrorAniReadyCallbackInfo->GetOnGlobalRef();
-            ani_env* env = onErrorAniReadyCallbackInfo->GetEnvRef();
-            if (onErrorGlobalRef == nullptr || env == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onErrorGlobalRef or env is nullptr");
-                return;
-            }
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
+    auto onErrorCallback = [onErrorAniReadyCallbackInfo] (
+        int32_t code, const std::string& name, const std::string& message) {
+        if (onErrorAniReadyCallbackInfo == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onErrorAniReadyCallbackInfo is nullptr");
+            return;
+        }
+
+        ani_ref onErrorGlobalRef = onErrorAniReadyCallbackInfo->GetOnGlobalRef();
+        ani_env* env = onErrorAniReadyCallbackInfo->GetEnvRef();
+        if (onErrorGlobalRef == nullptr || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onErrorGlobalRef or env is nullptr");
+            return;
+        }
 
         int32_t code, const std::string& name, const std::string& message) {
         auto fnObj = reinterpret_cast<ani_fn_object>(onErrorGlobalRef);
@@ -500,25 +497,24 @@ ani_status NativeUiExtension::SetOnRecive(
     ani_ref onReciveRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onReciveGlobalRef;
     env->GlobalReference_Create(onReciveRef, &onReciveGlobalRef);
-    auto onReciveCallback = [env, onReciveGlobalRef] (const AAFwk::WantParams& params) {
-        ani_vm* vm = nullptr;
-        env->GetVM(&vm);
-        auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
-        auto onReciveCallback = [onReciveAniReadyCallbackInfo] (const AAFwk::WantParams& params) {
-            if (onReciveAniReadyCallbackInfo == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onReciveAniReadyCallbackInfo is nullptr");
-                return;
-            }
-    
-            ani_ref onReciveGlobalRef = onReciveAniReadyCallbackInfo->GetOnGlobalRef();
-            ani_env* env = onReciveAniReadyCallbackInfo->GetEnvRef();
-            if (onReciveGlobalRef == nullptr || env == nullptr) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "onReciveGlobalRef or env is nullptr");
-                return;
-            }
-    
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
+    auto onReciveCallback = [onReciveAniReadyCallbackInfo] (const AAFwk::WantParams& params) {
+        if (onReciveAniReadyCallbackInfo == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onReciveAniReadyCallbackInfo is nullptr");
+            return;
+        }
+
+        ani_ref onReciveGlobalRef = onReciveAniReadyCallbackInfo->GetOnGlobalRef();
+        ani_env* env = onReciveAniReadyCallbackInfo->GetEnvRef();
+        if (onReciveGlobalRef == nullptr || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onReciveGlobalRef or env is nullptr");
+            return;
+        }
+
         auto fnObj = reinterpret_cast<ani_fn_object>(onReciveGlobalRef);
         auto wantparamArgs = OHOS::AppExecFwk::WrapWantParams(env, params);
         if (wantparamArgs == nullptr) {
