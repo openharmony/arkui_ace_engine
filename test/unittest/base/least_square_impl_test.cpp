@@ -70,7 +70,7 @@ HWTEST_F(LeastSquareImplTest, LeastSquareImplTest001, TestSize.Level1)
 
 /**
  * @tc.name: LeastSquareImplTest002
- * @tc.desc: Test all functions of the class LeastSquareImpl.
+ * @tc.desc: Test ResetValsFromRaw of the class LeastSquareImpl.
  * @tc.type: FUNC
  */
 HWTEST_F(LeastSquareImplTest, LeastSquareImplTest002, TestSize.Level1)
