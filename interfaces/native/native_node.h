@@ -1228,11 +1228,19 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32: position along the x-axis, in px. \n
      * .value[1].f32: position along the y-axis, in px. \n
-     * \n
+     * .value[2].?i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].?i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: position along the x-axis, in px. \n
      * .value[1].f32: position along the y-axis, in px. \n
+     * .value[2].i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
      *
+     * @since 21
      */
     NODE_BACKGROUND_IMAGE_POSITION,
     /**

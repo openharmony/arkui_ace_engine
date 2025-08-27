@@ -619,3 +619,188 @@ HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAndWaitAPITest001, TestSize.Leve
     auto ret = OH_ArkUI_PostUITaskAndWait(uiContext, nullptr, [](void* asyncUITaskData){});
     EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: NativeBackgroundImagePositionTest001
+ * @tc.desc: Test NativeBackgroundImagePositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto row = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(row, nullptr);
+    nodeAPI->addChild(column, row);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(column), 1);
+
+    /**
+     * @tc.steps: step2. test backgroundImagePositon params error
+     */
+    ArkUI_NumberValue value[] = { { .f32 = 100.0 }, { .f32 = 100.0 } };
+    ArkUI_AttributeItem backgroundImagePosition = { .value = value, .size = 0 };
+    auto ret = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_AttributeItem backgroundImagePosition2 = { .value = value, .size = 5 };
+    auto ret2 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeBackgroundImagePositionTest002
+ * @tc.desc: Test NativeBackgroundImagePositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto row = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(row, nullptr);
+    nodeAPI->addChild(column, row);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(column), 1);
+
+    /**
+     * @tc.steps: step2. test backgroundImagePositon with position
+     */
+    ArkUI_NumberValue value[] = { { .f32 = 100.0 }, { .f32 = 100.0 } };
+    ArkUI_AttributeItem backgroundImagePosition = { .value = value, .size = 2 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition);
+    auto ret = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_NEAR(ret->value[0].f32, 100.0f, 0.01f);
+    EXPECT_NEAR(ret->value[1].f32, 100.0f, 0.01f);
+}
+
+/**
+ * @tc.name: NativeBackgroundImagePositionTest003
+ * @tc.desc: Test NativeBackgroundImagePositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto row = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUI_NumberValue widthValue3[] = { 300 };
+    ArkUI_AttributeItem widthItem3 = { widthValue3, 1 };
+    ArkUI_NumberValue heightValue3[] = { 300 };
+    ArkUI_AttributeItem heightItem3 = { heightValue3, 1 };
+    ArkUI_NumberValue bgSizeVal[] = { { .f32 = 100 }, { .f32 = 100 } };
+    ArkUI_AttributeItem bgSize = { bgSizeVal, 2 };
+    nodeAPI->setLengthMetricUnit(row, ArkUI_LengthMetricUnit::ARKUI_LENGTH_METRIC_UNIT_PX);
+    nodeAPI->setAttribute(row, NODE_WIDTH, &widthItem3);
+    nodeAPI->setAttribute(row, NODE_HEIGHT, &heightItem3);
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_SIZE, &bgSize);
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(row, nullptr);
+    nodeAPI->addChild(column, row);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(column), 1);
+
+    /**
+     * @tc.steps: step2. test backgroundImagePositon with position and alignment
+     */
+    ArkUI_NumberValue value[] = { { .f32 = 100.0 }, { .f32 = 100.0 }, { .i32 = 4 }, { .i32 = 0 } };
+    ArkUI_AttributeItem backgroundImagePosition = { .value = value, .size = 3 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition);
+    auto ret = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_NEAR(ret->value[0].f32, 100.0f, 0.01f);
+    EXPECT_NEAR(ret->value[1].f32, 100.0f, 0.01f);
+    EXPECT_EQ(ret->value[2].i32, 4);
+    EXPECT_EQ(ret->value[3].i32, 3);
+
+    /**
+     * @tc.steps: step3. test align and direction default
+     */
+    nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    value[2].i32 = -1;
+    ArkUI_AttributeItem backgroundImagePosition2 = { .value = value, .size = 3 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
+    auto ret2 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_EQ(ret2->value[2].i32, 0);
+    EXPECT_EQ(ret2->value[3].i32, 3);
+    nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    value[2].i32 = 9;
+    ArkUI_AttributeItem backgroundImagePosition3 = { .value = value, .size = 3 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
+    auto ret3 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_EQ(ret3->value[2].i32, 0);
+    EXPECT_EQ(ret3->value[3].i32, 3);
+}
+
+/**
+ * @tc.name: NativeBackgroundImagePositionTest004
+ * @tc.desc: Test NativeBackgroundImagePositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto row = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUI_NumberValue widthValue3[] = { 300 };
+    ArkUI_AttributeItem widthItem3 = { widthValue3, 1 };
+    ArkUI_NumberValue heightValue3[] = { 300 };
+    ArkUI_AttributeItem heightItem3 = { heightValue3, 1 };
+    ArkUI_NumberValue bgSizeVal[] = { { .f32 = 100 }, { .f32 = 100 } };
+    ArkUI_AttributeItem bgSize = {bgSizeVal, 2};
+    nodeAPI->setLengthMetricUnit(row, ArkUI_LengthMetricUnit::ARKUI_LENGTH_METRIC_UNIT_PX);
+    nodeAPI->setAttribute(row, NODE_WIDTH, &widthItem3);
+    nodeAPI->setAttribute(row, NODE_HEIGHT, &heightItem3);
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_SIZE, &bgSize);
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(row, nullptr);
+    nodeAPI->addChild(column, row);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(column), 1);
+
+    /**
+     * @tc.steps: step2. test backgroundImagePositon with position alignment and direction
+     */
+    ArkUI_NumberValue value[] = { { .f32 = 100.0 }, { .f32 = 100.0 }, { .i32 = 0 }, { .i32 = 0 } };
+    ArkUI_AttributeItem backgroundImagePosition = { .value = value, .size = 4 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition);
+    auto ret = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_NEAR(ret->value[0].f32, 100.0f, 0.01f);
+    EXPECT_NEAR(ret->value[1].f32, 100.0f, 0.01f);
+    EXPECT_EQ(ret->value[2].i32, 0);
+    EXPECT_EQ(ret->value[3].i32, 0);
+
+    /**
+     * @tc.steps: step3. test align and direction default
+     */
+    nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    value[3].i32 = -1;
+    ArkUI_AttributeItem backgroundImagePosition2 = { .value = value, .size = 4 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
+    auto ret2 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_EQ(ret2->value[2].i32, 0);
+    EXPECT_EQ(ret2->value[3].i32, 3);
+    nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    value[3].i32 = 2;
+    ArkUI_AttributeItem backgroundImagePosition3 = { .value = value, .size = 4 };
+    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
+    auto ret3 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
+    EXPECT_EQ(ret3->value[2].i32, 0);
+    EXPECT_EQ(ret3->value[3].i32, 3);
+}
