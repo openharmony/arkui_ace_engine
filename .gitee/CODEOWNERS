@@ -99,6 +99,8 @@ adapter/ohos/entrance/ui_event_impl.h @arkuiframework
 adapter/ohos/entrance/ui_session/ @arkuiframework
 adapter/ohos/entrance/utils.cpp @arkuiframework
 adapter/ohos/entrance/utils.h @arkuiframework
+adapter/ohos/entrance/image_task_pool_impl.h @arkui_image
+adapter/ohos/entrance/image_task_pool_impl.cpp @arkui_image
 adapter/ohos/entrance/window_free_container.cpp @arkuiframework
 adapter/ohos/entrance/vibrator/vibrator_utils.cpp @arkuiscroll
 adapter/ohos/entrance/window/drag_window_ohos.cpp @arkuievent

@@ -73,15 +73,15 @@ void ImageUtils::PostToBg(
     std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
     CHECK_NULL_VOID(task);
-#ifdef PREVIEW
+#if defined(PREVIEW) || defined(CROSS_PLATFORM)
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str(), priorityType);
-    return;
-#endif
+#else
     ImageTaskPool::GetInstance()->PostTask(
         [task, containerId] {
             ContainerScope scope(containerId);
             task();
         },
         name);
+#endif
 }
 } // namespace OHOS::Ace::NG
