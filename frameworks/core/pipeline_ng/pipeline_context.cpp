@@ -56,6 +56,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -4730,6 +4731,15 @@ void PipelineContext::SetAppBgColor(const Color& color)
     auto renderContext = stage->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(color);
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_VOID(appbar);
+    auto pattern = appbar->GetAtomicServicePattern();
+    CHECK_NULL_VOID(pattern);
+    auto atomicServicePattern = AceType::DynamicCast<AtomicServicePattern>(pattern);
+    CHECK_NULL_VOID(atomicServicePattern);
+    atomicServicePattern->AppBgColorCallBack();
 }
 
 void PipelineContext::SetAppTitle(const std::string& title)
