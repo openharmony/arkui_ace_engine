@@ -1593,7 +1593,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof BaseContext")
         }
     }
-    static isBaseEvent(value: Object | string | number | undefined | boolean, duplicated_target: boolean, duplicated_timestamp: boolean, duplicated_source: boolean, duplicated_axisHorizontal: boolean, duplicated_axisVertical: boolean, duplicated_pressure: boolean, duplicated_tiltX: boolean, duplicated_tiltY: boolean, duplicated_rollAngle: boolean, duplicated_sourceTool: boolean, duplicated_deviceId: boolean, duplicated_targetDisplayId: boolean): boolean {
+    static isBaseEvent(value: Object | string | number | undefined | boolean, duplicated_target: boolean, duplicated_timestamp: boolean, duplicated_source: boolean, duplicated_axisHorizontal: boolean, duplicated_axisVertical: boolean, duplicated_axisPinch: boolean, duplicated_pressure: boolean, duplicated_tiltX: boolean, duplicated_tiltY: boolean, duplicated_rollAngle: boolean, duplicated_sourceTool: boolean, duplicated_deviceId: boolean, duplicated_targetDisplayId: boolean): boolean {
         if ((!duplicated_target) && (value?.hasOwnProperty("target"))) {
             return true
         }
@@ -1619,6 +1619,9 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_axisVertical) && (value?.hasOwnProperty("axisVertical"))) {
+            return true
+        }
+        else if ((!duplicated_axisPinch) && (value?.hasOwnProperty("axisPinch"))) {
             return true
         }
         else if ((!duplicated_rollAngle) && (value?.hasOwnProperty("rollAngle"))) {

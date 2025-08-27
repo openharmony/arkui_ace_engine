@@ -781,12 +781,15 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     }
     napi_value napiAxisHorizontal = nullptr;
     napi_value napiAxisVertical = nullptr;
+    napi_value napiAxisPinch = nullptr;
     napi_value napiDeviceId = nullptr;
     napi_value napiTargetDisplayId = nullptr;
     napi_create_double(env_, gestureEventInfo.GetHorizontalAxis(), &napiAxisHorizontal);
     napi_set_named_property(env_, objValueEvent, "axisHorizontal", napiAxisHorizontal);
     napi_create_double(env_, gestureEventInfo.GetVerticalAxis(), &napiAxisVertical);
     napi_set_named_property(env_, objValueEvent, "axisVertical", napiAxisVertical);
+    napi_create_double(env_, gestureEventInfo.GetPinchAxisScale(), &napiAxisPinch);
+    napi_set_named_property(env_, objValueEvent, "axisPinch", napiAxisPinch);
     napi_create_double(env_, gestureEventInfo.GetDeviceId(), &napiDeviceId);
     napi_set_named_property(env_, objValueEvent, "deviceId", napiDeviceId);
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);

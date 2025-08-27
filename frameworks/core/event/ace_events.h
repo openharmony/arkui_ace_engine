@@ -259,6 +259,11 @@ public:
         return verticalAxis_;
     }
 
+    float GetPinchAxisScale() const
+    {
+        return pinchAxisScale_;
+    }
+
     void SetHorizontalAxis(float axis)
     {
         horizontalAxis_ = axis;
@@ -267,6 +272,11 @@ public:
     void SetVerticalAxis(float axis)
     {
         verticalAxis_ = axis;
+    }
+
+    void SetPinchAxisScale(float scale)
+    {
+        pinchAxisScale_ = scale;
     }
 
     void CopyConvertInfoFrom(const ConvertInfo& info)
@@ -308,6 +318,7 @@ protected:
     int32_t operatingHand_ = 0;
     float horizontalAxis_ = 0.0;
     float verticalAxis_ = 0.0;
+    float pinchAxisScale_ = 0.0;
     ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
 };
 

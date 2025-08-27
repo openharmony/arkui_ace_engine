@@ -14635,6 +14635,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Number* axisVertical)
     {
     }
+    Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
+    {
+        return {};
+    }
+    void SetAxisPinchImpl(Ark_BaseEvent peer,
+                             const Ark_Number* axisPinch)
+    {
+    }
     Ark_Number GetPressureImpl(Ark_BaseEvent peer)
     {
         return {};
@@ -15146,6 +15154,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
+    {
+        return {};
+    }
+    Ark_Number GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
     {
         return {};
     }
@@ -21877,6 +21889,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseEventAccessor::SetAxisHorizontalImpl,
             BaseEventAccessor::GetAxisVerticalImpl,
             BaseEventAccessor::SetAxisVerticalImpl,
+            BaseEventAccessor::GetAxisPinchImpl,
+            BaseEventAccessor::SetAxisPinchImpl,
             BaseEventAccessor::GetPressureImpl,
             BaseEventAccessor::SetPressureImpl,
             BaseEventAccessor::GetTiltXImpl,
@@ -22058,6 +22072,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::GetFinalizerImpl,
             AxisEventAccessor::GetHorizontalAxisValueImpl,
             AxisEventAccessor::GetVerticalAxisValueImpl,
+            AxisEventAccessor::GetPinchAxisScaleValueImpl,
             AxisEventAccessor::GetActionImpl,
             AxisEventAccessor::SetActionImpl,
             AxisEventAccessor::GetDisplayXImpl,

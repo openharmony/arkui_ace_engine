@@ -159,16 +159,6 @@ int32_t AxisInfo::GetScrollStep() const
     return scrollStep_;
 }
 
-void AxisInfo::SetPinchAxisScale(float scale)
-{
-    pinchAxisScale_ = scale;
-}
-
-float AxisInfo::GetPinchAxisScale() const
-{
-    return pinchAxisScale_;
-}
-
 void AxisInfo::SetRotateAxisAngle(float angle)
 {
     rotateAxisAngle_ = angle;

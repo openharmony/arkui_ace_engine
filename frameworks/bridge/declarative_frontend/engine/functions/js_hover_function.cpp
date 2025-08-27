@@ -38,6 +38,7 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
     hoverObj->SetProperty<double>("axisVertical", 0.0f);
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
+    hoverObj->SetProperty<double>("axisPinch", 0.0f);
     hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
     hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
@@ -80,6 +81,7 @@ void JsHoverFunction::HoverMoveExecute(HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
     hoverObj->SetProperty<double>("axisVertical", 0.0f);
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
+    hoverObj->SetProperty<double>("axisPinch", 0.0f);
     hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
     hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
@@ -123,6 +125,7 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
     hoverObj->SetProperty<double>("axisVertical", 0.0f);
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
+    hoverObj->SetProperty<double>("axisPinch", 0.0f);
     hoverObj->SetProperty<double>("tiltX", 0.0f);
     hoverObj->SetProperty<double>("tiltY", 0.0f);
     hoverObj->SetProperty<double>("rollAngle", 0.0f);

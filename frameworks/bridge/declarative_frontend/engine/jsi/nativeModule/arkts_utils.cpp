@@ -2570,7 +2570,7 @@ Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
 }
 
-Local<JSValueRef> ArkTSUtils::JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info)
+Local<JSValueRef> ArkTSUtils::JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo =

@@ -1137,6 +1137,8 @@ panda::Local<panda::JSValueRef> WrapAxisEventPointer(panda::JsiRuntimeCallInfo* 
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetHorizontalAxisValue));
     dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "getVerticalAxisValue"),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetVerticalAxisValue));
+    dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPinchAxisScaleValue"),
+        panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetPinchAxisScaleValue));
     dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState));
     panda::Local<panda::JSValueRef> pointerObj = runtimeCallInfo->GetCallArgRef(1);
