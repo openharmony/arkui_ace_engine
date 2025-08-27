@@ -54,16 +54,16 @@ struct CustomDialogTestLevel0_2 {
     }),
 
     onWillAppear: () => {
-      console.info('LCG  customDialog onWillAppear')
+      console.info('customDialog onWillAppear')
     },
     onDidAppear: () => {
-      console.info('LCG  customDialog onDidAppear')
+      console.info('customDialog onDidAppear')
     },
     onWillDisappear: () => {
-      console.info('LCG  customDialog onWillDisappear')
+      console.info('customDialog onWillDisappear')
     },
     onDidDisappear: () => {
-      console.info('LCG  customDialog onDidDisappear')
+      console.info('customDialog onDidDisappear')
     },
   })
 
@@ -86,16 +86,16 @@ struct CustomDialogTestLevel0_2 {
                   inputValue: $inputValue
                 }),
                 onWillAppear: () => {
-                  console.info('LCG  customDialog onWillAppear')
+                  console.info('customDialog onWillAppear')
                 },
                 onDidAppear: () => {
-                  console.info('LCG  customDialog onDidAppear')
+                  console.info('customDialog onDidAppear')
                 },
                 onWillDisappear: () => {
-                  console.info('LCG  customDialog onWillDisappear')
+                  console.info('customDialog onWillDisappear')
                 },
                 onDidDisappear: () => {
-                  console.info('LCG  customDialog onDidDisappear')
+                  console.info('customDialog onDidDisappear')
                 },
               })
               this.dialogController?.open()
@@ -111,16 +111,16 @@ struct CustomDialogTestLevel0_2 {
                   inputValue: $inputValue
                 }),
                 onWillAppear: () => {
-                  console.info('LCG  customDialog onWillAppear')
+                  console.info('customDialog onWillAppear')
                 },
                 onDidAppear: () => {
-                  console.info('LCG  customDialog onDidAppear')
+                  console.info('customDialog onDidAppear')
                 },
                 onWillDisappear: () => {
-                  console.info('LCG  customDialog onWillDisappear')
+                  console.info('customDialog onWillDisappear')
                 },
                 onDidDisappear: () => {
-                  console.info('LCG  customDialog onDidDisappear')
+                  console.info('customDialog onDidDisappear')
                 },
               })
               this.dialogController?.open()
@@ -137,7 +137,7 @@ struct CustomDialogTestLevel0_2 {
                 showInSubWindow: false,
                 cancel: () => {
                   setTimeout(() => {
-                    console.info('LCG  customDialog disappear transition loading')
+                    console.info('customDialog disappear transition loading')
                   }, 1000)
                 },
 
@@ -146,21 +146,21 @@ struct CustomDialogTestLevel0_2 {
                   inputValue: $inputValue
                 }),
                 onWillAppear: () => {
-                  console.info('LCG  customDialog onWillAppear')
+                  console.info('customDialog onWillAppear')
                 },
                 onDidAppear: () => {
-                  console.info('LCG  customDialog onDidAppear')
+                  console.info('customDialog onDidAppear')
                 },
                 onWillDisappear: () => {
-                  console.info('LCG  customDialog onWillDisappear')
+                  console.info('customDialog onWillDisappear')
                 },
                 onDidDisappear: () => {
-                  console.info('LCG  customDialog onDidDisappear')
+                  console.info('customDialog onDidDisappear')
                 },
               })
               this.dialogController?.open()
               setTimeout(() => {
-                console.info('LCG  customDialog appear transition loading')
+                console.info('customDialog appear transition loading')
               }, 1000)
             })
         }
