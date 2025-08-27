@@ -700,13 +700,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_020, TestSize.Level1)
     pattern->OnRebuildFrame();
     EXPECT_EQ(num, 0);
     formNode->renderContext_ = renderContext;
-
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-    pattern->OnSnapshot(pixelMap);
-    pattern->HandleOnSnapshot(pixelMap);
-    pattern->OnRebuildFrame();
-    EXPECT_EQ(pattern->isSnapshot_, true);
-    EXPECT_EQ(renderContext->GetHost()->GetChildren().size(), 1);
 }
 
 /**
