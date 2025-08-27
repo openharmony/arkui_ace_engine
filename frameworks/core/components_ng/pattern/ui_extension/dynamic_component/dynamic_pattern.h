@@ -90,7 +90,7 @@ public:
 
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
-private:
+protected:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
     bool CheckDynamicRendererConstraint(void* runtime);
