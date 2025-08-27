@@ -2363,4 +2363,409 @@ HWTEST_F(ArcindexerPatternTestNg, GetActualIndexTestNg001, TestSize.Level1)
     index = pattern_->GetActualIndex(0);
     EXPECT_EQ(index, 5);
 }
+
+/**
+ * @tc.name: ArcindexerPatternTest001
+ * @tc.desc: Test arc indexer pattern InitArrayValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest001, TestSize.Level1)
+{
+    IndexerModelNG model = Create(nullptr, LONG_ARRAY, 0);
+    bool autoCollapseModeChanged = false;
+
+    /**
+     * @tc.steps: step1. Test with propSelect >= fullCount_.
+     * @tc.expected: selected_ correct.
+     */
+    pattern_->isNewHeightCalculated_ = true;
+    pattern_->fullCount_ = LONG_ARRAY.size();
+    layoutProperty_->UpdateSelected(LONG_ARRAY.size() + 1);
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_EQ(layoutProperty_->GetSelected(), LONG_ARRAY.size() - 1);
+    EXPECT_EQ(pattern_->selected_, 3);
+    EXPECT_FALSE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step2. Test with fullCount_ = 0.
+     * @tc.expected: selected_ correct.
+     */
+    pattern_->isNewHeightCalculated_ = true;
+    pattern_->fullCount_ = 0;
+    layoutProperty_->UpdateSelected(LONG_ARRAY.size() - 1);
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_EQ(layoutProperty_->GetSelected(), LONG_ARRAY.size() - 1);
+    EXPECT_EQ(pattern_->selected_, 3);
+    EXPECT_FALSE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step3. Test with propSelect < fullCount_.
+     * @tc.expected: selected_ correct.
+     */
+    pattern_->isNewHeightCalculated_ = true;
+    pattern_->fullCount_ = LONG_ARRAY.size();
+    layoutProperty_->UpdateSelected(0);
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_EQ(layoutProperty_->GetSelected(), 0);
+    EXPECT_EQ(pattern_->selected_, 0);
+    EXPECT_FALSE(pattern_->selectChanged_);
+
+    /**
+     * @tc.steps: step4. Test with propSelect < fullCount_ and fullCount = 0.
+     * @tc.expected: selected_ correct.
+     */
+    pattern_->isNewHeightCalculated_ = true;
+    pattern_->fullCount_ = 0;
+    layoutProperty_->UpdateSelected(0);
+    pattern_->InitArrayValue(autoCollapseModeChanged);
+    EXPECT_EQ(layoutProperty_->GetSelected(), 0);
+    EXPECT_EQ(pattern_->selected_, 0);
+    EXPECT_FALSE(pattern_->selectChanged_);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest002
+ * @tc.desc: Test arc indexer pattern OnDirtyLayoutWrapperSwap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest002, TestSize.Level1)
+{
+    Create(nullptr, LONG_ARRAY, 0);
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = false;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto algorithm = AceType::MakeRefPtr<ArcIndexerLayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+
+    /**
+     * @tc.steps: step1. Test with no changed.
+     * @tc.expected: stepAngle_ correct.
+     */
+    algorithm->actualSize_ = 5;
+    algorithm->stepAngle_ = 10;
+    algorithm->startAngle_ = 10;
+    pattern_->stepAngle_ = 10;
+    pattern_->autoCollapse_ = true;
+    pattern_->arcIndexerSize_ = 5;
+    pattern_->startAngle_ = 10;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(pattern_->arcIndexerSize_, 5);
+    EXPECT_EQ(pattern_->stepAngle_, 10);
+    EXPECT_EQ(pattern_->startAngle_, 10);
+    EXPECT_TRUE(pattern_->initialized_);
+
+    /**
+     * @tc.steps: step2. Test with all changed.
+     * @tc.expected: stepAngle_ correct.
+     */
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = true;
+    algorithm->actualSize_ = 10;
+    algorithm->stepAngle_ = 15;
+    algorithm->startAngle_ = 15;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(pattern_->arcIndexerSize_, 10);
+    EXPECT_EQ(pattern_->stepAngle_, 15);
+    EXPECT_EQ(pattern_->startAngle_, 15);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest003
+ * @tc.desc: Test arc indexer pattern BuildFullArrayValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest003, TestSize.Level1)
+{
+    Create(nullptr, LONG_ARRAY, 0);
+
+    /**
+     * @tc.steps: step1. Test with arraySize > fullArraySize.
+     * @tc.expected: arcArrayValue_ correct.
+     */
+    std::vector<std::string> arrayValueStrs;
+    std::vector<std::string> expectValue;
+    std::vector<std::string> arrayValue;
+    arrayValueStrs = LONG_ARRAY;
+    for (int32_t i = 0; i < LONG_ARRAY.size() - ARC_INDEXER_ITEM_MAX_COUNT; ++i) {
+        arrayValueStrs.pop_back();
+    }
+    pattern_->fullArrayValue_ = arrayValueStrs;
+    pattern_->fullCount_ = arrayValueStrs.size();
+    pattern_->autoCollapse_ = false;
+    pattern_->BuildFullArrayValue();
+    expectValue = arrayValueStrs;
+    for (auto item : pattern_->arcArrayValue_) {
+        arrayValue.push_back(item.first);
+    }
+    EXPECT_EQ(arrayValue, expectValue);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest004
+ * @tc.desc: Test arc indexer pattern ApplyFourPlusOneMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest004, TestSize.Level1)
+{
+    Create(nullptr, CREATE_ARRAY, 0);
+    pattern_->autoCollapse_ = true;
+    std::vector<std::string> arrayvalue;
+    std::vector<std::string> expectValue;
+
+    /**
+     * @tc.steps: step1. Test with startIndex_ < 0.
+     * @tc.expected: arcArrayValue_ correct.
+     */
+    expectValue = { "AAAAAAAA", "BBBB", ">" };
+    pattern_->currectCollapsingMode_ = ArcIndexerCollapsingMode::FOUR;
+    pattern_->startIndex_ = -2;
+    pattern_->endIndex_ = 2;
+    pattern_->ApplyFourPlusOneMode();
+    for (auto item : pattern_->arcArrayValue_) {
+        arrayvalue.push_back(item.first);
+    }
+    EXPECT_EQ(arrayvalue, expectValue);
+
+    /**
+     * @tc.steps: step2. Test with endIndex_ > fullCount_.
+     * @tc.expected: arcArrayValue_ correct.
+     */
+    pattern_->currectCollapsingMode_ = ArcIndexerCollapsingMode::FOUR;
+    pattern_->fullCount_ = CREATE_ARRAY.size() + 2;
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = ARC_INDEXER_ITEM_MAX_COUNT;
+    pattern_->ApplyFourPlusOneMode();
+    arrayvalue.clear();
+    expectValue = CREATE_ARRAY;
+    expectValue.push_back(">");
+    for (auto item : pattern_->arcArrayValue_) {
+        arrayvalue.push_back(item.first);
+    }
+    EXPECT_EQ(arrayvalue, expectValue);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest005
+ * @tc.desc: Test arc indexer pattern IndexNodeExpandedAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest005, TestSize.Level1)
+{
+    Create();
+
+    /**
+     * @tc.steps: step1. Test with atomicAnimateOp_ true.
+     * @tc.expected: atomicAnimateOp_ correct.
+     */
+    pattern_->atomicAnimateOp_ = true;
+    pattern_->IndexNodeExpandedAnimation();
+    EXPECT_EQ(pattern_->expandedAnimateIndex_, ARC_INDEXER_COLLAPSE_ITEM_COUNT);
+    EXPECT_TRUE(pattern_->atomicAnimateOp_);
+
+    /**
+     * @tc.steps: step2. Test with atomicAnimateOp_ false.
+     * @tc.expected: atomicAnimateOp_ correct.
+     */
+    pattern_->atomicAnimateOp_ = false;
+    pattern_->IndexNodeExpandedAnimation();
+    EXPECT_FALSE(pattern_->atomicAnimateOp_);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest006
+ * @tc.desc: Test arc indexer pattern ItemSelectedChangedAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest006, TestSize.Level1)
+{
+    Create(nullptr, LONG_ARRAY, 0);
+
+    /**
+     * @tc.steps: step1. Test with selected -1.
+     * @tc.expected: animateSelected_ and lastSelected_ correct.
+     */
+    auto selectedFrameNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    auto renderContext = selectedFrameNode->GetRenderContext();
+    auto pipelineContext = frameNode_->GetContext();
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    pattern_->selected_ = -1;
+    pattern_->lastSelected_ = 0;
+    pattern_->ItemSelectedChangedAnimation();
+    EXPECT_EQ(pattern_->animateSelected_, -1);
+    EXPECT_EQ(pattern_->lastSelected_, -1);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest007
+ * @tc.desc: Test arc indexer pattern SetChildNodeAccessibility function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest007, TestSize.Level1)
+{
+    Create();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->isScreenReaderOn_ = true;
+
+    /**
+     * @tc.steps: step1. Test with ARC_INDEXER_STR_EXPANDED.
+     * @tc.expected: expandedNode_ correct.
+     */
+    auto nodeStr0 = StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED);
+    pattern_->SetChildNodeStyle(0, nodeStr0, true);
+    auto child0 = pattern_->GetHost()->GetChildByIndex(0);
+    EXPECT_NE(child0, nullptr);
+    auto childNode0 = child0->GetHostNode();
+    EXPECT_NE(childNode0, nullptr);
+    pattern_->SetChildNodeAccessibility(childNode0, nodeStr0);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
+    EXPECT_EQ(pattern_->expandedNode_, childNode0);
+
+    /**
+     * @tc.steps: step2. Test with ARC_INDEXER_STR_EXPANDED.
+     * @tc.expected: expandedNode_ correct.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->isScreenReaderOn_ = false;
+    pattern_->SetChildNodeAccessibility(childNode0, nodeStr0);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
+    EXPECT_EQ(pattern_->expandedNode_, childNode0);
+
+    /**
+     * @tc.steps: step3. Test with ARC_INDEXER_STR_COLLAPSED.
+     * @tc.expected: collapsedNode_ correct.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->isScreenReaderOn_ = true;
+    nodeStr0 = StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED);
+    pattern_->SetChildNodeStyle(0, nodeStr0, true);
+    child0 = pattern_->GetHost()->GetChildByIndex(0);
+    EXPECT_NE(child0, nullptr);
+    childNode0 = child0->GetHostNode();
+    EXPECT_NE(childNode0, nullptr);
+    pattern_->SetChildNodeAccessibility(childNode0, nodeStr0);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
+    EXPECT_EQ(pattern_->collapsedNode_, childNode0);
+
+    /**
+     * @tc.steps: step4. Test with ARC_INDEXER_STR_COLLAPSED.
+     * @tc.expected: collapsedNode_ correct.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->isScreenReaderOn_ = false;
+    pattern_->SetChildNodeAccessibility(childNode0, nodeStr0);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
+    EXPECT_EQ(pattern_->collapsedNode_, childNode0);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest008
+ * @tc.desc: Test arc indexer pattern ShowBubble function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest008, TestSize.Level1)
+{
+    Create(nullptr, LONG_ARRAY, 2);
+    auto layoutProperty = frameNode_->GetLayoutProperty<ArcIndexerLayoutProperty>();
+    layoutProperty->UpdateUsingPopup(true);
+
+    /**
+     * @tc.steps: step1. Test with isTouch_ true.
+     * @tc.expected: popupnode_ correct.
+     */
+    pattern_->isTouch_ = true;
+    pattern_->ShowBubble(true);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    auto renderContext = pattern_->popupNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacity(), 1);
+
+    /**
+     * @tc.steps: step2. Test with isTouch_ false.
+     * @tc.expected: popupnode_ correct.
+     */
+    pattern_->isTouch_ = false;
+    pattern_->ShowBubble(true);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    renderContext = pattern_->popupNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacity(), 1);
+
+    /**
+     * @tc.steps: step3. Test with itemCount_ 0.
+     * @tc.expected: popupnode_ correct.
+     */
+    pattern_->isTouch_ = true;
+    pattern_->itemCount_ = 0;
+    pattern_->ShowBubble(true);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    renderContext = pattern_->popupNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacity(), 1);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest009
+ * @tc.desc: Test arc indexer pattern StartIndexerNodeAppearAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest009, TestSize.Level1)
+{
+    Create(nullptr, LONG_ARRAY, 2);
+
+    /**
+     * @tc.steps: step1. Test with nodeIndex > fullArrayValueSize.
+     * @tc.expected: set correct.
+     */
+    int32_t nodeIndex  = LONG_ARRAY.size() + 1;
+    pattern_->StartIndexerNodeAppearAnimation(nodeIndex);
+    auto itemNode = GetChildFrameNode(frameNode_, 2);
+    pattern_->SetIndexerNodeOpacity(itemNode, 0.0);
+    auto renderContext = itemNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacityValue(), 0);
+}
+
+/**
+ * @tc.name: ArcindexerPatternTest010
+ * @tc.desc: Test arc indexer pattern FireOnSelect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTest010, TestSize.Level1)
+{
+    int32_t selected = -1;
+    int32_t changeSelected = -1;
+    int32_t creatChangeSelected = -1;
+    OnSelectedEvent onSelected = [&selected](int32_t selectedIndex) { selected = selectedIndex; };
+    OnSelectedEvent changeEvent = [&changeSelected](int32_t selectedIndex) { changeSelected = selectedIndex; };
+    OnSelectedEvent creatChangeEvent = [&creatChangeSelected](
+                                           int32_t selectedIndex) { creatChangeSelected = selectedIndex; };
+    IndexerModelNG model = Create(nullptr, CREATE_ARRAY, 0);
+    eventHub_->SetOnSelected(std::move(onSelected));
+    eventHub_->SetChangeEvent(std::move(changeEvent));
+    eventHub_->SetCreatChangeEvent(std::move(creatChangeEvent));
+
+    /**
+     * @tc.steps: step1. Test with selected_ > itemCount_.
+     * @tc.expected: lastFireSelectIndex_ correct.
+     */
+    EXPECT_NE(eventHub_->GetChangeEvent(), nullptr);
+    pattern_->lastFireSelectIndex_ = 0;
+    pattern_->lastIndexFromPress_ = true;
+    pattern_->selected_ = pattern_->itemCount_ + 1;
+    pattern_->FireOnSelect(pattern_->itemCount_ + 1, false);
+    EXPECT_EQ(pattern_->lastFireSelectIndex_, 6);
+    EXPECT_FALSE(pattern_->lastIndexFromPress_);
+
+    /**
+     * @tc.steps: step2. Test with selected_ < 0.
+     * @tc.expected: lastFireSelectIndex_ correct.
+     */
+    pattern_->lastFireSelectIndex_ = 0;
+    pattern_->lastIndexFromPress_ = true;
+    pattern_->selected_ = -1;
+    pattern_->FireOnSelect(-1, false);
+    EXPECT_EQ(pattern_->lastFireSelectIndex_, -1);
+    EXPECT_FALSE(pattern_->lastIndexFromPress_);
+}
 } // namespace OHOS::Ace::NG

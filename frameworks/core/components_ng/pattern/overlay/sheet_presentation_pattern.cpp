@@ -2375,8 +2375,7 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
     ACE_SCOPED_TRACE("Sheet OnWindowSizeChanged: WindowSizeChangeReason type is: %d", type);
-    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG_END ||
-        type == WindowSizeChangeReason::DRAG_MOVE) {
+    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG_MOVE) {
         return;
     }
     auto sheetType = GetSheetType();
