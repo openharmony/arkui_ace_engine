@@ -49,6 +49,7 @@ public:
     void SetIsFirstRegister(bool isFirstRegister) { isFirstRegister_ = isFirstRegister; }
 
 private:
+    void ParseNodeContent(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, std::string& nodeText);
     void CheckAccessibilityNodeAndReport(AccessibilityEventType type, int64_t accessibilityId);
 
     WeakPtr<Pattern> pattern_;
