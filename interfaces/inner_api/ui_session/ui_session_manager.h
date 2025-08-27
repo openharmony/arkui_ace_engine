@@ -154,11 +154,6 @@ public:
 #endif
     virtual void GetVisibleInspectorTree() {};
 
-    virtual bool IsHasReportObject()
-    {
-        return false;
-    };
-
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};

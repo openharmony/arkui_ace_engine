@@ -825,8 +825,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
+
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
-    int32_t OnInjectionEvent(const std::string& command) override;
 
     bool GetMaintainVisibleContentPosition()
     {
@@ -1322,10 +1322,6 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-    int32_t GetNodeId() const;
-    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
-    void ReportComponentChangeEvent(
-        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0f) const;
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);

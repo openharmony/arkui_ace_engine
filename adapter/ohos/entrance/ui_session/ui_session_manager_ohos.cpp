@@ -506,11 +506,6 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
     }
 }
 
-bool UiSessionManagerOhos::IsHasReportObject()
-{
-    return !reportObjectMap_.empty();
-}
-
 void UiSessionManagerOhos::SendCommand(const std::string& command)
 {
     if (sendCommandFunction_) {
