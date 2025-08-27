@@ -1441,6 +1441,13 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
     webPattern->UpdateDataDetectorConfig(config);
 }
 
+void WebModelNG::SetForceEnableZoom(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceEnableZoom(isEnabled);
+}
+
 void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2485,5 +2492,13 @@ void WebModelNG::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
+}
+
+void WebModelNG::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceEnableZoom(isEnabled);
 }
 } // namespace OHOS::Ace::NG

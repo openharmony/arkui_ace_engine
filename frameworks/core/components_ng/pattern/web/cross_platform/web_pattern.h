@@ -399,6 +399,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -603,6 +604,7 @@ private:
     void OnEnableDataDetectorUpdate(bool enable);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
+    void OnForceEnableZoomUpdate(bool isEnabled);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

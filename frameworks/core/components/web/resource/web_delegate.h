@@ -1404,6 +1404,7 @@ public:
         return false;
 #endif
     }
+    void SetForceEnableZoom(bool isEnabled);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

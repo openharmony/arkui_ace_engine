@@ -129,6 +129,7 @@ public:
     void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
+    void SetForceEnableZoom(bool isForceEnableZoom) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

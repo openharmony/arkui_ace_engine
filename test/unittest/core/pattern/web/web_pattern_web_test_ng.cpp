@@ -1291,4 +1291,34 @@ HWTEST_F(WebPatternWebTest, ClearKeyEventByKeyCodeTest, TestSize.Level1)
     EXPECT_TRUE(webPattern->webKeyEvent_.empty());
 #endif
 }
+
+/**
+ * @tc.name: OnForceEnableZoomUpdate
+ * @tc.desc: OnForceEnableZoomUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    bool value = true;
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
+    webPattern->OnForceEnableZoomUpdate(value);
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
+    webPattern->OnForceEnableZoomUpdate(value);
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
+    webPattern->delegate_ = nullptr;
+    webPattern->OnForceEnableZoomUpdate(value);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -9097,4 +9097,10 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
 }
 
+void WebDelegate::SetForceEnableZoom(bool isEnabled)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetForceEnableZoom(isEnabled);
+}
+
 } // namespace OHOS::Ace

@@ -743,4 +743,11 @@ void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* inf
     auto eventMarker = EventMarker(std::move(jsCallback));
     webComponent->SetOnLoadFinishedEventId(eventMarker);
 }
+ 
+void WebModelImpl::SetForceEnableZoom(bool isForceEnableZoom)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetForceEnableZoom(isForceEnableZoom);
+}
 } // namespace OHOS::Ace::Framework

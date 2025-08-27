@@ -222,6 +222,8 @@ public:
     static ArkUINativeModuleValue ResetOnBeforeUnload(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetJavaScriptProxy(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetJavaScriptProxy(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif

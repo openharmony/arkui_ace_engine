@@ -1279,4 +1279,12 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }
+
+void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateForceEnableZoom(isEnabled);
+}
 } // namespace OHOS::Ace::NG

@@ -1407,4 +1407,5 @@ bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
+void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 } // namespace OHOS::Ace
