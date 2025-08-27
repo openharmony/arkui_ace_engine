@@ -6123,6 +6123,9 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         if (item.tiltY.has_value()) {
             info.SetTiltY(item.tiltY.value());
         }
+        if (item.rollAngle.has_value()) {
+            info.SetRollAngle(item.rollAngle.value());
+        }
         info.SetSourceTool(item.sourceTool);
         event.AddTouchLocationInfo(std::move(info));
     }
