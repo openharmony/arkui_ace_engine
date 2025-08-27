@@ -102,11 +102,10 @@ GeneratedModifier::TabsControllerPeerImpl* Convert(const Ark_Materialized &src)
 template<>
 TabsOptions Convert(const Ark_TabsOptions& src)
 {
-    Ark_TabsController controller;
     return {
-        .barPosOpt = OptConvert<BarPosition>(src.barPosition).value_or(BarPosition::START),
-        .indexOpt = OptConvert<int32_t>(src.index).value_or(-1),
-        .controllerOpt = OptConvert<Ark_TabsController>(src.controller).value_or(controller),
+        .barPosOpt = OptConvert<BarPosition>(src.barPosition),
+        .indexOpt = OptConvert<int32_t>(src.index),
+        .controllerOpt = OptConvert<Ark_TabsController>(src.controller),
     };
 }
 
