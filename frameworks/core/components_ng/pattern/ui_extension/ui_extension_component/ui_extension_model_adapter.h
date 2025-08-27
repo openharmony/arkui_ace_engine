@@ -45,6 +45,7 @@ public:
     static void SetOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
     static void SetOnTerminated(FrameNode* frameNode,
         std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated);
+    static void SetOnDrawReady(FrameNode* frameNode, std::function<void()>&& onDrawReady);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H
