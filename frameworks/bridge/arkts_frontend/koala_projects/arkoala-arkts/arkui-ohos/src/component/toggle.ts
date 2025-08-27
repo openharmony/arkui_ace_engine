@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT, AttributeModifier } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
@@ -30,9 +30,11 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ToggleOpsHandWritten, hookToggleContentModifier } from "./../handwritten"
+import { ToggleOpsHandWritten, hookToggleContentModifier, hookToggleAttributeModifier, hookToggleButtonAttributeModifier, hookToggleCheckboxAttributeModifier } from "./../handwritten"
+import { ToggleModifier } from '../ToggleModifier'
 
 export class ArkTogglePeer extends ArkCommonMethodPeer {
+    _attributeSet?: ToggleModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -160,6 +162,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
 }
 
 export class ArkToggleButtonPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ToggleModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -212,6 +215,7 @@ export class ArkToggleButtonPeer extends ArkCommonMethodPeer {
 }
 
 export class ArkToggleCheckboxPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ToggleModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -288,15 +292,14 @@ export interface ToggleOptions {
 }
 export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
-    setToggleOptions(options: ToggleOptions): this {
-        return this
-    }
-    onChange(value: ((isVisible: boolean) => void) | undefined): this
-    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    switchPointColor(value: ResourceColor | undefined): this
-    switchStyle(value: SwitchStyle | undefined): this
-    _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
+    setToggleOptions(options: ToggleOptions): this { return this; }
+    onChange(value: ((isVisible: boolean) => void) | undefined): this { return this; }
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this { return this; }
+    selectedColor(value: ResourceColor | undefined): this { return this; }
+    switchPointColor(value: ResourceColor | undefined): this { return this; }
+    switchStyle(value: SwitchStyle | undefined): this { return this; }
+    _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
     onChange_value?: ((isVisible: boolean) => void) | undefined
@@ -384,6 +387,11 @@ export class ArkToggleCheckboxComponent extends ArkCommonMethodComponent impleme
         }
         return
     }
+
+    public attributeModifier(modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookToggleCheckboxAttributeModifier(this, modifier);
+        return this
+    }
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -448,6 +456,11 @@ export class ArkToggleButtonComponent extends ArkCommonMethodComponent implement
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookToggleButtonAttributeModifier(this, modifier);
+        return this
     }
 
     public applyAttributesFinish(): void {
@@ -526,6 +539,11 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookToggleAttributeModifier(this, modifier);
+        return this
     }
     
     public applyAttributesFinish(): void {

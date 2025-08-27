@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT, AttributeModifier } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
 import { Resource } from "global.resource"
@@ -30,9 +30,11 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_Boolean_Void } from "./navigation"
-import { CheckboxOpsHandWritten, hookCheckboxContentModifier } from "./../handwritten"
+import { hookCheckboxAttributeModifier, CheckboxOpsHandWritten, hookCheckboxContentModifier } from './../handwritten'
+import { CheckboxModifier } from '../CheckboxModifier'
 
 export class ArkCheckboxPeer extends ArkCommonMethodPeer {
+    _attributeSet?: CheckboxModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -328,17 +330,17 @@ export type CheckboxInterface = (options?: CheckboxOptions) => CheckboxAttribute
 export type OnCheckboxChangeCallback = (value: boolean) => void;
 export type Callback_Opt_Boolean_Void = (select: boolean | undefined) => void;
 export interface CheckboxAttribute extends CommonMethod {
-    setCheckboxOptions(options?: CheckboxOptions): this {
-        return this
-    }
-    select(value: boolean | Bindable<boolean> | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    shape(value: CheckBoxShape | undefined): this
-    unselectedColor(value: ResourceColor | undefined): this
-    mark(value: MarkStyle | undefined): this
-    onChange(value: OnCheckboxChangeCallback | undefined): this
-    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this
-    _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
+    setCheckboxOptions(options?: CheckboxOptions): this { return this; }
+    select(value: boolean | Bindable<boolean> | undefined): this { return this; }
+    selectedColor(value: ResourceColor | undefined): this { return this; }
+    shape(value: CheckBoxShape | undefined): this { return this; }
+    unselectedColor(value: ResourceColor | undefined): this { return this; }
+    mark(value: MarkStyle | undefined): this { return this; }
+    onChange(value: OnCheckboxChangeCallback | undefined): this { return this; }
+    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this { return this; }
+    _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<CheckboxAttribute> |
+        AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
     select_value?: boolean | undefined
@@ -499,6 +501,10 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
             return
         }
         return
+    }
+    public attributeModifier(modifier: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookCheckboxAttributeModifier(this, modifier);
+        return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public

@@ -14,7 +14,7 @@
  */
 
 import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from '../component/common';
-import { ArkButtonComponent, ButtonAttribute } from '../component/button';
+import { ArkButtonComponent, ButtonAttribute, ArkButtonPeer, ButtonOptions } from '../component/button';
 import { ArkMenuComponent, MenuAttribute } from '../component/menu';
 import { ArkMenuItemComponent, MenuItemAttribute } from '../component/menuItem';
 import { ArkMenuItemGroupComponent, MenuItemGroupAttribute } from '../component/menuItemGroup';
@@ -44,6 +44,13 @@ import { ArkImageSpanComponent, ImageSpanAttribute, ArkImageSpanPeer } from '../
 import { ArkSymbolSpanComponent, SymbolSpanAttribute, ArkSymbolSpanPeer } from '../component/symbolSpan';
 import { ArkContainerSpanComponent, ContainerSpanAttribute, ArkContainerSpanPeer } from '../component/containerSpan';
 import { applyAttributeModifierBase, applyCommonModifier, applyAttributeModifierNoCommonMethod } from "./modifiers/ArkCommonModifier";
+import { ArkCheckboxGroupComponent, CheckboxGroupAttribute } from '../component/checkboxgroup';
+import { ArkCheckboxComponent, CheckboxAttribute } from '../component/checkbox';
+import { ArkToggleComponent, ToggleAttribute, ArkToggleButtonComponent, ArkToggleCheckboxComponent } from '../component/toggle';
+import { ArkRadioComponent, RadioAttribute } from '../component/radio';
+import { ArkRatingComponent, RatingAttribute } from '../component/rating';
+import { ArkSelectComponent, SelectAttribute } from '../component/select';
+import { ArkSliderComponent, SliderAttribute } from '../component/slider';
 import { CommonModifier } from '../CommonModifier';
 import { ButtonModifier } from "../ButtonModifier";
 import { MenuModifier } from "../MenuModifier";
@@ -94,6 +101,13 @@ import { ArkScrollComponent, ScrollAttribute } from '../component/scroll';
 import { ScrollModifier } from '../ScrollModifier';
 import { ArkWaterFlowComponent, WaterFlowAttribute } from '../component/waterFlow';
 import { WaterFlowModifier } from '../WaterFlowModifier';
+import { CheckboxGroupModifier} from '../CheckboxGroupModifier';
+import { CheckboxModifier} from '../CheckboxModifier';
+import { RatingModifier} from '../RatingModifier';
+import { RadioModifier} from '../RadioModifier';
+import { SelectModifier} from '../SelectModifier';
+import { SliderModifier} from '../SliderModifier';
+import { ToggleModifier} from '../ToggleModifier';
 
 export function hookMenuItemGroupAttributeModifier(component: ArkMenuItemGroupComponent, modifier: AttributeModifier<MenuItemGroupAttribute>
     | AttributeModifier<CommonMethod> | undefined): void {
@@ -859,6 +873,302 @@ export function hookSymbolGlyphAttributeModifier(component: ArkSymbolGlyphCompon
     applyAttributeModifierBase(modifier as Object as AttributeModifier<SymbolGlyphAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
+export function hookCheckboxAttributeModifier(component: ArkCheckboxComponent,
+    modifier: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): CheckboxModifier => {
+        let isCheckboxModifier: boolean = modifier instanceof CheckboxModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new CheckboxModifier();
+        if (isCheckboxModifier) {
+            let checkboxModifier = modifier as object as CheckboxModifier;
+            initModifier.mergeModifier(checkboxModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkCheckboxComponent => {
+        let componentNew: ArkCheckboxComponent = new ArkCheckboxComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<CheckboxAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookCheckboxGroupAttributeModifier(component: ArkCheckboxGroupComponent,
+    modifier: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): CheckboxGroupModifier => {
+        let isCheckboxGroupModifier: boolean = modifier instanceof CheckboxGroupModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new CheckboxGroupModifier();
+        if (isCheckboxGroupModifier) {
+            let checkboxgroupModifier = modifier as object as CheckboxGroupModifier;
+            initModifier.mergeModifier(checkboxgroupModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkCheckboxGroupComponent => {
+        let componentNew: ArkCheckboxGroupComponent = new ArkCheckboxGroupComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<CheckboxGroupAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookRatingAttributeModifier(component: ArkRatingComponent,
+    modifier: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): RatingModifier => {
+        let isRatingModifier: boolean = modifier instanceof RatingModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new RatingModifier();
+        if (isRatingModifier) {
+            let componentModifier = modifier as object as RatingModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkRatingComponent => {
+        let componentNew: ArkRatingComponent = new ArkRatingComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<RatingAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookRadioAttributeModifier(component: ArkRadioComponent,
+    modifier: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): RadioModifier => {
+        let isRadioModifier: boolean = modifier instanceof RadioModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new RadioModifier();
+        if (isRadioModifier) {
+            let componentModifier = modifier as object as RadioModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkRadioComponent => {
+        let componentNew: ArkRadioComponent = new ArkRadioComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<RadioAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookSelectAttributeModifier(component: ArkSelectComponent,
+    modifier: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SelectModifier => {
+        let isSelectModifier: boolean = modifier instanceof SelectModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SelectModifier();
+        if (isSelectModifier) {
+            let componentModifier = modifier as object as SelectModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkSelectComponent => {
+        let componentNew: ArkSelectComponent = new ArkSelectComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SelectAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookSliderAttributeModifier(component: ArkSliderComponent,
+    modifier: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SliderModifier => {
+        let isSliderModifier: boolean = modifier instanceof SliderModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SliderModifier();
+        if (isSliderModifier) {
+            let componentModifier = modifier as object as SliderModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkSliderComponent => {
+        let componentNew: ArkSliderComponent = new ArkSliderComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SliderAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookToggleAttributeModifier(component: ArkToggleComponent,
+    modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ToggleModifier => {
+        let isToggleModifier: boolean = modifier instanceof ToggleModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ToggleModifier();
+        if (isToggleModifier) {
+            let componentModifier = modifier as object as ToggleModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkToggleComponent => {
+        let componentNew: ArkToggleComponent = new ArkToggleComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookToggleButtonAttributeModifier(component: ArkToggleButtonComponent,
+    modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ToggleModifier => {
+        let isToggleModifier: boolean = modifier instanceof ToggleModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ToggleModifier();
+        if (isToggleModifier) {
+            let componentModifier = modifier as object as ToggleModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkToggleButtonComponent => {
+        let componentNew: ArkToggleButtonComponent = new ArkToggleButtonComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookToggleCheckboxAttributeModifier(component: ArkToggleCheckboxComponent,
+    modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ToggleModifier => {
+        let isToggleModifier: boolean = modifier instanceof ToggleModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ToggleModifier();
+        if (isToggleModifier) {
+            let componentModifier = modifier as object as ToggleModifier;
+            initModifier.mergeModifier(componentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkToggleCheckboxComponent => {
+        let componentNew: ArkToggleCheckboxComponent = new ArkToggleCheckboxComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookGridAttributeModifier(component: ArkGridComponent,
     modifier: AttributeModifier<GridAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
