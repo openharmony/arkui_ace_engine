@@ -26,7 +26,7 @@ public:
     FeatureParam() = default;
     ~FeatureParam() = default;
 
-    // SyncloadParser
+    // SyncLoadParser
     static bool IsSyncLoadEnabled();
     static uint32_t GetSyncloadResponseDeadline();
     // UINodeGcParamParser
