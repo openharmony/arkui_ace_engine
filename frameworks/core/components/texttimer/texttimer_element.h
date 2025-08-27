@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class TextTimerElement : public SoleChildElement {
-    DECLARE_ACE_TYPE(TextTimerElement, SoleChildElement)
+    DECLARE_ACE_TYPE(TextTimerElement, SoleChildElement);
 
 public:
     bool CanUpdate(const RefPtr<Component>& newComponent) override

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT SystemBarStyle : public AceType {
-    DECLARE_ACE_TYPE(SystemBarStyle, AceType)
+    DECLARE_ACE_TYPE(SystemBarStyle, AceType);
 public:
     SystemBarStyle() = default;
     ~SystemBarStyle() = default;

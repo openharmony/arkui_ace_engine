@@ -28,7 +28,7 @@ class CanvasPaintMethod;
 using TaskFunc = std::function<void(CanvasPaintMethod&)>;
 using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
-    DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
+    DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod);
 public:
     CanvasPaintMethod() = default;
     CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode);

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class MenuWrapperLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuWrapperLayoutAlgorithm, LayoutAlgorithm)
+    DECLARE_ACE_TYPE(MenuWrapperLayoutAlgorithm, LayoutAlgorithm);
 public:
     MenuWrapperLayoutAlgorithm() = default;
     ~MenuWrapperLayoutAlgorithm() override = default;

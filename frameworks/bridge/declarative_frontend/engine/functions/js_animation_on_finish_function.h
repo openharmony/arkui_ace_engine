@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsAnimationOnFinishFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsAnimationOnFinishFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsAnimationOnFinishFunction, JsFunction);
 
 public:
     explicit JsAnimationOnFinishFunction(const JSRef<JSFunc>& jsFunction)

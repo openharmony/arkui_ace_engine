@@ -90,7 +90,7 @@ struct RouterPageInfo {
 };
 
 class PageRouterManager : public AceType {
-    DECLARE_ACE_TYPE(PageRouterManager, AceType)
+    DECLARE_ACE_TYPE(PageRouterManager, AceType);
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;

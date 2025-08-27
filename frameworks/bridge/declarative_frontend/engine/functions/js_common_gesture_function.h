@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsCommonGestureFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsCommonGestureFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsCommonGestureFunction, JsFunction);
 
 public:
     explicit JsCommonGestureFunction(const JSRef<JSFunc>& jsFunction)

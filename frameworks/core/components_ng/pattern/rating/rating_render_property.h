@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
 class RatingRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(RatingRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(RatingRenderProperty, PaintProperty);
 
 public:
     RatingRenderProperty() = default;

@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
 using namespace Framework;
 class NavDestinationEventHub : public NavBarEventHub {
-    DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub);
 public:
     void SetOnStateChange(const OnStateChangeEvent& changeEvent)
     {

@@ -96,7 +96,7 @@ inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
 class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::RenderContext, AceType)
+    DECLARE_ACE_TYPE(NG::RenderContext, AceType);
 
 public:
     ~RenderContext() override = default;

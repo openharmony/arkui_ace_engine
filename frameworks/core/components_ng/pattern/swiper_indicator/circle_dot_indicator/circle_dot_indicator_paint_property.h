@@ -30,7 +30,7 @@ struct CircleDotIndicatorStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaskColor, Gradient);
 };
 class CircleDotIndicatorPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(CircleDotIndicatorPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(CircleDotIndicatorPaintProperty, PaintProperty);
 
 public:
     CircleDotIndicatorPaintProperty() = default;

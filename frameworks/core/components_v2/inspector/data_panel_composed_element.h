@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT DataPanelComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(DataPanelComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(DataPanelComposedElement, InspectorComposedElement);
 
 public:
     explicit DataPanelComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

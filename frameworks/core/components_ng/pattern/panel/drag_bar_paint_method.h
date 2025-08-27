@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class DragBarPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(DragBarPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(DragBarPaintMethod, NodePaintMethod);
 public:
     DragBarPaintMethod() = default;
     ~DragBarPaintMethod() override = default;

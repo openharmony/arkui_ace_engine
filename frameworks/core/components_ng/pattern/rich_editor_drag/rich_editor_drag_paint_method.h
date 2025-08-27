@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorDragPaintMethod : public TextDragPaintMethod {
-    DECLARE_ACE_TYPE(RichEditorDragPaintMethod, TextDragPaintMethod)
+    DECLARE_ACE_TYPE(RichEditorDragPaintMethod, TextDragPaintMethod);
 public:
     RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
         const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod,

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT PatternLockComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(PatternLockComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(PatternLockComposedElement, InspectorComposedElement);
 
 public:
     explicit PatternLockComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

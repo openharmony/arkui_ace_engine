@@ -22,7 +22,7 @@
 #include "core/pipeline/base/composed_element.h"
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT MarqueeComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(MarqueeComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(MarqueeComposedElement, InspectorComposedElement);
 
 public:
     explicit MarqueeComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -30,7 +30,7 @@ using SurfaceChangedEvent = std::function<void(const std::string&, const RectF&)
 using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
 class XComponentEventHub : public EventHub {
-    DECLARE_ACE_TYPE(XComponentEventHub, EventHub)
+    DECLARE_ACE_TYPE(XComponentEventHub, EventHub);
 
 public:
     XComponentEventHub() = default;

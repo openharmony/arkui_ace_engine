@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class JsArcSwiperController : public virtual AceType {
-    DECLARE_ACE_TYPE(JsArcSwiperController, AceType)
+    DECLARE_ACE_TYPE(JsArcSwiperController, AceType);
 
 public:
     JsArcSwiperController() = default;

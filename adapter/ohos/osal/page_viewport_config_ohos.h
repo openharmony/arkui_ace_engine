@@ -31,7 +31,7 @@ namespace OHOS::Ace {
 using AvoidAreaInfo = std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>;
 
 class PageViewportConfigOhos : public PageViewportConfig {
-    DECLARE_ACE_TYPE(PageViewportConfigOhos, PageViewportConfig)
+    DECLARE_ACE_TYPE(PageViewportConfigOhos, PageViewportConfig);
 public:
     PageViewportConfigOhos() = default;
     ~PageViewportConfigOhos() = default;

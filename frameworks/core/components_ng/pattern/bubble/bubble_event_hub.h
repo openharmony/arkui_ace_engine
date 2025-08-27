@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 using StateChangeEvent = std::function<void(const std::string&)>;
 
 class BubbleEventHub : public EventHub {
-    DECLARE_ACE_TYPE(BubbleEventHub, EventHub)
+    DECLARE_ACE_TYPE(BubbleEventHub, EventHub);
 
 public:
     BubbleEventHub() = default;

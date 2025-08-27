@@ -45,7 +45,7 @@ enum class TransformStateAttribute {
 };
 
 class ACE_EXPORT TransformComponent : public SoleChildComponent {
-    DECLARE_ACE_TYPE(TransformComponent, SoleChildComponent)
+    DECLARE_ACE_TYPE(TransformComponent, SoleChildComponent);
 
 public:
     RefPtr<Element> CreateElement() override;

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuDividerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuDividerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(MenuDividerPaintMethod, NodePaintMethod);
 public:
     MenuDividerPaintMethod() {}
     ~MenuDividerPaintMethod() override = default;

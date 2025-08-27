@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 enum class PointAnimationStage { STATE_SHRINKT_TO_BLACK_POINT, STATE_EXPAND_TO_LONG_POINT };
 
 class ACE_EXPORT DotIndicatorPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(DotIndicatorPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(DotIndicatorPaintMethod, NodePaintMethod);
 public:
     explicit DotIndicatorPaintMethod(const RefPtr<DotIndicatorModifier>& dotIndicatorModifier)
         : dotIndicatorModifier_(dotIndicatorModifier)

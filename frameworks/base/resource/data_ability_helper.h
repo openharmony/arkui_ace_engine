@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 class DataAbilityHelper : public AceType {
-    DECLARE_ACE_TYPE(DataAbilityHelper, AceType)
+    DECLARE_ACE_TYPE(DataAbilityHelper, AceType);
 
 public:
     DataAbilityHelper() = default;

@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class MultimodalComponent final : public SoleChildComponent {
-    DECLARE_ACE_TYPE(MultimodalComponent, SoleChildComponent)
+    DECLARE_ACE_TYPE(MultimodalComponent, SoleChildComponent);
 
 public:
     explicit MultimodalComponent(int32_t pageId) : pageId_(pageId) {}

@@ -48,7 +48,7 @@ struct PixelMapConfig {
 class PixelMap;
 
 class ACE_FORCE_EXPORT ImageSource : public AceType {
-    DECLARE_ACE_TYPE(ImageSource, AceType)
+    DECLARE_ACE_TYPE(ImageSource, AceType);
 
 public:
     using Size = std::pair<int32_t, int32_t>;

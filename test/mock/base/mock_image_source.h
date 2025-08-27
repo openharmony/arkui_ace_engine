@@ -20,7 +20,7 @@
 #include "base/image/pixel_map.h"
 namespace OHOS::Ace {
 class MockImageSource : public ImageSource {
-    DECLARE_ACE_TYPE(MockImageSource, ImageSource)
+    DECLARE_ACE_TYPE(MockImageSource, ImageSource);
 
 public:
 

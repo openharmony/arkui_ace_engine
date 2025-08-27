@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsMouseFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsMouseFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsMouseFunction, JsFunction);
 
 public:
     explicit JsMouseFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

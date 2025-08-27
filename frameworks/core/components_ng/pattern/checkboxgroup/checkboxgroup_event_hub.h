@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using GroupChangeEvent = std::function<void(const BaseEventInfo* info)>;
 
 class CheckBoxGroupEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CheckBoxGroupEventHub, EventHub)
+    DECLARE_ACE_TYPE(CheckBoxGroupEventHub, EventHub);
 
 public:
     CheckBoxGroupEventHub() = default;

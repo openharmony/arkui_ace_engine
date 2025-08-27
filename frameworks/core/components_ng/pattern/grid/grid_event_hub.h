@@ -34,7 +34,7 @@ using ItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, b
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 
 class GridEventHub : public ScrollableEventHub {
-    DECLARE_ACE_TYPE(GridEventHub, ScrollableEventHub)
+    DECLARE_ACE_TYPE(GridEventHub, ScrollableEventHub);
 
 public:
     GridEventHub() = default;

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 class CJPageRouterNG final : public CJPageRouterAbstract {
-    DECLARE_ACE_TYPE(CJPageRouterNG, CJPageRouterAbstract)
+    DECLARE_ACE_TYPE(CJPageRouterNG, CJPageRouterAbstract);
 public:
     explicit CJPageRouterNG(WeakPtr<CJFrontendAbstract> frontend) : CJPageRouterAbstract(std::move(frontend)) {}
 

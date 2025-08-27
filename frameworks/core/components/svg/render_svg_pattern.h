@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class RenderSvgPattern : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgPattern, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgPattern, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();

@@ -28,7 +28,7 @@ class GridColumnInfo : public GridLayoutInfo {
 
 public:
     class Builder : public AceType {
-        DECLARE_ACE_TYPE(Builder, AceType)
+        DECLARE_ACE_TYPE(Builder, AceType);
     public:
         Builder()
         {

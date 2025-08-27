@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SliderComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SliderComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SliderComposedElement, InspectorComposedElement);
 
 public:
     explicit SliderComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

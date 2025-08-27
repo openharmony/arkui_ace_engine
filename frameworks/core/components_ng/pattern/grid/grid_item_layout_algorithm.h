@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT GridItemLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(GridItemLayoutAlgorithm, BoxLayoutAlgorithm)
+    DECLARE_ACE_TYPE(GridItemLayoutAlgorithm, BoxLayoutAlgorithm);
 public:
     GridItemLayoutAlgorithm() = default;
     ~GridItemLayoutAlgorithm() override = default;

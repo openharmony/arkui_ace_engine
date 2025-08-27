@@ -27,7 +27,7 @@
 // @deprecated
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(MenuPaintMethod, NodePaintMethod);
 public:
     MenuPaintMethod() = default;
     ~MenuPaintMethod() override = default;

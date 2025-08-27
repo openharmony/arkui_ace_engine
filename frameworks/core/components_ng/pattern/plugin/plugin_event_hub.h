@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using PluginCallback = std::function<void(const std::string&)>;
 
 class PluginEventHub : public EventHub {
-    DECLARE_ACE_TYPE(PluginEventHub, EventHub)
+    DECLARE_ACE_TYPE(PluginEventHub, EventHub);
 
 public:
     PluginEventHub() = default;

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsTouchInterceptFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsTouchInterceptFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsTouchInterceptFunction, JsFunction);
 
 public:
     explicit JsTouchInterceptFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

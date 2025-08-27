@@ -51,7 +51,7 @@ struct FadeoutInfo {
 };
 
 class TextContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:
     explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);

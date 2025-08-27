@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::Framework {
 class JSBaseNode : public AceType {
-    DECLARE_ACE_TYPE(JSBaseNode, AceType)
+    DECLARE_ACE_TYPE(JSBaseNode, AceType);
 public:
     JSBaseNode() = default;
     JSBaseNode(const NG::OptionalSizeF& size, NodeRenderType renderType, std::string surfaceId)

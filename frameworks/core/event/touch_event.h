@@ -467,7 +467,7 @@ private:
 };
 
 class ACE_EXPORT GestureEventResult : public AceType {
-    DECLARE_ACE_TYPE(GestureEventResult, AceType)
+    DECLARE_ACE_TYPE(GestureEventResult, AceType);
 
 public:
     GestureEventResult() = default;

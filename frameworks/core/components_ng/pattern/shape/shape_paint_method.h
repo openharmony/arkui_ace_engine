@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ShapePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ShapePaintMethod, NodePaintMethod);
 public:
     ShapePaintMethod() = default;
     ShapePaintMethod(

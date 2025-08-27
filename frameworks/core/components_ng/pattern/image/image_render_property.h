@@ -74,7 +74,7 @@ struct ImagePaintStyle {
 
 // PaintProperty are used to set render properties.
 class ImageRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ImageRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ImageRenderProperty, PaintProperty);
 
 public:
     ImageRenderProperty() = default;

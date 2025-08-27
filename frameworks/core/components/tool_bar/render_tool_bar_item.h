@@ -29,7 +29,7 @@
 namespace OHOS::Ace {
 
 class RenderToolBarItem : public RenderNode, public FocusNode {
-    DECLARE_ACE_TYPE(RenderToolBarItem, RenderNode)
+    DECLARE_ACE_TYPE(RenderToolBarItem, RenderNode);
 
 public:
     using TargetMenuCallBack = std::function<void(const Offset&, const Offset&)>;

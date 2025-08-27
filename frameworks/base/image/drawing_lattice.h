@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Ace {
 class ACE_EXPORT DrawingLattice : public AceType {
-    DECLARE_ACE_TYPE(DrawingLattice, AceType)
+    DECLARE_ACE_TYPE(DrawingLattice, AceType);
 
 public:
     static RefPtr<DrawingLattice> CreateDrawingLattice(void* sptrAddr);

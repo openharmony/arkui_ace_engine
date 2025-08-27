@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class GestureEventHub;
 
 class ClickEvent : public AceType {
-    DECLARE_ACE_TYPE(ClickEvent, AceType)
+    DECLARE_ACE_TYPE(ClickEvent, AceType);
 public:
     explicit ClickEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~ClickEvent() override = default;
@@ -73,7 +73,7 @@ private:
 };
 
 class ACE_EXPORT ClickEventActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(ClickEventActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(ClickEventActuator, GestureEventActuator);
 public:
     explicit ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ClickEventActuator() override = default;

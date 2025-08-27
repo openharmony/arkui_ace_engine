@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 
 class SvgCanvasImage : public CanvasImage {
-    DECLARE_ACE_TYPE(SvgCanvasImage, CanvasImage)
+    DECLARE_ACE_TYPE(SvgCanvasImage, CanvasImage);
 public:
     explicit SvgCanvasImage(const RefPtr<SvgDomBase>& svgDom) : svgDom_(svgDom) {}
     ~SvgCanvasImage() override = default;

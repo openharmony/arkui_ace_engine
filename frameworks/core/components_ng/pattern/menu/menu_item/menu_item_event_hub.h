@@ -25,7 +25,7 @@ using MenuJSCallback = std::function<void()>;
 using OnSelectEvent = std::function<void(int32_t)>;
 
 class MenuItemEventHub : public EventHub {
-    DECLARE_ACE_TYPE(MenuItemEventHub, EventHub)
+    DECLARE_ACE_TYPE(MenuItemEventHub, EventHub);
 
 public:
     MenuItemEventHub() = default;

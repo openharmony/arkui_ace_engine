@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT LinearSplitPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(LinearSplitPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(LinearSplitPaintMethod, NodePaintMethod);
 public:
     LinearSplitPaintMethod(std::vector<OffsetF> childrenOffset, float splitLength, SplitType splitType)
         : childrenOffset_(std::move(childrenOffset)), splitLength_(splitLength), splitType_(splitType)

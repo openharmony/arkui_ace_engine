@@ -28,7 +28,7 @@ enum class SplitType {
 };
 
 class ACE_EXPORT SplitContainerComponent : virtual public ComponentGroup {
-    DECLARE_ACE_TYPE(SplitContainerComponent, ComponentGroup)
+    DECLARE_ACE_TYPE(SplitContainerComponent, ComponentGroup);
 
 public:
     SplitContainerComponent(const std::list<RefPtr<Component>>& children, SplitType splitType)

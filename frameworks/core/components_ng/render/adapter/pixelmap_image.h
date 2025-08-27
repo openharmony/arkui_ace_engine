@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 class PixelMapImage : public virtual CanvasImage {
-    DECLARE_ACE_TYPE(PixelMapImage, CanvasImage)
+    DECLARE_ACE_TYPE(PixelMapImage, CanvasImage);
 public:
     PixelMapImage() = default;
     explicit PixelMapImage(RefPtr<PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {}

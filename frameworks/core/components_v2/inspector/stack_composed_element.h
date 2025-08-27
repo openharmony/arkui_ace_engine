@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT StackComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(StackComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(StackComposedElement, InspectorComposedElement);
 
 public:
     explicit StackComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 class Pattern;
 
 class ShapeOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(ShapeOverlayModifier, OverlayModifier)
+    DECLARE_ACE_TYPE(ShapeOverlayModifier, OverlayModifier);
 
 public:
     static constexpr double SHAPE_OVERLAY_SIZE_DEFAULT = 4096.0f;

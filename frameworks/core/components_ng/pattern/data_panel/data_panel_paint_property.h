@@ -89,7 +89,7 @@ struct DataPanelShadow {
     }
 };
 class DataPanelPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(DataPanelPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(DataPanelPaintProperty, PaintProperty);
 
 public:
     DataPanelPaintProperty() = default;

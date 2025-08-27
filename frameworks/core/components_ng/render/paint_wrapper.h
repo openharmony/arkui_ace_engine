@@ -38,7 +38,7 @@ class NodePaintMethod;
 
 // PaintWrapper are used to flush dirty render task.
 class PaintWrapper : public virtual AceType {
-    DECLARE_ACE_TYPE(PaintWrapper, AceType)
+    DECLARE_ACE_TYPE(PaintWrapper, AceType);
 
 public:
     PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,

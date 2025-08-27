@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 class XComponentPattern;
 class ACE_EXPORT XComponentPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(XComponentPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(XComponentPaintMethod, NodePaintMethod);
 public:
     XComponentPaintMethod(const RefPtr<NG::RenderSurface>& surface, const RefPtr<XComponentPattern>& pattern)
         : renderSuface_(surface), pattern_(pattern)

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsAccessibilityActionInterceptFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsAccessibilityActionInterceptFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsAccessibilityActionInterceptFunction, JsFunction);
 
 public:
     explicit JsAccessibilityActionInterceptFunction(const JSRef<JSFunc>& jsFunction)
@@ -37,7 +37,7 @@ public:
 };
 
 class JsAccessibilityHoverTransparentFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsAccessibilityHoverTransparentFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsAccessibilityHoverTransparentFunction, JsFunction);
 
 public:
     explicit JsAccessibilityHoverTransparentFunction(const JSRef<JSFunc>& jsFunction)

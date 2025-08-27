@@ -101,7 +101,7 @@ enum class DragBehavior {
 };
 
 class ACE_FORCE_EXPORT DragEvent : public AceType {
-    DECLARE_ACE_TYPE(DragEvent, AceType)
+    DECLARE_ACE_TYPE(DragEvent, AceType);
 
 public:
     DragEvent() = default;
@@ -495,7 +495,7 @@ private:
 };
 
 class NotifyDragEvent : public DragEvent {
-    DECLARE_ACE_TYPE(NotifyDragEvent, DragEvent)
+    DECLARE_ACE_TYPE(NotifyDragEvent, DragEvent);
 
 public:
     NotifyDragEvent() = default;
@@ -535,7 +535,7 @@ private:
 };
 
 class DragSpringLoadingContext : public AceType {
-    DECLARE_ACE_TYPE(DragSpringLoadingContext, AceType)
+    DECLARE_ACE_TYPE(DragSpringLoadingContext, AceType);
 public:
     explicit DragSpringLoadingContext() = default;
     ~DragSpringLoadingContext() override = default;

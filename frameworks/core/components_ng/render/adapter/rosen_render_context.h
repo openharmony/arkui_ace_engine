@@ -64,7 +64,7 @@ class OverlayTextModifier;
 class GradientStyleModifier;
 class PipelineContext;
 class RosenRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
+    DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
