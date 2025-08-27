@@ -49,8 +49,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->bufferSize_ = Size(themeCameraBufferWidth.Value(),
-                themeCameraBufferHeight.Value());
+            theme->bufferSize_ = Size(themeCameraBufferWidth.Value(), themeCameraBufferHeight.Value());
 #if defined(PREVIEW)
             theme->errorTextStyle_.SetFontSize(themeVideoTextFontsize);
             theme->errorTextStyle_.SetTextColor(themeVideoErrorTextColor);
