@@ -432,7 +432,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.filter(predicate);
     }
@@ -475,7 +475,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fn a function to apply
      * @return new Array after map and than flat
      */
-    public override flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
+    public override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.flatMap(fn);
     }
@@ -635,7 +635,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * immediately returns that element value. Otherwise, find returns undefined.
      * @returns the value of the first element in the array or undefined
      */
-    public override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.find(predicate);
     }
@@ -649,7 +649,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
+    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): number {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findIndex(predicate);
     }
@@ -661,7 +661,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate testing function
      * @returns found element or undefined otherwise
      */
-    public override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findLast(predicate);
     }
@@ -674,7 +674,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * which is coercible to the Boolean value false, or until the end of the array.
      * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.every(predicate);
     }
@@ -687,7 +687,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * which is coercible to the Boolean value true, or until the end of the array.
      * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.some(predicate);
     }
@@ -700,7 +700,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate testing function
      * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): number {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findLastIndex(predicate);
     }
@@ -711,7 +711,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduce(callbackfn);
     }
@@ -724,7 +724,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduce<U = T>(
-        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U,
         initialValue: U
     ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -738,7 +738,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduceRight(
-        callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T
+        callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T
     ): T {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduceRight(callbackfn);
@@ -752,7 +752,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduceRight<U>(
-        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U,
         initialValue: U
     ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -764,14 +764,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      */
-    public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
+    public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         // same V2, forEach triggers this addRef!
         const shouldAddRef = this.shouldAddRef();
         if (shouldAddRef) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         // Similar to V2!
-        const observedCb = (value: T, index: number, array: Array<T>) => {
+        const observedCb = (value: T, index: int, array: Array<T>) => {
             if (shouldAddRef) {
                 this.meta_.addRef(String(index as Object | undefined | null));
             }
@@ -1100,7 +1100,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }

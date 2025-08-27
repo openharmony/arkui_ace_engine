@@ -150,10 +150,10 @@ export struct TabTitleBar {
     this.tabOffsets.push(tabOffset);
     tabOffset += TabContentItem.marginFirst;
 
-    this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: number) => {
+    this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: int) => {
       if (tabItem.icon !== undefined || tabItem.symbolStyle !== undefined) {
-        if (Math.abs(this.imageWidths[Math.floor(index).toInt()]) > TabContentItem.imageHotZoneWidth) {
-          tabOffset += this.imageWidths[Math.floor(index).toInt()];
+        if (Math.abs(this.imageWidths[index]) > TabContentItem.imageHotZoneWidth) {
+          tabOffset += this.imageWidths[index];
         } else {
           tabOffset += TabContentItem.imageHotZoneWidth;
         }
