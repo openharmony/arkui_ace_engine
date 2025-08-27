@@ -15,40 +15,45 @@
 
 #include "convert_utils.h"
 
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "pixel_map.h"
-#include "base/image/pixel_map.h"
-#endif
+#include "canvas_ani/ani_canvas.h"
+#include "pixel_map_taihe_ani.h"
+
 #include "base/log/log_wrapper.h"
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::Ani {
 ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object pixelMapObj)
 {
-    ani_status ret;
-    ani_long nativeObj {};
-    if ((ret = env->Object_GetFieldByName_Long(pixelMapObj, "nativeObj", &nativeObj)) != ANI_OK) {
-        return nativeObj;
-    }
-    return nativeObj;
+    auto mediaPixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
+    CHECK_NULL_RETURN(mediaPixelMap, {});
+    auto* ptrAddr = reinterpret_cast<void*>(&mediaPixelMap);
+    return reinterpret_cast<ani_long>(ptrAddr);
 }
 
 ani_object ConvertToPixelMapAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long pixelMapPtr)
 {
-    static const char* className = "L@ohos/multimedia/image/image/PixelMapInner;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        return nullptr;
-    }
-    ani_object aniValue;
-    if (ANI_OK != env->Object_New(cls, ctor, &aniValue, pixelMapPtr)) {
-        return nullptr;
-    }
-    return aniValue;
+    auto* ptrAddr = reinterpret_cast<void*>(pixelMapPtr);
+    CHECK_NULL_RETURN(ptrAddr, nullptr);
+    std::shared_ptr<Media::PixelMap>* mediaPixelMap = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(ptrAddr);
+    CHECK_NULL_RETURN(*mediaPixelMap, nullptr);
+    return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, *mediaPixelMap);
 }
 
+ani_long ConvertFromDrawingCanvasAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object drawingCanvasObj)
+{
+    ani_long nativeObj {};
+    if (env->Object_GetFieldByName_Long(drawingCanvasObj, "nativeObj", &nativeObj) != ANI_OK) {
+        return {};
+    }
+    auto* canvasAni = reinterpret_cast<Rosen::Drawing::AniCanvas*>(nativeObj);
+    CHECK_NULL_RETURN(canvasAni, {});
+    return reinterpret_cast<ani_long>(canvasAni->GetCanvas());
+}
+
+ani_object ConvertToDrawingCanvasAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long drawingCanvasPtr)
+{
+    auto* canvas = reinterpret_cast<Rosen::Drawing::Canvas*>(drawingCanvasPtr);
+    CHECK_NULL_RETURN(canvas, nullptr);
+    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, canvas);
+}
 } // namespace OHOS::Ace::Ani
