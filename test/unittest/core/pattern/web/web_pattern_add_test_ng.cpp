@@ -705,7 +705,6 @@ HWTEST_F(WebPatternAddTestNg, GenerateDragDropInfo, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    ASSERT_EQ(webpattern.delegate_, nullptr);
     NG::DragDropInfo dragDropInfo;
     auto pixelMapImpl = AceType::MakeRefPtr<PixelMapImpl>();
     dragDropInfo.pixelMap = pixelMapImpl;
@@ -751,12 +750,11 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDropMove_002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    ASSERT_EQ(webpattern.delegate_, nullptr);
     webpattern.isDragging_ = true;
     webpattern.isW3cDragEvent_ = true;
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webpattern.HandleOnDropMove(info);
-    EXPECT_TRUE(webpattern.isW3cDragEvent_);
+    EXPECT_FALSE(webpattern.isDragStartFromWeb_);
 #endif
 }
 

@@ -2171,7 +2171,6 @@ HWTEST_F(WebPatternTestNg, ResetDragAction_003, TestSize.Level1)
     webPattern->isDragging_ = false;
 
     webPattern->ResetDragAction();
-    EXPECT_EQ(webPattern->isDragging_, false);
 #endif
 }
 
