@@ -1235,4 +1235,21 @@ HWTEST_F(AppBarTestNg, TestGetAppBarRect003, TestSize.Level1)
     rect = appBar->GetAppBarRect();
     EXPECT_EQ(rect, std::nullopt);
 }
+
+/**
+ * @tc.name: GetJSAppBarContainer001
+ * @tc.desc: Test GetJSAppBarContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, GetJSAppBarContainer001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+}
 } // namespace OHOS::Ace::NG
