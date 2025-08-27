@@ -1266,7 +1266,7 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 {}
 std::string WebDelegate::GetSelectInfo() const
 {
-    return "";
+    return g_setReturnStatus;
 }
 std::string WebDelegate::GetAllTextInfo() const
 {

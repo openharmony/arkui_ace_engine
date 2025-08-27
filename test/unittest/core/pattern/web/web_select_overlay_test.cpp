@@ -25,25 +25,24 @@
 #include "core/components_ng/pattern/web/web_select_overlay.h"
 #undef protected
 #undef private
+#include "nweb.h"
+#include "nweb_handler.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test\unittest\core\pattern\web\mock_web_delegate.cpp"
 
-#include "nweb.h"
-#include "nweb_handler.h"
 #include "base/web/webview/arkweb_utils/arkweb_utils.h"
-#include "core/components/web/web_event.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text/base_text_select_overlay.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/theme.h"
+#include "core/components/web/web_event.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/base_text_select_overlay.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3049,6 +3048,41 @@ HWTEST_F(WebSelectOverlayTest, ComputeTouchHandleRectTest, TestSize.Level1)
 
     EXPECT_FLOAT_EQ(paintRect.Width(), SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     EXPECT_FLOAT_EQ(paintRect.Height(), 5);
+#endif
+}
+
+/**
+ * @tc.name: SetMenuOptions_001
+ * @tc.desc: SetMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetMenuOptions_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("");
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showShare, false);
+    OHOS::Ace::SetReturnStatus("true");
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showShare, true);
+    OHOS::Ace::SetReturnStatus("");
 #endif
 }
 
