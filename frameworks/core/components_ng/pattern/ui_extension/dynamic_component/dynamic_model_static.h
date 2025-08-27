@@ -32,6 +32,7 @@ public:
     static void SetDynamicParam(FrameNode* frameNode, const DynamicParam& param);
     static void SetOnError(FrameNode* frameNode,
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
+    static void SetIsReportFrameEvent(FrameNode* frameNode, bool isReportFrameEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_DYNAMIC_MODEL_STATIC_H
