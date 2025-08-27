@@ -13372,6 +13372,20 @@ class TextAlignModifier extends ModifierWithKey {
   }
 }
 TextAlignModifier.identity = Symbol('textAlign');
+class TextContentAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextContentAlign(node);
+    }
+    else {
+      getUINativeModule().text.setTextContentAlign(node, this.value);
+    }
+  }
+}
+TextContentAlignModifier.identity = Symbol('textContentAlign');
 class TextHeightAdaptivePolicyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14334,6 +14348,10 @@ class ArkTextComponent extends ArkComponent {
   }
   textAlign(value) {
     modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
+    return this;
+  }
+  textContentAlign(value) {
+    modifierWithKey(this._modifiersWithKeys, TextContentAlignModifier.identity, TextContentAlignModifier, value);
     return this;
   }
   lineHeight(value) {

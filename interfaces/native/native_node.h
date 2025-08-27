@@ -2536,6 +2536,19 @@ typedef enum {
     NODE_TEXT_VERTICAL_ALIGN = 1035,
 
     /**
+     * @brief 设置文本内容区垂直对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}，默认值：ARKUI_TEXT_CONTENT_ALIGN_TOP \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}。 \n
+     *
+     * @since 21
+     */
+     NODE_TEXT_CONTENT_ALIGN = 1036,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

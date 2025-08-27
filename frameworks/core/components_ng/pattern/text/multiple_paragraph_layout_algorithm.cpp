@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+constexpr int32_t HEIGHT_HALF = 2;
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
@@ -496,10 +497,31 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
 
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        contentOffset = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        NG::OffsetF alignPosition;
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        if (textLayoutProperty) {
+            if (textLayoutProperty->HasTextContentAlign()) {
+                auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+                alignPosition = GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align);
+            } else {
+                alignPosition = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
+            }
+        }
+        contentOffset = alignPosition + paddingOffset;
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+NG::OffsetF MultipleParagraphLayoutAlgorithm::GetAlignPosition(const NG::SizeF& parentSize,
+    const NG::SizeF& childSize, const TextContentAlign& textContentAlign, const Alignment& alignment)
+{
+    NG::OffsetF offset;
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / HEIGHT_HALF);
+    }
+    offset.SetY(static_cast<int32_t>(textContentAlign) * (parentSize.Height() - contentHeight_) / HEIGHT_HALF);
+    return offset;
 }
 
 void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(

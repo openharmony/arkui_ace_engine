@@ -315,6 +315,21 @@ void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value, frameNode);
 }
 
+void TextModelNG::SetTextContentAlign(Ace::TextContentAlign value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextContentAlign, value);
+}
+
+void TextModelNG::SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextContentAlign, value, frameNode);
+}
+
+void TextModelNG::ReSetTextContentAlign()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT);
+}
+
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
@@ -941,6 +956,14 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
     return textLineStyle->GetTextAlign().value_or(TextAlign::START);
 }
 
+TextContentAlign TextModelNG::GetTextContentAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextContentAlign::CENTER);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextContentAlign::CENTER);
+    return layoutProperty->GetTextContentAlign().value_or(TextContentAlign::CENTER);
+}
+
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextOverflow::CLIP);
@@ -1521,5 +1544,11 @@ void TextModelNG::ResetContentTransition(FrameNode* frameNode)
         TextLayoutProperty, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, frameNode);
+}
+
+void TextModelNG::ReSetTextContentAlign(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT, frameNode);
 }
 } // namespace OHOS::Ace::NG

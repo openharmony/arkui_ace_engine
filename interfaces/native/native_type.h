@@ -402,6 +402,20 @@ typedef enum {
 } ArkUI_TextVerticalAlignment;
 
 /**
+ * @brief 定义文本内容区垂直对齐样式枚举值。
+ *
+ * @since 21
+ */
+typedef enum {
+    /** 顶部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_TOP = 0,
+    /** 居中对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_CENTER,
+    /** 底部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
+} ArkUI_TextContentAlign;
+
+/**
  * @brief Enumerates the types of the Enter key for a single-line text box.
  *
  * @since 12

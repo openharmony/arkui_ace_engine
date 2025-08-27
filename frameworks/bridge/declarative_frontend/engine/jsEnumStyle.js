@@ -66,6 +66,13 @@ let TextVerticalAlign;
   TextVerticalAlign[TextVerticalAlign.TOP = 3] = 'TOP';
 })(TextVerticalAlign || (TextVerticalAlign = {}));
 
+let TextContentAlign;
+(function (TextContentAlign) {
+  TextContentAlign[TextContentAlign.TOP = 0] = 'TOP';
+  TextContentAlign[TextContentAlign.CENTER = 1] = 'CENTER';
+  TextContentAlign[TextContentAlign.BOTTOM = 2] = 'BOTTOM';
+})(TextContentAlign || (TextContentAlign = {}));
+
 let TextDataDetectorType;
 (function (TextDataDetectorType) {
   TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
