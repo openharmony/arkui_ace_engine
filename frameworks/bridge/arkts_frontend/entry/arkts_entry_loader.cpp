@@ -16,8 +16,8 @@
 #include "arkts_entry_loader.h"
 
 #include "base/log/log_wrapper.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/container.h"
+#include "utils/ani_utils.h"
 
 #include <algorithm>
 
@@ -42,7 +42,7 @@ ani_object EntryLoader::GetPageEntryObj()
     ani_ref linkerRef;
 
     do {
-        if ((state = static_cast<ani_status>(ArktsAniUtils::GetNearestNonBootRuntimeLinker(env_, linkerRef))) !=
+        if ((state = static_cast<ani_status>(Ani::AniUtils::GetNearestNonBootRuntimeLinker(env_, linkerRef))) !=
             ANI_OK) {
             LOGE("EntryLoader Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
             break;
@@ -60,7 +60,7 @@ ani_object EntryLoader::GetPageEntryObj()
         }
 
         ani_object isInit;
-        if ((state = static_cast<ani_status>(ArktsAniUtils::CreateAniBoolean(env_, false, isInit))) != ANI_OK) {
+        if ((state = static_cast<ani_status>(Ani::AniUtils::CreateAniBoolean(env_, false, isInit))) != ANI_OK) {
             LOGE("EntryLoader Create Boolean object failed, %{public}d", state);
             break;
         }

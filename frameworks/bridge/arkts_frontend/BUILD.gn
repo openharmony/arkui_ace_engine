@@ -53,7 +53,8 @@ template("arkts_frontend") {
     configs = [ "$ace_root:ace_config" ]
     deps = [
       ":ArkoalaNative_ark",
-      "$ace_root/build:libace_compatible"
+      "$ace_root/build:libace_compatible",
+      "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common"
     ]
 
     sources = [

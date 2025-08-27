@@ -17,9 +17,9 @@
 #include <ani.h>
 
 #include "interfaces/inner_api/ace/constants.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline/pipeline_context.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -166,7 +166,7 @@ ArktsDynamicFrontend::ArktsDynamicFrontend(void* runtime): ArktsFrontend(runtime
 void ArktsDynamicFrontend::Destroy()
 {
     if (globalLinkObj_) {
-        auto* env = ArktsAniUtils::GetAniEnv(vm_);
+        auto* env = Ani::AniUtils::GetAniEnv(vm_);
         if (env) {
             env->GlobalReference_Delete(reinterpret_cast<ani_object>(globalLinkObj_));
         }
@@ -179,7 +179,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
 {
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunDynamicPage start content: %{public}s, params: %{public}s,"
         " entryPoint: %{public}s", content.c_str(), params.c_str(), entryPoint.c_str());
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
     if (pageRouterManager_ == nullptr) {
         pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
@@ -248,7 +248,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
     auto inId = pipeline_->GetInstanceId();
     pipeline_->SetVsyncListener([vm = vm_, app = app_, inId]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         if (env == nullptr) {
             TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunArkoalaEventLoop GetAniEnv failed");
             return;
@@ -258,7 +258,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     });
     // register one hook method to pipeline, which will be called at the tail of vsync
     pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         if (env == nullptr) {
             TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "FireAllArkoalaAsyncEvents GetAniEnv failed");
             return;
