@@ -447,7 +447,6 @@ ani_status NativeUiExtension::SetOnError(
             return;
         }
 
-        int32_t code, const std::string& name, const std::string& message) {
         auto fnObj = reinterpret_cast<ani_fn_object>(onErrorGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
