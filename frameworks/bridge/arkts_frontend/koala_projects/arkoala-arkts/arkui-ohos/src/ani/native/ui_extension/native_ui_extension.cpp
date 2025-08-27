@@ -575,8 +575,6 @@ ani_status NativeUiExtension::SetOnTerminate(
                 return;
             }
 
-    auto onTerminateCallback =
-        [env, onTerminateGlobalRef] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
             AAFwk::Want want;
             if (wantWrap) {
                 want = wantWrap->GetWant();
