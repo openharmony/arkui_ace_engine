@@ -1871,7 +1871,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
-export type CustomProperty = Object | undefined | Record<string, CustomProperty>;
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
     _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
