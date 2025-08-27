@@ -27,7 +27,6 @@ namespace AAFwk {
 namespace Ace {
 struct HostWindowInfo {
     int32_t hostInstanceId;
-    int32_t workerId = -1;
     uint32_t focusWindowId = 0;
     uint32_t realHostWindowId = 0;
     std::shared_ptr<OHOS::AAFwk::Want> hostWantParams;
@@ -35,6 +34,7 @@ struct HostWindowInfo {
 
 struct DynamicInitialConfig {
     int32_t hostInstanceId;
+    int32_t workerId = -1;
     std::string hapPath;
     std::string abcPath;
     std::string entryPoint;
