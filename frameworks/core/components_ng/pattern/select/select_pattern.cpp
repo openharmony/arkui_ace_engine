@@ -1944,7 +1944,7 @@ void SelectPattern::OnColorConfigurationUpdate()
         optionsPattern->SetFontColor(selectTheme->GetFontColor());
         auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+            optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
         }
 
         child->MarkModifyDone();
