@@ -25,7 +25,8 @@ import {
   ScaleOptions, RotateOptions, ClickEffect,  LinearGradientOptions, SweepGradientOptions, RadialGradientOptions,
   MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, BackgroundBrightnessOptions,
   BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback,
-  BlurOptions, LinearGradientBlurOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions } from "./component/common";
+  BlurOptions, LinearGradientBlurOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, MenuOptions, MenuElement,
+  CustomBuilder } from "./component/common";
 import { PeerNode } from './PeerNode';
 import { ResourceColor, ResourceStr, SizeOptions, Area, Position, Padding, LocalizedPadding, Edges, LocalizedEdges,
   LocalizedPosition, ConstraintSizeOptions, Dimension, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths,
@@ -65,6 +66,10 @@ export class CommonMethodModifier implements CommonMethod {
   _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
   _backgroundEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _backgroundEffect_0_0value?: BackgroundEffectOptions | undefined
+
+  _bindMenu_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+  _bindMenu0_value: Array<MenuElement> | CustomBuilder | undefined
+  _bindMenu1_value: MenuOptions | undefined
 
   _bindTips_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _bindTips0_value: TipsMessageType | undefined
@@ -502,6 +507,21 @@ export class CommonMethodModifier implements CommonMethod {
         this._backgroundEffect_1_1value = sysOptions
     } else {
       this._backgroundEffect_1_flag = AttributeUpdaterFlag.SKIP
+    }
+    return this
+  }
+  public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+    if (runtimeType(content) === RuntimeType.FUNCTION) {
+      return this
+    }
+    if ((this._bindMenu_flag) == (AttributeUpdaterFlag.INITIAL) ||
+      !Type.of(content).isPrimitive() || !Type.of(options).isPrimitive() ||
+      this._bindMenu0_value !== content || this._bindMenu1_value !== options) {
+        this._bindMenu_flag = AttributeUpdaterFlag.UPDATE
+        this._bindMenu0_value = content
+        this._bindMenu1_value = options
+    } else {
+      this._bindMenu_flag = AttributeUpdaterFlag.SKIP
     }
     return this
   }
@@ -2525,6 +2545,23 @@ export class CommonMethodModifier implements CommonMethod {
         }
       }
     }
+    if (this._bindMenu_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (this._bindMenu_flag) {
+        case AttributeUpdaterFlag.UPDATE: {
+          peerNode.bindMenu0Attribute((this._bindMenu0_value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu1_value as MenuOptions | undefined));
+          this._bindMenu_flag = AttributeUpdaterFlag.RESET;
+          break;
+        }
+        case AttributeUpdaterFlag.SKIP: {
+          this._bindMenu_flag = AttributeUpdaterFlag.RESET;
+          break;
+        }
+        default: {
+          this._bindMenu_flag = AttributeUpdaterFlag.INITIAL;
+          peerNode.bindMenu0Attribute((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+        }
+      }
+    }
     if (this._bindTips_flag != AttributeUpdaterFlag.INITIAL) {
       switch (this._bindTips_flag) {
         case AttributeUpdaterFlag.UPDATE: {
@@ -3899,6 +3936,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
         default: {
           this.backgroundEffect((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+        }
+      }
+    }
+    if (value._bindMenu_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (value._bindMenu_flag) {
+        case AttributeUpdaterFlag.UPDATE:
+        case AttributeUpdaterFlag.SKIP: {
+          this.bindMenu(value._bindMenu0_value, value._bindMenu1_value);
+          break;
+        }
+        default: {
+          this.bindMenu((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
         }
       }
     }
