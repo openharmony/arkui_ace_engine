@@ -159,5 +159,10 @@ ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
 
     return entryObject;
 }
+
+ani_object EntryLoader::GetLinkObj()
+{
+    return runtimeLinkerObj_;
+}
 }
 } // namespace OHOS::Ace
