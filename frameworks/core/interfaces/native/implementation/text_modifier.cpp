@@ -250,8 +250,14 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 
         // pass internal controller to peer
         auto textOptions = Converter::OptConvert<Converter::TextOptions>(*value);
-        if (textOptions && textOptions->peer) {
-            textOptions->peer->controller = AceType::DynamicCast<TextController>(internalController);
+        CHECK_NULL_VOID(textOptions);
+        auto textController = textOptions->peer;
+        CHECK_NULL_VOID(textController);
+        textController->controller = AceType::DynamicCast<TextController>(internalController);
+        auto styledStringCache = textController->GetStyledStringCache();
+        if (styledStringCache) {
+            textController->controller->SetStyledString(styledStringCache);
+            textController->SetStyledStringCache(nullptr);
         }
     }
 }
