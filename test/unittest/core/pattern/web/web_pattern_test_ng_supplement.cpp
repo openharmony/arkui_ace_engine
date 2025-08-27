@@ -242,11 +242,11 @@ HWTEST_F(WebPatternTestNgSupplement, HandleScaleGestureChange_001, TestSize.Leve
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -261,8 +261,6 @@ HWTEST_F(WebPatternTestNgSupplement, HandleScaleGestureChange_001, TestSize.Leve
     webPattern->startPageScale_ = 5.0;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 5);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 

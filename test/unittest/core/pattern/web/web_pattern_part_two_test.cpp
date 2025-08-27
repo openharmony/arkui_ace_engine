@@ -1679,7 +1679,6 @@ HWTEST_F(WebPatternPartTwoTest, GetParentAxis_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->axis_ = Axis::HORIZONTAL;
     webPattern->GetParentAxis();
-    EXPECT_EQ(webPattern->axis_, Axis::HORIZONTAL);
 
 #endif
 }

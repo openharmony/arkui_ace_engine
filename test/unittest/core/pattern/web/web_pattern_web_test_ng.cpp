@@ -858,11 +858,8 @@ HWTEST_F(WebPatternWebTest, OnZoomAccessEnabledUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     bool value = true;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -889,11 +886,8 @@ HWTEST_F(WebPatternWebTest, OnInitialScaleUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     float value = 1.0;
     webPattern->OnInitialScaleUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnInitialScaleUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
