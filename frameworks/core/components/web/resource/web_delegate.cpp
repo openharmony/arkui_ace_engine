@@ -2230,6 +2230,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
         OnNativeEmbedMouseEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedMouseEvent()
                                             : nullptr;
+        OnNativeEmbedObjectParamChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedObjectParamChangeEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedObjectParamChangeId(), oldContext);
         onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
             eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
         onRenderProcessNotRespondingV2_ = useNewPipe
@@ -7834,6 +7837,45 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedGestureEvent");
+}
+
+void WebDelegate::OnNativeEmbedObjectParamChange(
+    std::shared_ptr<OHOS::NWeb::NWebNativeEmbedParamDataInfo> paramDataInfo)
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+
+    std::string embedId;
+    std::string objectAttributeId;
+    std::vector<NativeEmbedParamItem> paramItems;
+    if (paramDataInfo) {
+        embedId = paramDataInfo->GetEmbedId();
+        objectAttributeId = paramDataInfo->GetObjectAttributeId();
+        for (const auto& paramItem : paramDataInfo->GetParamItems()) {
+            NativeEmbedParamItem item;
+            if (paramItem) {
+                item.status = static_cast<OHOS::Ace::NativeEmbedParamStatus>(paramItem->GetStatus());
+                item.id = paramItem->GetId();
+                item.name = paramItem->GetName();
+                item.value = paramItem->GetValue();
+            }
+            paramItems.push_back(item);
+        }
+    }
+
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), embedId, objectAttributeId, paramItems]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedObjectParamChangeV2_ = delegate->OnNativeEmbedObjectParamChangeV2_;
+            if (OnNativeEmbedObjectParamChangeV2_) {
+                OnNativeEmbedObjectParamChangeV2_(
+                    std::make_shared<NativeEmbedParamDataInfo>(embedId, objectAttributeId, paramItems));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedObjectParamChange");
 }
 
 void WebDelegate::OnNativeEmbedMouseEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent> event)

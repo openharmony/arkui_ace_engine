@@ -2536,6 +2536,24 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedMouseEventId001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetNativeEmbedObjectParamChangeId001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetNativeEmbedObjectParamChangeId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto nativeEmbedObjectParamChangeId = [&callCount](const BaseEventInfo* info) { callCount++; };
+    webModelNG.SetNativeEmbedObjectParamChangeId(std::move(nativeEmbedObjectParamChangeId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedObjectParamChangeEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetKeyboardAvoidMode012
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
