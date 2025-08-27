@@ -28,6 +28,8 @@ constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
+constexpr int32_t DIGIT_X_REVERSE = 23;
+constexpr int32_t DIGIT_Y_REVERSE = 24;
 
 TouchType ConvertTouchEventType(int32_t originAction)
 {
@@ -179,6 +181,13 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
     touchPoint.height = pointerItem.GetHeight();
+
+    uint32_t longAxis = static_cast<uint32_t>(pointerItem.GetLongAxis());
+    bool hasReverseSignalX = (longAxis & (1U << DIGIT_X_REVERSE) != 0);
+    bool hasReverseSignalY = (longAxis & (1U << DIGIT_Y_REVERSE) != 0);
+    touchPoint.isXReverse = static_cast<int32_t>(hasReverseSignalX);
+    touchPoint.isYReverse = static_cast<int32_t>(hasReverseSignalY);
+
     int32_t blobId = pointerItem.GetBlobId();
     if (blobId < 0) {
         touchPoint.operatingHand = 0;
@@ -297,7 +306,9 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetPressedTime(touchPoint.downTime)
         .SetWidth(touchPoint.width)
         .SetHeight(touchPoint.height)
-        .SetOperatingHand(touchPoint.operatingHand);
+        .SetOperatingHand(touchPoint.operatingHand)
+        .SetXReverse(touchPoint.isXReverse)
+        .SetYReverse(touchPoint.isYReverse);
     return event;
 }
 

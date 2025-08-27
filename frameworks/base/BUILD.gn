@@ -72,6 +72,7 @@ template("ace_base_source_set") {
       "mousestyle/mouse_style.cpp",
       "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_report.cpp",
+      "ressched/ressched_touch_optimizer.cpp",
       "subwindow/subwindow_manager.cpp",
       "thread/background_task_executor.cpp",
       "utils/base_id.cpp",

@@ -40,6 +40,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -3159,9 +3160,21 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         NotifyDragTouchEvent(scalePoint, node);
-        touchEvents_.emplace_back(point);
+
+        std::list<TouchEvent> touchEvents;
+        touchEvents.push_back(point);
+        ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
+        touchEvents_.emplace_back(touchEvents.back());
+
         hasIdleTasks_ = true;
-        RequestFrame();
+        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount())) {
+            FlushVsync(static_cast<uint64_t>(GetSysTimestamp()), GetFrameCount());
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(GetFrameCount());
+        } else {
+            RequestFrame();
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
+        }
         return;
     }
 
@@ -3774,7 +3787,7 @@ void PipelineContext::ConsumeTouchEvents(
     std::unordered_set<int32_t> ids;
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
-
+    ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
@@ -3802,11 +3815,15 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
+        TouchEvent resultPoint;
+        TouchEvent resamplePoint;
+        TouchEvent& tpPoint = idToTouchPoints[touchId];
         if (it != newIdTouchPoints.end()) {
-            touchEvents.emplace_back(it->second);
+            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
         } else {
-            touchEvents.emplace_back(idToTouchPoints[touchId]);
+            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
         }
+        touchEvents.emplace_back(resultPoint);
         ids.erase(touchId);
     }
     eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
