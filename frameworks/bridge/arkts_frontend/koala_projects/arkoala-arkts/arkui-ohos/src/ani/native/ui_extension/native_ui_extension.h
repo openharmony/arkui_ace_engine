@@ -25,6 +25,7 @@ class NativeUiExtension {
 public:
     static ani_status BindNativeUiExtension(ani_env *env);
     static ani_status BindNativeUiExtensionComponent(ani_env *env);
+    static ani_status BindNativeUiExtensionProxy(ani_env *env);
 
 private:
     // UiExtensionModal
@@ -49,7 +50,17 @@ private:
     static ani_status SetOnRelease(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
-};
+    static ani_status SetOnDrawReady(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
+    // UiExtensionProxy
+    static ani_status SendData(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj);
+    static ani_object SendDataSync(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj);
+}
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_UI_EXTESNION
