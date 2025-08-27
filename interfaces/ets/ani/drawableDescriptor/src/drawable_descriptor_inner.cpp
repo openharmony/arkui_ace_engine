@@ -414,7 +414,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         LOGI("find arkui drawable descriptor inner failed");
         return ANI_ERROR;
     }
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "createPixelMapDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePixelMapDrawable) },
         ani_native_function {
@@ -432,7 +432,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "nativeTransferStatic", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::NativeTransferStatic) },
         ani_native_function { "destructDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DestructDrawable) },
     };
-    auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
     if (bindRst != ANI_OK) {
         LOGI("bind native methods failed, id = %{public}d", static_cast<int>(bindRst));
         return bindRst;

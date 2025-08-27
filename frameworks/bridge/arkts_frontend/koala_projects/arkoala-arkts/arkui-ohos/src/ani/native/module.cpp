@@ -61,7 +61,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Image_ResizableOptions",
             nullptr,
@@ -1027,12 +1027,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetStringColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetNumberColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
@@ -1153,7 +1153,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         }
     };
 
-    auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
     if (bindRst != ANI_OK) {
         HILOGE("Bind native methonds failed, bindRst:%{public}d", bindRst);
         return bindRst;
