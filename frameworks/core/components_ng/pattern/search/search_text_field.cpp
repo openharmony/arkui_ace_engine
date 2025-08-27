@@ -15,10 +15,9 @@
 
 #include "core/components_ng/pattern/search/search_text_field.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -162,7 +161,7 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
     return searchHost->GetId();
 }
 
-float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
+float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension &fontSize)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
@@ -211,4 +210,4 @@ IMEClient SearchTextFieldPattern::GetIMEClientInfo()
     clientInfo.nodeId = parentFrameNode->GetId();
     return clientInfo;
 }
-} // namespace OHOS::Ace::NG
+}  // namespace OHOS::Ace::NG

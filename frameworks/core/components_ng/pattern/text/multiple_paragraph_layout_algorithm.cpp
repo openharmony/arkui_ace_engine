@@ -79,7 +79,6 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
-
     auto themeScopeId = frameNode->GetThemeScopeId();
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
@@ -106,9 +105,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
-    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
             SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode, textColor);
@@ -122,9 +121,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetParagraphVerticalAlign(
         textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
-    FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
     textStyle.SetTextDirection(ParagraphUtil::GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
 }
@@ -359,7 +360,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
 void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
 {
-    // Determines whether a foreground color is set or inherited.
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
         if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {

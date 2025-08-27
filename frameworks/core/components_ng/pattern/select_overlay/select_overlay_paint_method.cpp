@@ -69,7 +69,6 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);
-
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());
     } else {

@@ -4869,7 +4869,7 @@ HWTEST_F(SelectOverlayTestNg, GetCreateMenuOptionsParams001, TestSize.Level1)
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
         .WillRepeatedly(Return(selectTheme));
-    auto menuWrapper =  selectOverlayNode->CreateMenuNode(info_);
+    auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
 }
