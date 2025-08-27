@@ -158,18 +158,23 @@ ArkUINativeModuleValue ResourceBridge::SetResourceManagerCacheMaxCountForHSP(Ark
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             auto realValue = firstArg->ToNumber(vm)->Value();
             auto value = firstArg->Int32Value(vm);
-            if ((realValue - value) != 0) {
-                ArkTSUtils::ThrowBusinessError(vm, "The parameter value cannot be a floating-point number", ERROR_CODE_PARAMETER_TYPE_ERROR);
+            if (!NearEqual(realValue, value)) {
+                ArkTSUtils::ThrowBusinessError(vm,
+                    "cache count cannot be a floating-point number, but the input is " + std::to_string(realValue),
+                    ERROR_CODE_PARAMETER_TYPE_ERROR);
                 return panda::JSValueRef::Undefined(vm);
             }
             if (value < 0) {
-                ArkTSUtils::ThrowBusinessError(vm, "The parameter value cannot be less than 0", ERROR_CODE_PARAMETER_LESS_THAN_ZERO);
+                ArkTSUtils::ThrowBusinessError(vm,
+                    "cache count cannot be negative, but the input is " + std::to_string(realValue),
+                    ERROR_CODE_PARAMETER_LESS_THAN_ZERO);
                 return panda::JSValueRef::Undefined(vm);
             }
             cacheSize = static_cast<size_t>(value);
             ResourceManager::GetInstance().SetResourceCacheSize(cacheSize);
         } else {
-            ArkTSUtils::ThrowBusinessError(vm, "The function cannot be called from a non-main thread", ERROR_CODE_NOT_RUN_ON_UI_THREAD);
+            ArkTSUtils::ThrowBusinessError(
+                vm, "The function cannot be called from a non-main thread", ERROR_CODE_NOT_RUN_ON_UI_THREAD);
             return panda::JSValueRef::Undefined(vm);
         }
     }
