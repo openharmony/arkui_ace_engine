@@ -318,6 +318,7 @@ export class TouchTestInfoTransfer {
         rect.setProperty('width', touchTestInfo.rect.width);
         rect.setProperty('height', touchTestInfo.rect.height);
         retValue.setProperty('rect', rect);
+        retValue.setProperty('id', touchTestInfo.id);
         return retValue
     }
 }
