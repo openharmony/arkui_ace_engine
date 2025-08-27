@@ -1031,8 +1031,8 @@ ani_status BindAnimator(ani_env *env)
             reinterpret_cast<void *>(ANICreate)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator method fail");
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator static method fail");
         return ANI_ERROR;
     };
     return ANI_OK;
@@ -1061,11 +1061,18 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"reset", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
+    };
+
+    std::array staticMethods = {
         ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind native method fail");
+        return ANI_ERROR;
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind static native static method fail");
         return ANI_ERROR;
     };
     return ANI_OK;
