@@ -74,8 +74,8 @@ public:
     AssertionResult IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id);
     AssertionResult IsEqualNextFocusNodeInGroup(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
         int32_t groupIndex = 0, int32_t groupItemNum = GROUP_ITEM_NUMBER);
-    AssertionResult IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep step, int32_t currentIndex, int32_t expectNextIndex,
-        int32_t groupIndex = 0, int32_t groupItemNum = GROUP_ITEM_NUMBER);
+    AssertionResult IsEqualNextFocusNodeInGroupWithHeaderAndFooter(FocusStep step, int32_t currentIndex,
+        int32_t expectNextIndex, int32_t groupIndex = 0, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     int32_t FindFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     std::vector<RefPtr<FrameNode>> GetFlatListItems();
     std::vector<RefPtr<FrameNode>> GetGroupListItems(RefPtr<FrameNode> group);
@@ -260,7 +260,7 @@ void ListCommonTestNg::MouseSelect(Offset start, Offset end)
 
 AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex)
 {
-    std::vector<RefPtr<FrameNode>> listItems = GetListItemOrListItemGroupInList();    
+    std::vector<RefPtr<FrameNode>> listItems = GetListItemOrListItemGroupInList();
     RefPtr<FocusHub> currentFocusNode = listItems[currentIndex]->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
     RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNodeInList(step, currentFocusNode).Upgrade();
@@ -402,7 +402,7 @@ std::vector<RefPtr<FrameNode>> ListCommonTestNg::GetFlatListItems()
         } else if (childFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             listItems.emplace_back(childFrameNode);
         }
-    }    
+    }
     return listItems;
 }
 

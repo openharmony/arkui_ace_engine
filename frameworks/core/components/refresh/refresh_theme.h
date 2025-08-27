@@ -122,7 +122,6 @@ public:
         return ratio_;
     }
 
-
 protected:
     RefreshTheme() = default;
 

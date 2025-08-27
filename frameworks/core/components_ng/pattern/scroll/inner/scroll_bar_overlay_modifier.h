@@ -59,7 +59,7 @@ class ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier);
 
 public:
-    ScrollBarOverlayModifier(const OffsetF& barOffset = OffsetF(), const SizeF& barSize = SizeF());
+    explicit ScrollBarOverlayModifier(const OffsetF& barOffset = OffsetF(), const SizeF& barSize = SizeF());
 
     ~ScrollBarOverlayModifier() override = default;
 

@@ -921,7 +921,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     auto group1 = GetChildFrameNode(frameNode_, 1);
     auto footerIndex = 1 + GROUP_ITEM_NUMBER; // HeaderCount + GroupItemNumber
     auto footer1Rect = GetChildRect(group1, footerIndex);
-    EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
+    EXPECT_EQ(footer1Rect.Bottom(), 100.f);
 
     /**
      * @tc.steps: step3. Scroll To ListItem in group.

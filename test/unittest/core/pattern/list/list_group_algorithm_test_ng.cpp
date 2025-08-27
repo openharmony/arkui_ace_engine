@@ -303,7 +303,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout001, TestSize.Level1)
     RectF firstItemRect = GetChildRect(groupNode, HEADER_INDEX + 1);
     RectF secondItemRect = GetChildRect(groupNode, HEADER_INDEX + 2);
     RectF footRect = GetChildRect(groupNode, 3);
-     EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, WIDTH, groupHeight)));
+    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, WIDTH, groupHeight)));
     EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, WIDTH, GROUP_HEADER_LEN)));
     EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE)));
