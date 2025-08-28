@@ -406,6 +406,9 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;
     }
+    if (textDetectResult_.menuOptionAndAction.empty()) {
+        GetAIEntityMenu();
+    }
     aiDetectFlag_ |= URL_DETECT_FINISH;
     if (aiDetectFlag_ == ALL_DETECT_FINISH) {
         FireFinalResult();
