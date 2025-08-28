@@ -127,6 +127,26 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_RemoveTextFieldInfo003, Test
 }
 
 /**
+ * @tc.name: TextFieldManagerNG_SetAttachInput001
+ * @tc.desc: test SetAttachInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_SetAttachInput001, TestSize.Level1)
+{
+    TextFieldManagerNG text_field_manager;
+    EXPECT_EQ(text_field_manager.GetAttachInputId(), -1);
+    text_field_manager.SetAttachInputId(100);
+    EXPECT_EQ(text_field_manager.GetAttachInputId(), 100);
+
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CheckAttachInput();
+}
+
+/**
  * @tc.name: TextFieldManagerNG_UpdateTextFieldInfo001
  * @tc.desc: test UpdateTextFieldInfo
  * @tc.type: FUNC
