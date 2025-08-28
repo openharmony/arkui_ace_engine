@@ -73,11 +73,11 @@ private:
     int64_t lastRVSPointTimeStamp_ = 0;
     std::once_flag rvsOnceFlag_;
     std::atomic_bool rvsEnable_ = false;
-    std::atomic_bool paramEnable_ = true;
+
     // Default value is true, set to false when pan recognizer down, set to true when accept
-    bool slideAccepted_ = true;
+    std::atomic_bool slideAccepted_ = true;
     // Whether the last frame drawing was triggered by TP
-    bool lastTpFlush_ = false;
+    std::atomic_bool lastTpFlush_ = false;
     // Record the last VSync count to determine if current TP falls between
     // the last TP triggered early drawing and the next VSync
     uint32_t lastTpFlushCount_ = 0;

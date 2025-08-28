@@ -411,8 +411,7 @@ bool ResSchedTouchOptimizer::RVSEnableCheck()
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             rvsEnable_ = ResSchedReport::GetInstance().AppRVSEnableCheck(payload, reply);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d %{public}d",
-                static_cast<int32_t>(rvsEnable_), static_cast<int32_t>(paramEnable_));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d", static_cast<int32_t>(rvsEnable_));
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
