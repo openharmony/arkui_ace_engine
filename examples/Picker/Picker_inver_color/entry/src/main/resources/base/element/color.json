@@ -1,0 +1,20 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "red",
+      "value": "#FF0000"
+    },
+    {
+      "name": "green",
+      "value": "#00FF00"
+    },
+    {
+      "name": "picker_bak_theme",
+      "value": "#FFFFFF"
+    }
+  ]
+}
