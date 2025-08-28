@@ -487,7 +487,7 @@ Local<panda::ObjectRef> CreateSpanResultObject(EcmaVM *vm, const ResultObject& r
         if (resultObject.valuePixelMap) {
 #if defined (PIXEL_MAP_SUPPORTED)
             auto jsPixmap = Framework::ConvertPixmap(resultObject.valuePixelMap);
-            if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
+            if (!jsPixmap->IsUndefined()) {
                 resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                     panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
             }
@@ -552,7 +552,7 @@ void SetImageChangeSpanResult(
             returnHeight = valuePixelMap->GetHeight();
         }
         auto jsPixmap = Framework::ConvertPixmap(valuePixelMap);
-        if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
+        if (!jsPixmap->IsUndefined()) {
             resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                 panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
         }
@@ -753,7 +753,7 @@ void CreateImageStyleObj(EcmaVM* vm, Local<panda::ObjectRef>& imageStyleObj, Loc
     if (spanResult.GetValuePixelMap()) {
 #ifdef PIXEL_MAP_SUPPORTED
         auto jsPixmap = Framework::ConvertPixmap(spanResult.GetValuePixelMap());
-        if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
+        if (!jsPixmap->IsUndefined()) {
             spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                 panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
         }

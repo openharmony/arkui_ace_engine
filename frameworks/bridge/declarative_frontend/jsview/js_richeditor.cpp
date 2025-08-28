@@ -1538,7 +1538,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         imageStyle.size = imageSize;
     }
     JSRef<JSVal> verticalAlign = imageAttribute->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
+    if (!verticalAlign->IsNull()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -2627,7 +2627,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
-    } else if (!lineHeight->IsUndefined() && lineHeight->IsString() &&
+    } else if (!lineHeight->IsUndefined() &&
                !std::all_of(lineHeight->ToString().begin(), lineHeight->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2647,7 +2647,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         letters = theme->GetTextStyle().GetLetterSpacing();
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
-    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() && letterSpacing->IsString() &&
+    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() &&
                !std::all_of(letterSpacing->ToString().begin(), letterSpacing->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2694,7 +2694,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     auto decorationObject = JSObjectCast(styleObject->GetProperty("decoration"));
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
-        if (!type->IsNull() && !type->IsUndefined() && type->IsNumber()) {
+        if (!type->IsNull() && !type->IsUndefined()) {
             updateSpanStyle.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
@@ -2706,7 +2706,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
             updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
-        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined() && textDecorationStyle->IsNumber()) {
+        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
             updateSpanStyle.updateTextDecorationStyle =
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
