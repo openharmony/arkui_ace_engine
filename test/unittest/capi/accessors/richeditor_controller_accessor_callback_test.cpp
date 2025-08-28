@@ -357,14 +357,11 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    auto value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
-    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onClick, nullptr);
-    accessor_->addTextSpan(peer_, &res, &optOptions);
+    accessor_->addTextSpan(peer_, &value, &optOptions);
     ASSERT_NE(g_gestureOptions.onClick, nullptr);
 
     GestureEvent event;
@@ -401,14 +398,11 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubl
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    auto value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
-    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
-    accessor_->addTextSpan(peer_, &res, &optOptions);
+    accessor_->addTextSpan(peer_, &value, &optOptions);
     ASSERT_NE(g_gestureOptions.onDoubleClick, nullptr);
 
     GestureEvent event;
@@ -446,14 +440,11 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    auto value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
-    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onLongPress, nullptr);
-    accessor_->addTextSpan(peer_, &res, &optOptions);
+    accessor_->addTextSpan(peer_, &value, &optOptions);
     ASSERT_NE(g_gestureOptions.onLongPress, nullptr);
 
     GestureEvent event;
