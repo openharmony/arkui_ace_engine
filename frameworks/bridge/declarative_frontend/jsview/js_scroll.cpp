@@ -418,17 +418,16 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
 
 void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(theme);
-    Color color(theme->GetForegroundColor());
+    Color color;
     RefPtr<ResourceObject> resObj;
-    JSViewAbstract::ParseJsColor(args[0], color, resObj);
+    if (JSViewAbstract::ParseJsColor(args[0], color, resObj)) {
+        ScrollModel::GetInstance()->SetScrollBarColor(color);
+    } else {
+        ScrollModel::GetInstance()->ResetScrollBarColor();
+    }
     if (SystemProperties::ConfigChangePerform()) {
         ScrollModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
     }
-    ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)

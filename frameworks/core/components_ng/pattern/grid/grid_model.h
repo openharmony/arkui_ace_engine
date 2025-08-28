@@ -49,6 +49,7 @@ public:
     virtual void SetGridHeight(const Dimension& value) = 0;
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarColor(const std::optional<Color>& scrollBarColor) {};
     virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual void SetCachedCount(int32_t value, bool show = false) = 0;
     virtual void SetIsRTL(TextDirection direction) = 0;
