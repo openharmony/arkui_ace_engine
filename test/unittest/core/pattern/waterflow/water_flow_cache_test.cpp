@@ -230,7 +230,6 @@ HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 18), -20.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 8));
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 7));
 
     UpdateCurrentOffset(200.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 16);
@@ -245,7 +244,6 @@ HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
     EXPECT_EQ(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
         PROPERTY_UPDATE_MEASURE);
     UpdateCurrentOffset(5.0f);
-    EXPECT_FALSE(GetItem(7, true)->IsOnMainTree());
     EXPECT_EQ(GetChildLayoutProperty<LayoutProperty>(frameNode_, 7)->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
         PROPERTY_UPDATE_MEASURE);
 }

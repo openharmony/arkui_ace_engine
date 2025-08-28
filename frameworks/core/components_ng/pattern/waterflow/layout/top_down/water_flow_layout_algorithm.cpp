@@ -92,6 +92,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
 
+    // Initialize unlayouted items if not layouted
+    InitUnlayoutedItems();
+
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
@@ -162,6 +165,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
+
+    measuredStartIndex_ = layoutInfo_->startIndex_;
+    measuredEndIndex_ = layoutInfo_->endIndex_;
     layoutInfo_->lastMainSize_ = mainSize_;
 
     const int32_t cacheCnt = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
@@ -174,6 +180,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         PreloadItems(layoutWrapper, layoutInfo_, cacheCnt);
     }
+
+    isLayouted_ = false;
 }
 
 bool WaterFlowLayoutAlgorithm::MeasureToTarget(
@@ -251,6 +259,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         skipMeasure_ = false;
         return;
     }
+
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     const int32_t cachedCount = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
 
@@ -325,6 +334,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
     UpdateOverlay(layoutWrapper);
+
+    ClearUnlayoutedItems(layoutWrapper);
+    isLayouted_ = true;
 }
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)

@@ -52,6 +52,13 @@ public:
     { /* callback when cache layout ends */
     }
 
+    // record the previous layout index range for selective clearing mechanism
+    int32_t prevStartIndex_ = -1;
+    int32_t prevEndIndex_ = -1;
+
+    // Flag indicating if layout phase is completed.
+    bool isLayouted_ = true;
+
 protected:
     /**
      * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
@@ -79,6 +86,34 @@ protected:
         return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_ ||
                layoutWrapper->IsIgnoreOptsValid();
     }
+
+    /**
+    * Init unlayouted items collection from layout info when not layouted.
+    */
+    void InitUnlayoutedItems();
+
+    /**
+     * Clear layout algorithms only for measured items to preserve component states
+     */
+    void ClearUnlayoutedItems(LayoutWrapper* layoutWrapper);
+
+    /**
+    * @brief Get the layout information for the current water flow layout algorithm.
+    * @return RefPtr to the layout information base object.
+    */
+    virtual RefPtr<WaterFlowLayoutInfoBase> LayoutInfo() const = 0;
+
+    /**
+    * @brief Get the start index of items determined after the measure phase.
+    * @return The start index of the layout range established during measurement.
+    */
+    virtual int32_t MeasuredStartIndex() const = 0;
+
+    /**
+    * @brief Get the end index of items determined after the measure phase.
+    * @return The end index of the layout range established during measurement.
+    */
+    virtual int32_t MeasuredEndIndex() const = 0;
 
     bool syncLoad_ = false;
 

@@ -59,12 +59,28 @@ private:
 
     RefPtr<WaterFlowLayoutInfo> layoutInfo_;
 
+    RefPtr<WaterFlowLayoutInfoBase> LayoutInfo() const override {
+        return layoutInfo_;
+    }
+
+    int32_t MeasuredStartIndex() const override {
+        return measuredStartIndex_;
+    }
+
+    int32_t MeasuredEndIndex() const override {
+        return measuredEndIndex_;
+    }
+
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float footerMainStartPos_ = 0.0f;
     bool skipMeasure_ = false;
+
+    // Record the index range after measurement completion
+    int32_t measuredStartIndex_ = -1;
+    int32_t measuredEndIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H

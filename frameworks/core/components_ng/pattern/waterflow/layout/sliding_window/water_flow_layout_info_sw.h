@@ -150,8 +150,8 @@ public:
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 
-    int32_t StartIndex() const;
-    int32_t EndIndex() const;
+    int32_t StartIndex() const override;
+    int32_t EndIndex() const override;
     inline bool ItemInView(int32_t idx) const
     {
         return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
