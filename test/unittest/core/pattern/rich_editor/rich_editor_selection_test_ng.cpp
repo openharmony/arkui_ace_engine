@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
- 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -2144,6 +2143,8 @@ HWTEST_F(RichEditorSelectionTestNg, UpdateSelectionAndHandleVisibility001, TestS
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->insertValueLength_ = 5;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->UpdateSelectionAndHandleVisibility();
     ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 5);
