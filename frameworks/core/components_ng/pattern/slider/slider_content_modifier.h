@@ -27,6 +27,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+using UpdateImageCenterCallback = std::function<void(const PointF&)>;
+
 enum class SliderStatus : uint32_t {
     DEFAULT,
     CLICK,
@@ -53,8 +55,7 @@ public:
         Color blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters, std::function<void(float)> updateImageCenterX,
-        std::function<void(float)> updateImageCenterY);
+    explicit SliderContentModifier(const Parameters& parameters, UpdateImageCenterCallback updateImageCenter);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -368,8 +369,7 @@ private:
     void UpdateSliderEndsPosition();
 
 private:
-    std::function<void(float)> updateImageCenterX_;
-    std::function<void(float)> updateImageCenterY_;
+    UpdateImageCenterCallback updateImageCenterCallback_;
     std::function<void()> updateAccessibilityVirtualNode_;
     WeakPtr<FrameNode> host_;
 

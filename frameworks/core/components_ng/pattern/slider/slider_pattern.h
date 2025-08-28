@@ -46,15 +46,10 @@ public:
         if (!sliderContentModifier_) {
             sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
                 paintParameters,
-                [weak = WeakClaim(this)](float x) {
+                [weak = WeakClaim(this)](const PointF& imageCenter) {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateImagePositionX(x);
-                },
-                [weak = WeakClaim(this)](float y) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->UpdateImagePositionY(y);
+                    pattern->UpdateImagePosition(imageCenter);
                 });
             sliderContentModifier_->SetHost(GetHost());
         }
@@ -394,8 +389,7 @@ private:
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
-    void UpdateImagePositionX(float centerX);
-    void UpdateImagePositionY(float centerY);
+    void UpdateImagePosition(const PointF& imageCenter);
     std::pair<OffsetF, float> GetBubbleVertexPosition(
         const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
