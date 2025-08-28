@@ -1841,11 +1841,6 @@ class NodeAdapterThunk extends NativeThunk {
 }
 
 class NodeAdapterFinalizable extends Finalizable {
-    ptr: pointer
-    finalizer: pointer
-    cleaner: NativeThunk | undefined = undefined
-    managed: boolean
-
     constructor(ptr: pointer) {
         super(ptr, nullptr, false);
         this.init(ptr)
