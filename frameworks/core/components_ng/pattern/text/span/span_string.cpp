@@ -292,7 +292,7 @@ std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanSt
         NG::ParagraphUtil::HandleEmptyParagraph(paragraph, group);
         paragraph->Build();
         auto maxWidthVal = maxWidth.has_value()? maxWidth.value() : std::numeric_limits<float>::max();
-        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle);
+        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle, maxWidthVal);
         paragraph->Layout(maxWidthVal);
         paraVec.emplace_back(paragraph);
     }

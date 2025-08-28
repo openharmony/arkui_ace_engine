@@ -83,7 +83,7 @@ int32_t StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
                 callback->Callback(res);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
 }
 
@@ -113,7 +113,7 @@ int32_t StylusDetectorCallBack::GetText(int32_t nodeId, const RefPtr<TaskExecuto
             res.resultData = pattern->GetTextValue();
             callback->Callback(res);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
 }
 
@@ -131,7 +131,7 @@ int32_t StylusDetectorCallBack::Redo(int32_t nodeId, const RefPtr<TaskExecutor>&
             pattern->HandleOnRedoAction();
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
 }
 
@@ -149,7 +149,7 @@ int32_t StylusDetectorCallBack::Undo(int32_t nodeId, const RefPtr<TaskExecutor>&
             pattern->HandleOnUndoAction();
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
 }
 

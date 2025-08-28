@@ -40,7 +40,7 @@ public:
         bool& spanStringHasMaxLines);
     static void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup);
     static void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
-        const TextStyle& textStyle);
+        const TextStyle& textStyle, double indentMaxWidth);
     static ParagraphStyle GetParagraphStyle(const TextStyle& textStyle);
     static ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
     static PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
