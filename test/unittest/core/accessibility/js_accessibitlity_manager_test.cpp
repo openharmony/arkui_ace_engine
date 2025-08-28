@@ -3106,6 +3106,34 @@ HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedFrameNode001, TestSize.Leve
 }
 
 /**
+ * @tc.name: CheckAndGetEmbedWebElementInfo001
+ * @tc.desc: Test CheckAndGetEmbedFrameNode with normal and nullptr node
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, CheckAndGetEmbedWebElementInfo001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "embedNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    frameNode->context_ = AceType::RawPtr(context);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    AccessibilityElementInfo elementInfo;
+    auto ret = jsAccessibilityManager->CheckAndGetEmbedWebElementInfo(frameNode, elementInfo);
+    EXPECT_EQ(ret, false);
+
+    RefPtr<NG::FrameNode> nullNode;
+    ret = jsAccessibilityManager->CheckAndGetEmbedWebElementInfo(nullNode, elementInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: SearchElementInfoBySurfaceId001
  * @tc.desc: Test SearchElementInfoBySurfaceId with valid surfaceId and different types
  * @tc.type: FUNC
@@ -3592,4 +3620,63 @@ HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement002, Tes
     EXPECT_TRUE(result);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: ConvertAceAction001
+ * @tc.desc: Test ConvertAceAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertAceAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
+    ActionType result;
+    result= jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_ACCESSIBILITY_FOCUS);
+    EXPECT_EQ(result, ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS);
+
+    result= jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_NONE);
+    EXPECT_EQ(result, ActionType::ACCESSIBILITY_ACTION_INVALID);
+}
+
+/**
+ * @tc.name: GetAccessibilityPrevFocusNode001
+ * @tc.desc: Test ConvertAceAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    auto node1 = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+
+    auto prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
+    ASSERT_EQ(prevNode, nullptr);
+    std::string testKey = "test_key";
+    node1->UpdateInspectorId(testKey);
+    prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
+    ASSERT_EQ(prevNode, nullptr);
+
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(instanceId, testKey, node1->GetAccessibilityId());
+    prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
+    ASSERT_EQ(prevNode, nullptr);
+    MockPipelineContext::TearDown();
+}
+
 } // namespace OHOS::Ace::NG
