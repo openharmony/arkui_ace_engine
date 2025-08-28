@@ -145,4 +145,39 @@ ArkUINativeModuleValue ResourceBridge::ClearCache(ArkUIRuntimeCallInfo* runtimeC
     ResourceManager::GetInstance().Reset();
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ResourceBridge::SetResourceManagerCacheMaxCountForHSP(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+    CHECK_NULL_RETURN(taskExecutor, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    size_t cacheSize = 0;
+    if (firstArg->IsNumber()) {
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            auto realValue = firstArg->ToNumber(vm)->Value();
+            auto value = firstArg->Int32Value(vm);
+            if (!NearEqual(realValue, value)) {
+                ArkTSUtils::ThrowBusinessError(vm,
+                    "cache count cannot be a floating-point number, but the input is " + std::to_string(realValue),
+                    ERROR_CODE_PARAMETER_TYPE_ERROR);
+                return panda::JSValueRef::Undefined(vm);
+            }
+            if (value < 0) {
+                ArkTSUtils::ThrowBusinessError(vm,
+                    "cache count cannot be negative, but the input is " + std::to_string(realValue),
+                    ERROR_CODE_PARAMETER_LESS_THAN_ZERO);
+                return panda::JSValueRef::Undefined(vm);
+            }
+            cacheSize = static_cast<size_t>(value);
+            ResourceManager::GetInstance().SetResourceCacheSize(cacheSize);
+        } else {
+            ArkTSUtils::ThrowBusinessError(
+                vm, "The function cannot be called from a non-main thread", ERROR_CODE_NOT_RUN_ON_UI_THREAD);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

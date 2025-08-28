@@ -186,6 +186,10 @@ public:
 
     void SetResourceCacheSize(size_t cacheSize) {
         capacity_.store(cacheSize);
+        while (cache_.size() > capacity_) {
+            cache_.erase(cacheList_.back().cacheKey);
+            cacheList_.pop_back();
+        }
     }
 
 private:
