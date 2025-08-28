@@ -136,7 +136,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
     }
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         FalsifyCancelEventAndDispatch(touchPoint);
-        refereeNG_->ForceCleanGestureReferee();
+        refereeNG_->ForceCleanGestureRefereeState();
         responseCtrl_->Reset();
         refereeNG_->CleanAll();
         CleanGestureEventHub();

@@ -1306,4 +1306,48 @@ HWTEST_F(EventManagerTestNg, UpdateInfoWhenFinishDispatch001, TestSize.Level1)
     eventManager->UpdateInfoWhenFinishDispatch(event, true);
     EXPECT_EQ(eventManager->lastSourceTool_, SourceTool::FINGER);
 }
+
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.desc: Test CleanRefereeBeforeTouchTest function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.step2: Set refereeNG_ and touchTestResults_.
+     * @tc.expected: refereeNG_ and touchTestResults_ not null.
+     */
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::NONE }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->OnPending();
+    touchTestResults.push_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(resultId);
+    ASSERT_NE(scope, nullptr);
+    ASSERT_NE(eventManager->refereeNG_, nullptr);
+    eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(resultId, scope));
+    eventManager->lastDownFingerNumber_ = 0;
+    TouchEvent event;
+    event.id = resultId;
+    event.type = TouchType::UP;
+    event.sourceTool = SourceTool::FINGER;
+    event.isFalsified = true;
+
+    /**
+     * @tc.step3: Call CleanRefereeBeforeTouchTest.
+     * @tc.expected: refereeNG_->gestureScopes_.empty() is true.
+     */
+    eventManager->CleanRefereeBeforeTouchTest(event, true);
+    EXPECT_EQ(eventManager->refereeNG_->gestureScopes_.empty(), true);
+}
 } // namespace OHOS::Ace::NG
