@@ -1634,6 +1634,23 @@ public:
         ViewAbstract::NotifyDragStartRequest(dragStatus);
     }
 
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override;
+    static std::string PopupTypeStr(const PopupType& type);
+    static void UpdateColor(const RefPtr<NG::FrameNode>& frameNode, const PopupType& type, const Color& color);
+    static void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, const PopupType& type);
+    static void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
+    static std::string PopupOptionTypeStr(const PopupOptionsType& type);
+    static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimension);
+    static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;
@@ -1654,27 +1671,10 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
-    static std::string PopupTypeStr(const PopupType& type);
-    static void UpdateColor(const RefPtr<NG::FrameNode>& frameNode, const PopupType& type, const Color& color);
-    static void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, const PopupType& type);
-    static void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
-    static std::string PopupOptionTypeStr(const PopupOptionsType& type);
-    static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimension);
-    static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
-    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
     void RemoveResObj(const std::string& key) override
     {
         ViewAbstract::RemoveResObj(key);
     }
-    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override;
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);
