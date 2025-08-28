@@ -3118,7 +3118,7 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_002, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     OHOS::Ace::SetReturnStatus("");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
-    g_overlay.SetMenuOptions(selectInfo, 0......................................................................................................................................................................................................., callback);
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showCut, false);
     OHOS::Ace::SetReturnStatus("true");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
