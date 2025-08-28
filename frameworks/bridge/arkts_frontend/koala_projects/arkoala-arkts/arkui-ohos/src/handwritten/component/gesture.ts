@@ -907,11 +907,11 @@ export class ScrollableTargetInfoTransfer {
         let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
         let esValue: ESValue = ESValue.wrap(input);
         let id = esValue.invokeMethod("getId");
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
         if (id.isString()) {
             ArkUIAniModule._ScrollableTargetInfoAccessorWithId(peer, id.toString())
         }
-        const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
             return new Object();
         }
