@@ -1097,7 +1097,6 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
     auto preVisibility = propVisibility_;
-
     // update visibility value.
     propVisibility_ = visible;
 
