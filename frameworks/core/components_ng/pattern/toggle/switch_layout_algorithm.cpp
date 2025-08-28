@@ -62,7 +62,6 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     }
 
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     }
