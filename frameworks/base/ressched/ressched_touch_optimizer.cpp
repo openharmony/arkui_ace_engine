@@ -15,6 +15,8 @@
 
 #include "ressched_touch_optimizer.h"
 
+#include <string_view>
+
 #include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
 
@@ -37,7 +39,7 @@ namespace {
     constexpr double THRESHOLD_OFFSET_VALUE = 2.0;
     // Coefficient for TP use end calculation
     constexpr double TP_USE_END_COEFFICIENT = 0.6;
-    
+    const std::string_view RVS_ENABLE_PARAM_KEY = "debug.sys.touch.rvs_enable";
     // Direction enum for RVS detection
     enum RVS_DIRECTION : int32_t {
         RVS_NOT_APPLY = 0,      // No reverse signal
@@ -408,15 +410,17 @@ bool ResSchedTouchOptimizer::RVSEnableCheck()
 {
     std::call_once(rvsOnceFlag_, [this]() {
         auto task = [this]() {
+            paramEnable_ = OHOS::system::GetBoolParameter(RVS_ENABLE_PARAM_KEY.data(), true);
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             rvsEnable_ = ResSchedReport::GetInstance().AppRVSEnableCheck(payload, reply);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d", static_cast<int32_t>(rvsEnable_));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d %{public}d",
+                static_cast<int32_t>(rvsEnable_), static_cast<int32_t>(paramEnable_));
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
-    return rvsEnable_;
+    return rvsEnable_ && paramEnable_;
 }
 
 /*
