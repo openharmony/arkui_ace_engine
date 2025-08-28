@@ -498,6 +498,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     auto childNode1 = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<RichEditorPattern>(), true);
     host->AddChild(childNode1);
     childNode1->SetParent(host);
@@ -1286,7 +1288,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level
     EXPECT_EQ(ret, true);
 }
 
-
 /**
  * @tc.name: BeforeChangeText001
  * @tc.desc: test BeforeChangeText
@@ -1361,6 +1362,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 6;
     richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
     auto childNode2 = FrameNode::CreateFrameNode("childNode", 2, AceType::MakeRefPtr<ImagePattern>());
     auto childNode3 = FrameNode::CreateFrameNode("childNode", 3, AceType::MakeRefPtr<PlaceholderSpanPattern>());
@@ -1413,6 +1416,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset004, TestSize.Level1)
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem2);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
     std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
     auto childNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
@@ -1448,6 +1453,8 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset005, TestSize.Level1)
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
     std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
     auto childNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
