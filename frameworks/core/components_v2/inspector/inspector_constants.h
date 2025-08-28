@@ -385,10 +385,6 @@ ACE_EXPORT extern const char INDEXER_ETS_TAG[];
 ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SLIDER_ETS_TAG[];
 
-// sliderTip
-ACE_EXPORT extern const char SLIDER_TIP_NODE_COMPONENT_TAG[];
-ACE_EXPORT extern const char SLIDER_TIP_NODE_ETS_TAG[];
-
 // rating
 ACE_EXPORT extern const char RATING_COMPONENT_TAG[];
 ACE_EXPORT extern const char RATING_ETS_TAG[];

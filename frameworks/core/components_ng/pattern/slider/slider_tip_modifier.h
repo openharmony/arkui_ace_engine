@@ -25,8 +25,7 @@ class SliderTipModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SliderTipModifier, OverlayModifier);
 
 public:
-    explicit SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc,
-        std::function<void()> onFinishEventTipSize = nullptr);
+    explicit SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc);
     ~SliderTipModifier() override;
 
     void PaintTip(DrawingContext& context);
@@ -46,7 +45,7 @@ public:
         }
     }
 
-    void SetTextFontSize(const Dimension& fontSize)
+    void SetTextFont(const Dimension& fontSize)
     {
         textFontSize_ = fontSize;
     }
@@ -164,7 +163,6 @@ private:
     std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc_;
     int32_t taskId_ = 0;
     int32_t tipDelayTime_ = 0;
-    std::function<void()> onFinishEventTipSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };
