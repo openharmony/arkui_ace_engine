@@ -9139,4 +9139,11 @@ void WebDelegate::SetImeShow(bool visible)
     CHECK_NULL_VOID(webPattern);
     webPattern->SetImeShow(visible);
 }
+
+bool WebDelegate::IsShowHandle()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->IsShowHandle();
+}
 } // namespace OHOS::Ace
