@@ -338,6 +338,7 @@ public:
     void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
                                         uint32_t width,
                                         uint32_t height) override;
+    void SetImeShow(bool visible) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

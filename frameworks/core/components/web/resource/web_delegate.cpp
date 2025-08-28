@@ -9103,4 +9103,10 @@ void WebDelegate::SetForceEnableZoom(bool isEnabled)
     nweb_->SetForceEnableZoom(isEnabled);
 }
 
+void WebDelegate::SetImeShow(bool visible)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetImeShow(visible);
+}
 } // namespace OHOS::Ace

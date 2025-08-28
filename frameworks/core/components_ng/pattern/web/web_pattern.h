@@ -844,6 +844,7 @@ public:
     void SetSurfaceDensity(double density);
     void InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
     void UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
+    void SetImeShow(bool visible);
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();

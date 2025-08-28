@@ -4266,7 +4266,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (!IsDialogNested()) {
             double webKeyboard = keyboard - (height - GetCoordinatePoint()->GetY() - drawSize_.Height());
             webKeyboard = (webKeyboard < 0) ? 0 : webKeyboard;
-            TAG_LOGW(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true webKeyboard:%{public}f", webKeyboard);
+            TAG_LOGI(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true webKeyboard:%{public}f", webKeyboard);
             delegate_->SetVirtualKeyBoardArg(width, height, webKeyboard);
         } else {
             delegate_->SetVirtualKeyBoardArg(width, height, 0);
@@ -8968,5 +8968,16 @@ void WebPattern::UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &con
     CHECK_NULL_VOID(context);
     context->UnregisterDensityChangedCallback(densityCallbackId_);
     densityCallbackId_ = 0;
+}
+
+void WebPattern::SetImeShow(bool visible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetImeShow(visible);
 }
 } // namespace OHOS::Ace::NG
