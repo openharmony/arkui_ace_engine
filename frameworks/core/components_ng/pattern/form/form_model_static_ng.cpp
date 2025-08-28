@@ -22,9 +22,23 @@
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
 {
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (stack == nullptr) {
+        LOGE("stack is nullptr");
+        return nullptr;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_ETS_TAG, nodeId);
     auto frameNode = FormNode::GetOrCreateFormNode(
         V2::FORM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    stack->Push(frameNode);
     return frameNode;
+}
+
+void FormModelNG::UpdateProperty(const RequestFormInfo& formInfo)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, VisibleType::INVISIBLE);
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, VisibleType::VISIBLE);
 }
 
 // void FormModelNG::AllowUpdate(FrameNode* frameNode, bool allowUpdate)
