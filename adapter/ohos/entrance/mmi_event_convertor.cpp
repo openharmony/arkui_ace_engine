@@ -185,8 +185,8 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     uint32_t longAxis = static_cast<uint32_t>(pointerItem.GetLongAxis());
     bool hasReverseSignalX = (longAxis & (1U << DIGIT_X_REVERSE) != 0);
     bool hasReverseSignalY = (longAxis & (1U << DIGIT_Y_REVERSE) != 0);
-    touchPoint.isXReverse = static_cast<int32_t>(hasReverseSignalX);
-    touchPoint.isYReverse = static_cast<int32_t>(hasReverseSignalY);
+    touchPoint.xReverse = static_cast<int32_t>(hasReverseSignalX);
+    touchPoint.yReverse = static_cast<int32_t>(hasReverseSignalY);
 
     int32_t blobId = pointerItem.GetBlobId();
     if (blobId < 0) {
@@ -307,8 +307,8 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetWidth(touchPoint.width)
         .SetHeight(touchPoint.height)
         .SetOperatingHand(touchPoint.operatingHand)
-        .SetXReverse(touchPoint.isXReverse)
-        .SetYReverse(touchPoint.isYReverse);
+        .SetXReverse(touchPoint.xReverse)
+        .SetYReverse(touchPoint.yReverse);
     return event;
 }
 

@@ -146,7 +146,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(TouchEvent touchEvent, uint32_t cu
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
-    if (!lastTpFlush_ && (touchEvent.isXReverse || touchEvent.isYReverse)) {
+    if (!lastTpFlush_ && (touchEvent.xReverse || touchEvent.yReverse)) {
         ACE_SCOPED_TRACE("slide reversed");
         return true;
     }
@@ -224,7 +224,7 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithSignal(TouchEvent& touchEvent, con
     double pointBefore = RVS_INITIAL_VALUE;
     double pointCurrent = RVS_INITIAL_VALUE;
     // Get reverse signal for the specified axis
-    uint32_t rvsSignal = axis == RVS_AXIS::RVS_AXIS_X ? touchEvent.isXReverse : touchEvent.isYReverse;
+    int32_t rvsSignal = axis == RVS_AXIS::RVS_AXIS_X ? touchEvent.xReverse : touchEvent.yReverse;
     if (rvsSignal == RVS_DIRECTION::RVS_NOT_APPLY) {
         return false;
     }
@@ -240,11 +240,11 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithSignal(TouchEvent& touchEvent, con
             uint32_t direction = gap < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
-                touchEvent.isXReverse = direction;
+                touchEvent.xReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse with signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
             } else {
-                touchEvent.isYReverse = direction;
+                touchEvent.yReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse with signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
             }
@@ -295,12 +295,12 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithoutSignal(TouchEvent& touchEvent, 
             uint32_t direction = gap2 < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
-                touchEvent.isXReverse = direction;
+                touchEvent.xReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse without signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
                 return true;
             } else {
-                touchEvent.isYReverse = direction;
+                touchEvent.yReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse without signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
                 return true;
@@ -448,7 +448,7 @@ void ResSchedTouchOptimizer::SelectSinglePoint(std::list<TouchEvent>& touchEvent
 
         // Find point with direction reversal
         for (auto& point : points) {
-            if (point.isXReverse != 0 || point.isYReverse != 0) {
+            if (point.xReverse != 0 || point.yReverse != 0) {
                 selectedPoint = point;
                 foundReverse = true;
                 break;
@@ -621,7 +621,7 @@ bool ResSchedTouchOptimizer::HandleState1(const TouchEvent& point, const bool re
     double pointNow = (axis == RVS_AXIS::RVS_AXIS_X) ? point.x : point.y;
     const std::deque<double>& dptQueue = (axis == RVS_AXIS::RVS_AXIS_X) ? dptHistoryPointX_[id] : dptHistoryPointY_[id];
     std::unordered_map<int32_t, double>& dptGap = (axis == RVS_AXIS::RVS_AXIS_X) ? dptGapX_ : dptGapY_;
-    uint32_t rvsSignal = (axis == RVS_AXIS::RVS_AXIS_X) ? point.isXReverse : point.isYReverse;
+    int32_t rvsSignal = (axis == RVS_AXIS::RVS_AXIS_X) ? point.xReverse : point.yReverse;
 
     // Handle reverse signal
     if (rvsSignal) {

@@ -251,15 +251,15 @@ TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetXReverse(uint32_t xReverse)
+TouchEvent& TouchEvent::SetXReverse(int32_t xReverse)
 {
-    this->isXReverse = xReverse;
+    this->xReverse = xReverse;
     return *this;
 }
 
-TouchEvent& TouchEvent::SetYReverse(uint32_t yReverse)
+TouchEvent& TouchEvent::SetYReverse(int32_t yReverse)
 {
-    this->isYReverse = yReverse;
+    this->yReverse = yReverse;
     return *this;
 }
 

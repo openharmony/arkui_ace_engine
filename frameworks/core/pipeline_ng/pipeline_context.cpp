@@ -3160,11 +3160,14 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         NotifyDragTouchEvent(scalePoint, node);
-
-        std::list<TouchEvent> touchEvents;
-        touchEvents.push_back(point);
-        ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
-        touchEvents_.emplace_back(touchEvents.back());
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            std::list<TouchEvent> touchEvents;
+            touchEvents.push_back(point);
+            ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
+            touchEvents_.emplace_back(touchEvents.back());
+        } else {
+            touchEvents_.emplace_back(point);
+        }
 
         hasIdleTasks_ = true;
         if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount())) {
@@ -3787,7 +3790,9 @@ void PipelineContext::ConsumeTouchEvents(
     std::unordered_set<int32_t> ids;
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
-    ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
+    if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+        ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
+    }
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
@@ -3815,15 +3820,23 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
-        TouchEvent resultPoint;
-        TouchEvent resamplePoint;
-        TouchEvent& tpPoint = idToTouchPoints[touchId];
-        if (it != newIdTouchPoints.end()) {
-            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            TouchEvent resultPoint;
+            TouchEvent resamplePoint;
+            TouchEvent& tpPoint = idToTouchPoints[touchId];
+            if (it != newIdTouchPoints.end()) {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
+            } else {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
+            }
+            touchEvents.emplace_back(resultPoint);
         } else {
-            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
+            if (it != newIdTouchPoints.end()) {
+                touchEvents.emplace_back(it->second);
+            } else {
+                touchEvents.emplace_back(idToTouchPoints[touchId]);
+            }
         }
-        touchEvents.emplace_back(resultPoint);
         ids.erase(touchId);
     }
     eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
