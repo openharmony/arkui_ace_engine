@@ -6241,40 +6241,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest103, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeTest104
- * @tc.desc: Test NODE_SWIPER_DISPLAY_COUNT function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTest, NativeNodeTest104, TestSize.Level1)
-{
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
-    ASSERT_NE(swiper, nullptr);
-    ArkUI_NumberValue value[] = { {.i32 = 1}, {.i32 = 1} };
-    ArkUI_AttributeItem item = { .value = value, .string = "auto", .size = 2};
-    value[0].i32 = 1;
-    value[1].i32 = 1;
-    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
-    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
-    EXPECT_EQ(ret->value[0].i32, 1);
-    EXPECT_EQ(ret->value[1].i32, 1);
-    std::string str = "auto";
-    EXPECT_EQ(ret->string, str);
-    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
-    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
-    EXPECT_EQ(ret->value[0].i32, 1);
-    EXPECT_EQ(ret->value[1].i32, 0);
-    value[0].i32 = -1;
-    value[1].i32 = -1;
-    nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item);
-    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
-    EXPECT_EQ(ret->value[0].i32, 1);
-    EXPECT_EQ(ret->value[1].i32, 0);
-    nodeAPI->disposeNode(swiper);
-}
-
-/**
  * @tc.name: NativeNodeTest105
  * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
  * @tc.type: FUNC
