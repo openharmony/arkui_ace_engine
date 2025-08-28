@@ -160,10 +160,14 @@ void JSSlider::Create(const JSCallbackInfo& info)
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         changeEventVal = valueObj->GetProperty("changeEvent");
         auto valueProperty = valueObj->GetProperty("value");
-        value = valueProperty->ToNumber<double>();
+        if (valueProperty->IsNumber()) {
+            value = valueProperty->ToNumber<double>();
+        }
     } else if (paramObject->HasProperty("$value")) {
         changeEventVal = paramObject->GetProperty("$value");
-        value = getValue->ToNumber<double>();
+        if (getValue->IsNumber()) {
+            value = getValue->ToNumber<double>();
+        }
     } else if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
     }
