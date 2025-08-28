@@ -6502,7 +6502,7 @@ bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrol
     return HandleScrollVelocity(GetNestedScrollParent(), velocity);
 }
 
-bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
+bool WebPattern::HandleScrollVelocity(const RefPtr<NestableScrollContainer>& parent, float velocity)
 {
     CHECK_NULL_RETURN(parent, false);
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
@@ -6790,7 +6790,7 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
             xVelocity = 0.0f;
         }
     }
-    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandleVelocity(velocity);
     TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, xVelocity:%{public}f, yVelocity:%{public}f, "
         "isConsumed:%{public}d",
@@ -6818,7 +6818,7 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
 {
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandleVelocity(velocity);
     TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::FilterScrollEvent  x=%{public}f, y=%{public}f, xVelocity:%{public}f, yVelocity:%{public}f, "
         "isConsumed:%{public}d",
@@ -6883,7 +6883,7 @@ bool WebPattern::CheckOverParentScroll(const float &directValue, const NestedScr
             expectedScrollAxis_ == Axis::HORIZONTAL);
 }
 
-bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
+bool WebPattern::FilterScrollEventHandleVelocity(const float velocity)
 {
     float directVelocity = velocity;
     if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
