@@ -18,6 +18,7 @@ import { ContentModifier } from './component/common';
 import { ArkSliderPeer, SliderAttribute, SliderInteraction, SliderConfiguration, SlideRange, SliderBlockStyle, SliderChangeMode, ArkSliderComponent } from './component/slider';
 import { CommonMethodModifier, AttributeUpdaterFlag } from './CommonMethodModifier';
 import { hookSliderContentModifier } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class SliderModifier extends CommonMethodModifier implements SliderAttribute, AttributeModifier<SliderAttribute> {
     _instanceId: number = -1;
@@ -76,8 +77,9 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1content?: ResourceStr | undefined
-    applyModifierPatch(peer: ArkSliderPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkSliderPeer
         if (this._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._blockColor_0_flag) {
@@ -497,8 +499,12 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
             }
         }
     }
-    mergeModifier(modifier: SliderModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof SliderModifier)) {
+            return
+        }
+        const modifier = value as SliderModifier;
         if (modifier._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._blockColor_0_flag) {

@@ -338,8 +338,12 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
             this.applyModifierPatchSwitch(value as ArkTogglePeer)
         }
     }
-    mergeModifier(modifier: ToggleModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof ToggleModifier)) {
+            return
+        }
+        const modifier = value as ToggleModifier;
         if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onChange_0_flag) {

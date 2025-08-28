@@ -18,6 +18,7 @@ import { ContentModifier } from './component/common';
 import { OnRatingChangeCallback, StarStyleOptions, RatingConfiguration, RatingAttribute, ArkRatingPeer, ArkRatingComponent } from './component/rating'
 import { CommonMethodModifier, AttributeUpdaterFlag } from './CommonMethodModifier';
 import { hookRatingContentModifier } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class RatingModifier extends CommonMethodModifier implements RatingAttribute, AttributeModifier<RatingAttribute> {
     _instanceId: number = -1;
@@ -39,8 +40,9 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     _onChange_0_0value?: OnRatingChangeCallback | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<RatingConfiguration> | undefined
-    applyModifierPatch(peer: ArkRatingPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkRatingPeer
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._stars_0_flag) {
@@ -136,8 +138,12 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
             }
         }
     }
-    mergeModifier(modifier: RatingModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof RatingModifier)) {
+            return
+        }
+        const modifier = value as RatingModifier;
         if (modifier._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stars_0_flag) {

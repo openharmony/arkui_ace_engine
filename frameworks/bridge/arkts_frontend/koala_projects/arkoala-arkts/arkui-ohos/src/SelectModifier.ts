@@ -21,6 +21,7 @@ import { Resource } from 'global.resource';
 import { ArkSelectPeer } from './component/select';
 import { TypeChecker } from '#components';
 import { SelectOpsHandWritten } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute, AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
@@ -87,8 +88,9 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
-    applyModifierPatch(peer: ArkSelectPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkSelectPeer
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selected_0_flag) {
@@ -592,8 +594,12 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
             }
         }
     }
-    mergeModifier(modifier: SelectModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof SelectModifier)) {
+            return
+        }
+        const modifier = value as SelectModifier;
         if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selected_0_flag) {
