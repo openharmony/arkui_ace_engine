@@ -1267,7 +1267,8 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     });
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(350.0f, DimensionUnit::PX)));
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(350.0f, DimensionUnit::PX)));
     PaddingProperty padding;
     padding.left = CalcLength(10.0f);
     padding.right = CalcLength(10.0f);
@@ -1279,13 +1280,16 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
-    childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
+    childLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     frameNode->CreateLayoutTask();
-    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 350.0f))  << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 350.0f))
+        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
     EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
-    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 0.0f))  << column->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 0.0f))
+        << column->GetGeometryNode()->GetFrameRect().ToString();
 }
 
 /**
