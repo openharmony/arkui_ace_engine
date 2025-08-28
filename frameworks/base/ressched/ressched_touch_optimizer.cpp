@@ -177,6 +177,7 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
 
     for (auto& iter : touchEvents) {
         if (iter.sourceTool != SourceTool::FINGER) {
+            RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
             return;
         }
         // Reset RVS data for non-MOVE events
