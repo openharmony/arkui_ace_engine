@@ -18,8 +18,6 @@
 
 import { CommonConfiguration, ContentModifier } from "./arkui-wrapper-builder"
 import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, PX, VP, FP, LPX, Percentage, EdgeOutlineWidths, EdgeColors } from "./units"
-import { TextModifier } from "./arkui-external"
-import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
@@ -30,12 +28,15 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { OptionWidthMode, Color } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { SelectOpsHandWritten } from "./../handwritten"
+import { SelectOpsHandWritten, hookSelectAttributeModifier } from "./../handwritten"
+import { SelectModifier } from '../SelectModifier'
+import { TextModifier } from '../TextModifier'
+import { SymbolGlyphModifier } from '../SymbolGlyphModifier'
 
 export interface MenuItemConfiguration {
     value: ResourceStr
@@ -262,6 +263,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
 }
 export class ArkSelectPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SelectModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1235,39 +1237,38 @@ export type Callback_Number_String_Void = (index: number, value: string) => void
 export type Callback_Opt_Union_Number_Resource_Void = (selected: number | Resource | undefined) => void;
 export type Callback_Opt_ResourceStr_Void = (value: ResourceStr | undefined) => void;
 export interface SelectAttribute extends CommonMethod {
-    setSelectOptions(options: Array<SelectOption>): this {
-        return this
-    }
-    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this
-    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    selectedOptionBgColor(value: ResourceColor | undefined): this
-    selectedOptionFont(value: Font | undefined): this
-    selectedOptionFontColor(value: ResourceColor | undefined): this
-    optionBgColor(value: ResourceColor | undefined): this
-    optionFont(value: Font | undefined): this
-    optionFontColor(value: ResourceColor | undefined): this
-    onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this
-    space(value: Length | undefined): this
-    arrowPosition(value: ArrowPosition | undefined): this
-    optionWidth(value: Dimension | OptionWidthMode | undefined): this
-    optionHeight(value: Dimension | undefined): this
-    menuBackgroundColor(value: ResourceColor | undefined): this
-    menuBackgroundBlurStyle(value: BlurStyle | undefined): this
-    controlSize(value: ControlSize | undefined): this
-    menuItemContentModifier(value: ContentModifier | undefined): this
-    divider(value: DividerOptions | null | undefined): this
-    textModifier(value: TextModifier | undefined): this
-    arrowModifier(value: SymbolGlyphModifier | undefined): this
-    optionTextModifier(value: TextModifier | undefined): this
-    selectedOptionTextModifier(value: TextModifier | undefined): this
-    dividerStyle(value: DividerStyleOptions | undefined): this
-    avoidance(value: AvoidanceMode | undefined): this
-    menuOutline(value: MenuOutlineOptions | undefined): this
-    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
-    _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
-    _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
+    setSelectOptions(options: Array<SelectOption>): this { return this; }
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this { return this; }
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this { return this; }
+    font(value: Font | undefined): this { return this; }
+    fontColor(value: ResourceColor | undefined): this { return this; }
+    selectedOptionBgColor(value: ResourceColor | undefined): this { return this; }
+    selectedOptionFont(value: Font | undefined): this { return this; }
+    selectedOptionFontColor(value: ResourceColor | undefined): this { return this; }
+    optionBgColor(value: ResourceColor | undefined): this { return this; }
+    optionFont(value: Font | undefined): this { return this; }
+    optionFontColor(value: ResourceColor | undefined): this { return this; }
+    onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this { return this; }
+    space(value: Length | undefined): this { return this; }
+    arrowPosition(value: ArrowPosition | undefined): this { return this; }
+    optionWidth(value: Dimension | OptionWidthMode | undefined): this { return this; }
+    optionHeight(value: Dimension | undefined): this { return this; }
+    menuBackgroundColor(value: ResourceColor | undefined): this { return this; }
+    menuBackgroundBlurStyle(value: BlurStyle | undefined): this { return this; }
+    controlSize(value: ControlSize | undefined): this { return this; }
+    menuItemContentModifier(value: ContentModifier | undefined): this { return this; }
+    divider(value: DividerOptions | null | undefined): this { return this; }
+    textModifier(value: TextModifier | undefined): this { return this; }
+    arrowModifier(value: SymbolGlyphModifier | undefined): this { return this; }
+    optionTextModifier(value: TextModifier | undefined): this { return this; }
+    selectedOptionTextModifier(value: TextModifier | undefined): this { return this; }
+    dividerStyle(value: DividerStyleOptions | undefined): this { return this; }
+    avoidance(value: AvoidanceMode | undefined): this { return this; }
+    menuOutline(value: MenuOutlineOptions | undefined): this { return this; }
+    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this { return this; }
+    _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void {}
+    _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
     selected_value?: number | Resource | undefined
@@ -1809,6 +1810,11 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSelectAttributeModifier(this, modifier);
+        return this
     }
     
     public applyAttributesFinish(): void {

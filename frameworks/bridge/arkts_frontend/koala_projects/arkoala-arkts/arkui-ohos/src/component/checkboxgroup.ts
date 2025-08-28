@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -30,9 +30,11 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CheckboxGroupOpsHandWritten } from "./../handwritten"
+import { hookCheckboxGroupAttributeModifier, CheckboxGroupOpsHandWritten } from './../handwritten'
+import { CheckboxGroupModifier } from '../CheckboxGroupModifier'
 
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
+    _attributeSet?: CheckboxGroupModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -308,16 +310,16 @@ export interface CheckboxGroupResult {
 export type CheckboxGroupInterface = (options?: CheckboxGroupOptions) => CheckboxGroupAttribute;
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
-    setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        return this
-    }
-    selectAll(value: boolean | Bindable<boolean> | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    unselectedColor(value: ResourceColor | undefined): this
-    mark(value: MarkStyle | undefined): this
-    onChange(value: OnCheckboxGroupChangeCallback | undefined): this
-    checkboxShape(value: CheckBoxShape | undefined): this
-    _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void
+    setCheckboxGroupOptions(options?: CheckboxGroupOptions): this { return this; }
+    selectAll(value: boolean | Bindable<boolean> | undefined): this { return this; }
+    selectedColor(value: ResourceColor | undefined): this { return this; }
+    unselectedColor(value: ResourceColor | undefined): this { return this; }
+    mark(value: MarkStyle | undefined): this { return this; }
+    onChange(value: OnCheckboxGroupChangeCallback | undefined): this { return this; }
+    checkboxShape(value: CheckBoxShape | undefined): this { return this; }
+    _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<CheckboxGroupAttribute> |
+        AttributeModifier<CommonMethod> | undefined ): this  { return this; }
 }
 export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
     selectAll_value?: boolean | undefined
@@ -468,6 +470,10 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
             return
         }
         return
+    }
+    public attributeModifier(modifier: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookCheckboxGroupAttributeModifier(this, modifier);
+        return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
