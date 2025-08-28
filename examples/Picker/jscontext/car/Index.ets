@@ -13,10 +13,4 @@ export { InitBuilder1,
   InitBuilder11,
   InitBuilder12,
   InitBuilder13,
-  InitBuilder14,
-  InitBuilder15,
-  InitBuilder16,
-  InitBuilder17,
-  InitBuilder18,
-  InitBuilder19,
-  InitBuilder20 } from './src/main/ets/component/CarComponent'
+  InitBuilder14 } from './src/main/ets/component/CarComponent'
