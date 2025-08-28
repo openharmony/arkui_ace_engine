@@ -221,10 +221,18 @@ void MenuWrapperPattern::RegisterDetachCallback()
         CHECK_NULL_VOID(wrapperNode);
         auto context = wrapperNode->GetContext();
         CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
-        MenuView::RemoveMenuHoverScaleStatus(id);
+        taskExecutor->PostTask(
+            [id, weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                auto overlayManager = weakOverlay.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->DeleteMenu(id);
+                MenuView::RemoveMenuHoverScaleStatus(id);
+            },
+            TaskExecutor::TaskType::UI, "TargetDestroyDeleteMenu");
     };
     targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(host->GetId()));
 }
