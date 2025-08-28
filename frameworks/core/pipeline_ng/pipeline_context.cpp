@@ -3820,23 +3820,15 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
-        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
-            TouchEvent resultPoint;
-            TouchEvent resamplePoint;
-            TouchEvent& tpPoint = idToTouchPoints[touchId];
-            if (it != newIdTouchPoints.end()) {
-                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
-            } else {
-                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
-            }
-            touchEvents.emplace_back(resultPoint);
+        TouchEvent resultPoint;
+        TouchEvent resamplePoint;
+        TouchEvent& tpPoint = idToTouchPoints[touchId];
+        if (it != newIdTouchPoints.end()) {
+            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
         } else {
-            if (it != newIdTouchPoints.end()) {
-                touchEvents.emplace_back(it->second);
-            } else {
-                touchEvents.emplace_back(idToTouchPoints[touchId]);
-            }
+            ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
         }
+        touchEvents.emplace_back(resultPoint);
         ids.erase(touchId);
     }
     eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));

@@ -647,7 +647,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
     optimizer.stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
     EXPECT_TRUE(optimizer.HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer.stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE);
+    EXPECT_EQ(optimizer.stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
 }
 
 /**
@@ -1246,7 +1246,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
     
     EXPECT_FALSE(optimizer.HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
     EXPECT_EQ(optimizer.stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
-    EXPECT_DOUBLE_EQ(optimizer.dptGapX_[1], THRESHOLD_OFFSET_VALUE);
+    EXPECT_DOUBLE_EQ(optimizer.dptGapX_[1], -THRESHOLD_OFFSET_VALUE);
 }
 
 /**
@@ -1299,7 +1299,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
     
     optimizer.stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
-    // Condition (dptGap < 0 && (pointNow - dptGap) > 0) is not met because (100 - (-5)) > 0 but we test the other branch
     EXPECT_TRUE(optimizer.HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
     EXPECT_EQ(optimizer.stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE); // State should not change
     EXPECT_DOUBLE_EQ(result, 100); // point.x - dptGapX_
@@ -1579,7 +1578,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
     EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());
     
-    // UP event should cause reset, but since it's for a different ID, 
     // data for ID 1 should still exist
     EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());

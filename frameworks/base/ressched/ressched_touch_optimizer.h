@@ -86,5 +86,5 @@ private:
     Offset slideAcceptOffset_{0.0, 0.0};
     float accumulatedDistance_ = 0.0;
 };
-}// namespace OHOS::Ace
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H

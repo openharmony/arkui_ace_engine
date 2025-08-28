@@ -352,7 +352,8 @@ void ResSchedTouchOptimizer::RVSPointReset(int32_t id, const int32_t resetInfo)
  *     state [in] New state value.
  *     axis [in] Axis identifier (X or Y).
  */
-void ResSchedTouchOptimizer::UpdateState(const int32_t id, const int32_t state, const int32_t axis) {
+void ResSchedTouchOptimizer::UpdateState(const int32_t id, const int32_t state, const int32_t axis)
+{
     std::unordered_map<int32_t, int32_t>& stateTag = (axis == RVS_AXIS::RVS_AXIS_X) ? stateTagX_ : stateTagY_;
     stateTag[id] = state;
     ACE_SCOPED_TRACE("RVSCheck state changed[%d][%d]", axis, stateTag[id]);
@@ -646,7 +647,7 @@ bool ResSchedTouchOptimizer::HandleState1(const TouchEvent& point, const bool re
                 return false;
             }
             if (pointNow - dptQueue.back() <= 0) {
-                dptGap[id] = THRESHOLD_OFFSET_VALUE;
+                dptGap[id] = -THRESHOLD_OFFSET_VALUE;
                 UpdateState(id, RVS_FINETUNE_STATE::OFFSET, axis);
                 return false;
             }
@@ -679,9 +680,10 @@ bool ResSchedTouchOptimizer::HandleState2(const TouchEvent& point, const int32_t
     int32_t id = point.id;
     double pointNow = (axis == RVS_AXIS::RVS_AXIS_X) ? point.x : point.y;
     const double& dptGap = (axis == RVS_AXIS::RVS_AXIS_X) ? dptGapX_[id] : dptGapY_[id];
+    const std::deque<double>& dptQueue = (axis == RVS_AXIS::RVS_AXIS_X) ? dptHistoryPointX_[id] : dptHistoryPointY_[id];
 
     // Transition back to NO_CHANGE state if condition is met
-    if ((dptGap > 0 && (dptGap - pointNow) > 0) || (dptGap < 0 && (pointNow - dptGap) > 0)) {
+    if ((dptGap > 0 && (dptQueue.back() - pointNow) < 0) || (dptGap < 0 && (pointNow - dptQueue.back()) < 0)) {
         UpdateState(id, RVS_FINETUNE_STATE::NO_CHANGE, axis);
         result = pointNow;
         return true;
