@@ -22,6 +22,7 @@ group("advanced_ui_component_static") {
     deps += [
       "selecttitlebar:selectTitleBar",
       "fullscreenlaunchcomponent:fullScreenLaunch",
+      "filter:Filter",
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
       "swiperefresher:swipeRefresher",
