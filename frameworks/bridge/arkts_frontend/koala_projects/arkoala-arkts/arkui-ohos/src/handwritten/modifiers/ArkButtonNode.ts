@@ -1,0 +1,145 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { RuntimeType, runtimeType } from "@koalaui/interop";
+
+import { ArkBaseNode } from "./ArkBaseNode";
+import { ButtonAttribute, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, FontStyle, LabelStyle, Length, ArkButtonPeer, ButtonOptions, ButtonConfiguration, ResourceStr, ResourceColor, ButtonLabelStyle, FontWeight } from "../../component";
+import { Resource } from "global.resource"
+import { ContentModifier } from "@component_handwritten/common";
+export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
+    constructParam(...params: Object[]): this {
+        if (params.length > 2) {
+            throw new Error('more than 2 parameters');
+        }
+        let content_casted: ResourceStr | undefined = undefined;
+        let options_casted: ButtonOptions | undefined = undefined;
+        if (params.length >= 1) {
+            if (typeof (params[0]) == "string") {
+                content_casted = params[0] as string;
+            } else if (typeof (params[0]) == "object") {
+                content_casted = params[0] as string;
+            }
+        }
+        if (params.length == 2) {
+            const param1_type = runtimeType(params[1]);
+            if (RuntimeType.OBJECT == param1_type) {
+                options_casted = params[1] as ButtonOptions;
+            }
+        }
+        if (content_casted && options_casted) {
+            this.getPeer().setButtonOptions2Attribute(content_casted, options_casted);
+        } else if (!content_casted && options_casted) {
+            this.getPeer().setButtonOptions1Attribute(options_casted);
+        } else {
+            this.getPeer().setButtonOptions0Attribute();
+        }
+        return this;
+    }
+    getPeer(): ArkButtonPeer {
+        return this.peer as ArkButtonPeer;
+    }
+    initialize(): this {
+        this.getPeer()?.setButtonOptions0Attribute();
+        return this;
+    }
+    initializeWithChild(options: ButtonOptions): this {
+        const options_casted = options as (ButtonOptions);
+        this.getPeer()?.setButtonOptions1Attribute(options_casted);
+        return this;
+    }
+    initializeWithLabel(label: ResourceStr, options?: ButtonOptions): this {
+        const label_casted = label as (ResourceStr);
+        const options_casted = options as (ButtonOptions | undefined);
+        this.getPeer()?.setButtonOptions2Attribute(label_casted, options_casted);
+        return this;
+    }
+    type(value: ButtonType | undefined): this {
+        const value_casted = value as (ButtonType | undefined);
+        this.getPeer()?.typeAttribute(value_casted);
+        return this;
+    }
+    setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
+        const label_casted = label as (ResourceStr);
+        const options_casted = options as (ButtonOptions | undefined);
+        this.getPeer()?.setButtonOptions2Attribute(label_casted, options_casted);
+        return this;
+    }
+    stateEffect(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.stateEffectAttribute(value_casted);
+        return this;
+    }
+    buttonStyle(value: ButtonStyleMode | undefined): this {
+        const value_casted = value as (ButtonStyleMode | undefined);
+        this.getPeer()?.buttonStyleAttribute(value_casted);
+        return this;
+    }
+    controlSize(value: ControlSize | undefined): this {
+        const value_casted = value as (ControlSize | undefined);
+        this.getPeer()?.controlSizeAttribute(value_casted);
+        return this;
+    }
+    role(value: ButtonRole | undefined): this {
+        const value_casted = value as (ButtonRole | undefined);
+        this.getPeer()?.roleAttribute(value_casted);
+        return this;
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined);
+        this.getPeer()?.fontColorAttribute(value_casted);
+        return this;
+    }
+    fontSize(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined);
+        this.getPeer()?.fontSizeAttribute(value_casted);
+        return this;
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        const value_casted = value as (number | FontWeight | string | undefined);
+        this.getPeer()?.fontWeightAttribute(value_casted);
+        return this;
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        const value_casted = value as (FontStyle | undefined);
+        this.getPeer()?.fontStyleAttribute(value_casted);
+        return this;
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        const value_casted = value as (string | Resource | undefined);
+        this.getPeer()?.fontFamilyAttribute(value_casted);
+        return this;
+    }
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        const value_casted = value as (ContentModifier<ButtonConfiguration> | undefined);
+        this.getPeer()?.contentModifierAttribute(value_casted);
+        return this;
+    }
+    labelStyle(value: ButtonLabelStyle | undefined): this {
+        const value_casted = value as (ButtonLabelStyle | undefined);
+        this.getPeer()?.labelStyleAttribute(value_casted);
+        return this;
+    }
+    minFontScale(value: number | Resource | undefined): this {
+        const value_casted = value as (number | Resource | undefined);
+        this.getPeer()?.minFontScaleAttribute(value_casted);
+        return this;
+    }
+    maxFontScale(value: number | Resource | undefined): this {
+        const value_casted = value as (number | Resource | undefined);
+        this.getPeer()?.maxFontScaleAttribute(value_casted);
+        return this;
+    }
+}
