@@ -389,7 +389,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     auto style = paramObject->GetProperty("style");
-    if (!style->IsNull()) {
+    if (!style->IsNull() && style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
     TextFieldModel::GetInstance()->SetPlaceholderFont(font);
@@ -641,7 +641,7 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         RefPtr<ResourceObject> resourceObject;
         ParseJsString(args, fontWeight, resourceObject);
@@ -1643,13 +1643,12 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetShowCounterBorder(isBorderShow);
         }
         auto parameter = paramObject->GetProperty("thresholdPercentage");
-        auto inputNumber = parameter->ToNumber<int32_t>();
-        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
-        if (parameter->IsNull() || parameter->IsUndefined()) {
+        if (parameter->IsNull() || parameter->IsUndefined() || !parameter->IsNumber()) {
             TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
             return;
         }
+        auto inputNumber = parameter->ToNumber<int32_t>();
         if (static_cast<uint32_t>(inputNumber) < MINI_VAILD_VALUE ||
             static_cast<uint32_t>(inputNumber) > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
@@ -1657,6 +1656,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
         return;
     }

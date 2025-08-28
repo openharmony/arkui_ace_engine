@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
+#include <cmath>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -221,7 +222,7 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         ParseJsString(args, fontWeight);
     }
@@ -467,7 +468,8 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         ParseJsInt32(args, value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
