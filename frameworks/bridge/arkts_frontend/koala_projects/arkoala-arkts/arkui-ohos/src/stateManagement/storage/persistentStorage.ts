@@ -28,11 +28,11 @@ export const enum AreaMode {
 }
 
 export interface IAniStorage {
-    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined;
-    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void;
-    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean;
+    get(key: string, areaMode?: AreaMode): string | undefined;
+    set(key: string, val: string, areaMode?: AreaMode): void;
+    has(key: string, areaMode?: AreaMode): boolean;
     clear(): void;
-    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void;
+    delete(key: string, areaMode?: AreaMode): void;
 }
 
 // class JsonElement{}
@@ -99,20 +99,41 @@ class TypedMap {
 }
 
 export class AniStorage implements IAniStorage {
-    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined {
-        return ArkUIAniModule._PersistentStorage_Get(key, areaMode);
-    }
-    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Set(key, val, areaMode);
-    }
-    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean {
-        return ArkUIAniModule._PersistentStorage_Has(key, areaMode);
-    }
-    clear(): void {
+    clear(): void { // No AreaMode parameter
         ArkUIAniModule._PersistentStorage_Clear();
     }
-    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Delete(key, areaMode);
+    delete(key: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Delete(key, areaModeToInt(areaMode));
+    }
+    get(key: string, areaMode?: AreaMode): string | undefined {
+        return ArkUIAniModule._PersistentStorage_Get(key, areaModeToInt(areaMode));
+    }
+    has(key: string, areaMode?: AreaMode): boolean {
+        return ArkUIAniModule._PersistentStorage_Has(key, areaModeToInt(areaMode));
+    }
+    set(key: string, val: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Set(key, val, areaModeToInt(areaMode));
+    }
+}
+
+function areaModeToInt(areaMode?: AreaMode): Int {
+    if (areaMode === undefined) {
+        return -1;
+    }
+    switch(areaMode) {
+        case AreaMode.EL1:
+            return 0;
+        case AreaMode.EL2:
+            return 1;
+        case AreaMode.EL3:
+            return 2;
+        case AreaMode.EL4:
+            return 3;
+        case AreaMode.EL5:
+            return 4;
+        default:
+            // never getting here
+            return -1;
     }
 }
 

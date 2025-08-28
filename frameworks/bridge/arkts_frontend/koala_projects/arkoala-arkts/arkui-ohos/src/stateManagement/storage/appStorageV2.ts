@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
@@ -76,7 +76,7 @@ export class AppStorageV2Impl {
             }
             let defaultValue = defaultCreator!();
             StorageHelper.checkTypeByInstanceOf(key!, ttype, defaultValue);
-            let observedValue = UIUtils.makeObserved(defaultValue);
+            let observedValue = uiUtils.makeObserved(defaultValue, true);
 
             this.memorizedValues_.set(key!, observedValue);
             return observedValue;
