@@ -1778,9 +1778,7 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildMoreOrBackButton, TestSize.Level1)
     auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
     selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
     auto onCreateMenuCallback = [menuOptionItems](
-                                    const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
-        return menuOptionItems;
-    };
+                                    const std::vector<NG::MenuItemParam>& menuItems) { return menuOptionItems; };
     selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     ASSERT_NE(infoPtr, nullptr);
@@ -1790,9 +1788,8 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildMoreOrBackButton, TestSize.Level1)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
  
-    float maxWidth = 1040.0f;
     selectOverlayNode->CreateToolBar();
-    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, 1040.0f);
     EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
     EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
     auto gestureHub = selectOverlayNode->moreButton_->GetOrCreateGestureEventHub();
