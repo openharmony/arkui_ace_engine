@@ -241,6 +241,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->selectOverlay_->needRefreshMenu_);
 }
 
+
 /**
  * @tc.name: OnAncestorNodeChanged
  * @tc.desc: test OnAncestorNodeChanged

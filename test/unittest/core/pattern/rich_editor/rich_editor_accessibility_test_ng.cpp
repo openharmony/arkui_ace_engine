@@ -517,6 +517,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level1)
     EXPECT_EQ(changeReason, TextChangeReason::CUT);
 }
 
+
 /**
  * @tc.name: AccessibilityProperty
  * @tc.desc: Test GetText

@@ -493,6 +493,7 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle003, TestSize.Level0)
     EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
 }
 
+
 /**
  * @tc.name: UpdateCaretStyleByTypingStyleTest001
  * @tc.desc: test SetTypingStyle

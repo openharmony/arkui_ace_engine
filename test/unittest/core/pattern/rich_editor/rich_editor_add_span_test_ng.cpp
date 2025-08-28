@@ -413,6 +413,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan003, TestSize.Level1)
     ClearSpan();
 }
 
+
 /**
  * @tc.name: AddSymbolSpan004
  * @tc.desc: test delete symbol span

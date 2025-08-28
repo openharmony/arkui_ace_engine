@@ -1286,6 +1286,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level
     EXPECT_EQ(ret, true);
 }
 
+
 /**
  * @tc.name: BeforeChangeText001
  * @tc.desc: test BeforeChangeText

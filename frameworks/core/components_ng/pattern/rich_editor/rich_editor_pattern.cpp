@@ -1447,6 +1447,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     UpdateUrlStyle(spanNode, options.urlAddress);
 }
 
+
 void RichEditorPattern::UpdateTextBackgroundStyle(
     RefPtr<SpanNode>& spanNode, const std::optional<TextBackgroundStyle>& style)
 {

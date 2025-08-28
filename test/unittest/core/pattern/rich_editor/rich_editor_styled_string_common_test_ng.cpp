@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+ 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"

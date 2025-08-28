@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+ 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
