@@ -3826,4 +3826,32 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore002, TestSize.Level1)
     EXPECT_EQ(size, SizeF(240.0f, 100.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 440.0f));
 }
+
+/**
+ * @tc.name: BigJumpAccuracyTest001
+ * @tc.desc: jump with big offset and check position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, BigJumpAccuracyTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create List with big ListItem height
+    * @tc.expected: currentOffset_ is 0.
+    */
+    auto model = CreateList();
+    model.SetInitialIndex(0);
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(10000));
+    CreateDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+    * @tc.steps: step2. UpdateCurrentOffset big offset with ScrollBar
+    * @tc.expected: Scroll to bottom
+    */
+    UpdateCurrentOffset(-10000.f, SCROLL_FROM_BAR);
+    EXPECT_EQ(pattern_->currentOffset_, 9600.f);
+}
 } // namespace OHOS::Ace::NG

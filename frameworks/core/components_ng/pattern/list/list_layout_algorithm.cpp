@@ -808,6 +808,7 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     currentDelta_ -= itemPosition_.begin()->second.startPos;
     if (NonNegative(currentDelta_)) {
         int32_t items = currentDelta_ / averageHeight;
+        items = std::min(items, totalItemCount_ - 1 - targetIndex);
         targetIndex += items;
         currentDelta_ -= items * averageHeight;
     } else {
