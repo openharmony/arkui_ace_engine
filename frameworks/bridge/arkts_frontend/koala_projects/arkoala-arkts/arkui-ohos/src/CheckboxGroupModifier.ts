@@ -17,6 +17,7 @@ import { AttributeModifier, ResourceColor, CheckboxGroupAttribute, Bindable, Mar
 import { ArkCheckboxGroupPeer } from './component/checkboxgroup';
 import { CommonMethodModifier, AttributeUpdaterFlag } from './CommonMethodModifier';
 import { CheckboxGroupOpsHandWritten } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class CheckboxGroupModifier extends CommonMethodModifier implements CheckboxGroupAttribute, AttributeModifier<CheckboxGroupAttribute> {
     _instanceId: number = -1;
@@ -40,8 +41,9 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
     _onChange_0_0value?: OnCheckboxGroupChangeCallback | undefined
     _checkboxShape_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _checkboxShape_0_0value?: CheckBoxShape | undefined
-    applyModifierPatch(peer: ArkCheckboxGroupPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkCheckboxGroupPeer
         if (this._selectAll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selectAll_0_flag) {
@@ -159,8 +161,12 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
             }
         }
     }
-    mergeModifier(modifier: CheckboxGroupModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof CheckboxGroupModifier)) {
+            return
+        }
+        const modifier = value as CheckboxGroupModifier;
         if (modifier._selectAll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selectAll_0_flag) {

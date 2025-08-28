@@ -18,6 +18,7 @@ import { ContentModifier } from './component/common';
 import { OnCheckboxChangeCallback, CheckBoxConfiguration, CheckboxAttribute, ArkCheckboxPeer, ArkCheckboxComponent } from "./component/checkbox"
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { CheckboxOpsHandWritten, hookCheckboxContentModifier } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class CheckboxModifier extends CommonMethodModifier implements CheckboxAttribute, AttributeModifier<CheckboxAttribute> {
     _instanceId: number = -1;
@@ -43,8 +44,9 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
     _onChange_0_0value?: OnCheckboxChangeCallback | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<CheckBoxConfiguration> | undefined
-    applyModifierPatch(peer: ArkCheckboxPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkCheckboxPeer
         if (this._select_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._select_0_flag) {
@@ -184,8 +186,12 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
             }
         }
     }
-    mergeModifier(modifier: CheckboxModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof CheckboxModifier)) {
+            return
+        }
+        const modifier = value as CheckboxModifier;
         if (modifier._select_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._select_0_flag) {

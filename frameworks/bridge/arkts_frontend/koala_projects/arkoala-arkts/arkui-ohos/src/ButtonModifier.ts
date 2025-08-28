@@ -20,6 +20,7 @@ import { Length, ResourceColor } from './component/units';
 import { FontWeight, FontStyle } from './component/enums'
 import { Resource } from 'global.resource'
 import { hookButtonContentModifier } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class ButtonModifier extends CommonMethodModifier implements ButtonAttribute, AttributeModifier<ButtonAttribute> {
     _instanceId: number = -1;
@@ -59,8 +60,9 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _minFontScale_0_0value?: number | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: number | Resource | undefined
-    applyModifierPatch(peer: ArkButtonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkButtonPeer
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._type_0_flag) {
@@ -318,8 +320,12 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
             }
         }
     }
-    mergeModifier(modifier: ButtonModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof ButtonModifier)) {
+            return
+        }
+        const modifier = value as ButtonModifier;
         if (modifier._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._type_0_flag) {

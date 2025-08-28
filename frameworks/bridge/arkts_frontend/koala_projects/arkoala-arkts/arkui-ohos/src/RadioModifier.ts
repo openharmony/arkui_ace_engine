@@ -18,6 +18,7 @@ import { ContentModifier } from './component/common';
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute, ArkRadioComponent } from './component/radio';
 import { CommonMethodModifier, AttributeUpdaterFlag } from './CommonMethodModifier';
 import { RadioOpsHandWritten, hookRadioContentModifier } from './handwritten';
+import { PeerNode } from './PeerNode';
 
 export class RadioModifier extends CommonMethodModifier implements RadioAttribute, AttributeModifier<RadioAttribute> {
     _instanceId: number = -1;
@@ -37,8 +38,9 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     _radioStyle_0_0value?: RadioStyle | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<RadioConfiguration> | undefined
-    applyModifierPatch(peer: ArkRadioPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+        const peer = value as ArkRadioPeer
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._checked_0_flag) {
@@ -124,8 +126,12 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
             }
         }
     }
-    mergeModifier(modifier: RadioModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof RadioModifier)) {
+            return
+        }
+        const modifier = value as RadioModifier;
         if (modifier._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._checked_0_flag) {
