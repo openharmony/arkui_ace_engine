@@ -832,6 +832,8 @@ void PrevMarginImpl(Ark_NativePointer node,
     CalcDimension margin;
     if (!optMargin) {
         margin.SetValue(0.0);
+    } else {
+        margin = optMargin.value();
     }
     bool ignoreResult = false;
     if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -852,10 +854,12 @@ void NextMarginImpl(Ark_NativePointer node,
     CalcDimension margin;
     if (!optMargin) {
         margin.SetValue(0.0);
+    } else {
+        margin = optMargin.value();
     }
     bool ignoreResult = false;
     if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        SwiperModelStatic::SetPreviousMargin(frameNode, margin, false);
+        SwiperModelStatic::SetNextMargin(frameNode, margin, false);
         return;
     }
     SwiperModelStatic::SetNextMargin(frameNode, margin, ignoreResult);
