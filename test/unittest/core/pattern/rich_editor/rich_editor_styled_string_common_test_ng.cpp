@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
- 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -38,6 +37,8 @@ void RichEditorStyledStringCommonTestNg::SetUp()
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->undoManager_ =
         std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
