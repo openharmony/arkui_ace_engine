@@ -1095,8 +1095,8 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     auto preVisibility = propVisibility_;
     // update visibility value.
     propVisibility_ = visible;
-    auto pipeline = host->GetContext();
 
+    auto pipeline = host->GetContext();
     if ((preVisibility != propVisibility_) && pipeline) {
         pipeline->SetIsDisappearChangeNodeMinDepth(host->GetDepth());
     }
