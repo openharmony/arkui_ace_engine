@@ -45,11 +45,14 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     for (const auto& rect : responseRegionList) {
         oss << rect.ToString().c_str();
     }
+    oss << ", childTouchTestStrategy: " << static_cast<int>(strategy);
 #else
     oss << "responseRegionSize: ";
     for (const auto& rect : responseRegionList) {
         oss << rect.GetSize().ToString().c_str();
     }
+    oss << ", childTouchTestStrategy: " << static_cast<int>(strategy) << ", "
+        << " childTouchResultId: " << id;
 #endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
@@ -230,6 +233,22 @@ void EventTreeRecord::AddFrameNodeSnapshot(FrameNodeSnapshot&& node)
             return;
         }
         eventTreeList.back().hitTestTree.emplace_back(node);
+    }
+}
+
+void EventTreeRecord::UpdateFrameNodeSnapshot(int32_t nodeId, const TouchTestStrategy& strategy, const std::string& id)
+{
+    if (eventTreeList.empty()) {
+        return;
+    }
+    if (eventTreeList.back().hitTestTree.size() < MAX_FRAME_NODE_CNT) {
+        for (auto& iter : eventTreeList.back().hitTestTree) {
+            if (iter.nodeId == nodeId) {
+                iter.strategy = strategy;
+                iter.id = id;
+                break;
+            }
+        }
     }
 }
 

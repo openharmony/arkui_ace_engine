@@ -946,7 +946,7 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
             continue;
         }
         std::string gestureLog = "{";
-        gestureLog += "types: " + gestureSnapshot->type.substr(0, gestureSnapshot->type.find("Recognizer"));
+        gestureLog += "type: " + gestureSnapshot->type.substr(0, gestureSnapshot->type.find("Recognizer"));
         gestureLog += ", tag: " + hitFrameNode[gestureSnapshot->nodeId];
 #ifndef IS_RELEASE_VERSION
         auto frameNode =
@@ -961,11 +961,11 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         auto stateHistorys = gestureSnapshot->stateHistory;
         for (auto stateHistory : stateHistorys) {
             if (stateHistory.procedure.find("Down") != std::string::npos) {
-                gestureLog += ", prcd: Down";
+                gestureLog += ", prcd: D";
             } else if (stateHistory.procedure.find("Move") != std::string::npos) {
-                gestureLog += ", prcd: Move";
+                gestureLog += ", prcd: M";
             } else {
-                gestureLog += ", prcd: Up";
+                gestureLog += ", prcd: U";
             }
             gestureLog += ", state: " + stateHistory.state;
             if (stateHistory.extraInfo != "") {
@@ -2247,8 +2247,8 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     history.assign(historyBegin, events.end());
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
-            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Touch Interpolate" SEC_PLD(,
+            " point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
             PRIu64), SEC_PARAM(resample.id, resample.x, resample.y,
             resample.screenX, resample.screenY,
             static_cast<uint64_t>(resample.time.time_since_epoch().count())));
@@ -2287,8 +2287,8 @@ bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         ret = true;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
-            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Touch Interpolate" SEC_PLD(,
+            " point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
             PRIu64), SEC_PARAM(newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
             newTouchEvent.screenX, newTouchEvent.screenY,
             static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count())));

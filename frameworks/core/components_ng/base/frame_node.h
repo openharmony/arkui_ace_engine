@@ -1585,6 +1585,8 @@ private:
     void AddFrameNodeSnapshot(
         bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
+    void UpdateFrameNodeSnapshot(const TouchResult& touchResult, EventTreeType type);
+
     int32_t GetNodeExpectedRate();
 
     void RecordExposureInner();
