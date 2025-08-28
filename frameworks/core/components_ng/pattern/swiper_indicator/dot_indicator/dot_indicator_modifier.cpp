@@ -63,6 +63,68 @@ const auto LONG_POINT_STEP_FOUR_CURVE = AceType::MakeRefPtr<InterpolatingSpring>
 const auto LONG_POINT_STEP_FIVE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 148, 28);
 } // namespace
 
+std::tuple<float, float, float, float> DotIndicatorModifier::CalCBoundsRect()
+{
+    ContentProperty contentProperty;
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
+    contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
+    contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
+    contentProperty.indicatorPadding = indicatorPadding_->Get();
+    contentProperty.indicatorMargin = indicatorMargin_->Get();
+    contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    // Calculate the size of the dirty area of the background board firstly.
+    CalCBackground(contentProperty);
+    auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    auto itemHalfSizes = GetItemHalfSizes(0, contentProperty);
+    if ((totalCount <= 0 && NearZero(contentProperty.longPointLeftCenterX) &&
+        NearZero(contentProperty.longPointRightCenterX)) || itemHalfSizes.size() != ITEM_SIZE) {
+        return { rectLeft_, rectTop_, rectRight_ - rectLeft_, rectBottom_ - rectTop_ };
+    }
+
+    auto rectLeft = rectLeft_;
+    auto rectRight = rectRight_;
+    auto rectTop = rectTop_;
+    auto rectBottom = rectBottom_;
+    // The indicator points did not consider vertical orientation,
+    // and require the orientation of the background board to adapt.
+    if (axis_ == Axis::VERTICAL) {
+        rectLeft = rectTop_;
+        rectRight = rectBottom_;
+        rectTop = rectLeft_;
+        rectBottom = rectRight_;
+    }
+    // Calculate the size of the dirty area of the indicator points.
+    float itemHalfWidth = itemHalfSizes[ITEM_HALF_WIDTH];
+    float itemHalfHeight = itemHalfSizes[ITEM_HALF_HEIGHT];
+    float selecteditemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float selecteditemHalfHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    OffsetF center = { contentProperty.vectorBlackPointCenterX[0], centerY_ };
+    rectLeft = std::min({ rectLeft, center.GetX() - itemHalfWidth, center.GetX() - selecteditemHalfWidth });
+    rectTop = std::min({ rectTop, center.GetY() - itemHalfHeight, center.GetY() - selecteditemHalfHeight });
+    rectBottom = std::max({ rectBottom, center.GetY() + itemHalfHeight, center.GetY() + selecteditemHalfHeight });
+
+    center = { contentProperty.vectorBlackPointCenterX[totalCount - 1], centerY_ };
+    rectRight = std::max({ rectRight, center.GetX() + itemHalfWidth, center.GetX() + selecteditemHalfWidth });
+
+    if (targetVectorBlackPointCenterX_.size() != 0) {
+        center = { targetVectorBlackPointCenterX_[0], centerY_ };
+        rectLeft = std::min({ rectLeft, center.GetX() - itemHalfWidth, center.GetX() - selecteditemHalfWidth });
+        rectTop = std::min({ rectTop, center.GetY() - itemHalfHeight, center.GetY() - selecteditemHalfHeight });
+        rectBottom = std::max({ rectBottom, center.GetY() + itemHalfHeight, center.GetY() + selecteditemHalfHeight });
+
+        center = { targetVectorBlackPointCenterX_[targetVectorBlackPointCenterX_.size() - 1], centerY_ };
+        rectRight = std::max({ rectRight, center.GetX() + itemHalfWidth, center.GetX() + selecteditemHalfWidth });
+
+        targetVectorBlackPointCenterX_.clear();
+    }
+    // The dirty area size needs to be adjusted finally according to the display direction.
+    if (axis_ == Axis::VERTICAL) {
+        return { rectTop, rectLeft, rectBottom - rectTop, rectRight - rectLeft };
+    }
+    return { rectLeft, rectTop, rectRight - rectLeft, rectBottom - rectTop };
+}
+
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
@@ -104,7 +166,7 @@ void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentPr
     }
 }
 
-void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentProperty& contentProperty)
+void DotIndicatorModifier::CalCBackground(ContentProperty& contentProperty)
 {
     CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
@@ -145,14 +207,25 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentPrope
             rectRight = std::max(rectRight, rightCenterX + rectPadding);
         }
     }
+    rectLeft_ = rectLeft;
+    rectRight_ = rectRight;
+    rectTop_ = rectTop;
+    rectBottom_ = rectBottom;
+    rectWidth_ = rectWidth;
+    rectHeight_ = rectHeight;
+}
+
+void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentProperty& contentProperty)
+{
+    CalCBackground(contentProperty);
     // Paint background
     RSCanvas& canvas = context.canvas;
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
     canvas.AttachBrush(brush);
-    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
+    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight_ : rectWidth_;
+    canvas.DrawRoundRect({ { rectLeft_, rectTop_, rectRight_, rectBottom_ }, radius, radius });
     canvas.DetachBrush();
 }
 
@@ -928,6 +1001,7 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
     StopAnimation();
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
+    targetVectorBlackPointCenterX_ = vectorBlackPointCenterX;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
 }

@@ -112,6 +112,7 @@ public:
         uint8_t newPointOpacity = 0;
     };
 
+    std::tuple<float, float, float, float> CalCBoundsRect();
     void onDraw(DrawingContext& context) override;
     // paint
     virtual void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
@@ -122,6 +123,7 @@ public:
         const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, ContentProperty& contentProperty);
+    void CalCBackground(ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
@@ -428,6 +430,13 @@ protected:
     float scaleIndicator_ = 1.33f;
     RectF boundsRectF_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    float rectLeft_ = 0.0f;
+    float rectRight_ = 0.0f;
+    float rectTop_ = 0.0f;
+    float rectBottom_ = 0.0f;
+    float rectWidth_ = 0.0f;
+    float rectHeight_ = 0.0f;
+    LinearVector<float> targetVectorBlackPointCenterX_;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
