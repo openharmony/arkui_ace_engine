@@ -99,7 +99,7 @@ class Util {
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
-  public static isResourceType(resource: ResourceStr | undefined | null): boolean {
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
     if (!resource) {
       return false;
     }
@@ -186,10 +186,9 @@ export struct ToolBar {
   isFollowSystem: boolean = false;
   maxFontSizeScale: number = 3.2;
   moreIndex: number = 4;
-  publicMore: Resource = $r('sys.symbol.dot_grid_2x2');
   moreItem: ToolBarOption = {
     content: $r('sys.string.ohos_toolbar_more'),
-    icon: this.publicMore,
+    icon: PUBLIC_MORE,
   } as ToolBarOption;
   isRefreshData: boolean = true;
 
@@ -208,7 +207,7 @@ export struct ToolBar {
   MoreTabBuilder(index: number) {
     Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
       Column() {
-        SymbolGlyph(this.publicMore)
+        SymbolGlyph(PUBLIC_MORE)
           .fontSize(IMAGE_SIZE)
           .fontColor([this.toolBarTheme.iconPrimaryColor])
           .draggable(false)
@@ -279,13 +278,19 @@ export struct ToolBar {
             .fontColor([this.getIconColor(index)])
             .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
         } else {
-          Image(this.toolBarList[Double.toInt(index)]?.icon as Resource)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
-            .fillColor(this.getIconColor(index))
-            .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
-            .objectFit(ImageFit.Contain)
-            .draggable(false)
+          if (this.toolBarList[Double.toInt(index)]?.icon !== undefined) {
+            Image(this.toolBarList[Double.toInt(index)]?.icon as Resource)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor(this.getIconColor(index))
+              .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
+              .objectFit(ImageFit.Contain)
+              .draggable(false)
+          } else {
+            SymbolGlyph()
+              .fontSize(IMAGE_SIZE)
+              .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
+          }
         }
         Text(this.toolBarList[Double.toInt(index)]?.content)
           .fontColor(this.getTextColor(index))
@@ -496,12 +501,8 @@ export struct ToolBar {
       } else {
         this.menuContent = [];
       }
-      if (i < (this.toolBarItemBackground.length)) {
-        this.toolBarItemBackground[i] = this.toolBarItemBackground[i];
-      } else {
-        if (this.toolBarItemBackground.length < this.toolBarList.length) {
-          this.toolBarItemBackground.push(Color.Transparent);
-        }
+      if (i >= this.toolBarItemBackground.length && this.toolBarItemBackground.length < this.toolBarList.length) {
+        this.toolBarItemBackground.push(Color.Transparent);
       }
     }
     return true;
