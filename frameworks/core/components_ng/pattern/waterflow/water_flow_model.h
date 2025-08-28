@@ -82,6 +82,7 @@ public:
     }
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarColor(const std::optional<Color>& scrollBarColor) {};
     virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual RefPtr<NG::WaterFlowSections> GetOrCreateWaterFlowSections()
     {
