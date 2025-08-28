@@ -114,12 +114,9 @@ struct ListItemGroupExample {
     }.width('100%').height('100%').backgroundColor(0xDCDCDC).padding({ top: 5 })
   }
 
-  getValidMargin(value: any): number {
+  getValidMargin(value: number | Resource | undefined | null): number {
     if (typeof value === 'number') {
       return value;
-    } else if (typeof value === 'string') {
-      const parsedValue = parseInt(value, 10);
-      return isNaN(parsedValue) ? 0 : parsedValue;
     } else {
       return 0;
     }
