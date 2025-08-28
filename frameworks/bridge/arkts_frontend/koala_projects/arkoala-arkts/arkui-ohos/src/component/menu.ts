@@ -22,15 +22,18 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Length, Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions, PX, VP, FP, LPX, Percentage } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { MenuModifier } from "../MenuModifier"
+import { hookMenuAttributeModifier } from '../handwritten'
 
 export class ArkMenuPeer extends ArkCommonMethodPeer {
+    _attributeSet?: MenuModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -171,13 +174,13 @@ export interface MenuAttribute extends CommonMethod {
     setMenuOptions(): this {
         return this
     }
-    fontSize(value: Length | undefined): this
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    radius(value: Dimension | BorderRadiuses | undefined): this
-    menuItemDivider(value: DividerStyleOptions | undefined): this
-    menuItemGroupDivider(value: DividerStyleOptions | undefined): this
-    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
+    font(value: Font | undefined): this {return this;}
+    fontColor(value: ResourceColor | undefined): this {return this;}
+    radius(value: Dimension | BorderRadiuses | undefined): this {return this;}
+    menuItemDivider(value: DividerStyleOptions | undefined): this {return this;}
+    menuItemGroupDivider(value: DividerStyleOptions | undefined): this {return this;}
+    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute {
     fontSize_value?: Length | undefined
@@ -283,6 +286,11 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookMenuAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

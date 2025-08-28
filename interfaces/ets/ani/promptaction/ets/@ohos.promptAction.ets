@@ -309,4 +309,19 @@ export default namespace promptAction {
 
     export native function getTopOrder(): number | undefined;
     export native function getBottomOrder(): number | undefined;
+
+    export native function getDialogNode(content: long): long | undefined;
+    export native function setDialogController(dialog: long, controller: DialogController): boolean;
+    export function getDialogController(content: long): DialogController | undefined {
+        let dialog = getDialogNode(content);
+        if (dialog === undefined) {
+            return undefined;
+        }
+
+        let controller = new DialogController();
+        if (setDialogController(dialog, controller)) {
+            return controller;
+        }
+        return undefined;
+    }
 }

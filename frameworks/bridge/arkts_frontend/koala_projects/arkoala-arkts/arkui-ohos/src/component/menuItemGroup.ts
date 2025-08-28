@@ -22,13 +22,16 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceStr } from "./units"
+import { MenuItemGroupModifier } from "../MenuItemGroupModifier"
+import { hookMenuItemGroupAttributeModifier } from "../handwritten"
 
 export class ArkMenuItemGroupPeer extends ArkCommonMethodPeer {
+    _attributeSet?: MenuItemGroupModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -61,6 +64,8 @@ export interface MenuItemGroupAttribute extends CommonMethod {
     setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
         return this
     }
+    attributeModifier(value: AttributeModifier<MenuItemGroupAttribute>|AttributeModifier<CommonMethod>|undefined):this
+    {return this;}
 }
 export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuItemGroupAttribute {
     public setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
@@ -83,6 +88,11 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookMenuItemGroupAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

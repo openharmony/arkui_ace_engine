@@ -25,8 +25,10 @@ import { GeometryInfo, Layoutable, Measurable, SizeResult } from './common';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
+import promptAction from '@ohos/promptAction';
 import { Theme } from '@ohos/arkui/theme';
 import { ArkThemeScopeManager } from "arkui/handwritten/theme/ArkThemeScopeManager";
+import { CustomDialogController } from './customDialogController';
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -75,6 +77,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr); 
+    }
+
+    getDialogController(): promptAction.DialogController | undefined {
+        return promptAction.getDialogController(this.getPeer()!.peer.ptr);
     }
 
     aboutToAppear(): void {
@@ -283,6 +289,8 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         CustomDelegate._instantiate(
             () => createInstance(uiContext, factory, initializers), content, initializers);
     }
+
+    public __setDialogController__(controller: CustomDialogController): void {}
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options> {

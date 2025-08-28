@@ -28,7 +28,7 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Scene } from "./arkui-custom"
+import { Scene } from "#external"
 
 export class ArkComponent3DPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -252,9 +252,7 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
     }
     public setComponent3DOptions(sceneOptions?: SceneOptions): this {
         if (this.checkPriority("setComponent3DOptions")) {
-            const sceneOptions_casted = sceneOptions as (SceneOptions | undefined)
-            this.getPeer()?.setComponent3DOptionsAttribute(sceneOptions_casted)
-            return this
+            hookSetComponent3DOptions(this, sceneOptions)
         }
         return this
     }

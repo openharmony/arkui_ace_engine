@@ -3176,6 +3176,15 @@ frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuifr
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
 
 frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/calendar_controller_peer.h @arkui_image
@@ -3243,6 +3252,7 @@ test/unittest/core/event/ @arkuievent
 test/unittest/core/gestures/ @arkuievent
 test/unittest/core/image_file_cache/ @arkui_image
 test/unittest/core/image_provider/ @arkui_image
+test/unittest/core/image/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent

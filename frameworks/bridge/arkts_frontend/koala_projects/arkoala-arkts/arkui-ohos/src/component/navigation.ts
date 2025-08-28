@@ -262,7 +262,7 @@ export class NavPathStack implements MaterializedBase {
     public getAllPathName(): Array<string> {
         return this.getAllPathName_serialize()
     }
-    public getParamByIndex(index: number): Object | undefined {
+    public getParamByIndex(index: number): Object | null | undefined {
         return PathStackUtils.getParamByIndex(this, index)
     }
     public getParamByName(name: string): Array<Object | undefined> {
@@ -1582,8 +1582,8 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             hookNavigationSetNavigationOptionsImpl(this.getPeer().peer.ptr, info)
 
             if (pathInfos != undefined) {
-                    const updater: (name: string, param: object|undefined)=>PeerNode =
-                    (name: string, param: object|undefined) => {
+                    const updater: (name: string, param: object|null|undefined)=>PeerNode =
+                    (name: string, param: object|null|undefined) => {
                         let node = ArkStackPeer.create(new ArkStackComponent())
                         return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
                             setNeedCreate(true)
@@ -1591,7 +1591,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
                             setNeedCreate(false)
                         })
                     }
-                    const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                    const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
                     NavExtender.setUpdateStackCallback(pathInfos!, () => {
                         addPartialUpdate(() => {
                             if (!this.isNeedSync()) {

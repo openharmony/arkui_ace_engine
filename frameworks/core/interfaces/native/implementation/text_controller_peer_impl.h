@@ -19,5 +19,18 @@
 
 struct TextControllerPeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::TextController> controller;
+
+    void SetStyledStringCache(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& styledString)
+    {
+        styledStringCache_ = styledString;
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase> GetStyledStringCache() const
+    {
+        return styledStringCache_;
+    }
+
+private:
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase> styledStringCache_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_CONTROLLER_PEER_IMPL_H

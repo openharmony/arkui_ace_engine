@@ -509,11 +509,18 @@ ani_status BindMatrixTransit(ani_env* env)
         ani_native_function { "skew", nullptr, reinterpret_cast<void*>(Matrix4_Skew) },
         ani_native_function { "setPolyToPoly", nullptr, reinterpret_cast<void*>(Matrix4_SetPolyToPoly) },
         ani_native_function { "transformPoint", nullptr, reinterpret_cast<void*>(Matrix4_TransformPoint) },
-        ani_native_function { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         return ANI_ERROR;
     };
+
+    std::array staticMethod = {
+        ani_native_function  { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethod.data(), staticMethod.size())) {
+        return ANI_ERROR;
+    };
+
     return ANI_OK;
 }
 } // namespace OHOS::Ace::MatrixAni

@@ -214,11 +214,11 @@ export class PathStackUtils {
         PathStackUtils.popPage(retval)
         return pathInfo
     }
-    static getParamByIndex(pathStack: NavPathStack, index: number): Object | undefined {
+    static getParamByIndex(pathStack: NavPathStack, index: number): Object | null | undefined {
         const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index as (int32));
         let pathInfo = PathStackUtils.getNavPathInfoById(navDestinationId)
         if (pathInfo?.param === null) {
-            return undefined
+            return null
         }
         return pathInfo?.param as Object | undefined
     }

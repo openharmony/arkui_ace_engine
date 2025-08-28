@@ -107,4 +107,12 @@ void UIExtensionAdapter::SetOnTerminated(FrameNode* frameNode,
     CHECK_NULL_VOID(pattern);
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
+
+void UIExtensionAdapter::SetOnDrawReady(FrameNode* frameNode, std::function<void()>&& onDrawReady)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnDrawReadyCallback(std::move(onDrawReady));
+}
 } // namespace OHOS::Ace::NG

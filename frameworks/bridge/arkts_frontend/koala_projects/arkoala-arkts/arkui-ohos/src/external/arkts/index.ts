@@ -26,6 +26,7 @@ import curves from "@ohos.curves"
 
 export * from "@ohos.base"
 export * from "@ohos.arkui.drawableDescriptor"
+export { Scene } from "@ohos.graphics.scene"
 
 export type TranslateOption = matrix4.TranslateOption
 export type ScaleOption = matrix4.ScaleOption

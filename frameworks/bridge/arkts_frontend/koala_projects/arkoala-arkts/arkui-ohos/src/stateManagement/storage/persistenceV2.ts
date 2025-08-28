@@ -22,7 +22,7 @@ import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { RenderIdType } from '../decorator';
 
 import { StateMgmtTool } from '#stateMgmtTool';
-import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 import { IAniStorage, AniStorage, AreaMode } from './persistentStorage'
 
 export type StorageDefaultCreator<T> = () => T;
@@ -91,6 +91,10 @@ export class PersistenceV2 {
 
     public static keys(): Array<string> {
         return PersistenceV2Impl.instance().keys();
+    }
+
+    public static notifyOnError(callback: PersistErrorCallback | undefined): void {
+        PersistenceV2Impl.instance().notifyOnError(callback);
     }
 
     public static remove(keyOrType: string | Type): boolean {
@@ -650,7 +654,7 @@ export class PersistenceV2Impl {
             throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
 
-        return new StoragePropertyV2<T>(key, UIUtils.makeObserved(value));
+        return new StoragePropertyV2<T>(key, uiUtils.makeObserved(value, true));
     }
 
     private static getTargetClassName<T extends object>(value: T): string {
@@ -702,7 +706,7 @@ export class PersistenceV2Impl {
             if (newValue === undefined) {
                 throw new Error("unable to deserialize object for the key: " + key);
             }
-            let newObservedValue = UIUtils.makeObserved(newValue!);
+            let newObservedValue = uiUtils.makeObserved(newValue!, true);
             property.set(newObservedValue);
 
             // Collect dependencies
@@ -829,24 +833,19 @@ export class PersistenceV2Impl {
         try {
             // check for global path
             if (areaMode !== undefined) {
-                StateMgmtConsole.log("### removeFromPersistenceV2 YES aremode");
                 this.storageBackend_!.delete(key, areaMode);
                 this.globalKeysArr_[areaMode].delete(key);
                 this.storeKeysToStorage(this.globalKeysArr_[areaMode], areaMode);
             } else {
-                StateMgmtConsole.log("### removeFromPersistenceV2 NO areamode");
                 let removeFlag: boolean = false;
                 // check for module path
                 if (this.storageBackend_!.has(key)) {
-                    StateMgmtConsole.log("### removeFromPersistenceV2 NO areamode 01");
                     removeFlag = true;
                     this.removeForModulePath(key);
                 } else {
-                    StateMgmtConsole.log("### removeFromPersistenceV2 NO key in the storage NO areamode else 03");
                     removeFlag = this.removeFlagForGlobalPath(key);
                 }
                 if (!removeFlag) {
-                    StateMgmtConsole.log("### removeFromPersistenceV2 NO areamode 04");
                     StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY + `keys:${key}`);
                 }
             }
@@ -883,8 +882,6 @@ export class PersistenceV2Impl {
     }
 
     private storeKeysToStorage(keysSet: Set<string>, areaMode?: AreaMode | undefined): void {
-        //this.storageBackend_!.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysSet)), areaMode);
-        //return;
         let keysArray: FixedStringArrayType = new StringOrUndefinedType[keysSet.size];
         let idx: int = 0;
         keysSet.forEach((key) => { keysArray[idx++] = key; })

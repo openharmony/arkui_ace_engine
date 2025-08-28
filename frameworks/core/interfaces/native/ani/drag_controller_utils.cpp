@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ani_utils.h"
+#include "ani.h"
 #include "core/common/ace_engine.h"
 #include "drag_controller_utils.h"
 #include "core/pipeline/pipeline_base.h"

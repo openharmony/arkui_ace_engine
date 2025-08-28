@@ -17,9 +17,9 @@
 #include <ani.h>
 
 #include "interfaces/inner_api/ace/constants.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline/pipeline_context.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -104,7 +104,7 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(
 
 UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
 
     std::vector<uint8_t> abcContent;
@@ -158,12 +158,12 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
 
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
     pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         RunArkoalaEventLoop(env, app);
     });
     // register one hook method to pipeline, which will be called at the tail of vsync
     pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         FireAllArkoalaAsyncEvents(env, app);
     });
 
@@ -182,7 +182,7 @@ void ArktsPluginFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& cont
 void ArktsPluginFrontend::Destroy()
 {
     CHECK_NULL_VOID(vm_);
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_VOID(env);
     env->GlobalReference_Delete(app_);
     app_ = nullptr;

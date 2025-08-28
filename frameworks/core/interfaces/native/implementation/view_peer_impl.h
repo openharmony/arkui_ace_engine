@@ -13,20 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H
+#pragma once
 
-#include <string>
-#include <vector>
+#include "core/event/mouse_event.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-#include "ani.h"
-
-namespace OHOS::Ace::NG {
-class AniUtils {
-public:
-    static std::string ANIStringToStdString(ani_env* env, ani_string aniStr);
-    static ani_object CreateDouble(ani_env* env, double value);
+struct ViewPeer
+    : public OHOS::Ace::AceType {
+protected:
+    ViewPeer() = default;
+    ~ViewPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
-} // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H

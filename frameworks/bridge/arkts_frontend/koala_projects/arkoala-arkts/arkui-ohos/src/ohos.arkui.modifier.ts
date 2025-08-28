@@ -57,6 +57,12 @@ export { RelativeContainerModifier } from './RelativeContainerModifier';
 
 export { ButtonModifier } from './ButtonModifier';
 
+export { MenuModifier } from './MenuModifier';
+ 
+export { MenuItemModifier } from './MenuItemModifier';
+ 
+export { MenuItemGroupModifier } from './MenuItemGroupModifier';
+
 export { LineModifier } from './LineModifier';
 
 export { PathModifier } from './PathModifier';
@@ -100,3 +106,17 @@ export { SwiperModifier } from './SwiperModifier';
 export { RichEditorModifier } from './RichEditorModifier'
 
 export { ParticleModifier } from './ParticleModifier';
+
+export { CheckboxModifier } from './CheckboxModifier';
+
+export { CheckboxGroupModifier } from './CheckboxGroupModifier';
+
+export { ToggleModifier } from './ToggleModifier';
+
+export { SelectModifier } from './SelectModifier';
+
+export { SliderModifier } from './SliderModifier';
+
+export { RadioModifier } from './RadioModifier';
+
+export { RatingModifier } from './RatingModifier';

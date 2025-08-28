@@ -2756,11 +2756,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabContentInterface_setTabContentOptions(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TabContentAttribute_tabBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabContentAttribute_onWillShow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -7232,9 +7228,7 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_cursorControl_restoreDefault(): void
     @ani.unsafe.Quick
     native static _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterPush1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterReplace1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_MoveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void
@@ -7242,7 +7236,6 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_RouterBack0attribute(): void
     @ani.unsafe.Direct
     native static _RouterExtender_RouterBack1attribute(thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterRunPage(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_RouterClear(): void

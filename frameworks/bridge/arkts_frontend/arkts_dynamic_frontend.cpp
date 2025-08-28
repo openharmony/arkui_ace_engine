@@ -17,9 +17,9 @@
 #include <ani.h>
 
 #include "interfaces/inner_api/ace/constants.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline/pipeline_context.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -163,12 +163,23 @@ void GetUrlByDcEntryPoint(
 ArktsDynamicFrontend::ArktsDynamicFrontend(void* runtime): ArktsFrontend(runtime)
 {}
 
+void ArktsDynamicFrontend::Destroy()
+{
+    if (globalLinkObj_) {
+        auto* env = Ani::AniUtils::GetAniEnv(vm_);
+        if (env) {
+            env->GlobalReference_Delete(reinterpret_cast<ani_object>(globalLinkObj_));
+        }
+    }
+    ArktsFrontend::Destroy();
+}
+
 UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     const std::string& content, const std::string& params, const std::string& entryPoint)
 {
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunDynamicPage start content: %{public}s, params: %{public}s,"
         " entryPoint: %{public}s", content.c_str(), params.c_str(), entryPoint.c_str());
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
     if (pageRouterManager_ == nullptr) {
         pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
@@ -223,6 +234,8 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
         entryPointObj ? entryPointObj : optionalEntry), return UIContentErrorCode::INVALID_URL);
 
     env->GlobalReference_Create(appLocal, &app_);
+    auto linkObj = entryLoader.GetLinkObj();
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(linkObj), &globalLinkObj_);
 
     ani_method start;
     ANI_CALL(env, Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start),
@@ -235,7 +248,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
     auto inId = pipeline_->GetInstanceId();
     pipeline_->SetVsyncListener([vm = vm_, app = app_, inId]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         if (env == nullptr) {
             TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunArkoalaEventLoop GetAniEnv failed");
             return;
@@ -245,8 +258,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     });
     // register one hook method to pipeline, which will be called at the tail of vsync
     pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
-        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "SetAsyncEventsHookListener start");
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         if (env == nullptr) {
             TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "FireAllArkoalaAsyncEvents GetAniEnv failed");
             return;
@@ -256,5 +268,13 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     });
 
     return UIContentErrorCode::NO_ERRORS;
+}
+
+extern "C" ACE_FORCE_EXPORT Frontend* OHOS_ACE_CreatArkTsDynamicFrontend(void* runtime) {
+    if (!runtime) {
+        LOGE("runtime is nullptr.");
+        return nullptr;
+    }
+    return static_cast<Frontend*>(new ArktsDynamicFrontend(runtime));
 }
 } // namespace OHOS::Ace

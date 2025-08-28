@@ -88,12 +88,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {"setImageCacheCount", nullptr, reinterpret_cast<void *>(setImageCacheCount)},
         ani_native_function {"setImageRawDataCacheSize", nullptr, reinterpret_cast<void *>(setImageRawDataCacheSize)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };

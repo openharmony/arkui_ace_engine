@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT, AttributeModifier } from "./common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { CrownSensitivity, Color, Axis } from "./enums"
@@ -31,9 +31,11 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { SliderOpsHandWritten, hookSliderContentModifier } from "./../handwritten"
+import { SliderOpsHandWritten, hookSliderContentModifier, hookSliderAttributeModifier } from "./../handwritten"
+import { SliderModifier } from '../SliderModifier'
 
 export class ArkSliderPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SliderModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -573,33 +575,32 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
 export type SliderInterface = (options?: SliderOptions) => SliderAttribute;
 export type Callback_Number_SliderChangeMode_Void = (value: number, mode: SliderChangeMode) => void;
 export interface SliderAttribute extends CommonMethod {
-    setSliderOptions(options?: SliderOptions): this {
-        return this
-    }
-    blockColor(value: ResourceColor | undefined): this
-    trackColor(value: ResourceColor | LinearGradient | undefined): this
-    selectedColor(value: ResourceColor | LinearGradient | undefined): this
-    minLabel(value: string | undefined): this
-    maxLabel(value: string | undefined): this
-    showSteps(value: boolean | undefined): this
-    trackThickness(value: Length | undefined): this
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this
-    blockBorderColor(value: ResourceColor | undefined): this
-    blockBorderWidth(value: Length | undefined): this
-    stepColor(value: ResourceColor | undefined): this
-    trackBorderRadius(value: Length | undefined): this
-    selectedBorderRadius(value: Dimension | undefined): this
-    blockSize(value: SizeOptions | undefined): this
-    blockStyle(value: SliderBlockStyle | undefined): this
-    stepSize(value: Length | undefined): this
-    sliderInteractionMode(value: SliderInteraction | undefined): this
-    minResponsiveDistance(value: number | undefined): this
-    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this
-    slideRange(value: SlideRange | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this
-    _onChangeEvent_value(callback: ((index: number) => void)): void
+    setSliderOptions(options?: SliderOptions): this { return this; }
+    blockColor(value: ResourceColor | undefined): this { return this; }
+    trackColor(value: ResourceColor | LinearGradient | undefined): this { return this; }
+    selectedColor(value: ResourceColor | LinearGradient | undefined): this { return this; }
+    minLabel(value: string | undefined): this { return this; }
+    maxLabel(value: string | undefined): this { return this; }
+    showSteps(value: boolean | undefined): this { return this; }
+    trackThickness(value: Length | undefined): this { return this; }
+    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this { return this; }
+    blockBorderColor(value: ResourceColor | undefined): this { return this; }
+    blockBorderWidth(value: Length | undefined): this { return this; }
+    stepColor(value: ResourceColor | undefined): this { return this; }
+    trackBorderRadius(value: Length | undefined): this { return this; }
+    selectedBorderRadius(value: Dimension | undefined): this { return this; }
+    blockSize(value: SizeOptions | undefined): this { return this; }
+    blockStyle(value: SliderBlockStyle | undefined): this { return this; }
+    stepSize(value: Length | undefined): this { return this; }
+    sliderInteractionMode(value: SliderInteraction | undefined): this { return this; }
+    minResponsiveDistance(value: number | undefined): this { return this; }
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this { return this; }
+    slideRange(value: SlideRange | undefined): this { return this; }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this { return this; }
+    enableHapticFeedback(value: boolean | undefined): this { return this; }
+    showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this { return this; }
+    _onChangeEvent_value(callback: ((index: number) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined
@@ -915,6 +916,11 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSliderAttributeModifier(this, modifier);
+        return this
     }
     
     public applyAttributesFinish(): void {
