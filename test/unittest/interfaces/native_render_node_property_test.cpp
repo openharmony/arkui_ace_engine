@@ -328,9 +328,9 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest013, TestSize
     ASSERT_NE(rootRenderNode, nullptr);
     
     float alpha = 0;
-    OH_ArkUI_RenderNodeUtils_SetShadowAlpha(rootRenderNode, 0.5);
+    OH_ArkUI_RenderNodeUtils_SetShadowAlpha(rootRenderNode, 0.5f);
     OH_ArkUI_RenderNodeUtils_GetShadowAlpha(rootRenderNode, &alpha);
-    ASSERT_EQ(alpha, 0.5);
+    ASSERT_EQ(alpha, 0.5f);
 }
 
 /**
