@@ -1102,6 +1102,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish();
         hookTabsApplyAttributesFinish(this)
     }
 }
