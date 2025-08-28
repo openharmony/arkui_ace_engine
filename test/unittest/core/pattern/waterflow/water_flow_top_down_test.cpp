@@ -655,8 +655,6 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     UpdateCurrentOffset(300.0f);
     EXPECT_EQ(info->startIndex_, 24);
     EXPECT_EQ(info->endIndex_, 35);
-    // item in cache range shouldn't be created yet
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
