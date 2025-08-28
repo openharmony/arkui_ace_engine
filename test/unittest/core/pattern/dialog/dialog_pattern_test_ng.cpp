@@ -1757,4 +1757,37 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityH
     auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
     ASSERT_NE(dialogAccessibilityProperty, nullptr);
 }
+
+/**
+ * @tc.name: DialogPatternTestSetDialogAccessibilityHoverConsume
+ * @tc.desc: Test OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, OnWindowShow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set refreshOnWindowShow to true and invoke function.
+     * @tc.expected: RefreshOnWindowShow is false.
+     */
+    pattern->refreshOnWindowShow_ = true;
+    pattern->OnWindowShow();
+    EXPECT_FALSE(pattern->refreshOnWindowShow_);
+    
+    pattern->refreshOnWindowShow_ = false;
+    pattern->OnWindowShow();
+    EXPECT_FALSE(pattern->refreshOnWindowShow_);
+}
 } // namespace OHOS::Ace::NG
