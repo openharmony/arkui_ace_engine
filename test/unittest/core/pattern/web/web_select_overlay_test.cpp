@@ -3172,6 +3172,64 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMenuOptions_004
+ * @tc.desc: SetMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetMenuOptions_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("");
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    OHOS::Ace::SetReturnStatus("");
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
+    OHOS::Ace::SetReturnStatus("true");
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    auto container = MockContainer::Current();
+    container->SetIsSceneBoardWindow(false);
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    container->SetIsSceneBoardWindow(true);
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    auto textFieldTheme = webPattern->GetTheme();
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, true);
+    OHOS::Ace::SetReturnStatus("");
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+#endif
+}
+
+/**
  * @tc.name: OnMenuItemAction_001
  * @tc.desc: OnMenuItemAction.
  * @tc.type: FUNC
