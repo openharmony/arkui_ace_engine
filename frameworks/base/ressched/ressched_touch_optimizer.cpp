@@ -506,7 +506,7 @@ double ResSchedTouchOptimizer::HandleMainDelta(double& mainDelta, const double& 
     }
 
     for (const auto& it : touchPoints) {
-        if (it.second.sourceTool != sourceTool::FINGER) {
+        if (it.second.sourceTool != SourceTool::FINGER) {
             return main_Delta;
         }
     }

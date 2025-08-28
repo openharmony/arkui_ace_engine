@@ -183,8 +183,8 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.height = pointerItem.GetHeight();
 
     uint32_t longAxis = static_cast<uint32_t>(pointerItem.GetLongAxis());
-    bool hasReverseSignalX = (longAxis & (1U << DIGIT_X_REVERSE) != 0);
-    bool hasReverseSignalY = (longAxis & (1U << DIGIT_Y_REVERSE) != 0);
+    bool hasReverseSignalX = ((longAxis & (1U << DIGIT_X_REVERSE)) != 0);
+    bool hasReverseSignalY = ((longAxis & (1U << DIGIT_Y_REVERSE)) != 0);
     touchPoint.xReverse = static_cast<int32_t>(hasReverseSignalX);
     touchPoint.yReverse = static_cast<int32_t>(hasReverseSignalY);
 

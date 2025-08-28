@@ -42,10 +42,10 @@ public:
     void SetSlideAcceptOffset(Offset offset);
     double HandleMainDelta(double& mainDelta, const double& touchPointsSize,
         const std::map<int32_t, TouchEvent>& touchPoints);
+    bool RVSEnableCheck();
 
 private:
     // RVS Dispatch funcs
-    bool RVSEnableCheck();
     void RVSPointReset(const int32_t pointId, const int32_t info);
     void UpdateDptHistory(const TouchEvent& event);
     void UpdateState(const int32_t id, const int32_t newState, const int32_t axis);
