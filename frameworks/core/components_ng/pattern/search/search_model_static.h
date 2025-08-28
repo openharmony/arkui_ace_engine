@@ -29,6 +29,7 @@ public:
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& font);
     static void SetSearchImageIcon(FrameNode* frameNode, std::optional<IconOptions>& iconOptions);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);

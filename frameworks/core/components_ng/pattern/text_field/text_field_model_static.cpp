@@ -117,6 +117,18 @@ void TextFieldModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::
     }
 }
 
+void TextFieldModelStatic::SetAutoCapitalizationMode(
+    FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (value) {
+        pattern->UpdateAutoCapitalizationMode(*value);
+    } else {
+        pattern->ResetAutoCapitalizationMode();
+    }
+}
+
 void TextFieldModelStatic::SetHeightAdaptivePolicy(FrameNode* frameNode,
     const std::optional<TextHeightAdaptivePolicy>& valueOpt)
 {
