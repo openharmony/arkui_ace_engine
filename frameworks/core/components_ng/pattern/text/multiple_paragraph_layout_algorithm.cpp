@@ -849,7 +849,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         if (!useParagraphCache_) {
             HandleEmptyParagraph(paragraph, group);
             paragraph->Build();
-            ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle, GetIndentMaxWidth(maxWidth));
             UpdateSymbolSpanEffect(frameNode, paragraph, group);
         }
         if (paraStyle.maxLines != UINT32_MAX) {

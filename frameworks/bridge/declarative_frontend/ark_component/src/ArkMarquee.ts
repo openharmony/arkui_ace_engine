@@ -139,9 +139,6 @@ class MarqueeAllowScaleModifier extends ModifierWithKey<boolean> {
   }
 }
 class MarqueeFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
-  constructor(value: string | number | FontWeight) {
-    super(value);
-  }
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

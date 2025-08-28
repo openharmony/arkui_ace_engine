@@ -97,11 +97,10 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
             pasteData->SetDraggedDataFlag(isDragData);
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetDataWithCopyOption", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetDataWithCopyOption");
 #else
     taskExecutor_->PostTask(
-        [data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetTextPasteData",
-        PriorityType::IMMEDIATE);
+        [data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetTextPasteData");
 #endif
 }
 
@@ -122,11 +121,10 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Set pixmap to system clipboard");
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetPixelMapWithCopyOption", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetPixelMapWithCopyOption");
 #else
     taskExecutor_->PostTask(
-        [pixmap]() { g_pixmap = pixmap; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetImagePasteData",
-        PriorityType::IMMEDIATE);
+        [pixmap]() { g_pixmap = pixmap; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetImagePasteData");
 #endif
 }
 
@@ -150,7 +148,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() {
             callback(textData);
         },
-        TaskExecutor::TaskType::UI, "ArkUIClipboardTextDataCallback", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardTextDataCallback");
 #endif
 }
 
@@ -171,7 +169,7 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
     } else {
         taskExecutor_->PostTask([callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)),
                                     imageData = g_pixmap]() { callback(imageData); },
-            TaskExecutor::TaskType::UI, "ArkUIClipboardImageDataCallback", PriorityType::IMMEDIATE);
+            TaskExecutor::TaskType::UI, "ArkUIClipboardImageDataCallback");
     }
 #endif
 }
@@ -342,7 +340,7 @@ void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions c
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add pasteData to clipboard, shareOption:  %{public}d", shareOption);
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetMixDataWithCopyOption", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetMixDataWithCopyOption");
 #endif
 }
 
@@ -434,16 +432,14 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 EventReport::ReportClipboardFailEvent("SystemKeyboardData is not exist from MiscServices");
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed",
-                    PriorityType::IMMEDIATE);
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData)) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed",
-                    PriorityType::IMMEDIATE);
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
                 return;
             }
             std::string resText;
@@ -453,17 +449,16 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
             }
             if (resText.empty()) {
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed",
-                    PriorityType::IMMEDIATE);
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed");
                 return;
             }
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "resText len:%{public}d", static_cast<int32_t>(resText.length()));
             auto result = resText;
             taskExecutor->PostTask(
                 [callback, result]() { callback(result); },
-                TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback", PriorityType::IMMEDIATE);
+                TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback");
         },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
 void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
@@ -573,22 +568,22 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
                     auto result = *textData;
                     taskExecutor->PostTask(
                         [textCallback, result, isLastRecord]() { textCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextCallback", PriorityType::IMMEDIATE);
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextCallback");
                 } else if (pasteDataRecord->GetPixelMap() != nullptr) {
                     auto imageData = pasteDataRecord->GetPixelMap();
                     auto result = AceType::MakeRefPtr<PixelMapOhos>(imageData);
                     taskExecutor->PostTask(
                         [pixelMapCallback, result, isLastRecord]() { pixelMapCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageCallback", PriorityType::IMMEDIATE);
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageCallback");
                 } else if (pasteDataRecord->GetUri() != nullptr) {
                     auto textData = pasteDataRecord->GetUri();
                     auto result = (*textData).ToString();
                     taskExecutor->PostTask([urlCallback, result, isLastRecord]() { urlCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetUrlCallback", PriorityType::IMMEDIATE);
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetUrlCallback");
                 }
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync");
 }
 #endif
 
@@ -629,13 +624,12 @@ void ClipboardImpl::GetSpanStringDataHelper(
         auto result = text;
         taskExecutor->PostTask(
             [callback, arrays, result, isMultiTypeRecord]() mutable { callback(arrays, result, isMultiTypeRecord); },
-            TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback", PriorityType::IMMEDIATE);
+            TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
     };
     if (syncMode) {
         taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataSync");
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataAsync",
-        PriorityType::IMMEDIATE);
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataAsync");
     }
 }
 
@@ -709,8 +703,7 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             if (!has) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed",
-                    PriorityType::IMMEDIATE);
+                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
@@ -718,8 +711,7 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             if (!ok) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed",
-                    PriorityType::IMMEDIATE);
+                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
                 return;
             }
             auto imageData = pasteData.GetPrimaryPixelMap();
@@ -727,15 +719,15 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardImageData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(nullptr); },
-                    TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataFailed", PriorityType::IMMEDIATE);
+                    TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataFailed");
                 return;
             }
             auto result = AceType::MakeRefPtr<PixelMapOhos>(imageData);
             taskExecutor->PostTask(
                 [callback, result]() { callback(result); },
-                TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataCallback", PriorityType::IMMEDIATE);
+                TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataCallback");
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetImageDataAsync", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetImageDataAsync");
 }
 #endif
 
