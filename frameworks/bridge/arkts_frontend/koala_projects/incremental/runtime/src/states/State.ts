@@ -425,15 +425,15 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
 
     at(index: number): Item {
         const array = this.value
-        return array[index < 0 ? array.length + index : index]
+        return array[(index < 0 ? array.length + index : index) as int32]
     }
 
     get(index: number): Item {
-        return this.value[index]
+        return this.value[index as int32]
     }
 
     set(index: number, item: Item): void {
-        this.mutable[index] = item
+        this.mutable[index as int32] = item
     }
 
     copyWithin(target: number, start: number, end?: number): Array<Item> {

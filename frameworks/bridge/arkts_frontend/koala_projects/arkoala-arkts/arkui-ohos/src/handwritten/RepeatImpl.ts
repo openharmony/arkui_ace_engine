@@ -127,7 +127,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
                 console.error(`onLazyLoading function execute error: ${error}`);
             }
         }
-        return this.arr_[index];
+        return this.arr_[index as int32];
     }
 
     setOnLazyLoading(onLazyLoading?: (index: number) => void): void {

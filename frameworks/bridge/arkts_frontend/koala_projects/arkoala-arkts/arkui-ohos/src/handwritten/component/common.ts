@@ -156,7 +156,7 @@ export class ChildrenMainSize {
             if (childrenSizeLength === 0) {
                 childrenSize = [];
             }
-            for (let i: number = 0; i < childrenSizeLength; i++) {
+            for (let i = 0; i < childrenSizeLength; i++) {
                 if (this.isInvalid(childrenSize[i])) {
                     // -1: represent default size.
                     childrenSize[i] = -1;
@@ -807,7 +807,7 @@ export class TouchEventTransfer {
         touchEvent.type = TypeChecker.TouchType_FromNumeric(typeValue as int32);
         const changedTouchesValue = esValue.getProperty("changedTouches");
         let changedTouchArray: Array<TouchObject> = [];
-        let index: number = 0;
+        let index = 0;
         for (let changedTouch of changedTouchesValue) {
             let staticChangedTouch: TouchObject = {
                 type: TypeChecker.TouchType_FromNumeric(changedTouch.getProperty("type").toNumber() as int32),

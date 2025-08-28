@@ -28,7 +28,7 @@ import { runtimeType, RuntimeType } from "@koalaui/interop"
 const PlayBackSpeedTable: number[] = [0.75, 1.0, 1.25, 1.75, 2.0];
 
 function convertPlaybackSpeed(value: PlaybackSpeed): number {
-    const index = value as number;
+    const index = value as int32;
     return PlayBackSpeedTable[index]
 }
 
