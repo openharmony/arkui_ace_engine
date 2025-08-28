@@ -501,6 +501,9 @@ void ResSchedTouchOptimizer::UpdateDptHistory(const TouchEvent& event)
 double ResSchedTouchOptimizer::HandleMainDelta(double& mainDelta, const double& touchPointsSize,
     const std::map<int32_t, TouchEvent>& touchPoints)
 {
+    if (touchPointsSize <= 0) {
+        return mainDelta;
+    }
     double main_Delta = mainDelta / touchPointsSize;
     if (!RVSEnableCheck()) {
         return main_Delta;

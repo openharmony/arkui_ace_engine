@@ -29,6 +29,9 @@ void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
 double ResSchedTouchOptimizer::HandleMainDelta(double& mainDelta, const double& touchPointsSize,
     const std::map<int32_t, TouchEvent>& touchPoints)
 {
+    if (touchPointsSize <= 0) {
+        return mainDelta;
+    }
     return mainDelta / touchPointsSize;
 }
 
