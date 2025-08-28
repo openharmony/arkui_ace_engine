@@ -539,8 +539,6 @@ public:
     void SetFocusDisable();
     void SetFocusEnable();
 
-    void UpdateTranslatedOptionsMap();
-
     void UpdateLanguageAndAmPmTimeOrder()
     {
         if (language_ == "ug") {
@@ -755,7 +753,7 @@ private:
     void HandleMinuteBuildTimeRange(uint32_t hourOf24, uint32_t minute);
     void HandleSecondBuildTimeRange();
     void SetHourColumnIndexByTime(std::string hour);
-    void SetMinuteColumnIndexByTime(std::string minute);
+    void SetMinuteColumnIndexByTime(uint32_t hourOf24, std::string minute);
     void RecordHourOptions();
     void LimitSelectedTimeInRange();
     bool IsAmJudgeByAmPmColumn(const RefPtr<FrameNode>& amPmColumn);

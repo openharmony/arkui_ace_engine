@@ -2779,6 +2779,53 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern031, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TimePickerRowPattern032
+ * @tc.desc: Test TimePickerRowPattern GetCurrentEnterTime using 12-hour system
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern032, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(amPmPickerColumnPattern, nullptr);
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(hourPickerColumnPattern, nullptr);
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minutePickerColumnPattern, nullptr);
+
+    amPmPickerColumnPattern->SetEnterIndex(0);
+    hourPickerColumnPattern->SetEnterIndex(AM_PM_HOUR_12 - 1);
+    minutePickerColumnPattern->SetEnterIndex(0);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetHour(), 0);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetMinute(), minutePickerColumnPattern->GetEnterIndex());
+
+    hourPickerColumnPattern->SetEnterIndex(AM_PM_HOUR_12 - 2);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetHour(), AM_PM_HOUR_12 - 1);
+
+    amPmPickerColumnPattern->SetEnterIndex(1);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetHour(), AM_PM_HOUR_12 * 2 - 1);
+
+    hourPickerColumnPattern->SetEnterIndex(AM_PM_HOUR_12 - 1);
+    EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetHour(), AM_PM_HOUR_12);
+}
+
+/**
  * @tc.name: TimePickerFireChangeEventTest001
  * @tc.desc: Test SetSelectedDate.
  * @tc.type: FUNC
@@ -7400,5 +7447,48 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerGetCurrentOption001, TestSize.Level0
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);
     EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "");
+}
+
+/**
+ * @tc.name: SetDateTimeOptionsTest001
+ * @tc.desc: Test SetDateTimeOptions should update options when all types different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, SetDateTimeOptionsTest001, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    ZeroPrefixType hourType = ZeroPrefixType::SHOW;
+    ZeroPrefixType minuteType = ZeroPrefixType::HIDE;
+    ZeroPrefixType secondType = ZeroPrefixType::HIDE;
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(hourType, minuteType, secondType);
+    EXPECT_EQ(timePickerRowPattern->GetPrefixHour(), hourType);
+    EXPECT_EQ(timePickerRowPattern->GetPrefixMinute(), minuteType);
+    EXPECT_EQ(timePickerRowPattern->GetPrefixSecond(), secondType);
+}
+
+/**
+ * @tc.name: SetHour24Test001
+ * @tc.desc: Test SetHour24.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, SetHour24Test001, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    EXPECT_TRUE(timePickerRowPattern->GetCachedHour24());
+    TimePickerModelNG::SetHour24(frameNode, false);
+    EXPECT_FALSE(timePickerRowPattern->GetCachedHour24());
 }
 } // namespace OHOS::Ace::NG
