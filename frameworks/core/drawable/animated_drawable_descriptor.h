@@ -61,10 +61,7 @@ public:
         return iterations_;
     }
 
-    void SetTotalDuration(const int32_t totalDuration)
-    {
-        totalDuration_ = totalDuration;
-    }
+    void SetTotalDuration(const int32_t totalDuration);
 
     void SetIterations(const int32_t iterations)
     {

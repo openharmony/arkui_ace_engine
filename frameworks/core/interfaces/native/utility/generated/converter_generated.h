@@ -2026,7 +2026,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Resource_LinearGradient_common& src)
+                   const Ark_Union_String_Resource_LinearGradientOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -4326,7 +4326,6 @@ ASSIGN_OPT(Opt_LeadingMarginPlaceholder)
 ASSIGN_OPT(Opt_LengthMetrics)
 ASSIGN_OPT(Opt_LetterSpacingStyle)
 ASSIGN_OPT(Opt_LevelMode)
-ASSIGN_OPT(Opt_LinearGradient_common)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_LinearGradientOptions)
 ASSIGN_OPT(Opt_LinearIndicatorStartOptions)
@@ -4622,7 +4621,7 @@ ASSIGN_OPT(Opt_Union_String_PixelMap_Resource)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_String_Resource_ComponentContent)
-ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient_common)
+ASSIGN_OPT(Opt_Union_String_Resource_LinearGradientOptions)
 ASSIGN_OPT(Opt_Union_String_Resource_PixelMap)
 ASSIGN_OPT(Opt_Union_String_WebResourceRequest)
 ASSIGN_OPT(Opt_Union_WebController_WebviewController)

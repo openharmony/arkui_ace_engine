@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t DEFAULT_TOTAL_DURATION = 1000;
+constexpr int32_t DEFAULT_DURATION = 1000;
 } // namespace
 
 RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
@@ -30,10 +30,19 @@ RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
     return pixelMapList_.front();
 }
 
+void AnimatedDrawableDescriptor::SetTotalDuration(const int32_t totalDuration)
+{
+    if (totalDuration <= 0) {
+        totalDuration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
+    } else {
+        totalDuration_ = totalDuration;
+    }
+}
+
 int32_t AnimatedDrawableDescriptor::GetTotalDuration()
 {
-    if (totalDuration_ < 0) {
-        totalDuration_ = DEFAULT_TOTAL_DURATION;
+    if (totalDuration_ <= 0) {
+        totalDuration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
     }
     return totalDuration_;
 }
@@ -48,7 +57,7 @@ std::vector<int32_t> AnimatedDrawableDescriptor::GetDurations()
 {
     auto size = pixelMapList_.size();
     if (durations_.empty() && size > 0) {
-        durations_.resize(size, DEFAULT_TOTAL_DURATION / size);
+        durations_.resize(size, GetTotalDuration() / size);
     }
     return durations_;
 }

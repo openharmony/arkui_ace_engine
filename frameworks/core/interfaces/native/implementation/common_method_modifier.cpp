@@ -2376,7 +2376,7 @@ void BorderImageImpl(Ark_NativePointer node,
     }
     uint8_t bitSet = 0;
     Converter::VisitUnion(optValue->source,
-        [frameNode, &bitSet](const Ark_LinearGradient_common& src) {
+        [frameNode, &bitSet](const Ark_LinearGradientOptions& src) {
             Gradient gradient = Converter::Convert<Gradient>(src);
             ViewAbstract::SetBorderImageGradient(frameNode, gradient);
             bitSet |= BorderImage::GRADIENT_BIT;
