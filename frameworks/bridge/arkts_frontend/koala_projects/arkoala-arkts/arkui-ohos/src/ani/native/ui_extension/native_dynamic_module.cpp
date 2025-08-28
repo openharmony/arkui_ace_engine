@@ -54,9 +54,9 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
         ani_native_function {
             "_Dynamic_Set_OnErrorCallback",
             nullptr, reinterpret_cast<void *>(SetOnError)},
-            ani_native_function {
-                "_Dynamic_Set_IsReportFrameEvent",
-                nullptr, reinterpret_cast<void *>(SetIsReportFrameEvent)},
+        ani_native_function {
+            "_Dynamic_Set_IsReportFrameEvent",
+            nullptr, reinterpret_cast<void *>(SetIsReportFrameEvent)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
