@@ -32,6 +32,10 @@ namespace OHOS::Ace::NG {
 void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 {
     info_->BeginUpdate();
+
+    // Initialize unlayouted items if not layouted
+    InitUnlayoutedItems();
+
     InitEnv(wrapper);
     info_->axis_ = axis_ = props_->GetAxis();
 
@@ -67,6 +71,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
 
     if (info_->measureInNextFrame_) {
+        isLayouted_ = false;
         return;
     }
 
@@ -75,6 +80,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     } else {
         PreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     }
+
+    isLayouted_ = false;
 }
 
 void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
@@ -107,6 +114,8 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
     info_->EndCacheUpdate();
 
+    ClearUnlayoutedItems(wrapper);
+
     wrapper->SetCacheCount(cacheCount);
     wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount,
         props_->GetShowCachedItemsValue(false));
@@ -121,6 +130,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
 
     UpdateOverlay(wrapper_);
+    isLayouted_ = true;
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)

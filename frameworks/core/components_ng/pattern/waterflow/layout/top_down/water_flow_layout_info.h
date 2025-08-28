@@ -224,6 +224,16 @@ public:
 
     void UpdateItemStart(bool canOverScrollStart);
 
+    int32_t StartIndex() const override
+    {
+        return startIndex_;
+    }
+
+    int32_t EndIndex() const override
+    {
+        return endIndex_;
+    }
+
 private:
     inline float TopMargin() const
     {

@@ -2196,4 +2196,51 @@ HWTEST_F(WaterFlowSegmentTest, EmptySectionWithDefaultSize, TestSize.Level1)
     EXPECT_EQ(geometryNode->GetFrameSize().Width(), 400.0f);
     EXPECT_EQ(geometryNode->GetFrameSize().Height(), 600.0f);
 }
+
+    /**
+     * @tc.name: WaterFlowSegmentReMeasureTest001
+     * @tc.desc: Test WaterFlow segmented layout selective clearing mechanism
+     * @tc.type: FUNC
+     */
+    HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with segmented layout
+     * @tc.expected: WaterFlow index range is correct
+     */
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(50);
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Create algorithm and perform initial measurement
+     * @tc.expected: Algorithm works correctly
+     */
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(
+        AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
+    EXPECT_TRUE(algo);
+
+    // First Measure
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    /**
+     * @tc.steps: step3. Change WaterFlow mainSize and call measure for second time
+     * @tc.expected: Check selective clearing mechanism works
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(400.f, 200.f);
+    contentConstraint.maxSize = SizeF(400.f, 200.f);
+    contentConstraint.percentReference = SizeF(400.f, 200.f);
+    layoutProperty_->UpdateLayoutConstraint(contentConstraint);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    algo->Layout(AceType::RawPtr(frameNode_));
+
+    EXPECT_TRUE(algo->isLayouted_);
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,10 @@
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#define private public
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
+#undef private
+
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
@@ -2175,5 +2179,60 @@ HWTEST_F(WaterFlowSWTest, UpdateAndJump001, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 0.000000 EndPos: 300.000000 Items [8 9 ] }");
     EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 500.000000 EndPos: 900.000000 Items [12 14 15 ] }");
     EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 500.000000 EndPos: 700.000000 Items [13 ] }");
+}
+
+/**
+ * @tc.name: WaterFlowSWReMeasureTest001
+ * @tc.desc: Test WaterFlow sliding window selective clearing mechanism
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, WaterFlowSWReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with sliding window
+     * @tc.expected: WaterFlow index range is correct
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Call measure of WaterFlow for first time
+     * @tc.expected: WaterFlow layout range is correct, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<WaterFlowLayoutSW>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    // Record initial index range
+    int32_t initialStartIndex = layoutAlgorithm->info_->StartIndex();
+    int32_t initialEndIndex = layoutAlgorithm->info_->EndIndex();
+
+    /**
+     * @tc.steps: step3. Change WaterFlow mainSize and call measure for second time
+     * @tc.expected: Check selective clearing mechanism works with index-based approach
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(240.f, 200.f);
+    contentConstraint.maxSize = SizeF(240.f, 200.f);
+    contentConstraint.percentReference = SizeF(240.f, 200.f);
+
+    layoutProperty_->UpdateLayoutConstraint(contentConstraint);
+
+    // Verify that prevStartIndex_ and prevEndIndex_ are set correctly before measure
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+
+    // Verify index range has changed
+    int32_t newStartIndex = layoutAlgorithm->info_->StartIndex();
+    int32_t newEndIndex = layoutAlgorithm->info_->EndIndex();
+
+    // Verify that the selective clearing mechanism uses real-time indices correctly
+    EXPECT_TRUE(newStartIndex != initialStartIndex || newEndIndex != initialEndIndex);
+
+    // Complete layout to trigger ClearUnlayoutedItems
+    layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(layoutAlgorithm->isLayouted_);
 }
 } // namespace OHOS::Ace::NG
