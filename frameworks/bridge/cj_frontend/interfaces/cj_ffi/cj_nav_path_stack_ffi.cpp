@@ -736,6 +736,10 @@ int64_t FfiOHOSAceFrameworkNavPathStackGetParent(int64_t id)
         LOGE("Failed to invoke ffi function: CJNavPathStack getParent!");
         return -1;
     }
+    if (self_->GetParent() == nullptr) {
+        LOGI("There is no parent navPathStack: CJNavPathStack getParent!");
+        return -1;
+    }
     return self_->GetParent()->GetID();
 }
 }
