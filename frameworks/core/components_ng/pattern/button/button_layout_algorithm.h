@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,8 @@ private:
     static float GetDefaultHeight(LayoutWrapper* layoutWrapper);
     static float GetDefaultBorderRadius(LayoutWrapper* layoutWrapper);
     bool ProcessLayoutPolicyIsNotNoMatch(std::optional<NG::LayoutPolicyProperty> layoutPolicy);
+    void LayoutPolicyIsFixAtIdelSize(std::optional<NG::LayoutPolicyProperty> layoutPolicy, const float& topPadding,
+        const float& bottomPadding, SizeF& frameSize);
     SizeF childSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);

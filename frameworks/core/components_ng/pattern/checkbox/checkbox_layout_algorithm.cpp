@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,12 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        return LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        return LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy);
     }
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
@@ -194,6 +200,62 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::LayoutPolicyIsMatchParent(const La
             realSize = height;
         }
         return SizeF(realSize, realSize);
+    }
+    return SizeF();
+}
+
+std::optional<SizeF> CheckBoxLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+    auto defaultLenght = std::min(defaultWidth_ - 2 * horizontalPadding_, defaultHeight_ - 2 * verticalPadding_);
+    auto defaultSize = SizeF(defaultLenght, defaultLenght);
+    if (layoutPolicy->IsWidthFix() && layoutPolicy->IsHeightFix()) {
+        return defaultSize;
+    } else if (layoutPolicy->IsWidthFix()) {
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            return defaultSize;
+        }
+        return SizeF(selfHeight, selfHeight);
+    } else if (layoutPolicy->IsHeightFix()) {
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            return defaultSize;
+        }
+        return SizeF(selfWidth, selfWidth);
+    }
+    return SizeF();
+}
+
+std::optional<SizeF> CheckBoxLayoutAlgorithm::LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    auto height = contentConstraint.parentIdealSize.Height().value_or(0.0f);
+    auto width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+    auto defaultLenght = std::min(defaultWidth_ - 2 * horizontalPadding_, defaultHeight_ - 2 * verticalPadding_);
+    auto defaultSize = SizeF(defaultLenght, defaultLenght);
+    auto parentMinLength = std::min(width, height);
+    if (layoutPolicy->IsWidthWrap() && layoutPolicy->IsHeightWrap()) {
+        auto length = std::min(parentMinLength, defaultLenght);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsWidthWrap()) {
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            auto length = std::min(parentMinLength, defaultLenght);
+            return SizeF(length, length);
+        }
+        auto length = std::min(parentMinLength,  selfHeight);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsHeightWrap()) {
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            auto length = std::min(parentMinLength, defaultLenght);
+            return SizeF(length, length);
+        }
+        auto length = std::min(parentMinLength, selfWidth);
+        return SizeF(length, length);
     }
     return SizeF();
 }

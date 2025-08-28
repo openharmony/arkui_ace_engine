@@ -75,8 +75,10 @@ const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
 const SizeF TEST_SIZE_100_200 = SizeF(100.0f, 200.0f);
 const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
 const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_40 = SizeF(40.0f, 40.0f);
 const SizeF TEST_SIZE_50 = SizeF(50.0f, 50.0f);
 const SizeF TEST_SIZE_60 = SizeF(60.0f, 60.0f);
+constexpr float TEST_HORIZONPADDING = 5.0f;
 constexpr float TEST_WIDTH_50 = 50.0f;
 constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
@@ -3283,5 +3285,279 @@ HWTEST_F(CheckBoxTestNG, CheckBoxLayoutPolicyIsMatchParentTest137, TestSize.Leve
     ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
         layoutPolicy, &layoutWrapper);
     EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: CheckBoxMeasureTest138
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest138, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: create mock theme manager, set checkbox theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    checkboxTheme->defaultWidth_ = Dimension(TEST_HEIGHT_60);
+    checkboxTheme->defaultPaddingSize_ = Dimension(TEST_HORIZONPADDING);
+    checkboxTheme->hotZoneHorizontalPadding_ = Dimension(TEST_HORIZONPADDING);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_100_200);
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: CheckBoxMeasureTest139
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest139, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: create mock theme manager, set checkbox theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    checkboxTheme->defaultWidth_ = Dimension(TEST_HEIGHT_60);
+    checkboxTheme->defaultPaddingSize_ = Dimension(TEST_HORIZONPADDING);
+    checkboxTheme->hotZoneHorizontalPadding_ = Dimension(TEST_HORIZONPADDING);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     */
+    LayoutConstraintF contentConstraint;
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_100_200);
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+}
+
+
+/**
+ * @tc.name: CheckBoxMeasureTest140
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest140, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: create mock theme manager, set checkbox theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    checkboxTheme->defaultWidth_ = Dimension(TEST_HEIGHT_60);
+    checkboxTheme->defaultPaddingSize_ = Dimension(TEST_HORIZONPADDING);
+    checkboxTheme->hotZoneHorizontalPadding_ = Dimension(TEST_HORIZONPADDING);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT.
+     * @tc.expected: step3. switchSize is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_60);
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+}
+
+/**
+ * @tc.name: CheckBoxMeasureTest141
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest141, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: create mock theme manager, set checkbox theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    checkboxTheme->defaultWidth_ = Dimension(TEST_HEIGHT_60);
+    checkboxTheme->defaultPaddingSize_ = Dimension(TEST_HORIZONPADDING);
+    checkboxTheme->hotZoneHorizontalPadding_ = Dimension(TEST_HORIZONPADDING);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set heightLayoutPolicy_ to WRAP_CONTENT.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    auto ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_60);
+    ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty);
+    EXPECT_EQ(ret, TEST_SIZE_0);
 }
 } // namespace OHOS::Ace::NG
