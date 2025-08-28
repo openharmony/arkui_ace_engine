@@ -3498,8 +3498,6 @@ bool RichEditorPattern::HandleUserGestureEvent(
             }
             info = info.SetScreenLocation(
                 Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
-            info = info.SetGlobalDisplayLocation(
-                Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
             return gestureFunc(item, info);
         }
     }
