@@ -508,6 +508,7 @@ arkui_path_keys = [
   "#stateMgmtTool",
   "@ohos/arkui/Parallelize",
   "@ohos/arkui/theme",
+  "@ohos.arkui.component",
 ]
 
 arkui_path_values = [
@@ -550,4 +551,5 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/stateManagement/tools/arkts",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.theme.ets",
+  "arkui-preprocessed/arkui/component",
 ]
