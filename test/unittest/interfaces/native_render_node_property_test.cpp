@@ -132,9 +132,9 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest004, TestSize
     ASSERT_NE(rootRenderNode, nullptr);
     
     float opacity = 0;
-    OH_ArkUI_RenderNodeUtils_SetOpacity(rootRenderNode, 0.5);
+    OH_ArkUI_RenderNodeUtils_SetOpacity(rootRenderNode, 0.5f);
     OH_ArkUI_RenderNodeUtils_GetOpacity(rootRenderNode, &opacity);
-    ASSERT_EQ(opacity, 0.5);
+    ASSERT_EQ(opacity, 0.5f);
 }
 
 /**
