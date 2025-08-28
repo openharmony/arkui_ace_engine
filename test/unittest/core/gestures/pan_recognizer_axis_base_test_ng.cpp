@@ -47,6 +47,19 @@ struct PanAxisTestCase {
     {}
 };
 
+struct PanAxisDeltaTestCase {
+    PanDirection direction;
+    SourceTool sourceTool;
+    Matrix4 localMatrix4;
+    Offset originDelta;
+    Offset expectDelta;
+    PanAxisDeltaTestCase(
+        PanDirection direction, SourceTool sourceTool, Matrix4 localMatrix4, Offset originDelta, Offset expectDelta)
+        : direction(direction), sourceTool(sourceTool), localMatrix4(localMatrix4),
+        originDelta(originDelta), expectDelta(expectDelta)
+    {}
+};
+
 const std::vector<PanAxisTestCase> AXIS_TEST_CASES = {
     PanAxisTestCase(2, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
@@ -186,6 +199,21 @@ const std::vector<PanAxisTestCase> AXIS_TEST_CASES = {
         RefereeState::FAIL), // case 33
 };
 
+const std::vector<PanAxisDeltaTestCase> AXIS_DELTA_TEST_CASES = {
+    PanAxisDeltaTestCase({ PanDirection::VERTICAL }, SourceTool::MOUSE,
+        Matrix4::CreateIdentity(), { 100.0f, -100.0f }, { 0.0f, -100.0f }),
+    PanAxisDeltaTestCase({ PanDirection::HORIZONTAL }, SourceTool::MOUSE,
+        Matrix4::CreateIdentity(), { 100.0f, -100.0f }, { 100.0f, 0.0f }),
+    PanAxisDeltaTestCase({ PanDirection::ALL }, SourceTool::MOUSE,
+        Matrix4::CreateIdentity(), { 100.0f, -100.0f }, { 100.0f, -100.0f }),
+    PanAxisDeltaTestCase({ PanDirection::ALL }, SourceTool::TOUCHPAD,
+        Matrix4::CreateIdentity(), { 100.0f, -100.0f }, { 100.0f, -100.0f }),
+    PanAxisDeltaTestCase({ PanDirection::ALL }, SourceTool::TOUCHPAD,
+        Matrix4::CreateRotate(90, 0, 0, 1), { 100.0f, -100.0f }, { 100.0f, 100.0f }),
+    PanAxisDeltaTestCase({ PanDirection::ALL }, SourceTool::UNKNOWN,
+        Matrix4::CreateIdentity(), { 100.0f, -100.0f }, { 100.0f, -100.0f }),
+};
+
 namespace {
 void CalculateAxisValue(
     float distance, PanQuadrantDirection direction, SourceTool sourceTool, float& horizontalAxis, float& verticalAxis)
@@ -298,4 +326,35 @@ HWTEST_F(PanRecognizerAxisBaseTestNg, PanRecognizerAxisBaseTest001, TestSize.Lev
     }
 }
 
+/**
+ * @tc.name: PanRecognizerUpdateAxisDeltaTransformTest001
+ * @tc.desc: Test PanRecognizer function: UpdateAxisDeltaTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerAxisBaseTestNg, PanRecognizerUpdateAxisDeltaTransformTest001, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : AXIS_DELTA_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create PanRecognizer.
+         */
+        RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+        panGestureOption->SetDirection(testCase.direction);
+        RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+        auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+        panRecognizer->AttachFrameNode(frameNode);
+        frameNode->localMat_ = testCase.localMatrix4;
+
+        /**
+         * @tc.steps: step2. UpdateAxisDeltaTransform.
+         * @tc.expected: step2. delta_ equals.
+         */
+        AxisEvent axisEvent;
+        axisEvent.sourceTool = testCase.sourceTool;
+        panRecognizer->delta_ = testCase.originDelta;
+        panRecognizer->UpdateAxisDeltaTransform(axisEvent);
+        EXPECT_EQ(panRecognizer->delta_, testCase.expectDelta);
+        caseNum++;
+    }
+}
 } // namespace OHOS::Ace::NG
