@@ -2820,8 +2820,10 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
 
     textContentModifier.SetTextDecorationColor(Color::ColorFromString("#55FFFFFF"), false);
     textContentModifier.textDecoration_ = TextDecoration::LINE_THROUGH;
+    textContentModifier.textDecorationAnimatable_ = true;
     textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
     EXPECT_EQ(textContentModifier.textDecorationColorAlpha_->Get(), 85.0f);
+    EXPECT_FALSE(textContentModifier.textDecorationAnimatable_);
 }
 
 /**

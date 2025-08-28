@@ -102,7 +102,7 @@ namespace {
         int32_t pos, const std::string& type, std::vector<std::string>& params, int32_t containCount)
     {
         auto index = pos + containCount;
-        if (index < 0) {
+        if (index < 0 || index >= static_cast<int32_t>(params.size())) {
             return std::string();
         }
         return params.at(index);
