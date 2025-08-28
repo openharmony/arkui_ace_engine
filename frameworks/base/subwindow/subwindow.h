@@ -28,7 +28,6 @@
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
-
 enum class ToastWindowType {
     TOAST_IN_TYPE_APP_SUB_WINDOW = 0,
     TOAST_IN_TYPE_SYSTEM_SUB_WINDOW,
@@ -80,10 +79,10 @@ public:
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f),
         float meunuScale = 1.0f, bool isRedragStart = false, int32_t menuWrapperId = -1) = 0;
-    virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
     virtual void UpdatePreviewPosition() = 0;
     virtual bool GetMenuPreviewCenter(NG::OffsetF& offset) = 0;
+    virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) = 0;
