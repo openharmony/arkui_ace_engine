@@ -28,7 +28,7 @@ void LinearLayoutBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void LinearLayoutBaseTestNG::SetUp() 
+void LinearLayoutBaseTestNG::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
 }

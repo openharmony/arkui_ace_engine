@@ -28,7 +28,7 @@ void StackBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void StackBaseTestNG::SetUp() 
+void StackBaseTestNG::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
 }

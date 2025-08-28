@@ -141,7 +141,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level0)
             ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
             ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PERCENT));
             ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
-            stack2 = CreateStack( [this](StackModelNG model) {});
+            stack2 = CreateStack([this](StackModelNG model) {});
         });
     });
     auto childLayoutProperty = stack2->GetLayoutProperty();
