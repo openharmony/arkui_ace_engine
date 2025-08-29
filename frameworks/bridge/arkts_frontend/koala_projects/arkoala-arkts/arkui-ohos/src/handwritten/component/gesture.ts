@@ -370,18 +370,20 @@ export class GestureGroupHandler extends GestureHandler {
     }
     createGestureGroup(): KPointer {
         this.pointer = GestureOps.createGestureGroup(this.mode);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
         return this.pointer;
     }
     addGestureToGroup(group: KPointer): void {
         this.createGestureGroup();
         for (let gesture of this.gestures) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.addGestureToGroup(this.pointer);
-            }
-            if (gesture instanceof GestureGroup) {
-                let gestureGroup = gesture as GestureGroup;
+            if (gesture instanceof GestureGroupHandler) {
+                let gestureGroup = gesture as GestureGroupHandler;
                 gestureGroup.addGestureToGroup(this.pointer);
+            } else if (gesture instanceof GestureHandler) {
+                let singleGesture = gesture as GestureHandler;
+                singleGesture.addGestureToGroup(this.pointer);
             }
         }
         GestureOps.addGestureToGroup(group, this.pointer);
