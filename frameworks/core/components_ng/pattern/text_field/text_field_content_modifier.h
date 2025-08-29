@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -82,6 +83,7 @@ private:
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
+
     void DoNormalDraw(DrawingContext& context);
     void DoTextFadeoutDraw(DrawingContext& context);
     void DrawTextFadeout(DrawingContext& context);
@@ -135,7 +137,6 @@ private:
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyInt> textOverflow_;
 
-    // 是否需要开启渐隐
     bool textFadeoutEnabled_ { false };
     RefPtr<AnimatablePropertyFloat> autoFillTranslationOffset_;
     RefPtr<AnimatablePropertyFloat> autoFillTextScrollOffset_;

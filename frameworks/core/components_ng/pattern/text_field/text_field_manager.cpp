@@ -79,12 +79,10 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    auto y = std::max(0.0, position.GetY());
-    Offset newPosition = { position.GetX(), y };
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition from %{public}s to %{public}s",
-        position_.ToString().c_str(), newPosition.ToString().c_str());
-    position_ = newPosition;
-    optionalPosition_ = newPosition;
+        position_.ToString().c_str(), position.ToString().c_str());
+    position_ = position;
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
