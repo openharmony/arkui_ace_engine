@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/text/text_base.h"
 
+#include "core/components/web/web_property.h"
+
 namespace OHOS::Ace::NG {
 
 class WebContextSelectOverlay : public BaseTextSelectOverlay {
@@ -57,9 +59,14 @@ public:
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     // override SelectOverlayCallback end
 
+    void SetElementType(const WebElementType& type) { elementType_ = type; }
+    void SetResponseType(const ResponseType& type) { responseType_ = type; }
+
 private:
     bool hasText_ = false;
     bool hasImage_ = false;
+    WebElementType elementType_ = WebElementType::NONE;
+    ResponseType responseType_ = ResponseType::RIGHT_CLICK;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebContextSelectOverlay);
 };

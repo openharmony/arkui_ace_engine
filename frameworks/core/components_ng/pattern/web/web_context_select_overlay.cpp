@@ -143,6 +143,7 @@ void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->contextMenuResult_);
     pattern->contextMenuResult_->Cancel();
+    pattern->curContextMenuResult_ = false;
 }
 
 void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
@@ -173,5 +174,6 @@ void WebContextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.isSingleHandle = true;
     }
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
+    pattern->CopySelectionMenuParams(selectInfo, elementType_, responseType_);
 }
 } // namespace OHOS::Ace::NG
