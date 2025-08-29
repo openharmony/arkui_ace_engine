@@ -35,6 +35,7 @@
 #include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -3118,11 +3119,11 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_002, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     OHOS::Ace::SetReturnStatus("");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showCut, false);
     OHOS::Ace::SetReturnStatus("true");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showCut, true);
     OHOS::Ace::SetReturnStatus("");
 #endif
@@ -3156,17 +3157,17 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_003, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     OHOS::Ace::SetReturnStatus("");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(g_overlay.canShowAIMenu_, false);
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
     OHOS::Ace::SetReturnStatus("false");
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(g_overlay.canShowAIMenu_, false);
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
     OHOS::Ace::SetReturnStatus("true");
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(g_overlay.canShowAIMenu_, true);
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, true);
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(g_overlay.canShowAIMenu_, false);
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
     OHOS::Ace::SetReturnStatus("");
 #endif
 }
@@ -3191,6 +3192,8 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_004, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
+    ASSERT_NE(frameNode->GetGeomertyNode(), nullptr);
+    frameNode->GetGeomertyNode()->SetContentSize({});
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     OHOS::Ace::SetReturnStatus("");
@@ -3202,26 +3205,33 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_004, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     OHOS::Ace::SetReturnStatus("");
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
     OHOS::Ace::SetReturnStatus("true");
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
     auto container = MockContainer::Current();
-    container->SetIsSceneBoardWindow(false);
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
     container->SetIsSceneBoardWindow(true);
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    container->SetIsSceneBoardWindow(false);
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto theme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     auto textFieldTheme = webPattern->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
     textFieldTheme->aiWriteBundleName_ = "BundleName";
     textFieldTheme->aiWriteAbilityName_ = "AbilityName";
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showAIwrite, false);
     textFieldTheme->aiWriteIsSupport_ = "true";
-    g_overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showAIwrite, true);
     OHOS::Ace::SetReturnStatus("");
     MockPipelineContext::TearDown();
@@ -3339,6 +3349,7 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest005, TestSize.Level1)
     std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
     std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
+    OHOS::Ace::SetReturnStatus("");
     g_overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_FALSE(selectInfo.menuInfo.showCut);
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
