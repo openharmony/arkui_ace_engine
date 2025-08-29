@@ -48,7 +48,6 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
         !gestureHub->GetTextDraggable()) {
         DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
     }
-
     AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
@@ -232,7 +231,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
         CHECK_NULL_VOID(dragDropManager);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         dragDropManager->SetIsAnyDraggableHit(gestureHub->IsAllowedDrag(eventHub));
     }

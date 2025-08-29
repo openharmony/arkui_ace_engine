@@ -21,7 +21,6 @@
 #include "pixel_map_napi.h"
 #endif
 
-
 #include "core/common/ace_engine.h"
 
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -541,8 +540,8 @@ static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info inf
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't get delegate of ace_engine. param: " SEC_PLD(%{public}d),
-            SEC_PARAM(uniqueId));
+            "Can't get delegate of ace_engine. param: %{public}d",
+            uniqueId);
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         napi_close_escapable_handle_scope(env, scope);
@@ -583,7 +582,7 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't get delegate of ace_engine. param: " SEC_PLD(%{public}d), SEC_PARAM(uniqueId));
+            "Can't get delegate of ace_engine. param: %{public}d", uniqueId);
         NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;

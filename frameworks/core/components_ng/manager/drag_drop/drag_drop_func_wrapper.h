@@ -108,7 +108,6 @@ public:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static void RecordMenuWrapperNodeForDrag(int32_t targetId);
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
-    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
     // modifier
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
@@ -136,6 +135,8 @@ public:
         DragSummaryInfo& dragSummaryInfo, int32_t& ret);
     static void EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey,
         DragSummaryInfo& dragSummaryInfo, int32_t& dataSize);
+
+    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode>& targetNode);
 
 private:
