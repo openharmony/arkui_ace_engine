@@ -4327,30 +4327,13 @@ void ClipShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
+    ViewAbstractModelStatic::SetClipShape(frameNode, convValue.value_or(nullptr));
 }
 void ClipShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    ClipShape0Impl(node, value);
 }
 void Mask0Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
@@ -4379,7 +4362,7 @@ void MaskShape0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
-    ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
+    ViewAbstractModelStatic::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)

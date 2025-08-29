@@ -1660,4 +1660,81 @@ int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const Re
     menuParam = menuProperties;
     return ERROR_CODE_NO_ERROR;
 }
+
+void ViewAbstractModelStatic::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            CHECK_NULL_VOID(frameNode);
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->GetClipEdge().has_value()) {
+                target->UpdateClipEdge(false);
+            }
+            target->UpdateClipShape(basicShapeValue);
+            target->OnClipShapeUpdate(basicShapeValue);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("clipShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+        }
+        if (basicShape) {
+            target->UpdateClipShape(basicShape);
+        } else {
+            target->ResetClipShape();
+        }
+    }
+}
+
+void ViewAbstractModelStatic::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShapeValue);
+            target->OnClipMaskUpdate(basicShapeValue);
+        };
+        pattern->AddResObj("maskShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
+        }
+        if (basicShape) {
+            target->UpdateClipMask(basicShape);
+        } else {
+            target->ResetClipMask();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
