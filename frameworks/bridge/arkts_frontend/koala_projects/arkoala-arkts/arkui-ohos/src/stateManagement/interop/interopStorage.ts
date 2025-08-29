@@ -67,10 +67,10 @@ export class InteropStorageBase extends StorageBase {
         throw new Error('not implement');
     };
     protected clearDynamicValue_: () => boolean = () => {
-        throw new Error('not implement');
+        return true;
     };
     protected checkClearDynamicValue_: () => boolean = () => {
-        throw new Error('not implement');
+        return true;
     };
     protected getStaticSize(): number {
         return super.size();
