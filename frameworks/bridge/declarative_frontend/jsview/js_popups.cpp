@@ -1099,7 +1099,14 @@ void JSViewPopups::ParseMenuShowInSubWindowParam(
         }
     }
     if (showInSubWindowValue->IsBoolean()) {
-        menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        bool showInSubBoolean = showInSubWindowValue->ToBoolean();
+#if defined(PREVIEW)
+        if (showInSubBoolean) {
+            LOGI("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+            showInSubBoolean = false;
+        }
+#endif
+        menuParam.isShowInSubWindow = showInSubBoolean;
     }
 }
 
