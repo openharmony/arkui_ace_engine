@@ -3185,6 +3185,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Ren
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @arkuievent
 
 frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/calendar_controller_peer.h @arkui_image
