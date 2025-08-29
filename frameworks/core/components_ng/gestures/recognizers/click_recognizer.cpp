@@ -774,4 +774,32 @@ void ClickRecognizer::AboutToAddToPendingRecognizers(const TouchEvent& event)
         eventManager->AddToMousePendingRecognizers(AceType::WeakClaim(this));
     }
 }
+
+void ClickRecognizer::SetDistanceThreshold(double distanceThreshold)
+{
+    distanceThreshold_ = Dimension(Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    if (distanceThreshold <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
+        distanceThreshold_ = appTheme->GetClickDistanceThreshold();
+    }
+}
+
+void ClickRecognizer::SetDistanceThreshold(Dimension distanceThreshold)
+{
+    distanceThreshold_ = distanceThreshold;
+    if (distanceThreshold_.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
+        distanceThreshold_ = appTheme->GetClickDistanceThreshold();
+    }
+}
 } // namespace OHOS::Ace::NG
