@@ -251,6 +251,18 @@ TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetXReverse(int32_t xReverse)
+{
+    this->xReverse = xReverse;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetYReverse(int32_t yReverse)
+{
+    this->yReverse = yReverse;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);

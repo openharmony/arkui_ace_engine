@@ -300,6 +300,13 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
     return reply["result"] == "\"true\"" ? true : false;
 }
 
+bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 1, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
+}
+
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
 {
     if (!triggerExecuted) {

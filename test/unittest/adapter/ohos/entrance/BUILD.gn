@@ -44,6 +44,7 @@ ohos_source_set("ace_layout_inspector_mock") {
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",

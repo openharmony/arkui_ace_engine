@@ -19,6 +19,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -43,6 +44,7 @@ void PanRecognizer::ForceCleanRecognizer()
     touchPointsDistance_.clear();
     localMatrix_.clear();
     isStartTriggered_ = false;
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
@@ -146,6 +148,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
 void PanRecognizer::OnAccepted()
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     int64_t acceptTime = GetSysTimestamp();
     int64_t inputTime = acceptTime;
     if (firstInputTime_.has_value()) {
@@ -182,6 +185,7 @@ void PanRecognizer::OnAccepted()
         isStartTriggered_ = false;
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
     }
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 void PanRecognizer::OnRejected()
@@ -242,6 +246,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
     extraInfo_ = "";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
                                                                   : static_cast<int32_t>(MouseAction::PRESS);
@@ -345,6 +350,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
@@ -382,6 +388,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
+            ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
             AddOverTimeTrace();
             lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
@@ -606,6 +613,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
@@ -773,6 +781,7 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 void PanRecognizer::OnSucceedCancel()
@@ -812,7 +821,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
     info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
-    info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
+    info.SetMainDelta((ResSchedTouchOptimizer::GetInstance().HandleMainDelta(mainDelta_,
+        static_cast<double>(touchPoints_.size()), touchPoints_)));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());
