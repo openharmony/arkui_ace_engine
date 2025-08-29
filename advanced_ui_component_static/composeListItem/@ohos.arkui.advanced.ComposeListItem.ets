@@ -20,7 +20,7 @@ import {
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, ToggleType, HoverEffect, TextOverflow,
   ImageFit, SymbolEffectStrategy, px2vp, $r, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent, MeasureResult,
-  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,
+  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,ClassCastError
 } from '@ohos.arkui.component'
 import { State, PropRef, Watch, Link } from '@ohos.arkui.stateManagement'
 import { Theme } from '@ohos.arkui.theme';
@@ -221,8 +221,8 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
       this.ComposeListItem.fontSizeScale = Math.min(
         this.ComposeListItem.maxFontScale, config.fontSizeScale ?? 1);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError).code;
+      let message = (paramError as ClassCastError).message;
       hilog.error(0x3900, 'Ace',
         `ComposeListItem environmentCallback error: ${code}, ${message}`);
     }
@@ -624,6 +624,9 @@ export struct OperateItemStruct {
         }
       }
     })
+    .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -678,6 +681,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
+    .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
   }
 
@@ -786,6 +792,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -827,6 +836,9 @@ export struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -866,6 +878,9 @@ export struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -884,6 +899,9 @@ export struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.toggle?.accessibilityLevel, this.toggle?.onChange))
+        .accessibilityText(getAccessibilityText(this.toggle?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.toggle?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) } as LocalizedMargin)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -1045,6 +1063,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   getFlexOptions(): FlexOptions {
@@ -1107,11 +1128,12 @@ function getAccessibilityText(resource: ResourceStr): string {
     if (typeof resource === 'string') {
       resourceString = resource as string;
     } else {
+      resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id);
     }
     return resourceString;
   } catch (error) {
-    let code: number = (error as BusinessError).code;
-    let message: string = (error as BusinessError).message;
+    let code: number = (error as ClassCastError).code;
+    let message: string = (error as ClassCastError).message;
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
@@ -1183,6 +1205,7 @@ export struct ComposeListItem {
   private operateItemStructRef: OperateItemStructController = new OperateItemStructController();
   envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   applicationContext: ApplicationContext = new ApplicationContext()
+  @State NORMAL_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_normal_color');
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1214,8 +1237,9 @@ export struct ComposeListItem {
       } else {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
-        this.itemHeight = (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ?
-        ItemHeight.SECOND_HEIGHT as number: systemIconLineHeight as number;
+        this.itemHeight =
+          (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT as number :
+            systemIconLineHeight as number;
       }
     } else if (this.contentItem?.description === undefined) {
       let iconStyle: IconType = (this.contentItem?.iconStyle as IconType);
@@ -1239,6 +1263,20 @@ export struct ComposeListItem {
         this.itemHeight = iconSize + SAFE_LIST_PADDING;
       }
     }
+    if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
+    } else {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
+    }
   }
 
   aboutToAppear() {
@@ -1257,12 +1295,12 @@ export struct ComposeListItem {
         }
       }
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError).code;
+      let message = (paramError as ClassCastError).message;
       hilog.error(0x3900, 'Ace',
         `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
     }
-    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
   }
@@ -1478,6 +1516,7 @@ export struct ComposeListItem {
           })
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })
@@ -1501,7 +1540,7 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-          this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+          this.frontColor = isHover ? FOCUSED_BG_COLOR : this.NORMAL_BG_COLOR;
           if (isHover) {
             this.zoomIn()
           } else {
@@ -1532,6 +1571,8 @@ export struct ComposeListItem {
       .padding(this.containerPadding)
     }
     .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(this.accessibilityTextBuilder)
     .onFocus(() => {
       this.isFocus = true;
       this.frontColor = FOCUSED_BG_COLOR;
@@ -1539,7 +1580,7 @@ export struct ComposeListItem {
     })
     .onBlur(() => {
       this.isFocus = false;
-      this.frontColor = NORMAL_BG_COLOR;
+      this.frontColor = this.NORMAL_BG_COLOR;
       this.zoomOut();
     })
     .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
