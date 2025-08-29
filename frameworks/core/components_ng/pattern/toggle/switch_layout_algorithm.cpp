@@ -71,14 +71,9 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
         LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     }
-    float width = 0.0f;
-    float height = 0.0f;
-    CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
 
-    width_ = width;
-    height_ = height;
-
-    return SizeF(width, height);
+    CalcHeightAndWidth(frameNode, height_, width_, frameHeight, frameWidth);
+    return SizeF(width_, height_);
 }
 
 void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

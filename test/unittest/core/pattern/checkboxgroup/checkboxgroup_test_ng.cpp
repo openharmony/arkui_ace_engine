@@ -2478,7 +2478,6 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest003, TestSize.Level
      */
     LayoutConstraintF contentConstraint;
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_50);
-    // contentConstraint.selfIdealSize.SetSize(TEST_SIZE_100_200);
     auto layoutProperty = layoutWrapper.GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     LayoutPolicyProperty layoutPolicyProperty;

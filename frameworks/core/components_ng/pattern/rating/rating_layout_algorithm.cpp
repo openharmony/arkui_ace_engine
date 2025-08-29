@@ -150,7 +150,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsMatchParent(const Layo
 }
 
 std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
-    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth ,float defaultHeight)
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth, float defaultHeight)
 {
     CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
     float width = 0.0f;
@@ -177,12 +177,12 @@ std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const La
 }
 
 std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
-    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth ,float defaultHeight)
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth, float defaultHeight)
 {
     CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
     float width = 0.0f;
     float height = 0.0f;
-    if ( stars <= 0) {
+    if (stars <= 0) {
         return SizeF(width, height);
     }
     auto parentHeight = contentConstraint.parentIdealSize.Height().value_or(0.0f);
