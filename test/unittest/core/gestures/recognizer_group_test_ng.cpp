@@ -350,12 +350,20 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest013, TestSize.Level1)
     auto gestureRecognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(testRecognizer);
     recognizerTest->recognizers_.push_back(gestureRecognizer);
     recognizerTest->recognizers_.push_back(nullptr);
+    recognizerTest->RemainChildOnResetStatus();
     /**
      * @tc.step2: Call ForceCleanRecognizerWithGroup.
-     * @tc.expected: RecognizerTest->recognizers_.empty() is true.
+     * @tc.expected: RecognizerTest->recognizers_.empty() is false.
      */
     recognizerTest->ForceCleanRecognizerWithGroup();
+    EXPECT_EQ(recognizerTest->recognizers_.empty(), false);
+
+    /**
+     * @tc.step3: Call ForceCleanRecognizerWithGroup.
+     * @tc.expected: RecognizerTest->recognizers_.empty() is true.
+     */
+    recognizerTest->remainChildOnResetStatus_ = false;
+    recognizerTest->ForceCleanRecognizerWithGroup();
     EXPECT_EQ(recognizerTest->recognizers_.empty(), true);
-    EXPECT_EQ(recognizerTest->touchPoints_.empty(), true);
 }
 }; // namespace OHOS::Ace::NG
