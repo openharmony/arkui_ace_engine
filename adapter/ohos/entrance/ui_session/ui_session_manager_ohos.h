@@ -75,7 +75,6 @@ public:
     void GetPixelMap() override;
     void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) override;
     void GetVisibleInspectorTree() override;
-    bool IsHasReportObject() override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
     void RegisterPipeLineExeAppAIFunction(
