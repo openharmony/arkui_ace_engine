@@ -51,7 +51,7 @@ public:
                         std::shared_ptr<RSImageFilter>>& resultHash);
     Rect ResolvePrimitiveSubRegion();
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
-    void SetFilterContext(SvgFilterContext filterContext) {filterContext_ = filterContext; }
+    void SetFilterContext(const SvgFilterContext &filterContext) {filterContext_ = filterContext; }
     SvgFilterContext GetFilterContext() const {return filterContext_;}
 protected:
     virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const SvgColorInterpolationType& srcColor,

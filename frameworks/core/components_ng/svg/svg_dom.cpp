@@ -44,7 +44,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 #include "frameworks/core/components_ng/svg/svg_fit_convertor.h"
-#include "frameworks/core/components_ng/svg/svg_ulils.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
@@ -55,48 +55,52 @@ const char DOM_SVG_CLASS[] = "class";
 constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 } // namespace
 
-static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
-    { "animate", []() -> RefPtr<SvgNode> { return SvgAnimation::Create(); } },
-    { "animateMotion", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateMotion(); } },
-    { "animateTransform", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateTransform(); } },
-    { "circle", []() -> RefPtr<SvgNode> { return SvgCircle::Create(); } },
-    { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
-    { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
-    { "ellipse", []() -> RefPtr<SvgNode> { return SvgEllipse::Create(); } },
-    { "feBlend", []() -> RefPtr<SvgNode> { return SvgFeBlend::Create(); } },
-    { "feColorMatrix", []() -> RefPtr<SvgNode> { return SvgFeColorMatrix::Create(); } },
-    { "feComposite", []() -> RefPtr<SvgNode> { return SvgFeComposite::Create(); } },
-    { "feFlood", []() -> RefPtr<SvgNode> { return SvgFeFlood::Create(); } },
-    { "feGaussianBlur", []() -> RefPtr<SvgNode> { return SvgFeGaussianBlur::Create(); } },
-    { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
-    { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },
-    { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
-    { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
-    { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
-    { "linearGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-             return SvgGradient::CreateLinearGradient();
+static const LinearMapNode<RefPtr<SvgNode> (*)(bool)> TAG_FACTORIES[] = {
+    { "animate", [](bool featrueEnable) -> RefPtr<SvgNode> { return SvgAnimation::Create(); } },
+    { "animateMotion", [](bool featrueEnable)-> RefPtr<SvgNode> {
+        return SvgAnimation::CreateAnimateMotion();
+        } },
+    { "animateTransform", [](bool featrueEnable)-> RefPtr<SvgNode> {
+        return SvgAnimation::CreateAnimateTransform();
+        } },
+    { "circle", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgCircle::Create(); } },
+    { "clipPath", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
+    { "defs", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgDefs::Create(); } },
+    { "ellipse", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgEllipse::Create(); } },
+    { "feBlend", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeBlend::Create(); } },
+    { "feColorMatrix", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeColorMatrix::Create(); } },
+    { "feComposite", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeComposite::Create(); } },
+    { "feFlood", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeFlood::Create(); } },
+    { "feGaussianBlur", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeGaussianBlur::Create(); } },
+    { "feOffset", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
+    { "filter", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgFilter::Create(); } },
+    { "g", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgG::Create(); } },
+    { "image", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgImage::Create(); } },
+    { "line", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgLine::Create(); } },
+    { "linearGradient", [](bool featrueEnable)-> RefPtr<SvgNode> {
+        if (!featrueEnable) {
+            return SvgGradient::CreateLinearGradient();
         } else {
             return SvgLinearGradient::Create();
         }
         } },
-    { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
-    { "path", []() -> RefPtr<SvgNode> { return SvgPath::Create(); } },
-    { "pattern", []() -> RefPtr<SvgNode> { return SvgPattern::Create(); } },
-    { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
-    { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
-    { "radialGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    { "mask", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgMask::Create(); } },
+    { "path", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgPath::Create(); } },
+    { "pattern", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgPattern::Create(); } },
+    { "polygon", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
+    { "polyline", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
+    { "radialGradient", [](bool featrueEnable)-> RefPtr<SvgNode> {
+        if (!featrueEnable) {
             return SvgGradient::CreateRadialGradient();
         } else {
             return SvgRadialGradient::Create();
         }
         } },
-    { "rect", []() -> RefPtr<SvgNode> { return SvgRect::Create(); } },
-    { "stop", []() -> RefPtr<SvgNode> { return SvgStop::Create(); } },
-    { "style", []() -> RefPtr<SvgNode> { return SvgStyle::Create(); } },
-    { "svg", []() -> RefPtr<SvgNode> { return SvgSvg::Create(); } },
-    { "use", []() -> RefPtr<SvgNode> { return SvgUse::Create(); } },
+    { "rect", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgRect::Create(); } },
+    { "stop", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgStop::Create(); } },
+    { "style", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgStyle::Create(); } },
+    { "svg", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgSvg::Create(); } },
+    { "use", [](bool featrueEnable)-> RefPtr<SvgNode> { return SvgUse::Create(); } },
 };
 
 SvgDom::SvgDom()
@@ -119,6 +123,10 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& 
     RefPtr<SvgDom> svgDom = AceType::MakeRefPtr<SvgDom>();
     svgDom->fillColor_ = src.GetFillColor();
     svgDom->path_ = src.GetSrc();
+    auto supportSvg2 = src.IsSupportSvg2();
+    if (supportSvg2) {
+        svgDom->svgContext_->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    }
     bool ret = svgDom->ParseSvg(svgStream);
     if (ret) {
         return svgDom;
@@ -182,7 +190,9 @@ RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
     if (elementIter == -1) {
         return nullptr;
     }
-    RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
+    auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion());
+    RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value(featureEnable);
+
     CHECK_NULL_RETURN(node, nullptr);
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         isStatic_.store(false);
@@ -220,7 +230,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
         std::string newValue;
         std::stringstream stream;
         auto fillColor = fillColor_.value();
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion())) {
             stream << std::hex << fillColor.GetValue();
             newValue = stream.str();
         } else {
@@ -356,7 +366,7 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion())) {
         root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     } else {
         Size viewPort = svgContext_->GetRootViewBox().GetSize();
@@ -423,10 +433,11 @@ void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
     colorFilter_ = colorFilter;
 }
 
-std::string SvgDom::IntToHexString(const int number)
+std::string SvgDom::IntToHexString(const uint8_t number)
 {
     std::stringstream stringStream;
     stringStream << std::setw(ONE_BYTE_TO_HEX_LEN) << std::setfill('0') << std::hex << number;
     return stringStream.str();
 }
+
 } // namespace OHOS::Ace::NG

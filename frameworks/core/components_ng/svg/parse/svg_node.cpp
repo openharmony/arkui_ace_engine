@@ -30,6 +30,7 @@
 #include "core/components_ng/svg/parse/svg_gradient.h"
 #include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -136,9 +137,9 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
     if (ParseAndSetSpecializedAttr(name, value)) {
         return;
     }
-    static const LinearMapNode<void (*)(const std::string&, SvgBaseAttribute&)> SVG_BASE_ATTRS[] = {
+    static const LinearMapNode<void (*)(const std::string&, SvgBaseAttribute&, uint32_t)> SVG_BASE_ATTRS[] = {
         { DOM_SVG_SRC_CLIP_PATH,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.find("url(") == 0) {
                     auto src = std::regex_replace(value,
@@ -147,12 +148,12 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 }
             } },
         { DOM_SVG_SRC_CLIP_RULE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.clipState.SetClipRule(val == "evenodd" ? SvgRuleType::SVG_RULE_EVENODD :
                     SvgRuleType::SVG_RULE_NONEZERO);
             } },
         { DOM_CLIP_PATH,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.find("url(") == 0) {
                     auto src = std::regex_replace(value,
@@ -161,24 +162,25 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 }
             } },
         { SVG_CLIP_PATH_UNITS,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.clipState.SetClipPathUnits((val == "objectBoundingBox") ?
                     SvgLengthScaleUnit::OBJECT_BOUNDING_BOX : SvgLengthScaleUnit::USER_SPACE_ON_USE);
             } },
         { SVG_CLIP_RULE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.clipState.SetClipRule(val == "evenodd" ? SvgRuleType::SVG_RULE_EVENODD :
                     SvgRuleType::SVG_RULE_NONEZERO);
             } },
         { SVG_FILL,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
                     SetCompatibleFill(value, attrs);
                     return;
                 }
                 Color color;
-                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion);
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color, featureEnable)) {
                     attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
                     attrs.fillState.SetIsFillNone(val == VALUE_NONE);
                     return;
@@ -190,61 +192,62 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 }
             } },
         { DOM_SVG_SRC_FILL_OPACITY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.fillState.SetOpacity(std::clamp(StringUtils::StringToDouble(val), 0.0, 1.0));
             } },
         { DOM_SVG_SRC_FILL_RULE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.fillState.SetFillRule(val);
             } },
         { SVG_FILL_OPACITY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.fillState.SetOpacity(std::clamp(StringUtils::StringToDouble(val), 0.0, 1.0));
             } },
         { SVG_FILL_RULE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.fillState.SetFillRule(val);
             } },
         { SVG_FILTER,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.filterId = val;
             } },
         { SVG_FONT_SIZE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 Dimension fontSize = StringUtils::StringToDimension(val);
                 if (GreatOrEqual(fontSize.Value(), 0.0)) {
                     attrs.textStyle.SetFontSize(fontSize);
                 }
             } },
         { SVG_HREF,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.substr(0, 1) == "#") {
                     attrs.href = value.substr(1);
                 }
             } },
         { SVG_MASK,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.maskId = val;
             } },
         { SVG_OPACITY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.hasOpacity = true;
                 attrs.opacity = std::clamp(StringUtils::StringToDouble(val), 0.0, 1.0);
             } },
         { SVG_PATTERN_TRANSFORM,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.transform = val;
             } },
         { SVG_STROKE,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
                     SetCompatibleStroke(value, attrs);
                     return;
                 }
                 Color color;
-                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion);
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color, featureEnable)) {
                     attrs.strokeState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
                     return;
                 }
@@ -255,7 +258,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 }
             } },
         { DOM_SVG_SRC_STROKE_DASHARRAY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 if (val.empty()) {
                     return;
                 }
@@ -265,37 +268,37 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 attrs.strokeState.SetLineDash(lineDashVector);
             } },
         { DOM_SVG_SRC_STROKE_DASHOFFSET,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineDashOffset(StringUtils::StringToDouble(val));
             } },
         { DOM_SVG_SRC_STROKE_LINECAP,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineCap(SvgAttributesParser::GetLineCapStyle(val));
             } },
         { DOM_SVG_SRC_STROKE_LINEJOIN,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineJoin(SvgAttributesParser::GetLineJoinStyle(val));
             } },
         { DOM_SVG_SRC_STROKE_MITERLIMIT,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 double miterLimit = StringUtils::StringToDouble(val);
                 if (GreatOrEqual(miterLimit, 1.0)) {
                     attrs.strokeState.SetMiterLimit(miterLimit);
                 }
             } },
         { DOM_SVG_SRC_STROKE_OPACITY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetOpacity(std::clamp(StringUtils::StringToDouble(val), 0.0, 1.0));
             } },
         { DOM_SVG_SRC_STROKE_WIDTH,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 Dimension lineWidth = StringUtils::StringToDimension(val);
                 if (GreatOrEqual(lineWidth.Value(), 0.0)) {
                     attrs.strokeState.SetLineWidth(lineWidth);
                 }
             } },
         { SVG_STROKE_DASHARRAY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 if (val.empty()) {
                     return;
                 }
@@ -304,37 +307,37 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 attrs.strokeState.SetLineDash(lineDashVector);
             } },
         { SVG_STROKE_DASHOFFSET,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineDashOffset(StringUtils::StringToDouble(val));
             } },
         { SVG_STROKE_LINECAP,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineCap(SvgAttributesParser::GetLineCapStyle(val));
             } },
         { SVG_STROKE_LINEJOIN,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetLineJoin(SvgAttributesParser::GetLineJoinStyle(val));
             } },
         { SVG_STROKE_MITERLIMIT,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 double miterLimit = StringUtils::StringToDouble(val);
                 if (GreatOrEqual(miterLimit, 1.0)) {
                     attrs.strokeState.SetMiterLimit(miterLimit);
                 }
             } },
         { SVG_STROKE_OPACITY,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.strokeState.SetOpacity(std::clamp(StringUtils::StringToDouble(val), 0.0, 1.0));
             } },
         { SVG_STROKE_WIDTH,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 Dimension lineWidth = StringUtils::StringToDimension(val);
                 if (GreatOrEqual(lineWidth.Value(), 0.0)) {
                     attrs.strokeState.SetLineWidth(lineWidth);
                 }
             } },
         { SVG_TRANSFORM,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.transform = val;
                 attrs.transformVec = SvgAttributesParser::GetTransformInfo(val);
                 if (attrs.transformVec.empty()) {
@@ -342,11 +345,11 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                 }
             } },
         { DOM_SVG_SRC_TRANSFORM_ORIGIN,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 attrs.transformOrigin = SvgAttributesParser::GetTransformOrigin(val);
             } },
         { SVG_XLINK_HREF,
-            [](const std::string& val, SvgBaseAttribute& attrs) {
+            [](const std::string& val, SvgBaseAttribute& attrs, uint32_t usrConfigVersion) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.substr(0, 1) == "#") {
                     attrs.href = value.substr(1);
@@ -355,7 +358,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
     };
     auto attrIter = BinarySearchFindIndex(SVG_BASE_ATTRS, ArraySize(SVG_BASE_ATTRS), name.c_str());
     if (attrIter != -1) {
-        SVG_BASE_ATTRS[attrIter].value(value, attributes_);
+        SVG_BASE_ATTRS[attrIter].value(value, attributes_, GetUsrConfigVersion());
     }
 }
 
@@ -768,7 +771,12 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPor
                 return value.Value() * height;
             }
             if (type == SvgLengthType::OTHER) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                uint32_t usrConfigVersion = SVG_FEATURE_SUPPORT_UNDEFINE;
+                auto svgContext = svgContext_.Upgrade();
+                if (svgContext) {
+                    usrConfigVersion = svgContext->GetUsrConfigVersion();
+                }
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion)) {
                     return value.Value() * sqrt(width * height);
                 }
                 return value.Value() * std::sqrt(width * width + height * height) / std::sqrt(2.0f);
@@ -1040,5 +1048,15 @@ void SvgNode::ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& le
     Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule);
     auto matrix = NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot, lengthRule);
     path.Transform(RosenSvgPainter::ToDrawingMatrix(matrix));
+}
+
+uint32_t SvgNode::GetUsrConfigVersion()
+{
+    uint32_t usrConfigVersion = SVG_FEATURE_SUPPORT_UNDEFINE;
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext) {
+        usrConfigVersion = svgContext->GetUsrConfigVersion();
+    }
+    return usrConfigVersion;
 }
 } // namespace OHOS::Ace::NG

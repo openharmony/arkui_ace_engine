@@ -18,6 +18,7 @@
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -132,19 +133,19 @@ double SvgMask::ParseUnitsAttr(const Dimension& attr, double value)
 
 bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
-    static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
+    static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&, bool)> attrs[] = {
         { SVG_HEIGHT,
-            [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.height);
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.height, featureEnable);
             } },
         { SVG_MASK_CONTENT_UNITS,
-            [](const std::string& val, SvgMaskAttribute& attr) {
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
                 attr.maskContentUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
                     SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_MASK_UNITS,
-            [](const std::string& val, SvgMaskAttribute& attr) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
+                if (!featureEnable) {
                     attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
                         SvgLengthScaleUnit::USER_SPACE_ON_USE;
                     return;
@@ -153,23 +154,24 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
                     SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },
         { SVG_WIDTH,
-            [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.width);
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.width, featureEnable);
             } },
         { SVG_X,
-            [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.x);
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.x, featureEnable);
             } },
         { SVG_Y,
-            [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.y);
+            [](const std::string& val, SvgMaskAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.y, featureEnable);
             } },
     };
     std::string key = name;
     StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
-        attrs[attrIter].value(value, maskAttr_);
+        auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion());
+        attrs[attrIter].value(value, maskAttr_, featureEnable);
         return true;
     }
     return false;

@@ -76,6 +76,7 @@
 #include "core/components_ng/svg/parse/svg_radial_gradient.h"
 #include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -314,12 +315,12 @@ HWTEST_F(ParseTestThreeNg, ConvertDimensionToPxTest001, TestSize.Level1)
 {
     auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
     auto dimension = Dimension(0.1, DimensionUnit::PERCENT);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgNode->SetContext(svgContext);
     Size viewPort(1, 1);
     SvgLengthType svgLengthType = SvgLengthType::OTHER;
     EXPECT_FLOAT_EQ(svgNode->ConvertDimensionToPx(dimension, viewPort, svgLengthType), 0.1);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -333,14 +334,14 @@ HWTEST_F(ParseTestThreeNg, SvgImageCalcDstRectTest001, TestSize.Level1)
     EXPECT_NE(svgImage, nullptr);
     Size imageSize(1.0, 1.0);
     Rect containerRect (0, 0, 1.0, 1.0);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgImage->SetContext(svgContext);
     auto dstRect = svgImage->CalcDstRect(imageSize, containerRect);
     EXPECT_FLOAT_EQ(dstRect.GetLeft(), 0.0);
     EXPECT_FLOAT_EQ(dstRect.GetRight(), 1.0);
     EXPECT_FLOAT_EQ(dstRect.GetTop(), 0.0);
     EXPECT_FLOAT_EQ(dstRect.GetBottom(), 1.0);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -352,9 +353,8 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(PATTERN_SVG_LABEL.c_str(), PATTERN_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -372,7 +372,6 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Save());
     EXPECT_CALL(rSCanvas, Restore());
     svgPattern->OnPatternEffect(rSCanvas, rSBrush, context);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -384,9 +383,8 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest002, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(PATTERN_SVG_LABEL.c_str(), PATTERN_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -405,7 +403,6 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest002, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Restore());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -415,8 +412,6 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest002, TestSize.Level1)
  */
 HWTEST_F(ParseTestThreeNg, ComputeScaleTest001, TestSize.Level1)
 {
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     SvgPreserveAspectRatio preserveAspectRatio;
     Size viewBox = {0.0, 0.0};
     Size viewPort = {1.0, 1.0};
@@ -425,7 +420,6 @@ HWTEST_F(ParseTestThreeNg, ComputeScaleTest001, TestSize.Level1)
     SvgAttributesParser::ComputeScale(viewBox, viewPort, preserveAspectRatio, scaleX, scaleY);
     EXPECT_FLOAT_EQ(scaleX, 1.0);
     EXPECT_FLOAT_EQ(scaleY, 1.0);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -435,40 +429,38 @@ HWTEST_F(ParseTestThreeNg, ComputeScaleTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestThreeNg, ParseDimensionTest001, TestSize.Level1)
 {
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    bool featureEnable = false;
     std::string val = "10";
     Dimension y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 10);
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
-    SvgAttributesParser::ParseDimension(val, y);
+    featureEnable = true;
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 10);
     y = Dimension(-0.1, DimensionUnit::PERCENT);
     val = "auto";
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), -0.1);
     val = " ";
     y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), -0.1);
     val = "20%";
     y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 0.2);
     val = "10px";
     y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 10);
     val = "10vp";
     y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 10);
     val = "10lpx";
     y = Dimension(-0.1, DimensionUnit::PERCENT);
-    SvgAttributesParser::ParseDimension(val, y);
+    SvgAttributesParser::ParseDimension(val, y, featureEnable);
     EXPECT_FLOAT_EQ(y.Value(), 10);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -517,9 +509,8 @@ HWTEST_F(ParseTestThreeNg, ClipPathEvenoddTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(CLIPPATH_EVENODD_SVG_LABEL.c_str(), CLIPPATH_EVENODD_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -540,7 +531,6 @@ HWTEST_F(ParseTestThreeNg, ClipPathEvenoddTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Restore());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -553,9 +543,8 @@ HWTEST_F(ParseTestThreeNg, ClipPathDefaultTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(CLIPPATH_DEFAULT_SVG_LABEL.c_str(), CLIPPATH_DEFAULT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -576,7 +565,6 @@ HWTEST_F(ParseTestThreeNg, ClipPathDefaultTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Restore());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -589,10 +577,9 @@ HWTEST_F(ParseTestThreeNg, MaskTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(MASK_SVG_LABEL.c_str(), MASK_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
     src.SetFillColor(Color::GREEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -612,7 +599,6 @@ HWTEST_F(ParseTestThreeNg, MaskTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(3);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -625,9 +611,8 @@ HWTEST_F(ParseTestThreeNg, MaskTest002, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(MASK_SVG_LABEL.c_str(), MASK_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -647,7 +632,6 @@ HWTEST_F(ParseTestThreeNg, MaskTest002, TestSize.Level1)
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(3);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -660,9 +644,8 @@ HWTEST_F(ParseTestThreeNg, FilterTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(FILTER_SVG_LABEL.c_str(), FILTER_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -682,7 +665,6 @@ HWTEST_F(ParseTestThreeNg, FilterTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(1);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -695,9 +677,8 @@ HWTEST_F(ParseTestThreeNg, SvgRadialGradientTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(RADIAL_GRADIENT_SVG_LABEL.c_str(), RADIAL_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -716,7 +697,6 @@ HWTEST_F(ParseTestThreeNg, SvgRadialGradientTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Restore());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 
@@ -729,10 +709,9 @@ HWTEST_F(ParseTestThreeNg, SvgLinearGradientTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(LINEAR_GRADIENT_SVG_LABEL.c_str(), LINEAR_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
     src.SetFillColor(Color::GREEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     svgDom->SetAnimationOnFinishCallback([](){});
     svgDom->SetColorFilter(std::nullopt);
@@ -745,7 +724,6 @@ HWTEST_F(ParseTestThreeNg, SvgLinearGradientTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, Restore());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -758,10 +736,9 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(RECT_SVG_LABEL.c_str(), RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
     src.SetFillColor(Color::GREEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -781,7 +758,6 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest001, TestSize.Level1)
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::RADIAL_GRADIENT);
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::PATTERN);
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::NONE);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -794,9 +770,8 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest002, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(RADIAL_GRADIENT_SVG_LABEL.c_str(), RADIAL_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -816,7 +791,6 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest002, TestSize.Level1)
     gradient.AddColor(gradientColor);
     svgRect->attributes_.fillState.SetGradient(gradient);
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::RADIAL_GRADIENT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -829,9 +803,8 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest003, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(LINEAR_GRADIENT_SVG_LABEL.c_str(), LINEAR_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -851,7 +824,6 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest003, TestSize.Level1)
     gradient.AddColor(gradientColor);
     svgRect->attributes_.fillState.SetGradient(gradient);
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::LINEAR_GRADIENT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -864,9 +836,8 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest004, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(PATTERN_SVG_LABEL.c_str(), PATTERN_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -888,7 +859,6 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest004, TestSize.Level1)
     gradient.AddColor(gradientColor);
     svgRect->attributes_.fillState.SetGradient(gradient);
     svgRect->InitBrush(rSCanvas, rSBrush, context, PaintType::PATTERN);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -901,9 +871,8 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_RECT_SVG_LABEL.c_str(), STROKE_RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -922,7 +891,6 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest001, TestSize.Level1)
     svgRect->InitPenFill(rSPen, context, PaintType::RADIAL_GRADIENT);
     svgRect->InitPenFill(rSPen, context, PaintType::PATTERN);
     svgRect->InitPenFill(rSPen, context, PaintType::NONE);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -935,9 +903,8 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest002, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_RADIAL_GRADIENT_SVG_LABEL.c_str(), STROKE_RADIAL_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -956,7 +923,6 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest002, TestSize.Level1)
     gradient.AddColor(gradientColor);
     svgRect->attributes_.fillState.SetGradient(gradient);
     svgRect->InitPenFill(rSPen, context, PaintType::RADIAL_GRADIENT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -969,9 +935,8 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest003, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_LINEAR_GRADIENT_SVG_LABEL.c_str(), STROKE_LINEAR_GRADIENT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -990,7 +955,6 @@ HWTEST_F(ParseTestThreeNg, InitPenFillTest003, TestSize.Level1)
     gradient.AddColor(gradientColor);
     svgRect->attributes_.fillState.SetGradient(gradient);
     svgRect->InitPenFill(rSPen, context, PaintType::LINEAR_GRADIENT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1003,9 +967,8 @@ HWTEST_F(ParseTestThreeNg, GetLocalMatrixTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_RECT_SVG_LABEL.c_str(), STROKE_RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -1016,7 +979,6 @@ HWTEST_F(ParseTestThreeNg, GetLocalMatrixTest001, TestSize.Level1)
     SvgCoordinateSystemContext context(containerRect, viewPort);
     auto rsMatrix = svgRect->GetLocalMatrix(SvgLengthScaleUnit::OBJECT_BOUNDING_BOX, context);
     rsMatrix = svgRect->GetLocalMatrix(SvgLengthScaleUnit::USER_SPACE_ON_USE, context);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1029,9 +991,8 @@ HWTEST_F(ParseTestThreeNg, GetFillTypeTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(RECT_SVG_LABEL.c_str(), RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -1059,7 +1020,6 @@ HWTEST_F(ParseTestThreeNg, GetFillTypeTest001, TestSize.Level1)
     svgRect->attributes_.fillState.SetIsFillNone(true);
     fillType = svgRect->GetFillType();
     EXPECT_EQ(fillType, PaintType::NONE);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1072,9 +1032,8 @@ HWTEST_F(ParseTestThreeNg, GetStrokeTypeTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_RECT_SVG_LABEL.c_str(), STROKE_RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -1099,7 +1058,6 @@ HWTEST_F(ParseTestThreeNg, GetStrokeTypeTest001, TestSize.Level1)
     svgRect->attributes_.strokeState.SetHref("test");
     strokeType = svgRect->GetStrokeType();
     EXPECT_EQ(strokeType, PaintType::NONE);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1112,9 +1070,8 @@ HWTEST_F(ParseTestThreeNg, SetPenStyleTest001, TestSize.Level1)
     auto svgStream =
         SkMemoryStream::MakeCopy(STROKE_RECT_SVG_LABEL.c_str(), STROKE_RECT_SVG_LABEL.length());
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     Size size = { 100, 100 };
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
@@ -1136,6 +1093,5 @@ HWTEST_F(ParseTestThreeNg, SetPenStyleTest001, TestSize.Level1)
         std::vector<double> segments = {4.0, 2.0, 6.0};
     svgRect->attributes_.strokeState.SetLineDash(segments);
     svgRect->SetPenStyle(rSPen);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

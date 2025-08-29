@@ -21,9 +21,10 @@
 
 namespace OHOS::Ace::NG {
 class SvgColorFilterEffect {
+private:
+    SvgColorFilterEffect() = delete;
+    ~SvgColorFilterEffect() = default;
 public:
-    SvgColorFilterEffect();
-    ~SvgColorFilterEffect();
     static std::shared_ptr<RSRecordingColorFilter> GetRsColorFilter(const ImageColorFilter& imageColorFilter);
 };
 } // namespace OHOS::Ace::NG

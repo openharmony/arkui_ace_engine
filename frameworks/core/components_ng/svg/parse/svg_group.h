@@ -40,6 +40,7 @@ protected:
         inheritStyle_ = true;
         drawTraversed_ = true;
     }
+    std::optional<RSRecordingPath> path_;
 };
 
 } // namespace OHOS::Ace::NG

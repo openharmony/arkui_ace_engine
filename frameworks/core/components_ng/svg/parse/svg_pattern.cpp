@@ -32,6 +32,9 @@ RefPtr<SvgNode> SvgPattern::Create()
 
 void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+    if (!patternAttr_.width.IsValid() || !patternAttr_.height.IsValid()) {
+        return;
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
         auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
