@@ -34,8 +34,8 @@
 
 #include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components/select/select_theme.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
