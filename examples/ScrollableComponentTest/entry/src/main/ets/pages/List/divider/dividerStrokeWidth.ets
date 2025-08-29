@@ -113,7 +113,7 @@ struct ListItemGroupExample {
     }.width('100%').height('100%').backgroundColor(0xDCDCDC).padding({ top: 5 })
   }
 
-  getValidStrokeWidth(value: any): number {
+  getValidStrokeWidth(value: number | Resource | undefined | null): number {
     if (typeof value === 'number') {
       return value;
     } else {

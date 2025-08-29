@@ -14,320 +14,320 @@
     },
     {
       "name": "width",
-      "value": "300"
-    },
-    {
-      "name": "height",
       "value": "200"
     },
     {
+      "name": "height",
+      "value": "100"
+    },
+    {
       "name": "title",
-      "value": "title"
+      "value": "标题"
     },
     {
       "name": "subtitle",
-      "value": "subtitle"
-    },
-    {
-      "name": "message",
-      "value": "message"
+      "value": "小标题"
     },
     {
       "name": "value",
-      "value": "button"
+      "value": "按钮"
     },
     {
       "name": "apples",
-      "value": "apples"
+      "value": "APPLES"
     },
     {
       "name": "bananas",
-      "value": "bananas"
+      "value": "BANANAS"
     },
     {
       "name": "pears",
-      "value": "pears"
+      "value": "PEARS"
     },
     {
       "name": "x",
-      "value": "20"
+      "value": "-20"
     },
     {
       "name": "x1",
-      "value": "50"
+      "value": "-80"
     },
     {
       "name": "y",
-      "value": "40"
+      "value": "-40"
     },
     {
       "name": "radius",
-      "value": "20"
+      "value": "500"
     },
     {
       "name": "content",
-      "value": "菜单选项"
+      "value": "选项"
     },
     {
       "name": "labelInfo",
-      "value": "Ctrl+C"
+      "value": "Ctrl+V"
     },
     {
       "name": "header",
-      "value": "header"
+      "value": "标题"
     },
     {
       "name": "footer",
-      "value": "footer"
+      "value": "脚标"
+    },
+    {
+      "name": "message",
+      "value": "dark dark dark dark"
     },
     {
       "name": "fontFamily",
-      "value": "HarmonyOS,Sans"
+      "value": "medium"
     },
     {
       "name": "fontFamily1",
-      "value": "HarmonyOS,Sans"
+      "value": "Arial"
     },
     {
       "name": "size",
-      "value": "28"
+      "value": "48"
     },
     {
       "name": "multiple",
-      "value": "1"
+      "value": "0.5"
     },
     {
       "name": "radio",
-      "value": "5"
+      "value": "10"
     },
     {
       "name": "index",
-      "value": "0"
+      "value": "1"
     },
     {
       "name": "promptText",
-      "value": "这是浅色promptText"
+      "value": "这是深色promptText"
     },
     {
       "name": "friction",
-      "value": "99"
+      "value": "0.1"
     },
     {
       "name": "Snap",
-      "value": "[0,3]"
+      "value": "[0,2]"
     },
     {
       "name": "margin",
-      "value": "30"
+      "value": "60"
     },
     {
       "name": "guiter",
-      "value": "30"
+      "value": "60"
     },
     {
       "name": "text",
-      "value": "浅页签"
+      "value": "深页签"
     },
     {
       "name": "left",
-      "value": "50"
+      "value": "30"
     },
     {
       "name": "right",
-      "value": "50"
+      "value": "30"
     },
     {
       "name": "top",
-      "value": "50"
+      "value": "30"
     },
     {
       "name": "bottom",
-      "value": "50"
+      "value": "30"
     },
     {
       "name": "friction1",
-      "value": "11"
+      "value": "-99"
     },
 
     {
       "name": "module_desc11",
-      "value": "module description xin"
+      "value": "module description 11xin"
     },
     {
       "name": "EntryAbility_desc11",
-      "value": "description xin"
+      "value": "description xin 11"
     },
     {
       "name": "EntryAbility_label11",
-      "value": "label xin"
+      "value": "label xin 11"
     },
     {
       "name": "width11",
-      "value": "430"
+      "value": "-330"
     },
     {
       "name": "height11",
-      "value": "330"
+      "value": "-230"
     },
     {
       "name": "title11",
-      "value": "title11"
+      "value": "title11xin"
     },
     {
       "name": "subtitle11",
-      "value": "subtitle11"
+      "value": "subtitle11xin"
     },
     {
       "name": "message11",
-      "value": "message11"
+      "value": "message11xin"
     },
     {
       "name": "value11",
-      "value": "button11"
+      "value": "button11xin"
     },
     {
       "name": "apples11",
-      "value": "apples11"
+      "value": "apples11xin"
     },
     {
       "name": "bananas11",
-      "value": "bananas11"
+      "value": "bananas11xin"
     },
     {
       "name": "pears11",
-      "value": "pears11"
+      "value": "pears11xin"
     },
     {
       "name": "x11",
-      "value": "40"
+      "value": "-27"
     },
     {
       "name": "x111",
-      "value": "35"
+      "value": "19"
     },
     {
       "name": "y11",
-      "value": "46"
+      "value": "-38"
     },
     {
       "name": "radius11",
-      "value": "27"
+      "value": "-18"
     },
     {
       "name": "content11",
-      "value": "菜单选项11"
+      "value": "菜单选项11xin"
     },
     {
       "name": "labelInfo11",
-      "value": "Ctrl+C11"
+      "value": "Ctrl+C11xin"
     },
     {
       "name": "header11",
-      "value": "header11"
+      "value": "header11xin"
     },
     {
       "name": "footer11",
-      "value": "footer11"
+      "value": "footer11xin"
     },
     {
       "name": "fontFamily11",
-      "value": "medium"
+      "value": "fontFamily"
     },
     {
       "name": "fontFamily111",
-      "value": "HarmonyOS Sans,Arial,HarmonyOS Sans"
+      "value": "fontFamily"
     },
     {
       "name": "size11",
-      "value": "38"
+      "value": "-17"
     },
     {
       "name": "multiple11",
-      "value": "2"
+      "value": "1"
     },
     {
       "name": "radio11",
-      "value": "7"
+      "value": "5"
     },
     {
       "name": "index11",
-      "value": "2"
+      "value": "-3"
     },
     {
       "name": "promptText11",
-      "value": "这是浅色promptText 11"
+      "value": "这是浅色promptText 11HarmonyOS Sans"
     },
     {
       "name": "friction11",
-      "value": "77"
+      "value": "-99"
     },
     {
       "name": "Snap11",
-      "value": "[0,1]"
+      "value": "[0,-9]"
     },
     {
       "name": "margin11",
-      "value": "38"
+      "value": "-68"
     },
     {
       "name": "guiter11",
-      "value": "39"
+      "value": "69"
     },
     {
       "name": "text11",
-      "value": "浅页签11"
+      "value": "浅页签11HarmonyOS Sans"
     },
     {
       "name": "left11",
-      "value": "78"
+      "value": "-48"
     },
     {
       "name": "right11",
-      "value": "68"
+      "value": "88"
     },
     {
       "name": "top11",
-      "value": "98"
+      "value": "-28"
     },
     {
       "name": "bottom11",
-      "value": "89"
+      "value": "-59"
     },
     {
       "name": "friction111",
-      "value": "333"
+      "value": "0.6"
     },
     {
       "name": "marginBarmode",
-      "value": "100"
+      "value": "120"
     },
     {
       "name": "marginBarmode11",
-      "value": "140"
+      "value": "-20"
     },
     {
       "name": "color",
-      "value": "#FFE4E1"
+      "value": "这是一个异常color"
     },
     {
       "name": "fontFamilyNumber",
-      "value": "HarmonyOS Sans"
+      "value": "number"
     },
     {
       "name": "heightxia",
-      "value": "50"
+      "value": "10"
     },
     {
       "name": "heightheight",
-      "value": "150"
+      "value": "-150"
     },
     {
       "name": "widthwidth",
-      "value": "150"
+      "value": "-150"
     },
     {
       "name": "x22",
-      "value": "400"
+      "value": "40"
     }
   ]
 }
