@@ -186,7 +186,7 @@ void SizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto dimension = Converter::OptConvert<LiteralDimension>(*value);
     if (!dimension) {
-        // TODO: Reset value
+        LOGE("dimension is null");
         return;
     }
     FormModelNG::SetSize(frameNode, dimension->width, dimension->height);
@@ -200,7 +200,7 @@ void ModuleNameImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto moduleName = Converter::OptConvert<std::string>(*value);
     if (!moduleName) {
-        // TODO: Reset value
+        LOGE("moduleName is null");
         return;
     }
     FormModelNG::SetModuleName(frameNode, *moduleName);
@@ -225,7 +225,10 @@ void AllowUpdateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto allowUpdate = Converter::OptConvert<bool>(*value);
-    CHECK_NULL_VOID(allowUpdate);
+    if (!allowUpdate) {
+        LOGE("allowUpdate is null");
+        return;
+    }
     FormModelNG::AllowUpdate(frameNode, *allowUpdate);
 #endif // FORM_SUPPORTED
 }
@@ -248,7 +251,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("acquired is null");
         return;
     }
     auto onAcquired = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -280,7 +283,7 @@ void OnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("error is null");
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -323,7 +326,7 @@ void OnUninstallImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("uninstall is null");
         return;
     }
     auto onUninstall = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -356,7 +359,7 @@ void OnLoadImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("load is null");
         return;
     }
     auto onLoad = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
