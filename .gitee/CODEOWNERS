@@ -3167,6 +3167,8 @@ frameworks/core/interfaces/native/implementation/dismiss_popup_action_accessor.c
 frameworks/core/interfaces/native/implementation/dismiss_popup_action_peer.h @arkuipopupwindow
 frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/mouse_event_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/mouse_event_peer.h @arkuievent
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuiframework
