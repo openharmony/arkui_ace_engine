@@ -437,7 +437,10 @@ std::string ImageSourceInfo::GetTaskKey() const
 {
     // only svg sets fillColor
     if (isSvg_ && fillColor_.has_value()) {
-        return cacheKey_ + fillColor_.value().ColorToString() + std::to_string(containerId_);
+        return cacheKey_ + fillColor_.value().ColorToString() + std::to_string(containerId_) +
+               std::string(supportSvg2_ ? "true" : "false");
+    } else if (isSvg_) {
+        return cacheKey_ + std::to_string(containerId_) + std::string(supportSvg2_ ? "true" : "false");
     }
     return cacheKey_ + std::to_string(containerId_) + std::to_string(isHdr_);
 }

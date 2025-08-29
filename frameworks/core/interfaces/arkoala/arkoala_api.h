@@ -3291,6 +3291,8 @@ struct ArkUIImageModifier {
     void (*resetImageOnFinish)(ArkUINodeHandle node);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*resetResizableLattice)(ArkUINodeHandle node);
+    void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetSupportSvg2)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

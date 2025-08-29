@@ -79,6 +79,7 @@ public:
     bool GetIsAnimation() override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override {};
     void SetImageFillSetByUser(bool value) override {};
+    void SetSupportSvg2(bool enable) override {};
 };
 
 } // namespace OHOS::Ace::Framework
