@@ -88,6 +88,13 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+
+    auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
+    RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
+    auto origin = dotIndicatorModifier_->GetBoundsRect();
+    CHECK_EQUAL_VOID(origin, boundsRect);
+    dotIndicatorModifier_->SetBoundsRect(boundsRect);
+    paintWrapper->FlushContentModifier();
 }
 
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
