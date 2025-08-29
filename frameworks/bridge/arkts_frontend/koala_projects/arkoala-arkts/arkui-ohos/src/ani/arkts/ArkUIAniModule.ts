@@ -242,6 +242,10 @@ export class ArkUIAniModule {
     native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
     native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
+    // for UIContext without window
+    native static _CreateWindowFreeContainer(context: common.Context): KInt
+    native static _DestroyWindowFreeContainer(instanceId: KInt): void
+
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void

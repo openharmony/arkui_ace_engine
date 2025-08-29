@@ -53,10 +53,12 @@
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "frameworks/core/common/container.h"
+#include "frameworks/core/common/window_free_container.h"
+#include "frameworks/core/common/container_scope.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "core/components_ng/token_theme/token_colors.h"
 #include "ui/base/geometry/ng/size_t.h"
-
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -268,6 +270,22 @@ ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
     auto peerPtr = PeerUtils::CreatePeer<RenderNodePeer>(nodePtr);
     ani_long ret = reinterpret_cast<ani_long>(peerPtr);
     return ret;
+}
+
+ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> nativeContext)
+{
+    auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
+        &nativeContext, FrontendType::ARK_TS);
+    CHECK_NULL_RETURN(container, -1);
+    int32_t instanceId = container->GetInstanceId();
+    ContainerScope::Add(instanceId);
+    return instanceId;
+}
+
+void DestroyWindowFreeContainer(ani_int id)
+{
+    Platform::WindowFreeContainer::DestroyWindowFreeContainer();
+    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -830,6 +848,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getNodeIdWithNodePtr = OHOS::Ace::NG::GetNodeIdWithNodePtr,
         .getNodeIdWithPeerPtr = OHOS::Ace::NG::GetNodeIdWithPeerPtr,
         .createRenderNodePeerWithNodePtr = OHOS::Ace::NG::CreateRenderNodePeerWithNodePtr,
+        .createWindowFreeContainer = OHOS::Ace::NG::CreateWindowFreeContainer,
+        .destroyWindowFreeContainer = OHOS::Ace::NG::DestroyWindowFreeContainer,
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,

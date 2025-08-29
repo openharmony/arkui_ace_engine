@@ -125,6 +125,10 @@ private:
     std::shared_ptr<void> ptr_;
 };
 
+namespace OHOS::AbilityRuntime {
+class Context;
+}
+
 namespace OHOS::Ace::Ani {
 class DragAction;
 class AniGlobalReference;
@@ -431,6 +435,8 @@ struct ArkUIAniCommonModifier {
     ani_int (*getNodeIdWithNodePtr)(ani_long ptr);
     ani_int (*getNodeIdWithPeerPtr)(ani_long ptr);
     ani_long (*createRenderNodePeerWithNodePtr)(ani_long ptr);
+    ani_int (*createWindowFreeContainer)(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> context);
+    void (*destroyWindowFreeContainer)(ani_int id);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_long ptr);
