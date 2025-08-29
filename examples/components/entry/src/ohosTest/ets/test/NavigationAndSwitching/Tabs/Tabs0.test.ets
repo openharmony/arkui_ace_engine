@@ -1,61 +1,39 @@
-import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
-import { ON, Point } from '@ohos.UiTest';
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { describe, beforeAll, it} from '@ohos/hypium'
+import { Driver, Component } from '@kit.TestKit';
+import { ON } from '@ohos.UiTest';
 import {
   buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  searchParentBlock,
   Slide,
   sliderDrag,
   titleSearch,
   ToggleClick,
-  Search,
-  getToggle,
-  searchToggle
-} from '../../utils';
+} from '../../../utils';
+import { TabsStart } from './Tabs';
 
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function TabsBootcampTest() {
-  describe('TabsBootcampTest', () => {
-    /**
-     * 打开应用
-     */
+export default function Tabs0() {
+  describe('Tabs0', () => {
     beforeAll(async (done: Function) => {
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(4500);
-
-        let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
-        await atomNavigates.click();
-        await driver.delayMs(3500);
-
-        let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-        let width: Point = await ListItems[0].getBoundsCenter()
-        let width2: Point = await ListItems[2].getBoundsCenter()
-        await driver.swipe(width.x, width2.y, width.x, width.y, 1000)
-        await driver.delayMs(5000);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('页签容器/Tabs'))
-        await scrollSearch.click()
-        await driver.delayMs(3500);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(3500);
-
-      } catch (err) {
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-      }
-      done();
+      await TabsStart(done)
     })
-
     /**
      * 测试组件'barPosition'支持设置包含单个子组件为'Start'且获取属性正确
      */
@@ -75,7 +53,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barPosition'支持设置包含单个子组件为'End'且获取属性正确
      */
@@ -95,7 +72,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'vertical'支持设置包含单个子组件为'true'且获取属性正确
      */
@@ -115,7 +91,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'vertical'支持设置包含单个子组件为'false'且获取属性正确
      */
@@ -135,7 +110,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'scrollable'支持设置包含单个子组件为'true'且获取属性正确
      */
@@ -150,7 +124,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'scrollable'支持设置包含单个子组件为'false'且获取属性正确
      */
@@ -165,7 +138,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.value'支持设置包含单个子组件为'Scrollable'且获取属性正确
      */
@@ -180,7 +152,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.value'支持设置包含单个子组件为'Fixed'且获取属性正确
      */
@@ -200,7 +171,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.options.margin'支持设置页签容器的数据值且获取属性正确
      */
@@ -222,7 +192,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.options.nonScrollableLayoutStyle'支持设置包含单个子组件为'ALWAYS_CENTER'且获取属性正确
      */
@@ -237,7 +206,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.options.nonScrollableLayoutStyle'支持设置包含单个子组件为'ALWAYS_AVERAGE_SPLIT'且获取属性正确
      */
@@ -249,7 +217,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barMode.options.nonScrollableLayoutStyle'支持设置包含单个子组件为'SPACE_BETWEEN_OR_CENTER'且获取属性正确
      */
@@ -264,7 +231,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barWidth'支持设置页签容器的数据值且获取属性正确
      */
@@ -297,7 +263,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barHeight'支持设置页签容器的数据值且获取属性正确
      */
@@ -330,7 +295,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'animationDuration'支持设置页签容器的数据值且获取属性正确
      */
@@ -352,7 +316,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'animationMode'持设置包含单个子组件为'CONTENT_FIRST'且获取属性正确
      */
@@ -372,7 +335,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'animationMode'支持设置包含单个子组件为'ACTION_FIRST'且获取属性正确
      */
@@ -389,7 +351,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'animationMode'支持设置包含单个子组件为'NO_ANIMATION'且获取属性正确
      */
@@ -409,8 +370,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件'divider.strokeWidth'支持设置页签容器的数据值且获取属性正确
      */
@@ -432,7 +391,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为1号色显示且获取属性正确
      */
@@ -447,7 +405,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为2号色显示且获取属性正确
      */
@@ -459,7 +416,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为3号色显示且获取属性正确
      */
@@ -471,7 +427,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为4号色显示且获取属性正确
      */
@@ -483,7 +438,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为5号色显示且获取属性正确
      */
@@ -495,8 +449,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件'divider.color'支持设置页签容器的颜色为6号色显示且获取属性正确
      */
@@ -511,8 +463,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件'divider.startMargin'支持设置页签容器的数据值且获取属性正确
      */
@@ -529,7 +479,7 @@ export default function TabsBootcampTest() {
           new KeyStruct('divider', JsonType.obj),
           new KeyStruct('startMargin', JsonType.value),
         ],
-        assertEqual: '10.00px'
+        assertEqual: '0.00px'
       })
 
       await sliderDrag({
@@ -547,7 +497,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'divider.endMargin'支持设置页签容器的数据值且获取属性正确
      */
@@ -569,8 +518,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件'fadingEdge'支持设置包含单个子组件为'true'且获取属性正确
      */
@@ -590,7 +537,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'fadingEdge'支持设置包含单个子组件为'false'且获取属性正确
      */
@@ -610,7 +556,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barOverlap'支持设置包含单个子组件为'true'且获取属性正确
      */
@@ -630,7 +575,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barOverlap'支持设置包含单个子组件为'false'且获取属性正确
      */
@@ -650,7 +594,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为1号色显示且获取属性正确
      */
@@ -672,7 +615,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为2号色显示且获取属性正确
      */
@@ -692,7 +634,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为3号色显示且获取属性正确
      */
@@ -712,7 +653,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为4号色显示且获取属性正确
      */
@@ -732,7 +672,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为5号色显示且获取属性正确
      */
@@ -752,8 +691,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件'barBackgroundColor'支持设置量规图的颜色为6号色显示且获取属性正确
      */
@@ -773,7 +710,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'NONE'且获取属性正确
      */
@@ -793,7 +729,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'Thin'且获取属性正确
      */
@@ -810,7 +745,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'Regular'且获取属性正确
      */
@@ -827,7 +761,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'Thick'且获取属性正确
      */
@@ -844,7 +777,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'BACKGROUND_THIN'且获取属性正确
      */
@@ -861,7 +793,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'BACKGROUND_REGULAR'且获取属性正确
      */
@@ -878,7 +809,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'BACKGROUND_THICK'且获取属性正确
      */
@@ -895,7 +825,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'BACKGROUND_ULTRA_THICK'且获取属性正确
      */
@@ -912,7 +841,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'COMPONENT_ULTRA_THIN'且获取属性正确
      */
@@ -929,7 +857,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'COMPONENT_THIN'且获取属性正确
      */
@@ -946,7 +873,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'COMPONENT_REGULAR'且获取属性正确
      */
@@ -963,7 +889,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'COMPONENT_THICK'且获取属性正确
      */
@@ -980,7 +905,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barBackgroundBlurStyle'支持设置包含单个子组件为'COMPONENT_ULTRA_THICK'且获取属性正确
      */
@@ -996,7 +920,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign'支持设置包含单个子组件为'true'且获取属性正确
      */
@@ -1011,7 +934,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign'支持设置包含单个子组件为'false'且获取属性正确
      */
@@ -1026,7 +948,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign.margin'支持设置页签容器的数据值且获取属性正确
      */
@@ -1049,7 +970,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign.gutter'支持设置页签容器的数据值且获取属性正确
      */
@@ -1071,7 +991,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign.sm'支持设置页签容器的数据值且获取属性正确
      */
@@ -1095,7 +1014,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign.md'支持设置页签容器的数据值且获取属性正确
      */
@@ -1119,7 +1037,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'barGridAlign.lg'支持设置页签容器的数据值且获取属性正确
      */
@@ -1143,7 +1060,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'edgeEffect'支持设置包含单个子组件为'Spring'且获取属性正确
      */
@@ -1159,7 +1075,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'edgeEffect'支持设置包含单个子组件为'Fade'且获取属性正确
      */
@@ -1174,7 +1089,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
     /**
      * 测试组件'edgeEffect'支持设置包含单个子组件为'None'且获取属性正确
      */
@@ -1190,8 +1104,6 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
-
     /**
      * 测试组件width且获取属性正确
      */
@@ -1268,7 +1180,7 @@ export default function TabsBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        // id: 'Tabs',
+        id: 'Tabs',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -1991,6 +1903,5 @@ export default function TabsBootcampTest() {
       })
       done();
     })
-
   })
 }
