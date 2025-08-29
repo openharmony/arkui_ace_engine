@@ -29,9 +29,353 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
+struct Circle {
+    float centerX;
+    float centerY;
+    float radius;
+};
+
+template<>
+Converter::Circle Convert(const Ark_Circle& src)
+{
+    return {
+        Converter::Convert<float>(src.centerX),
+        Converter::Convert<float>(src.centerY),
+        Converter::Convert<float>(src.radius)
+    };
+}
+
+template<>
+OHOS::Ace::NG::RectF Convert(const Ark_Rect& value)
+{
+    auto left = Converter::Convert<float>(value.left);
+    auto top = Converter::Convert<float>(value.top);
+    auto right = Converter::Convert<float>(value.right);
+    auto bottom = Converter::Convert<float>(value.bottom);
+    return { left, top, right - left, bottom - top };
+}
+
+template<>
+OHOS::Ace::NG::RoundRect Convert(const Ark_RoundRect& value)
+{
+    auto rect = Converter::Convert<RectF>(value.rect);
+    auto corners = Converter::Convert<Corner>(value.corners);
+
+    RoundRect roundRectInstance;
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        corners.topLeftRadius.GetX().Value(),
+        corners.topLeftRadius.GetY().Value());
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        corners.topRightRadius.GetX().Value(),
+        corners.topRightRadius.GetY().Value());
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        corners.bottomLeftRadius.GetX().Value(),
+        corners.bottomLeftRadius.GetY().Value());
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        corners.bottomRightRadius.GetX().Value(),
+        corners.bottomRightRadius.GetY().Value());
+
+    auto left = Converter::Convert<float>(rect.Left());
+    auto top = Converter::Convert<float>(rect.Top());
+    auto right = Converter::Convert<float>(rect.Right());
+    auto bottom = Converter::Convert<float>(rect.Bottom());
+    RectF rectValue(left, top, right - left, bottom - top);
+    roundRectInstance.SetRect(rectValue);
+
+    return roundRectInstance;
+}
+
+template<>
+Size Convert(const Ark_Size& value)
+{
+    auto width = Converter::OptConvert<float>(value.width);
+    auto height = Converter::OptConvert<float>(value.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    return Size { width.value_or(0), height.value_or(0) };
+}
+
+template<>
+Rect Convert(const Ark_Frame& value)
+{
+    auto x = Converter::Convert<float>(value.x);
+    auto y = Converter::Convert<float>(value.y);
+    auto width = Converter::OptConvert<float>(value.width);
+    auto height = Converter::OptConvert<float>(value.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    return Rect { x, y, width.value_or(0), height.value_or(0) };
+}
+
+template<>
+VectorF Convert(const Ark_Vector2& value)
+{
+    return {
+        Converter::Convert<float>(value.x),
+        Converter::Convert<float>(value.y)
+    };
+}
+
+template<>
+Vector3F Convert(const Ark_Vector3& value)
+{
+    return {
+        Converter::Convert<float>(value.x),
+        Converter::Convert<float>(value.y),
+        Converter::Convert<float>(value.z)
+    };
+}
+
+template<>
+Matrix4 Convert(const Ark_Matrix4& value)
+{
+    return {
+        Converter::Convert<float>(value.value0),
+        Converter::Convert<float>(value.value1),
+        Converter::Convert<float>(value.value2),
+        Converter::Convert<float>(value.value3),
+        Converter::Convert<float>(value.value4),
+        Converter::Convert<float>(value.value5),
+        Converter::Convert<float>(value.value6),
+        Converter::Convert<float>(value.value7),
+        Converter::Convert<float>(value.value8),
+        Converter::Convert<float>(value.value9),
+        Converter::Convert<float>(value.value10),
+        Converter::Convert<float>(value.value11),
+        Converter::Convert<float>(value.value12),
+        Converter::Convert<float>(value.value13),
+        Converter::Convert<float>(value.value14),
+        Converter::Convert<float>(value.value15)
+    };
+}
+
+template<>
+Offset Convert(const Ark_Vector2& value)
+{
+    return Offset{
+        Converter::Convert<float>(value.x),
+        Converter::Convert<float>(value.y)
+    };
+}
+
+template<>
+Color Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToColor().value_or(Color());
+    } else {
+        return Color(static_cast<uint32_t>(src.value));
+    }
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_EdgesNumber& src)
+{
+    BorderWidthProperty property;
+    property.leftDimen = OptConvert<Dimension>(src.left);
+    property.topDimen = OptConvert<Dimension>(src.top);
+    property.rightDimen = OptConvert<Dimension>(src.right);
+    property.bottomDimen = OptConvert<Dimension>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_BorderRadiuses_graphics& src)
+{
+    BorderRadiusProperty property;
+    property.radiusTopLeft = OptConvert<Dimension>(src.topLeft);
+    property.radiusTopRight = OptConvert<Dimension>(src.topRight);
+    property.radiusBottomLeft = OptConvert<Dimension>(src.bottomLeft);
+    property.radiusBottomRight = OptConvert<Dimension>(src.bottomRight);
+    return property;
+}
+
+void AssignArkValue(Ark_Position& dst, const OffsetT<Dimension>& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+}
+
+void AssignArkValue(Ark_Vector2& dst, const DimensionOffset& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_Vector2& dst, const VectorF& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.x);
+    dst.y = Converter::ArkValue<Ark_Number>(src.y);
+}
+
+void AssignArkValue(Ark_Vector2& dst, const TranslateOptions& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.x);
+    dst.y = Converter::ArkValue<Ark_Number>(src.y);
+}
+
+void AssignArkValue(Ark_Vector3& dst, const Vector3F& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.x);
+    dst.y = Converter::ArkValue<Ark_Number>(src.y);
+    dst.z = Converter::ArkValue<Ark_Number>(src.z);
+}
+
+void AssignArkValue(Ark_Matrix4& dst, const Matrix4& src, ConvContext *ctx)
+{
+    constexpr int32_t index0 = 0;
+    constexpr int32_t index1 = 1;
+    constexpr int32_t index2 = 2;
+    constexpr int32_t index3 = 3;
+    dst.value0 = Converter::ArkValue<Ark_Number>(src.Get(index0, index0));
+    dst.value1 = Converter::ArkValue<Ark_Number>(src.Get(index0, index1));
+    dst.value2 = Converter::ArkValue<Ark_Number>(src.Get(index0, index2));
+    dst.value3 = Converter::ArkValue<Ark_Number>(src.Get(index0, index3));
+    dst.value4 = Converter::ArkValue<Ark_Number>(src.Get(index1, index0));
+    dst.value5 = Converter::ArkValue<Ark_Number>(src.Get(index1, index1));
+    dst.value6 = Converter::ArkValue<Ark_Number>(src.Get(index1, index2));
+    dst.value7 = Converter::ArkValue<Ark_Number>(src.Get(index1, index3));
+    dst.value8 = Converter::ArkValue<Ark_Number>(src.Get(index2, index0));
+    dst.value9 = Converter::ArkValue<Ark_Number>(src.Get(index2, index1));
+    dst.value10 = Converter::ArkValue<Ark_Number>(src.Get(index2, index2));
+    dst.value11 = Converter::ArkValue<Ark_Number>(src.Get(index2, index3));
+    dst.value12 = Converter::ArkValue<Ark_Number>(src.Get(index3, index0));
+    dst.value13 = Converter::ArkValue<Ark_Number>(src.Get(index3, index1));
+    dst.value14 = Converter::ArkValue<Ark_Number>(src.Get(index3, index2));
+    dst.value15 = Converter::ArkValue<Ark_Number>(src.Get(index3, index3));
+}
+
+void AssignArkValue(Ark_Vector2& dst, const Offset& src, ConvContext *ctx)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_BorderStyle& dst, const BorderStyle& src, ConvContext *ctx)
+{
+    switch (src) {
+        case OHOS::Ace::BorderStyle::SOLID: dst = ARK_BORDER_STYLE_SOLID; break;
+        case OHOS::Ace::BorderStyle::DASHED: dst = ARK_BORDER_STYLE_DASHED; break;
+        case OHOS::Ace::BorderStyle::DOTTED: dst = ARK_BORDER_STYLE_DOTTED; break;
+        default: dst = static_cast<Ark_BorderStyle>(-1);
+    }
+}
+
+void AssignArkValue(Ark_EdgeStyles& dst, const BorderStyleProperty& src, ConvContext *ctx)
+{
+    if (src.styleTop.has_value()) {
+        dst.top = Converter::ArkValue<Opt_BorderStyle>(src.styleTop.value());
+    } else {
+        dst.top = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
+    }
+
+    if (src.styleRight.has_value()) {
+        dst.right = Converter::ArkValue<Opt_BorderStyle>(src.styleRight.value());
+    } else {
+        dst.right = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
+    }
+
+    if (src.styleBottom.has_value()) {
+        dst.bottom = Converter::ArkValue<Opt_BorderStyle>(src.styleBottom.value());
+    } else {
+        dst.bottom = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
+    }
+
+    if (src.styleLeft.has_value()) {
+        dst.left = Converter::ArkValue<Opt_BorderStyle>(src.styleLeft.value());
+    } else {
+        dst.left = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
+    }
+}
+
+void AssignArkValue(Ark_EdgesNumber& dst, const BorderWidthProperty& src, ConvContext *ctx)
+{
+    if (src.topDimen.has_value()) {
+        dst.top = Converter::ArkValue<Opt_Number>(src.topDimen.value());
+    } else {
+        dst.top = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.rightDimen.has_value()) {
+        dst.right = Converter::ArkValue<Opt_Number>(src.rightDimen.value());
+    } else {
+        dst.right = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.bottomDimen.has_value()) {
+        dst.bottom = Converter::ArkValue<Opt_Number>(src.bottomDimen.value());
+    } else {
+        dst.bottom = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.leftDimen.has_value()) {
+        dst.left = Converter::ArkValue<Opt_Number>(src.leftDimen.value());
+    } else {
+        dst.left = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+}
+
+void AssignArkValue(Ark_EdgesNumber& dst, const BorderColorProperty& src, ConvContext *ctx)
+{
+    if (src.topColor.has_value()) {
+        dst.top = Converter::ArkValue<Opt_Number>(static_cast<float>(src.topColor.value().GetValue()));
+    } else {
+        dst.top = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.rightColor.has_value()) {
+        dst.right = Converter::ArkValue<Opt_Number>(static_cast<float>(src.rightColor.value().GetValue()));
+    } else {
+        dst.right = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.bottomColor.has_value()) {
+        dst.bottom = Converter::ArkValue<Opt_Number>(static_cast<float>(src.bottomColor.value().GetValue()));
+    } else {
+        dst.bottom = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+
+    if (src.leftColor.has_value()) {
+        dst.left = Converter::ArkValue<Opt_Number>(static_cast<float>(src.leftColor.value().GetValue()));
+    } else {
+        dst.left = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    }
+}
+
+void AssignArkValue(Ark_BorderRadiuses_graphics& dst, const BorderRadiusProperty& src, ConvContext *ctx)
+{
+    if (src.radiusTopLeft.has_value()) {
+        dst.topLeft = Converter::ArkValue<Ark_Number>(src.radiusTopLeft.value());
+    } else {
+        dst.topLeft = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusTopRight.has_value()) {
+        dst.topRight = Converter::ArkValue<Ark_Number>(src.radiusTopRight.value());
+    } else {
+        dst.topRight = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusBottomRight.has_value()) {
+        dst.bottomRight = Converter::ArkValue<Ark_Number>(src.radiusBottomRight.value());
+    } else {
+        dst.bottomRight = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusBottomLeft.has_value()) {
+        dst.bottomLeft = Converter::ArkValue<Ark_Number>(src.radiusBottomLeft.value());
+    } else {
+        dst.bottomLeft = Converter::ArkValue<Ark_Number>(0);
+    }
+}
+
 template<>
 void AssignCast(std::optional<LengthMetricsUnit>& dst, const Ark_LengthMetricsUnit& src)
 {
@@ -74,6 +418,26 @@ RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
 {
     return peer ? peer->shape : nullptr;
 }
+
+RefPtr<FrameNode> GetParentNode(const RefPtr<FrameNode>& nodeRef)
+{
+    CHECK_NULL_RETURN(nodeRef, nullptr);
+    auto parent = nodeRef->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
+    return (parent == nullptr || parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::STAGE_ETS_TAG)
+               ? nullptr : AceType::DynamicCast<FrameNode>(parent);
+}
+
+RefPtr<RenderContext> GetRenderContext(const RefPtr<FrameNode>& node, bool checkProxy = true)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (checkProxy) {
+        CHECK_NULL_RETURN(node->GetTag() != "BuilderProxyNode", nullptr);
+    }
+    return node->GetRenderContext();
+}
 } // namespace
 namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer)
@@ -100,10 +464,10 @@ void AppendChildImpl(Ark_RenderNode peer, Ark_RenderNode node)
     }
     auto parent = peer->GetFrameNode();
     auto child = node->GetFrameNode();
-    if (parent && child) {
-        parent->AddChild(child);
-        parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
-    }
+    CHECK_NULL_VOID(parent && child && child->GetParent());
+
+    parent->AddChild(child);
+    parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 void InsertChildAfterImpl(Ark_RenderNode peer, Ark_RenderNode child, const Ark_Union_RenderNode_Undefined* sibling)
 {
@@ -111,14 +475,20 @@ void InsertChildAfterImpl(Ark_RenderNode peer, Ark_RenderNode child, const Ark_U
         LOGW("This renderNode or child is nullptr when InsertChildAfter !");
         return;
     }
-    if (!sibling || sibling->selector == ARK_UNION_UNDEFINED || !sibling->value0) {
+    if (!sibling) {
         LOGW("Sibling node is nullptr or undefined when InsertChildAfter !");
         return;
     }
     auto currentNode = peer->GetFrameNode();
     auto childNode = child->GetFrameNode();
-    auto siblingNode = sibling->value0->GetFrameNode();
-    auto index = currentNode->GetChildIndex(siblingNode);
+    CHECK_NULL_VOID(currentNode && childNode && childNode->GetParent());
+
+    auto siblingOpt = Converter::OptConvert<RenderNodePeer*>(*sibling);
+    auto index = -1;
+    if (siblingOpt.has_value()) {
+        auto siblingNode = siblingOpt.value()->GetFrameNode();
+        index = currentNode->GetChildIndex(siblingNode);
+    }
     currentNode->AddChild(childNode, index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -130,10 +500,9 @@ void RemoveChildImpl(Ark_RenderNode peer, Ark_RenderNode node)
     }
     auto currentNode = peer->GetFrameNode();
     auto childNode = node->GetFrameNode();
-    if (currentNode && childNode) {
-        currentNode->RemoveChild(childNode);
-        currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
-    }
+    CHECK_NULL_VOID(currentNode && childNode);
+    currentNode->RemoveChild(childNode);
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 void ClearChildrenImpl(Ark_RenderNode peer)
 {
@@ -142,28 +511,68 @@ void ClearChildrenImpl(Ark_RenderNode peer)
         return;
     }
     auto currentNode = peer->GetFrameNode();
-    if (currentNode) {
-        currentNode->Clean();
-        currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
-    }
+    CHECK_NULL_VOID(currentNode);
+    currentNode->Clean();
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 Ark_Union_RenderNode_Undefined GetChildImpl(Ark_RenderNode peer, const Ark_Number* index)
 {
-    return {};
+    auto errorValue = Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_Undefined>(Ark_Undefined{});
+    CHECK_NULL_RETURN(peer && index, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto indexInt = Converter::Convert<int32_t>(*index);
+    CHECK_NULL_RETURN(indexInt >= 0, errorValue);
+    LOGW("FrameNodeAccessor::GetChildImpl work only for case: IsExpanded is false");
+    auto retValue = PeerUtils::CreatePeer<RenderNodePeer>(
+        frameNode->GetFrameNodeChildByIndex(indexInt, false, false));
+    return Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_RenderNode>(retValue);
 }
 Ark_Union_RenderNode_Undefined GetFirstChildImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_Undefined>(Ark_Undefined{});
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto child = frameNode->GetFirstChild();
+    CHECK_NULL_RETURN(child, errorValue);
+    auto retValue = PeerUtils::CreatePeer<RenderNodePeer>(AceType::DynamicCast<FrameNode>(child));
+    return Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_RenderNode>(retValue);
 }
 Ark_Union_RenderNode_Undefined GetNextSiblingImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_Undefined>(Ark_Undefined{});
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto parent = GetParentNode(frameNode);
+    CHECK_NULL_RETURN(parent, errorValue);
+    LOGW("RenderNodeAccessor::GetNextSiblingImpl work only for case: IsExpanded is false");
+    auto index = parent->GetFrameNodeIndex(frameNode, false);
+    CHECK_NULL_RETURN(index >= 0, errorValue);
+    auto sibling = parent->GetFrameNodeChildByIndex(index + 1, false, false);
+    auto retValue = PeerUtils::CreatePeer<RenderNodePeer>(sibling);
+    return Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_RenderNode>(retValue);
 }
 Ark_Union_RenderNode_Undefined GetPreviousSiblingImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_Undefined>(Ark_Undefined{});
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto parent = GetParentNode(frameNode);
+    CHECK_NULL_RETURN(parent, errorValue);
+    LOGW("RenderNodeAccessor::GetPreviousSiblingImpl work only for case: IsExpanded is false");
+    auto index = parent->GetFrameNodeIndex(frameNode, false);
+    CHECK_NULL_RETURN(index > 0, errorValue);
+    auto sibling = parent->GetFrameNodeChildByIndex(index - 1, false, false);
+    auto retValue = PeerUtils::CreatePeer<RenderNodePeer>(sibling);
+    return Converter::ArkUnion<Ark_Union_RenderNode_Undefined, Ark_RenderNode>(retValue);
 }
-void DrawImpl(Ark_RenderNode peer, const Ark_DrawContext* context) {}
+void DrawImpl(Ark_RenderNode peer, const Ark_DrawContext* context)
+{
+    LOGW("RenderNodeAccessor::DrawImpl is not implemented.");
+}
 void InvalidateImpl(Ark_RenderNode peer)
 {
     if (!peer) {
@@ -174,12 +583,21 @@ void InvalidateImpl(Ark_RenderNode peer)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RenderNodePattern>();
     CHECK_NULL_VOID(pattern);
-    auto renderContext = frameNode->GetRenderContext();
+    auto renderContext = GetRenderContext(frameNode);
     CHECK_NULL_VOID(renderContext);
     pattern->Invalidate();
     renderContext->RequestNextFrame();
 }
-void DisposeImpl(Ark_RenderNode peer) {}
+void DisposeImpl(Ark_RenderNode peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto parent = GetParentNode(frameNode);
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(frameNode);
+    parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+}
 Ark_Number GetBackgroundColorImpl(Ark_RenderNode peer)
 {
     return {};
