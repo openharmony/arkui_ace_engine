@@ -329,7 +329,9 @@ void SetRawDeltaXImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(rawDeltaX);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    info->SetRawDeltaX(Converter::Convert<float>(*rawDeltaX));
+    auto value = Converter::Convert<float>(*rawDeltaX);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    info->SetRawDeltaX(xConvert);
 }
 Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
@@ -346,7 +348,9 @@ void SetRawDeltaYImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(rawDeltaY);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    info->SetRawDeltaY(Converter::Convert<float>(*rawDeltaY));
+    auto value = Converter::Convert<float>(*rawDeltaY);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
+    info->SetRawDeltaY(yConvert);
 }
 Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
 {
