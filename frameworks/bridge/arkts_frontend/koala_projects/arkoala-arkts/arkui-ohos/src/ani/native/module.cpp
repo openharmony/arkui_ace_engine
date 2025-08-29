@@ -763,6 +763,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JJ:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::AddComponentToFrameNode)
         },
+
+        ani_native_function {
+            "_CreateWindowFreeContainer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateWindowFreeContainer)
+        },
+
+        ani_native_function {
+            "_DestroyWindowFreeContainer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DestroyWindowFreeContainer)
+        },
+
         ani_native_function {
             "_CheckIsUIThread",
             "I:I",

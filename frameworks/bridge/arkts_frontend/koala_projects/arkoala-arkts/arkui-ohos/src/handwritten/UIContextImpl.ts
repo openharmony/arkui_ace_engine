@@ -15,9 +15,11 @@
 
 import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
 import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkUINativeModule } from '#components'
+import { UIAbilityContext, ExtensionContext } from "#external"
 import { int32, int64 } from "@koalaui/common"
-import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
-    runtimeType, Finalizable } from "@koalaui/interop"
+import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType, runtimeType, Finalizable,
+    registerNativeModuleLibraryName, wrapSystemCallback } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
@@ -1331,6 +1333,8 @@ export class UIContextImpl extends UIContext {
     buffer: KBuffer = new KBuffer(this.bufferSize)
     position: int64 = 0
     deserializer: Deserializer = new Deserializer(this.buffer.buffer, this.bufferSize)
+    static windowFreeInstanceId: int32 = -1
+    static initFlag_ = false
 
     constructor(instanceId: int32) {
         super()
@@ -1763,6 +1767,35 @@ export class UIContextImpl extends UIContext {
 
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
+    }
+
+
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        if (!UIContextImpl.initFlag_) {
+            UIContextImpl.initFlag_ = true;
+            wrapSystemCallback(1, (buff : KSerializerBuffer, len : int32) => {
+                deserializeAndCallCallback(new Deserializer(buff, len))
+                return 0
+            })
+        }
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            return UIContextUtil.getOrCreateUIContextById(UIContextImpl.windowFreeInstanceId)
+        }
+        const instanceId = ArkUIAniModule._CreateWindowFreeContainer(context)
+        if (instanceId < 0) {
+            return undefined
+        }
+        UIContextImpl.windowFreeInstanceId = instanceId;
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+
+    static destroyUIContextWithoutWindow() {
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            ArkUIAniModule._DestroyWindowFreeContainer(UIContextImpl.windowFreeInstanceId)
+            UIContextUtil.removeUIContext(UIContextImpl.windowFreeInstanceId)
+            UIContextImpl.windowFreeInstanceId = -1
+        }
     }
 
     public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {

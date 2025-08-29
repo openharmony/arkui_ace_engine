@@ -23,6 +23,8 @@ import { SizeOptions } from "arkui/component/units"
 import { AnimateParam } from "arkui/component"
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
@@ -626,6 +628,13 @@ export class UIContext {
 
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
+    }
+
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        return UIContextImpl.createUIContextWithoutWindow(context)
+    }
+    static destroyUIContextWithoutWindow() {
+        UIContextImpl.destroyUIContextWithoutWindow()
     }
 
     public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {

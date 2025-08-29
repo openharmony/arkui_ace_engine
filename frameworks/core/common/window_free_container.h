@@ -17,13 +17,19 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_COMMON_WINDOW_FREE_CONTAINER_H
 
 #include "frameworks/base/utils/macros.h"
+#include "frameworks/core/common/frontend.h"
 #include "base/memory/referenced.h"
+
+namespace OHOS::Ace {
+class Container;
+}
 
 namespace OHOS::Ace::Platform {
 class ACE_FORCE_EXPORT WindowFreeContainer {
 public:
 WindowFreeContainer() = delete;
-static RefPtr<Container> CreateWindowFreeContainer(void *env, void *context);
+static RefPtr<Container> CreateWindowFreeContainer(void *env, void *context,
+    FrontendType frontendType = FrontendType::DECLARATIVE_JS);
 static void DestroyWindowFreeContainer();
 };
 } // namespace OHOS::Ace

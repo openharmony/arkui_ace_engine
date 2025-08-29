@@ -173,7 +173,7 @@ double GetDensity()
     return density;
 }
 
-RefPtr<Container> WindowFreeContainer::CreateWindowFreeContainer(void *runtime, void *ctx)
+RefPtr<Container> WindowFreeContainer::CreateWindowFreeContainer(void *runtime, void *ctx, FrontendType frontendType)
 {
     if (g_WindowFreeContainer) {
         return g_WindowFreeContainer;
@@ -187,7 +187,7 @@ RefPtr<Container> WindowFreeContainer::CreateWindowFreeContainer(void *runtime, 
     CHECK_NULL_RETURN(context, nullptr);
     std::string tempDir;
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info = GetAbilityInfo(context, tempDir);
-    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId, FrontendType::DECLARATIVE_JS,
+    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId, frontendType,
         context, info, std::make_unique<PseudoEventCallback>(), false, false, true);
     if (!container) {
         LOGW("Create container failed.");

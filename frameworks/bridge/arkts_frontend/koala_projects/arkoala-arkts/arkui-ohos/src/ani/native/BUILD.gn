@@ -102,7 +102,12 @@ ohos_shared_library("arkoala_native_ani") {
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
   ]
-
+  if (!build_ohos_sdk) {
+    external_deps += [
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:ani_base_context",
+    ]
+  }
   if (defined(model_component_support) && model_component_support) {
     external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
   }
@@ -149,7 +154,13 @@ if (use_linux) {
       "napi:ace_napi",
       "runtime_core:ani",
     ]
-  
+    if (!build_ohos_sdk) {
+      external_deps += [
+        "ability_runtime:abilitykit_native",
+        "ability_runtime:ani_base_context",
+      ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
     defines = []
     if (pixel_map_support) {

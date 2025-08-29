@@ -16,6 +16,8 @@
 #include "common_module.h"
 
 #if !defined(PREVIEW)
+#define OHOS_AAFWK_HILOG_TAG_WRAPPER_H
+#include "ani_base_context.h"
 #include "canvas_ani/ani_canvas.h"
 #endif
 
@@ -26,7 +28,6 @@
 
 #include "ani.h"
 #include "load.h"
-#include "log/log.h"
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
@@ -608,6 +609,29 @@ ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color)
     unsigned int uClr = static_cast<unsigned int>(color);
     int32_t clr = static_cast<int32_t>(uClr);
     return clr;
+}
+
+ani_int CreateWindowFreeContainer(ani_env *env, [[maybe_unused]]ani_object object, ani_object context)
+{
+#if !defined(PREVIEW)
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return -1;
+    }
+    auto nativeContext = OHOS::AbilityRuntime::GetStageModeContext(env, context);
+    return modifier->getCommonAniModifier()->createWindowFreeContainer(env, nativeContext);
+#else
+    return -1;
+#endif
+}
+
+void DestroyWindowFreeContainer([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object object, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->destroyWindowFreeContainer(id);
 }
 
 ani_int CheckIsUIThread([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
