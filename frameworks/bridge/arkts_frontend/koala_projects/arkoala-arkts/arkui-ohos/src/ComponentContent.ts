@@ -23,7 +23,7 @@ import { Content } from "./Content"
 import { KPointer, pointer } from "@koalaui/interop"
 
 export interface ComponentContentBase extends Content {
-
+    getNodePtr(): KPointer | undefined;
 }
 
 export class ComponentContent<T = undefined> implements ComponentContentBase {

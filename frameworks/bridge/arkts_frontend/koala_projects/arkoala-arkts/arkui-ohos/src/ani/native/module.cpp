@@ -414,6 +414,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
+            "_SetWaterFlowFooterContent",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooterContent)
+        },
+        ani_native_function {
+            "_SetWaterFlowFooter",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooter)
+        },
+        ani_native_function {
+            "_SetWaterFlowScroller",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowScroller)
+        },
+        ani_native_function {
+            "_SetWaterFlowLayoutMode",
+            "JI:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowLayoutMode)
+        },
+        ani_native_function {
             "_SetListChildrenMainSize",
             "JLarkui/component/common/ChildrenMainSize;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)

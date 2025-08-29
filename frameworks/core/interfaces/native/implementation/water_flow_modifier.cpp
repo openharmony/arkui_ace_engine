@@ -227,6 +227,14 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convCount = Converter::OptConvert<int32_t>(*count);
+    Validator::ValidateNonNegative(convCount);
+    WaterFlowModelStatic::SetCachedCount(frameNode, convCount);
+    auto showValue = Converter::OptConvert<bool>(*show);
+    if (!showValue) {
+        showValue = false;
+    }
+    WaterFlowModelStatic::SetShowCached(frameNode, showValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)
