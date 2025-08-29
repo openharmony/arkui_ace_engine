@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -288,7 +288,6 @@ export struct SubNavigation {
         .mode(NavigationMode.Stack)
         .navDestination(this.SubNavDestination)
         .hideTitleBar(true, true)
-        .title('Navigation3', {})
         .hideToolBar(true, true)
         .hideBackButton(true)
         .onTouch((event) => {
@@ -311,7 +310,6 @@ export struct SubNavigation {
           this.needRenderLeftClickCount.leftClickCount--;
         }
       })
-      .title('Navigation2', {})
     }
     .onBackPressed(() => {
       hilog.debug(0x0000, 'MultiNavigation', 'subNavigation NavDestination onBackPressed');
@@ -323,7 +321,6 @@ export struct SubNavigation {
       return false;
     })
     .hideTitleBar(true, true)
-    .title('navDestination1', {})
   }
 }
 
@@ -562,22 +559,14 @@ export struct MultiNavigation {
 
   @Builder
   MultiNavDestination(name: string, param?: object|SubNavigationStack) {
-    if (name === 'SubNavigation') {
-      let needRenderIsFullScreen = new NeedRenderIsFullScreen()
-      let primaryStack = new MyNavPathStack()
-      let secondaryStack = new MyNavPathStack()
-      if (param) {
-        needRenderIsFullScreen = (param as SubNavigationStack).needRenderIsFullScreen
-        primaryStack = (param as SubNavigationStack).primaryStack
-        secondaryStack = (param as SubNavigationStack).secondaryStack
-      }
+    if (name === 'SubNavigation' && param) {
       SubNavigation({
         isPortrait: this.isPortrait,
         multiStack: this.multiStack,
         navDestination: this.navDestination,
-        needRenderIsFullScreen: needRenderIsFullScreen,
-        primaryStack: primaryStack,
-        secondaryStack: secondaryStack,
+        needRenderIsFullScreen: (param as SubNavigationStack).needRenderIsFullScreen,
+        primaryStack: (param as SubNavigationStack).primaryStack,
+        secondaryStack: (param as SubNavigationStack).secondaryStack,
         needRenderLeftClickCount: this.multiStack.needRenderLeftClickCount,
         navWidthRangeModifier: this.multiStack.navWidthRangeModifier,
         onNavigationModeChange: this?.callback,
@@ -741,11 +730,11 @@ export class MultiNavPathStack extends NavPathStack {
         }
       }
     } else {
-      let subStack = new SubNavigationStack();
+      let subStack:SubNavigationStack = new SubNavigationStack();
       subStack.registerMultiStackOperateCallback(this.navPathStackOperate);
       subStack.disableAnimation(this.disableAllAnimation);
       this.subStackList.push(subStack);
-      let info: NavPathInfo = new NavPathInfo('SubNavigation', subStack as object)
+      let info: NavPathInfo = new NavPathInfo('SubNavigation', subStack)
       this.outerStack.pushPath(info, animated);
       setTimeout(() => {
         subStack.pushPrimaryPath(multiPolicyStack as MultiNavPolicyInfo, false);
@@ -812,11 +801,11 @@ export class MultiNavPathStack extends NavPathStack {
         }
       }
     } else {
-      let subStack = new SubNavigationStack();
+      let subStack:SubNavigationStack = new SubNavigationStack();
       subStack.registerMultiStackOperateCallback(this.navPathStackOperate);
       subStack.disableAnimation(this.disableAllAnimation);
       this.subStackList.push(subStack);
-      let info: NavPathInfo = new NavPathInfo('SubNavigation', subStack as object)
+      let info: NavPathInfo = new NavPathInfo('SubNavigation', subStack)
       this.outerStack.pushPath(info, animated);
       setTimeout(() => {
         subStack.pushPrimaryPath(multiPolicyStack as MultiNavPolicyInfo, false);
@@ -1158,8 +1147,8 @@ export class MultiNavPathStack extends NavPathStack {
     if (index !== -1) {
       let currentPath = this.totalStack[totalSize - 1].navInfo;
       let secondaryStackSize: number[] = [];
-      this.subStackList.forEach((subStack, index) => {
-        secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
+      this.subStackList.forEach((subStack) => {
+        secondaryStackSize.push(subStack.secondaryStack.size());
       });
       let removeIndex = 0;
       for (let i = 0; i < subStackLength; i++) {
@@ -1197,8 +1186,8 @@ export class MultiNavPathStack extends NavPathStack {
     if (index !== -1) {
       let currentPath = this.totalStack[totalSize - 1].navInfo;
       let secondaryStackSize: number[] = [];
-      this.subStackList.forEach((subStack, index) => {
-        secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
+      this.subStackList.forEach((subStack) => {
+        secondaryStackSize.push(subStack.secondaryStack.size());
       });
       let removeIndex = 0;
       for (let i = 0; i < subStackLength; i++) {
@@ -1245,8 +1234,8 @@ export class MultiNavPathStack extends NavPathStack {
     }
     let currentPath = this.totalStack[totalSize - 1].navInfo;
     let secondaryStackSize: number[] = [];
-    this.subStackList.forEach((subStack, index) => {
-      secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
+    this.subStackList.forEach((subStack) => {
+      secondaryStackSize.push(subStack.secondaryStack.size());
     });
     let removeIndex = 0;
     for (let i = 0; i < subStackLength; i++) {
@@ -1285,8 +1274,8 @@ export class MultiNavPathStack extends NavPathStack {
     }
     let currentPath = this.totalStack[totalSize - 1].navInfo;
     let secondaryStackSize: number[] = [];
-    this.subStackList.forEach((subStack, index) => {
-      secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
+    this.subStackList.forEach((subStack) => {
+      secondaryStackSize.push(subStack.secondaryStack.size());
     });
     let removeIndex = 0;
     for (let i = 0; i < subStackLength; i++) {
@@ -1739,7 +1728,6 @@ interface MultiNavPathStackOperate {
   onSecondaryPop: ()=>void;
 }
 
-declare type NavDestinationBuildFunction = (name: string, param?: object) => void;
 
 declare type OnNavigationModeChangeCallback = (mode: NavigationMode) => void;
 
