@@ -846,6 +846,24 @@ void UpdatePreviewOptionDefaultAttr(
     NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAsyncContext->dragPreviewOption);
 }
 
+void UpdateDragPreviewOptionsFromModifier(std::shared_ptr<DragControllerAsyncCtx> dragAsyncContext,
+    const ArkUIDragControllerAsync& asyncCtx)
+{
+    CHECK_NULL_VOID(dragAsyncContext);
+    if (!asyncCtx.dragPreviewOption.modifier) {
+        return;
+    }
+    auto onApply = [executeFunc =
+        std::move(asyncCtx.dragPreviewOption.modifier)](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto ptr = AceType::RawPtr(node);
+        CHECK_NULL_VOID(executeFunc);
+        executeFunc(ptr);
+    };
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(onApply, dragAsyncContext->dragPreviewOption);
+}
+
 void* CreateDragEventPeer(const ArkUIDragNotifyMessage& dragNotifyMsg)
 {
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -875,6 +893,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
+    UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {
         auto unifiedDataPtr = std::static_pointer_cast<UDMF::UnifiedData>(asyncCtx.unifiedData.GetSharedPtr());
         auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();

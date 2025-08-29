@@ -53,6 +53,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
+    public static createImagePeerFromPtr(peerPtr: KPointer) :ArkImagePeer {
+        const peerId = PeerNode.nextId()
+        const _peer = new ArkImagePeer(peerPtr, peerId, "Image", 0)
+        return _peer
+    }
     setImageOptions0Attribute(src: PixelMap | ResourceStr | DrawableDescriptor): void {
         const thisSerializer : Serializer = Serializer.hold()
         let src_type : int32 = RuntimeType.UNDEFINED
