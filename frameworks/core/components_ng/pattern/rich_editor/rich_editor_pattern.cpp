@@ -7914,6 +7914,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
+    IF_TRUE(previewLongPress_, CloseKeyboard(true));
     textSelector_.Update(selectStart, selectEnd);
     FireOnSelect(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
