@@ -70,6 +70,7 @@ public:
     static ArkUINativeModuleValue GetParent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue MoveTo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetFrameNodeRawPtr(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPositionToParent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPositionToScreen(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
