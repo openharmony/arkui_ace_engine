@@ -81,7 +81,9 @@ void JSRadio::Create(const JSCallbackInfo& info)
         } else {
             group = "";
         }
-        indicator = indicatorTemp->ToNumber<int32_t>();
+        if (indicatorTemp->IsNumber()) {
+            indicator = indicatorTemp->ToNumber<int32_t>();
+        }
         ParseIndicator(info, indicator, customBuilderFunc, builderObject);
     }
     RadioModel::GetInstance()->Create(value, group, indicator);

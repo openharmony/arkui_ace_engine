@@ -82,7 +82,9 @@ void JSRating::Create(const JSCallbackInfo& info)
             }
         } else if (paramObject->HasProperty("$rating")) {
             changeEventVal = paramObject->GetProperty("$rating");
-            rating = getRating->ToNumber<double>();
+            if (getRating->IsNumber()) {
+                rating = getRating->ToNumber<double>();
+            }
         } else if (getRating->IsNumber()) {
             rating = getRating->ToNumber<double>();
         }
