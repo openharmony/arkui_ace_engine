@@ -2269,7 +2269,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    
+
     backgroundColor0Attribute(value: ResourceColor | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -7229,7 +7229,7 @@ export enum SheetSize {
 export interface BorderImageOption {
     slice?: Length | EdgeWidths | LocalizedEdgeWidths;
     repeat?: RepeatMode;
-    source?: string | Resource | LinearGradient_common;
+    source?: string | Resource | LinearGradientOptions;
     width?: Length | EdgeWidths | LocalizedEdgeWidths;
     outset?: Length | EdgeWidths | LocalizedEdgeWidths;
     fill?: boolean;
@@ -8761,7 +8761,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     }
 }
 export type CommonAttribute = CommonMethod
-export type CustomBuilder = 
+export type CustomBuilder =
 /** @memo */
 () => void;
 export interface OverlayOptions {
@@ -8834,12 +8834,6 @@ export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements C
     public strokeDashArray(value: Array<Length> | undefined): this {
         return this
     }
-}
-export interface LinearGradient_common {
-    angle?: number | string;
-    direction?: GradientDirection;
-    colors: Array<[ ResourceColor, number ]>;
-    repeating?: boolean;
 }
 export interface PixelRoundPolicy {
     start?: PixelRoundCalcPolicy;
@@ -11133,7 +11127,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
-        this._attributeOptimizer.applyModifierPatch(this.getPeer()); 
+        this._attributeOptimizer.applyModifierPatch(this.getPeer());
         super.applyAttributesFinish()
     }
 }
@@ -12988,7 +12982,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             exactRetValue.push(new Byte(retval[i]))
         }
         let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
+
         let returnResult = retvalDeserializer.readCallback_Void(true);
         return returnResult;
     }

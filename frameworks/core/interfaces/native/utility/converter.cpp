@@ -1139,7 +1139,7 @@ std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient_common& value)
+Gradient Convert(const Ark_LinearGradientOptions& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);

@@ -2042,8 +2042,6 @@ typedef struct Opt_LetterSpacingStyle Opt_LetterSpacingStyle;
 typedef struct LevelOrderPeer LevelOrderPeer;
 typedef struct LevelOrderPeer* Ark_LevelOrder;
 typedef struct Opt_LevelOrder Opt_LevelOrder;
-typedef struct Ark_LinearGradient_common Ark_LinearGradient_common;
-typedef struct Opt_LinearGradient_common Opt_LinearGradient_common;
 typedef struct Ark_LinearGradientBlurOptions Ark_LinearGradientBlurOptions;
 typedef struct Opt_LinearGradientBlurOptions Opt_LinearGradientBlurOptions;
 typedef struct Ark_LinearGradientOptions Ark_LinearGradientOptions;
@@ -2681,8 +2679,6 @@ typedef struct Ark_Union_String_Resource Ark_Union_String_Resource;
 typedef struct Opt_Union_String_Resource Opt_Union_String_Resource;
 typedef struct Ark_Union_String_Resource_ComponentContent Ark_Union_String_Resource_ComponentContent;
 typedef struct Opt_Union_String_Resource_ComponentContent Opt_Union_String_Resource_ComponentContent;
-typedef struct Ark_Union_String_Resource_LinearGradient_common Ark_Union_String_Resource_LinearGradient_common;
-typedef struct Opt_Union_String_Resource_LinearGradient_common Opt_Union_String_Resource_LinearGradient_common;
 typedef struct Ark_Union_String_Resource_PixelMap Ark_Union_String_Resource_PixelMap;
 typedef struct Opt_Union_String_Resource_PixelMap Opt_Union_String_Resource_PixelMap;
 typedef struct Ark_Union_String_WebResourceRequest Ark_Union_String_WebResourceRequest;
@@ -3300,7 +3296,7 @@ typedef struct Opt_NavigationToolbarOptions Opt_NavigationToolbarOptions;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
 typedef struct Opt_PopupOptions Opt_PopupOptions;
 typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
-typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents; 
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_SingleLengthDetent Ark_SingleLengthDetent;
 typedef struct Opt_SingleLengthDetent Opt_SingleLengthDetent;
 typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
@@ -13481,16 +13477,6 @@ typedef struct Opt_LevelOrder {
     Ark_Tag tag;
     Ark_LevelOrder value;
 } Opt_LevelOrder;
-typedef struct Ark_LinearGradient_common {
-    Opt_Union_Number_String angle;
-    Opt_GradientDirection direction;
-    Array_Tuple_ResourceColor_Number colors;
-    Opt_Boolean repeating;
-} Ark_LinearGradient_common;
-typedef struct Opt_LinearGradient_common {
-    Ark_Tag tag;
-    Ark_LinearGradient_common value;
-} Opt_LinearGradient_common;
 typedef struct Ark_LinearGradientBlurOptions {
     Array_FractionStop fractionStops;
     Ark_GradientDirection direction;
@@ -16443,18 +16429,18 @@ typedef struct Opt_Union_String_Resource_ComponentContent {
     Ark_Tag tag;
     Ark_Union_String_Resource_ComponentContent value;
 } Opt_Union_String_Resource_ComponentContent;
-typedef struct Ark_Union_String_Resource_LinearGradient_common {
+typedef struct Ark_Union_String_Resource_LinearGradientOptions {
     Ark_Int32 selector;
     union {
         Ark_String value0;
         Ark_Resource value1;
-        Ark_LinearGradient_common value2;
+        Ark_LinearGradientOptions value2;
     };
-} Ark_Union_String_Resource_LinearGradient_common;
-typedef struct Opt_Union_String_Resource_LinearGradient_common {
+} Ark_Union_String_Resource_LinearGradientOptions;
+typedef struct Opt_Union_String_Resource_LinearGradientOptions {
     Ark_Tag tag;
-    Ark_Union_String_Resource_LinearGradient_common value;
-} Opt_Union_String_Resource_LinearGradient_common;
+    Ark_Union_String_Resource_LinearGradientOptions value;
+} Opt_Union_String_Resource_LinearGradientOptions;
 typedef struct Ark_Union_String_Resource_PixelMap {
     Ark_Int32 selector;
     union {
@@ -19049,7 +19035,7 @@ typedef struct Opt_BaseGestureEvent {
 typedef struct Ark_BorderImageOption {
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths slice;
     Opt_RepeatMode repeat;
-    Opt_Union_String_Resource_LinearGradient_common source;
+    Opt_Union_String_Resource_LinearGradientOptions source;
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths width;
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths outset;
     Opt_Boolean fill;
