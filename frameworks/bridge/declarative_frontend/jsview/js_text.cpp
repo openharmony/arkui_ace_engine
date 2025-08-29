@@ -730,18 +730,13 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("TextDecorationColor", resObj, result);
     }
-    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
-    if (styleValue->IsNumber()) {
-        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    }
-    float lineThicknessScale = 1.0f;
-    if (thicknessScaleValue->IsNumber()) {
-        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
-    }
+    auto style =
+        styleValue->IsNumber() ? styleValue->ToNumber<int32_t>() : static_cast<int32_t>(DEFAULT_TEXT_DECORATION_STYLE);
+    float lineThicknessScale = thicknessScaleValue->IsNumber() ? thicknessScaleValue->ToNumber<float>() : 1.0f;
     lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
     TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
