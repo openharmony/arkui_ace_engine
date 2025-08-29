@@ -16,7 +16,6 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonConfiguration, ContentModifier } from "./arkui-wrapper-builder"
 import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, PX, VP, FP, LPX, Percentage, EdgeOutlineWidths, EdgeColors } from "./units"
 import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
@@ -28,7 +27,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier,CommonConfiguration, ContentModifier, CustomBuilderT  } from "./common"
 import { OptionWidthMode, Color } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions } from "./textPicker"
@@ -46,7 +45,7 @@ export interface MenuItemConfiguration {
     index: number
     triggerSelect(index: number, value: string): void
 }
-export class MenuItemConfigurationInternal implements MaterializedBase,CommonConfiguration,MenuItemConfiguration {
+export class MenuItemConfigurationInternal implements MaterializedBase,CommonConfiguration<MenuItemConfiguration>,MenuItemConfiguration {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -57,13 +56,13 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     set enabled(enabled: boolean) {
         this.setEnabled(enabled)
     }
-    get contentModifier(): ContentModifier {
+    get contentModifier(): ContentModifier<MenuItemConfiguration> | undefined {
         throw new Error("Not implemented")
     }
-    set contentModifier(contentModifier: ContentModifier) {
+    set contentModifier(contentModifier: ContentModifier<MenuItemConfiguration> | undefined) {
         this.setContentModifier(contentModifier)
     }
-    get value(): ResourceStr {
+    get value(): ResourceStr{
         throw new Error("Not implemented")
     }
     set value(value: ResourceStr) {
@@ -120,13 +119,14 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
         this.setEnabled_serialize(enabled_casted)
         return
     }
-    private getContentModifier(): ContentModifier {
+    private getContentModifier(): ContentModifier<MenuItemConfiguration> {
         return this.getContentModifier_serialize()
     }
-    private setContentModifier(contentModifier: ContentModifier): void {
-        const contentModifier_casted = contentModifier as (ContentModifier)
-        this.setContentModifier_serialize(contentModifier_casted)
-        return
+    private setContentModifier(contentModifier: ContentModifier<MenuItemConfiguration> | undefined): void {
+        if (contentModifier != undefined) {
+            const contentModifier_casted = contentModifier! as (ContentModifier<MenuItemConfiguration>)
+            this.setContentModifier_serialize(contentModifier_casted)
+        }
     }
     private getValue(): ResourceStr {
         return this.getValue_serialize()
@@ -178,13 +178,13 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     private setEnabled_serialize(enabled: boolean): void {
         ArkUIGeneratedNativeModule._MenuItemConfiguration_setEnabled(this.peer!.ptr, enabled ? 1 : 0)
     }
-    private getContentModifier_serialize(): ContentModifier {
+    private getContentModifier_serialize(): ContentModifier<MenuItemConfiguration> {
         const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : ContentModifier = (retvalDeserializer.readObject() as ContentModifier)
+        const returnResult : ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
         return returnResult
     }
-    private setContentModifier_serialize(contentModifier: ContentModifier): void {
+    private setContentModifier_serialize(contentModifier: ContentModifier<MenuItemConfiguration>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         ArkUIGeneratedNativeModule._MenuItemConfiguration_setContentModifier(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -264,7 +264,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
 }
 export class ArkSelectPeer extends ArkCommonMethodPeer {
     _attributeSet?: SelectModifier;
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSelectPeer {
@@ -1036,7 +1036,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_controlSize1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    menuItemContentModifier0Attribute(value: ContentModifier | undefined): void {
+    menuItemContentModifier0Attribute(value: ContentModifier<MenuItemConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -1048,7 +1048,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuItemContentModifier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    menuItemContentModifier1Attribute(value: ContentModifier | undefined): void {
+    menuItemContentModifier1Attribute(value: ContentModifier<MenuItemConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -1256,7 +1256,7 @@ export interface SelectAttribute extends CommonMethod {
     menuBackgroundColor(value: ResourceColor | undefined): this { return this; }
     menuBackgroundBlurStyle(value: BlurStyle | undefined): this { return this; }
     controlSize(value: ControlSize | undefined): this { return this; }
-    menuItemContentModifier(value: ContentModifier | undefined): this { return this; }
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this { return this; }
     divider(value: DividerOptions | null | undefined): this { return this; }
     textModifier(value: TextModifier | undefined): this { return this; }
     arrowModifier(value: SymbolGlyphModifier | undefined): this { return this; }
@@ -1289,7 +1289,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     menuBackgroundColor_value?: ResourceColor | undefined
     menuBackgroundBlurStyle_value?: BlurStyle | undefined
     controlSize_value?: ControlSize | undefined
-    menuItemContentModifier_value?: ContentModifier | undefined
+    menuItemContentModifier_value?: ContentModifier<MenuItemConfiguration> | undefined
     divider_value?: DividerOptions | undefined
     textModifier_value?: TextModifier | undefined
     arrowModifier_value?: SymbolGlyphModifier | undefined
@@ -1355,7 +1355,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     public controlSize(value: ControlSize | undefined): this {
         return this
     }
-    public menuItemContentModifier(value: ContentModifier | undefined): this {
+    public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
         return this
     }
     public divider(value: DividerOptions | null | undefined): this {
@@ -1700,16 +1700,16 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
-    public menuItemContentModifier(value: ContentModifier | undefined): this {
+    public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
         if (this.checkPriority("menuItemContentModifier")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
+                const value_casted = value as (ContentModifier<MenuItemConfiguration> | undefined)
                 this.getPeer()?.menuItemContentModifier0Attribute(value_casted)
                 return this
             }
             if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
+                const value_casted = value as (ContentModifier<MenuItemConfiguration> | undefined)
                 this.getPeer()?.menuItemContentModifier1Attribute(value_casted)
                 return this
             }

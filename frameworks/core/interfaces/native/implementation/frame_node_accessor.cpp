@@ -640,6 +640,14 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "TextClock", GENERATED_ARKUI_TEXT_CLOCK },
         { "TextTimer", GENERATED_ARKUI_TEXT_TIMER },
         { "Image", GENERATED_ARKUI_IMAGE },
+        { "Button", GENERATED_ARKUI_BUTTON },
+        { "CheckboxGroup", GENERATED_ARKUI_CHECKBOX_GROUP },
+        { "Checkbox", GENERATED_ARKUI_CHECKBOX },
+        { "Radio", GENERATED_ARKUI_RADIO },
+        { "Rating", GENERATED_ARKUI_RATING },
+        { "Select", GENERATED_ARKUI_SELECT },
+        { "Slider", GENERATED_ARKUI_SLIDER },
+        { "Toggle", GENERATED_ARKUI_TOGGLE },
     };
     GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
     auto iter = typeMap.find(type);
