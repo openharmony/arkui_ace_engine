@@ -172,6 +172,7 @@ public:
     void SetCancelButtonStyle(const CancelButtonStyle& cancelButtonStyle);
     void SetCancelIconSize(const Dimension& value);
     void SetCancelIconColor(const Color& color);
+    void ResetCancelButtonColor();
     void InitIconColorSize();
     void InitSearchIconColorSize();
     void InitCancelIconColorSize();
@@ -263,7 +264,7 @@ private:
     std::string SymbolColorToString(std::vector<Color>& colors) const;
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+        int32_t duration, const RefPtr<Curve>& curve, int32_t childId);
     void AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
         int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);

@@ -58,6 +58,7 @@ constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
 constexpr Dimension SYMBOL_ICON_HEIGHT = 16.0_fp;
 constexpr Dimension ICON_MAX_SIZE = 32.0_vp;
 constexpr Dimension SEARCH_TEXTINPUT_BORDER_WIDTH = 0.0_vp;
+constexpr float HOVER_STRAT_OPACITY = 0.0f;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float TOUCH_OPACITY = 0.1f;
 constexpr float MAX_FONT_SCALE = 2.0f;
@@ -952,6 +953,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     // When press '->' or '<-', focus delete button or search button according to whether there is text in the search.
     if (event.code == KeyCode::KEY_DPAD_LEFT || event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            ResetCancelButtonColor();
             focusChoice_ = FocusChoice::SEARCH;
             PaintFocusState();
             return true;
@@ -1004,6 +1006,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return textFieldPattern->OnKeyEvent(event);
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            ResetCancelButtonColor();
             if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
                 (event.code == KeyCode::KEY_DPAD_RIGHT)) {
                 return false; // Go out of Search
@@ -1091,8 +1094,16 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     if (renderContext->GetBackgroundColor().value_or(searchNormalColor_) == searchNormalColor_) {
-        renderContext->UpdateBackgroundColor(searchTheme->GetFocusBgColor());
+        renderContext->UpdateBackgroundColor(
+            searchTheme->GetSearchNormalColor().BlendColor(searchTheme->GetFocusBgColor()));
         isFocusBgColorSet_ = true;
+    }
+    if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+        auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(searchTheme->GetSearchCancelButtonFocusColor());
     }
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
@@ -1193,9 +1204,10 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomLeft = 0.0f;
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
+    float cancelButtonFocusPadding = searchTheme->GetSearchCancelButtonFocusPadding().ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        auto searchTheme = GetTheme();
-        CHECK_NULL_VOID(searchTheme);
         // 分层参数控制是否需要绘制焦点框
         if (searchTheme->NeedFocusBox()) {
             GetSearchFocusPaintRect(paintRect);
@@ -1203,14 +1215,14 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         }
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
-        originX = cancelButtonOffset_.GetX() + focusOffset;
-        originY = cancelButtonOffset_.GetY() + focusOffset;
-        endX = cancelButtonSize_.Width() + originX - DOUBLE * focusOffset;
-        endY = cancelButtonSize_.Height() + originY - DOUBLE * focusOffset;
-        radiusTopLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusTopRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusBottomLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusBottomRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
+        originX = cancelButtonOffset_.GetX() + focusOffset - cancelButtonFocusPadding;
+        originY = cancelButtonOffset_.GetY() + focusOffset - cancelButtonFocusPadding;
+        endX = cancelButtonSize_.Width() + originX - DOUBLE * focusOffset + DOUBLE * cancelButtonFocusPadding;
+        endY = cancelButtonSize_.Height() + originY - DOUBLE * focusOffset + DOUBLE * cancelButtonFocusPadding;
+        radiusTopLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusTopRight = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusBottomLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusBottomRight = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
     }
     if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
         originX = buttonOffset_.GetX() + focusOffset;
@@ -1310,9 +1322,10 @@ void SearchPattern::OnButtonTouchDown(int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
-        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+        AnimateTouchAndHover(
+            renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
     } else {
-        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION, childId);
     }
 }
 
@@ -1325,9 +1338,10 @@ void SearchPattern::OnButtonTouchUp(int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+        AnimateTouchAndHover(
+            renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
     } else {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION, childId);
     }
 }
 
@@ -1362,23 +1376,50 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (isHover) {
-        AnimateTouchAndHover(renderContext, 0.0f, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(
+            renderContext, HOVER_STRAT_OPACITY, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION, childId);
     } else {
-        AnimateTouchAndHover(renderContext, HOVER_OPACITY, 0.0f, HOVER_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(
+            renderContext, HOVER_OPACITY, HOVER_STRAT_OPACITY, HOVER_DURATION, Curves::FRICTION, childId);
     }
 }
 
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-    int32_t duration, const RefPtr<Curve>& curve)
+    int32_t duration, const RefPtr<Curve>& curve, int32_t childId)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto colorMode = context->GetColorMode();
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     if (colorMode == ColorMode::DARK) {
-        touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
-        touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+        if (childId == CANCEL_BUTTON_INDEX) {
+            if (startOpacity == HOVER_STRAT_OPACITY) {
+                //hover
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = searchTheme->GetSearchCancelButtonHoverColor();
+            } else if (endOpacity == HOVER_STRAT_OPACITY) {
+                //non-hover
+                touchColorFrom = searchTheme->GetSearchCancelButtonHoverColor();
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            } else if (startOpacity == HOVER_OPACITY) {
+                //touch down
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = searchTheme->GetSearchCancelButtonPressColor();
+            } else if (endOpacity == HOVER_OPACITY) {
+                //touch up
+                touchColorFrom = searchTheme->GetSearchCancelButtonPressColor();
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            } else {
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            }
+        } else {
+            touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+            touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+        }
     }
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
@@ -1419,7 +1460,7 @@ void SearchPattern::ClearButtonStyle(int32_t childId)
     CHECK_NULL_VOID(buttonFrameNode);
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
 }
 
 void SearchPattern::InitSearchTheme()
@@ -2491,6 +2532,19 @@ void SearchPattern::SetCancelIconColor(const Color& color)
             cancelIconFrameNode->MarkModifyDone();
             cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+    }
+}
+
+void SearchPattern::ResetCancelButtonColor()
+{
+    if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
 }
 
