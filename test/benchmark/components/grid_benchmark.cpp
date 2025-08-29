@@ -18,7 +18,8 @@
 #include <numeric>
 #include <vector>
 
-#include "core/components/scroll/scroll_controller_base.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
@@ -26,8 +27,6 @@
 
 // Benchmark constants
 namespace {
-constexpr int32_t MIN_ITER_COUNT = 50;
-constexpr int32_t MAX_ITER_COUNT = 1000;
 constexpr int32_t CACHED_COUNT = 5;
 constexpr double GAP_SIZE = 10.0;
 } // namespace
@@ -36,71 +35,47 @@ namespace OHOS::Ace::NG {
 static void CreateGrid(benchmark::State& state)
 {
     testing::FLAGS_gmock_verbose = "error";
-    auto gridCount = static_cast<int32_t>(state.range(0));
-    for (auto iter : state) {
-        // Test creating multiple grid frame nodes
-        std::vector<RefPtr<FrameNode>> grids {};
-        grids.reserve(gridCount);
-
-        for (int32_t i = 0; i < gridCount; ++i) {
-            auto gridNode = GridModelNG::CreateFrameNode(i);
-            grids.push_back(gridNode);
-            // Test grid configuration operations
-            GridModelNG::SetColumnsTemplate(gridNode.GetRawPtr(), "1fr 1fr 1fr");
-            GridModelNG::SetRowsTemplate(gridNode.GetRawPtr(), "1fr 1fr");
-            GridModelNG::SetColumnsGap(gridNode.GetRawPtr(), Dimension(GAP_SIZE));
-            GridModelNG::SetRowsGap(gridNode.GetRawPtr(), Dimension(GAP_SIZE));
-            GridModelNG::SetCachedCount(gridNode.GetRawPtr(), CACHED_COUNT);
-            GridModelNG::SetScrollEnabled(gridNode.GetRawPtr(), true);
-            gridNode->MarkModifyDone();
-        }
-
-        benchmark::DoNotOptimize(grids);
-    }
-}
-
-static void CreateGridWithModel(benchmark::State& state)
-{
-    testing::FLAGS_gmock_verbose = "error";
-    for (auto iter : state) {
-        GridModelNG gridModel;
-        // Create grid with controller
-        RefPtr<ScrollControllerBase> controller = nullptr;
-        RefPtr<ScrollProxy> scrollProxy = nullptr;
-        gridModel.Create(controller, scrollProxy);
-        gridModel.Pop();
-
-        benchmark::DoNotOptimize(gridModel);
+    TestNG::SetUpTestSuite(); // to create mocked pipeline
+    for (auto iter : state) { // framework automatically determines number of iterations
+        auto gridNode = GridModelNG::CreateFrameNode(0);
+        // Test grid configuration operations
+        GridModelNG::SetColumnsTemplate(gridNode.GetRawPtr(), "1fr 1fr 1fr");
+        GridModelNG::SetRowsTemplate(gridNode.GetRawPtr(), "1fr 1fr");
+        GridModelNG::SetColumnsGap(gridNode.GetRawPtr(), Dimension(GAP_SIZE));
+        GridModelNG::SetRowsGap(gridNode.GetRawPtr(), Dimension(GAP_SIZE));
+        GridModelNG::SetCachedCount(gridNode.GetRawPtr(), CACHED_COUNT);
+        GridModelNG::SetScrollEnabled(gridNode.GetRawPtr(), true);
+        gridNode->MarkModifyDone();
     }
 }
 
 static void LayoutGrid(benchmark::State& state)
 {
-    auto frameNode = GridModelNG::CreateFrameNode(0);
-    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
-    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
-    GridModelNG::SetRowsTemplate(frameNode.GetRawPtr(), "1fr 1fr");
-    // Create grid items as children using GridItemModelNG APIs
-    for (int32_t i = 0; i < 10; ++i) {
-        auto gridItemNode = GridItemModelNG::CreateFrameNode(i);
-        GridItemModelNG::SetRowStart(gridItemNode.GetRawPtr(), i / 2);
-        GridItemModelNG::SetColumnStart(gridItemNode.GetRawPtr(), i % 2);
-        GridItemModelNG::SetSelectable(gridItemNode.GetRawPtr(), true);
-        gridItemNode->MountToParent(frameNode);
-        gridItemNode->MarkModifyDone();
-    }
-    frameNode->MarkModifyDone();
-    for (auto iter : state) {
+    for (auto it : state) {
+        auto frameNode = GridModelNG::CreateFrameNode(0);
+        ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
+        ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
+        GridModelNG::SetRowsTemplate(frameNode.GetRawPtr(), "1fr 1fr");
+        // Create grid items as children using GridItemModelNG APIs
+        for (int32_t i = 0; i < 10; ++i) {
+            auto gridItemNode = GridItemModelNG::CreateFrameNode(i);
+            GridItemModelNG::SetRowStart(gridItemNode.GetRawPtr(), i / 2);
+            GridItemModelNG::SetColumnStart(gridItemNode.GetRawPtr(), i % 2);
+            GridItemModelNG::SetSelectable(gridItemNode.GetRawPtr(), true);
+            gridItemNode->MountToParent(frameNode);
+            gridItemNode->MarkModifyDone();
+        }
+        frameNode->MarkModifyDone();
         frameNode->SetActive();
         frameNode->SetLayoutDirtyMarked(true);
         frameNode->CreateLayoutTask();
+        benchmark::DoNotOptimize(frameNode);
     }
+    TestNG::TearDownTestSuite();
 }
 
-// Register benchmarks with varying sizes
-BENCHMARK(CreateGrid)->Range(MIN_ITER_COUNT, MAX_ITER_COUNT)->Unit(benchmark::kMicrosecond);
-BENCHMARK(CreateGridWithModel)->Range(MIN_ITER_COUNT, MAX_ITER_COUNT)->Unit(benchmark::kMicrosecond);
-BENCHMARK(LayoutGrid)->Range(MIN_ITER_COUNT, MAX_ITER_COUNT)->Unit(benchmark::kMicrosecond);
+BENCHMARK(CreateGrid);
+BENCHMARK(LayoutGrid);
 } // namespace OHOS::Ace::NG
 
 // Main
