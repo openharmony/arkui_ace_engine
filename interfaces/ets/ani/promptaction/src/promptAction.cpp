@@ -27,6 +27,31 @@
 #include "frameworks/core/components/common/properties/shadow.h"
 #include "promptActionUtils.h"
 
+namespace OHOS::Ace::NG {
+bool ContainerIsService()
+{
+    auto containerId = Container::CurrentIdSafely();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    // for pa service
+    return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
+}
+
+bool ContainerIsScenceBoard()
+{
+    auto container = Container::CurrentSafely();
+    if (!container) {
+        container = Container::GetActive();
+    }
+    return container && container->IsSceneBoardWindow();
+}
+} // OHOS::Ace::NG
+
 std::unordered_map<std::string, int> alignmentMap = {
     {"TopStart", 0},
     {"Top", 1},
@@ -330,28 +355,14 @@ bool GetToastParams(ani_env* env, ani_object options, OHOS::Ace::NG::ToastInfo t
 }
 bool HandleShowToast(OHOS::Ace::NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
-    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
-        toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard() && toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
         auto delegate = OHOS::Ace::EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             return false;
         }
         delegate->ShowToast(toastInfo, std::move(toastCallback));
-    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-        OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
     }
-#else
-    auto delegate = OHOS::Ace::EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        return false;
-    }
-    // if (toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
-    //     delegate->ShowToast(toastInfo, std::move(toastCallback));
-    // } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-    //     OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
-    // }
-#endif
     return true;
 }
 static void showToast([[maybe_unused]] ani_env* env, ani_object options)
