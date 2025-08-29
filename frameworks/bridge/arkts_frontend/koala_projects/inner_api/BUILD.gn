@@ -23,6 +23,8 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/NativePeerNode.d.ets",
     "./arkui/PeerNode.d.ets",
     "./arkui/ReusablePool.d.ets",
+    "./arkui/ArkComponentRoot.d.ets",
+    "./arkui/ArkUIEntry.d.ets",
   ]
   sources += [
     "./arkui/component.d.ets",
@@ -34,6 +36,8 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/component/stack.d.ets",
     "./arkui/component/tabs.d.ets",
     "./arkui/component/text.d.ets",
+    "./arkui/component/stack.d.ets",
+    "./arkui/component/navigationExtender.d.ets",
   ]
   sources += [
     "./@koalaui/common.d.ets",
