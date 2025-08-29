@@ -3062,8 +3062,9 @@ void PipelineContext::OnTouchEvent(
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
         auto touchTestResults = eventManager_->touchTestResults_;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
-            scalePoint, eventManager_->touchTestResults_)) {
+        if (scalePoint.sourceTool == SourceTool::PEN &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
+                scalePoint, eventManager_->touchTestResults_)) {
             eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
             return;
         }
