@@ -3192,8 +3192,8 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_004, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
-    ASSERT_NE(frameNode->GetGeomertyNode(), nullptr);
-    frameNode->GetGeomertyNode()->SetContentSize({});
+    ASSERT_NE(frameNode->GetGeometryNode(), nullptr);
+    frameNode->GetGeometryNode()->SetContentSize({});
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     OHOS::Ace::SetReturnStatus("");
