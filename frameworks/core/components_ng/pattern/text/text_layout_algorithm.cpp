@@ -734,7 +734,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     textStyleTmp.ResetTextBaselineOffset();
     paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
-        UpdateParagraphForAISpan(textStyleTmp, layoutWrapper, paragraph);
+        UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
     } else {
         if (pattern->IsDragging()) {
             auto dragContents = pattern->GetDragContents();
@@ -793,8 +793,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         (!spans_.empty() && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
         if (!CreateParagraphAndLayout(
             textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint, layoutWrapper)) {
-            TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",
-                contentConstraint.ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
             return false;
         }
     } else {

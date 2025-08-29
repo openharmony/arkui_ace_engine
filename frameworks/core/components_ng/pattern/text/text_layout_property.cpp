@@ -169,11 +169,6 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
 
-    ToJsonValueForOption(json, filter);
-}
-
-void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? CovertShadowToJson(shadow.front()) : CovertShadowsToJson(shadow);
@@ -190,7 +185,6 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("textSelectable", V2::ConvertWrapTextSelectableToString(
         GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
     json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
-    auto host = GetHost();
     json->PutExtAttr("privacySensitive", host ? host->IsPrivacySensitive() : false, filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);

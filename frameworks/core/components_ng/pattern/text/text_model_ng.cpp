@@ -814,7 +814,7 @@ void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
 void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnMarqueeStateChange(std::move(func));
 }
@@ -1265,7 +1265,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
 }
@@ -1273,7 +1273,7 @@ void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::
 void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
 }
@@ -1404,6 +1404,7 @@ void TextModelNG::SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim)
 
 bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OptimizeTrailingSpace, value, frameNode, value);
     return value;
