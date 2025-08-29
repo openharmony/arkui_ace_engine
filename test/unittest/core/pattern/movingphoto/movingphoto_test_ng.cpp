@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/image/image_source_info.h"
+
 #include "component_ext/movingphoto/movingphoto_styles.h"
 #include "component_ext/movingphoto/movingphoto_pattern.h"
 #include "component_ext/movingphoto/movingphoto_node.h"
