@@ -38,6 +38,8 @@ public:
     // key: string
     // parentView?: JSView
     static void CreateNewChildFinish(const JSCallbackInfo& info);
+    static void RecycleChild(const JSCallbackInfo& info);
+    static void ReuseChild(const JSCallbackInfo& info);
     static void AfterAddChild();
     static void OnMove(const JSCallbackInfo& info);
     static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj);

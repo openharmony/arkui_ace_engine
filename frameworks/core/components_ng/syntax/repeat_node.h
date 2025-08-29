@@ -63,6 +63,9 @@ public:
         ids_ = std::move(ids);
     }
 
+    void ReuseChild(uint32_t index);
+    void RecycleChild(uint32_t index);
+
     void AfterAddChild();
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
