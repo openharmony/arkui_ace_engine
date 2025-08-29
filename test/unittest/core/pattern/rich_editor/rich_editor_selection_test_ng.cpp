@@ -2143,6 +2143,8 @@ HWTEST_F(RichEditorSelectionTestNg, UpdateSelectionAndHandleVisibility001, TestS
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->insertValueLength_ = 5;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->UpdateSelectionAndHandleVisibility();
     ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 5);

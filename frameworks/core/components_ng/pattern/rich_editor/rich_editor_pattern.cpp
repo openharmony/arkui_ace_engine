@@ -163,8 +163,10 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     SetSpanStringMode(isStyledStringMode);
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
-    styledString_ = MakeRefPtr<MutableSpanString>(u"");
-    styledString_->SetSpanWatcher(WeakClaim(this));
+    if (isStyledStringMode) {
+        styledString_ = MakeRefPtr<MutableSpanString>(u"");
+        styledString_->SetSpanWatcher(WeakClaim(this));
+    }
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
@@ -340,6 +342,7 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
 void RichEditorPattern::HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
     std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput)
 {
+    CHECK_NULL_VOID(styledString_);
     auto changeStart = record.rangeBefore.start;
     auto changeLength = record.rangeBefore.GetLength();
     if (changeLength > 0 && (subValue.length() > 0 || !shouldCommitInput)) {
@@ -4955,7 +4958,7 @@ void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString,
 
 void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy)
 {
-    CHECK_NULL_VOID(spanString);
+    CHECK_NULL_VOID(spanString && styledString_);
     int currentCaretPosition = caretPosition_;
     auto strLength = spanString->GetLength();
     insertValueLength_ = strLength;
@@ -8590,6 +8593,7 @@ void RichEditorPattern::OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData)
 
 void RichEditorPattern::HandleOnCopyStyledString()
 {
+    CHECK_NULL_VOID(styledString_);
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
     subSpanString->isFromStyledStringMode = true;

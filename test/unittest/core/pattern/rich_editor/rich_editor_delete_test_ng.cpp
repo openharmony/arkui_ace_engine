@@ -941,6 +941,8 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteRange004, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 2;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->styledString_->text_ = u"test";
     auto styleString = richEditorPattern->styledString_;
     richEditorPattern->previewLongPress_ = true;
@@ -1140,6 +1142,8 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteToMaxLength003, TestSize.Level1)
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
     ASSERT_EQ(richEditorPattern->GetTextContentLength(), static_cast<int32_t>(INIT_VALUE_1.length()));
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->DeleteToMaxLength(maxLen);
     richEditorPattern->isSpanStringMode_ = false;
 

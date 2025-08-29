@@ -265,6 +265,8 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopyStyledString001, TestSize.Lev
 
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->OnCopyOperation();
     ASSERT_NE(richEditorPattern->GetClipboard(), nullptr);
 }

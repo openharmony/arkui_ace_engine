@@ -1479,6 +1479,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
      */
     richEditorPattern->spans_.clear();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     pasteCallback(arrs, text, isMulitiTypeRecord);
     EXPECT_EQ(2, richEditorPattern->spans_.size());
 }
@@ -1549,6 +1551,29 @@ HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString003, TestSize.Level1)
     richEditorPattern->ProcessStyledString();
 
     EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: ProcessStyledString003
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringCreateTest, TestSize.Level1)
+{
+    RefPtr<RichEditorPattern> pattern;
+    bool isStyledStringMode;
+
+    isStyledStringMode = false;
+    pattern = AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isSpanStringMode_, false);
+    EXPECT_EQ(pattern->styledString_, nullptr);
+
+    isStyledStringMode = true;
+    pattern = AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isSpanStringMode_, true);
+    EXPECT_NE(pattern->styledString_, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

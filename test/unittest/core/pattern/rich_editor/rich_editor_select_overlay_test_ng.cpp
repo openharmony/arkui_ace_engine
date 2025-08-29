@@ -1289,6 +1289,8 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles001, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);
     EXPECT_EQ(richEditorPattern->caretVisible_, true);
