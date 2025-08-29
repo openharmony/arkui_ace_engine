@@ -130,6 +130,7 @@ private:
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultSymbolColor(const TextStyle& textStyle);
+    void SetSymbolColors(const LinearVector<LinearColor>& value);
     LinearVector<LinearColor> Convert2VectorLinearColor(const std::vector<Color>& colorList);
     void SetDefaultTextShadow(const TextStyle& textStyle);
     void AddShadow(const Shadow& shadow);
