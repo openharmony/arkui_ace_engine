@@ -179,7 +179,7 @@ void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvCon
     if (src.menuOptionsParam.content.has_value()) {
         dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
     } else {
-        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr);
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
     }
     dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
