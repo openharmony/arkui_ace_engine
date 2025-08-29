@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gesture_event_hub.h"
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
@@ -1022,7 +1023,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
-        ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
+        ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback());
     }
     if (ret != 0) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAGFWK_START_FAIL);
@@ -1231,56 +1232,63 @@ void GestureEventHub::HandleOnDragCancel()
     dragDropProxy_ = nullptr;
 }
 
-OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
+OnDragCallbackCore GestureEventHub::GetDragCallback()
 {
     auto ret = [](const DragNotifyMsgCore& notifyMessage) {};
-    auto eventHub = hub.Upgrade();
-    CHECK_NULL_RETURN(eventHub, ret);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
-    CHECK_NULL_RETURN(pipeline, ret);
-    auto taskScheduler = pipeline->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskScheduler, ret);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, ret);
-    auto eventManager = pipeline->GetEventManager();
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager,
-                        dragframeNodeInfo = dragframeNodeInfo_,
-                        gestureEventHubPtr = AceType::Claim(this)](const DragNotifyMsgCore& notifyMessage) {
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, ret);
+    auto callback = [id = frameNode->GetInstanceId(), weak = AceType::WeakClaim(this)]
+        (const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
-        taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id, dragframeNodeInfo,
-                gestureEventHubPtr]() {
-                auto container = Container::GetContainer(id);
-                if (!container) {
-                    TAG_LOGE(AceLogTag::ACE_DRAG, "handle drag end callback, can not get container.");
-                    return;
-                }
-                DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-                TAG_LOGI(
-                    AceLogTag::ACE_DRAG, "handle drag end callback, windowId is %{public}d.", container->GetWindowId());
-                dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, id);
-                auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
-                if (ret != 0) {
-                    TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
-                }
-                if (eventManager) {
-                    eventManager->DoMouseActionRelease();
-                }
-                if (notifyMessage.isInnerAndOuterTriggerBothNeeded) {
-                    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
-                }
-                if (eventHub->HasOnDragEnd()) {
-                    (eventHub->GetOnDragEnd())(dragEvent);
-                }
-                gestureEventHubPtr->HandleDragEndAction(dragframeNodeInfo);
-                auto dragEventActuator = gestureEventHubPtr->GetDragEventActuator();
-                CHECK_NULL_VOID(dragEventActuator);
-                dragEventActuator->NotifyDragEnd();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask([id, weak, notifyMessage]() {
+                auto gestureEventHub = weak.Upgrade();
+                CHECK_NULL_VOID(gestureEventHub);
+                gestureEventHub->HandleDragEnd(id, notifyMessage);
             },
             TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };
     return callback;
+}
+
+void GestureEventHub::HandleDragEnd(int32_t containerId, const DragNotifyMsgCore& notifyMessage)
+{
+    auto container = Container::GetContainer(containerId);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "handle drag end callback, can not get container.");
+        return;
+    }
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "handle drag end callback, windowId is %{public}d.", container->GetWindowId());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, containerId);
+    auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
+    }
+    auto eventManager = pipeline->GetEventManager();
+    if (eventManager) {
+        eventManager->DoMouseActionRelease();
+    }
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    if (notifyMessage.isInnerAndOuterTriggerBothNeeded) {
+        eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+    }
+    if (eventHub->HasOnDragEnd()) {
+        (eventHub->GetOnDragEnd())(dragEvent);
+    }
+    HandleDragEndAction(dragframeNodeInfo_);
+    auto dragEventActuator = GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    dragEventActuator->NotifyDragEnd();
 }
 
 DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
