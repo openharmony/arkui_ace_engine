@@ -2726,8 +2726,8 @@ HWTEST_F(RatingTestNg, MeasureTest007, TestSize.Level1)
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     ASSERT_NE(ratingTheme, nullptr);
-    auto ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM,
-        TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
+    auto ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
+        contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
     EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
     EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
 
@@ -2735,8 +2735,8 @@ HWTEST_F(RatingTestNg, MeasureTest007, TestSize.Level1)
      * @tc.steps: step2. call MeasureContent function.
      * @tc.expected: ret is not equal to TEST_SIZE_0.
      */
-    ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(contentConstraint, layoutPolicyProperty, RATING_STAR_NUM_ZERO,
-        TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
+        contentConstraint, layoutPolicyProperty, RATING_STAR_NUM_ZERO, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
     EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
     EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
 }

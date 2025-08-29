@@ -2718,7 +2718,6 @@ HWTEST_F(RadioTestNg, MeasureContentTest004, TestSize.Level1)
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF contentConstraint;
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
-    // contentConstraint.selfIdealSize.SetSize(TEST_SIZE_60);
     auto layoutProperty = layoutWrapper.GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     LayoutPolicyProperty layoutPolicyProperty;

@@ -51,9 +51,8 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
-        auto height = contentConstraint.selfIdealSize.Height().value();
-        auto width = contentConstraint.selfIdealSize.Width().value();
-        auto length = std::min(width, height);
+        auto length =
+            std::min(contentConstraint.selfIdealSize.Width().value(), contentConstraint.selfIdealSize.Height().value());
         return SizeF(length, length);
     }
     // Case 2: The front end only sets either width or height
@@ -70,9 +69,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
         return SizeF(height, height);
     }
     // Case 3: Width and height are not set in the front end, so return from the theme
-    auto width = defaultWidth_ - 2 * horizontalPadding_;
-    auto height = defaultHeight_ - 2 * verticalPadding_;
-    auto size = SizeF(width, height);
+    auto size = SizeF(defaultWidth_ - 2 * horizontalPadding_, defaultHeight_ - 2 * verticalPadding_);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());

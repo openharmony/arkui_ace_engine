@@ -123,8 +123,8 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::LayoutPolicyIsMatchParent(con
     return SizeF();
 }
 
-std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
-    std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(
+    const LayoutConstraintF& contentConstraint, std::optional<NG::LayoutPolicyProperty> layoutPolicy)
 {
     CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
     auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);

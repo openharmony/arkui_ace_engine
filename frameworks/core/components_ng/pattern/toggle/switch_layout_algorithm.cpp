@@ -28,11 +28,9 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            frameNode->GetGeometryNode()->ResetContent();
-        } else {
-            frameNode->GetGeometryNode()->Reset();
-        }
+        auto geometryNode = frameNode->GetGeometryNode();
+        const bool isApi18OrHigher = frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+        isApi18OrHigher ? geometryNode->ResetContent() : geometryNode->Reset();
         return std::nullopt;
     }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -71,14 +69,9 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
         LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     }
-    float width = 0.0f;
-    float height = 0.0f;
-    CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
 
-    width_ = width;
-    height_ = height;
-
-    return SizeF(width, height);
+    CalcHeightAndWidth(frameNode, height_, width_, frameHeight, frameWidth);
+    return SizeF(width_, height_);
 }
 
 void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
