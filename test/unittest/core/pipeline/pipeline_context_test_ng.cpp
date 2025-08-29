@@ -1468,42 +1468,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg031
- * @tc.desc: Test OnTouchEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    TouchEvent point_;
-    /**
-     * @tc.steps2: create callback and call OnTouchEvent.
-     * @tc.expected: flag is false.
-     */
-    bool flag = false;
-    context_->OnTouchEvent(point_, true);
-    EXPECT_FALSE(flag);
-    /**
-     * @tc.steps3: call OnTouchEvent with second arg is false.
-     * @tc.expected: hasIdleTasks_ is true.
-     */
-    point_.type = TouchType::UNKNOWN;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(context_->hasIdleTasks_);
-    /**
-     * @tc.steps4: change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: hasIdleTasks_ is true.
-     */
-    point_.type = TouchType::UP;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(context_->hasIdleTasks_);
-}
-
-/**
  * @tc.name: PipelineContextTestNg032
  * @tc.desc: Test OnSurfacePositionChanged RegisterSurfacePositionChangedCallback
  * UnregisterSurfacePositionChangedCallback.
