@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -56,6 +57,9 @@ namespace MediaCachedImageModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components MediaCachedImage used in ParallelizeUI");
+    }
     RefPtr<PixelMap> pixmap = nullptr;
     auto frameNode = ImageModelNG::CreateFrameNode(id, "", pixmap, "", "", false);
     CHECK_NULL_RETURN(frameNode, nullptr);
