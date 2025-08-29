@@ -26,11 +26,8 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            host->GetGeometryNode()->ResetContent();
-        } else {
-            host->GetGeometryNode()->Reset();
-        }
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ? host->GetGeometryNode()->ResetContent()
+                                                                              : host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
@@ -74,9 +71,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     }
 
     // case 3: Using the theme's height and width by default if rating component is not set size.
-    SizeF componentSize;
-    componentSize.SetHeight(static_cast<float>(defaultHeight));
-    componentSize.SetWidth(static_cast<float>(defaultWidth));
+    SizeF componentSize(static_cast<float>(defaultWidth), static_cast<float>(defaultHeight));
     return contentConstraint.Constrain(componentSize);
 }
 
