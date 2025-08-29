@@ -7931,6 +7931,7 @@ void RichEditorPattern::HandleTouchCancelAfterLongPress()
     auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touch canceled, textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
+    IF_TRUE(previewLongPress_, CloseKeyboard(true));
     textSelector_.Update(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
