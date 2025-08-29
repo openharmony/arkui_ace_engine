@@ -73,7 +73,9 @@ void JSFolderStack::Create(const JSCallbackInfo& info)
         std::vector<std::string> upperItems(upperItemLength);
         if (upperId->IsArray()) {
             for (size_t i = 0; i < upperItemLength; i++) {
-                upperItems[i] = upperIdParams->GetValueAt(i)->ToString();
+                if (upperIdParams->GetValueAt(i)->IsString()) {
+                    upperItems[i] = upperIdParams->GetValueAt(i)->ToString();
+                }
             }
         }
         FolderStackModel::GetInstance()->Create(upperItems);

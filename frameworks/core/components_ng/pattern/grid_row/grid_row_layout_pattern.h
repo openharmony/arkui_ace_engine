@@ -54,6 +54,13 @@ public:
     void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
 
     FocusPattern GetFocusPattern() const override
     {
