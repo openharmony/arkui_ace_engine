@@ -83,3 +83,14 @@ export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
 
     public aboutToBeDeleted(): void {}
 }
+
+export enum ColorMode {
+    LIGHT = 0,
+    DARK
+}
+
+export enum LayoutDirection {
+    LTR,
+    RTL,
+    Auto
+}

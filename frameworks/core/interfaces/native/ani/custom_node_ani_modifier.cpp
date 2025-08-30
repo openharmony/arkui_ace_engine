@@ -28,23 +28,21 @@
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-    std::function<bool()>&& onBackPress, std::function<void()>&& pageTransitionFunc,
-    std::function<void()>&& onCleanupFunc, std::function<std::string()>&& onDumpInspectorFunc)
+ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
-    struct NodeKoalaInfo info {
-        .onPageShowFunc = std::move(onPageShow),
-        .onPageHideFunc = std::move(onPageHide),
-        .onBackPressedFunc = std::move(onBackPress),
-        .pageTransitionFunc = std::move(pageTransitionFunc),
-        .onCleanupFunc = std::move(onCleanupFunc),
-        .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
-        .jsViewName = key
-    };
-    auto customNode = NG::CustomNodeStatic::ConstructCustomNode(id, std::move(info));
+    auto customNode = NG::CustomNode::CreateCustomNode(id, key);
+    customNode->IncRefCount();
+
+    customNode->SetOnPageShowFunc(std::move(customNodeInfo.onPageShowFunc));
+    customNode->SetOnPageHideFunc(std::move(customNodeInfo.onPageHideFunc));
+    customNode->SetOnBackPressedFunc(std::move(customNodeInfo.onBackPressedFunc));
+    customNode->SetPageTransitionFunc(std::move(customNodeInfo.pageTransitionFunc));
+    customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
+    customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
+
     if (customNode) {
-        return reinterpret_cast<ani_long>(customNode);
+        return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
     }
     return 0;
 }
