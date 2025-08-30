@@ -3146,6 +3146,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.overlayManager.ts @arkuipopupwindow
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.promptAction.ts @arkuipopupwindow
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/modifiers/ArkFlowItemNode.ts @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/modifiers/ArkGridItemNode.ts @arkuiscroll
@@ -3175,7 +3176,10 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Fra
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniModule.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
@@ -3186,6 +3190,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Nod
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @arkuievent
@@ -3206,6 +3212,9 @@ frameworks/core/interfaces/native/implementation/time_picker_dialog_accessor.cpp
 frameworks/core/interfaces/native/implementation/time_picker_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/time_picker_selected_ops_accessor.cpp @arkui_image
 
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @arkuievent
 frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @arkuievent
 frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @arkuievent
@@ -3214,9 +3223,6 @@ frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @arkuievent
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @arkuievent
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @arkuievent
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @arkuievent
-frameworks/core/interfaces/native/ani/drag_controller_utils.cpp @arkuievent
-frameworks/core/interfaces/native/ani/drag_controller_utils.h @arkuievent
-frameworks/core/interfaces/native/ani/drag_preview.h @arkuievent
 frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @arkuievent
 frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @arkuievent
 
