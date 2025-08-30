@@ -1,0 +1,24 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/CalendarPicker",
+    "pages/CalendarPickerDialog",
+    "pages/CalendarPickerDialogMemTest",
+    "pages/ComponentV2Test",
+    "pages/DatePicker",
+    "pages/DatePickerDialogDST",
+    "pages/HapticTest",
+    "pages/HeavyDataTextPicker",
+    "pages/IndexDialog",
+    "pages/MultiTextPicker",
+    "pages/PickerDialog",
+    "pages/PickerLongPage",
+    "pages/TextPicker",
+    "pages/TextPickerAge",
+    "pages/TextPickerMatchParent",
+    "pages/TextPickerRangeTest",
+    "pages/TextPickerThree",
+    "pages/TimePicker",
+    "pages/TimePickerBindSheet"
+  ]
+}
