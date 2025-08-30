@@ -602,6 +602,11 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition = this.initializeConsume('selectedItemPosition', 'selectedItemPosition');
     this.__zoomScaleArray = this.initializeConsume('zoomScaleArray', 'zoomScaleArray');
     this.__buttonBorderRadius = this.initializeConsume('buttonBorderRadius', 'buttonBorderRadius');
+    this.__isSegmentFocusStyleCustomized = new SynchedPropertySimpleOneWayPU(
+      params.isSegmentFocusStyleCustomized,
+      this,
+      'isSegmentFocusStyleCustomized'
+    );
     this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
@@ -612,6 +617,7 @@ class SelectItem extends ViewPU {
   updateStateVars(params) {
     this.__optionsArray.set(params.optionsArray);
     this.__options.set(params.options);
+    this.__isSegmentFocusStyleCustomized.reset(params.isSegmentFocusStyleCustomized);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
     this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
@@ -621,6 +627,7 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition.purgeDependencyOnElmtId(rmElmtId);
     this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
+    this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__optionsArray.aboutToBeDeleted();
@@ -630,6 +637,7 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition.aboutToBeDeleted();
     this.__zoomScaleArray.aboutToBeDeleted();
     this.__buttonBorderRadius.aboutToBeDeleted();
+    this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -669,6 +677,12 @@ class SelectItem extends ViewPU {
   set buttonBorderRadius(newValue) {
     this.__buttonBorderRadius.set(newValue);
   }
+  get isSegmentFocusStyleCustomized() {
+    return this.__isSegmentFocusStyleCustomized.get();
+  }
+  set isSegmentFocusStyleCustomized(newValue) {
+    this.__isSegmentFocusStyleCustomized.set(newValue);
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -690,7 +704,7 @@ class SelectItem extends ViewPU {
               x: this.zoomScaleArray[this.selectedIndexes[0]],
               y: this.zoomScaleArray[this.selectedIndexes[0]],
             });
-            Stack.shadow(
+            Stack.shadow(this.isSegmentFocusStyleCustomized ? undefined :
               resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
             );
           }, Stack);
@@ -3053,6 +3067,7 @@ export class SegmentButton extends ViewPU {
                             optionsArray: this.options.buttons,
                             options: this.options,
                             selectedIndexes: this.__selectedIndexes,
+                            isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                           },
                           undefined,
                           elmtId,
@@ -3065,6 +3080,7 @@ export class SegmentButton extends ViewPU {
                             optionsArray: this.options.buttons,
                             options: this.options,
                             selectedIndexes: this.selectedIndexes,
+                            isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                           };
                         };
                         componentCall.paramsGenerator_ = paramsLambda;
@@ -3072,6 +3088,7 @@ export class SegmentButton extends ViewPU {
                         this.updateStateVarsOfChildByElmtId(elmtId, {
                           optionsArray: this.options.buttons,
                           options: this.options,
+                          isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                         });
                       }
                     },
