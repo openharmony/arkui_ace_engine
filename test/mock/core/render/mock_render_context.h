@@ -137,6 +137,16 @@ public:
         groupProperty->propEffectOption = effectOption;
     }
 
+    void OnUseEffectUpdate(bool useEffect) override
+    {
+        propUseEffect_ = useEffect;
+    }
+
+    void OnUseEffectTypeUpdate(EffectType effectType) override
+    {
+        propUseEffectType_ = effectType;
+    }
+
     void SetOuterBorderWidth(const BorderWidthProperty& value) override
     {
         GetOrCreateOuterBorder()->propOuterBorderWidth = value;
