@@ -685,7 +685,7 @@ export class MouseEventTransfer {
         }
         const pressedButtonsValue = esValue.getProperty("pressedButtons");
         for (let button of pressedButtonsValue) {
-            mouseEvent.pressedButtons?.push(TypeChecker.MouseButton_FromNumeric(button.invokeMethod("valueOf").toNumber() as int32))
+            mouseEvent.pressedButtons?.push(TypeChecker.MouseButton_FromNumeric(button.toNumber() as int32))
         }
         return mouseEvent;
     }
@@ -741,7 +741,16 @@ export class MouseEventTransfer {
         retValue.setProperty('targetDisplayId', mouseEvent.targetDisplayId);
         retValue.setProperty('rawDeltaX', mouseEvent.rawDeltaX);
         retValue.setProperty('rawDeltaY', mouseEvent.rawDeltaY);
-        retValue.setProperty('pressedButtons', mouseEvent.pressedButtons);
+
+        if (mouseEvent.pressedButtons !== undefined) {
+            let pressedButtonsArray = mouseEvent!.pressedButtons as Array<MouseButton>;
+            let pressedButtonsValue = ESValue.instantiateEmptyArray();
+            for (let index = 0; index < pressedButtonsArray.length; index++) {
+                pressedButtonsValue.setProperty(index, TypeChecker.MouseButton_ToNumeric(mouseEvent.button));
+            }
+            retValue.setProperty('pressedButtons', pressedButtonsValue);
+        }
+
         return retValue;
     }
 }
