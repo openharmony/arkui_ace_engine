@@ -279,11 +279,6 @@ void MenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isNeedDivider_ = false;
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    RefPtr<UINode> previousNode = nullptr;
-    UpdateMenuItemChildren(uiNode, previousNode);
-    RemoveLastNodeDivider(previousNode);
     ResetThemeByInnerMenuCount();
     auto menuWrapperNode = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapperNode);
@@ -492,6 +487,41 @@ void MenuPattern::UpdateSelectIndex(int32_t index)
     FireBuilder();
 }
 
+void MenuPattern::OnAttachToMainTree()
+{
+    AddBuildDividerTask();
+}
+
+void MenuPattern::AddBuildDividerTask()
+{
+    if (buildDividerTaskAdded_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->BuildDivider();
+        };
+    buildDividerTaskAdded_ = true;
+    pipeline->AddBuildFinishCallBack(std::move(callback));
+}
+
+void MenuPattern::BuildDivider()
+{
+    buildDividerTaskAdded_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isNeedDivider_ = false;
+    auto uiNode = AceType::DynamicCast<UINode>(host);
+    RefPtr<UINode> previousNode = nullptr;
+    UpdateMenuItemChildren(uiNode, previousNode);
+    RemoveLastNodeDivider(previousNode);
+}
+
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     // determine menu type based on sibling menu count
@@ -510,11 +540,6 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ResetNeedDivider();
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    RefPtr<UINode> previousNode = nullptr;
-    UpdateMenuItemChildren(uiNode, previousNode);
-    RemoveLastNodeDivider(previousNode);
     SetAccessibilityAction();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);

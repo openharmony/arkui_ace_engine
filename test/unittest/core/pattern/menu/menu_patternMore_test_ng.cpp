@@ -1829,4 +1829,59 @@ HWTEST_F(MenuPattern2TestNg, OnColorConfigurationUpdate, TestSize.Level1)
     menuPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), theme->GetBackgroundColor());
 }
+
+/**
+ * @tc.name: BuildDivider
+ * @tc.desc: Verify BuildDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, BuildDivider, TestSize.Level1)
+{
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->BuildDivider();
+    EXPECT_FALSE(menuPattern->buildDividerTaskAdded_);
+}
+
+/**
+ * @tc.name: AddBuildDividerTask
+ * @tc.desc: Verify AddBuildDividerTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, AddBuildDividerTask, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(TARGET_FONT));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);  // add divider
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MneuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemPattern->OnAttachToMainTree();
+    menuPattern->OnAttachToMainTree();
+    EXPECT_TRUE(menuPattern->buildDividerTaskAdded_);
+
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_FALSE(menuPattern->buildDividerTaskAdded_);
+}
 } // namespace OHOS::Ace::NG

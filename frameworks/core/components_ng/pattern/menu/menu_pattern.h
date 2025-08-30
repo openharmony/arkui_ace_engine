@@ -717,6 +717,8 @@ public:
         return subMenuDepth_;
     }
 
+    void AddBuildDividerTask();
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -803,6 +805,8 @@ private:
         AnimationOption& option) const;
     void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+    void OnAttachToMainTree() override;
+    void BuildDivider();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -862,6 +866,7 @@ private:
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
     bool isDisableMenuBgColorByUser_ = false;
+    bool buildDividerTaskAdded_ = false;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

@@ -545,6 +545,7 @@ friend class ServiceCollaborationMenuAceHelper;
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
+    void OnAttachToMainTree() override;
 
     std::list<TouchRegion> hoverRegions_;
 
