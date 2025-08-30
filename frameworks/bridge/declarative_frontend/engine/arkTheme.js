@@ -179,7 +179,7 @@ class ArkThemeCache {
     }
     remove(theme) {
         const index = this.cache.indexOf(theme);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.cache.splice(index, 1);
@@ -270,7 +270,7 @@ class ArkThemeBase {
     }
     unbindFromScope(themeScopeId) {
         const index = this.bindedThemeScopesIds.indexOf(themeScopeId);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.scopesCounter--;

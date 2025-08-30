@@ -346,7 +346,8 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
     void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
 
 /**
- * @brief Register a callback to be executed at the end of the next idle frame.If there is no next frame, will request one automatically.
+ * @brief Register a callback to be executed at the end of the next idle frame.
+          If there is no next frame, will request one automatically.
  *
  * @param uiContext ArkUI_ContextHandle.
  * @param userData Indicates the custom data to be saved.

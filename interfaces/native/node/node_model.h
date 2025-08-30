@@ -47,8 +47,8 @@ struct ArkUI_Node {
     void* alignRuleOption = nullptr;  
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
-    void* imageFrameInfos = nullptr;
     void* drawableDescriptor = nullptr;
+    void* imageFrameInfos = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
