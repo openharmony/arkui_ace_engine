@@ -2020,7 +2020,7 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<NG::HitTestMode>(value);
     if (!convValue) {
-        // TODO: Reset value
+        ViewAbstract::SetHitTestMode(frameNode, NG::HitTestMode::HTMDEFAULT);
         return;
     }
     ViewAbstract::SetHitTestMode(frameNode, *convValue);
