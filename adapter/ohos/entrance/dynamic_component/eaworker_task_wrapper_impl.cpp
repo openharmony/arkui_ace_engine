@@ -17,18 +17,22 @@
 
 
 #include <ani.h>
+#include <iomanip>
+#include <sstream>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "concurrency_helpers.h"
-
-#include "adapter/ohos/entrance/ace_container.h"
-#include "base/utils/time_util.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
-
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int64_t SEC_TO_NANOSEC = 1000000000;
+
 void GetVM(int32_t hostInstanceId, ani_vm **vm)
 {
-    auto container = Platform::AceContainer::GetContainer(hostInstanceId);
+    auto container = Container::GetContainer(hostInstanceId);
     CHECK_NULL_VOID(container);
     RefPtr<Frontend> frontend = container->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -62,6 +66,13 @@ bool CheckWorkerId(int32_t workerId)
 {
     return workerId >= 0;
 }
+
+int64_t GetSysTimestamp()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec;
+}
 }
 
 EaWorkerTaskWrapperImpl::EaWorkerTaskWrapperImpl(int32_t hostInstanceId, int32_t workerId)
@@ -69,6 +80,7 @@ EaWorkerTaskWrapperImpl::EaWorkerTaskWrapperImpl(int32_t hostInstanceId, int32_t
 {
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "Create EaWorkerTaskWrapperImpl "
         "hostInstanceId: %{public}d, workerId:%{public}d", hostInstanceId_, workerId_);
+    threadId_ = pthread_self();
 }
 
 EaWorkerTaskWrapperImpl::~EaWorkerTaskWrapperImpl()
@@ -122,41 +134,7 @@ bool EaWorkerTaskWrapperImpl::HasAttachCurrentThread(pthread_t tid)
 
 void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task)
 {
-    if (!CheckWorkerId(workerId_)) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl Call due "
-            "to error invalid workerId: %{public}d", workerId_);
-        return;
-    }
-    ani_env *callerAniEnv = nullptr;
-    auto tid = pthread_self();
-    bool attachCurrentThread = HasAttachCurrentThread(tid);
-    GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv);
-    auto callerWorkerId = arkts::concurrency_helpers::GetWorkerId(callerAniEnv);
-    if (callerAniEnv == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl callerAniEnv is nullptr, "
-            "callerWorkerId: %{public}d, workerId: %{public}d", callerWorkerId, workerId_);
-        return;
-    }
-
-    if (!attachCurrentThread) {
-        attachCurrentThreads_.insert(tid);
-    }
-
-    int64_t ts = GetSysTimestamp();
-    EaWorkerEvent* event = new EaWorkerEvent(task, ts);
-    auto status = arkts::concurrency_helpers::SendEvent(callerAniEnv, workerId_,
-        [] (void *data) {
-            auto *event = reinterpret_cast<EaWorkerEvent *>(data);
-            if (event == nullptr) {
-                TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "event is null");
-                return;
-            }
-
-            event->Fire();
-        }, reinterpret_cast<void *>(event));
-    if (status != arkts::concurrency_helpers::WorkStatus::OK) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
-    }
+    Call(task, 0);
 }
 
 void EaWorkerTaskWrapperImpl::DumpWorker()
@@ -219,9 +197,19 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t dela
             }
 
             event->Fire();
+            delete event;
         }, reinterpret_cast<void *>(event), delayTime);
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
     }
+}
+
+extern "C" ACE_FORCE_EXPORT TaskWrapper* OHOS_ACE_CreatEaWorkerTaskWrapper(
+    int32_t hostInstanceId, int32_t workerId) {
+    return static_cast<TaskWrapper*>(new EaWorkerTaskWrapperImpl(hostInstanceId, workerId));
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetCurrentThreadAniEnv() {
+    return EaWorkerTaskWrapperImpl::GetCurrentAniEnv();
 }
 } // namespace OHOS::Ace::NG

@@ -17,7 +17,6 @@
 
 #include <atomic>
 #include <cinttypes>
-#include <ani.h>
 #include <optional>
 
 #include "ability_context.h"
@@ -70,7 +69,6 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
-#include "adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/aps_monitor_impl.h"
@@ -84,6 +82,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "arkts_dynamic_renderer_loader.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -278,11 +277,14 @@ void ArktsDynamicUIContentImpl::InitializeArktsDynamicUIContentImpl(const Dynami
     registerComponents_ = config.registerComponents;
     auto entryPoint = config.entryPoint;
     hostWindowInfo_ = config.hostWindowInfo;
-    auto eaWorkerTaskWrapperImpl = std::make_shared<EaWorkerTaskWrapperImpl>(config.hostInstanceId, config.workerId);
-    auto threadId = pthread_self();
-    eaWorkerTaskWrapperImpl->SetCurrentPthread(threadId);
-    taskWrapper_ = eaWorkerTaskWrapperImpl;
+    auto taskWrapper = ArktsDynamicRendererLoader::GetInstance().CreatEaWorkerTaskWrapper(
+        config.hostInstanceId, config.workerId);
+    if (taskWrapper == nullptr) {
+        TAG_LOGE(aceLogTag_, "CreatEaWorkerTaskWrapper failed");
+        return;
+    }
 
+    taskWrapper_.reset(taskWrapper);
     CommonInitializeDc(config.abcPath);
     AddWatchSystemParameter();
 
