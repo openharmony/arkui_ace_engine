@@ -1722,6 +1722,7 @@ template<>
 void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 {
     switch (src) {
+        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
         case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
         case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
         case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;

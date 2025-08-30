@@ -1370,12 +1370,7 @@ void ViewAbstractModelStatic::SetForegroundEffect(FrameNode* frameNode, const st
 
 void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
 {
-    if (blendMode.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
-    }
+    ViewAbstract::SetBlendMode(frameNode, blendMode.value_or(BlendMode::NONE));
 }
 
 void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)
@@ -1543,12 +1538,7 @@ void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
-    if (blendApplyType) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
-    }
+    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType.value_or(BlendApplyType::FAST));
 }
 
 void ViewAbstractModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
