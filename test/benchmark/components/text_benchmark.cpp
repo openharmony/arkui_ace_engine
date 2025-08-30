@@ -28,8 +28,5 @@ static void CreateText(benchmark::State& state)
     }
 }
 
-// static void LayoutText(benchmark::State& state) {}
-
 BENCHMARK(CreateText);
-// BENCHMARK(LayoutText)->Range(8, 512); // range specifies number of children
 } // namespace OHOS::Ace::NG
