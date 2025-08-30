@@ -65,22 +65,9 @@ public:
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
-    void SetDistanceThreshold(double distanceThreshold)
-    {
-        distanceThreshold_ = Dimension(
-            Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-        if (distanceThreshold <= 0) {
-            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-        }
-    }
+    void SetDistanceThreshold(double distanceThreshold);
 
-    void SetDistanceThreshold(Dimension distanceThreshold)
-    {
-        distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_.ConvertToPx() <= 0) {
-            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-        }
-    }
+    void SetDistanceThreshold(Dimension distanceThreshold);
 
     int GetCount()
     {
