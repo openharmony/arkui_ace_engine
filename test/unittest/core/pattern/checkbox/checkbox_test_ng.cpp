@@ -885,6 +885,19 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize4);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize4, &layoutWrapper);
+
+    /**
+     *  Set Border
+     */
+    LayoutConstraintF layoutConstraintSize5;
+    layoutConstraintSize5.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    BorderWidthProperty borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    layoutWrapper.GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+    auto size5 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+    // Test the size set by codes.
+    EXPECT_EQ(size5, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
 }
 
 /**
