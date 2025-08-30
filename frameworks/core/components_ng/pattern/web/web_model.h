@@ -226,6 +226,7 @@ public:
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetForceEnableZoom(bool isEnabled) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

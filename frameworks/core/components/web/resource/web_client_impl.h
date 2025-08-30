@@ -178,6 +178,7 @@ public:
         const std::vector<std::string>& keyTypes,
         const std::vector<std::string>& issuers) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
+    void OnContextMenuDismissed() override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
     void UpdateClippedSelectionBounds(int x, int y, int w, int h) override;
@@ -338,6 +339,7 @@ public:
     void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
                                         uint32_t width,
                                         uint32_t height) override;
+    void SetImeShow(bool visible) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

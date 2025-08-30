@@ -297,16 +297,17 @@ ArkUINativeModuleValue ScrollableBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> arg_flingSpeedLimit = runtimeCallInfo->GetCallArgRef(1);
-
-    double flingSpeedLimit = -1.0f;
-    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    if (!ArkTSUtils::ParseJsDouble(vm, arg_flingSpeedLimit, flingSpeedLimit)) {
-        flingSpeedLimit = -1.0f;
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> flingSpeedLimitArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    double max = -1.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, flingSpeedLimitArg, max)) {
+        GetArkUINodeModifiers()->getScrollableModifier()->resetFlingSpeedLimit(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getScrollableModifier()->setFlingSpeedLimit(nativeNode,
+            static_cast<ArkUI_Float32>(max));
     }
-    GetArkUINodeModifiers()->getScrollableModifier()->setFlingSpeedLimit(nativeNode, flingSpeedLimit);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -314,9 +315,9 @@ ArkUINativeModuleValue ScrollableBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetFlingSpeedLimit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -344,6 +344,7 @@ public:
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
+    static void ThrowBusinessError(const EcmaVM* vm, const std::string& msg, int32_t code);
     static bool CheckKeysPressed(
         const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
     static Local<JSValueRef> GetModifierKeyState(

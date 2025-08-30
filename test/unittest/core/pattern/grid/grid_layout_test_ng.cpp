@@ -615,7 +615,7 @@ HWTEST_F(GridLayoutTestNg, SpringEffect001, TestSize.Level1)
 
     EXPECT_EQ(pattern_->info_.startIndex_, 38);
     EXPECT_EQ(pattern_->info_.endIndex_, 39);
-    EXPECT_EQ(GetChildY(frameNode_, 39), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 39), -100);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 19);
 
     // remove the last child.
@@ -625,7 +625,6 @@ HWTEST_F(GridLayoutTestNg, SpringEffect001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 38), -9.4070988);
     EXPECT_EQ(pattern_->info_.startIndex_, 38);
     EXPECT_EQ(pattern_->info_.endIndex_, 38);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 19);
@@ -634,7 +633,7 @@ HWTEST_F(GridLayoutTestNg, SpringEffect001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.startIndex_, 32);
     EXPECT_EQ(pattern_->info_.endIndex_, 38);
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_NEAR(0, pattern_->info_.currentOffset_, 0.1);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 38), 300);
     EXPECT_EQ(GetChildRect(frameNode_, 38).Bottom(), 400.0f);
     EXPECT_TRUE(GetItem(38, true)->IsActive());

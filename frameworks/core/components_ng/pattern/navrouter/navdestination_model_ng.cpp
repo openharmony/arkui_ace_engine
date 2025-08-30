@@ -1007,6 +1007,8 @@ void NavDestinationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    bool isValidImage = noPixMap || (pixMap != nullptr);
+    titleBarLayoutProperty->UpdateIsValidImage(isValidImage);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(

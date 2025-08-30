@@ -375,7 +375,7 @@ int32_t ListCommonTestNg::FindFocusNodeIndexInGroup(
             focusIndex = index;
         }
     }
-    if (groupIndexInList != -1 && focusNode != nullptr) {
+    if (groupIndexInList != -1 && focusNode != nullptr && groupItemNum != 0) {
         focusIndex = focusIndex % groupItemNum;
     }
     return focusIndex;
@@ -4715,7 +4715,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-
     std::vector<ResourceObjectParams> params;
     resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
     resMaxObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);

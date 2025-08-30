@@ -224,6 +224,27 @@ const segmentButtonTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
+  SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_unselected_font_weight'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  SEGMENT_BUTTON_BORDER_WIDTH: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_border_width'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  SEGMENT_BUTTON_BORDER_COLOR: {
+    id: -1,
+    type: 10002,
+    params: ['sys.color.segment_button_border_color'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
 };
 function nearEqual(first, second) {
   return Math.abs(first - second) < 0.001;
@@ -231,6 +252,23 @@ function nearEqual(first, second) {
 function validateLengthMetrics(value, defaultValue) {
   const actualValue = value ?? defaultValue;
   return actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT ? defaultValue : actualValue;
+}
+function initFontWeight(defaultValue) {
+  const value = LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT).value;
+  switch (value) {
+    case 100:
+      return FontWeight.Lighter;
+    case 400:
+      return FontWeight.Regular;
+    case 500:
+      return FontWeight.Medium;
+    case 700:
+      return FontWeight.Bold;
+    case 900:
+      return FontWeight.Bolder;
+    default:
+      return defaultValue;
+  }
 }
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
@@ -350,7 +388,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
     this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
     this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
-    this.fontWeight = options.fontWeight ?? FontWeight.Regular;
+    this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular);
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
@@ -564,6 +602,11 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition = this.initializeConsume('selectedItemPosition', 'selectedItemPosition');
     this.__zoomScaleArray = this.initializeConsume('zoomScaleArray', 'zoomScaleArray');
     this.__buttonBorderRadius = this.initializeConsume('buttonBorderRadius', 'buttonBorderRadius');
+    this.__isSegmentFocusStyleCustomized = new SynchedPropertySimpleOneWayPU(
+      params.isSegmentFocusStyleCustomized,
+      this,
+      'isSegmentFocusStyleCustomized'
+    );
     this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
@@ -574,6 +617,7 @@ class SelectItem extends ViewPU {
   updateStateVars(params) {
     this.__optionsArray.set(params.optionsArray);
     this.__options.set(params.options);
+    this.__isSegmentFocusStyleCustomized.reset(params.isSegmentFocusStyleCustomized);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
     this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
@@ -583,6 +627,7 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition.purgeDependencyOnElmtId(rmElmtId);
     this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
+    this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__optionsArray.aboutToBeDeleted();
@@ -592,6 +637,7 @@ class SelectItem extends ViewPU {
     this.__selectedItemPosition.aboutToBeDeleted();
     this.__zoomScaleArray.aboutToBeDeleted();
     this.__buttonBorderRadius.aboutToBeDeleted();
+    this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -631,6 +677,12 @@ class SelectItem extends ViewPU {
   set buttonBorderRadius(newValue) {
     this.__buttonBorderRadius.set(newValue);
   }
+  get isSegmentFocusStyleCustomized() {
+    return this.__isSegmentFocusStyleCustomized.get();
+  }
+  set isSegmentFocusStyleCustomized(newValue) {
+    this.__isSegmentFocusStyleCustomized.set(newValue);
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -652,7 +704,7 @@ class SelectItem extends ViewPU {
               x: this.zoomScaleArray[this.selectedIndexes[0]],
               y: this.zoomScaleArray[this.selectedIndexes[0]],
             });
-            Stack.shadow(
+            Stack.shadow(this.isSegmentFocusStyleCustomized ? undefined :
               resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
             );
           }, Stack);
@@ -2174,7 +2226,7 @@ let ItemProperty = class ItemProperty {
   constructor() {
     this.fontColor = segmentButtonTheme.FONT_COLOR;
     this.fontSize = segmentButtonTheme.FONT_SIZE;
-    this.fontWeight = FontWeight.Regular;
+    this.fontWeight = initFontWeight(FontWeight.Regular)
     this.isSelected = false;
   }
 };
@@ -2897,6 +2949,8 @@ export class SegmentButton extends ViewPU {
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
                   });
+                  Stack.borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH);
+                  Stack.borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR);
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   If.create();
@@ -3013,6 +3067,7 @@ export class SegmentButton extends ViewPU {
                             optionsArray: this.options.buttons,
                             options: this.options,
                             selectedIndexes: this.__selectedIndexes,
+                            isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                           },
                           undefined,
                           elmtId,
@@ -3025,6 +3080,7 @@ export class SegmentButton extends ViewPU {
                             optionsArray: this.options.buttons,
                             options: this.options,
                             selectedIndexes: this.selectedIndexes,
+                            isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                           };
                         };
                         componentCall.paramsGenerator_ = paramsLambda;
@@ -3032,6 +3088,7 @@ export class SegmentButton extends ViewPU {
                         this.updateStateVarsOfChildByElmtId(elmtId, {
                           optionsArray: this.options.buttons,
                           options: this.options,
+                          isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                         });
                       }
                     },
@@ -3148,7 +3205,7 @@ export class SegmentButton extends ViewPU {
         : (this.options.fontSize ?? segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontWeight = selected
         ? (this.options.selectedFontWeight ?? FontWeight.Medium)
-        : (this.options.fontWeight ?? FontWeight.Regular);
+        : (this.options.fontWeight ?? initFontWeight(FontWeight.Regular));
       this.buttonItemProperty[index].isSelected = selected;
     });
   }

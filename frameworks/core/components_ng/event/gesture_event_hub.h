@@ -305,7 +305,7 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+    OnDragCallbackCore GetDragCallback();
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
         const float scale = 1.0f, const RectF& innerRect = RectF()) const;
@@ -330,6 +330,7 @@ public:
     void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
+    void HandleDragEnd(int32_t containerId, const DragNotifyMsgCore& notifyMessage);
     void HandleOnDragCancel();
     void StartLongPressActionForWeb();
     void CancelDragForWeb();

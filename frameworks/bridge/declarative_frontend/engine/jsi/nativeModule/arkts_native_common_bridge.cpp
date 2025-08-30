@@ -3140,8 +3140,10 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     options.push_back(static_cast<ArkUI_Float32>(offsetY.value().Unit()));
     options.push_back(static_cast<ArkUI_Float32>(hasOptions));
     options.push_back(static_cast<ArkUI_Float32>(hasOffset));
+    options.push_back(0);
+    options.push_back(0);
     auto textPtr = (text.has_value()) ? text.value().c_str() : nullptr;
-    GetArkUINodeModifiers()->getCommonModifier()->setOverlay(nativeNode, textPtr, options.data(), options.size());
+    GetArkUINodeModifiers()->getCommonModifier()->setOverlay(nativeNode, textPtr, options.data(), options.size(), nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3568,6 +3570,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     }
 
     ArkUI_Float32 values[SIZE_OF_TWO];
+    ArkUI_Int32 alignMode[] = { ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START, ArkUI_Direction::ARKUI_DIRECTION_AUTO };
     int32_t types[SIZE_OF_TWO];
     values[NUM_0] = static_cast<ArkUI_Float32>(valueX);
     types[NUM_0] = static_cast<int32_t>(typeX);
@@ -3576,8 +3579,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
 
     auto bgImageXRawPtr = AceType::RawPtr(resObjX);
     auto bgImageYRawPtr = AceType::RawPtr(resObjY);
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(nativeNode, values, types, isAlign,
-        SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
+        nativeNode, values, types, alignMode, isAlign, SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -9302,6 +9305,8 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceTool())));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };

@@ -72,7 +72,7 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
         params.axis == Axis::VERTICAL ? SizeF(params.crossSize, itemMainSize) : SizeF(itemMainSize, params.crossSize);
 
     itemConstraint.maxSize = itemIdealSize;
-    itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
+    itemConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), params.axis);
     itemConstraint.percentReference = itemIdealSize;
 
     if (child) {
@@ -159,7 +159,7 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
             props->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
         size.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
         if (isMainFix) {
-            size.SetMainSize(Infinity<float>(), axis);
+            size.SetMainSize(LayoutInfinity<float>(), axis);
         }
     }
     auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis)) || isMainWrap;

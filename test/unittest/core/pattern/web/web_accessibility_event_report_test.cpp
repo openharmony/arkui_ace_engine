@@ -540,6 +540,10 @@ HWTEST_F(WebAccessibilityEventReportTest, ReportEvent, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+
+    report->ReportEvent(AccessibilityEventType::FOCUS, 1);
+    report->eventReportEnable_ = true;
+
     report->lastFocusInputId_ = 2;
     report->ReportEvent(AccessibilityEventType::FOCUS, 1);
     EXPECT_EQ(report->lastFocusReportId_, 2);
@@ -580,6 +584,40 @@ HWTEST_F(WebAccessibilityEventReportTest, ReportTextBlurEventByFocus, TestSize.L
     report->ReportTextBlurEventByFocus(2);
     EXPECT_EQ(report->lastFocusInputId_, 2);
     EXPECT_EQ(report->lastFocusReportId_, 1);
+#endif
+}
+
+/**
+ * @tc.name: ParseNodeContent
+ * @tc.desc: Test ParseNodeContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityEventReportTest, ParseNodeContent, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    auto node = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    std::string nodeText = "";
+    {
+        EXPECT_CALL(*node, GetIsPassword()).WillOnce(testing::Return(true));
+        report->ParseNodeContent(node, nodeText);
+        EXPECT_EQ(nodeText, "*");
+    }
+    {
+        EXPECT_CALL(*node, GetIsPassword()).WillOnce(testing::Return(false));
+        EXPECT_CALL(*node, GetInputType())
+            .WillOnce(testing::Return(static_cast<int32_t>(AceTextCategory::INPUT_TYPE_NUMBER)));
+        nodeText = "123, placeholder";
+        report->ParseNodeContent(node, nodeText);
+        EXPECT_EQ(nodeText, "123");
+    }
+    {
+        EXPECT_CALL(*node, GetIsPassword()).WillOnce(testing::Return(false));
+        EXPECT_CALL(*node, GetInputType()).WillOnce(testing::Return(0));
+        nodeText = "text";
+        report->ParseNodeContent(node, nodeText);
+        EXPECT_EQ(nodeText, "text");
+    }
 #endif
 }
 

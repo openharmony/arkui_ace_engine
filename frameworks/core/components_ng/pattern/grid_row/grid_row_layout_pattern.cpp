@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -20,9 +21,10 @@ namespace {} // namespace
 
 void GridRowLayoutPattern::OnAttachToFrameNode()
 {
-    Pattern::OnAttachToFrameNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
+    Pattern::OnAttachToFrameNode();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline && !callbackId_.has_value()) {
@@ -40,11 +42,24 @@ void GridRowLayoutPattern::OnAttachToFrameNode()
 void GridRowLayoutPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CHECK_NULL_VOID(node);
-    auto pipeline = node->GetContext();
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node); // call OnDetachFromFrameNodeMultiThread()
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (callbackId_.has_value()) {
         pipeline->UnregisterSurfaceChangedCallback(callbackId_.value_or(-1));
     }
+}
+
+void GridRowLayoutPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+}
+
+void GridRowLayoutPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);  // call OnDetachFromMainTreeMultiThread() by multi thread
 }
 
 void GridRowLayoutPattern::MarkDirty()

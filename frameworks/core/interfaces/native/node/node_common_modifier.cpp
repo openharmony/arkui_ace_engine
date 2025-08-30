@@ -118,6 +118,8 @@ constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 constexpr int32_t API_TARGET_VERSION_MASK = 1000;
+constexpr double FULL_DIMENSION = 100.0;
+constexpr double HALF_DIMENSION = 50.0;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -197,6 +199,44 @@ Alignment ParseAlignment(int32_t align)
             break;
     }
     return alignment;
+}
+
+TextDirection ParseDirection(int32_t dir)
+{
+    TextDirection direction = TextDirection::LTR;
+    switch (dir) {
+        case NUM_0:
+            direction = TextDirection::LTR;
+            break;
+        case NUM_1:
+            direction = TextDirection::RTL;
+            break;
+        case NUM_3:
+            direction = TextDirection::AUTO;
+            break;
+        default:
+            break;
+    }
+    return direction;
+}
+
+int32_t ParseDirectionToIndex(TextDirection dir)
+{
+    int32_t direction = 0;
+    switch (dir) {
+        case TextDirection::LTR:
+            direction = NUM_0;
+            break;
+        case TextDirection::RTL:
+            direction = NUM_1;
+            break;
+        case TextDirection::AUTO:
+            direction = NUM_3;
+            break;
+        default:
+            break;
+    }
+    return direction;
 }
 
 int32_t ConvertAlignmentToInt(Alignment alignment)
@@ -1072,6 +1112,7 @@ void SetWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI
             ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
         }
     }
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
 }
 
 void ResetWidth(ArkUINodeHandle node)
@@ -1080,6 +1121,21 @@ void ResetWidth(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetResObj(frameNode, "width");
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
+void SetWidthLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
+    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, true);
+}
+
+void ResetWidthLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
 }
 
 void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* heightResPtr)
@@ -1099,6 +1155,7 @@ void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkU
             ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
         }
     }
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, false);
 }
 void ResetHeight(ArkUINodeHandle node)
 {
@@ -1106,6 +1163,21 @@ void ResetHeight(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ResetResObj(frameNode, "height");
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
+
+void SetHeightLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
+    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, false);
+}
+
+void ResetHeightLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, false);
 }
 
 void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
@@ -1534,10 +1606,31 @@ void ResetPositionEdges(ArkUINodeHandle node)
     ViewAbstract::ResetResObj(frameNode, "position.x");
     ViewAbstract::ResetResObj(frameNode, "position.y");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        ViewAbstract::ResetPosition();
+        ViewAbstract::ResetPosition(frameNode);
     } else {
         ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
     }
+}
+
+void FillArrFromEdges(ArkUIStringAndFloat* vec, int32_t offset, std::optional<Dimension>& edge, ArkUI_Int32 unit)
+{
+    vec[offset] = ArkUIStringAndFloat { static_cast<double>(edge.has_value()), nullptr };
+    vec[offset + NUM_1] =
+        ArkUIStringAndFloat { edge.value_or(Dimension()).GetNativeValue(static_cast<DimensionUnit>(unit)), nullptr };
+    vec[offset + NUM_2] = ArkUIStringAndFloat { static_cast<double>(unit), nullptr };
+}
+
+ArkUI_Bool GetPositionEdges(ArkUINodeHandle node, ArkUIStringAndFloat* result, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto edges = ViewAbstract::GetPositionEdges(frameNode);
+    CHECK_NULL_RETURN(edges, false);
+    FillArrFromEdges(result, NUM_0, edges->top, unit);
+    FillArrFromEdges(result, NUM_3, edges->left, unit);
+    FillArrFromEdges(result, NUM_6, edges->bottom, unit);
+    FillArrFromEdges(result, NUM_9, edges->right, unit);
+    return true;
 }
 
 /**
@@ -2160,22 +2253,10 @@ void ResetRadialGradient(ArkUINodeHandle node)
     ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 
-/**
- * @param text text value
- * @param options option value
- * option[0], option[1]: align(hasValue, value)
- * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
- * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
- * option[8]: hasOptions
- * option[9]: hasOffset
- * @param optionsLength options length
- */
-void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options, ArkUI_Int32 optionsLength)
+bool ParseOverlayOptions(const ArkUI_Float32* options, ArkUI_Int32 optionsLength, NG::OverlayOptions& overlay)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if ((options == nullptr) || (optionsLength != NUM_10)) {
-        return;
+    if ((options == nullptr) || (optionsLength != NUM_12)) {
+        return false;
     }
     auto alignHasValue = options[NUM_0];
     auto alignValue = options[NUM_1];
@@ -2187,10 +2268,9 @@ void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* o
     auto offsetYUnit = options[NUM_7];
     auto hasOptions = options[NUM_8];
     auto hasOffset = options[NUM_9];
-    NG::OverlayOptions overlay;
-    if (text != nullptr) {
-        overlay.content = text;
-    }
+    auto hasDirection = options[NUM_10];
+    auto direction = options[NUM_11];
+
     if (static_cast<bool>(hasOptions)) {
         if (static_cast<bool>(alignHasValue)) {
             overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
@@ -2205,12 +2285,48 @@ void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* o
                 overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
             }
         }
+        if (static_cast<bool>(hasDirection)) {
+            overlay.direction = ParseDirection(static_cast<int32_t>(direction));
+        } else {
+            overlay.direction = TextDirection::LTR;
+        }
     } else {
         overlay.align = Alignment::TOP_LEFT;
         overlay.x = CalcDimension(0);
         overlay.y = CalcDimension(0);
     }
-    ViewAbstract::SetOverlay(frameNode, overlay);
+    return true;
+}
+
+/**
+ * @param text text value
+ * @param options option value
+ * option[0], option[1]: align(hasValue, value)
+ * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
+ * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
+ * option[8]: hasOptions
+ * option[9]: hasOffset
+ * option[10], option[11]: direction(hasDirection, direction)
+ * @param optionsLength options length
+ */
+void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options,
+    ArkUI_Int32 optionsLength, ArkUINodeHandle overlayNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OverlayOptions overlay;
+    if (!ParseOverlayOptions(options, optionsLength, overlay)) {
+        return;
+    }
+    if (text != nullptr) {
+        overlay.content = text;
+    }
+
+    if (!overlay.content.empty()) {
+        ViewAbstract::SetOverlay(frameNode, overlay);
+    } else {
+        ViewAbstract::SetOverlayNode(frameNode, reinterpret_cast<FrameNode*>(overlayNode), overlay);
+    }
 }
 
 void ResetOverlay(ArkUINodeHandle node)
@@ -2221,7 +2337,9 @@ void ResetOverlay(ArkUINodeHandle node)
     overlay.align = Alignment::TOP_LEFT;
     overlay.x = CalcDimension(0);
     overlay.y = CalcDimension(0);
+    overlay.direction = TextDirection::LTR;
     ViewAbstract::SetOverlay(frameNode, overlay);
+    ViewAbstract::SetOverlayNode(frameNode, nullptr, overlay);
 }
 
 /**
@@ -2694,12 +2812,33 @@ void SetBackgroundImagePositionUpdateFunc(
                        : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
+void SetBgImgPositionSuperpositon(BackgroundImagePosition& bgImgPosition, int32_t align, int32_t direction)
+{
+    std::vector<std::pair<ArkUI_Float64, ArkUI_Float64>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
+        { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
+        { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
+    if (align < 0 || align >= vec.size()) {
+        align = static_cast<int32_t>(AlignmentMode::TOP_START);
+    }
+    OHOS::Ace::AnimationOption option;
+    auto animatableDimensionX = AnimatableDimension(vec[align].first, DimensionUnit::PERCENT, option);
+    auto animatableDimensionY = AnimatableDimension(vec[align].second, DimensionUnit::PERCENT, option);
+    bgImgPosition.SetPercentX(animatableDimensionX);
+    bgImgPosition.SetPercentY(animatableDimensionY);
+    bgImgPosition.SetAlignment(static_cast<AlignmentMode>(align));
+    bgImgPosition.SetIsOffsetBaseOnAlignmentNeeded(true);
+    if (direction < 0 || (direction > 1 && direction != 3)) {
+        direction = static_cast<int32_t>(DirectionType::AUTO);
+    }
+    bgImgPosition.SetDirectionType(static_cast<DirectionType>(direction));
+}
+
 void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
-    ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
+    const ArkUI_Int32* alignMode, ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (size != NUM_2) {
+    if (size < NUM_2) {
         return;
     }
     BackgroundImagePosition bgImgPosition;
@@ -2710,6 +2849,9 @@ void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* value
     DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
     DimensionUnit typeY = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_1]);
     SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
+    if (size > NUM_2) {
+        SetBgImgPositionSuperpositon(bgImgPosition, alignMode[NUM_0], alignMode[NUM_1]);
+    }
     bgImgPosition.SetIsAlign(isAlign);
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
@@ -3085,6 +3227,8 @@ void GetBackgroundImagePosition(ArkUINodeHandle node, ArkUIPositionOptions* posi
     auto imagePosition = ViewAbstract::GetBackgroundImagePosition(frameNode);
     position->x = imagePosition.GetSizeX().GetNativeValue(static_cast<DimensionUnit>(unit));
     position->y = imagePosition.GetSizeY().GetNativeValue(static_cast<DimensionUnit>(unit));
+    position->alignment = static_cast<int32_t>(imagePosition.GetAlignment());
+    position->direction = static_cast<int32_t>(imagePosition.GetDirectionType());
 }
 
 /**
@@ -6555,7 +6699,8 @@ ArkUI_Int32 GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32 (*values)[32])
     return index;
 }
 
-ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit)
+ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit,
+    ArkUINodeHandle& overlayNode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -6564,6 +6709,11 @@ ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, Ark
     options->x = overlayOptions.x.GetNativeValue(static_cast<DimensionUnit>(unit));
     options->y = overlayOptions.y.GetNativeValue(static_cast<DimensionUnit>(unit));
     options->content = overlayOptions.content.c_str();
+    options->direction = ParseDirectionToIndex(overlayOptions.direction);
+    auto overlay = frameNode->GetOverlayNode();
+    if (overlay) {
+        overlayNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(overlay));
+    }
     g_strValue = overlayOptions.content;
     return g_strValue.c_str();
 }
@@ -7178,11 +7328,33 @@ ArkUI_Float32 GetWidth(ArkUINodeHandle node, ArkUI_Int32 unit)
     return ViewAbstract::GetWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+ArkUI_Int32 GetWidthLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, true);
+    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return ERROR_INT_CODE;
+    }
+    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+}
+
 ArkUI_Float32 GetHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return ViewAbstract::GetHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Int32 GetHeightLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, false);
+    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return ERROR_INT_CODE;
+    }
+    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
 }
 
 ArkUI_Uint32 GetBackgroundColor(ArkUINodeHandle node)
@@ -8223,8 +8395,8 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
     touchEvent.globalDisplayY = arkUITouchEvent->actionTouchPoint.globalDisplayY * density;
     touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
-    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
-    NG::SetPostPointerEvent(pointerEvent, touchEvent);
+    ArkUITouchEvent* arkUITouchEventCloned = const_cast<ArkUITouchEvent*>(arkUITouchEvent);
+    NG::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
     return PostTouchEventToFrameNode(node, touchEvent);
 }
 
@@ -8298,6 +8470,14 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
         arkUITouchEventCloned->historyEvents = nullptr;
         arkUITouchEventCloned->historySize = 0;
     }
+}
+
+void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    CHECK_NULL_VOID(arkUITouchEvent);
+    NG::DestroyRawPointerEvent(arkUITouchEvent);
+    delete arkUITouchEvent;
+    arkUITouchEvent = nullptr;
 }
 
 void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
@@ -8454,6 +8634,44 @@ void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle n
     }  else {
         ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
     }
+}
+
+void SetOnKeyEventExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [nodeId, eventReceiver, node](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // modifierkeystates
+        event.keyEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+
+        eventReceiver(node, event);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
 }
 
 void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
@@ -9752,10 +9970,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOnHoverMove = SetOnHoverMoveExt,
         .setOnChange = SetOnChangeExt,
         .setOnClick = SetOnClickExt,
+        .setOnKeyEvent = SetOnKeyEventExt,
         .setOnAppear = SetOnAppearExt,
         .dispatchKeyEvent = DispatchKeyEvent,
         .postTouchEvent = PostTouchEvent,
         .createClonedTouchEvent = CreateClonedTouchEvent,
+        .destroyTouchEvent = DestroyTouchEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
@@ -9805,6 +10025,13 @@ const ArkUICommonModifier* GetCommonModifier()
         .unregisterCommonOnSizeChange = UnregisterCommonOnSizeChange,
         .setCommonOnVisibleAreaApproximateChangeEvent = SetCommonOnVisibleAreaApproximateChangeEvent,
         .unregisterCommonOnVisibleAreaApproximateChangeEvent = UnregisterCommonOnVisibleAreaApproximateChangeEvent,
+        .setWidthLayoutPolicy = SetWidthLayoutPolicy,
+        .resetWidthLayoutPolicy = ResetWidthLayoutPolicy,
+        .getWidthLayoutPolicy = GetWidthLayoutPolicy,
+        .setHeightLayoutPolicy = SetHeightLayoutPolicy,
+        .resetHeightLayoutPolicy = ResetHeightLayoutPolicy,
+        .getHeightLayoutPolicy = GetHeightLayoutPolicy,
+        .getPositionEdges = GetPositionEdges,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

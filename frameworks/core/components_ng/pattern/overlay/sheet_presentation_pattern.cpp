@@ -2375,8 +2375,7 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
     ACE_SCOPED_TRACE("Sheet OnWindowSizeChanged: WindowSizeChangeReason type is: %d", type);
-    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG_END ||
-        type == WindowSizeChangeReason::DRAG_MOVE) {
+    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG_MOVE) {
         return;
     }
     auto sheetType = GetSheetType();
@@ -3195,7 +3194,16 @@ bool SheetPresentationPattern::AvoidKeyboardBeforeTranslate()
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) {
         // resize bindSheet need to keep safe distance from keyboard
         auto distanceFromBottom = sheetType_ == SheetType::SHEET_CENTER ? height_ - centerHeight_ : 0.0f;
-        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ? 0.0f : keyboardHeight_ - distanceFromBottom);
+
+        /**
+         * If the keyboardHeight_ is less than distanceFromBottom,
+         * it means that there is no overlap between the current soft keyboard and the sheet,
+         * and there is no need to resize sheet Content area.
+         */
+        auto decreaseHeight = keyboardHeight_ == 0 || LessNotEqual(keyboardHeight_, distanceFromBottom)
+            ? 0.0f
+            : keyboardHeight_ - distanceFromBottom;
+        DecreaseScrollHeightInSheet(decreaseHeight);
         return true;
     }
     return false;
@@ -3790,7 +3798,7 @@ bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
     if (it == sheetDetentHeight_.end()) {
         return false;
     }
-    if (IsAvoidingKeyboard()) {
+    if (IsAvoidingKeyboard() || !IsSheetBottomStyle()) {
         return false;
     }
     float lowestDetentHeight = *it;

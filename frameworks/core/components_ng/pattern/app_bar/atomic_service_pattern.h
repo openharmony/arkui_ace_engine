@@ -81,6 +81,7 @@ private:
     std::optional<bool> onBackPressedConsumed_;
     std::optional<RectF> appBarRect_;
     std::unordered_map<int32_t, std::function<void(const RectF& rect)>> rectChangeListeners_;
+    RefPtr<CustomAppBarNode> customAppBarNodeNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

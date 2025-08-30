@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
+#include <cmath>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -82,6 +83,8 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
     TextAlign::LEFT, TextAlign::RIGHT };
+const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
+    TextContentAlign::BOTTOM };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
@@ -219,7 +222,7 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         ParseJsString(args, fontWeight);
     }
@@ -465,7 +468,8 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         ParseJsInt32(args, value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
@@ -519,6 +523,19 @@ void JSText::SetAlign(const JSCallbackInfo& info)
         return;
     }
     TextModel::GetInstance()->OnSetAlign();
+}
+
+void JSText::SetTextContentAlign(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextModel::GetInstance()->ReSetTextContentAlign();
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    if (index >= 0 && index < TEXT_CONTENT_ALIGNS.size()) {
+        TextModel::GetInstance()->SetTextContentAlign(TEXT_CONTENT_ALIGNS[index]);
+    }
 }
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)
@@ -730,18 +747,13 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("TextDecorationColor", resObj, result);
     }
-    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
-    if (styleValue->IsNumber()) {
-        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    }
-    float lineThicknessScale = 1.0f;
-    if (thicknessScaleValue->IsNumber()) {
-        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
-    }
+    auto style =
+        styleValue->IsNumber() ? styleValue->ToNumber<int32_t>() : static_cast<int32_t>(DEFAULT_TEXT_DECORATION_STYLE);
+    float lineThicknessScale = thicknessScaleValue->IsNumber() ? thicknessScaleValue->ToNumber<float>() : 1.0f;
     lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
     TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
@@ -927,6 +939,10 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
@@ -1198,7 +1214,7 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
 
 void JSText::SetContentTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && !info[0]->IsObject()) {
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
         TextModel::GetInstance()->ResetContentTransition();
         return;
     }
@@ -1245,6 +1261,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
+    JSClass<JSText>::StaticMethod("textContentAlign", &JSText::SetTextContentAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
     JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
@@ -1270,11 +1287,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
-    } else {
-        JSClass<JSText>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
-    }
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);

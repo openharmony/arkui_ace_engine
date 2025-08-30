@@ -127,6 +127,20 @@ class TextAlignModifier extends ModifierWithKey<number> {
   }
 }
 
+class TextContentAlignModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textContentAlign');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextContentAlign(node);
+    } else {
+      getUINativeModule().text.setTextContentAlign(node, this.value);
+    }
+  }
+}
+
 class TextHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
   constructor(value: TextHeightAdaptivePolicy) {
     super(value);
@@ -1017,6 +1031,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   textAlign(value: TextAlign): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
+    return this;
+  }
+  textContentAlign(value: TextContentAlign): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextContentAlignModifier.identity, TextContentAlignModifier, value);
     return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {

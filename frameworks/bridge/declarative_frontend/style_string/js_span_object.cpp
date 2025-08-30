@@ -868,6 +868,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
     JSClass<JSImageAttachment>::CustomProperty(
         "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
     JSClass<JSImageAttachment>::CustomProperty(
+        "sizeInVp", &JSImageAttachment::GetImageSizeInVp, &JSImageAttachment::SetImageSizeInVp);
+    JSClass<JSImageAttachment>::CustomProperty(
         "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
     JSClass<JSImageAttachment>::CustomProperty(
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
@@ -932,7 +934,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     ImageSpanAttribute imageStyle;
     ParseJsImageSpanSizeAttribute(obj, imageStyle);
     JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull()) {
+    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -1083,6 +1085,25 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
         imageSize->SetProperty<float>("height", size->height->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
+    }
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageSizeInVp(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    const auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
     }
     info.SetReturnValue(imageSize);
 }
@@ -1344,7 +1365,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             float width = 0;
             if (result->HasProperty("width")) {
                 auto widthObj = result->GetProperty("width");
-                width = widthObj->ToNumber<float>();
+                width = widthObj->IsNumber() ? widthObj->ToNumber<float>() : width;
                 if (LessNotEqual(width, 0.0)) {
                     width = 0;
                 }
@@ -1352,7 +1373,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             std::optional<float> heightOpt;
             if (result->HasProperty("height")) {
                 auto heightObj = result->GetProperty("height");
-                auto height = heightObj->ToNumber<float>();
+                auto height = heightObj->IsNumber() ? heightObj->ToNumber<float>() : -1.0;
                 if (GreatOrEqual(height, 0.0)) {
                     heightOpt = height;
                 }
@@ -1602,7 +1623,8 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
     int32_t value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         JSContainerBase::ParseJsInt32(args, value);
     }
     if (!args->IsUndefined()) {

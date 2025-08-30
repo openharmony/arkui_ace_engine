@@ -636,7 +636,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(header0Rect.Top(), contentStartOffset - groupPos);
 
     auto group1 = GetChildFrameNode(frameNode_, 1);
-    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footerIndex = 1 + GROUP_ITEM_NUMBER; // HeaderCount + GroupItemNumber
     auto footer1Rect = GetChildRect(group1, footerIndex);
     EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
 
@@ -3708,6 +3708,41 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent and padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ViewAbstract::SetPadding(AceType::RawPtr(list), CalcLength(10.f));
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's height is 280.
+    auto listPattern = list->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto height = listPattern->contentMainSize_;
+    EXPECT_EQ(height, 280.0f);
+}
+
+/**
  * @tc.name: LayoutPolicyTest001
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
@@ -3790,5 +3825,33 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore002, TestSize.Level1)
     auto offset = geometryNode->GetFrameOffset();
     EXPECT_EQ(size, SizeF(240.0f, 100.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 440.0f));
+}
+
+/**
+ * @tc.name: BigJumpAccuracyTest001
+ * @tc.desc: jump with big offset and check position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, BigJumpAccuracyTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create List with big ListItem height
+    * @tc.expected: currentOffset_ is 0.
+    */
+    auto model = CreateList();
+    model.SetInitialIndex(0);
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(10000));
+    CreateDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+    * @tc.steps: step2. UpdateCurrentOffset big offset with ScrollBar
+    * @tc.expected: Scroll to bottom
+    */
+    UpdateCurrentOffset(-10000.f, SCROLL_FROM_BAR);
+    EXPECT_EQ(pattern_->currentOffset_, 9600.f);
 }
 } // namespace OHOS::Ace::NG

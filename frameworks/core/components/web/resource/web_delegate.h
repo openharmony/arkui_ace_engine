@@ -286,6 +286,8 @@ public:
     std::string GetSelectionText() const override;
     void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
     bool IsAILink() const override;
+    int GetSourceTypeV2() const override;
+    int GetMediaTypeV2() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -1104,6 +1106,7 @@ public:
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuDismissed();
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     void OnContextMenuHide(const std::string& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
@@ -1395,6 +1398,7 @@ public:
 
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void SetImeShow(bool visible);
 
     bool HasOnNativeEmbedGestureEventV2()
     {
@@ -1404,6 +1408,7 @@ public:
         return false;
 #endif
     }
+    void SetForceEnableZoom(bool isEnabled);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

@@ -103,7 +103,7 @@ HWTEST_F(TextTestEightNg, DumpInfo001, TestSize.Level1)
 
 /**
  * @tc.name: DumpInfo002
- * @tc.desc: test DumpInfo.
+ * @tc.desc: test DumpInfo when pManager_ is nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestEightNg, DumpInfo002, TestSize.Level1)
@@ -1492,5 +1492,60 @@ HWTEST_F(TextTestEightNg, InitAiSelection002, TestSize.Level1)
     // 7. 验证结果
     EXPECT_FALSE(pattern->textSelector_.aiStart.has_value());
     EXPECT_FALSE(pattern->textSelector_.aiEnd.has_value());
+}
+
+/**
+ * @tc.name: InitAiSelection003
+ * @tc.desc: test InitAiSelection with overlapping spans, should select the one with smaller start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, InitAiSelection003, TestSize.Level1)
+{
+    // 1. 创建 TextPattern 并初始化依赖项
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // 2. 初始化 aiSpanMap 包含重叠的 AISpan
+    AISpan span1 = { 0, 30, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 30, 50, "test content1", TextDataDetectType::PHONE_NUMBER };
+    AISpan span3 = { 40, 50, "test content2", TextDataDetectType::PHONE_NUMBER };
+    AISpan span4 = { 50, 125, "example content3", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, span1));
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(40, span3));
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(30, span2));
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(50, span4));
+
+    pattern->textDetectEnable_ = true;
+    pattern->enabled_ = true;
+    pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
+
+    // 3. 模拟点击位置在重叠范围内（extend = 45）
+    int32_t mockExtend = 45; // 同时位于 span2[30,50] 和 span3[40,50] 范围内
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(mockExtend));
+    std::vector<RectF> rects { RectF(0.0f, 0.0f, 100.0f, 100.0f) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(100));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 125 });
+
+    // 4. 设置必要的全局偏移量
+    auto globalOffset = Offset(50.0f, 50.0f);
+    pattern->contentRect_.SetOffset(OffsetF(10.0f, 10.0f));
+    pattern->baselineOffset_ = 0.0f;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    // 5. 调用被测函数
+    pattern->InitAiSelection(globalOffset);
+
+    // 6. 验证结果：应该选择 start 更小的 span1 (30, 50)
+    EXPECT_EQ(pattern->textSelector_.aiStart.value_or(-1), span2.start); // 选择 start 更小的
+    EXPECT_EQ(pattern->textSelector_.aiEnd.value_or(-1), span2.end);
 }
 } // namespace OHOS::Ace::NG

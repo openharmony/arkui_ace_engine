@@ -218,7 +218,7 @@ PaddingProperty BlankTestNg::CreatePadding(float left, float top, float right, f
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator001, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
     for (int platformVersion : platformVersions) {
@@ -241,7 +241,7 @@ HWTEST_F(BlankTestNg, BlankFrameNodeCreator001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator002, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
     for (int platformVersion : platformVersions) {
@@ -264,7 +264,7 @@ HWTEST_F(BlankTestNg, BlankFrameNodeCreator002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator003, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
     for (int platformVersion : platformVersions) {
@@ -294,7 +294,7 @@ HWTEST_F(BlankTestNg, BlankFrameNodeCreator003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest001, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest001, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
     for (int platformVersion : platformVersions) {
@@ -362,7 +362,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest002, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest002, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -421,7 +421,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest003, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest003, TestSize.Level0)
 {
     auto flexRow = CreateFlexRow();
     auto flexRowFrameNode = flexRow.first;
@@ -480,7 +480,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest004, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest004, TestSize.Level0)
 {
     auto flexColumn = CreateFlexColumn();
     auto flexColumnFrameNode = flexColumn.first;
@@ -539,7 +539,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest005, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest005, TestSize.Level0)
 {
     BlankModelNG blank;
     Dimension blankMin;
@@ -607,7 +607,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest006, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest006, TestSize.Level0)
 {
     BlankModelNG blank;
     Dimension blankMin;
@@ -673,7 +673,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, BlankPatternTest007, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest007, TestSize.Level0)
 {
     BlankModelNG blank;
     blank.Create();
@@ -691,7 +691,7 @@ HWTEST_F(BlankTestNg, BlankPatternTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level1)
+HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level0)
 {
     BlankModelNG blank;
     blank.Create();
@@ -715,7 +715,7 @@ HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level1)
  * @tc.desc: Test SetColor of Blank
  * @tc.type: FUNC
  */
-HWTEST_F(BlankTestNg, SetColorTest1, TestSize.Level1)
+HWTEST_F(BlankTestNg, SetColorTest1, TestSize.Level0)
 {
     BlankModelNG blankModelNG;
     blankModelNG.Create();

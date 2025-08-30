@@ -163,8 +163,10 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     SetSpanStringMode(isStyledStringMode);
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
-    styledString_ = MakeRefPtr<MutableSpanString>(u"");
-    styledString_->SetSpanWatcher(WeakClaim(this));
+    if (isStyledStringMode) {
+        styledString_ = MakeRefPtr<MutableSpanString>(u"");
+        styledString_->SetSpanWatcher(WeakClaim(this));
+    }
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
@@ -340,6 +342,7 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
 void RichEditorPattern::HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
     std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput)
 {
+    CHECK_NULL_VOID(styledString_);
     auto changeStart = record.rangeBefore.start;
     auto changeLength = record.rangeBefore.GetLength();
     if (changeLength > 0 && (subValue.length() > 0 || !shouldCommitInput)) {
@@ -3498,8 +3501,6 @@ bool RichEditorPattern::HandleUserGestureEvent(
             }
             info = info.SetScreenLocation(
                 Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
-            info = info.SetGlobalDisplayLocation(
-                Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
             return gestureFunc(item, info);
         }
     }
@@ -4957,7 +4958,7 @@ void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString,
 
 void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy)
 {
-    CHECK_NULL_VOID(spanString);
+    CHECK_NULL_VOID(spanString && styledString_);
     int currentCaretPosition = caretPosition_;
     auto strLength = spanString->GetLength();
     insertValueLength_ = strLength;
@@ -7913,6 +7914,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
+    IF_TRUE(previewLongPress_, CloseKeyboard(true));
     textSelector_.Update(selectStart, selectEnd);
     FireOnSelect(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
@@ -7929,6 +7931,7 @@ void RichEditorPattern::HandleTouchCancelAfterLongPress()
     auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touch canceled, textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
+    IF_TRUE(previewLongPress_, CloseKeyboard(true));
     textSelector_.Update(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
@@ -8592,6 +8595,7 @@ void RichEditorPattern::OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData)
 
 void RichEditorPattern::HandleOnCopyStyledString()
 {
+    CHECK_NULL_VOID(styledString_);
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
     subSpanString->isFromStyledStringMode = true;
@@ -8771,7 +8775,7 @@ void RichEditorPattern::HandleOnPaste()
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
     OnReportRichEditorEvent("onPasteComplete");
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
     if (event.IsPreventDefault()) {
         CloseSelectOverlay();
         ResetSelection();

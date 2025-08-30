@@ -47,6 +47,7 @@ const struct UpdateSpanStyle TEST_TYPING_STYLE = {
     .updateFontSize = CalcDimension(1.0),
     .updateItalicFontStyle = OHOS::Ace::FontStyle::ITALIC,
     .updateFontWeight = FontWeight::BOLD,
+    .updateTextShadows = SHADOWS,
 };
 }
 
@@ -225,4 +226,32 @@ HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Le
     richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
 }
 
+/**
+ * @tc.name: GetTypingStyle001
+ * @tc.desc: test GetTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. get typing style
+     */
+    richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
+
+    /**
+     * @tc.steps: step2. get typing style
+     */
+    auto typingStyleResult = richEditorController->GetTypingStyle();
+    EXPECT_TRUE(typingStyleResult.has_value());
+    auto textShadows = typingStyleResult->updateTextShadows;
+    EXPECT_TRUE(textShadows.has_value());
+
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
+}
 }

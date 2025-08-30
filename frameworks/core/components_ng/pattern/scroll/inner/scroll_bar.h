@@ -347,10 +347,14 @@ public:
     {
         return isReverse_;
     }
+
+    Axis GetPanDirection() const;
+
     Rect GetTouchRegion() const
     {
         return touchRegion_;
     }
+    BarDirection CheckBarDirection(const Point& point);
     RefPtr<ClickEvent> GetClickEvent()
     {
         return clickevent_;
@@ -392,8 +396,6 @@ public:
     float GetMainOffset(const Offset& offset) const;
     float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);
-    BarDirection CheckBarDirection(const Point& point);
-    Axis GetPanDirection() const;
     // infos for dump
     void AddScrollBarLayoutInfo();
     void GetShapeModeDumpInfo();
@@ -564,7 +566,7 @@ protected:
     {
         return arcNormalBackgroundWidth_;
     }
- 
+
     const Dimension& GetArcActiveBackgroundWidth() const
     {
         return arcActiveBackgroundWidth_;

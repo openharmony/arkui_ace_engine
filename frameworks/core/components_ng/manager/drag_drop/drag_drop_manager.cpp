@@ -118,6 +118,16 @@ DragDropManager::DragDropManager()
     DragDropGlobalController::GetInstance().SetIsAppGlobalDragEnabled(state);
 }
 
+DragDropManager::~DragDropManager()
+{
+    if (isDragFwkShow_ == false) {
+        ACE_SCOPED_TRACE("drag: set drag window visible when destroy");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "destroy, transDragWindowToDragFwk is %{public}d", isDragFwkShow_);
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        isDragFwkShow_ = true;
+    }
+}
+
 const Point DragDropManager::GetDragMoveLastPointByCurrentPointer(int32_t pointerId)
 {
     auto it = fingerPointInfo_.find(pointerId);

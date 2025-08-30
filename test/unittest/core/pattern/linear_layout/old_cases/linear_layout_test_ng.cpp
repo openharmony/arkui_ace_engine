@@ -218,7 +218,7 @@ PaddingProperty LinearLayoutTestNg::CreatePadding(float left, float top, float r
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::Start(default)
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest001, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -267,7 +267,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest001, TestSize.Level1)
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::End
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest002, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest002, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -326,7 +326,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest002, TestSize.Level1)
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::Center
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest003, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest003, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -379,7 +379,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest003, TestSize.Level1)
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::SpaceBetween
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest004, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest004, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -432,7 +432,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest004, TestSize.Level1)
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::SpaceAround
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest005, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest005, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -487,7 +487,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest005, TestSize.Level1)
  * @tc.desc: Layout items in row linear algorithm with main alignment FlexAlign::SpaceEvenly
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest006, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest006, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -543,7 +543,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest006, TestSize.Level1)
  * FlexAlign::End FlexAlign::End
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest007, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest007, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -596,7 +596,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest007, TestSize.Level1)
  * FlexAlign::Center FlexAlign::End
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest008, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest008, TestSize.Level0)
 {
     auto row = CreateRow();
     auto rowFrameNode = row.first;
@@ -648,7 +648,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowLayoutTest008, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::Start(default)
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest001, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -697,7 +697,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest001, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::Center
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest002, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest002, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -748,7 +748,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest002, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::End
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest003, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest003, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -804,7 +804,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest003, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::SpaceBetween
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest004, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest004, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -856,7 +856,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest004, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::SpaceAround
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest005, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest005, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -910,7 +910,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest005, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with main alignment FlexAlign::SpaceEvenly
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest006, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest006, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -963,7 +963,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest006, TestSize.Level1)
  * @tc.desc: Layout items in column linear algorithm with RightToLeft
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest007, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest007, TestSize.Level0)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -1009,7 +1009,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest007, TestSize.Level1)
  * @tc.desc: Test create row without space
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest001, TestSize.Level0)
 {
     RowModelNG instance;
     instance.Create(SPACE_NEGATIVE, nullptr, EMPTY_TAG);
@@ -1035,7 +1035,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest001, TestSize.Level1)
  * @tc.desc: Test create row with space
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest002, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest002, TestSize.Level0)
 {
     RowModelNG instance;
     instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);
@@ -1057,7 +1057,7 @@ HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest002, TestSize.Level1)
  * @tc.desc: Test create column without space
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest001, TestSize.Level0)
 {
     ColumnModelNG instance;
     instance.Create(SPACE_NEGATIVE, nullptr, EMPTY_TAG);
@@ -1083,7 +1083,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest001, TestSize.Level1)
  * @tc.desc: Test create column with space
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest002, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest002, TestSize.Level0)
 {
     ColumnModelNG instance;
     instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);
@@ -1105,7 +1105,7 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest002, TestSize.Level1)
  * @tc.desc: Verify whether the layout property, layoutAlgorithm are created.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutTestNg, LinearLayoutPatternTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutTestNg, LinearLayoutPatternTest001, TestSize.Level0)
 {
     RowModelNG instance;
     instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);

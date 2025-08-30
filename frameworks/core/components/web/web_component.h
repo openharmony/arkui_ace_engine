@@ -1207,6 +1207,16 @@ public:
         return isParserBudgetOptimized_;
     }
 
+    bool GetForceEnableZoom() const
+    {
+        return isForceEnableZoom_;
+    }
+
+    void SetForceEnableZoom(bool isEnabled)
+    {
+        isForceEnableZoom_ = isEnabled;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1288,6 +1298,7 @@ private:
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
     bool isParserBudgetOptimized_ = false;
+    bool isForceEnableZoom_ = true;
 };
 
 } // namespace OHOS::Ace

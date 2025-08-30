@@ -19,13 +19,11 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
-void MenuItemGroupPattern::OnAttachToFrameNode()
-{
-    CreateBottomDivider();
-}
-
 void MenuItemGroupPattern::CreateBottomDivider()
 {
+    if (bottomDivider_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
@@ -36,6 +34,7 @@ void MenuItemGroupPattern::CreateBottomDivider()
 
 void MenuItemGroupPattern::AttachBottomDivider()
 {
+    CreateBottomDivider();
     CHECK_NULL_VOID(bottomDivider_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

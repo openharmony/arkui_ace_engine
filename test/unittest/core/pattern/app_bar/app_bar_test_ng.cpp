@@ -1215,6 +1215,40 @@ HWTEST_F(AppBarTestNg, RectChangeListener003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestAppBgColorCallBack030
+ * @tc.desc: Test AppBgColorCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestAppBgColorCallBack030, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);
+    auto menuBar = appBar->BuildMenuBar();
+    atom->AddChild(menuBar);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetAppBgColor(Color::RED);
+
+    bool isExecute = false;
+    auto callback = [&isExecute](const std::string& name, const std::string& value) mutable {
+        isExecute = true;
+    };
+
+    custom->SetCustomCallback(std::move(callback));
+    pattern->AppBgColorCallBack();
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
  * @tc.name: TestGetAppBarRect003
  * @tc.desc: Test GetAppBarRect
  * @tc.type: FUNC
@@ -1234,5 +1268,22 @@ HWTEST_F(AppBarTestNg, TestGetAppBarRect003, TestSize.Level1)
     pipeline->SetInstallationFree(1);
     rect = appBar->GetAppBarRect();
     EXPECT_EQ(rect, std::nullopt);
+}
+
+/**
+ * @tc.name: GetJSAppBarContainer001
+ * @tc.desc: Test GetJSAppBarContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, GetJSAppBarContainer001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
 }
 } // namespace OHOS::Ace::NG

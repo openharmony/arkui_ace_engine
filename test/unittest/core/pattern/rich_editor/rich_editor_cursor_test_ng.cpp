@@ -304,6 +304,36 @@ HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+}
+
+/**
+ * @tc.name: CursorMoveUp002
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF paintOffset = { -10, 1 };
+    richEditorPattern->richTextRect_.SetOffset(paintOffset);
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+}
+
+/**
  * @tc.name: CursorMoveUp003
  * @tc.desc: test RichEditorPattern CursorMoveUp
  * @tc.type: FUNC
@@ -410,36 +440,6 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveEnd001, TestSize.Level2)
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = 2;
     EXPECT_FALSE(richEditorPattern->CursorMoveEnd());
-}
-
-/**
- * @tc.name: CursorMoveUp001
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-}
-
-/**
- * @tc.name: CursorMoveUp002
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    OffsetF paintOffset = { -10, 1 };
-    richEditorPattern->richTextRect_.SetOffset(paintOffset);
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
 }
 
 /**

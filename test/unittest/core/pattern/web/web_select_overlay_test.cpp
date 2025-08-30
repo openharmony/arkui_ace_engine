@@ -1234,6 +1234,16 @@ public:
     {
         return selectHeight_;
     }
+    
+    void SetSelectHeight(int32_t h)
+    {
+        selectHeight_ = h;
+    }
+    
+    void SetSelectY(int32_t y)
+    {
+        selectY_ = y;
+    }
 
     std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(NWebTouchHandleState::TouchHandleType type) override
     {
@@ -1361,6 +1371,16 @@ public:
     int32_t GetSelectXHeight() override
     {
         return selectHeight_;
+    }
+    
+    void SetSelectHeight(int32_t h)
+    {
+        selectHeight_ = h;
+    }
+    
+    void SetSelectY(int32_t y)
+    {
+        selectY_ = y;
     }
 
     std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(NWebTouchHandleState::TouchHandleType type) override
@@ -4156,8 +4176,8 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_001, TestSize.Level1
     endHandle->GetViewPortX();
     endHandle->GetViewPortY();
     bool isNewAvoid = true;
-    overlay.ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
-    EXPECT_EQ(isNewAvoid, true);
+    RectF result = overlay.ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
+    EXPECT_EQ(result, RectF());
     auto paramsone = std::make_shared<NWebQuickMenuParamsNeMockSecond>();
     auto startHandleone = std::make_shared<NWebTouchHandleStateNeMockSecond>();
     auto endHandleone = std::make_shared<NWebTouchHandleStateNeMockFirst>();
@@ -4169,8 +4189,8 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_001, TestSize.Level1
     startHandleone->GetViewPortY();
     endHandleone->GetViewPortX();
     endHandleone->GetViewPortY();
-    overlay.ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
-    EXPECT_EQ(isNewAvoid, true);
+    result = overlay.ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
+    EXPECT_EQ(result, RectF());
 #endif
 }
 
@@ -4213,7 +4233,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_002, TestSize.Level1
     startHandle->GetViewPortY();
     endHandle->GetViewPortX();
     endHandle->GetViewPortY();
-    bool isNewAvoid = true;
+    bool isNewAvoid = false;
     overlay.ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
@@ -4262,7 +4282,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeClippedSelectionBound_003, TestSize.Level1
     endHandleone->GetViewPortX();
     endHandleone->GetViewPortY();
     endHandleone->GetEdgeHeight();
-    bool isNewAvoid = true;
+    bool isNewAvoid = false;
     overlay.ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
@@ -5540,6 +5560,13 @@ HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptions, TestSize.Level1)
  */
 HWTEST_F(WebSelectOverlayTest, OnHandleMarkInfoChange001, TestSize.Level1)
 {
+    MockPipelineContext::SetUp();
+    // set SelectTheme to themeManager before using themeManager to get SelectTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
@@ -5551,6 +5578,10 @@ HWTEST_F(WebSelectOverlayTest, OnHandleMarkInfoChange001, TestSize.Level1)
     WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
     WebSelectOverlay overlay(textBase);
 
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    overlay.OnBind(manager);
+
     auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
     SelectOverlayDirtyFlag flag = DIRTY_HANDLE_COLOR_FLAG;
     overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
@@ -5558,17 +5589,14 @@ HWTEST_F(WebSelectOverlayTest, OnHandleMarkInfoChange001, TestSize.Level1)
     flag = DIRTY_FIRST_HANDLE;
     overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
 
-    shareOverlayInfo->menuInfo.showShare = false;
+    flag = DIRTY_SECOND_HANDLE;
     overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
 
     shareOverlayInfo->menuInfo.showShare = true;
     overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
-
-    flag = DIRTY_SECOND_HANDLE;
-    overlay.needResetHandleReverse_ = false;
-    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
-    overlay.needResetHandleReverse_ = true;
-    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -5726,9 +5754,8 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest011, TestSize.Level1)
     ASSERT_NE(endSelectionHandle, nullptr);
     overlay.isShowHandle_ = true;
     overlay.selectOverlayDragging_ = true;
-    overlay.isSelectAll_ = true;
     overlay.OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
-    EXPECT_EQ(overlay.isSelectAll_, true);
+    EXPECT_EQ(overlay.isSelectAll_, false);
 }
 
 /**

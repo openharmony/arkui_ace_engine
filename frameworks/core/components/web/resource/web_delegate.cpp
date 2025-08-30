@@ -570,12 +570,34 @@ int ContextMenuParamOhos::GetEditStateFlags() const
 int ContextMenuParamOhos::GetSourceType() const
 {
     if (param_) {
+        auto type = param_->GetSourceType();
+        if (type <= OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
+            return type;
+        }
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE;
+}
+
+int ContextMenuParamOhos::GetSourceTypeV2() const
+{
+    if (param_) {
         return param_->GetSourceType();
     }
     return OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE;
 }
 
 int ContextMenuParamOhos::GetMediaType() const
+{
+    if (param_) {
+        auto type = param_->GetMediaType();
+        if (type <= OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE) {
+            return type;
+        }
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
+}
+
+int ContextMenuParamOhos::GetMediaTypeV2() const
 {
     if (param_) {
         return param_->GetMediaType();
@@ -6047,6 +6069,14 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
     return result;
 }
 
+void WebDelegate::OnContextMenuDismissed()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuDismissed");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCloseContextMenu();
+}
+
 bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 {
     CHECK_NULL_RETURN(taskExecutor_, false);
@@ -6630,7 +6660,7 @@ void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     if (hotZone) {
-        if (webPattern->IsShowHandle()) {
+        if (IS_CALLING_FROM_M114() || webPattern->IsShowHandle()) {
             hotZone->SetWidth(touchHandleSize);
             hotZone->SetHeight(touchHandleSize);
         } else {
@@ -9097,4 +9127,16 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
 }
 
+void WebDelegate::SetForceEnableZoom(bool isEnabled)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetForceEnableZoom(isEnabled);
+}
+
+void WebDelegate::SetImeShow(bool visible)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetImeShow(visible);
+}
 } // namespace OHOS::Ace

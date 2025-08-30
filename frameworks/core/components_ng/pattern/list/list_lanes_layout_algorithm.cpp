@@ -24,7 +24,7 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis);
     groupLayoutConstraint_ = contentConstraint;
     auto crossSizeOptional = selfIdealSize.CrossSize(axis);
     if (crossSizeOptional.has_value()) {

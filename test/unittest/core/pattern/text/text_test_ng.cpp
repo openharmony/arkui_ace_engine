@@ -2820,8 +2820,10 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
 
     textContentModifier.SetTextDecorationColor(Color::ColorFromString("#55FFFFFF"), false);
     textContentModifier.textDecoration_ = TextDecoration::LINE_THROUGH;
+    textContentModifier.textDecorationAnimatable_ = true;
     textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
     EXPECT_EQ(textContentModifier.textDecorationColorAlpha_->Get(), 85.0f);
+    EXPECT_FALSE(textContentModifier.textDecorationAnimatable_);
 }
 
 /**
@@ -3076,6 +3078,54 @@ HWTEST_F(TextTestNg, TextContentModifier008, TestSize.Level1)
     textContentModifier.PauseAnimation();
     textContentModifier.racePercentFloat_ = nullptr;
     textContentModifier.GetTextRacePercent();
+}
+
+/**
+ * @tc.name: TextContentAlign001
+ * @tc.desc: test text_content_modifier.cpp .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentAlign001, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to 100.0f
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentSize.value().Width(), 100.0f);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::TOP);
+    auto contentOffset = textLayoutAlgorithm->GetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentOffset.GetY(), 0.0f);
+    textPattern->pManager_->Reset();
 }
 
 /**
@@ -4903,5 +4953,46 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     auto line = textModelNG.GetLineCount(frameNode);
     ASSERT_EQ(line, 0);
+}
+
+/**
+ * @tc.name: TextContentModifierSetSymbolColor001
+ * @tc.desc: Test SetSymbolColor with existing symbolColors (size=2) and input value size=1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifierSetSymbolColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier and initialize symbolColors_ with size=2.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    std::vector<Color> initialColors = { Color::BLUE };
+    TextStyle style;
+    style.SetSymbolColorList(initialColors);
+    textContentModifier->SetDefaultSymbolColor(style);
+
+    // Initialize symbolColors_ with 2 colors
+    std::vector<Color> newColors1 = { Color::RED, Color::BLUE };
+    textContentModifier->SetSymbolColor(newColors1, false);
+    auto resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 2);
+
+    /**
+     * @tc.steps: step2. Call SetSymbolColor with value size=1 (smaller than current symbolColors_)
+     */
+    std::vector<Color> newColors2 = { Color::GREEN };
+    textContentModifier->SetSymbolColor(newColors2, false);
+
+    /**
+     * @tc.steps: step3. Verify symbolColors_ is correctly updated and truncated
+     * @tc.expected: symbolColors_ should have size=1 with the new color
+     */
+    resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 1);
+    EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
 } // namespace OHOS::Ace::NG

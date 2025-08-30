@@ -14,6 +14,7 @@
  */
 #include "js_plugin_util.h"
 #include "json/json.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
@@ -899,7 +900,7 @@ napi_value AceGetCallbackErrorValue(napi_env env, int errCode)
  *
  * @return Return a pointer to AsyncPermissionCallbackInfo on success, nullptr on failure
  */
-ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
+ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env, bool checkCurrentThread)
 {
     napi_value global = 0;
     NAPI_CALL(env, napi_get_global(env, &global));
@@ -914,6 +915,9 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
     }
 
     auto containerId = Container::CurrentIdSafelyWithCheck();
+    if (checkCurrentThread && !IsContainerInCurrentThead(containerId)) {
+        return nullptr;
+    }
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new (std::nothrow) ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,
@@ -1094,5 +1098,30 @@ void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char* 
     napi_value prop = nullptr;
     napi_create_string_utf8(env, objName, NAPI_AUTO_LENGTH, &prop);
     napi_set_named_property(env, jsObject, propName, prop);
+}
+
+/**
+ * @brief Check if the container is in the current thread.
+ * @param containerId The id of container.
+ * @return Return true if the container is in the current thread, otherwise return false.
+ */
+bool IsContainerInCurrentThead(int32_t containerId)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT, "can't get container by container id: %{public}d", containerId);
+        return false;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT, "can't get taskExecutor by container id: %{public}d",
+            containerId);
+        return false;
+    }
+    if (!taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT, "container id: %{public}d is from other thread.", containerId);
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::Napi

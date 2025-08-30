@@ -171,6 +171,12 @@ void TextContentModifier::SetDefaultSymbolColor(const TextStyle& textStyle)
     AttachProperty(animatableSymbolColor_);
 }
 
+void TextContentModifier::SetSymbolColors(const LinearVector<LinearColor>& value)
+{
+    CHECK_NULL_VOID(animatableSymbolColor_);
+    animatableSymbolColor_->Set(value);
+}
+
 LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color>& colorList)
 {
     LinearVector<LinearColor> colors;
@@ -994,13 +1000,23 @@ void TextContentModifier::TextColorModifier(const Color& value)
 
 void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool isReset)
 {
+    auto colors = Convert2VectorLinearColor(value);
     if (!isReset) {
-        symbolColors_ = Convert2VectorLinearColor(value);
+        symbolColors_ = colors;
     } else {
         symbolColors_ = std::nullopt;
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
-    animatableSymbolColor_->Set(Convert2VectorLinearColor(value));
+    auto animatableColors = animatableSymbolColor_->Get();
+    if (colors.size() != animatableColors.size()) {
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), colors]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetSymbolColors(colors);
+        });
+    } else {
+        animatableSymbolColor_->Set(colors);
+    }
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
@@ -1030,13 +1046,12 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
 void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isReset)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
+    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
+                                (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
     if (oldTextDecoration == type) {
         UpdateTextDecorationColorAlpha();
         return;
     }
-
-    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-                                (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
     if (!isReset) {
         textDecoration_ = type;
     } else {

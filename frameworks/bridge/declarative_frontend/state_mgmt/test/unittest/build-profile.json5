@@ -39,6 +39,14 @@
         "targetSdkVersion": 14,
         "runtimeOS": "OpenHarmony",
       }
+    ],
+     "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
     ]
   },
   "modules": [

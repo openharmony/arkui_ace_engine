@@ -435,7 +435,6 @@ HWTEST_F(WebPatternAddTestNg, CalculateTooltipOffset, TestSize.Level1)
     pipeline->rootWidth_ = ROOT_WIDTH_VALUE;
     pipeline->rootHeight_ = ROOT_HEIGHT_VALUE;
     webPattern->CalculateTooltipOffset(tooltipNode, *tooltipOffset);
-    EXPECT_EQ(pipeline->rootWidth_, ROOT_WIDTH_VALUE);
 #endif
 }
 
@@ -705,7 +704,6 @@ HWTEST_F(WebPatternAddTestNg, GenerateDragDropInfo, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    ASSERT_EQ(webpattern.delegate_, nullptr);
     NG::DragDropInfo dragDropInfo;
     auto pixelMapImpl = AceType::MakeRefPtr<PixelMapImpl>();
     dragDropInfo.pixelMap = pixelMapImpl;
@@ -751,12 +749,11 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDropMove_002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    ASSERT_EQ(webpattern.delegate_, nullptr);
     webpattern.isDragging_ = true;
     webpattern.isW3cDragEvent_ = true;
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webpattern.HandleOnDropMove(info);
-    EXPECT_TRUE(webpattern.isW3cDragEvent_);
+    EXPECT_FALSE(webpattern.isDragStartFromWeb_);
 #endif
 }
 
@@ -1253,6 +1250,33 @@ HWTEST_F(WebPatternAddTestNg, handleDragCancelTask001, TestSize.Level1)
     auto drag_cancel_task = webPattern->dragEvent_->GetActionCancelEventFunc();
     EXPECT_NE(drag_cancel_task, nullptr);
     drag_cancel_task();
+    EXPECT_FALSE(webPattern->isDragging_);
+#endif
+}
+
+/**
+ * @tc.name: handleDragCancelTask001
+ * @tc.desc: handleOnDragEnterId001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, handleOnDragEnterId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<OHOS::Ace::NG::WebEventHub> eventHub = AceType::MakeRefPtr<OHOS::Ace::NG::WebEventHub>();
+    webPattern->InitWebEventHubDragDropStart(eventHub);
+    std::string extraParams = "123";
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, nullptr, extraParams);
     EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }

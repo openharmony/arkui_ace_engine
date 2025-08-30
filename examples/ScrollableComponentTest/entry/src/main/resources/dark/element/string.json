@@ -1,0 +1,333 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "width",
+      "value": "200"
+    },
+    {
+      "name": "height",
+      "value": "100"
+    },
+    {
+      "name": "title",
+      "value": "标题"
+    },
+    {
+      "name": "subtitle",
+      "value": "小标题"
+    },
+    {
+      "name": "value",
+      "value": "按钮"
+    },
+    {
+      "name": "apples",
+      "value": "APPLES"
+    },
+    {
+      "name": "bananas",
+      "value": "BANANAS"
+    },
+    {
+      "name": "pears",
+      "value": "PEARS"
+    },
+    {
+      "name": "x",
+      "value": "-20"
+    },
+    {
+      "name": "x1",
+      "value": "-80"
+    },
+    {
+      "name": "y",
+      "value": "-40"
+    },
+    {
+      "name": "radius",
+      "value": "500"
+    },
+    {
+      "name": "content",
+      "value": "选项"
+    },
+    {
+      "name": "labelInfo",
+      "value": "Ctrl+V"
+    },
+    {
+      "name": "header",
+      "value": "标题"
+    },
+    {
+      "name": "footer",
+      "value": "脚标"
+    },
+    {
+      "name": "message",
+      "value": "dark dark dark dark"
+    },
+    {
+      "name": "fontFamily",
+      "value": "medium"
+    },
+    {
+      "name": "fontFamily1",
+      "value": "Arial"
+    },
+    {
+      "name": "size",
+      "value": "48"
+    },
+    {
+      "name": "multiple",
+      "value": "0.5"
+    },
+    {
+      "name": "radio",
+      "value": "10"
+    },
+    {
+      "name": "index",
+      "value": "1"
+    },
+    {
+      "name": "promptText",
+      "value": "这是深色promptText"
+    },
+    {
+      "name": "friction",
+      "value": "0.1"
+    },
+    {
+      "name": "Snap",
+      "value": "[0,2]"
+    },
+    {
+      "name": "margin",
+      "value": "60"
+    },
+    {
+      "name": "guiter",
+      "value": "60"
+    },
+    {
+      "name": "text",
+      "value": "深页签"
+    },
+    {
+      "name": "left",
+      "value": "30"
+    },
+    {
+      "name": "right",
+      "value": "30"
+    },
+    {
+      "name": "top",
+      "value": "30"
+    },
+    {
+      "name": "bottom",
+      "value": "30"
+    },
+    {
+      "name": "friction1",
+      "value": "-99"
+    },
+
+    {
+      "name": "module_desc11",
+      "value": "module description 11xin"
+    },
+    {
+      "name": "EntryAbility_desc11",
+      "value": "description xin 11"
+    },
+    {
+      "name": "EntryAbility_label11",
+      "value": "label xin 11"
+    },
+    {
+      "name": "width11",
+      "value": "-330"
+    },
+    {
+      "name": "height11",
+      "value": "-230"
+    },
+    {
+      "name": "title11",
+      "value": "title11xin"
+    },
+    {
+      "name": "subtitle11",
+      "value": "subtitle11xin"
+    },
+    {
+      "name": "message11",
+      "value": "message11xin"
+    },
+    {
+      "name": "value11",
+      "value": "button11xin"
+    },
+    {
+      "name": "apples11",
+      "value": "apples11xin"
+    },
+    {
+      "name": "bananas11",
+      "value": "bananas11xin"
+    },
+    {
+      "name": "pears11",
+      "value": "pears11xin"
+    },
+    {
+      "name": "x11",
+      "value": "-27"
+    },
+    {
+      "name": "x111",
+      "value": "19"
+    },
+    {
+      "name": "y11",
+      "value": "-38"
+    },
+    {
+      "name": "radius11",
+      "value": "-18"
+    },
+    {
+      "name": "content11",
+      "value": "菜单选项11xin"
+    },
+    {
+      "name": "labelInfo11",
+      "value": "Ctrl+C11xin"
+    },
+    {
+      "name": "header11",
+      "value": "header11xin"
+    },
+    {
+      "name": "footer11",
+      "value": "footer11xin"
+    },
+    {
+      "name": "fontFamily11",
+      "value": "fontFamily"
+    },
+    {
+      "name": "fontFamily111",
+      "value": "fontFamily"
+    },
+    {
+      "name": "size11",
+      "value": "-17"
+    },
+    {
+      "name": "multiple11",
+      "value": "1"
+    },
+    {
+      "name": "radio11",
+      "value": "5"
+    },
+    {
+      "name": "index11",
+      "value": "-3"
+    },
+    {
+      "name": "promptText11",
+      "value": "这是浅色promptText 11HarmonyOS Sans"
+    },
+    {
+      "name": "friction11",
+      "value": "-99"
+    },
+    {
+      "name": "Snap11",
+      "value": "[0,-9]"
+    },
+    {
+      "name": "margin11",
+      "value": "-68"
+    },
+    {
+      "name": "guiter11",
+      "value": "69"
+    },
+    {
+      "name": "text11",
+      "value": "浅页签11HarmonyOS Sans"
+    },
+    {
+      "name": "left11",
+      "value": "-48"
+    },
+    {
+      "name": "right11",
+      "value": "88"
+    },
+    {
+      "name": "top11",
+      "value": "-28"
+    },
+    {
+      "name": "bottom11",
+      "value": "-59"
+    },
+    {
+      "name": "friction111",
+      "value": "0.6"
+    },
+    {
+      "name": "marginBarmode",
+      "value": "120"
+    },
+    {
+      "name": "marginBarmode11",
+      "value": "-20"
+    },
+    {
+      "name": "color",
+      "value": "这是一个异常color"
+    },
+    {
+      "name": "fontFamilyNumber",
+      "value": "number"
+    },
+    {
+      "name": "heightxia",
+      "value": "10"
+    },
+    {
+      "name": "heightheight",
+      "value": "-150"
+    },
+    {
+      "name": "widthwidth",
+      "value": "-150"
+    },
+    {
+      "name": "x22",
+      "value": "40"
+    }
+  ]
+}

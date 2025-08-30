@@ -1365,4 +1365,139 @@ HWTEST_F(IndexerPatternTestThreeNg, IndexerPatternTestThreeNg026, TestSize.Level
     CHECK_NULL_VOID(renderContext);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
 }
+
+/**
+ * @tc.name: IndexerPatternTestThreeNg027
+ * @tc.desc: Test indexer pattern OnDirtyLayoutWrapperSwap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, IndexerPatternTestThreeNg027, TestSize.Level1)
+{
+    CreateIndexer(GetMidArrayValue(), 0);
+    CreateDone();
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto algorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+
+    /**
+     * @tc.steps: step1. Test with skipLayout true and skipMeasure true.
+     * @tc.expected: initialized_ true.
+     */
+    bool ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(pattern_->initialized_);
+
+    /**
+     * @tc.steps: step2. Test with skipLayout true and skipMeasure false.
+     * @tc.expected: maxContentHeight_ correct.
+     */
+    pattern_->lastAutoCollapse_ = true;
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = false;
+    algorithm->maxContentHeight_ = INDEXER_ITEM_SIZE;
+    pattern_->maxContentHeight_ = INDEXER_ITEM_SIZE + 1;
+    ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(pattern_->maxContentHeight_, INDEXER_ITEM_SIZE);
+    EXPECT_TRUE(pattern_->isNewHeightCalculated_);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step3. Test with skipLayout false and skipMeasure true.
+     * @tc.expected: maxContentHeight_ correct.
+     */
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = true;
+    pattern_->maxContentHeight_ = INDEXER_ITEM_SIZE + 1;
+    ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(pattern_->maxContentHeight_, INDEXER_ITEM_SIZE);
+    EXPECT_TRUE(pattern_->isNewHeightCalculated_);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IndexerPatternTestThreeNg028
+ * @tc.desc: Test indexer pattern CollapseArrayValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, IndexerPatternTestThreeNg028, TestSize.Level1)
+{
+    std::vector<std::string> arrayvalue;
+    CreateIndexer(GetShortArrayValue(), 0);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Test with itemSize 0.
+     * @tc.expected: arrayValue_ correct.
+     */
+    pattern_->maxContentHeight_ = SHORT_INDEXER_HEIGHT;
+    pattern_->fullArrayValue_ = GetShortArrayValue();
+    layoutProperty_->UpdateItemSize(Dimension(0, DimensionUnit::VP));
+    pattern_->CollapseArrayValue();
+    for (auto item : pattern_->arrayValue_) {
+        arrayvalue.push_back(item.first);
+    }
+    EXPECT_EQ(arrayvalue, GetShortArrayValue());
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(pattern_->arrayValue_.size(), GetShortArrayValue().size());
+    EXPECT_EQ(arrayvalue, GetShortArrayValue());
+}
+
+/**
+ * @tc.name: IndexerPatternTestThreeNg029
+ * @tc.desc: Test indexer pattern FireOnSelect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, IndexerPatternTestThreeNg029, TestSize.Level1)
+{
+    int32_t selected = -1;
+    int32_t changeSelected = -1;
+    int32_t creatChangeSelected = -1;
+    OnSelectedEvent onSelected = [&selected](int32_t selectedIndex) { selected = selectedIndex; };
+    OnSelectedEvent changeEvent = [&changeSelected](int32_t selectedIndex) { changeSelected = selectedIndex; };
+    OnSelectedEvent creatChangeEvent = [&creatChangeSelected](
+                                           int32_t selectedIndex) { creatChangeSelected = selectedIndex; };
+    IndexerModelNG model = CreateIndexer(GetShortArrayValue(), 0);
+    eventHub_->SetOnSelected(std::move(onSelected));
+    eventHub_->SetChangeEvent(std::move(changeEvent));
+    eventHub_->SetCreatChangeEvent(std::move(creatChangeEvent));
+
+    /**
+     * @tc.steps: step1. Test with selected_ > itemCount_.
+     * @tc.expected: lastFireSelectIndex_ correct.
+     */
+    EXPECT_NE(eventHub_->GetChangeEvent(), nullptr);
+    pattern_->lastFireSelectIndex_ = 0;
+    pattern_->lastIndexFromPress_ = false;
+    pattern_->selected_ = pattern_->itemCount_ + 1;
+    pattern_->FireOnSelect(pattern_->itemCount_ + 1, false);
+    EXPECT_EQ(pattern_->lastFireSelectIndex_, 1);
+    EXPECT_FALSE(pattern_->lastIndexFromPress_);
+
+    /**
+     * @tc.steps: step2. Test with selected_ < 0.
+     * @tc.expected: lastFireSelectIndex_ correct.
+     */
+    pattern_->lastFireSelectIndex_ = 0;
+    pattern_->lastIndexFromPress_ = true;
+    pattern_->selected_ = -1;
+    pattern_->FireOnSelect(-1, false);
+    EXPECT_EQ(pattern_->lastFireSelectIndex_, -1);
+    EXPECT_FALSE(pattern_->lastIndexFromPress_);
+
+    /**
+     * @tc.steps: step3. Test with lastFireSelectIndex_ != selectIndex.
+     * @tc.expected: lastFireSelectIndex_ correct.
+     */
+    pattern_->lastFireSelectIndex_ = 0;
+    pattern_->lastIndexFromPress_ = true;
+    pattern_->FireOnSelect(1, false);
+    EXPECT_EQ(pattern_->lastFireSelectIndex_, 1);
+    EXPECT_FALSE(pattern_->lastIndexFromPress_);
+}
 } // namespace OHOS::Ace::NG

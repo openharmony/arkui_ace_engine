@@ -194,7 +194,7 @@ public:
 
     void InvalidatedOffset() override {};
 
-    float currentOffset_ = 0.0f;
+    double currentOffset_ = 0.0;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 
@@ -224,6 +224,16 @@ public:
 
     void UpdateItemStart(bool canOverScrollStart);
 
+    int32_t StartIndex() const override
+    {
+        return startIndex_;
+    }
+
+    int32_t EndIndex() const override
+    {
+        return endIndex_;
+    }
+
 private:
     inline float TopMargin() const
     {
@@ -243,7 +253,7 @@ struct WaterFlowLayoutInfo::ItemInfo {
     }
 
     int32_t crossIdx = 0;
-    float mainOffset = 0.0f;
+    double mainOffset = 0.0;
     float mainSize = 0.0f;
 };
 

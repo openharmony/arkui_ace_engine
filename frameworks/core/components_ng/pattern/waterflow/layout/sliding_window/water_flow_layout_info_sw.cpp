@@ -294,10 +294,10 @@ int32_t WaterFlowLayoutInfoSW::GetMainCount() const
 float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx */) const
 {
     if (!ItemInView(idx)) {
-        return Infinity<float>();
+        return LayoutInfinity<float>();
     }
     const auto* lane = GetLane(idx);
-    CHECK_NULL_RETURN(lane, Infinity<float>());
+    CHECK_NULL_RETURN(lane, LayoutInfinity<float>());
     float pos = 0.0f; // main-axis position of the item's top edge relative to viewport top. Positive if below viewport
     float itemSize = 0.0f;
     if (idx < endIndex_) {
@@ -305,12 +305,12 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
         auto it = std::find_if(
             lane->items_.begin(), lane->items_.end(), [idx](const ItemInfo& item) { return item.idx == idx; });
         if (it == lane->items_.end()) {
-            return Infinity<float>();
+            return LayoutInfinity<float>();
         }
         itemSize = it->mainSize;
     } else {
         if (lane->items_.empty()) {
-            return Infinity<float>();
+            return LayoutInfinity<float>();
         }
         itemSize = lane->items_.back().mainSize;
         pos = lane->endPos - itemSize;

@@ -3,6 +3,62 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "gray",
+      "value": "#F0F0F0"
+    },
+    {
+      "name": "green",
+      "value": "#87F787"
+    },
+    {
+      "name": "blue",
+      "value": "#ADD8E6"
+    },
+    {
+      "name": "yellow",
+      "value": "#FFFAFAAF"
+    },
+    {
+      "name": "orange",
+      "value": "#FFE4B5"
+    },
+    {
+      "name": "purple",
+      "value": "#D8BFD8"
+    },
+    {
+      "name": "pink",
+      "value": "#FFE4E1"
+    },
+    {
+      "name": "gray1",
+      "value": "#F0F0F0"
+    },
+    {
+      "name": "green1",
+      "value": "#87F787"
+    },
+    {
+      "name": "blue1",
+      "value": "#ADD8E6"
+    },
+    {
+      "name": "yellow1",
+      "value": "#FFFFE0"
+    },
+    {
+      "name": "orange1",
+      "value": "#FFE4B5"
+    },
+    {
+      "name": "purple1",
+      "value": "#D8BFD8"
+    },
+    {
+      "name": "pink1",
+      "value": "#FFE4E1"
     }
   ]
 }

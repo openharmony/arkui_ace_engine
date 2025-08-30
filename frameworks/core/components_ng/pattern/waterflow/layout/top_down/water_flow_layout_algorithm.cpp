@@ -92,6 +92,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
 
+    // Initialize unlayouted items if not layouted
+    InitUnlayoutedItems();
+
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
@@ -107,7 +110,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
         if (isMainFix) {
-            idealSize.SetMainSize(Infinity<float>(), axis);
+            idealSize.SetMainSize(LayoutInfinity<float>(), axis);
         }
     }
     if (NearZero(GetCrossAxisSize(idealSize, axis))) {
@@ -162,6 +165,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
+
+    measuredStartIndex_ = layoutInfo_->startIndex_;
+    measuredEndIndex_ = layoutInfo_->endIndex_;
     layoutInfo_->lastMainSize_ = mainSize_;
 
     const int32_t cacheCnt = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
@@ -174,6 +180,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         PreloadItems(layoutWrapper, layoutInfo_, cacheCnt);
     }
+
+    isLayouted_ = false;
 }
 
 bool WaterFlowLayoutAlgorithm::MeasureToTarget(
@@ -207,7 +215,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
         } else {
             ViewPosReference ref {
                 .viewPosStart = 0,
-                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? Infinity<float>() : expandMainSize,
+                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? LayoutInfinity<float>() : expandMainSize,
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,
@@ -251,6 +259,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         skipMeasure_ = false;
         return;
     }
+
+    InitUnlayoutedItems();
+
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     const int32_t cachedCount = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
 
@@ -325,6 +336,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
     UpdateOverlay(layoutWrapper);
+
+    ClearUnlayoutedItems(layoutWrapper);
+    isLayouted_ = true;
 }
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
@@ -390,7 +404,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         } else {
             ViewPosReference ref {
                 .viewPosStart = 0,
-                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? Infinity<float>() : expandMainSize,
+                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? LayoutInfinity<float>() : expandMainSize,
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,

@@ -1175,15 +1175,27 @@ void JSParticle::Create(const JSCallbackInfo& args)
 }
 void JSParticle::AddDisturbance(std::vector<OHOS::Ace::ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj)
 {
-    float strength = paramObj->GetProperty("strength")->ToNumber<float>();
-    int shape = paramObj->GetProperty("shape")->ToNumber<int>();
+    float strength = 0.0f;
+    auto strengthPrp = paramObj->GetProperty("strength");
+    if (strengthPrp->IsNumber()) {
+        strength = strengthPrp->ToNumber<float>();
+    }
+    int shape = 0;
+    auto shapePrp = paramObj->GetProperty("shape");
+    if (shapePrp->IsNumber()) {
+        shape = shapePrp->ToNumber<int>();
+    }
     int sizeXValue = 0;
     int sizeYValue = 0;
     int positionXValue = 0;
     int positionYValue = 0;
     GetSizeAndPositionValues(paramObj, sizeXValue, sizeYValue, positionXValue, positionYValue);
-    int feather = paramObj->GetProperty("feather")->ToNumber<int>();
-    feather = std::clamp(feather, 0, 100);
+    int feather = 0;
+    auto featherPrp = paramObj->GetProperty("feather");
+    if (featherPrp->IsNumber()) {
+        feather = featherPrp->ToNumber<int>();
+        feather = std::clamp(feather, 0, 100);
+    }
     float noiseScale = 1.0f;
     if (paramObj->GetProperty("noiseScale")->IsNumber()) {
         noiseScale = paramObj->GetProperty("noiseScale")->ToNumber<float>();
@@ -1225,15 +1237,23 @@ void JSParticle::GetSizeAndPositionValues(
     JSRef<JSVal> sizeJsValue = paramObj->GetProperty("size");
     if (sizeJsValue->IsObject()) {
         JSRef<JSObject> sizeJsObject = JSRef<JSObject>::Cast(sizeJsValue);
-        sizeXValue = sizeJsObject->GetProperty("width")->ToNumber<int>();
-        sizeYValue = sizeJsObject->GetProperty("height")->ToNumber<int>();
+        if (sizeJsObject->GetProperty("width")->IsNumber()) {
+            sizeXValue = sizeJsObject->GetProperty("width")->ToNumber<int>();
+        }
+        if (sizeJsObject->GetProperty("height")->IsNumber()) {
+            sizeYValue = sizeJsObject->GetProperty("height")->ToNumber<int>();
+        }
     }
 
     JSRef<JSVal> positionJsValue = paramObj->GetProperty("position");
     if (positionJsValue->IsObject()) {
         JSRef<JSObject> positionJsObject = JSRef<JSObject>::Cast(positionJsValue);
-        positionXValue = positionJsObject->GetProperty("x")->ToNumber<int>();
-        positionYValue = positionJsObject->GetProperty("y")->ToNumber<int>();
+        if (positionJsObject->GetProperty("x")->IsNumber()) {
+            positionXValue = positionJsObject->GetProperty("x")->ToNumber<int>();
+        }
+        if (positionJsObject->GetProperty("y")->IsNumber()) {
+            positionYValue = positionJsObject->GetProperty("y")->ToNumber<int>();
+        }
     }
 }
 
@@ -1282,10 +1302,12 @@ void JSParticle::ParseEmitterProperty(
     auto sizeProperty = paramObj->GetProperty("size");
     if (sizeProperty->IsObject()) {
         auto sizeValue = Framework::JSRef<Framework::JSObject>::Cast(sizeProperty);
-        auto sizeXValue = sizeValue->GetProperty("width")->ToNumber<float>();
-        auto sizeYValue = sizeValue->GetProperty("height")->ToNumber<float>();
-        if (sizeXValue > 0 && sizeYValue > 0) {
-            emitterProperty.size = { sizeXValue, sizeYValue };
+        if (sizeValue->GetProperty("width")->IsNumber() && sizeValue->GetProperty("height")->IsNumber()) {
+            auto sizeXValue = sizeValue->GetProperty("width")->ToNumber<float>();
+            auto sizeYValue = sizeValue->GetProperty("height")->ToNumber<float>();
+            if (sizeXValue > 0 && sizeYValue > 0) {
+                emitterProperty.size = { sizeXValue, sizeYValue };
+            }
         }
     }
 

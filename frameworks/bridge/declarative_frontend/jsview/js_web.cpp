@@ -2182,6 +2182,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
     JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
+    JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3879,49 +3880,40 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnContextMenuShow(jsCallback);
 }
 
-void ParseBindSelectionMenuParam(
-    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+std::function<void()> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
+    const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name)
 {
-    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
-    if (onDisappearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnDisAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
-                            node = frameNode]() {
+    auto onMenuCallbackValue = menuOptions->GetProperty(name.c_str());
+    if (onMenuCallbackValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnMenuCallbackFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onMenuCallbackValue));
+        auto onMenuCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMenuCallbackFunc),
+                                  node = frameNode, eventName = name]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDisappear");
+            ACE_SCORING_EVENT(eventName);
             PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
-        menuParam.onDisappear = std::move(onDisappear);
+        return onMenuCallback;
     }
-
-    auto onAppearValue = menuOptions->GetProperty("onAppear");
-    if (onAppearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
-        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc),
-                         node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.onAppear = std::move(onAppear);
-    }
+    return nullptr;
 }
 
 void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args,
-    NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+    std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam)
 {
     auto menuOptions = JSRef<JSObject>::Cast(args);
-    ParseBindSelectionMenuParam(info, menuOptions, menuParam);
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    selectMenuParam->menuParam.onDisappear = ParseMenuCallback(frameNode, menuOptions, info, "onDisappear");
+    selectMenuParam->menuParam.onAppear = ParseMenuCallback(frameNode, menuOptions, info, "onAppear");
+    selectMenuParam->onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
+    selectMenuParam->onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
 
     auto preview = menuOptions->GetProperty("preview");
     if (!preview->IsFunction()) {
         return;
     }
+    NG::MenuParam& menuParam = selectMenuParam->menuParam;
     auto menuType = menuOptions->GetProperty("menuType");
     bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
     menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
@@ -3937,9 +3929,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         }
         RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
-        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                            node = frameNode]() {
+        selectMenuParam->previewBuilder = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
+                                              node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
             PipelineContext::SetCallBackNode(node);
@@ -3948,17 +3939,18 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
-NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo &info, ResponseType responseType,
-    std::function<void()> &previewBuilder, WebElementType elementType)
+void GetSelectionMenuParam(const JSCallbackInfo &info, std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam)
 {
-    NG::MenuParam menuParam;
+    NG::MenuParam& menuParam = selectMenuParam->menuParam;
     if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
-        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], selectMenuParam);
     }
 
-    if (responseType != ResponseType::LONG_PRESS) {
+    if (selectMenuParam->responseType == ResponseType::RIGHT_CLICK) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    } else if (selectMenuParam->responseType == ResponseType::LONG_PRESS) {
+        menuParam.menuBindType = MenuBindingType::LONG_PRESS;
     }
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
@@ -3967,9 +3959,8 @@ NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo &info, ResponseType res
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.disappearScaleToTarget = true;
-    menuParam.isPreviewContainScale = (elementType == WebElementType::IMAGE);
+    menuParam.isPreviewContainScale = (selectMenuParam->type == WebElementType::IMAGE);
     menuParam.isShow = true;
-    return menuParam;
 }
 
 bool CheckSelectionMenuParam(const JSCallbackInfo &info)
@@ -3978,7 +3969,9 @@ bool CheckSelectionMenuParam(const JSCallbackInfo &info)
         !info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
         return false;
     }
-    std::vector<WebElementType> supportType = {WebElementType::IMAGE, WebElementType::LINK};
+    std::vector<WebElementType> supportType = {
+        WebElementType::IMAGE, WebElementType::LINK, WebElementType::TEXT
+    };
     int32_t elementType = info[0]->ToNumber<int32_t>();
     auto supportType_iter = std::find_if(supportType.begin(), supportType.end(), [elementType](auto &type) {
         return static_cast<int32_t>(type) == elementType;
@@ -3987,24 +3980,46 @@ bool CheckSelectionMenuParam(const JSCallbackInfo &info)
         TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType param err");
         return false;
     }
-    if (info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
-        static_cast<int32_t>(ResponseType::LONG_PRESS)) {
+    int32_t responseType = info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>();
+    if (responseType != static_cast<int32_t>(WebResponseType::LONG_PRESS) &&
+        responseType != static_cast<int32_t>(WebResponseType::RIGHT_CLICK)) {
         TAG_LOGW(AceLogTag::ACE_WEB, "WebResponseType param err");
         return false;
     }
     return true;
 }
+
+ResponseType ConverToResponseType(const WebResponseType& webType)
+{
+    ResponseType type;
+    switch (webType) {
+        case WebResponseType::LONG_PRESS:
+            type = ResponseType::LONG_PRESS;
+            break;
+        case WebResponseType::RIGHT_CLICK:
+            type = ResponseType::RIGHT_CLICK;
+            break;
+        default:
+            type = ResponseType::LONG_PRESS;
+            break;
+    }
+    return type;
+}
+
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
     if (!CheckSelectionMenuParam(info)) {
         return;
     }
-    WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
-    if (elementType == WebElementType::LINK) {
+    auto selectMenuParam = std::make_shared<WebPreviewSelectionMenuParam>();
+    CHECK_NULL_VOID(selectMenuParam);
+    selectMenuParam->type = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
+    selectMenuParam->responseType = ConverToResponseType(
+        static_cast<WebResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>()));
+    if (selectMenuParam->type != WebElementType::IMAGE ||
+        selectMenuParam->responseType != ResponseType::LONG_PRESS) {
         RETURN_IF_CALLING_FROM_M114();
     }
-    ResponseType responseType =
-        static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
 
     // Builder
     JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
@@ -4016,7 +4031,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    std::function<void()> menuBuilder = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+    selectMenuParam->menuBuilder = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
                                          node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindSelectionMenu");
@@ -4024,12 +4039,9 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder, elementType);
+    GetSelectionMenuParam(info, selectMenuParam);
     WebModel::GetInstance()->SetNewDragStyle(true);
-    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
-        elementType, responseType, menuBuilder, previewBuilder, menuParam);
-    WebModel::GetInstance()->SetPreviewSelectionMenu(previewSelectionMenuParam);
+    WebModel::GetInstance()->SetPreviewSelectionMenu(selectMenuParam);
 }
 
 void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
@@ -6520,6 +6532,15 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
     }
     auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
     WebModel::GetInstance()->SetGestureFocusMode(mode);
+}
+ 
+void JSWeb::SetForceEnableZoom(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool enabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetForceEnableZoom(enabled);
 }
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)

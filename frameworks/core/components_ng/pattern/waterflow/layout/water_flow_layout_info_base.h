@@ -207,6 +207,18 @@ public:
 
     virtual void InvalidatedOffset() = 0;
 
+    /**
+    * @brief Get the start index of visible items in the layout.
+    * @return The start index of the current layout range.
+    */
+    virtual int32_t StartIndex() const = 0;
+
+    /**
+    * @brief Get the end index of visible items in the layout.
+    * @return The end index of the current layout range.
+    */
+    virtual int32_t EndIndex() const = 0;
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.

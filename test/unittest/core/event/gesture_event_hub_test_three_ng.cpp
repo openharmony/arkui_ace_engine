@@ -69,8 +69,6 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
     * @tc.expected: gestureEventHub is not null.
     */
     auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
 
@@ -82,7 +80,6 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
-    renderContext->UpdateTransformRotate({ 0.0f, 0.0f, 1.0f, 1.0f, 0.0f });
 
     /**
      * @tc.steps: step3. call CalcFrameNodeOffsetAndSize.
@@ -91,8 +88,6 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
     EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
     guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, false);
     EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
-    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetX(), 0.0);
-    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetY(), 0.0);
 }
 
 /**

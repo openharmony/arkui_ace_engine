@@ -14,16 +14,36 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("ressched_report_test") {
+ace_unittest("ressched_report_test") {
   module_out_path = frameworks_test_output_path
-  sources = [
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
-    "$ace_root/test/mock/base/mock_ressched_report.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
-    "ressched_report_test.cpp",
+
+  type = "pipeline"
+  module_name = "ace_engine"
+  module_output = "pipeline"
+  flutter_skia = true
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:2d_graphics",
+    "napi:ace_napi",
   ]
 
-  external_deps = [ "googletest:gmock_main" ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  sources = [
+    "ressched_report_test.cpp",
+    "ressched_touch_optimizer_test.cpp",
+    "$ace_root/adapter/ohos/osal/ressched_report.cpp",
+    "$ace_root/frameworks/base/ressched/ressched_report.cpp",
+    "$ace_root/frameworks/base/ressched/ressched_touch_optimizer.cpp",
+    "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+  ]
 }

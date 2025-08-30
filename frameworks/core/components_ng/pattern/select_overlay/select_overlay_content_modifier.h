@@ -163,7 +163,7 @@ public:
         CHECK_NULL_VOID(handleOpacity_);
         handleOpacity_->Set(opacity);
     }
-    
+
     void SetIsUsingMouse(bool value)
     {
         isUsingMouse_ = value;

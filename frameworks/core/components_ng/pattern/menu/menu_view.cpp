@@ -2508,6 +2508,9 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetNotifyChildAction(
         [weak = WeakPtr<FrameNode>(menuNode)] (const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
             auto result = AccessibilityActionResult::ACTION_ERROR;
             CHECK_NULL_RETURN(node, result);
             auto menu = weak.Upgrade();

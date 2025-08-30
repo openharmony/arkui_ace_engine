@@ -5531,7 +5531,7 @@ void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& conte
 
 void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY)
+    const std::optional<Dimension>& offsetY, TextDirection direction)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -5549,6 +5549,7 @@ void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNod
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
     layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    layoutProperty->UpdateLayoutDirection(direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -5964,6 +5965,25 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
         height = layoutConstraint->selfIdealSize->Height();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
+        layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+    }
+}
+
+void ViewAbstract::ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+    }
 }
 
 void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -6397,6 +6417,34 @@ void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& g
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
+}
+
+void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const NG::OverlayOptions& overlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    SetOverlay(frameNode, overlay);
+    auto overlayNode = AceType::WeakClaim(node).Upgrade();
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(overlay.align);
+    layoutProperty->SetOverlayOffset(overlay.x, overlay.y);
+    layoutProperty->UpdateLayoutDirection(overlay.direction);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
 }
 
 void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)
@@ -8218,6 +8266,13 @@ OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
     return target->GetPositionValue(position);
 }
 
+std::optional<EdgesParam> ViewAbstract::GetPositionEdges(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, std::nullopt);
+    return target->GetPositionEdges();
+}
+
 std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
 {
     Shadow value;
@@ -8567,6 +8622,17 @@ Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
         }
     }
     return value;
+}
+
+LayoutCalPolicy ViewAbstract::GetLayoutPolicy(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_RETURN(frameNode, LayoutCalPolicy::NO_MATCH);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicyProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicy = layoutPolicyProperty->GetLayoutPolicy(isWidth);
+    return layoutPolicy.value_or(LayoutCalPolicy::NO_MATCH);
 }
 
 Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)

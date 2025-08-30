@@ -64,4 +64,10 @@ ResSchedReportScope::ResSchedReportScope(
 {}
 
 ResSchedReportScope::~ResSchedReportScope() = default;
+
+bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    return false;
+}
 } // namespace OHOS::Ace

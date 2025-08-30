@@ -1490,14 +1490,12 @@ void OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(ArkUI_RectShapeOption* opti
  * @brief Set the edge value of RectShape option.
  *
  * @param option Pointer to the RectShape option.
- * @param top The top value of the RectShape.
- * @param right The right value of the RectShape.
- * @param bottom The bottom value of the RectShape.
- * @param left The left  value of the RectShape.
+ * @param edgeValue The edge value of the RectShape.
+ * @param direction {@Link ArkUI_EdgeDirection} The direction of the edge.
  * @since 20
  */
 void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(
-    ArkUI_RectShapeOption* option, float top, float right, float bottom, float left);
+    ArkUI_RectShapeOption* option, float edgeValue, ArkUI_EdgeDirection direction);
 
 /**
  * @brief Create a NodeBorderStyle option.
@@ -1670,14 +1668,12 @@ void OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(ArkUI_RoundRectShapeOp
  * @brief Set the edge value of RoundRectShape option.
  *
  * @param option Pointer to the RoundRectShape option.
- * @param top The top value of the RoundRectShape.
- * @param right The right value of the RoundRectShape.
- * @param bottom The bottom value of the RoundRectShape.
- * @param left The left value of the RoundRectShape.
+ * @param edgeValue The edge value of the RoundRectShape.
+ * @param direction {@Link ArkUI_EdgeDirection} The direction of the edge.
  * @since 20
  */
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(
-    ArkUI_RoundRectShapeOption* option, float top, float right, float bottom, float left);
+    ArkUI_RoundRectShapeOption* option, float edgeValue, ArkUI_EdgeDirection direction);
 
 /**
  * @brief Set the coordinate value of the target corner.

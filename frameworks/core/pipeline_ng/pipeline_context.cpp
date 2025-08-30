@@ -40,6 +40,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -56,6 +57,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -3159,9 +3161,24 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         NotifyDragTouchEvent(scalePoint, node);
-        touchEvents_.emplace_back(point);
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            std::list<TouchEvent> touchEvents;
+            touchEvents.push_back(point);
+            ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
+            touchEvents_.emplace_back(touchEvents.back());
+        } else {
+            touchEvents_.emplace_back(point);
+        }
+
         hasIdleTasks_ = true;
-        RequestFrame();
+        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount())) {
+            FlushVsync(static_cast<uint64_t>(GetSysTimestamp()), GetFrameCount());
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(GetFrameCount());
+        } else {
+            RequestFrame();
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
+        }
         return;
     }
 
@@ -3774,7 +3791,9 @@ void PipelineContext::ConsumeTouchEvents(
     std::unordered_set<int32_t> ids;
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
-
+    if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+        ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
+    }
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
@@ -3802,10 +3821,22 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
-        if (it != newIdTouchPoints.end()) {
-            touchEvents.emplace_back(it->second);
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            TouchEvent resultPoint;
+            TouchEvent resamplePoint;
+            TouchEvent& tpPoint = idToTouchPoints[touchId];
+            if (it != newIdTouchPoints.end()) {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
+            } else {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
+            }
+            touchEvents.emplace_back(resultPoint);
         } else {
-            touchEvents.emplace_back(idToTouchPoints[touchId]);
+            if (it != newIdTouchPoints.end()) {
+                touchEvents.emplace_back(it->second);
+            } else {
+                touchEvents.emplace_back(idToTouchPoints[touchId]);
+            }
         }
         ids.erase(touchId);
     }
@@ -4730,6 +4761,15 @@ void PipelineContext::SetAppBgColor(const Color& color)
     auto renderContext = stage->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(color);
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_VOID(appbar);
+    auto pattern = appbar->GetAtomicServicePattern();
+    CHECK_NULL_VOID(pattern);
+    auto atomicServicePattern = AceType::DynamicCast<AtomicServicePattern>(pattern);
+    CHECK_NULL_VOID(atomicServicePattern);
+    atomicServicePattern->AppBgColorCallBack();
 }
 
 void PipelineContext::SetAppTitle(const std::string& title)

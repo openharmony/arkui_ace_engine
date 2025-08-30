@@ -296,6 +296,57 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseRightFocus004
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::IMAGE;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_NE(richEditorPattern->selectedType_, TextSpanType::IMAGE);
+}
+
+/**
+ * @tc.name: MouseRightFocus005
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::NORMAL;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->previewLongPress_ = true;
+    focusHub->RequestFocusImmediately();
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->isEditing_, true);
+}
+
+/**
  * @tc.name: MouseRightFocus006
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
@@ -1321,57 +1372,6 @@ HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level1)
 
     richEditorPattern->lastHoverSpanItem_ = imageSpanNode4->GetSpanItem();
     richEditorPattern->HandleImageHoverEvent(mouseInfo);
-}
-
-/**
- * @tc.name: MouseRightFocus004
- * @tc.desc: test MouseRightFocus
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = PREVIEW_TEXT_VALUE2;
-    spanItem->spanItemType = SpanItemType::IMAGE;
-    spanItem->position = 0;
-    richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->spans_.push_back(spanItem);
-    MouseInfo info;
-    info.SetGlobalLocation({ 0, 0 });
-    richEditorPattern->MouseRightFocus(info);
-    EXPECT_NE(richEditorPattern->selectedType_, TextSpanType::IMAGE);
-}
-
-/**
- * @tc.name: MouseRightFocus005
- * @tc.desc: test MouseRightFocus
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = PREVIEW_TEXT_VALUE2;
-    spanItem->spanItemType = SpanItemType::NORMAL;
-    spanItem->position = 0;
-    richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->spans_.push_back(spanItem);
-    MouseInfo info;
-    info.SetGlobalLocation({ 0, 0 });
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    focusHub->RequestFocusImmediately();
-    EXPECT_EQ(richEditorPattern->isEditing_, false);
-    richEditorPattern->MouseRightFocus(info);
-    EXPECT_EQ(richEditorPattern->isEditing_, true);
 }
 
 }

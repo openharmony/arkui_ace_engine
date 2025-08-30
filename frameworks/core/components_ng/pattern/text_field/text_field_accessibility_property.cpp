@@ -129,12 +129,12 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = UtfUtils::Str16DebugToStr8(textFieldLayoutProperty->GetValueValue(u""));
+    auto text = textFieldLayoutProperty->GetValueValue(u"");
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
 
-    return text;
+    return UtfUtils::Str16DebugToStr8(text);
 }
 
 bool TextFieldAccessibilityProperty::IsHint() const

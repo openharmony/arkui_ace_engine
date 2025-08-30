@@ -726,6 +726,39 @@ HWTEST_F(GestureRecognizerTestNg, LongPressGestureJudgeTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRecognizerHandleEvent002
+ * @tc.desc: Test GestureRecognizer function: AboutToAddCurrentFingers AboutToMinusCurrentFingers
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GestureRecognizerHandleEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. test handle touch event.
+     */
+    TouchEvent touchEvent;
+    bool result = false;
+    touchEvent.type = TouchType::CANCEL;
+    clickRecognizerPtr->SetPreventBegin(true);
+    result = clickRecognizerPtr->HandleEvent(touchEvent);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. test handle axis event.
+     */
+    AxisEvent axisEvent;
+    result = false;
+    axisEvent.action = AxisAction::CANCEL;
+    clickRecognizerPtr->SetPreventBegin(true);
+    result = clickRecognizerPtr->HandleEvent(axisEvent);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: HandleGestureAcceptTest001
  * @tc.desc: Test function: HandleGestureAccept for PanRecognizer
  * @tc.type: FUNC

@@ -32,6 +32,7 @@ ace_unittest("accessibility_test_ng") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "accessibility_manager_ng_test_ng.cpp",
     "accessibility_node_test_ng.cpp",
@@ -39,6 +40,7 @@ ace_unittest("accessibility_test_ng") {
     "js_third_provider_interaction_operation_utils_test.cpp",
     "native_interface_accessibility_provider_test.cpp",
     "native_interface_accessibility_test.cpp",
+    "node_uitls/accessibility_frame_node_utils_test.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [ "OHOS_STANDARD_SYSTEM" ]
@@ -52,6 +54,7 @@ ace_unittest("accessibility_adapter_test_ng") {
   module_output = "basic"
   sources = [
     "$ace_root/adapter/ohos/osal/accessibility/accessibility_hidumper_osal.cpp",
+    "$ace_root/adapter/ohos/osal/accessibility/element_info/accessibility_node_osal.cpp",
     "$ace_root/adapter/ohos/osal/js_accessibility_manager.cpp",
     "$ace_root/adapter/ohos/osal/js_third_accessibility_hover_ng.cpp",
     "$ace_root/adapter/ohos/osal/js_third_provider_interaction_operation.cpp",
@@ -60,6 +63,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/accessibility/hidumper/accessibility_hidumper.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_badge.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_button.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_camera.cpp",
@@ -116,6 +120,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "accessibitlity_manager_utils_test.cpp",
     "hidumper/accessibitlity_hidumper_test.cpp",
     "hidumper/accessibitlity_hidumper_osal_test.cpp",
+    "osal/element_info/accessibility_node_osal_test.cpp",
     "js_accessibitlity_manager_test.cpp",
     "js_third_accessibility_hover_ng_test.cpp",
     "js_third_provider_interaction_operation_test.cpp",
@@ -154,6 +159,7 @@ ace_unittest("accessibility_adapter_test_web_ng") {
   module_output = "basic"
   sources = [
     "$ace_root/adapter/ohos/osal/accessibility/accessibility_hidumper_osal.cpp",
+    "$ace_root/adapter/ohos/osal/accessibility/element_info/accessibility_node_osal.cpp",
     "$ace_root/adapter/ohos/osal/js_accessibility_manager.cpp",
     "$ace_root/adapter/ohos/osal/js_third_accessibility_hover_ng.cpp",
     "$ace_root/adapter/ohos/osal/js_third_provider_interaction_operation.cpp",
@@ -162,6 +168,7 @@ ace_unittest("accessibility_adapter_test_web_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/accessibility/hidumper/accessibility_hidumper.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",
     "js_accessibility_manager_web_test.cpp",
     "mock_js_accessibility_manager.cpp",

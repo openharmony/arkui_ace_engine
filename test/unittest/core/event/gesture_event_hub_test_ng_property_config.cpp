@@ -1806,7 +1806,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     eventHub->SetOnDragEnd([&callbackInfo](const RefPtr<OHOS::Ace::DragEvent>& /*dragEvent*/) {
         callbackInfo = 1;
     });
-    auto dragCallback = gestureEventHub->GetDragCallback(context, eventHub);
+    auto dragCallback = gestureEventHub->GetDragCallback();
     ASSERT_NE(dragCallback, nullptr);
     EXPECT_CALL(*mock, UnRegisterCoordinationListener()).Times(1).WillOnce(Return(50));
     DragNotifyMsgCore notifyMessage;

@@ -1701,7 +1701,7 @@ HWTEST_F(NavDestinationPatternTestNg, GetSerializedParamTest001, TestSize.Level1
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     ASSERT_NE(navDestinationPattern, nullptr);
-    const std::string param = "{}";
+    const std::string param = "param";
     navDestinationPattern->UpdateSerializedParam(param);
     ASSERT_EQ(navDestinationPattern->GetSerializedParam(), param);
     NavDestinationPatternTestNg::TearDownTestCase();
@@ -1776,5 +1776,41 @@ HWTEST_F(NavDestinationPatternTestNg, ReCalcNavDestinationSize001, TestSize.Leve
 
     SizeF targetSize = SizeF(600, 600);
     EXPECT_EQ(geometryNode->GetFrameSize(), targetSize);
+}
+
+/**
+ * @tc.name: UpdateSerializedParamTest001
+ * @tc.desc: Test UpdateSerializedParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, UpdateSerializedParamTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navdestinationNode
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_EQ(pattern->serializedParam_, "");
+    /**
+    * @tc.steps: step2. test the specified arg for function call `UpdateSerializedParam`
+    */
+    pattern->UpdateSerializedParam("");
+    ASSERT_EQ(pattern->serializedParam_, "");
+    pattern->UpdateSerializedParam("{}");
+    ASSERT_EQ(pattern->serializedParam_, "");
+    pattern->UpdateSerializedParam("undefined");
+    ASSERT_EQ(pattern->serializedParam_, "");
+    /**
+    * @tc.steps: step3. test other arg for function call `UpdateSerializedParam`
+    */
+    const std::string paramOne = "paramOne";
+    pattern->UpdateSerializedParam(paramOne);
+    ASSERT_EQ(pattern->serializedParam_, paramOne);
+    const std::string paramTwo = "paramTwo";
+    pattern->UpdateSerializedParam(paramTwo);
+    ASSERT_EQ(pattern->serializedParam_, paramTwo);
 }
 } // namespace OHOS::Ace::NG

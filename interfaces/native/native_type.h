@@ -257,6 +257,13 @@ typedef struct AbilityBase_Want AbilityBase_Want;
 typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
 
 /**
+ * @brief Define the Edges describing the position of a component by distances to the container's four edges.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -393,6 +400,20 @@ typedef enum {
     /** 顶部对齐。 */
     ARKUI_TEXT_VERTICAL_ALIGNMENT_TOP,
 } ArkUI_TextVerticalAlignment;
+
+/**
+ * @brief 定义文本内容区垂直对齐样式枚举值。
+ *
+ * @since 21
+ */
+typedef enum {
+    /** 顶部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_TOP = 0,
+    /** 居中对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_CENTER,
+    /** 底部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
+} ArkUI_TextContentAlign;
 
 /**
  * @brief Enumerates the types of the Enter key for a single-line text box.
@@ -2618,6 +2639,23 @@ typedef enum {
     /** Set bottom right corner derection. */
     ARKUI_CORNER_DIRECTION_BOTTOM_RIGHT,
 } ArkUI_CornerDirection;
+
+/**
+ * @brief Enumerates the LayoutPolicy.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** The component fills its parent, which means its size is as large as its parent */
+    ARKUI_LAYOUTPOLICY_MATCHPARENT = 0,
+    /**
+     * The component fills its content, which means its size is as large as its children but it is constrained
+     * by its parent.
+     */
+    ARKUI_LAYOUTPOLICY_WRAPCONTENT,
+    /** The component fills its content which means its size is as large as its children. */
+    ARKUI_LAYOUTPOLICY_FIXATIDEALSIZE,
+} ArkUI_LayoutPolicy;
 
 /**
  * @brief Defines parameter used by the system font style callback event.
@@ -5218,6 +5256,115 @@ void OH_ArkUI_EmbeddedComponentOption_SetOnError(
  */
 void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
     ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
+
+/**
+ * @brief Create an edge object for position attribute.
+ *
+ * @return A pointer to the edge object.
+ * @since 21
+ */
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Create();
+
+/**
+ * @brief Creates a deep copy of an edge object for position attribute.
+ *
+ * @param edges A pointer to an edge object.
+ * @return A pointer to the new edge object.
+ * @since 21
+ */
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Copy(const ArkUI_PositionEdges* edges);
+
+/**
+ * @brief Dispose an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object to be disposed.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_Dispose(ArkUI_PositionEdges* edges);
+
+/**
+ * @brief Sets the top edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of top edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetTop(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the top edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of top edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetTop(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the left edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of left edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetLeft(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the left edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of left edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetLeft(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the bottom edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetBottom(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the bottom edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetBottom(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the right edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of right edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the right edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of right edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value);
 #ifdef __cplusplus
 };
 #endif

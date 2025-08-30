@@ -15,7 +15,6 @@
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
 import { ON, Point } from '@ohos.UiTest';
 
-
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
@@ -31,12 +30,10 @@ export async function SteeperItemStart(done: Function) {
   await atomDisplays.click();
   await driver.delayMs(3500);
 
-  let ListItems: Component[] = await driver.findComponents(ON.type('ListItem'))
+  let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
   let width: Point = await ListItems[0].getBoundsCenter()
   let width2: Point = await ListItems[2].getBoundsCenter()
-  await driver.swipe(width.x, width2.y, width.x, width.y, 500)
-  await driver.delayMs(3500);
-  await driver.swipe(width.x, width2.y, width.x, width.y, 500)
+  await driver.swipe(width.x, width2.y, width.x, width.y);
   await driver.delayMs(3500);
 
   let scrollSearch: Component = await driver.findComponent(ON.text('步骤导航项/StepperItem'))

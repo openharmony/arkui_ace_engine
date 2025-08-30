@@ -2378,6 +2378,20 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         }, node);
 #endif // WEB_SUPPORTED
 }
+void ForceEnableZoomImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        WebModelStatic::SetForceEnableZoom(frameNode, false);
+        return;
+    }
+    WebModelStatic::SetForceEnableZoom(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -2512,6 +2526,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::NativeEmbedOptionsImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
         WebAttributeModifier::BindSelectionMenuImpl,
+        WebAttributeModifier::ForceEnableZoomImpl,
     };
     return &ArkUIWebModifierImpl;
 }

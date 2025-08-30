@@ -1228,11 +1228,19 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32: position along the x-axis, in px. \n
      * .value[1].f32: position along the y-axis, in px. \n
-     * \n
+     * .value[2].?i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].?i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: position along the x-axis, in px. \n
      * .value[1].f32: position along the y-axis, in px. \n
+     * .value[2].i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
      *
+     * @since 21
      */
     NODE_BACKGROUND_IMAGE_POSITION,
     /**
@@ -2000,6 +2008,50 @@ typedef enum {
      * @since 20
      */
     NODE_ROTATE_ANGLE = 104,
+    /**
+     * @brief Defines the width attribute with param type LayoutPolicy, which can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: the LayoutPolicy that the width of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: the LayoutPolicy that the width of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * 
+     * @since 21
+     */
+    NODE_WIDTH_LAYOUTPOLICY = 105,
+    /**
+     * @brief Defines the height attribute with param type LayoutPolicy, which can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: the LayoutPolicy that the height of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: the LayoutPolicy that the height of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     *
+     * @since 21
+     */
+    NODE_HEIGHT_LAYOUTPOLICY = 106,
+    /**
+     * @brief Defines the position attribute in param type Edges, which specifies the position of the component
+     * by the distance relative to the parent container's four edges. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object indicates struct of edges for position. The parameter type is {@link ArkUI_PositionEdges}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object indicates struct of edges for position. The parameter type is {@link ArkUI_PositionEdges}. \n
+     *
+     * @since 21
+     */
+    NODE_POSITION_EDGES = 107,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -2490,6 +2542,19 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_VERTICAL_ALIGN = 1035,
+
+    /**
+     * @brief 设置文本内容区垂直对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}，默认值：ARKUI_TEXT_CONTENT_ALIGN_TOP \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}。 \n
+     *
+     * @since 21
+     */
+     NODE_TEXT_CONTENT_ALIGN = 1036,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.

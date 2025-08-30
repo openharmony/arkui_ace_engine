@@ -1820,4 +1820,52 @@ HWTEST_F(SwiperPatternTestNg, UpdateDefaultColor001, TestSize.Level1)
     EXPECT_EQ(pattern_->swiperParameters_->colorVal.value(), Color::RED);
     EXPECT_EQ(pattern_->swiperParameters_->selectedColorVal.value(), Color::RED);
 }
+
+/**
+ * @tc.name: AccumulatingTerminateHelper001
+ * @tc.desc: Test SwiperPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, AccumulatingTerminateHelper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is true.
+     */
+    frameNode->isScrollableAxis_ = true;
+    ExpandEdges padding {0, 5, 10, 15};
+    RectF rect {};
+    auto result = swiperPattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper002
+ * @tc.desc: Test SwiperPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, AccumulatingTerminateHelper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is false.
+     */
+    frameNode->isScrollableAxis_ = false;
+    ExpandEdges padding {15, 10, 5, 0};
+    RectF rect {};
+    auto result = swiperPattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG

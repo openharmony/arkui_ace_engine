@@ -838,6 +838,8 @@ public:
 
     virtual void UpdateCustomBackground() {}
 
+    virtual void UpdateOverlayText() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

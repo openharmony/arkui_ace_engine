@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 
+#include <cstdint>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -176,7 +177,7 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
     std::string fontWeight;
     JSRef<JSVal> args = info[0];
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         ParseJsString(args, fontWeight, resObj);
     }

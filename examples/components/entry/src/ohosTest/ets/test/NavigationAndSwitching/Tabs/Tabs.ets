@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
-import { ON } from '@ohos.UiTest';
+import { ON, Point } from '@ohos.UiTest';
 
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
@@ -23,10 +23,16 @@ export async function TabsStart(done: Function) {
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
   });
-  await driver.delayMs(4500);
+  await driver.delayMs(5000);
 
   let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
   await atomNavigates.click();
+  await driver.delayMs(3500);
+
+  let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
+  let width: Point = await ListItems[0].getBoundsCenter()
+  let width2: Point = await ListItems[2].getBoundsCenter()
+  await driver.swipe(width.x, width2.y, width.x, width.y);
   await driver.delayMs(3500);
 
   let scrollSearch: Component = await driver.findComponent(ON.text('页签容器/Tabs'))

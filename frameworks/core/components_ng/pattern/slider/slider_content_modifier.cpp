@@ -27,9 +27,9 @@ constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
 constexpr int32_t STEPS_MIN_NUMBER = 2;
 } // namespace
-SliderContentModifier::SliderContentModifier(const Parameters& parameters,
-    std::function<void(float)> updateImageCenterX, std::function<void(float)> updateImageCenterY)
-    : updateImageCenterX_(std::move(updateImageCenterX)), updateImageCenterY_(std::move(updateImageCenterY)),
+SliderContentModifier::SliderContentModifier(
+    const Parameters& parameters, UpdateImageCenterCallback updateImageCenterCallback)
+    : updateImageCenterCallback_(std::move(updateImageCenterCallback)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
     // animatable property
@@ -648,11 +648,8 @@ void SliderContentModifier::DrawBlock(DrawingContext& context)
             DrawBlockShape(context);
         } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
             auto blockCenter = GetBlockCenter();
-            if (updateImageCenterX_) {
-                updateImageCenterX_(blockCenter.GetX());
-            }
-            if (updateImageCenterY_) {
-                updateImageCenterY_(blockCenter.GetY());
+            if (updateImageCenterCallback_) {
+                updateImageCenterCallback_(blockCenter);
             }
         }
     }

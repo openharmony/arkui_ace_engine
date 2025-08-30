@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -192,14 +193,57 @@ void MenuWrapperPattern::OnAttachToFrameNode()
     RegisterOnTouch();
 }
 
+void MenuWrapperPattern::OnAttachToMainTree()
+{
+    RegisterDetachCallback();
+}
+
 void MenuWrapperPattern::OnDetachFromMainTree()
 {
+    UnRegisterDetachCallback();
     CHECK_NULL_VOID(filterColumnNode_);
     auto pipeline = filterColumnNode_->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->RemoveMenuFilter(GetHost());
+}
+
+void MenuWrapperPattern::RegisterDetachCallback()
+{
+    auto targetNode = FrameNode::GetFrameNodeOnly(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto destructor = [id = targetNode->GetId(),
+                          weakMenuWrapper = AceType::WeakClaim(AceType::RawPtr(host))]() mutable {
+        auto wrapperNode = weakMenuWrapper.Upgrade();
+        CHECK_NULL_VOID(wrapperNode);
+        auto context = wrapperNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        taskExecutor->PostTask(
+            [id, weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                auto overlayManager = weakOverlay.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->DeleteMenu(id);
+                MenuView::RemoveMenuHoverScaleStatus(id);
+            },
+            TaskExecutor::TaskType::UI, "TargetDestroyDeleteMenu");
+    };
+    targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(host->GetId()));
+}
+
+void MenuWrapperPattern::UnRegisterDetachCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNodeOnly(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    targetNode->RemoveDestroyCallbackWithTag(std::to_string(host->GetId()));
 }
 
 // close subMenu when mouse move outside

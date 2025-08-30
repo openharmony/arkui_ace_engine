@@ -298,7 +298,9 @@ public:
 
     void UpdateSerializedParam(const std::string& param)
     {
-        serializedParam_ = param;
+        if (param != "" && param != "{}" && param != "undefined") {
+            serializedParam_ = param;
+        }
     }
 
     void BeforeCreateLayoutWrapper() override;

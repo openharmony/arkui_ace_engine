@@ -172,6 +172,12 @@ constexpr T Infinity()
     return static_cast<const T>(1000000.0);
 }
 
+template<typename T>
+constexpr T LayoutInfinity()
+{
+    return static_cast<const T>(16777216.0);
+}
+
 namespace {
 constexpr float INF_APPROACH = Infinity<float>() * 0.5f;
 }

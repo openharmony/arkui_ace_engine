@@ -31,6 +31,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_model_static.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
@@ -757,5 +758,93 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Lev
     ASSERT_NE(counterTheme, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
+}
+
+/**
+ * @tc.name: CounterModelNGSetOnIncTest001
+ * @tc.desc: Test SetOnInc function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    int32_t addId = 100;
+    bool called = false;
+    CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+
+    CounterModelNG model;
+    model.SetOnInc(std::move(onInc));
+
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    auto gestureHub = addNode->GetOrCreateGestureEventHub();
+
+    EXPECT_EQ(gestureHub->parallelCombineClick, false);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateContentNodeChildTest001
+ * @tc.desc: Test CreateContentNodeChild function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateContentNodeChildTest001, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterThemeWrapper = CounterThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
+    EXPECT_NE(counterThemeWrapper, nullptr);
+    auto counterTheme = AceType::DynamicCast<CounterTheme>(counterThemeWrapper);
+    ASSERT_NE(counterTheme, nullptr);
+
+    int32_t contentId = 2;
+    auto contentNode = CounterModelStatic::CreateContentNodeChild(contentId, counterTheme);
+    ASSERT_NE(contentNode, nullptr);
+    auto layoutProperty = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetMainAxisAlign(), FlexAlign::CENTER);
+}
+
+/**
+ * @tc.name: CounterModelNGUpdatesHeightForAllChildrenTest001
+ * @tc.desc: Test UpdatesHeightForAllChildren function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGUpdatesHeightForAllChildrenTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    CalcLength height(50.0);
+    CounterModelStatic::SetHeight(frameNode, height);
+
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+
+    int32_t subId = counterPattern->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    ASSERT_NE(subNode, nullptr);
+    auto subLayoutProperty = subNode->GetLayoutProperty();
+    ASSERT_NE(subLayoutProperty, nullptr);
+
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetFirstChild());
+    ASSERT_NE(subTextNode, nullptr);
+    auto subTextLayoutProperty = subTextNode->GetLayoutProperty();
+    ASSERT_NE(subTextLayoutProperty, nullptr);
+
+    int32_t addId = counterPattern->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
+    auto addLayoutProperty = addNode->GetLayoutProperty();
+    ASSERT_NE(addLayoutProperty, nullptr);
+
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetFirstChild());
+    ASSERT_NE(addTextNode, nullptr);
+    auto addTextLayoutProperty = addTextNode->GetLayoutProperty();
+    ASSERT_NE(addTextLayoutProperty, nullptr);
+
+    int32_t contentId = counterPattern->GetContentId();
+    auto contentNode = AceType::DynamicCast<FrameNode>(
+        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    ASSERT_NE(contentNode, nullptr);
+    auto contentLayoutProperty = contentNode->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
 }
 } // namespace OHOS::Ace::NG

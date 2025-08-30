@@ -663,6 +663,40 @@ export struct TextBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
+  @State enableEditMenuOptions: boolean = false;
+  @State editMenuOptions: EditMenuOptions = {
+    onCreateMenu: (menuItems: Array<TextMenuItem>) => {
+      let item1: TextMenuItem = {
+        content: 'custom1',
+        icon: $r('sys.symbol.cut'),
+        id: TextMenuItemId.of('custom1'),
+      };
+      let item2: TextMenuItem = {
+        content: 'custom2',
+        id: TextMenuItemId.of('custom2'),
+        icon: $r('sys.symbol.cut'),
+      };
+      menuItems.push(item1);
+      menuItems.unshift(item2);
+      return menuItems;
+    },
+    onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+      if (menuItem.id.equals(TextMenuItemId.of('custom2'))) {
+        this.compEventTriggeredLog('拦截 id: custom2 start:' + textRange.start + '; end:' + textRange.end)
+        return false;
+      }
+      if (menuItem.id.equals(TextMenuItemId.COPY)) {
+        this.compEventTriggeredLog('拦截 COPY start:' + textRange.start + '; end:' + textRange.end)
+        return false;
+      }
+      if (menuItem.id.equals(TextMenuItemId.SELECT_ALL)) {
+        this.compEventTriggeredLog('不拦截 SELECT_ALL start:' + textRange.start + '; end:' + textRange.end)
+        return false;
+      }
+      this.compEventTriggeredLog('Icon: ' + menuItem.icon)
+      return false;
+    }
+  }
   scroller: Scroller = new Scroller()
 
   aboutToAppear() {
@@ -1479,6 +1513,7 @@ export struct TextBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .editMenuOptions(useEnabled(this.enableEditMenuOptions, this.editMenuOptions))
     }.justifyContent(FlexAlign.Start)
   }
 
@@ -1946,6 +1981,16 @@ export struct TextBootcamp {
             { label: '"ordn" off', value: '"ordn" off' },
             { label: '"sinf" on', value: '"sinf" on' },
             { label: '"sinf" off', value: '"sinf" off' },
+          ]
+        })
+
+        RadioBlock({
+          title: 'editMenuOptions',
+          isEnabled: this.enableEditMenuOptions,
+          value: this.enableEditMenuOptions,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
           ]
         })
       }

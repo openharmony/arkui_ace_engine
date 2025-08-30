@@ -22,36 +22,8 @@ struct ListItemGroupExample {
       projects: ['美术', '音乐', '体育']
     },
     {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
-      title: '星期四',
-      projects: ['美术', '音乐', '体育']
-    },
-    {
       title: '星期一',
-      projects: ['语文', '数学', '英语']
+      projects: ['数学', '英语', '语文']
     },
     {
       title: '星期二',
@@ -62,8 +34,24 @@ struct ListItemGroupExample {
       projects: ['历史', '地理', '政治']
     },
     {
+      title: '星期四',
+      projects: ['美术', '音乐', '体育']
+    },
+    {
+      title: '星期五',
+      projects: ['计算机', '编程', '设计']
+    },
+    {
+      title: '星期六',
+      projects: ['阅读', '写作', '讨论']
+    },
+    {
+      title: '星期日',
+      projects: ['休息', '娱乐', '自由活动']
+    },
+    {
       title: '星期一',
-      projects: ['语文', '数学', '英语']
+      projects: ['数学', '英语', '语文']
     },
     {
       title: '星期二',
@@ -74,8 +62,24 @@ struct ListItemGroupExample {
       projects: ['历史', '地理', '政治']
     },
     {
+      title: '星期四',
+      projects: ['美术', '音乐', '体育']
+    },
+    {
+      title: '星期五',
+      projects: ['计算机', '编程', '设计']
+    },
+    {
+      title: '星期六',
+      projects: ['阅读', '写作', '讨论']
+    },
+    {
+      title: '星期日',
+      projects: ['休息', '娱乐', '自由活动']
+    },
+    {
       title: '星期一',
-      projects: ['语文', '数学', '英语']
+      projects: ['数学', '英语', '语文']
     },
     {
       title: '星期二',
@@ -86,27 +90,23 @@ struct ListItemGroupExample {
       projects: ['历史', '地理', '政治']
     },
     {
+      title: '星期四',
+      projects: ['美术', '音乐', '体育']
+    },
+    {
+      title: '星期五',
+      projects: ['计算机', '编程', '设计']
+    },
+    {
+      title: '星期六',
+      projects: ['阅读', '写作', '讨论']
+    },
+    {
+      title: '星期日',
+      projects: ['休息', '娱乐', '自由活动']
+    },
+    {
       title: '星期一',
-      projects: ['语文', '数学', '英语']
-    },
-    {
-      title: '星期二',
-      projects: ['物理', '化学', '生物']
-    },
-    {
-      title: '星期三',
-      projects: ['历史', '地理', '政治']
-    },
-    {
-      title: '星期一',
-      projects: ['语文', '数学', '英语']
-    },
-    {
-      title: '星期二',
-      projects: ['物理', '化学', '生物']
-    },
-    {
-      title: '星期三',
       projects: ['历史', '地理', '政治']
     }
   ];
@@ -165,7 +165,7 @@ struct ListItemGroupExample {
         })
       }
       .lanes({
-        minLength: this.changeList[this.changeIndex],
+        minLength: this.changeList[this.changeIndex] ? Number(this.changeList[this.changeIndex]) : 0,
         maxLength: 100,
       })
       .width('90%')

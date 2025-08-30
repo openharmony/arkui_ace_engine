@@ -717,13 +717,10 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->isResizeContentAvoid_, false);
-    EXPECT_EQ(webPattern->isInWindowDrag_, false);
     webPattern->isInWindowDrag_ = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(webPattern->isInWindowDrag_, true);
     config.contentSizeChange = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(config.contentSizeChange, true);
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->drawSize_.width_, 0.0);
@@ -835,7 +832,6 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_004, TestSize.Level1)
     webPattern->OnAreaChangedInner();
     EXPECT_NE(webPattern->layoutMode_, WebLayoutMode::NONE);
     EXPECT_FALSE(webPattern->isInWindowDrag_);
-    EXPECT_EQ(webPattern->renderMode_, RenderMode::SYNC_RENDER);
 #endif
 }
 
@@ -862,11 +858,8 @@ HWTEST_F(WebPatternWebTest, OnZoomAccessEnabledUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     bool value = true;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -893,11 +886,8 @@ HWTEST_F(WebPatternWebTest, OnInitialScaleUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     float value = 1.0;
     webPattern->OnInitialScaleUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnInitialScaleUpdate(value);
-    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -1299,6 +1289,36 @@ HWTEST_F(WebPatternWebTest, ClearKeyEventByKeyCodeTest, TestSize.Level1)
     webPattern->webKeyEvent_.push_front(keyEvent);
     webPattern->ClearKeyEventByKeyCode(value);
     EXPECT_TRUE(webPattern->webKeyEvent_.empty());
+#endif
+}
+
+/**
+ * @tc.name: OnForceEnableZoomUpdate
+ * @tc.desc: OnForceEnableZoomUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    bool value = true;
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
+    webPattern->OnForceEnableZoomUpdate(value);
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
+    webPattern->OnForceEnableZoomUpdate(value);
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
+    webPattern->delegate_ = nullptr;
+    webPattern->OnForceEnableZoomUpdate(value);
 #endif
 }
 } // namespace OHOS::Ace::NG

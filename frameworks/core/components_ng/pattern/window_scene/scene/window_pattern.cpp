@@ -222,8 +222,7 @@ void WindowPattern::OnAttachToFrameNode()
 
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
 
-    if ((state == Rosen::SessionState::STATE_BACKGROUND || session_->IsAnco()) &&
-        session_->GetScenePersistence() &&
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
         if (!session_->GetShowRecent()) {
             AddChild(host, appWindow_, appWindowName_, 0);

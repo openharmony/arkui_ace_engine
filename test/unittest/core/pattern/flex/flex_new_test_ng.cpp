@@ -62,7 +62,7 @@ public:
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, Example, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, Example, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -107,7 +107,7 @@ HWTEST_F(FlexNewTestNG, Example, TestSize.Level1)
  * @tc.desc: test CheckSizeValidity
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, CheckSizeValidity001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, CheckSizeValidity001, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {});
     ASSERT_NE(frameNode, nullptr);
@@ -141,7 +141,7 @@ HWTEST_F(FlexNewTestNG, CheckSizeValidity001, TestSize.Level1)
  * @tc.desc: test HandleBlankFirstTimeMeasure
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, HandleBlankFirstTimeMeasure001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, HandleBlankFirstTimeMeasure001, TestSize.Level0)
 {
     RefPtr<FrameNode> blankFrameNode = nullptr;
     auto frameNode = CreateFlexRow([this, &blankFrameNode](FlexModelNG model) {
@@ -199,7 +199,7 @@ HWTEST_F(FlexNewTestNG, HandleBlankFirstTimeMeasure001, TestSize.Level1)
  * @tc.desc: test PlaceChildren
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, PlaceChildren001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, PlaceChildren001, TestSize.Level0)
 {
     RefPtr<FrameNode> textFrameNode = nullptr;
     auto frameNode = CreateFlexRow([this, &textFrameNode](FlexModelNG model) {
@@ -266,7 +266,7 @@ HWTEST_F(FlexNewTestNG, PlaceChildren001, TestSize.Level1)
  * @tc.desc: test SecondaryMeasureByProperty
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, SecondaryMeasureByProperty001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, SecondaryMeasureByProperty001, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
@@ -336,7 +336,7 @@ HWTEST_F(FlexNewTestNG, SecondaryMeasureByProperty001, TestSize.Level1)
  * @tc.desc: test MeasureAndCleanMagicNodes
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes001, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
@@ -403,7 +403,7 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes001, TestSize.Level1)
  * @tc.desc: test MeasureAndCleanMagicNodes
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes002, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes002, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
@@ -466,7 +466,7 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes002, TestSize.Level1)
  * @tc.desc: test ReverseFlexDirection
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, ReverseFlexDirection001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, ReverseFlexDirection001, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
@@ -516,7 +516,7 @@ HWTEST_F(FlexNewTestNG, ReverseFlexDirection001, TestSize.Level1)
  * @tc.desc: test CheckIsGrowOrShrink
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, CheckIsGrowOrShrink001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, CheckIsGrowOrShrink001, TestSize.Level0)
 {
     RefPtr<FrameNode> textFrameNode = nullptr;
     auto frameNode = CreateFlexRow([this, &textFrameNode](FlexModelNG model) {
@@ -565,7 +565,7 @@ HWTEST_F(FlexNewTestNG, CheckIsGrowOrShrink001, TestSize.Level1)
  * @tc.desc: test CheckBlankAndKeepMin
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, CheckBlankAndKeepMin001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, CheckBlankAndKeepMin001, TestSize.Level0)
 {
     RefPtr<FrameNode> blankFrameNode = nullptr;
     auto frameNode = CreateFlexRow([this, &blankFrameNode](FlexModelNG model) {
@@ -620,7 +620,7 @@ HWTEST_F(FlexNewTestNG, CheckBlankAndKeepMin001, TestSize.Level1)
  * @tc.desc: test UpdateLayoutConstraintOnCrossAxis
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, UpdateLayoutConstraintOnCrossAxis001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, UpdateLayoutConstraintOnCrossAxis001, TestSize.Level0)
 {
     RefPtr<FrameNode> textFrameNode = nullptr;
     auto frameNode = CreateFlexRow([this, &textFrameNode](FlexModelNG model) {
@@ -674,7 +674,7 @@ HWTEST_F(FlexNewTestNG, UpdateLayoutConstraintOnCrossAxis001, TestSize.Level1)
  * @tc.desc: test MeasureAndCleanMagicNodes
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes003, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes003, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
@@ -719,7 +719,7 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes003, TestSize.Level1)
  * @tc.desc: test PerformLayoutInitialize
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, PerformLayoutInitialize001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, PerformLayoutInitialize001, TestSize.Level0)
 {
     auto frameNode = CreateFlexRow([this](FlexModelNG model) {});
     ASSERT_NE(frameNode, nullptr);
@@ -774,7 +774,7 @@ HWTEST_F(FlexNewTestNG, PerformLayoutInitialize001, TestSize.Level1)
  * @tc.desc: test CalcItemCrossAxisOffset
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, CalcItemCrossAxisOffset002, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, CalcItemCrossAxisOffset002, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     ASSERT_NE(wrapFrameNode, nullptr);
@@ -807,7 +807,7 @@ HWTEST_F(FlexNewTestNG, CalcItemCrossAxisOffset002, TestSize.Level1)
  * @tc.desc: test flex ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea001, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     RefPtr<FrameNode> row2;
@@ -850,7 +850,7 @@ HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea001, TestSize.Level1)
  * @tc.desc: test flex ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea002, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea002, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     RefPtr<FrameNode> row2;
@@ -893,7 +893,7 @@ HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea002, TestSize.Level1)
  * @tc.desc: test flex ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea003, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea003, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     RefPtr<FrameNode> column2;
@@ -935,7 +935,7 @@ HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea003, TestSize.Level1)
  * @tc.desc: test flex ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea004, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea004, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     RefPtr<FrameNode> column2;
@@ -978,7 +978,7 @@ HWTEST_F(FlexNewTestNG, FlexIgnoreLayoutSafeArea004, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1026,7 +1026,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and parent has padding.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1076,7 +1076,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest002, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1124,7 +1124,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest003, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     RefPtr<FrameNode> flexOutter;
@@ -1190,7 +1190,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest004, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1238,7 +1238,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest005, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     RefPtr<FrameNode> flexOutter;
@@ -1304,7 +1304,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest007, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1355,7 +1355,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest007, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, LayoutPolicyTest008, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest008, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner;
     auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
@@ -1404,11 +1404,80 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutPolicyTest009
+ * @tc.desc: test the viewabstract UpdateLayoutPolicyProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest009, TestSize.Level0)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(100.0f));
+        ViewAbstract::SetHeight(CalcLength(100.0f));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {});
+        ViewAbstract::UpdateLayoutPolicyProperty(flexInner.GetRawPtr(), LayoutCalPolicy::MATCH_PARENT, true);
+        ViewAbstract::UpdateLayoutPolicyProperty(flexInner.GetRawPtr(), LayoutCalPolicy::MATCH_PARENT, false);
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    // Expect flex's width is 100, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(100.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 100, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(100.0f, 100.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest010
+ * @tc.desc: test the viewabstract Get and Reset LayoutPolicyProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest010, TestSize.Level0)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(100.0f));
+        ViewAbstract::SetHeight(CalcLength(100.0f));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {});
+        ViewAbstract::UpdateLayoutPolicyProperty(flexInner.GetRawPtr(), LayoutCalPolicy::MATCH_PARENT, true);
+        ViewAbstract::UpdateLayoutPolicyProperty(flexInner.GetRawPtr(), LayoutCalPolicy::MATCH_PARENT, false);
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+
+    ViewAbstract::ResetLayoutPolicyProperty(flexInner.GetRawPtr(), true);
+    ViewAbstract::ResetLayoutPolicyProperty(flexInner.GetRawPtr(), false);
+    CreateLayoutTask(flex);
+    LayoutCalPolicy widthPolicy1 = ViewAbstract::GetLayoutPolicy(flexInner.GetRawPtr(), true);
+    LayoutCalPolicy heightPolicy1 = ViewAbstract::GetLayoutPolicy(flexInner.GetRawPtr(), false);
+    EXPECT_EQ(widthPolicy1, LayoutCalPolicy::NO_MATCH);
+    EXPECT_EQ(heightPolicy1, LayoutCalPolicy::NO_MATCH);
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(-1.0f, -1.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
  * @tc.name: FlexWrapTest001
  * @tc.desc: test the measure result in flex wrap and pixel_round_after_measure mode.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexWrapTest001, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, FlexWrapTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> flexInner1, flexInner2;
     auto flexWrap = CreateFlexWrapRow([this, &flexInner1, &flexInner2](FlexModelNG model) {
@@ -1468,7 +1537,7 @@ HWTEST_F(FlexNewTestNG, FlexWrapTest001, TestSize.Level1)
  * @tc.desc: test UpdatePercentSensitive
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, UpdatePercentSensitiveTest, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, UpdatePercentSensitiveTest, TestSize.Level0)
 {
     auto flexNode = CreateFlexRow([this](FlexModelNG model) {});
     FlexLayoutAlgorithm algorithm;
@@ -1502,7 +1571,7 @@ HWTEST_F(FlexNewTestNG, UpdatePercentSensitiveTest, TestSize.Level1)
  *           test flex layout algorithm update percentSensitive correctly
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, SetInitMainAxisSizeTest, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, SetInitMainAxisSizeTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1543,7 +1612,7 @@ HWTEST_F(FlexNewTestNG, SetInitMainAxisSizeTest, TestSize.Level1)
  * @tc.desc: test flex layout algorithm update percentSensitive correctly
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodesTest, TestSize.Level1)
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodesTest, TestSize.Level0)
 {
     auto flexNode = CreateFlexRow([this](FlexModelNG model) {
         CreateText(u"text1", [this](TextModelNG model) {

@@ -2227,6 +2227,41 @@ HWTEST_F(ImageTestNg, ImageContentModifierOnDraw001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImageContentModifierOnDraw002
+ * @tc.desc: Test ImageContentModifier OnDraw with ImagePaintConfig isSvg_ is true.
+ * @tc.type: FUNC
+ * @tc.require: issueICL7E0
+ */
+HWTEST_F(ImageTestNg, ImageContentModifierOnDraw002, TestSize.Level0)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->MarkModifyDone();
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+    ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
+    auto contentModifier = AceType::MakeRefPtr<ImageContentModifier>(WeakPtr(imagePattern));
+    ASSERT_NE(contentModifier, nullptr);
+
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, WIDTH, HEIGHT };
+    auto canvasImage = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    ImagePaintConfig config;
+    config.isSvg_ = true;
+    canvasImage->SetPaintConfig(config);
+    EXPECT_TRUE(canvasImage->GetPaintConfig().isSvg_);
+    CanvasImageModifierWrapper wrapper;
+    wrapper.SetCanvasImage(canvasImage);
+    contentModifier->SetCanvasImageWrapper(wrapper);
+    ASSERT_NE(contentModifier->canvasImageWrapper_->Get().GetCanvasImage(), nullptr);
+    contentModifier->onDraw(context);
+    EXPECT_FALSE(contentModifier->sensitive_->Get());
+}
+
+/**
  * @tc.name: ImageReset001
  * @tc.desc: Test ImageReset.
  * @tc.type: FUNC

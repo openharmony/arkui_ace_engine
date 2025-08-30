@@ -216,10 +216,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     crossLen += params.crossGap * (itemSize.columns - 1);
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
-        constraint.maxSize = SizeF { crossLen, Infinity<float>() };
+        constraint.maxSize = SizeF { crossLen, LayoutInfinity<float>() };
         constraint.parentIdealSize = OptionalSizeF(crossLen, std::nullopt);
     } else {
-        constraint.maxSize = SizeF { Infinity<float>(), crossLen };
+        constraint.maxSize = SizeF { LayoutInfinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
     

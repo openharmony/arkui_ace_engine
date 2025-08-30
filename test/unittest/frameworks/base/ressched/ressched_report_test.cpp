@@ -14,10 +14,14 @@
  */
 
 #include "gtest/gtest.h"
+#define private public
+#define protected public
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;

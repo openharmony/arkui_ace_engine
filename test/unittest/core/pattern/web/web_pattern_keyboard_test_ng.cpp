@@ -563,11 +563,11 @@ HWTEST_F(WebPatternKeyboardTestNg, CheckOverParentScroll006, TestSize.Level1)
 }
 
 /**
- * @tc.name: FilterScrollEventHandlevVlocity001
- * @tc.desc: FilterScrollEventHandlevVlocity.
+ * @tc.name: FilterScrollEventHandleVelocity001
+ * @tc.desc: FilterScrollEventHandleVelocity.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternKeyboardTestNg, FilterScrollEventHandlevVlocity001, TestSize.Level1)
+HWTEST_F(WebPatternKeyboardTestNg, FilterScrollEventHandleVelocity001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -590,11 +590,11 @@ HWTEST_F(WebPatternKeyboardTestNg, FilterScrollEventHandlevVlocity001, TestSize.
 
     webPattern->isParentReachEdge_ = true;
 
-    bool result = webPattern->FilterScrollEventHandlevVlocity(100.0f);
+    bool result = webPattern->FilterScrollEventHandleVelocity(100.0f);
     EXPECT_FALSE(result);
 
     webPattern->isParentReachEdge_ = false;
-    result = webPattern->FilterScrollEventHandlevVlocity(-100.0f);
+    result = webPattern->FilterScrollEventHandleVelocity(-100.0f);
     EXPECT_FALSE(result);
 #endif
 }

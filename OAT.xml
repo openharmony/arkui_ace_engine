@@ -134,6 +134,10 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="examples/TextInputComponentTest/entry/src/main/resources/base/media/startIcon.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/ScrollableComponentTest/entry/src/main/resources/base/media/ic_public_delete_bottom.png" desc=" 自研的二进制图片"/>
                 <filteritem type="filepath" name="examples/ScrollableComponentTest/entry/src/main/resources/base/media/ic_public_delete_top.png" desc=" 自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/startIcon.png" desc=" 自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/AppScope/resources/base/media/app_icon.png" desc=" 自研的二进制图片"/>
+                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/.*/entry/src/main/resources/base/media/startIcon.png" desc=" 测试工程自带的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/.*/entry/src/main/resources/rawfile/TESTFONT.TTF" desc="用于测试的假字体文件，是空文本文件"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/navigation/entry/src/main/resources/base/media/test_image.png" desc=" 自研的二进制图片"/>
@@ -155,11 +159,7 @@ Note:If the text contains special characters, please escape them according to th
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/rating/StarOrange.png" desc=" 自研的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
-                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
-                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
-                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/resources/base/media/startIcon.png" desc=" 自研的二进制图片"/>
-                <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/AppScope/resources/base/media/app_icon.png" desc=" 自研的二进制图片"/>
-                <filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc="自研的音振效果文件"/>
+				<filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc="自研的音振效果文件"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_mirror/ui2abc/libarkts/rollup.lib.mjs" desc="组装所需"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >

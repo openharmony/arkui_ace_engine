@@ -459,7 +459,7 @@ public:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
-    bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
+    bool HandleScrollVelocity(const RefPtr<NestableScrollContainer>& parent, float velocity);
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(float position);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
@@ -546,6 +546,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
 
     bool IsFocus() const
     {
@@ -678,6 +679,7 @@ public:
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool IsRtl();
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
         bool isAccessibilityFocus);
@@ -811,6 +813,7 @@ public:
         return gestureFocusMode_ == GestureFocusMode::DEFAULT;
     }
 
+    void ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
     std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
@@ -842,6 +845,7 @@ public:
     void SetSurfaceDensity(double density);
     void InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
     void UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
+    void SetImeShow(bool visible);
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
@@ -889,6 +893,10 @@ public:
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
     bool IsShowHandle();
+
+    void OnCloseContextMenu();
+    bool CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
+        const WebElementType& elementType, const ResponseType& responseType);
 
     bool IsShowAIWrite();
     int GetSelectStartIndex() const;
@@ -1021,6 +1029,7 @@ private:
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
+    void OnForceEnableZoomUpdate(bool value);
 
     int GetWebId();
 
@@ -1157,7 +1166,7 @@ private:
     bool FilterScrollEventHandleOffset(float offset);
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
-    bool FilterScrollEventHandlevVlocity(const float velocity);
+    bool FilterScrollEventHandleVelocity(const float velocity);
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);

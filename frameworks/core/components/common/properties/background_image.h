@@ -109,6 +109,33 @@ enum class ACE_EXPORT BackgroundImagePositionType {
     PX,
 };
 
+enum class ACE_EXPORT DirectionType {
+    LTR = 0,
+    RTL,
+    AUTO = 3,
+};
+
+enum class ACE_EXPORT AlignmentMode {
+    /** Top start. */
+    TOP_START = 0,
+    /** Top center. */
+    TOP,
+    /** Top end. */
+    TOP_END,
+    /** Vertically centered start. */
+    START,
+    /** Horizontally and vertically centered. */
+    CENTER,
+    /** Vertically centered end. */
+    END,
+    /** Bottom start. */
+    BOTTOM_START,
+    /** Horizontally centered on the bottom. */
+    BOTTOM,
+    /** Bottom end. */
+    BOTTOM_END,
+};
+
 class ACE_EXPORT BackgroundImagePosition {
 public:
     BackgroundImagePosition() = default;
@@ -237,12 +264,77 @@ public:
         }
     }
 
+    void SetPercentX(const AnimatableDimension& percentX)
+    {
+        percentX_ = percentX;
+    }
+
+    void SetPercentY(const AnimatableDimension& percentY)
+    {
+        percentY_ = percentY;
+    }
+
+    AnimatableDimension GetPercentX() const
+    {
+        return percentX_;
+    }
+
+    AnimatableDimension GetPercentY() const
+    {
+        return percentY_;
+    }
+
+    double GetPercentValueX() const
+    {
+        return percentX_.Value();
+    }
+
+    double GetPercentValueY() const
+    {
+        return percentY_.Value();
+    }
+
+    void SetDirectionType(DirectionType direction)
+    {
+        direction_ = direction;
+    }
+
+    DirectionType GetDirectionType() const
+    {
+        return direction_;
+    }
+
+    void SetAlignment(AlignmentMode alignment)
+    {
+        alignment_ = alignment;
+    }
+
+    AlignmentMode GetAlignment() const
+    {
+        return alignment_;
+    }
+
+    void SetIsOffsetBaseOnAlignmentNeeded(bool isOffsetBaseOnAlignmentNeeded)
+    {
+        isOffsetBaseOnAlignmentNeeded_ = isOffsetBaseOnAlignmentNeeded;
+    }
+
+    bool GetIsOffsetBaseOnAlignmentNeeded() const
+    {
+        return isOffsetBaseOnAlignmentNeeded_;
+    }
+
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
     AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
+    AnimatableDimension percentX_ = AnimatableDimension(0.0);
+    AnimatableDimension percentY_ = AnimatableDimension(0.0);
+    AlignmentMode alignment_ = AlignmentMode::TOP_START;
+    DirectionType direction_ = DirectionType::AUTO;
     bool isAlign_ = false;
+    bool isOffsetBaseOnAlignmentNeeded_ = false;
     struct ResourceUpdater {
         RefPtr<ResourceObject> obj;
         std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)> updateFunc;

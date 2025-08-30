@@ -440,6 +440,7 @@ public:
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
+    void RegisterAccessibilityClickAction();
     void RegisterOnPress();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();

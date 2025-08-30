@@ -38,6 +38,10 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
+        const Dimension themeCameraBufferWidth = Dimension(1080.0, DimensionUnit::PX);
+        const Dimension themeCameraBufferHeight = Dimension(1920.0, DimensionUnit::PX);
+        const Dimension themeVideoTextFontsize = Dimension(15.0, DimensionUnit::VP);
+        const Color themeVideoErrorTextColor = Color(0xffc0c0c0);
 
         RefPtr<CameraTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -45,11 +49,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->bufferSize_ = Size(themeConstants->GetDimension(THEME_CAMERA_BUFFER_WIDTH).Value(),
-                themeConstants->GetDimension(THEME_CAMERA_BUFFER_HEIGHT).Value());
+            theme->bufferSize_ = Size(themeCameraBufferWidth.Value(), themeCameraBufferHeight.Value());
 #if defined(PREVIEW)
-            theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_VIDEO_TEXT_FONTSIZE));
-            theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_VIDEO_ERROR_TEXT_COLOR));
+            theme->errorTextStyle_.SetFontSize(themeVideoTextFontsize);
+            theme->errorTextStyle_.SetTextColor(themeVideoErrorTextColor);
 #endif
             return theme;
         }

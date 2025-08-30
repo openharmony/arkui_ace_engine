@@ -616,9 +616,14 @@ public:
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
 
-    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {
         destroyCallbacksMap_[tag] = callback;
+    }
+
+    void RemoveDestroyCallbackWithTag(const std::string& tag)
+    {
+        destroyCallbacksMap_.erase(tag);
     }
 
     void SetConfigurationModeUpdateCallback(

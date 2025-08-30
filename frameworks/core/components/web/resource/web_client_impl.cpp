@@ -692,6 +692,14 @@ void WebClientImpl::OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptu
     delegate->OnScreenCaptureRequest(request);
 }
 
+void WebClientImpl::OnContextMenuDismissed()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnContextMenuDismissed();
+}
+
 bool WebClientImpl::RunContextMenu(
     std::shared_ptr<NWeb::NWebContextMenuParams> params,
     std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
@@ -1550,5 +1558,14 @@ void WebClientImpl::OnInsertBlanklessFrameWithSize(const std::string& pathToFram
     CHECK_NULL_VOID(delegate);
     // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
     delegate->CreateSnapshotFrameNode(pathToFrame, width, height);
+}
+
+void WebClientImpl::SetImeShow(bool visible)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebClientImpl::SetImeShow, visible: %{public}d", visible);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->SetImeShow(visible);
 }
 } // namespace OHOS::Ace

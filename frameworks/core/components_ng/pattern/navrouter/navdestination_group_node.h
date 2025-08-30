@@ -280,12 +280,6 @@ public:
     {
         return isTitleConsumedElapsedTime_;
     }
-
-    void MarkTitleConsumedElapsedTime()
-    {
-        isTitleConsumedElapsedTime_ = true;
-    }
-
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -304,6 +298,12 @@ private:
     std::function<void()> BuildTransitionFinishCallback(
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
     std::function<void()> BuildEmptyFinishCallback();
+
+    bool IsNeedHandleElapsedTime() const
+    {
+        return !isTitleConsumedElapsedTime_ && systemTransitionType_ == NavigationSystemTransitionType::TITLE &&
+            titleAnimationElapsedTime_ > 0 && titleAnimationElapsedTime_ < 450;
+    }
 
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;

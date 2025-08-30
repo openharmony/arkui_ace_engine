@@ -2717,6 +2717,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0058, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
+    
     g_isConfigChangePerform = true;
     ViewAbstract::SetClipEdge(frameNode, true);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);

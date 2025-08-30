@@ -190,6 +190,7 @@ public:
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
+    void DumpTextStyleInfo5();
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
@@ -882,6 +883,7 @@ public:
     virtual RefPtr<FrameNode> CreateAIEntityMenu();
     virtual bool CheckAIPreviewMenuEnable();
     void InitAiSelection(const Offset& globalOffset);
+    bool PressOnEllipsisTextRange(const Offset& localOffset);
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
     void ResetAISelected(AIResetSelectionReason reason) override;

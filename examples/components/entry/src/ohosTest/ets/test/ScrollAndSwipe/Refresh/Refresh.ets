@@ -24,7 +24,7 @@ export async function RefreshStart(done: Function) {
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
   });
-  await driver.delayMs(4500);
+  await driver.delayMs(5000);
 
   let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
   await atomNavigates.click();
@@ -32,8 +32,8 @@ export async function RefreshStart(done: Function) {
 
   let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
   let width: Point = await ListItems[0].getBoundsCenter()
-  let width2: Point = await ListItems[6].getBoundsCenter()
-  await driver.swipe(width.x, width2.y, width.x, width.y, 2000)
+  let width2: Point = await ListItems[3].getBoundsCenter()
+  await driver.swipe(width.x, width2.y, width.x, width.y, 1500)
   await driver.delayMs(3500);
 
   let scrollSearch: Component = await driver.findComponent(ON.text('刷新容器/Refresh'))

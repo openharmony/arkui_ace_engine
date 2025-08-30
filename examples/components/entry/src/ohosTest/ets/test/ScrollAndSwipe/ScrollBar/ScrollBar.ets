@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
-import { ON } from '@ohos.UiTest';
+import { ON, Point } from '@ohos.UiTest';
 
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
@@ -29,7 +29,13 @@ export async function ScrollBarStart(done: Function) {
   await atomNavigates.click();
   await driver.delayMs(3500);
 
-  let scrollSearch: Component = await driver.findComponent(ON.text('滚动条/ScrollBar'))
+  let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'));
+  let width: Point = await ListItems[0].getBoundsCenter();
+  let width2: Point = await ListItems[3].getBoundsCenter();
+  await driver.swipe(width.x, width2.y, width.x, width.y, 1000);
+  await driver.delayMs(3500);
+
+  let scrollSearch: Component = await driver.findComponent(ON.text('滚动条/Scrollbar'));
   await scrollSearch.click()
   await driver.delayMs(3500);
 

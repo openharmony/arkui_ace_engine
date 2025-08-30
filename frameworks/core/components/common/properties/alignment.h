@@ -55,6 +55,8 @@ public:
     static Offset GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment);
     static NG::OffsetF GetAlignPosition(
         const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
+    static NG::OffsetF GetAlignPositionWithDirection(const NG::SizeF& parentSize, const NG::SizeF& childSize,
+        const Alignment& alignment, TextDirection direction);
     static const Alignment TOP_LEFT;
     static const Alignment TOP_CENTER;
     static const Alignment TOP_RIGHT;

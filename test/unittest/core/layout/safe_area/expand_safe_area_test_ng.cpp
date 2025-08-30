@@ -200,7 +200,7 @@ SafeAreaInsets ExpandSafeAreaTestNg::GetSafeAreaInsets()
  * @tc.desc: Test SafeAreaManager top & bottom system safeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(ExpandSafeAreaTestNg, Manager001, TestSize.Level1)
+HWTEST_F(ExpandSafeAreaTestNg, Manager001, TestSize.Level0)
 {
     AvoidConfig config { .isFullScreen = true };
     InitSafeAreaManager(config);

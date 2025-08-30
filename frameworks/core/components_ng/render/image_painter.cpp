@@ -338,10 +338,25 @@ OffsetF ImagePainter::CalculateBgImagePosition(const SizeF& boxPaintSize_, const
     }
 
     if (bgImgPosition.IsAlign()) {
-        offset.SetX(
-            bgImgPosition.GetSizeValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) / PERCENT_TRANSLATE);
-        offset.SetY(
-            bgImgPosition.GetSizeValueY() * (boxPaintSize_.Height() - imageRenderSize_.Height()) / PERCENT_TRANSLATE);
+        if (bgImgPosition.GetIsOffsetBaseOnAlignmentNeeded()) {
+            offset.AddX(bgImgPosition.GetPercentValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) /
+                        PERCENT_TRANSLATE);
+            offset.AddY(bgImgPosition.GetPercentValueY() * (boxPaintSize_.Height() - imageRenderSize_.Height()) /
+                        PERCENT_TRANSLATE);
+        } else {
+            offset.SetX(
+                bgImgPosition.GetSizeValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) / PERCENT_TRANSLATE);
+            offset.SetY(bgImgPosition.GetSizeValueY() * (boxPaintSize_.Height() - imageRenderSize_.Height()) /
+                        PERCENT_TRANSLATE);
+        }
+    }
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (bgImgPosition.GetDirectionType() != DirectionType::AUTO) {
+        isRtl = (bgImgPosition.GetDirectionType() == DirectionType::RTL);
+    }
+    if (isRtl) {
+        offset.SetX(boxPaintSize_.Width() - offset.GetX() - imageRenderSize_.Width());
     }
     return offset;
 }

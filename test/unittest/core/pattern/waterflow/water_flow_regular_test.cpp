@@ -955,13 +955,13 @@ HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
 
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
     pattern_->ScrollPage(false);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
 
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
     pattern_->ScrollPage(false);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     // sw need estimate currentOffset.
     EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
 }
@@ -1018,7 +1018,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
         .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
 
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
@@ -1033,7 +1033,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
     EXPECT_EQ(reachEnd, false);
 
     UpdateCurrentOffset(-50.0f);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(reachEnd, true);
 }
 
@@ -1344,5 +1344,65 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeightReachEnd001, TestSize.Level1) {
     // Test the branch: should return maxHeight_ directly
     float estimatedHeight = info->EstimateTotalHeight();
     EXPECT_EQ(estimatedHeight, info->maxHeight_);
+}
+
+/**
+ * @tc.name: WaterFlowReMeasureTest001
+ * @tc.desc: Test WaterFlow TOP_DOWN selective clearing mechanism
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with TOP_DOWN mode
+     * @tc.expected: WaterFlow index range is correct
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Call measure of WaterFlow for first time
+     * @tc.expected: WaterFlow layout range is correct, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<WaterFlowLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    // Record initial index range
+    int32_t initialStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t initialEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    /**
+     * @tc.steps: step3. Change WaterFlow mainSize and call measure for second time
+     * @tc.expected: Check selective clearing mechanism works with new index-based approach
+     */
+    // Modify layout constraints to trigger re-measurement
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(240.f, 200.f);
+    contentConstraint.maxSize = SizeF(240.f, 200.f);
+    contentConstraint.percentReference = SizeF(240.f, 200.f);
+
+    layoutProperty_->UpdateLayoutConstraint(contentConstraint);
+
+    // Verify that prevStartIndex_ and prevEndIndex_ are set correctly before measure
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+
+    // Verify selective clearing mechanism uses final indices correctly
+    int32_t newStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t newEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    // Verify that measuredStartIndex_ and currentEndIndex_ are updated
+    EXPECT_EQ(layoutAlgorithm->measuredStartIndex_, newStartIndex);
+    EXPECT_EQ(layoutAlgorithm->measuredEndIndex_, newEndIndex);
+
+    // The index range should be different after constraint change
+    EXPECT_TRUE(newStartIndex != initialStartIndex || newEndIndex != initialEndIndex);
+
+    // Complete layout to trigger ClearUnlayoutedItems
+    layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(layoutAlgorithm->isLayouted_);
 }
 } // namespace OHOS::Ace::NG

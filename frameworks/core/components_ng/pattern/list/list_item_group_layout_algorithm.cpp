@@ -298,7 +298,7 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
-    headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    headerFooterLayoutConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     RefPtr<LayoutWrapper> headerWrapper = headerIndex_ >= 0 ?
         layoutWrapper->GetOrCreateChildByIndex(headerIndex_) : nullptr;
     RefPtr<LayoutWrapper> footerWrapper = footerIndex_ >= 0 ?
@@ -358,7 +358,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     auto crossSizeOptional = selfIdealSize.CrossSize(axis_);
     if (crossSizeOptional.has_value()) {
         float crossSize = crossSizeOptional.value();
@@ -381,6 +381,8 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
 float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
 {
     float maxCrossSize = 0.0f;
+    float crossSize = -laneGutter_;
+    float prevPos = itemPosition_.begin()->second.startPos;
     for (const auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first, false);
         if (!wrapper) {
@@ -390,8 +392,16 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(maxCrossSize, crossSize);
     }
+    crossSize = -laneGutter_;
+    prevPos = cachedItemPosition_.begin()->second.startPos;
     for (const auto& pos : cachedItemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first, false);
         if (!wrapper) {
@@ -401,7 +411,13 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(maxCrossSize, crossSize);
     }
     return maxCrossSize;
 }
@@ -535,8 +551,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         return;
     }
     if (targetIndex_) {
-        startPos_ = -Infinity<float>();
-        endPos_ = Infinity<float>();
+        startPos_ = -LayoutInfinity<float>();
+        endPos_ = LayoutInfinity<float>();
         targetIndex_ = isStackFromEnd_ ? totalItemCount_ - targetIndex_.value() - 1 : targetIndex_.value();
     }
     if (jumpIndex_.has_value()) {
@@ -1537,7 +1553,7 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
                 return;
             }
             if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
-                pauseMeasureCacheItem_ = curIndex + i;
+                pauseMeasureCacheItem_ = curIndex - i;
                 return;
             }
             cnt++;

@@ -8,38 +8,13 @@ function datePickerComponentBuilder(color: Color) {
 }
 
 @Builder
-function datePickerDialogComponentBuilder(color: Color) {
-  DatePickerDialogComponent({});
-}
-
-@Builder
-function calendarPickerComponentBuilder(color: Color) {
-  CalendarPickerComponent({});
-}
-
-@Builder
-function calendarPickerDialogComponentBuilder(color: Color) {
-  CalendarPickerDialogComponent({});
-}
-
-@Builder
 function timePickerComponentBuilder(color: Color) {
   TimePickerComponent({});
 }
 
 @Builder
-function timePickerDialogComponentBuilder(color: Color) {
-  TimePickerDialogComponent({});
-}
-
-@Builder
 function textPickerComponentBuilder(color: Color) {
   TextPickerComponent({});
-}
-
-@Builder
-function textPickerDialogComponentBuilder(color: Color) {
-  TextPickerDialogComponent({});
 }
 
 @Builder
@@ -90,11 +65,6 @@ function loadingprogressComponentBuilder(color: Color) {
 @Builder
 function progressComponentBuilder(color: Color) {
   ProgressComponent({});
-}
-
-@Builder
-function qrCodeComponentBuilder(color: Color) {
-  QRCodeComponent({});
 }
 
 @Builder
@@ -161,55 +131,6 @@ struct DatePickerComponent {
             this.datePickerModeIndex = 0;
           }
         })
-    }.width('100%')
-  }
-}
-
-@Component
-struct CalendarPickerComponent {
-  private selectedDate: Date = new Date('2024-03-05');
-  private onChange = 0;
-  @State edgeAlignList: (CalendarAlign)[] = [
-    CalendarAlign.START,
-    CalendarAlign.CENTER,
-    CalendarAlign.END,
-  ];
-  @State edgeAlignIndex: number = 0;
-  @State value1: string = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-  @State value2: string = 'onChange times: ' + this.onChange;
-  @State value3: string = 'onChange args: ';
-
-  build() {
-    Column() {
-      Divider()
-      Text('回调情况')
-      Text([
-        this.value1,
-        this.value2,
-        this.value3
-      ].join('\n')).backgroundColor(Color.Yellow)
-      Column() {
-        CalendarPicker({ hintRadius: 10, selected: this.selectedDate })
-          .edgeAlign(this.edgeAlignIndex)
-          .textStyle({ color: '#ff182431', font: { size: 20, weight: FontWeight.Normal } })
-          .margin(10)
-          .onChange((value: Date) => {
-            this.onChange++;
-            globalThis.width++;
-            this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-            this.value2 = 'onChange times: ' + this.onChange;
-            this.value3 = 'onChange args: ' + value.toString();
-          })
-      }.alignItems(HorizontalAlign.End).width('100%')
-
-      Button('edgeAlign :' + this.edgeAlignIndex).margin({ top: 20 })
-        .onClick(() => {
-          this.edgeAlignIndex++;
-          if (this.edgeAlignIndex >= this.edgeAlignList.length) {
-            this.edgeAlignIndex = 0;
-          }
-        })
-      Text('日历日期选择器').fontSize(30)
     }.width('100%')
   }
 }
@@ -338,473 +259,6 @@ struct TextPickerComponent {
             this.isLoop = isOn;
           })
       }.position({ x: '60%', y: '40%' })
-    }.width('100%')
-  }
-}
-
-@Component
-struct DatePickerDialogComponent {
-  selectedDate: Date = new Date('2010-1-1');
-  @State isLunar: boolean = false;
-  @State showTime: boolean = true;
-  @State useMilitaryTime: boolean = false;
-  private onDateAccept = 0;
-  private onCancel = 0;
-  private onDateChange = 0;
-  private onDidAppear = 0;
-  private onDidDisappear = 0;
-  private onWillAppear = 0;
-  private onWillDisappear = 0;
-  @State value1: string = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-  @State value2: string = 'onDateAccept times: ' + this.onDateAccept;
-  @State value3: string = 'onDateAccept args: ';
-  @State value4: string = 'onCancel times: ' + this.onCancel;
-  @State value5: string = 'onDateChange times: ' + this.onDateChange;
-  @State value6: string = 'onDateChange args: ';
-  @State value7: string = 'onDidAppear times: ' + this.onDidAppear;
-  @State value8: string = 'onDidDisappear times: ' + this.onDidDisappear;
-  @State value9: string = 'onWillAppear times: ' + this.onWillAppear;
-  @State value10: string = 'onWillDisappear times: ' + this.onWillDisappear;
-
-  build() {
-    Column() {
-      Divider()
-      Text('回调情况')
-      Text([
-        this.value1,
-        this.value2,
-        this.value3,
-        this.value4,
-        this.value5,
-        this.value6,
-        this.value7,
-        this.value8,
-        this.value9,
-        this.value10
-      ].join('\n')).backgroundColor(Color.Yellow)
-      Button('切换公历农历')
-        .margin({ top: 10, bottom: 10 })
-        .onClick(() => {
-          this.isLunar = !this.isLunar;
-        })
-      Button('切换showTime')
-        .margin({ top: 10, bottom: 10 })
-        .onClick(() => {
-          this.showTime = !this.showTime;
-        })
-      Button('切换useMilitaryTime')
-        .margin({ top: 10, bottom: 10 })
-        .onClick(() => {
-          this.useMilitaryTime = !this.useMilitaryTime;
-        })
-      Button('DatePickerDialog')
-        .margin(20)
-        .onClick(() => {
-          this.getUIContext().showDatePickerDialog({
-            start: new Date('2000-1-1'),
-            end: new Date('2100-12-31'),
-            lunar: this.isLunar,
-            selected: this.selectedDate,
-            showTime: this.showTime,
-            useMilitaryTime: this.useMilitaryTime,
-            disappearTextStyle: { color: '#297bec', font: { size: '20fp', weight: FontWeight.Bold } },
-            textStyle: { color: Color.Black, font: { size: '18fp', weight: FontWeight.Normal } },
-            selectedTextStyle: { color: Color.Blue, font: { size: '26fp', weight: FontWeight.Regular } },
-            dateTimeOptions: { hour: 'numeric', minute: '2-digit' },
-            onDateAccept: (value: Date) => {
-              // 通过Date的setFullYear方法设置按下确定按钮时的日期，这样当弹窗再次弹出时显示选中的是上一次确定的日期
-              this.selectedDate = value
-              this.onDateAccept++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value2 = 'onDateAccept times: ' + this.onDateAccept;
-              this.value3 = 'onDateAccept args: ' + value.toString();
-            },
-            onCancel: () => {
-              this.onCancel++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value4 = 'onCancel times: ' + this.onCancel;
-            },
-            onDateChange: (value: Date) => {
-              this.onDateChange++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value5 = 'onDateChange times: ' + this.onDateChange;
-              this.value6 = 'onDateChange args: ' + value.toString();
-            },
-            onDidAppear: () => {
-              this.onDidAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value7 = 'onDidAppear times: ' + this.onDidAppear;
-            },
-            onDidDisappear: () => {
-              this.onDidDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value8 = 'onDidDisappear times: ' + this.onDidDisappear;
-            },
-            onWillAppear: () => {
-              this.onWillAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value9 = 'onWillAppear times: ' + this.onWillAppear;
-            },
-            onWillDisappear: () => {
-              this.onWillDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value10 = 'onWillDisappear times: ' + this.onWillDisappear;
-            }
-          })
-        })
-    }.width('100%')
-  }
-}
-
-@Component
-struct CalendarPickerDialogComponent {
-  private selectedDate: Date = new Date('2024-04-23');
-  private onAccept = 0;
-  private onCancel = 0;
-  private onChange = 0;
-  private onDidAppear = 0;
-  private onDidDisappear = 0;
-  private onWillAppear = 0;
-  private onWillDisappear = 0;
-  @State value1: string = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-  @State value2: string = 'onAccept times: ' + this.onAccept;
-  @State value3: string = 'onAccept args: ';
-  @State value4: string = 'onCancel times: ' + this.onCancel;
-  @State value5: string = 'onChange times: ' + this.onChange;
-  @State value6: string = 'onChange args: ';
-  @State value7: string = 'onDidAppear times: ' + this.onDidAppear;
-  @State value8: string = 'onDidDisappear times: ' + this.onDidDisappear;
-  @State value9: string = 'onWillAppear times: ' + this.onWillAppear;
-  @State value10: string = 'onWillDisappear times: ' + this.onWillDisappear;
-
-  build() {
-    Column() {
-      Divider()
-      Text('回调情况')
-      Text([
-        this.value1,
-        this.value2,
-        this.value3,
-        this.value4,
-        this.value5,
-        this.value6,
-        this.value7,
-        this.value8,
-        this.value9,
-        this.value10
-      ].join('\n')).backgroundColor(Color.Yellow)
-      Button('Show CalendarPicker Dialog')
-        .margin(10)
-        .onClick(() => {
-          console.info('CalendarDialog.show');
-          CalendarPickerDialog.show({
-            selected: this.selectedDate,
-            backgroundColor: Color.Gray,
-            backgroundBlurStyle: BlurStyle.NONE,
-            shadow: ShadowStyle.OUTER_FLOATING_SM,
-            onAccept: (value: Date) => {
-              // 通过Date的setFullYear方法设置按下确定按钮时的日期，这样当弹窗再次弹出时显示选中的是上一次确定的日期
-              this.selectedDate = value
-              this.onAccept++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value2 = 'onAccept times: ' + this.onAccept;
-              this.value3 = 'onAccept args: ' + value.toString();
-            },
-            onCancel: () => {
-              this.onCancel++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value4 = 'onCancel times: ' + this.onCancel;
-            },
-            onChange: (value: Date) => {
-              this.onChange++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value5 = 'onChange times: ' + this.onChange;
-              this.value6 = 'onChange args: ' + value.toString();
-            },
-            onDidAppear: () => {
-              this.onDidAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value7 = 'onDidAppear times: ' + this.onDidAppear;
-            },
-            onDidDisappear: () => {
-              this.onDidDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value8 = 'onDidDisappear times: ' + this.onDidDisappear;
-            },
-            onWillAppear: () => {
-              this.onWillAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value9 = 'onWillAppear times: ' + this.onWillAppear;
-            },
-            onWillDisappear: () => {
-              this.onWillDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value10 = 'onWillDisappear times: ' + this.onWillDisappear;
-            }
-          });
-        })
-    }.width('100%')
-  }
-}
-
-@Component
-struct TimePickerDialogComponent {
-  @State useMilitaryTime: boolean = false;
-  private selectTime: Date = new Date('2020-12-25T08:30:00');
-  private onAccept = 0;
-  private onCancel = 0;
-  private onChange = 0;
-  private onDidAppear = 0;
-  private onDidDisappear = 0;
-  private onWillAppear = 0;
-  private onWillDisappear = 0;
-  private onEnterSelectedArea = 0;
-  @State value1: string = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-  @State value2: string = 'onAccept times: ' + this.onAccept;
-  @State value3: string = 'onAccept args: ';
-  @State value4: string = 'onCancel times: ' + this.onCancel;
-  @State value5: string = 'onChange times: ' + this.onChange;
-  @State value6: string = 'onChange args: ';
-  @State value7: string = 'onDidAppear times: ' + this.onDidAppear;
-  @State value8: string = 'onDidDisappear times: ' + this.onDidDisappear;
-  @State value9: string = 'onWillAppear times: ' + this.onWillAppear;
-  @State value10: string = 'onWillDisappear times: ' + this.onWillDisappear;
-  @State value11: string = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-  @State value12: string = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-
-  build() {
-    Column() {
-      Divider()
-      Text('回调情况')
-      Text([
-        this.value1,
-        this.value2,
-        this.value3,
-        this.value4,
-        this.value5,
-        this.value6,
-        this.value7,
-        this.value8,
-        this.value9,
-        this.value10,
-        this.value11,
-        this.value12
-
-      ].join('\n')).backgroundColor(Color.Yellow)
-      Button('切换useMilitaryTime')
-        .margin({ top: 10, bottom: 10 })
-        .onClick(() => {
-          this.useMilitaryTime = !this.useMilitaryTime;
-        })
-      Button('TimePickerDialog')
-        .margin(20)
-        .onClick(() => {
-          this.getUIContext().showTimePickerDialog({
-            selected: this.selectTime,
-            format: TimePickerFormat.HOUR_MINUTE,
-            useMilitaryTime: this.useMilitaryTime,
-            dateTimeOptions: { hour: 'numeric', minute: '2-digit' },
-            disappearTextStyle: { color: '#297bec', font: { size: '20fp', weight: FontWeight.Bold } },
-            textStyle: { color: Color.Black, font: { size: '18fp', weight: FontWeight.Normal } },
-            selectedTextStyle: { color: Color.Blue, font: { size: '26fp', weight: FontWeight.Regular } },
-            onAccept: (value: TimePickerResult) => {
-              // 设置selectTime为按下确定按钮时的时间，这样当弹窗再次弹出时显示选中的为上一次确定的时间
-              if (value.hour != undefined && value.minute != undefined) {
-                this.selectTime.setHours(value.hour, value.minute);
-              }
-              this.onAccept++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value2 = 'onAccept times: ' + this.onAccept;
-              this.value3 = 'onAccept args: ' + printFields(value);
-            },
-            onCancel: () => {
-              this.onCancel++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value4 = 'onCancel times: ' + this.onCancel;
-            },
-            onChange: (value: TimePickerResult) => {
-              this.onChange++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value5 = 'onChange times: ' + this.onChange;
-              this.value6 = 'onChange args: ' + printFields(value);
-            },
-            onDidAppear: () => {
-              this.onDidAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value7 = 'onDidAppear times: ' + this.onDidAppear;
-            },
-            onDidDisappear: () => {
-              this.onDidDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value8 = 'onDidDisappear times: ' + this.onDidDisappear;
-            },
-            onWillAppear: () => {
-              this.onWillAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value9 = 'onWillAppear times: ' + this.onWillAppear;
-            },
-            onWillDisappear: () => {
-              this.onWillDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value10 = 'onWillDisappear times: ' + this.onWillDisappear;
-            },
-            onEnterSelectedArea: (value: TimePickerResult) => {
-              this.onEnterSelectedArea++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value11 = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-              this.value12 = 'onEnterSelectedArea args: ' + printFields(value);
-            }
-          });
-        })
-    }.width('100%')
-  }
-}
-
-@Component
-struct TextPickerDialogComponent {
-  private select: number | number[] = 0;
-  private fruits: string[] = ['apple1', 'orange2', 'peach3', 'grape4', 'banana5'];
-  @State v: string = '';
-  private onAccept = 0;
-  private onCancel = 0;
-  private onChange = 0;
-  private onDidAppear = 0;
-  private onDidDisappear = 0;
-  private onWillAppear = 0;
-  private onWillDisappear = 0;
-  private onScrollStop = 0;
-  private onEnterSelectedArea = 0;
-  @State value1: string = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-  @State value2: string = 'onAccept times: ' + this.onAccept;
-  @State value3: string = 'onAccept args: ';
-  @State value4: string = 'onCancel times: ' + this.onCancel;
-  @State value5: string = 'onChange times: ' + this.onChange;
-  @State value6: string = 'onChange args: ';
-  @State value7: string = 'onDidAppear times: ' + this.onDidAppear;
-  @State value8: string = 'onDidDisappear times: ' + this.onDidDisappear;
-  @State value9: string = 'onWillAppear times: ' + this.onWillAppear;
-  @State value10: string = 'onWillDisappear times: ' + this.onWillDisappear;
-  @State value11: string = 'onScrollStop times: ' + this.onScrollStop;
-  @State value12: string = 'onScrollStop args: ';
-  @State value13: string = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-  @State value14: string = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-
-  build() {
-    Column() {
-      Divider()
-      Text('回调情况')
-      Text([
-        this.value1,
-        this.value2,
-        this.value3,
-        this.value4,
-        this.value5,
-        this.value6,
-        this.value7,
-        this.value8,
-        this.value9,
-        this.value10,
-        this.value11,
-        this.value12
-      ].join('\n')).backgroundColor(Color.Yellow)
-      Button('TextPickerDialog:' + this.v)
-        .margin(10)
-        .onClick(() => {
-          this.getUIContext().showTextPickerDialog({
-            range: this.fruits,
-            selected: this.select,
-            value: this.v,
-            defaultPickerItemHeight: 50,
-            disappearTextStyle: { color: '#297bec', font: { size: '20fp', weight: FontWeight.Bold } },
-            textStyle: { color: Color.Black, font: { size: '18fp', weight: FontWeight.Normal } },
-            selectedTextStyle: { color: Color.Blue, font: { size: '26fp', weight: FontWeight.Regular } },
-            onAccept: (value: TextPickerResult) => {
-              // 设置select为按下确定按钮时候的选中项index，这样当弹窗再次弹出时显示选中的是上一次确定的选项
-              this.select = value.index;
-              console.log(this.select + '');
-              // 点击确定后，被选到的文本数据展示到页面
-              this.v = value.value as string;
-              this.onAccept++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value2 = 'onAccept times: ' + this.onAccept;
-              this.value3 = 'onAccept args: ' + printFields(value);
-            },
-            onCancel: () => {
-              this.onCancel++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value4 = 'onCancel times: ' + this.onCancel;
-            },
-            onChange: (value: TextPickerResult) => {
-              this.onChange++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value5 = 'onChange times: ' + this.onChange;
-              this.value6 = 'onChange args: ' + printFields(value);
-            },
-            onScrollStop: (value: TextPickerResult) => {
-              this.onScrollStop++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value11 = 'onScrollStop times: ' + this.onScrollStop;
-              this.value12 = 'onScrollStop args: ' + printFields(value);
-            },
-            onDidAppear: () => {
-              this.onDidAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value7 = 'onDidAppear times: ' + this.onDidAppear;
-            },
-            onDidDisappear: () => {
-              this.onDidDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value8 = 'onDidDisappear times: ' + this.onDidDisappear;
-            },
-            onWillAppear: () => {
-              this.onWillAppear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value9 = 'onWillAppear times: ' + this.onWillAppear;
-            },
-            onWillDisappear: () => {
-              this.onWillDisappear++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value10 = 'onWillDisappear times: ' + this.onWillDisappear;
-            },
-            onEnterSelectedArea: (value: TextPickerResult) => {
-              this.onEnterSelectedArea++;
-              globalThis.width++;
-              this.value1 = 'globalThis.width: ' + (globalThis.width ?? 'undefined');
-              this.value13 = 'onEnterSelectedArea times: ' + this.onEnterSelectedArea;
-              this.value14 = 'onEnterSelectedArea args: ' + printFields(value);
-            },
-          });
-        })
     }.width('100%')
   }
 }
@@ -1488,22 +942,6 @@ struct ProgressComponent {
 }
 
 @Component
-struct QRCodeComponent {
-  private value: string = 'hello world';
-
-  build() {
-    Column() {
-      Divider()
-      RelativeContainer() {
-        Image($r('app.media.startIcon'))
-        // 设置二维码背景色为透明
-        QRCode(this.value).width(200).height(200).backgroundColor('#00ffffff')
-      }.width(200).height(200)
-    }.width('100%').margin({ top: 5 })
-  }
-}
-
-@Component
 struct BadgeComponent {
   @State badgeCount: number = 1;
 
@@ -1540,95 +978,65 @@ export function InitBuilder1(context: UIContext, color: Color) {
 
 export function InitBuilder2(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(calendarPickerComponentBuilder), color);
+    wrapBuilder<[Color]>(timePickerComponentBuilder), color);
 }
 
 export function InitBuilder3(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(timePickerComponentBuilder), color);
+    wrapBuilder<[Color]>(textPickerComponentBuilder), color);
 }
 
 export function InitBuilder4(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(textPickerComponentBuilder), color);
+    wrapBuilder<[Color]>(imageComponentBuilder), color);
 }
 
 export function InitBuilder5(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(datePickerDialogComponentBuilder), color);
+    wrapBuilder<[Color]>(imageAnimatorComponentBuilder), color);
 }
 
 export function InitBuilder6(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(calendarPickerDialogComponentBuilder), color);
+    wrapBuilder<[Color]>(counterComponentBuilder), color);
 }
 
 export function InitBuilder7(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(timePickerDialogComponentBuilder), color);
+    wrapBuilder<[Color]>(patternLockComponentBuilder), color);
 }
 
 export function InitBuilder8(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(textPickerDialogComponentBuilder), color);
+    wrapBuilder<[Color]>(textClockComponentBuilder), color);
 }
 
 export function InitBuilder9(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(imageComponentBuilder), color);
+    wrapBuilder<[Color]>(textTimerComponentBuilder), color);
 }
 
 export function InitBuilder10(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(imageAnimatorComponentBuilder), color);
+    wrapBuilder<[Color]>(dataPanelComponentBuilder), color);
 }
 
 export function InitBuilder11(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(counterComponentBuilder), color);
+    wrapBuilder<[Color]>(gaugeComponentBuilder), color);
 }
 
 export function InitBuilder12(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(patternLockComponentBuilder), color);
+    wrapBuilder<[Color]>(loadingprogressComponentBuilder), color);
 }
 
 export function InitBuilder13(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(textClockComponentBuilder), color);
-}
-
-export function InitBuilder14(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(textTimerComponentBuilder), color);
-}
-
-export function InitBuilder15(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(dataPanelComponentBuilder), color);
-}
-
-export function InitBuilder16(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(gaugeComponentBuilder), color);
-}
-
-export function InitBuilder17(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(loadingprogressComponentBuilder), color);
-}
-
-export function InitBuilder18(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
     wrapBuilder<[Color]>(progressComponentBuilder), color);
 }
 
-export function InitBuilder19(context: UIContext, color: Color) {
-  return new ComponentContent<Color>(context,
-    wrapBuilder<[Color]>(qrCodeComponentBuilder), color);
-}
-
-export function InitBuilder20(context: UIContext, color: Color) {
+export function InitBuilder14(context: UIContext, color: Color) {
   return new ComponentContent<Color>(context,
     wrapBuilder<[Color]>(badgeComponentBuilder), color);
 }

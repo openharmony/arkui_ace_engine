@@ -157,6 +157,61 @@ int32_t ScrollToTarget(const ScrollCommand& command, const RefPtr<NG::FrameNode>
     ScrollablePattern::ScrollToTarget(scrollable, target, command.scrollOffset, command.scrollAlign);
     return ERR_OK;
 }
+
+bool GetWebLangIfActive(const RefPtr<UINode>& node, std::string& lang)
+{
+#if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    if (!frameNode->IsActive()) {
+        return false;
+    }
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->GetActiveStatus()) {
+        lang = pattern->GetCurrentLanguage();
+        return true;
+    }
+    return false;
+#else
+    return false;
+#endif
+}
+
+void GetActiveWebNodeLang(const RefPtr<FrameNode>& root, std::string& lang)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (current == nullptr) {
+            continue;
+        }
+        if (current->GetTag() == V2::WEB_ETS_TAG) {
+            if (GetWebLangIfActive(current, lang)) {
+                return;
+            }
+            continue;
+        }
+
+        const auto& children = current->GetChildrenForInspector(false);
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return;
+}
+
+void GetCurrentWebLang(std::string& lang)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetStageManager());
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(pageRootNode);
+    GetActiveWebNodeLang(pageRootNode, lang);
+}
 } // namespace
 
 void SimplifiedInspector::TestScrollToTarget(
@@ -200,6 +255,12 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 std::string SimplifiedInspector::GetInspector()
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector1:container %{public}d", containerId_);
+    ContainerScope scope(Container::CurrentIdSafely());
+    if (params_.infoType == InspectorInfoType::WEB_LANG) {
+        std::string lang;
+        GetCurrentWebLang(lang);
+        return lang;
+    }
     auto jsonRoot = JsonUtil::Create(true);
     RefPtr<FrameNode> pageRootNode;
     auto success = GetInspectorStep1(jsonRoot, pageRootNode);

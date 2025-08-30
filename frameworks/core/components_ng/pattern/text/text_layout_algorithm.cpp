@@ -113,6 +113,11 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         needReCreateParagraph_, static_cast<int32_t>(spans_.size()));
     if (textStyle_.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
+        if (paragraphManager_) {
+            auto height = paragraphManager_->GetHeight();
+            auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
+            SetContentHeight(heightFinal);
+        }
         auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
@@ -147,6 +152,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
+    SetContentHeight(heightFinal);
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
     } else {

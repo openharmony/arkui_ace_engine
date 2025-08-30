@@ -465,6 +465,91 @@ HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetNearScale002
+ * @tc.desc: Test GetNearScale when the height of the item is large
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetNearScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with a large height of one of the items in the list.
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(1);
+    CreateListItemsWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(1000.f)));
+    CreateListItems(1);
+    CreateDone();
+    auto maxScale = 1.08f;
+    auto minScale = 0.406643271f;
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: The distance between the item and the middle point of the list does not reach the threshold.
+     * Therefore, the scale is minimum.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 250.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1250.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step3. Scroll to 50.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 50.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1050.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step4. Scroll to 100.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1000.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step5. Scroll to 400.
+     * @tc.expected: The distance is 0. Therefore, the scale reaches the maximum value.
+     */
+    ScrollTo(400);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -300.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step6. Scroll to 700.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(700);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -600.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 400.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step7. Scroll to 750.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale reaches the minimum value.
+     */
+    ScrollTo(750);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -650.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 350.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step8. Scroll to 800.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(800);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -700.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+}
+
+/**
  * @tc.name: UpdatePosMap001
  * @tc.desc: Test class ArcListPositionMap interface UpdatePosMap
  * @tc.type: FUNC

@@ -99,12 +99,15 @@ adapter/ohos/entrance/ui_event_impl.h @arkuiframework
 adapter/ohos/entrance/ui_session/ @arkuiframework
 adapter/ohos/entrance/utils.cpp @arkuiframework
 adapter/ohos/entrance/utils.h @arkuiframework
+adapter/ohos/entrance/image_task_pool_impl.h @arkui_image
+adapter/ohos/entrance/image_task_pool_impl.cpp @arkui_image
 adapter/ohos/entrance/window_free_container.cpp @arkuiframework
 adapter/ohos/entrance/vibrator/vibrator_utils.cpp @arkuiscroll
 adapter/ohos/entrance/window/drag_window_ohos.cpp @arkuievent
 adapter/ohos/entrance/window/drag_window_ohos.h @arkuievent
 adapter/ohos/entrance/window/foldable_window_ohos.cpp @arkuipopupwindow
 adapter/ohos/entrance/window/foldable_window_ohos.h @arkuipopupwindow
+adapter/ohos/osal/accessibility/ @arkuiabilitygroup
 adapter/ohos/osal/ace_checker.cpp @arkuiframework
 adapter/ohos/osal/ace_engine_ext.cpp @arkuievent
 adapter/ohos/osal/ace_trace.cpp @arkuiframework
@@ -3234,6 +3237,7 @@ test/unittest/core/event/ @arkuievent
 test/unittest/core/gestures/ @arkuievent
 test/unittest/core/image_file_cache/ @arkui_image
 test/unittest/core/image_provider/ @arkui_image
+test/unittest/core/image/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent

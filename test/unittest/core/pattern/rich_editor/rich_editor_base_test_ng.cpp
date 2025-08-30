@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,9 +35,8 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
-const Dimension MAGNIFIERNODE_WIDTH = 127.0_vp;
-const Dimension MAGNIFIERNODE_HEIGHT = 95.0_vp;
 SelectionRangeInfo testSelectionRange(0, 0);
+int32_t testOnSelect = 0;
 } // namespace
 
 class RichEditorBaseTestNg : public RichEditorCommonTestNg {
@@ -43,11 +44,122 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
-private:
-    void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
-        const RefPtr<MagnifierController>& controller, const OffsetF& localOffset);
-    void InitMagnifierParams(const SizeF& frameSize);
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    void GetFocus(const RefPtr<RichEditorPattern>& pattern);
+    void OnDrawVerify(const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset,
+        bool selected = false);
 };
+
+void RichEditorBaseTestNg::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
+void RichEditorBaseTestNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
+{
+    ASSERT_NE(pattern, nullptr);
+    auto focushHub = pattern->GetFocusHub();
+    focushHub->currentFocus_ = true;
+    pattern->HandleFocusEvent();
+    FlushLayoutTask(richEditorNode_);
+}
+
+void RichEditorBaseTestNg::OnDrawVerify(
+    const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset, bool selected)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
+    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
+    if (type == SelectSpanType::TYPESPAN) {
+        AddSpan(text);
+    } else if (type == SelectSpanType::TYPEIMAGE) {
+        AddImageSpan();
+    } else if (type == SelectSpanType::TYPESYMBOLSPAN) {
+        auto richEditorController = richEditorPattern->GetRichEditorController();
+        ASSERT_NE(richEditorController, nullptr);
+        richEditorController->AddSymbolSpan(options);
+    }
+
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    GetFocus(richEditorPattern);
+
+    if (!selected) {
+        GestureEvent info;
+        info.localLocation_ = offset;
+        richEditorPattern->HandleClickEvent(info);
+    } else {
+        richEditorPattern->HandleOnSelectAll();
+    }
+
+    /**
+     * @tc.steps: step2. Move handle
+     */
+    auto controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
+
+    /**
+     * @tc.steps: step3. Test magnifier open or close
+     * @tc.expected: magnifier is open
+     */
+    auto ret = controller->GetShowMagnifier();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Craete RichEditorOverlayModifier
+     */
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    auto richFieldOverlayModifier = AceType::MakeRefPtr<RichEditorOverlayModifier>(
+        richEditorPattern, AceType::WeakClaim(AceType::RawPtr(scrollBarModifier)), scrollEdgeEffect);
+    ASSERT_NE(richFieldOverlayModifier, nullptr);
+
+    /**
+     * @tc.steps: step5. Create DrawingContext
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step6. Do onDraw(context)
+     */
+    richFieldOverlayModifier->onDraw(context);
+
+    /**
+     * @tc.steps: step7. When handle move done
+     */
+    richEditorPattern->ProcessOverlay();
+    RectF handleRect;
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
+
+    /**
+     * @tc.steps: step8. Test magnifier open or close
+     * @tc.expected: magnifier is close
+     */
+    ret = controller->GetShowMagnifier();
+    EXPECT_FALSE(ret);
+    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
+}
 
 void RichEditorBaseTestNg::SetUp()
 {
@@ -81,29 +193,6 @@ void RichEditorBaseTestNg::TearDown()
 void RichEditorBaseTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
-}
-
-void RichEditorBaseTestNg::InitMagnifierParams(const SizeF& frameSize)
-{
-    // set frameSize to RichEditor
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto geometryNode = richEditorNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(frameSize);
-
-    // set frameSize to RootNode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto rootUINode = pipeline->GetRootElement();
-    ASSERT_NE(rootUINode, nullptr);
-    auto rootGeometryNode = rootUINode->GetGeometryNode();
-    ASSERT_NE(rootGeometryNode, nullptr);
-    rootGeometryNode->SetFrameSize(frameSize);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textfieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textfieldTheme));
 }
 
 /**
@@ -268,6 +357,31 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel008
+ * @tc.desc: test set on select
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel008, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
+    richEditorModel.SetOnSelect(std::move(func));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    SelectionInfo selection;
+    eventHub->FireOnSelect(&selection);
+    EXPECT_EQ(testOnSelect, 1);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
  * @tc.name: RichEditorModel009
  * @tc.desc: test set on text selection change
  * @tc.type: FUNC
@@ -320,6 +434,115 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel009, TestSize.Level1)
     richEditorPattern->HandleOnSelectAll();
     EXPECT_EQ(testSelectionRange.start_, 0);
     EXPECT_EQ(testSelectionRange.end_, 12);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel010
+ * @tc.desc: test set on text/image/symbol selection change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel010, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](const BaseEventInfo* info) {
+        const auto* selectionRange = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        ASSERT_NE(selectionRange, nullptr);
+        testSelectionRange = *selectionRange;
+    };
+    richEditorModel.SetOnSelectionChange(std::move(func));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+
+    // insert value
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+
+    // add image
+    ImageSpanOptions imageSpanOptions;
+    richEditorPattern->AddImageSpan(imageSpanOptions);
+    richEditorPattern->HandleOnSelectAll();
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 7);
+
+    // add symbol
+    SymbolSpanOptions symbolSpanOptions;
+    symbolSpanOptions.symbolId = SYMBOL_ID;
+    auto richEditorController =  richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorController->AddSymbolSpan(symbolSpanOptions);
+    richEditorPattern->HandleOnSelectAll();
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 9);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel011
+ * @tc.desc: test placeholder appear and disappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    PlaceholderOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorModel.SetPlaceholder(options);
+
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode, AceType::MakeRefPtr<GeometryNode>(), richEditorNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    // test placeholder appear when there is nothing in richEditor
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    auto spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 0);
+
+    // test add Text then placeholder disappear
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(textOptions);
+    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
+
+    // test when richEitor empty again,placeholder Appear again
+    RangeOptions rangeoptions;
+    richEditorController->DeleteSpans(rangeoptions);
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 0);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -558,38 +781,6 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyboardAvoidance001
- * @tc.desc: test for keyboardAvoidance
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, KeyboardAvoidance001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. setCustomKeyboard
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isEditing_ = true;
-
-    auto func = []() {};
-    richEditorModel.SetCustomKeyboard(func, true);
-    EXPECT_TRUE(richEditorPattern->keyboardAvoidance_);
-
-    /**
-     * @tc.steps: step2. check keyboardAvoidance
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto overlayManager = pipeline->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    EXPECT_TRUE(overlayManager->keyboardAvoidance_);
-}
-
-/**
  * @tc.name: RichEditorModel018
  * @tc.desc: test SetEnableHapticFeedback.
  * @tc.type: FUNC
@@ -666,6 +857,42 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel021
+ * @tc.desc: test paragraph style textVerticalAlign attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph style linebreakstrategy default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    CHECK_NULL_VOID(!info.empty());
+    auto hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+    EXPECT_FALSE(hasTextVerticalAlign);
+
+    std::vector strategies = { TextVerticalAlign::BASELINE, TextVerticalAlign::BOTTOM,
+    TextVerticalAlign::CENTER, TextVerticalAlign::TOP};
+    struct UpdateParagraphStyle style;
+    for (TextVerticalAlign strategy : strategies) {
+        // test paragraph style textVerticalAlign
+        style.textVerticalAlign = strategy;
+        richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+        info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+        hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
+        EXPECT_TRUE(hasTextVerticalAlign);
+        EXPECT_EQ(static_cast<TextVerticalAlign>(info[0].textVerticalAlign.value()), strategy);
+    }
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -681,205 +908,49 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MagnifierTest001
- * @tc.desc: Test magnifier position.
+ * @tc.name: onDraw001
+ * @tc.desc: Verify the onDraw Magnifier.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, onDraw001, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto frameSize = SizeF(600.f, 400.f);
-    InitMagnifierParams(frameSize);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paintOffset = richEditorPattern->GetTextPaintOffset();
+    Offset localOffset(0, 0);
+    SymbolSpanOptions symbolSpanOptions;
+    symbolSpanOptions.symbolId = SYMBOL_ID;
 
-    /**
-     * @tc.steps: step1. localOffset is on the far left.
-     */
-    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
+    //Verify the selected single line text magnifying glass
+    OnDrawVerify(SelectSpanType::TYPESPAN, INIT_VALUE_1, symbolSpanOptions, localOffset, true);
+
+    //Verify the selected multi line text magnifying glass
+    OnDrawVerify(SelectSpanType::TYPESPAN, INIT_VALUE_3, symbolSpanOptions, localOffset, true);
+
+    //Verify the selected image magnifying glass
+    OnDrawVerify(SelectSpanType::TYPEIMAGE, INIT_VALUE_1, symbolSpanOptions, localOffset, true);
+
+    //Verify the selected symbol magnifying glass
+    OnDrawVerify(SelectSpanType::TYPESYMBOLSPAN, INIT_VALUE_1, symbolSpanOptions, localOffset, true);
+
+    //Verify insertion status with a regular text magnifying glass
+    OnDrawVerify(SelectSpanType::TYPESPAN, INIT_VALUE_1, symbolSpanOptions, localOffset);
+
+    //Verify the insertion status of the image magnifying glass
+    OnDrawVerify(SelectSpanType::TYPEIMAGE, INIT_VALUE_1, symbolSpanOptions, localOffset);
+
+    //Verify the insertion state symbol magnifying glass
+    OnDrawVerify(SelectSpanType::TYPESYMBOLSPAN, INIT_VALUE_1, symbolSpanOptions, localOffset);
+}
+
+/**
+ * @tc.name: GetRichEditorController001
+ * @tc.desc: test GetRichEditorController
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetRichEditorController001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto controller = richEditorModel.GetRichEditorController();
     ASSERT_NE(controller, nullptr);
-    float offsetX = MAGNIFIER_OFFSETX.ConvertToPx();
-    OffsetF localOffset(offsetX, 0.f);
-    OffsetF magnifierOffset(0.f, 0.f);
-    controller->SetLocalOffset(localOffset);
-    ASSERT_NE(controller->magnifierFrameNode_, nullptr);
-    auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() - 1.0f);
-
-    /**
-     * @tc.steps: step2. localOffset is in the normal area.
-     */
-    localOffset.SetX(MAGNIFIERNODE_WIDTH.ConvertToPx());
-    controller->SetLocalOffset(localOffset);
-    magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(),
-        paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
-
-    /**
-     * @tc.steps: step3. localOffset is on the far right.
-     */
-    localOffset.SetX(frameSize.Width());
-    controller->SetLocalOffset(localOffset);
-    magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + frameSize.Width() - MAGNIFIERNODE_WIDTH.ConvertToPx());
-}
-
-/**
- * @tc.name: MagnifierTest002
- * @tc.desc: Test magnifier position.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto frameSize = SizeF(600.f, 400.f);
-    InitMagnifierParams(frameSize);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paintOffset = richEditorPattern->GetTextPaintOffset();
-
-    /**
-     * @tc.steps: step1. localOffset is on the top.
-     */
-    float offsetY = 1.f;
-    OffsetF localOffset(100.f, offsetY);
-    OffsetF magnifierOffset(0.f, 0.f);
-    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
-    ASSERT_NE(controller, nullptr);
-    controller->SetLocalOffset(localOffset);
-    ASSERT_NE(controller->magnifierFrameNode_, nullptr);
-    auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetY(), 0.f);
-
-    /**
-     * @tc.steps: step2. localOffset is in the normal area.
-     */
-    localOffset.SetY(MAGNIFIER_OFFSETY.ConvertToPx() + MAGNIFIERNODE_HEIGHT.ConvertToPx());
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    auto displayInfo = container->GetDisplayInfo();
-    ASSERT_NE(displayInfo, nullptr);
-    auto height = displayInfo->GetHeight();
-    displayInfo->SetHeight(1280);
-    controller->SetLocalOffset(localOffset);
-    displayInfo->SetHeight(height);
-    magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2
-        - MAGNIFIER_OFFSETY.ConvertToPx());
-
-    /**
-     * @tc.steps: step3. Test cases of magnifier.
-     */
-    TestMagnifier(richEditorPattern, controller, localOffset);
-}
-
-void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
-    const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
-{
-    richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(controller->GetShowMagnifier());
-
-    controller->SetLocalOffset(localOffset);
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_FALSE(controller->GetShowMagnifier());
-
-    controller->SetLocalOffset(localOffset);
-    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1, WindowSizeChangeReason::DRAG);
-    EXPECT_FALSE(controller->GetShowMagnifier());
-
-    controller->SetLocalOffset(localOffset);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    layoutWrapper->skipMeasureContent_ = false;
-    DirtySwapConfig config;
-    config.frameSizeChange = true;
-
-    richEditorPattern->selectOverlay_->isHandleMoving_ = true;
-    richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_TRUE(controller->GetShowMagnifier());
-
-    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
-    richEditorPattern->isCursorAlwaysDisplayed_ = true;
-    richEditorPattern->moveCaretState_.isMoveCaret = true;
-    richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(controller->GetShowMagnifier());
-    EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: UpdateMagnifierStateAfterLayout001
- * @tc.desc: test UpdateMagnifierStateAfterLayout
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, UpdateMagnifierStateAfterLayout001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    WeakPtr<TextBase> textBase;
-    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
-    richEditorPattern->magnifierController_.Reset();
-    richEditorPattern->UpdateMagnifierStateAfterLayout(true);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-}
-
-/**
- * @tc.name: UpdateMagnifierStateAfterLayout002
- * @tc.desc: test UpdateMagnifierStateAfterLayout
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, UpdateMagnifierStateAfterLayout002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    WeakPtr<TextBase> textBase;
-    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
-    WeakPtr<Pattern> pattern;
-    richEditorPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
-    richEditorPattern->magnifierController_->magnifierNodeExist_ = true;
-    richEditorPattern->UpdateMagnifierStateAfterLayout(true);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-}
-
-/**
- * @tc.name: HandleSurfaceChanged001
- * @tc.desc: test HandleSurfaceChanged
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, HandleSurfaceChanged001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->magnifierController_.Reset();
-    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2, WindowSizeChangeReason::DRAG);
-    EXPECT_FALSE(richEditorPattern->originIsMenuShow_);
-}
-
-/**
- * @tc.name: HandleSurfaceChanged002
- * @tc.desc: test HandleSurfaceChanged
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, HandleSurfaceChanged002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
-
-    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }
 
 } // namespace OHOS::Ace::NG

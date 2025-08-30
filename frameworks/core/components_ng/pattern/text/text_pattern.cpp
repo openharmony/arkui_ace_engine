@@ -320,22 +320,22 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     if (IsSelected() && LocalOffsetInRange(localOffset, textSelector_.GetTextStart(), textSelector_.GetTextEnd())) {
         return;
     }
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
-        auto range = pManager_->GetEllipsisTextRange();
-        if (LocalOffsetInRange(localOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
-            return;
-        }
+    if (PressOnEllipsisTextRange(localOffset)) {
+        return;
     }
     int32_t start = 0;
     int32_t end = 0;
     bool isAiSpan = false;
     if (GetDataDetectorAdapter()) {
-        auto aiSpanIter = dataDetectorAdapter_->aiSpanMap_.upper_bound(extend);
-        if (aiSpanIter != dataDetectorAdapter_->aiSpanMap_.begin()) {
-            --aiSpanIter;
+        std::map<int32_t, AISpan>::iterator aiSpanIter = dataDetectorAdapter_->aiSpanMap_.end();
+        for (auto it = dataDetectorAdapter_->aiSpanMap_.begin(); it != dataDetectorAdapter_->aiSpanMap_.end(); ++it) {
+            const AISpan& span = it->second;
+            if (extend >= span.start && extend < span.end &&
+                (aiSpanIter == dataDetectorAdapter_->aiSpanMap_.end() || span.start < aiSpanIter->second.start)) {
+                aiSpanIter = it;
+            }
         }
+        CHECK_NULL_VOID(aiSpanIter != dataDetectorAdapter_->aiSpanMap_.end());
         start = aiSpanIter->second.start;
         end = aiSpanIter->second.end;
         if (extend >= start && extend < end && LocalOffsetInRange(localOffset, start, end)) {
@@ -348,6 +348,19 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     }
     TAG_LOGI(AceLogTag::ACE_TEXT, "InitAiSelection[id:%{public}d][extend:%{public}d][start:%{public}d][end:%{public}d]",
         host->GetId(), extend, textSelector_.aiStart.value_or(-1), textSelector_.aiEnd.value_or(-1));
+}
+
+bool TextPattern::PressOnEllipsisTextRange(const Offset& localOffset)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, true);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
+        auto range = pManager_->GetEllipsisTextRange();
+        if (LocalOffsetInRange(localOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextPattern::IsAiSelected()
@@ -4971,7 +4984,7 @@ void TextPattern::DumpTextStyleInfo()
     dumpLog.AddDesc(
         std::string("FontColor: ")
             .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString())
-            .append(" pro: ")
+            .append(" prop: ")
             .append(
                 textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
             .append(" ForegroundColor: ")
@@ -4985,7 +4998,7 @@ void TextPattern::DumpTextStyleInfo()
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString())
-            .append(" pro: ")
+            .append(" prop: ")
             .append(textLayoutProp->HasFontSize()
                         ? textLayoutProp->GetFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                         : "Na")
@@ -4995,13 +5008,13 @@ void TextPattern::DumpTextStyleInfo()
         dumpLog.AddDesc(
             std::string("MaxFontSize: ")
                 .append(textStyle_->GetAdaptMaxFontSize().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasAdaptMaxFontSize()
                             ? textLayoutProp->GetAdaptMaxFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na")
                 .append(std::string(" MinFontSize: "))
                 .append(textStyle_->GetAdaptMinFontSize().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasAdaptMinFontSize()
                             ? textLayoutProp->GetAdaptMinFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na"));
@@ -5019,19 +5032,19 @@ void TextPattern::DumpTextStyleInfo2()
     if (textStyle_.has_value()) {
         dumpLog.AddDesc(std::string("FontWeight: ")
                             .append(StringUtils::ToString(textStyle_->GetFontWeight()))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasFontWeight()
                                         ? StringUtils::ToString(textLayoutProp->GetFontWeightValue(FontWeight::NORMAL))
                                         : "Na")
                             .append(" EnableVariableFontWeight: ")
                             .append(std::to_string(textStyle_->GetEnableVariableFontWeight()))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasEnableVariableFontWeight()
                                         ? std::to_string(textLayoutProp->GetEnableVariableFontWeightValue(false))
                                         : "Na")
                             .append(" VariableFontWeight: ")
                             .append(std::to_string(textStyle_->GetVariableFontWeight()))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasVariableFontWeight()
                                         ? std::to_string(textLayoutProp->GetVariableFontWeightValue(0))
                                         : "Na")
@@ -5041,19 +5054,19 @@ void TextPattern::DumpTextStyleInfo2()
         dumpLog.AddDesc(
             std::string("LineHeight: ")
                 .append(textStyle_->GetLineHeight().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasLineHeight()
                             ? textLayoutProp->GetLineHeightValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na")
                 .append(std::string(" LineSpacing: "))
                 .append(textStyle_->GetLineSpacing().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasLineSpacing()
                             ? textLayoutProp->GetLineSpacingValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na")
                 .append(" isOnlyBetweenLines: ")
                 .append((textStyle_->GetIsOnlyBetweenLines()) ? "true" : "false")
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasIsOnlyBetweenLines() ? hasIsOnlyBetweenLines : "Na"));
 
     }
@@ -5068,45 +5081,45 @@ void TextPattern::DumpTextStyleInfo3()
         dumpLog.AddDesc(
             std::string("maxLines: ")
                 .append(std::to_string(textStyle_->GetMaxLines()))
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(
                     textLayoutProp->HasMaxLines() ? std::to_string(textLayoutProp->GetMaxLinesValue(UINT32_MAX)) : "Na")
                 .append(std::string(" BaselineOffset: "))
                 .append(textStyle_->GetBaselineOffset().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasBaselineOffset()
                             ? textLayoutProp->GetBaselineOffsetValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na"));
         dumpLog.AddDesc(
             std::string("TextIndent: ")
                 .append(textStyle_->GetTextIndent().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasTextIndent()
                             ? textLayoutProp->GetTextIndentValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na"));
         dumpLog.AddDesc(
             std::string("fontFamily: ")
                 .append(GetFontFamilyInJson(textStyle_->GetFontFamilies()))
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily().value())
                                                         : "Na"));
         dumpLog.AddDesc(
             std::string("LetterSpacing: ")
                 .append(textStyle_->GetLetterSpacing().ToString())
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasLetterSpacing()
                             ? textLayoutProp->GetLetterSpacingValue(Dimension(0.0, DimensionUnit::FP)).ToString()
                             : "Na"));
         dumpLog.AddDesc(
             std::string("TextOverflow: ")
                 .append(StringUtils::ToString(textStyle_->GetTextOverflow()))
-                .append(" pro: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasTextOverflow()
                             ? StringUtils::ToString(textLayoutProp->GetTextOverflowValue(TextOverflow::NONE))
                             : "Na"));
         dumpLog.AddDesc(std::string("TextAlign: ")
                             .append(StringUtils::ToString(textStyle_->GetTextAlign()))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasTextAlign()
                                         ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
                                         : "Na"));
@@ -5127,20 +5140,35 @@ void TextPattern::DumpTextStyleInfo4()
                             .append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
         dumpLog.AddDesc(std::string("LineBreakStrategy: ")
                             .append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy()))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasLineBreakStrategy()
                                         ? GetLineBreakStrategyInJson(
                                               textLayoutProp->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY))
                                         : "Na"));
-        dumpLog.AddDesc(std::string("SymbolColorList: ")
-                            .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList())));
+        dumpLog.AddDesc(
+            std::string("SymbolColorList: ")
+                .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList()))
+                .append("prop: ")
+                .append(textLayoutProp->HasSymbolColorList()
+                            ? StringUtils::SymbolColorListToString(textLayoutProp->GetSymbolColorList().value())
+                            : "Na"));
         dumpLog.AddDesc(std::string("CopyOption: ")
                             .append(StringUtils::ToString(copyOption_))
-                            .append(" pro: ")
+                            .append(" prop: ")
                             .append(textLayoutProp->HasCopyOption() ? textLayoutProp->GetCopyOptionString() : "Na")
                             .append(" SelectableMode:")
                             .append(StringUtils::ToString(textLayoutProp->GetTextSelectableModeValue(
                                 TextSelectableMode::SELECTABLE_UNFOCUSABLE))));
+    }
+    DumpTextStyleInfo5();
+}
+
+void TextPattern::DumpTextStyleInfo5()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    if (textStyle_.has_value()) {
         dumpLog.AddDesc(
             std::string("Decoration: ")
                 .append(StringUtils::ToString(textStyle_->GetTextDecorationStyle()))
@@ -5150,9 +5178,9 @@ void TextPattern::DumpTextStyleInfo4()
                 .append(textStyle_->GetTextDecorationColor().ColorToString())
                 .append(" self: ")
                 .append(
-                    textLayoutProp->HasTextDecorationStyle()
-                        ? StringUtils::ToString(textLayoutProp->GetTextDecorationStyleValue(TextDecorationStyle::SOLID))
-                        : "Na")
+                textLayoutProp->HasTextDecorationStyle()
+                    ? StringUtils::ToString(textLayoutProp->GetTextDecorationStyleValue(TextDecorationStyle::SOLID))
+                    : "Na")
                 .append(" ")
                 .append(textLayoutProp->HasTextDecoration()
                             ? StringUtils::ToString(textLayoutProp->GetTextDecorationFirst())

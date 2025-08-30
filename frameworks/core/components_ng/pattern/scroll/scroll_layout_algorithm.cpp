@@ -28,12 +28,12 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
 {
     contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
+        contentConstraint.maxSize.SetHeight(LayoutInfinity<float>());
     } else if (axis == Axis::FREE) {
-        contentConstraint.maxSize.SetWidth(Infinity<float>());
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
+        contentConstraint.maxSize.SetWidth(LayoutInfinity<float>());
+        contentConstraint.maxSize.SetHeight(LayoutInfinity<float>());
     } else {
-        contentConstraint.maxSize.SetWidth(Infinity<float>());
+        contentConstraint.maxSize.SetWidth(LayoutInfinity<float>());
     }
 }
 

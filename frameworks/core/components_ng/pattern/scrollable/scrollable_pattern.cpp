@@ -822,6 +822,27 @@ void ScrollablePattern::SetOnWillStopDraggingCallback(const RefPtr<Scrollable>& 
     });
 }
 
+
+void ScrollablePattern::SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->AddPanActionEndEvent([weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireObserverOnPanActionEnd(info);
+    });
+}
+
+void ScrollablePattern::FireObserverOnPanActionEnd(GestureEvent& info)
+{
+    if (positionController_) {
+        auto observer = positionController_->GetObserver();
+        if (observer.onPanActionEndEvent) {
+            observer.onPanActionEndEvent(info);
+        }
+    }
+}
+
 RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
 {
     auto host = GetHost();
@@ -4634,7 +4655,8 @@ bool ScrollablePattern::AccumulatingTerminateHelper(
         return false;
     }
     auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,
-        { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+        { .type = ignoreType,
+          .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();

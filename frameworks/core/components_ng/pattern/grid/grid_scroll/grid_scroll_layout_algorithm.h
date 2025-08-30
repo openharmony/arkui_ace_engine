@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
@@ -255,9 +256,13 @@ private:
      * @param line index of line to measure
      * updates @param mainLength by adding this line's measured height
      * updates @param endIdx with max item index in this line
+     * updates @param isScrollableSpringMotionRunning spring effect is runnning
      * @return false if line isn't recorded.
      */
-    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
+    bool MeasureExistingLine(
+        int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning = false);
+
+    float GetContentHeight(LayoutWrapper* layoutWrapper);
 
     LayoutWrapper* wrapper_;
     SizeF frameSize_;

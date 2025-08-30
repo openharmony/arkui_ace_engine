@@ -52,7 +52,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis);
     auto crossSize = selfIdealSize.CrossSize(axis);
     if (crossSize.has_value()) {
         contentConstraint.maxSize.SetCrossSize(crossSize.value(), axis);
@@ -113,6 +113,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+    const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
 
     auto layoutPolicy = listLayoutProperty->GetLayoutPolicyProperty();
     auto isCrossWrap = false;
@@ -127,10 +128,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isCrossFix = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
         auto layoutPolicySize =
             ConstrainIdealSizeByLayoutPolicy(layoutConstraint, widthLayoutPolicy, heightLayoutPolicy, axis_);
+        MinusPaddingToSize(padding, layoutPolicySize);
         contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }
 
-    const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
@@ -145,7 +146,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             // use parent max size first.
             auto parentMaxSize = contentConstraint.maxSize;
-            contentMainSize_ = isMainFix ? Infinity<float>() : GetMainAxisSize(parentMaxSize, axis_);
+            contentMainSize_ = isMainFix ? LayoutInfinity<float>() : GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -807,6 +808,7 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     currentDelta_ -= itemPosition_.begin()->second.startPos;
     if (NonNegative(currentDelta_)) {
         int32_t items = currentDelta_ / averageHeight;
+        items = std::min(items, totalItemCount_ - 1 - targetIndex);
         targetIndex += items;
         currentDelta_ -= items * averageHeight;
     } else {

@@ -28,6 +28,8 @@ constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
+constexpr int32_t DIGIT_X_REVERSE = 23;
+constexpr int32_t DIGIT_Y_REVERSE = 24;
 
 TouchType ConvertTouchEventType(int32_t originAction)
 {
@@ -179,6 +181,13 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
     touchPoint.height = pointerItem.GetHeight();
+
+    uint32_t longAxis = static_cast<uint32_t>(pointerItem.GetLongAxis());
+    bool hasReverseSignalX = ((longAxis & (1U << DIGIT_X_REVERSE)) != 0);
+    bool hasReverseSignalY = ((longAxis & (1U << DIGIT_Y_REVERSE)) != 0);
+    touchPoint.xReverse = static_cast<int32_t>(hasReverseSignalX);
+    touchPoint.yReverse = static_cast<int32_t>(hasReverseSignalY);
+
     int32_t blobId = pointerItem.GetBlobId();
     if (blobId < 0) {
         touchPoint.operatingHand = 0;
@@ -297,7 +306,9 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetPressedTime(touchPoint.downTime)
         .SetWidth(touchPoint.width)
         .SetHeight(touchPoint.height)
-        .SetOperatingHand(touchPoint.operatingHand);
+        .SetOperatingHand(touchPoint.operatingHand)
+        .SetXReverse(touchPoint.xReverse)
+        .SetYReverse(touchPoint.yReverse);
     return event;
 }
 
@@ -309,10 +320,24 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     }
 }
 
-void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
     std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
     touchEvent.SetPointerEvent(pointer);
+}
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

@@ -125,6 +125,26 @@ void JSRepeat::AfterAddChild()
     RepeatModel::GetInstance()->AfterAddChild();
 }
 
+void JSRepeat::RecycleChild(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsNumber()) {
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "Invalid arguments for Repeat.RecycleChild");
+        return;
+    }
+    const auto index = info[0]->ToNumber<uint32_t>();
+    RepeatModel::GetInstance()->RecycleChild(index);
+}
+
+void JSRepeat::ReuseChild(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsNumber()) {
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "Invalid arguments for Repeat.ReuseChild");
+        return;
+    }
+    const auto index = info[0]->ToNumber<uint32_t>();
+    RepeatModel::GetInstance()->ReuseChild(index);
+}
+
 void JSRepeat::JsParseItemDragEventHandler(
     const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
@@ -178,6 +198,8 @@ void JSRepeat::JSBind(BindingTarget globalObj)
     JSClass<JSRepeat>::StaticMethod("createNewChildFinish", &JSRepeat::CreateNewChildFinish);
     JSClass<JSRepeat>::StaticMethod("afterAddChild", &JSRepeat::AfterAddChild);
     JSClass<JSRepeat>::StaticMethod("onMove", &JSRepeat::OnMove);
+    JSClass<JSRepeat>::StaticMethod("recycle", &JSRepeat::RecycleChild);
+    JSClass<JSRepeat>::StaticMethod("reuse", &JSRepeat::ReuseChild);
     JSClass<JSRepeat>::Bind<>(globalObj);
 }
 

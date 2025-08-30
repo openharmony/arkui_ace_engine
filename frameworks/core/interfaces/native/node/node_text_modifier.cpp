@@ -56,6 +56,8 @@ const std::string EMPTY_STRING = "";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
+const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
+    TextContentAlign::BOTTOM };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
@@ -241,6 +243,31 @@ void ResetTextAlign(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextAlign(frameNode, OHOS::Ace::TextAlign::START);
+}
+
+void SetTextContentAlign(ArkUINodeHandle node, ArkUI_Uint32 testContentAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (testContentAlign < 0 || testContentAlign >= TEXT_CONTENT_ALIGNS.size()) {
+        return;
+    }
+    TextModelNG::SetTextContentAlign(frameNode, TEXT_CONTENT_ALIGNS[testContentAlign]);
+}
+
+int32_t GetTextContentAlign(ArkUINodeHandle node)
+{
+    auto defaultTextContentAlign = static_cast<int32_t>(OHOS::Ace::TextContentAlign::TOP);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextContentAlign);
+    return static_cast<int32_t>(TextModelNG::GetTextContentAlign(frameNode));
+}
+
+void ResetTextContentAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ReSetTextContentAlign(frameNode);
 }
 
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
@@ -1835,6 +1862,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetFontStyle = ResetFontStyle,
         .setTextAlign = SetTextAlign,
         .resetTextAlign = ResetTextAlign,
+        .setTextContentAlign = SetTextContentAlign,
+        .resetTextContentAlign = ResetTextContentAlign,
         .setFontColor = SetFontColor,
         .resetFontColor = ResetFontColor,
         .setTextForegroundColor = SetTextForegroundColor,
@@ -1899,6 +1928,7 @@ const ArkUITextModifier* GetTextModifier()
         .getTextLetterSpacing = GetTextLetterSpacing,
         .getTextMaxLines = GetTextMaxLines,
         .getTextAlign = GetTextAlign,
+        .getTextContentAlign = GetTextContentAlign,
         .getTextTextOverflow = GetTextTextOverflow,
         .getTextTextIndent = GetTextTextIndent,
         .getFontColor = GetFontColor,

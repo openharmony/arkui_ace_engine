@@ -32,7 +32,7 @@ class StackNewTestNG : public StackBaseTestNG {};
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
  */
-HWTEST_F(StackNewTestNG, Example, TestSize.Level1)
+HWTEST_F(StackNewTestNG, Example, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -95,7 +95,7 @@ HWTEST_F(StackNewTestNG, Example, TestSize.Level1)
  * @tc.desc: test stack ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level1)
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level0)
 {
     RefPtr<FrameNode> text;
 
@@ -128,7 +128,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level1)
  * @tc.desc: test stack ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level1)
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level0)
 {
     RefPtr<FrameNode> stack1;
     RefPtr<FrameNode> stack2;
@@ -141,7 +141,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level1)
             ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
             ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PERCENT));
             ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
-            stack2 = CreateStack( [this](StackModelNG model) {});
+            stack2 = CreateStack([this](StackModelNG model) {});
         });
     });
     auto childLayoutProperty = stack2->GetLayoutProperty();
@@ -169,7 +169,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -217,7 +217,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest001, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and parent has padding.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -267,7 +267,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest002, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -315,7 +315,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest003, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     RefPtr<FrameNode> stackOutter;
@@ -380,7 +380,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest004, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -428,7 +428,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest005, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     RefPtr<FrameNode> stackOutter;
@@ -493,7 +493,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest007, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -544,7 +544,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest007, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level0)
 {
     RefPtr<FrameNode> stackInner;
     auto stack = CreateStack([this, &stackInner](StackModelNG model) {
@@ -595,7 +595,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level1)
  * @tc.desc: Test stack Layout with LayoutGravityTest
  * @tc.type: FUNC
  */
-HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level1)
+HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
 {
     auto frameNode = CreateStack([this](StackModelNG model) {
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::BOTTOM_CENTER);

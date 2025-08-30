@@ -197,6 +197,7 @@ private:
     void InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode);
     std::string GetPSurfaceName() override
     {
+        CHECK_NULL_RETURN(producerSurface_, "");
         return producerSurface_->GetName();
     }
 #endif

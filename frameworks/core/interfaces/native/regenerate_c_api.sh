@@ -49,7 +49,10 @@ API_VER=${API_VER:=99}
 
 echo "Preprocessing SDK..."
 
-rm -rf ${TMP_DIR}
+if [ -d "$TMP_DIR" ]; then
+    rm -rf ${TMP_DIR}
+fi
+
 mkdir -p ${TMP_DIR}
 
 ${PREPROCESSOR} \

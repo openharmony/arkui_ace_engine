@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
@@ -33,11 +34,12 @@ struct OverlayOptions {
     Alignment align;
     Dimension x;
     Dimension y;
+    TextDirection direction = TextDirection::LTR;
 
     bool operator==(const OverlayOptions& value) const
     {
         return (content.compare(value.content) == 0) && (align == value.align) &&
-               (x == value.x) && (y == value.y);
+               (x == value.x) && (y == value.y) && (direction == value.direction);
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

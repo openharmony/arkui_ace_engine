@@ -3208,6 +3208,12 @@ void RosenRenderContext::UpdateCustomBackground()
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateOverlayText()
+{
+    CHECK_NULL_VOID(overlayTextModifier_);
+    overlayTextModifier_->UpdateText();
+}
+
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3940,6 +3946,7 @@ void RosenRenderContext::SetPositionToRSNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetPositionToRSNode); // call SetPositionToRSNodeMultiThread() by multi thread
     CHECK_NULL_VOID(rsNode_);
     auto rect = AdjustPaintRect();
     if (!rect.GetSize().IsPositive()) {

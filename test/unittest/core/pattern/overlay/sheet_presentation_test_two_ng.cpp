@@ -637,6 +637,58 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate002, TestSize.L
 }
 
 /**
+ * @tc.name: AvoidKeyboardBeforeTranslate003
+ * @tc.desc: Branch: if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) => false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "AvoidKeyboardBeforeTranslate".
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto node = FrameNode::CreateFrameNode("Sheet", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    auto pattern = node->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. set keyboardAvoidMode is TRANSLATE_AND_RESIZE, test "AvoidKeyboardBeforeTranslate".
+     */
+    pattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+    EXPECT_NE(pattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::RESIZE_ONLY);
+    auto result = pattern->AvoidKeyboardBeforeTranslate();
+    EXPECT_FALSE(result);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: AvoidKeyboardBeforeTranslate004
+ * @tc.desc: Branch: if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) => true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "AvoidKeyboardBeforeTranslate".
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. set keyboardAvoidMode is RESIZE_ONLY, test "AvoidKeyboardBeforeTranslate".
+     */
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    EXPECT_EQ(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::RESIZE_ONLY);
+    auto result = sheetPattern->AvoidKeyboardBeforeTranslate();
+    EXPECT_TRUE(result);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: AvoidKeyboardAfterTranslate001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::AvoidKeyboardAfterTranslate function.
  * @tc.type: FUNC

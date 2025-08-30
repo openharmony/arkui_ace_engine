@@ -234,6 +234,33 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan004, TestSize.Level1
 }
 
 /**
+ * @tc.name: AddPlaceholderSpan005
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    RefPtr<FrameNode> builderNode1 = nullptr;
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
+    ClearSpan();
+}
+
+/**
  * @tc.name: InitPlaceholderSpansMap001
  * @tc.desc: test InitPlaceholderSpansMap
  * @tc.type: FUNC
@@ -266,6 +293,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap002, TestSize.L
     size_t placeholderGains = 0;
     spanItem->spanItemType = SpanItemType::CustomSpan;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
     EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
 }
@@ -302,6 +331,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithCustomSpan001, T
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
     EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
     EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
@@ -345,6 +376,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithCustomSpan003, T
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     spanItem->onMeasure.emplace();
     spanItem->onDraw.emplace();
     richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
@@ -365,6 +398,8 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithImageSpan001, Te
     size_t index = 1;
     size_t textIndex = 1;
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
     EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
     EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
@@ -447,4 +482,5 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, 0);
 }
+
 }

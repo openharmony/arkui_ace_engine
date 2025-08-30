@@ -1,0 +1,40 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "picker_text_style_font_size",
+      "value": "20fp"
+    },
+    {
+      "name": "calendar_picker_edge_align_offset",
+      "value": "20fp"
+    },
+    {
+      "name": "picker_text_style_min_font_size",
+      "value": "15fp"
+    },
+    {
+      "name": "picker_text_style_max_font_size",
+      "value": "18fp"
+    },
+    {
+      "name": "text_picker_gradient_height",
+      "value": "40vp"
+    },
+    {
+      "name": "text_picker_divider_stroke_width",
+      "value": "10vp"
+    },
+    {
+      "name": "text_picker_divider_start_margin",
+      "value": "10vp"
+    },
+    {
+      "name": "text_picker_divider_end_margin",
+      "value": "20vp"
+    }
+  ]
+}

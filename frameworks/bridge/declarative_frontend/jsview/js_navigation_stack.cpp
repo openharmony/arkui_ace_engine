@@ -1263,8 +1263,9 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     if (!serializedParam->IsString() || serializedParam->ToString().empty()) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
             "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
     return serializedParam->ToString();
 }
 

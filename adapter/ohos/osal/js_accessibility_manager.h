@@ -127,6 +127,7 @@ public:
     JsAccessibilityManager() = default;
     ~JsAccessibilityManager() override;
 
+    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
@@ -241,6 +242,8 @@ public:
     void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
+        const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
+    void SearchElementInfoBySpecificPropertyInner(const int64_t elementId, const SpecificPropertyParam &param,
         const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
@@ -424,6 +427,25 @@ public:
     {
         return isIgnoreAllAction_;
     }
+
+    void UpdateAccessibilityNodeInfo(
+        const RefPtr<AccessibilityNode>& node,
+        AccessibilityElementInfo& nodeInfo,
+        const RefPtr<JsAccessibilityManager>& manager,
+        int windowId);
+
+    RefPtr<NG::FrameNode> GetNextFocusNodeByManager(
+        const RefPtr<NG::UINode>& currentNode,
+        const RefPtr<NG::FrameNode>& rootNode);
+    RefPtr<NG::FrameNode> GetPrevFocusNodeByManager(
+        const RefPtr<NG::UINode>& currentNode,
+        const RefPtr<NG::FrameNode>& rootNode,
+        const RefPtr<PipelineBase>& context);
+
+    bool CheckAndGetEmbedWebElementInfo(
+        const RefPtr<NG::FrameNode>& node,
+        AccessibilityElementInfo& elementInfo);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -431,7 +453,6 @@ protected:
     void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false) override;
 
 private:
-    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     mutable std::mutex webPatternMapMutex_;
     std::unordered_map<std::string, WeakPtr<NG::WebPattern>> webPatternMap_;
 
@@ -787,8 +808,13 @@ private:
     SearchSurfaceIdRet SearchElementInfoBySurfaceId(
         const std::string& surfaceId, const int32_t windowId,
         const SearchSurfaceIdType searchType, std::list<AccessibilityElementInfo>& infos);
+    bool GetWebAccessibilityInfoBySurfaceId(
+        const std::string& surfaceId,
+        AccessibilityElementInfo& elementInfo);
 
     bool CheckWhiteList(const uint32_t& eventType);
+
+    ActionType ConvertAceAction(AceAction aceAction);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

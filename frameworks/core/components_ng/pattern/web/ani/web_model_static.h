@@ -198,6 +198,7 @@ public:
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
+    static void SetForceEnableZoom(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

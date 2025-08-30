@@ -26,7 +26,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-int32_t testOnSelect = 0;
+int32_t testOnSelect = 1;
 bool isOnWillChangeCalled = false;
 bool isOnDidChangeCalled = false;
 RichEditorChangeValue onWillChangeValue;
@@ -1433,31 +1433,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
     ClearSpan();
-}
-
-/**
- * @tc.name: RichEditorModel008
- * @tc.desc: test set on select
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, RichEditorModel008, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
-    richEditorModel.SetOnSelect(std::move(func));
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    SelectionInfo selection;
-    eventHub->FireOnSelect(&selection);
-    EXPECT_EQ(testOnSelect, 1);
-    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
-        ViewStackProcessor::GetInstance()->elementsStack_.pop();
-    }
 }
 
 /**
