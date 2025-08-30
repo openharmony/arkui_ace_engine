@@ -81,7 +81,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &ctor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
     }
     ani_object error = WrapStsError(env, msg);
@@ -90,8 +90,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
         return nullptr;
     }
     ani_object obj = nullptr;
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, ctor, &obj, dCode, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, ctor, &obj, Code, error)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Object_New failed %{public}d", status);
     }
     return reinterpret_cast<ani_ref>(obj);
@@ -318,19 +317,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
 
 static bool ParseRegionProperty(ani_env* env, ani_object regionObject, const char* regionType, ani_double& aniValue)
 {
-    ani_ref propertyRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(regionObject, regionType, &propertyRef)) {
-        return false;
-    }
-
-    ani_boolean isPropertyUndefined = true;
-    env->Reference_IsUndefined(propertyRef, &isPropertyUndefined);
-    if (!isPropertyUndefined) {
-        return false;
-    }
-
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, regionType, &aniValue)) {
         return false;
     }
     return true;
@@ -341,7 +328,7 @@ static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, OHOS::Ac
     snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
     ani_boolean isUndefined = true;
     env->Reference_IsUndefined(regionObject, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_double startANIValue;
@@ -383,7 +370,7 @@ static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::Sn
     snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
     ani_boolean isUndefined = true;
     env->Reference_IsUndefined(regionObject, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_double leftANIValue;
@@ -424,7 +411,7 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
 {
     ani_boolean isUndefined = true;
     env->Reference_IsUndefined(options, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_ref regionObject;
@@ -435,7 +422,7 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
 
     ani_boolean isPropertyUndefined = true;
     env->Reference_IsUndefined(regionObject, &isPropertyUndefined);
-    if (!isPropertyUndefined) {
+    if (isPropertyUndefined) {
         snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::NO_REGION;
         return false;
     }
