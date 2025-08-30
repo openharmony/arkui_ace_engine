@@ -46,6 +46,7 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void UpdateProperty(const RequestFormInfo& formInfo);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void AllowUpdate(FrameNode* frameNode, bool value);
     static void SetDimension(FrameNode* frameNode, int32_t value);
