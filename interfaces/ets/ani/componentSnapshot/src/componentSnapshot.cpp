@@ -90,7 +90,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
         return nullptr;
     }
     ani_object obj = nullptr;
-    if ((status = env->Object_New(cls, ctor, &obj, Code, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, ctor, &obj, code, error)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Object_New failed %{public}d", status);
     }
     return reinterpret_cast<ani_ref>(obj);
