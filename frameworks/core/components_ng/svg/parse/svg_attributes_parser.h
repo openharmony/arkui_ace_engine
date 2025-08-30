@@ -54,7 +54,7 @@ struct SvgPreserveAspectRatio {
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
-    static bool ParseColor(std::string value, Color& color);
+    static bool ParseColor(std::string value, Color& color, bool featureEnable);
     static bool ParseRGBAMagicColor(const std::string& value, Color& color);
     static std::optional<Color> GetSpecialColor(const std::string& value);
     static LineCapStyle GetLineCapStyle(const std::string& val);
@@ -73,7 +73,7 @@ public:
     static Color GetColorFromHexString(const std::string& value);
     static Color GetColorFrom4HexString(const std::string& value);
     static void StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension);
-    static void ParseDimension(const std::string& value, Dimension& dimension, bool useVp = false);
+    static void ParseDimension(const std::string& value, Dimension& dimension, bool featureEnable, bool useVp = false);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,

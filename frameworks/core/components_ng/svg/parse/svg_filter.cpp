@@ -127,39 +127,40 @@ void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContex
 
 bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
-    static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&)> attrs[] = {
+    static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&, bool)> attrs[] = {
         { SVG_FILTER_UNITS,
-            [](const std::string& val, SvgFilterAttribute& attr) {
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
                 attr.filterUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
                     SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },
         { SVG_HEIGHT,
-            [](const std::string& val, SvgFilterAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.height);
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.height, featureEnable);
             } },
         { SVG_PRIMITIVE_UNITS,
-            [](const std::string& val, SvgFilterAttribute& attr) {
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
                 attr.primitiveUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
                     SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_WIDTH,
-            [](const std::string& val, SvgFilterAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.width);
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.width, featureEnable);
             } },
         { SVG_X,
-            [](const std::string& val, SvgFilterAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.x);
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.x, featureEnable);
             } },
         { SVG_Y,
-            [](const std::string& val, SvgFilterAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.y);
+            [](const std::string& val, SvgFilterAttribute& attr, bool featureEnable) {
+                SvgAttributesParser::ParseDimension(val, attr.y, featureEnable);
             } },
     };
     std::string key = name;
     StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
-        attrs[attrIter].value(value, filterAttr_);
+        auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion());
+        attrs[attrIter].value(value, filterAttr_, featureEnable);
         return true;
     }
     return false;

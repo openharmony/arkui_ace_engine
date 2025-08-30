@@ -1224,6 +1224,20 @@ void ResetImageRotateOrientation(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::UP);
 }
+
+void SetSupportSvg2(ArkUINodeHandle node, ArkUI_Bool supportSvg2)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSupportSvg2(frameNode, supportSvg2);
+}
+
+void ResetSupportSvg2(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetSupportSvg2(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1338,6 +1352,8 @@ const ArkUIImageModifier* GetImageModifier()
         .resetImageOnFinish = ResetImageOnFinish,
         .setResizableLattice = SetResizableLattice,
         .resetResizableLattice = ResetResizableLattice,
+        .setSupportSvg2 = SetSupportSvg2,
+        .resetSupportSvg2 = ResetSupportSvg2,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

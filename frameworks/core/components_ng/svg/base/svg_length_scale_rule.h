@@ -60,8 +60,8 @@ public:
     void SetPathTransform(bool transform)
     {
         pathTransform_ = transform;
-        return ;
     }
+
     bool GetPathTransform() const
     {
         return pathTransform_;

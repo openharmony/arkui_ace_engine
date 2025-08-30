@@ -716,6 +716,22 @@ class ImageOnCompleteModifier extends ModifierWithKey<(event?: {
     }
   }
 }
+class ImageSupportSvg2Modifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('supportSvg2');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetSupportSvg2(node);
+    } else {
+      getUINativeModule().image.setSupportSvg2(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -883,6 +899,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   resizable(value: ResizableOptions): this {
     modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
+    return this;
+  }
+  supportSvg2(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
     return this;
   }
 }

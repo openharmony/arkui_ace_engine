@@ -8683,7 +8683,23 @@ class ImageOnFinishModifier extends ModifierWithKey {
   }
 }
 ImageOnFinishModifier.identity = Symbol('imageOnFinish');
-
+class ImageSupportSvg2Modifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetSupportSvg2(node);
+    }
+    else {
+      getUINativeModule().image.setSupportSvg2(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageSupportSvg2Modifier.identity = Symbol('supportSvg2');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8827,6 +8843,11 @@ class ArkImageComponent extends ArkComponent {
   analyzerConfig(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
+    return this;
+  }
+  supportSvg2(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
     return this;
   }
 }

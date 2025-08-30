@@ -70,6 +70,9 @@ protected:
     void OnGraphicFill()
     {
         if (rsCanvas_) {
+            if (!path_.has_value()) {
+                return;
+            }
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
@@ -146,6 +149,9 @@ protected:
 
     void OnGraphicStroke()
     {
+        if (!path_.has_value()) {
+            return;
+        }
         if (rsCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {

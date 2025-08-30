@@ -19,12 +19,15 @@
 #include "base/geometry/rect.h"
 
 namespace OHOS::Ace::NG {
+
 class SvgUtils {
+private:
+    SvgUtils() = default;
+    ~SvgUtils() = default;
 public:
-    SvgUtils();
-    ~SvgUtils();
     static void CalculateSvgConentSize(Size& svgContentSize, const Size& svgContainerSize,
         const Size& svgSize, const Rect& viewBox);
+    static bool IsFeatureEnable(uint32_t featureVersion, uint32_t usrConfigVersion);
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_UTILS_H

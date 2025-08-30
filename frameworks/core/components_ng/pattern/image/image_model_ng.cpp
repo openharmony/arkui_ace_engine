@@ -1363,5 +1363,24 @@ void ImageModelNG::SetImageFillSetByUser(bool value)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFillSetByUser, value);
     }
 }
+
+void ImageModelNG::SetSupportSvg2(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetSupportSvg2(frameNode, enable);
+}
+
+void ImageModelNG::SetSupportSvg2(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportSvg2(enable);
+}
+
+void ImageModelNG::ResetSupportSvg2(FrameNode* frameNode)
+{
+    SetSupportSvg2(frameNode, false);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

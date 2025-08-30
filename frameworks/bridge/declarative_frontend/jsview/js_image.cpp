@@ -1122,6 +1122,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
     JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+    JSClass<JSImage>::StaticMethod("supportSvg2", &JSImage::SupportSvg2);
 
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
@@ -1243,4 +1244,12 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageAnalyzerConfig(analyzerConfig);
 }
 
+void JSImage::SupportSvg2(const JSCallbackInfo& info)
+{
+    bool enable = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], enable);
+    }
+    ImageModel::GetInstance()->SetSupportSvg2(enable);
+}
 } // namespace OHOS::Ace::Framework

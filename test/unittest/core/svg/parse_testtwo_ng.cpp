@@ -602,11 +602,11 @@ HWTEST_F(ParseTestTwoNg, ParsePolygonTest004, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParsePolygonTest005, TestSize.Level1)
 {
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto polygon = AceType::DynamicCast<SvgPolygon>(AceType::MakeRefPtr<SvgPolygon>(true));
     EXPECT_NE(polygon, nullptr);
-
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    polygon->SetContext(svgContext);
     Size size;
     auto result = polygon->AsPath(size);
     EXPECT_TRUE(result.BuildFromSVGString(""));
@@ -620,7 +620,6 @@ HWTEST_F(ParseTestTwoNg, ParsePolygonTest005, TestSize.Level1)
     polygon->attributes_.fillState.fillRule_ = "evenodd";
     result = polygon->AsPath(size);
     EXPECT_TRUE(result.BuildFromSVGString(""));
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -717,18 +716,18 @@ HWTEST_F(ParseTestTwoNg, SvgPath001, TestSize.Level1)
     EXPECT_NE(svgPath, nullptr);
     SvgLengthScaleRule rule;
     rule.lengthScaleUnit_ = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
-    auto rect = svgPath->GetobjectBoundingBox(rule);
-    EXPECT_EQ(rect.Width(), 0);
-    EXPECT_EQ(rect.Height(), 0);
-    EXPECT_EQ(rect.Left(), 0);
-    EXPECT_EQ(rect.Top(), 0);
-
+    rule.containerRect_ = Rect(0, 0, 1, 1);
+    svgPath->path_ = std::nullopt;
+    auto result = svgPath->GetPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    svgPath->path_ = std::nullopt;
     rule.lengthScaleUnit_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
-    rect = svgPath->GetobjectBoundingBox(rule);
-    EXPECT_EQ(rect.Width(), 1);
-    EXPECT_EQ(rect.Height(), 1);
-    EXPECT_EQ(rect.Left(), 0);
-    EXPECT_EQ(rect.Top(), 0);
+    result = svgPath->GetPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    RSRecordingPath path;
+    svgPath->path_ = path;
+    result = svgPath->GetPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
 }
 
 /**
@@ -1199,13 +1198,12 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest005, TestSize.Level1)
      * @tc.steps: step4. set fill
      * @tc.expected: The property is set successfully
      */
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgNode->SetContext(svgContext);
 
     svgNode->SetAttr("fill", "#003153");
     EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetColor().GetValue(), 0xFF003153);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1326,15 +1324,17 @@ HWTEST_F(ParseTestTwoNg, ParseAnimation003, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
 {
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     /* *
      * @tc.steps: step1. create svgStop node
      */
     auto svgNode = SvgStop::Create();
     auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgNode->SetContext(svgContext);
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
 
     /* *
@@ -1710,14 +1710,13 @@ HWTEST_F(ParseTestTwoNg, ParseMaskTest003, TestSize.Level1)
 {
     auto svgMask = AceType::DynamicCast<SvgMask>(SvgMask::Create());
     EXPECT_NE(svgMask, nullptr);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgMask->SetContext(svgContext);
     auto result = svgMask->ParseAndSetSpecializedAttr("maskunits", "objectBoundingBox");
     EXPECT_TRUE(result);
     result = svgMask->ParseAndSetSpecializedAttr("maskunits", "objectBoundingBox222");
     EXPECT_TRUE(result);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 
@@ -1728,18 +1727,15 @@ HWTEST_F(ParseTestTwoNg, ParseMaskTest003, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseFilterTest003, TestSize.Level1)
 {
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
     EXPECT_NE(svgStream, nullptr);
 
     ImageSourceInfo src;
+    src.SetSupportSvg2(true);
     src.SetFillColor(Color::BLACK);
 
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     EXPECT_NE(svgDom, nullptr);
-
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_NE(svg, nullptr);
     EXPECT_GT(svg->children_.size(), 0);
@@ -1753,7 +1749,6 @@ HWTEST_F(ParseTestTwoNg, ParseFilterTest003, TestSize.Level1)
     auto nodeFe2 = AceType::DynamicCast<SvgFe>(svgFilter->children_.at(1));
     EXPECT_EQ(nodeFe1, nullptr);
     EXPECT_NE(nodeFe2, nullptr);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

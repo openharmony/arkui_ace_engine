@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "core/common/container.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const char LINECAP_ROUND[] = "round";
@@ -264,7 +266,7 @@ bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& c
     return true;
 }
 
-bool SvgAttributesParser::ParseColor(std::string value, Color& color)
+bool SvgAttributesParser::ParseColor(std::string value, Color& color, bool featureEnable)
 {
     auto colorOpt = GetSpecialColor(value);
     if (colorOpt.has_value()) {
@@ -272,8 +274,7 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)
-        && ParseRGBAMagicColor(value, color)) {
+    if (featureEnable && ParseRGBAMagicColor(value, color)) {
         return true;
     }
     if (Color::MatchColorHexString(value)) {
@@ -321,12 +322,15 @@ void SvgAttributesParser::StringToDimensionWithUnitSvg(const std::string& value,
         dimension = Dimension(result, DimensionUnit::LPX);
     } else if (std::strcmp(pEnd, "\0") == 0) {
         dimension = Dimension(result, DimensionUnit::PX);
+    } else {
+        return;
     }
 }
 
-void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& dimension, bool useVp)
+void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& dimension, bool featureEnable,
+    bool useVp)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!featureEnable) {
         dimension = StringUtils::StringToDimension(value, useVp);
         return;
     }
