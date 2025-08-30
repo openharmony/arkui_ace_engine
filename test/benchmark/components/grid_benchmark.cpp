@@ -51,13 +51,14 @@ static void CreateGrid(benchmark::State& state)
 
 static void LayoutGrid(benchmark::State& state)
 {
+    const auto numItems = state.range(0);
     for (auto it : state) {
         auto frameNode = GridModelNG::CreateFrameNode(0);
         ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
         ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(Dimension(100)));
         GridModelNG::SetRowsTemplate(frameNode.GetRawPtr(), "1fr 1fr");
         // Create grid items as children using GridItemModelNG APIs
-        for (int32_t i = 0; i < 10; ++i) {
+        for (int32_t i = 0; i < numItems; ++i) {
             auto gridItemNode = GridItemModelNG::CreateFrameNode(i);
             GridItemModelNG::SetRowStart(gridItemNode.GetRawPtr(), i / 2);
             GridItemModelNG::SetColumnStart(gridItemNode.GetRawPtr(), i % 2);
@@ -75,7 +76,7 @@ static void LayoutGrid(benchmark::State& state)
 }
 
 BENCHMARK(CreateGrid);
-BENCHMARK(LayoutGrid);
+BENCHMARK(LayoutGrid)->Range(8, 512); // range specifies number of children
 } // namespace OHOS::Ace::NG
 
 // Main
