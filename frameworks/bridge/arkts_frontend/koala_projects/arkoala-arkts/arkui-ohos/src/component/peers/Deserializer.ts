@@ -630,8 +630,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnSearchResultReceiveEvent(): OnSearchResultReceiveEvent {
         let valueDeserializer : Deserializer = this
-        const activeMatchOrdinal_result : number = (valueDeserializer.readNumber() as number)
-        const numberOfMatches_result : number = (valueDeserializer.readNumber() as number)
+        const activeMatchOrdinal_result : int32 = (valueDeserializer.readInt32() as int32)
+        const numberOfMatches_result : int32 = (valueDeserializer.readInt32() as int32)
         const isDoneCounting_result : boolean = valueDeserializer.readBoolean()
         let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result, numberOfMatches: numberOfMatches_result, isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
         return value
@@ -9755,7 +9755,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const handler_result : ClientAuthenticationHandler = (valueDeserializer.readClientAuthenticationHandler() as ClientAuthenticationHandler)
         const host_result : string = (valueDeserializer.readString() as string)
-        const port_result : number = (valueDeserializer.readNumber() as number)
+        const port_result : int32 = (valueDeserializer.readInt32() as int32)
         const keyTypes_buf_length : int32 = valueDeserializer.readInt32()
         let keyTypes_buf : Array<string> = new Array<string>(keyTypes_buf_length)
         for (let keyTypes_buf_i = 0; keyTypes_buf_i < keyTypes_buf_length; keyTypes_buf_i++) {
@@ -9792,7 +9792,7 @@ export class Deserializer extends DeserializerBase {
         const userAgent_result : string = (valueDeserializer.readString() as string)
         const contentDisposition_result : string = (valueDeserializer.readString() as string)
         const mimetype_result : string = (valueDeserializer.readString() as string)
-        const contentLength_result : number = (valueDeserializer.readNumber() as number)
+        const contentLength_result : int64 = (valueDeserializer.readInt64().toLong())
         let value : OnDownloadStartEvent = ({url: url_result, userAgent: userAgent_result, contentDisposition: contentDisposition_result, mimetype: mimetype_result, contentLength: contentLength_result} as OnDownloadStartEvent)
         return value
     }
