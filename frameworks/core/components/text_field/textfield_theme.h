@@ -181,6 +181,7 @@ public:
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
+            theme->cursorHeight_ = pattern->GetAttr<Dimension>("cursor_height", 0.0_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
@@ -386,6 +387,11 @@ public:
     const Color& GetCursorColor() const
     {
         return cursorColor_;
+    }
+
+    const Dimension& GetCursorHeight() const
+    {
+        return cursorHeight_;
     }
 
     const Dimension& GetCursorRadius() const
@@ -884,6 +890,7 @@ protected:
     Color cursorColor_;
     Color symbolColor_;
     Color textColorDisable_;
+    Dimension cursorHeight_;
 
 private:
     Edge padding_;

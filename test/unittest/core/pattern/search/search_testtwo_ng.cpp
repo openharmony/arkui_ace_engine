@@ -2834,7 +2834,7 @@ HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
     ASSERT_NE(buttonFrameNode, nullptr);
     auto renderContext = buttonFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
+    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION, 0);
 }
 
 /**
