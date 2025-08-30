@@ -55,7 +55,7 @@ public:
     protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextFieldTheme>& theme) const
         {
-            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
+            theme->height_ = Dimension(40.0, DimensionUnit::VP);
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");

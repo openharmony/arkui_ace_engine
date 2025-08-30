@@ -53,6 +53,7 @@ public:
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             ParseAIMenu(themeConstants->GetThemeStyle(), theme);
+            ParseAIPreviewMenu(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
@@ -60,8 +61,6 @@ public:
         void ParseThemeConstants(
             const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextOverlayTheme>& theme) const
         {
-            theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
-            theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
             theme->cutSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.cut");
@@ -170,25 +169,6 @@ public:
                 pattern->GetAttr<std::string>("general_ai_menu_phone_number", "Call now");
             theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::URL] =
                 pattern->GetAttr<std::string>("general_ai_menu_url", "Open");
-            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::ADDRESS] = pattern->GetAttr<std::string>(
-                "general_ai_preview_menu_address_open_map_app", "Use the Petal Map to navigate");
-            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::URL] = pattern->GetAttr<std::string>(
-                "general_ai_preview_menu_url_open_browser_app", "Use Huawei Browser to open it");
-            auto failedValue =
-                pattern->GetAttr<std::string>("general_ai_preview_menu_display_failed", "Preview display failed");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::URL] = failedValue;
-            auto addressValue = failedValue + "\n" +
-                                pattern->GetAttr<std::string>("general_ai_preview_menu_address_install_map_app",
-                                    "Click to install the Petal Map app");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::ADDRESS] = addressValue;
-            auto dataValue = failedValue + "\n" +
-                             pattern->GetAttr<std::string>("general_ai_preview_menu_date_install_calendar_app",
-                                 "Click to install the Calendar app");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::DATE_TIME] = dataValue;
-            theme->previewFailedFontColor_ =
-                pattern->GetAttr<Color>("general_ai_preview_menu_display_failed_font_color", Color());
-            theme->previewFailedFontSize_ =
-                pattern->GetAttr<Dimension>("general_ai_preview_menu_display_failed_font_size", 14.0_fp);
 
             theme->aiMenuFontGradientColors_ = {
                 pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color()),
@@ -203,6 +183,39 @@ public:
             theme->aiMenuSymbolColor_ = pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color(0xFF42CBF7));
 
             theme->askCelia_ = pattern->GetAttr<std::string>("general_ai_ask_celia", "Ask Celia");
+        }
+
+        void ParseAIPreviewMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
+        {
+            CHECK_NULL_VOID(themeStyle && theme);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            CHECK_NULL_VOID(pattern);
+            theme->previewMenuPadding_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_left", 0.0_vp);
+            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::URL] =
+                pattern->GetAttr<std::string>("general_ai_preview_menu_url_open_browser_app", "");
+            auto failedValue = pattern->GetAttr<std::string>("general_ai_preview_menu_display_failed", "");
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::URL] = failedValue;
+            auto addressValue = failedValue + "\n" +
+                                pattern->GetAttr<std::string>("general_ai_preview_menu_address_install_map_app", "");
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::ADDRESS] = addressValue;
+            std::string dataValue;
+            if (SystemProperties::GetPreviewStatus() == 0) {
+                dataValue = failedValue + "\n" +
+                            pattern->GetAttr<std::string>("general_ai_preview_menu_date_install_calendar_app",
+                                "Click to install the Calendar app");
+            } else {
+                dataValue = failedValue + "\n" +
+                            pattern->GetAttr<std::string>(
+                                "general_ai_preview_menu_date_retry", "Please install the Calendar app and try again.");
+            }
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::DATE_TIME] = dataValue;
+            theme->previewFailedFontColor_ =
+                pattern->GetAttr<Color>("general_ai_preview_menu_display_failed_font_color", Color());
+            theme->previewFailedFontSize_ =
+                pattern->GetAttr<Dimension>("general_ai_preview_menu_display_failed_font_size", 14.0_fp);
+            theme->locationTitle_ = pattern->GetAttr<std::string>("general_ai_location_title", "位置");
+            theme->linkTitle_ = pattern->GetAttr<std::string>("general_ai_link_title", "网址");
+            theme->previewContentSpace_ = pattern->GetAttr<Dimension>("general_ai_content_space", 2.0_vp);
         }
     };
 
@@ -326,16 +339,6 @@ public:
     Dimension GetHandleHotZoneRadius() const
     {
         return handleDiameter_;
-    }
-
-    InternalResource::ResourceId GetBackResourceId() const
-    {
-        return backResourceId_;
-    }
-
-    InternalResource::ResourceId GetMoreResourceId() const
-    {
-        return moreResourceId_;
     }
 
     double GetAlphaDisabled() const
@@ -576,6 +579,26 @@ public:
     {
         return askCelia_;
     }
+
+    std::string GetLocationTitle()
+    {
+        return locationTitle_;
+    }
+
+    std::string GetLinkTitle()
+    {
+        return linkTitle_;
+    }
+
+    Dimension GetPreviewContentSpace()
+    {
+        return previewContentSpace_;
+    }
+
+    Dimension GetPreviewMenuPadding()
+    {
+        return previewMenuPadding_;
+    }
 protected:
     TextOverlayTheme() = default;
     TextStyle menuButtonTextStyle_;
@@ -600,6 +623,7 @@ private:
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
     Dimension previewFailedFontSize_;
+    Dimension previewMenuPadding_;
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;
     std::string aiWrite_;
@@ -618,10 +642,10 @@ private:
     std::string searchLabel_;
     std::string moreAccessibilityText_;
     std::string backAccessibilityText_;
+    std::string locationTitle_ = "";
+    std::string linkTitle_ = "";
 
-    InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
-    InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
-
+    Dimension previewContentSpace_;
     Dimension symbolSize_;
     Color symbolColor_;
     uint32_t moreSymbolId_ = 0;

@@ -414,6 +414,18 @@ AISpan TextPattern::GetSelectedAIData()
     return aiSpan->second;
 }
 
+std::function<void()> TextPattern::GetPreviewMenuAISpanClickrCallback(const AISpan& aiSpan)
+{
+    return [weak = WeakClaim(this), aiSpan, mainId = Container::CurrentIdSafelyWithCheck()]() {
+        ContainerScope scope(mainId);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto dataDetectorAdapter_ = pattern->GetDataDetectorAdapter();
+        CHECK_NULL_VOID(dataDetectorAdapter_);
+        dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
+    };
+}
+
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
     auto host = GetHost();
