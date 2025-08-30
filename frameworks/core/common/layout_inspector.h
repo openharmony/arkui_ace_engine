@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 
+#include <mutex>
+#include <shared_mutex>
+
 #include "core/common/container.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/frame_node.h"
@@ -67,6 +70,10 @@ public:
     static void ConnectServerCallback();
     using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
+    //enable node trace
+    static bool GetEnableNodeTrace();
+    static void SetEnableNodeTrace(bool enable);
+
 private:
     static void SendEmpty3DSnapJson();
     static std::vector<PixelMapPair> Filter3DSnapshot(const std::vector<PixelMapPair>& snapinfos);
@@ -84,6 +91,8 @@ private:
     static std::once_flag loadFlag;
     static void* handlerConnectServerSo;
     static SetArkUICallback setArkUICallback;
+    static bool enableNodeTrace_;
+    static std::shared_mutex enableTraceMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H

@@ -83,6 +83,7 @@ ohos_source_set("preview_osal_source") {
       "image_source_preview.cpp",
       "input_manager.cpp",
       "input_method_manager_preview.cpp",
+      "layout_inspector.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "package_event_proxy_preview.cpp",

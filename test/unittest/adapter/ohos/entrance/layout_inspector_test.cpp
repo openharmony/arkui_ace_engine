@@ -109,4 +109,22 @@ HWTEST_F(LayoutInspectorTest, ProcessMessagesTest, TestSize.Level1)
     EXPECT_EQ(windowId, 11);
     EXPECT_EQ(methodNum, 2);
 }
+
+/**
+ * @tc.name: EnableNodeTrace
+ * @tc.desc: Test cast to EnableNodeTrace
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutInspectorTest, EnableNodeTrace, TestSize.Level1)
+{
+    // test1: enable node trace true
+    LayoutInspector::SetEnableNodeTrace(true);
+    auto res = LayoutInspector::GetEnableNodeTrace();
+    EXPECT_EQ(res, true);
+
+    // test1: enable node trace false
+    LayoutInspector::SetEnableNodeTrace(false);
+    res = LayoutInspector::GetEnableNodeTrace();
+    EXPECT_EQ(res, false);
+}
 } // namespace OHOS::Ace::NG
