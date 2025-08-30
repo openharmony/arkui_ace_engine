@@ -214,7 +214,7 @@ def main():
         
         print("\nAll tests completed successfully!")
         print("\nTo test with real benchmarks:")
-        print("1. Build benchmarks: ./build.sh --product-name rk3568 --build-target ace_engine:benchmark")
+        print("1. Build benchmarks: ./build.sh --product-name rk3568 --build-target benchmark_linux")
         print("2. Run: ./run_regression_check.sh")
         
         return 0

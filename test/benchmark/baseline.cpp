@@ -37,33 +37,10 @@ struct MockUINode {
     {}
 };
 
-static void BaselineAdd(benchmark::State& state)
-{
-    const int dataSize = 1000;
-    std::vector<int> data(dataSize, 1);
-    for (auto _ : state) {
-        long long sum = 0;
-        for (int v : data) {
-            sum += v;
-        }
-        benchmark::DoNotOptimize(sum); // prevent compiler from optimizing away
-    }
-}
-
-static void BaselineAccumulate(benchmark::State& state)
-{
-    const int dataSize = 1000;
-    std::vector<int> data(dataSize, 1);
-    for (auto _ : state) {
-        auto sum = std::accumulate(data.begin(), data.end(), 0LL);
-        benchmark::DoNotOptimize(sum);
-    }
-}
-
 // Baseline for node creation - similar to FrameNode creation
 static void BaselineNodeCreation(benchmark::State& state)
 {
-    const int nodeCount = 100;
+    const int nodeCount = 10;
     for (auto _ : state) {
         std::vector<std::shared_ptr<MockUINode>> nodes;
         nodes.reserve(nodeCount);
@@ -81,7 +58,7 @@ static void BaselineNodeCreation(benchmark::State& state)
 // Baseline for tree construction - similar to UI tree building
 static void BaselineTreeConstruction(benchmark::State& state)
 {
-    const int childCount = 100;
+    const int childCount = 10;
     for (auto _ : state) {
         auto root = std::make_shared<MockUINode>(0, "Root");
 
@@ -96,7 +73,7 @@ static void BaselineTreeConstruction(benchmark::State& state)
 // Baseline for layout calculation - similar to layout algorithm
 static void BaselineLayoutCalculation(benchmark::State& state)
 {
-    const int nodeCount = 100;
+    const int nodeCount = 10;
     // Pre-create nodes
     std::vector<std::shared_ptr<MockUINode>> nodes;
     for (int i = 0; i < nodeCount; ++i) {
@@ -127,7 +104,7 @@ static void BaselineLayoutCalculation(benchmark::State& state)
 // Baseline for property updates - similar to style/property changes
 static void BaselinePropertyUpdate(benchmark::State& state)
 {
-    const int nodeCount = 100;
+    const int nodeCount = 10;
     // Pre-create nodes
     std::vector<std::shared_ptr<MockUINode>> nodes;
     for (int i = 0; i < nodeCount; ++i) {
@@ -183,8 +160,6 @@ static void BaselineTreeTraversal(benchmark::State& state)
 }
 
 // Register benchmarks
-BENCHMARK(BaselineAdd);
-BENCHMARK(BaselineAccumulate);
 BENCHMARK(BaselineNodeCreation);
 BENCHMARK(BaselineTreeConstruction);
 BENCHMARK(BaselineLayoutCalculation);

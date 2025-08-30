@@ -18,7 +18,6 @@
 #include <numeric>
 #include <vector>
 
-#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -34,8 +33,6 @@ constexpr double GAP_SIZE = 10.0;
 namespace OHOS::Ace::NG {
 static void CreateGrid(benchmark::State& state)
 {
-    testing::FLAGS_gmock_verbose = "error";
-    TestNG::SetUpTestSuite(); // to create mocked pipeline
     for (auto iter : state) { // framework automatically determines number of iterations
         auto gridNode = GridModelNG::CreateFrameNode(0);
         // Test grid configuration operations
@@ -72,12 +69,8 @@ static void LayoutGrid(benchmark::State& state)
         frameNode->CreateLayoutTask();
         benchmark::DoNotOptimize(frameNode);
     }
-    TestNG::TearDownTestSuite();
 }
 
 BENCHMARK(CreateGrid);
 BENCHMARK(LayoutGrid)->Range(8, 512); // range specifies number of children
 } // namespace OHOS::Ace::NG
-
-// Main
-BENCHMARK_MAIN();
