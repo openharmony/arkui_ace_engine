@@ -32,9 +32,7 @@ void GetVM(int32_t hostInstanceId, ani_vm **vm)
     CHECK_NULL_VOID(container);
     RefPtr<Frontend> frontend = container->GetFrontend();
     CHECK_NULL_VOID(frontend);
-    auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
-    CHECK_NULL_VOID(arktsFrontend);
-    *vm = arktsFrontend->GetVM();
+    *vm = frontend->GetVM();
 }
 
 void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **result)
@@ -190,6 +188,40 @@ void EaWorkerTaskWrapperImpl::DumpWorker()
 
 void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
 {
-    Call(task);
+    if (!CheckWorkerId(workerId_)) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl Call due "
+            "to error invalid workerId: %{public}d", workerId_);
+        return;
+    }
+    ani_env *callerAniEnv = nullptr;
+    auto tid = pthread_self();
+    bool attachCurrentThread = HasAttachCurrentThread(tid);
+    GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv);
+    auto callerWorkerId = arkts::concurrency_helpers::GetWorkerId(callerAniEnv);
+    if (callerAniEnv == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl callerAniEnv is nullptr, "
+            "callerWorkerId: %{public}d, workerId: %{public}d", callerWorkerId, workerId_);
+        return;
+    }
+
+    if (!attachCurrentThread) {
+        attachCurrentThreads_.insert(tid);
+    }
+
+    int64_t ts = GetSysTimestamp();
+    EaWorkerEvent* event = new EaWorkerEvent(task, ts);
+    auto status = arkts::concurrency_helpers::SendEvent(callerAniEnv, workerId_,
+        [] (void *data) {
+            auto *event = reinterpret_cast<EaWorkerEvent *>(data);
+            if (event == nullptr) {
+                TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "event is null");
+                return;
+            }
+
+            event->Fire();
+        }, reinterpret_cast<void *>(event), delayTime);
+    if (status != arkts::concurrency_helpers::WorkStatus::OK) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -89,6 +89,25 @@ bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *na
     return res;
 }
 
+bool AniUtils::GetStringByName(
+    ani_env *env, ani_object param, const char *name, std::string &value)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref strRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(param, name, &strRef)) != ANI_OK) {
+        return false;
+    }
+
+    ani_object strObject = static_cast<ani_object>(strRef);
+    std::string strClassName = "std.core.String";
+    if (!AniUtils::CheckType(env, strObject, strClassName)) {
+        return false;
+    }
+
+    value = ANIStringToStdString(env, static_cast<ani_string>(strObject));
+    return true;
+}
+
 std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     CHECK_NULL_RETURN(env, "");

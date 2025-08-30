@@ -43,4 +43,12 @@ void DynamicModelStatic::SetOnError(FrameNode* frameNode,
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }
+
+void DynamicModelStatic::SetIsReportFrameEvent(FrameNode* frameNode, bool isReportFrameEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ArktsDynamicPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsReportFrameEvent(isReportFrameEvent);
+}
 } // namespace OHOS::Ace::NG

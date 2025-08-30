@@ -231,14 +231,14 @@ export class Application {
                 throw new Error("Invalid EntryPoint")
             }
             Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
-            InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
+            InteropNativeModule._NativeLog(`[${this.instanceId}] ArkTS Application.start before computeRoot`)
             const manager = GlobalStateManager.instance
             this.rootState = manager.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
             root = this.rootState!.value
-            InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+            InteropNativeModule._NativeLog(`[${this.instanceId}] ArkTS Application.start after computeRoot`)
         } catch (e) {
             if (e instanceof Error) {
-                InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} message: ${e.message}`);
+                InteropNativeModule._NativeLog(`[${this.instanceId}] ArkTS Application.start error name: ${e.name} message: ${e.message}`);
                 const stack = e.stack
                 if (stack) {
                     InteropNativeModule._NativeLog("ArkTS Application.start stack trace: " + stack)
@@ -268,11 +268,11 @@ export class Application {
                 break
             }
             default: {
-                InteropNativeModule._NativeLog(`ARKTS: [handleMessage] type = ${type} is unknown.`)
+                InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] type = ${type} is unknown.`)
                 break
             }
         }
-        InteropNativeModule._NativeLog(`ARKTS: [handleMessage] ptr: ${ptr}, type: ${type}, param: ${param}`);
+        InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] ptr: ${ptr}, type: ${type}, param: ${param}`);
         return result;
     }
 
@@ -374,7 +374,7 @@ export class Application {
                 }
             } catch (error) {
                 if (error instanceof Error) {
-                    InteropNativeModule._NativeLog(`ArkTS Application.enter error name: ${error.name} message: ${error.message}`);
+                    InteropNativeModule._NativeLog(`[${this.instanceId}]ArkTS Application.enter error name: ${error.name} message: ${error.message}`);
                     if (error.stack) {
                         leaveForeignContext()
                         InteropNativeModule._NativeLog(error.stack!.toString())

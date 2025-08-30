@@ -54,6 +54,9 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
         ani_native_function {
             "_Dynamic_Set_OnErrorCallback",
             nullptr, reinterpret_cast<void *>(SetOnError)},
+        ani_native_function {
+            "_Dynamic_Set_IsReportFrameEvent",
+            nullptr, reinterpret_cast<void *>(SetIsReportFrameEvent)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
@@ -155,6 +158,21 @@ ani_status NativeDynamicModule::SetOnError(
     };
 #ifdef WINDOW_SCENE_SUPPORTED
     NG::DynamicModelStatic::SetOnError(frameNode, std::move(onErrorCallback));
+#endif //WINDOW_SCENE_SUPPORTED
+    return ANI_OK;
+}
+
+ani_status NativeDynamicModule::SetIsReportFrameEvent(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_boolean value)
+{
+    auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
+    if (frameNode == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT, "frameNode is null when SetIsReportFrameEvent");
+        return ANI_ERROR;
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    NG::DynamicModelStatic::SetIsReportFrameEvent(frameNode, value);
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }

@@ -53,7 +53,9 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # dynamic_component
   sources += [
+    "dynamic_component/arkts_dynamic_pattern.cpp",
     "dynamic_component/dynamic_component_manager.cpp",
+    "dynamic_component/dynamic_model_static.cpp",
     "dynamic_component/dynamic_model.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",

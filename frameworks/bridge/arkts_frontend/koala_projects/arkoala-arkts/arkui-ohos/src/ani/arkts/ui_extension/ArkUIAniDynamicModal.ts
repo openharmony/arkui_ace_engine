@@ -13,25 +13,11 @@
  * limitations under the License.
  */
 
-export const ArkUIAniModule: any = undefined
-export const ArkUIAniUiextensionModal: any = undefined
-export const ArkUIAniUiextensionProxyModal: any = undefined
-export type AbilityWant = undefined
-export class ArkUIAniUIExtensionOptions {
-    constructor() {
-        this.isTransferringCaller = false;
-        this.dpiFollowStrategy = 0;
-    }
+import { KLong, KInt, InteropNativeModule } from "@koalaui/interop"
+import { ArkUIAniUiextensionLoadLibraryHelp } from "./ArkUIAniUiextensionLoadLibraryHelp"
 
-    isTransferringCaller: boolean;
-    dpiFollowStrategy: any;
-}
+export type DcErrorCallback = (code: number, name: string, message: string) => void;
 
-export type ResultCallback = any
-export type BusinessError = any
-
-// DC
-export const ArkUIAniDynamicModal: any = undefined
 export class ArkUIAniDynamicOptions {
     constructor() {
         this.entryPoint = '';
@@ -40,6 +26,16 @@ export class ArkUIAniDynamicOptions {
     }
 
     entryPoint: string;
-    workerId: any;
+    workerId: KInt;
     backgroundTransparent: boolean;
+}
+
+export class ArkUIAniDynamicModal {
+    static {
+        ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
+    }
+
+    native static _Dynamic_Set_Option(nodePointer: KLong, option: ArkUIAniDynamicOptions): void;
+    native static _Dynamic_Set_OnErrorCallback(nodePointer: KLong, value: DcErrorCallback) : void;
+    native static _Dynamic_Set_IsReportFrameEvent(nodePointer: KLong, value: boolean) : void;
 }
