@@ -597,8 +597,9 @@ public:
     int32_t GetAllDepthChildrenCount();
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
-                                              WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+        AccessibilityEventType eventType,
+        WindowsContentChangeTypes windowsContentChangeType = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID,
+        bool sendByNode = false);
 
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
