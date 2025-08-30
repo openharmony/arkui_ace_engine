@@ -8620,4 +8620,115 @@ HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest002, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
+/**
+ * @tc.name: NativeNodeOverlayTest001
+ * @tc.desc: Test Overlay attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeOverlayTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto overlayNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    ArkUI_NumberValue value4[] = {{.i32 = ARKUI_ALIGNMENT_TOP_START}, {.f32 = 0.0f},
+        {.f32 = 0.0f}, {.i32 = ARKUI_DIRECTION_LTR}};
+    ArkUI_AttributeItem item4 = {value4, sizeof(value4) / sizeof(ArkUI_NumberValue)};
+
+    item4.string = "";
+    item4.object = overlayNode;
+    item4.size = 0;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    item4.size = 4;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    auto overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP_START));
+    EXPECT_EQ(overlayVal->value[3].i32, static_cast<int32_t>(ARKUI_DIRECTION_LTR));
+    EXPECT_EQ(overlayVal->object, overlayNode);
+
+    value4[3].i32 = ARKUI_DIRECTION_RTL;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[3].i32, static_cast<int32_t>(ARKUI_DIRECTION_RTL));
+
+    value4[3].i32 = ARKUI_DIRECTION_AUTO;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[3].i32, static_cast<int32_t>(ARKUI_DIRECTION_AUTO));
+
+    value4[3].i32 = 2;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[3].i32, static_cast<int32_t>(ARKUI_DIRECTION_LTR));
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_OVERLAY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeOverlayTest002
+ * @tc.desc: Test Overlay attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeOverlayTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto overlayNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    ArkUI_NumberValue value4[] = {{.i32 = ARKUI_ALIGNMENT_TOP_START}, {.f32 = 0.0f},
+        {.f32 = 0.0f}, {.i32 = ARKUI_DIRECTION_LTR}};
+    ArkUI_AttributeItem item4 = {value4, sizeof(value4) / sizeof(ArkUI_NumberValue)};
+
+    item4.string = "test";
+    item4.object = overlayNode;
+    item4.size = 0;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    item4.size = 4;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    auto overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP_START));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_TOP;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_TOP_END;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_TOP_END));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_START;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_START));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_CENTER;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_CENTER));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_END;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_END));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_BOTTOM_START;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_BOTTOM_START));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_BOTTOM;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_BOTTOM));
+
+    value4[0].i32 = ARKUI_ALIGNMENT_BOTTOM_END;
+    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
+    overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
+    EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_BOTTOM_END));
+}
 } // namespace OHOS::Ace
