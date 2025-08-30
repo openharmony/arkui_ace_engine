@@ -558,7 +558,7 @@ HWTEST_F(SliderExTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
     // pattern->GetAnimatableBlockCenter() != OffsetF()
     auto pattern = AceType::DynamicCast<SliderPattern>(host->GetPattern());
     SliderContentModifier::Parameters parameters;
-    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     pattern->sliderContentModifier_->blockCenterX_->Set(POINTF_CENTER.GetX());
     pattern->sliderContentModifier_->blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
@@ -670,7 +670,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
@@ -734,7 +734,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
@@ -793,7 +793,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
      * @tc.steps: step1. create paintWrapper and sliderContentModifier.
      */
     auto sliderContentModifier =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
         SliderPaintMethod::TipParameters(), TextDirection::AUTO);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1023,7 +1023,7 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
     auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
 
     /**
      * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.
@@ -1924,7 +1924,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
