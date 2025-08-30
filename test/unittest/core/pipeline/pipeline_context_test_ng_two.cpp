@@ -2632,5 +2632,29 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg500, TestSize.Level1)
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg408
+ * @tc.desc: Test onTouchEvent with SourceTool.PEN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg408, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    TouchEvent point;
+    /**
+     * @tc.steps2: create callback and call OnTouchEvent.
+     * @tc.expected: hasIdleTasks_ is true.
+     */
+    point.type = TouchType::DOWN;
+    point.sourceTool = SourceTool::PEN;
+    EXPECT_NE(context_->eventManager_, nullptr);
+    context_->OnTouchEvent(point, true);
+    EXPECT_TRUE(context_->hasIdleTasks_);
+}
 } // namespace NG
 } // namespace OHOS::Ace
