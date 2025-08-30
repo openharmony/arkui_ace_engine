@@ -829,6 +829,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
             RenderContext::SetNeedCallbackNodeChange(true);
             HandleOnAreaChangeEvent(nanoTimestamp);
             HandleVisibleAreaChangeEvent(nanoTimestamp);
+        } else {
+            ACE_SCOPED_TRACE("SkipAreaChangeEvent");
         }
     } else {
         HandleOnAreaChangeEvent(nanoTimestamp);
@@ -4476,6 +4478,7 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 void PipelineContext::AddVisibleAreaChangeNode(const int32_t nodeId)
 {
     onVisibleAreaChangeNodeIds_.emplace(nodeId);
+    isNeedCallbackAreaChange_ = true;
     auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
     CHECK_NULL_VOID(frameNode);
     frameNode->ClearCachedIsFrameDisappear();
@@ -4496,6 +4499,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
     } else {
         node->SetVisibleAreaInnerCallback(ratios, addInfo, isCalculateInnerClip);
     }
+    isNeedCallbackAreaChange_ = true;
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
@@ -4525,6 +4529,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);
+    isNeedCallbackAreaChange_ = true;
     isOnAreaChangeNodesCacheVaild_ = false;
     auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
     CHECK_NULL_VOID(frameNode);
