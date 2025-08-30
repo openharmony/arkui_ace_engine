@@ -516,14 +516,6 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
             longPointRightCenterMoveRate;
-    if (isHorizontalAndRightToLeft_) {
-        longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX +
-        (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
-            longPointLeftCenterMoveRate;
-        longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
-            (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
-                longPointRightCenterMoveRate;
-    }
     return longPointCenterX;
 }
 

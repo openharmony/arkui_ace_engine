@@ -6767,7 +6767,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     auto currentIndex = GetLoopIndex(currentIndex_);
     auto totalCount = TotalCount();
     auto displayCount = GetDisplayCount();
-    bool commTouchBottom = (currentFirstIndex == totalCount - 1);
+    bool commTouchBottom = (currentFirstIndex == 0);
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
