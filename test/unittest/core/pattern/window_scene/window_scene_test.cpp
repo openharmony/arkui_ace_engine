@@ -583,13 +583,39 @@ HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level0)
     ASSERT_NE(session, nullptr);
     auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
     ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
 
-    Rosen::RSSurfaceNodeConfig config = {
-        .SurfaceNodeName = "SurfaceNode"
+    Rosen::SessionInfo subSessionInfo = {
+        .abilityName_ = "SUB_ABILITY_NAME",
+        .bundleName_ = "SUB_BUNDLE_NAME",
+        .moduleName_ = "SUB_MODULE_NAME",
     };
-    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
-    ASSERT_NE(session->surfaceNode_, nullptr);
-    ASSERT_EQ(windowScene->IsMainSessionRecent(), false);
+    auto subSession = ssm_->RequestSceneSession(subSessionInfo);
+    ASSERT_NE(subSession, nullptr);
+    auto subWindowScene = AceType::MakeRefPtr<WindowScene>(subSession);
+    ASSERT_NE(subWindowScene, nullptr);
+    auto subFrameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), subWindowScene);
+    subWindowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(subFrameNode));
+    ASSERT_NE(subWindowScene->GetHost(), nullptr);
+    windowScene->AddChild(windowScene->GetHost(), subFrameNode, "subWindow");
+
+    auto ret = subWindowScene->IsMainSessionRecent();
+    EXPECT_EQ(ret, false);
+
+    session->SetShowRecent(true);
+    ret = subWindowScene->IsMainSessionRecent();
+    EXPECT_EQ(ret, true);
+
+    auto startingWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->startingWindow_ = AceType::RawPtr(startingWindowNode);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+    ret = subWindowScene->IsMainSessionRecent();
+    EXPECT_EQ(ret, false);
 }
 
 /**

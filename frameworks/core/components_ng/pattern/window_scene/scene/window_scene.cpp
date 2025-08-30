@@ -122,7 +122,7 @@ bool WindowScene::IsMainSessionRecent()
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "IsMainSessionRecent id:%{public}d, nodeId:%{public}d,"
         "type:%{public}d, recent:%{public}d", windowScene->session_->GetPersistentId(), host->GetId(),
         windowScene->session_->GetWindowType(), windowScene->session_->GetShowRecent());
-    if (windowScene->session_->GetShowRecent()) {
+    if (windowScene->session_->GetShowRecent() && windowScene->startingWindow_ == nullptr) {
         windowScene->weakSubSessions_.push_back(wptr(session_));
         return true;
     }
