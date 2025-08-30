@@ -206,6 +206,9 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
         this.ttypeGenFunc_ = typedFunc;
         return this;
     }
+    applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+    }
 }
 
 export class SyntaxNodePeer extends PeerNode {

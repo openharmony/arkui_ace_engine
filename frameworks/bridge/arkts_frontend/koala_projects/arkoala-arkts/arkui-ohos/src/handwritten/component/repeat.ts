@@ -18,7 +18,6 @@
 
 import { __context, __id, remember } from '@koalaui/runtime';
 import { RepeatImplForOptions } from '../handwritten/RepeatImpl';
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from './common';
 import { InteropNativeModule } from "@koalaui/interop";
 
 export interface RepeatItem<T> {
@@ -44,7 +43,7 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface RepeatAttribute<T> extends CommonMethod {
+export interface RepeatAttribute<T> {
     arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
     key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
@@ -54,19 +53,13 @@ export interface RepeatAttribute<T> extends CommonMethod {
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
+    applyAttributesFinish(): void {}
 }
-
-// export class ArkRepeatStyle<T> extends ArkCommonMethodStyle implements RepeatAttribute<T> {
-//     public arr: RepeatArray<T> = [];
-//     public setRepeatOptions(arr: RepeatArray<T>): this {
-//         this.arr = arr;
-//         return this;
-//     }
-// }
-export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements RepeatAttribute<T> {
+    
+export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
     public arr: RepeatArray<T> = [];
     public setRepeatOptions(arr: RepeatArray<T>): this {
-    this.arr = arr;
+        this.arr = arr;
         return this;
     }
     public each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T> {
@@ -84,7 +77,11 @@ export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements R
     public templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T> {
         return this;
     };
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+    }
 }
+    
 /** @memo */
 export function RepeatImpl<T>(
     /** @memo */

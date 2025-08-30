@@ -17,7 +17,7 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id, remember } from "@koalaui/runtime"
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, DynamicNode } from "./common"
+import { DynamicNode } from "./common"
 import { LazyForEachImplForOptions } from "../handwritten/LazyForEachImpl"
 import { InteropNativeModule } from "@koalaui/interop";
 
@@ -112,22 +112,23 @@ export interface IDataSource<T> {
     unregisterDataChangeListener(listener: DataChangeListener): void;
 }
 
-export interface LazyForEachAttribute<T> extends CommonMethod {
+export interface LazyForEachAttribute<T> {
     dataSource: IDataSource<T> | null;
     setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
         itemGenerator: (item: T, index: number) => void,
         keyGenerator?: (item: T, index: number) => string): this {
         return this;
+    }
+    applyAttributesFinish(): void {}
+    
 }
-
-}
-export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent implements LazyForEachAttribute<T> {
+export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     dataSource: IDataSource<T> | null = null;
     /** @memo */
     itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
     keyGenerator?: (item: T, index: number) => string = undefined;
-
+    
     public setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
         itemGenerator: (item: T, index: number) => void,
@@ -137,6 +138,7 @@ export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent impleme
         this.keyGenerator = keyGenerator;
         return this;
     }
+    applyAttributesFinish(): void {}
 }
 /** @memo */
 export function LazyForEachImpl<T>(
@@ -148,7 +150,7 @@ export function LazyForEachImpl<T>(
     })
     style?.(receiver)
     if(!receiver.dataSource) {
-        InteropNativeModule._NativeLog("LazyForEach receiver.dataSource null ")
+            InteropNativeModule._NativeLog("LazyForEach receiver.dataSource null ")
     }
     else {
         LazyForEachImplForOptions(receiver.dataSource!, receiver.itemGenerator, receiver.keyGenerator)
