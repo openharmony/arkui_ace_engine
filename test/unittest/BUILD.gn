@@ -1520,7 +1520,6 @@ ohos_source_set("ace_components_pattern") {
   if (current_os == "ohos") {
     external_deps += [
       "c_utils:utils",
-      "graphic_2d:librender_service_client",
     ]
   }
 }
