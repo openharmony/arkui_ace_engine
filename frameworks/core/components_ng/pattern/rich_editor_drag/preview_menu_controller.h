@@ -70,6 +70,8 @@ private:
     static void MountUIExtensionNode(const RefPtr<FrameNode>& previewNode, const std::string& content,
         std::function<void()>&& disappearCallback, TextDataDetectType type,
         const std::map<std::string, std::string>& AIparams);
+    static void CreateWantParams(
+        TextDataDetectType type, const std::string& content, std::map<std::string, std::string>& AIparams);
     static AIPreviewMenuErrorCallback GetErrorCallback(const RefPtr<FrameNode>& previewNode, TextDataDetectType type,
         const std::string& content, std::function<void()>&& disappearCallback);
     std::function<void()> GetDisappearCallback();
@@ -77,7 +79,7 @@ private:
     static void CreateWantConfig(TextDataDetectType type, std::string& bundleName, std::string& abilityName,
         std::map<std::string, std::string>& params, const std::map<std::string, std::string>& AIparams);
     static void PreviewNodeClickCallback(TextDataDetectType type, const RefPtr<FrameNode>& previewNode,
-        const std::map<std::string, std::string>& AIparams);
+        const std::map<std::string, std::string>& AIparams, std::function<void()>&& disappearCallback);
     static Dimension GetPreviewMaxHeight(const RefPtr<FrameNode>& frameNode);
 
     MenuParam menuParam_;

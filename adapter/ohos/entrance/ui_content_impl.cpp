@@ -2498,34 +2498,55 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
-    container->SetAbilityOnCalendar([context = context_](const std::map<std::string, std::string>& params) {
-        auto sharedContext = context.lock();
-        CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        AAFwk::Want want;
-        auto bundleName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
-        CHECK_NULL_VOID(!bundleName.empty());
-        want.SetElementName(bundleName, ABILITYNAME_CALENDAR);
-        for (const auto& param : params) {
-            want.SetParam(param.first, param.second);
-        }
-        want.SetParam(ACTION_PARAM, ACRION_CALENDAR);
-        abilityContext->StartAbility(want, REQUEST_CODE);
-    });
+    container->SetAbilityOnCalendar(
+        [context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+            const std::map<std::string, std::string>& params) {
+            auto sharedContext = context.lock();
+            CHECK_NULL_VOID(sharedContext);
+            auto container = containerWeak.Upgrade();
+            CHECK_NULL_VOID(container);
+            AAFwk::Want want;
+            auto bundleName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
+            CHECK_NULL_VOID(!bundleName.empty());
+            want.SetElementName(bundleName, ABILITYNAME_CALENDAR);
+            for (const auto& param : params) {
+                want.SetParam(param.first, param.second);
+            }
+            want.SetParam(ACTION_PARAM, ACRION_CALENDAR);
+            if (container->IsUIExtensionWindow()) {
+                auto uiExtensionContext =
+                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+                CHECK_NULL_VOID(uiExtensionContext);
+                uiExtensionContext->StartAbility(want, REQUEST_CODE);
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->StartAbility(want, REQUEST_CODE);
+        });
 
-    container->SetAbilityOnInstallAppInStore([context = context_](const std::string& appName) {
+    container->SetAbilityOnInstallAppInStore([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
+        container))](const std::string& appName) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.SetAction(ACTION_APPDETAIL);
         auto urlPrefix = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
         auto url = urlPrefix + appName;
         want.SetUri(url);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
@@ -2542,17 +2563,27 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         abilityContext->OpenLink(want, REQUEST_CODE);
     });
 
-    container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {
+    container->SetAbilityOnJumpBrowser([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
+        container))](const std::string& address) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.SetAction(ACTION_VIEWDATA);
         want.SetUri(address);
         auto appName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::URL);
         want.SetBundle(appName);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
