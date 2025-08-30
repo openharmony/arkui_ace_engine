@@ -1094,4 +1094,39 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue034, TestSize.Level1)
     }
     EXPECT_FALSE(overlayManager->hasPixelMap_);
 }
+
+/**
+ * @tc.name: DragDropEventTestNgIssue035
+ * @tc.desc: Test CollectTouchTarget function with InitDragDropStatusToIdle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    /**
+     * @tc.steps: step2. call OnCollectTouchTarget function.
+     * @tc.expected: step2. DragDropInitiatingStatus equals.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    dragDropEventActuator->isExecCallback_ = true;
+    dragDropEventActuator->isDragUserReject_ = true;
+    dragDropEventActuator->isThumbnailCallbackTriggered_ = true;
+    dragDropEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    EXPECT_FALSE(dragDropEventActuator->isExecCallback_);
+    EXPECT_FALSE(dragDropEventActuator->isDragUserReject_);
+    EXPECT_FALSE(dragDropEventActuator->isThumbnailCallbackTriggered_);
+}
 } // namespace OHOS::Ace::NG
