@@ -6660,7 +6660,7 @@ void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     if (hotZone) {
-        if (webPattern->IsShowHandle()) {
+        if (IS_CALLING_FROM_M114() || webPattern->IsShowHandle()) {
             hotZone->SetWidth(touchHandleSize);
             hotZone->SetHeight(touchHandleSize);
         } else {
