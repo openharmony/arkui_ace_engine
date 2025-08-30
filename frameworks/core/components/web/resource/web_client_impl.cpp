@@ -1559,4 +1559,13 @@ void WebClientImpl::OnInsertBlanklessFrameWithSize(const std::string& pathToFram
     // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
     delegate->CreateSnapshotFrameNode(pathToFrame, width, height);
 }
+
+void WebClientImpl::SetImeShow(bool visible)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebClientImpl::SetImeShow, visible: %{public}d", visible);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->SetImeShow(visible);
+}
 } // namespace OHOS::Ace

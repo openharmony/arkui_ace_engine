@@ -1398,6 +1398,7 @@ public:
 
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void SetImeShow(bool visible);
 
     bool HasOnNativeEmbedGestureEventV2()
     {
