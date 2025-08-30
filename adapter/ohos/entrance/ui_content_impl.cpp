@@ -33,7 +33,6 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
-#include "request_preload.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -1536,7 +1535,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
-            Request::Preload::SetFileCachePath(context->GetCacheDir());
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         });
     }
@@ -2065,7 +2063,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
-    Request::Preload::SetFileCachePath(context->GetCacheDir());
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 

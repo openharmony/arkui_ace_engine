@@ -144,7 +144,6 @@ template("ace_ohos_standard_source_set") {
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
-      "request:preload_native",
       "resource_management:global_resmgr",
       "runtime_core:ani",
       "safwk:system_ability_fwk",
