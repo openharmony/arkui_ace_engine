@@ -1686,6 +1686,7 @@ HWTEST_F(SheetPresentationTestFiveNg, UpdateMaskBackgroundColorRender001, TestSi
     layoutProperty->UpdateSheetStyle(sheetStyle);
 
     sheetPattern->sheetMaskColor_ = Color(0xff0000ff);
+    sheetPattern->SetDismissProcess(true);
     sheetPattern->UpdateMaskBackgroundColorRender();
     EXPECT_EQ(sheetPattern->sheetMaskColor_, Color(0xff0000ff));
 
