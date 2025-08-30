@@ -1384,8 +1384,14 @@ void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
         info_.startIndex_ = 0;
         info_.currentOffset_ = 0;
     } else {
-        info_.startIndex_ -= estimatedLines * static_cast<int32_t>(crossCount_);
-        info_.currentOffset_ -= lineHeight * estimatedLines;
+        auto newIndex = info_.startIndex_ - estimatedLines * static_cast<int32_t>(crossCount_);
+        auto childrenCount = info_.GetChildrenCount();
+        // keep offset and startIndex if startIndex is in the last line
+        newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
+        if (newIndex > info_.startIndex_) {
+            info_.currentOffset_ += lineHeight * ((newIndex - info_.startIndex_) / static_cast<int32_t>(crossCount_));
+            info_.startIndex_ = newIndex;
+        }
     }
 }
 
@@ -2534,14 +2540,14 @@ bool GridScrollLayoutAlgorithm::SkipLargeLineHeightLines(float mainSize)
     }
     if (needSkip) {
         auto totalViewHeight = info_.GetTotalHeightOfItemsInView(mainGap_);
-        auto needSkipHeight = totalViewHeight + info_.prevOffset_ + mainGap_;
-        if (GreatOrEqual(needSkipHeight, -info_.currentOffset_)) {
+        // current item still in Grid after large offset
+        if (GreatOrEqual(totalViewHeight + mainGap_ + info_.currentOffset_, mainSize)) {
             return false;
         }
 
         auto endLine = info_.gridMatrix_.find(info_.endMainLineIndex_ + 1);
         if (endLine != info_.gridMatrix_.end() && !endLine->second.empty()) {
-            info_.currentOffset_ += needSkipHeight;
+            info_.currentOffset_ += totalViewHeight + mainGap_;
             info_.endMainLineIndex_++;
             info_.startMainLineIndex_ = info_.endMainLineIndex_;
         }

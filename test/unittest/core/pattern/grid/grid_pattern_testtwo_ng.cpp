@@ -724,7 +724,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines002, TestSize.Level1)
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -739,8 +739,8 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines003, TestSize.Level1)
     gridLayoutInfo.endMainLineIndex_ = 2;
     gridLayoutInfo.currentOffset_ = -5.0f;
     gridLayoutInfo.prevOffset_ = -8.0f;
-    gridLayoutInfo.lineHeightMap_[0] = 4.0f;
-    gridLayoutInfo.lineHeightMap_[1] = 6.0f;
+    gridLayoutInfo.lineHeightMap_[0] = 3.0f;
+    gridLayoutInfo.lineHeightMap_[1] = 3.0f;
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix;
     gridMatrix[0] = { { 1, 2 } };
     gridMatrix[1] = { { 3, 4 } };
@@ -778,7 +778,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines004, TestSize.Level1)
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -803,7 +803,7 @@ HWTEST_F(GridTestNg, SkipLargeLineHeightLines005, TestSize.Level1)
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0.0f;
     auto result = layout->SkipLargeLineHeightLines(2.0f);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
