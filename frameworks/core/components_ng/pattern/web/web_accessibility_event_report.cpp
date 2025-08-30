@@ -47,6 +47,7 @@ void WebAccessibilityEventReport::SetEventReportEnable(bool enable)
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
     eventReportEnable_ = enable;
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::SetEventReportEnable, enable = %{public}d", enable);
     if (enable) {
         delegate->SetAccessibilityState(true, isFirstRegister_);
     } else {
@@ -116,11 +117,18 @@ void WebAccessibilityEventReport::UnregisterCallback()
     textFocusCallback_ = nullptr;
     textBlurCallback_ = nullptr;
     textChangeCallback_ = nullptr;
+    lastFocusInputId_ = 0;
+    lastFocusReportId_ = 0;
+    isFirstRegister_ = false;
     SetEventReportEnable(false);
 }
 
 void WebAccessibilityEventReport::ReportEvent(AccessibilityEventType type, int64_t accessibilityId)
 {
+    if (!eventReportEnable_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::ReportEvent not enabled");
+        return;
+    }
     TAG_LOGD(
         AceLogTag::ACE_WEB, "WebAccessibilityEventReport::ReportEvent type = %{public}zu", static_cast<size_t>(type));
     if (type == AccessibilityEventType::FOCUS) {
@@ -157,6 +165,20 @@ void WebAccessibilityEventReport::ReportTextBlurEventByFocus(int64_t accessibili
     }
 }
 
+void WebAccessibilityEventReport::ParseNodeContent(
+    const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, std::string& nodeText)
+{
+    if (node->GetIsPassword()) {
+        nodeText = PASSWORD_PLACEHOLDER;
+        return;
+    }
+    if (node->GetInputType() == static_cast<int32_t>(AceTextCategory::INPUT_TYPE_NUMBER)) {
+        auto endOfNumericPrefix = std::find_if_not(nodeText.begin(), nodeText.end(), ::isdigit);
+        nodeText = std::string(nodeText.begin(), endOfNumericPrefix);
+        return;
+    }
+}
+
 void WebAccessibilityEventReport::CheckAccessibilityNodeAndReport(AccessibilityEventType type, int64_t accessibilityId)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::CheckAccessibilityNodeAndReport type = %{public}zu",
@@ -165,9 +187,7 @@ void WebAccessibilityEventReport::CheckAccessibilityNodeAndReport(AccessibilityE
     CHECK_NULL_VOID(accessibilityNode);
     std::string nodeText = accessibilityNode->GetContent();
     if (accessibilityNode->GetIsEditable()) {
-        if (accessibilityNode->GetIsPassword()) {
-            nodeText = PASSWORD_PLACEHOLDER;
-        }
+        ParseNodeContent(accessibilityNode, nodeText);
         switch (type) {
             case AccessibilityEventType::FOCUS:
                 CHECK_NULL_VOID(textFocusCallback_);
