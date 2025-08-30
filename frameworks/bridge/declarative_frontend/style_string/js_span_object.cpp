@@ -934,7 +934,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     ImageSpanAttribute imageStyle;
     ParseJsImageSpanSizeAttribute(obj, imageStyle);
     JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull()) {
+    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -1365,7 +1365,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             float width = 0;
             if (result->HasProperty("width")) {
                 auto widthObj = result->GetProperty("width");
-                width = widthObj->ToNumber<float>();
+                width = widthObj->IsNumber() ? widthObj->ToNumber<float>() : width;
                 if (LessNotEqual(width, 0.0)) {
                     width = 0;
                 }
@@ -1373,7 +1373,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             std::optional<float> heightOpt;
             if (result->HasProperty("height")) {
                 auto heightObj = result->GetProperty("height");
-                auto height = heightObj->ToNumber<float>();
+                auto height = heightObj->IsNumber() ? heightObj->ToNumber<float>() : -1.0;
                 if (GreatOrEqual(height, 0.0)) {
                     heightOpt = height;
                 }
@@ -1623,7 +1623,8 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
     int32_t value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         JSContainerBase::ParseJsInt32(args, value);
     }
     if (!args->IsUndefined()) {
