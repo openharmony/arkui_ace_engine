@@ -191,6 +191,18 @@ const std::string STROKE_LINEAR_GRADIENT_SVG_LABEL =
     "<rect x=\"10\" y=\"10\" width=\"180\" height=\"180\" fill=\"none\" stroke=\"url(#grad1)\" />"
     "</svg>";
 
+const std::string PATTERN_CONTENTUNITS_ERROR_LABEL =
+    "<svg width=\"200\" height=\"200\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<defs>"
+    "   <pattern id=\"pattern1\" patternUnits=\"objectBoundingBox\" patternContentUnits=\"bbb\" "
+    "   x=\"0\" y=\"0\" width=\"0.2\" height=\"0.2\">"
+    "       <rect x=\"0\" y=\"0\" width=\"20\" height=\"20\" fill=\"red\" />"
+    "       <polygon points=\"10,20 20,40 20,10 10,40 40,20\" fill=\"lightgreen\"/>"
+    "  </pattern>"
+    "</defs>"
+    "<rect x=\"10\" y=\"10\" width=\"200\" height=\"200\" fill=\"url(#pattern1)\" />"
+    "</svg>";
+
 std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 } // namespace
 class ParseTestThreeNg : public testing::Test {
@@ -1093,5 +1105,50 @@ HWTEST_F(ParseTestThreeNg, SetPenStyleTest001, TestSize.Level1)
         std::vector<double> segments = {4.0, 2.0, 6.0};
     svgRect->attributes_.strokeState.SetLineDash(segments);
     svgRect->SetPenStyle(rSPen);
+}
+
+/**
+ * @tc.name: PatternContentunitsErrorTest
+ * @tc.desc: pattern contentunits error test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestThreeNg, PatternContentunitsErrorTest001, TestSize.Level1)
+{
+    auto svgStream =
+        SkMemoryStream::MakeCopy(PATTERN_CONTENTUNITS_ERROR_LABEL.c_str(), PATTERN_CONTENTUNITS_ERROR_LABEL.length());
+    ImageSourceInfo src;
+    Size size = { 100, 100 };
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgDefs = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
+    EXPECT_NE(svgDefs, nullptr);
+    auto svgPattern = AceType::DynamicCast<SvgPattern>(svgDefs->children_.at(0));
+    EXPECT_NE(svgPattern, nullptr);
+    EXPECT_EQ(svgPattern->patternAttr_.usrConfigVersion, 0);
+    EXPECT_EQ(svgPattern->patternAttr_.patternContentUnits, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+}
+
+/**
+ * @tc.name: PatternContentunitsErrorTest
+ * @tc.desc: pattern contentunits error test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestThreeNg, PatternContentunitsErrorTest002, TestSize.Level1)
+{
+    auto svgStream =
+        SkMemoryStream::MakeCopy(PATTERN_CONTENTUNITS_ERROR_LABEL.c_str(), PATTERN_CONTENTUNITS_ERROR_LABEL.length());
+    ImageSourceInfo src;
+    src.SetSupportSvg2(true);
+    Size size = { 100, 100 };
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgDefs = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
+    EXPECT_NE(svgDefs, nullptr);
+    auto svgPattern = AceType::DynamicCast<SvgPattern>(svgDefs->children_.at(0));
+    EXPECT_NE(svgPattern, nullptr);
+    EXPECT_EQ(svgPattern->patternAttr_.usrConfigVersion, 2);
+    EXPECT_EQ(svgPattern->patternAttr_.patternContentUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
 }
 } // namespace OHOS::Ace::NG

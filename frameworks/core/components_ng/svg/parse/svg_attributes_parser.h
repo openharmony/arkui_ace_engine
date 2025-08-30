@@ -225,6 +225,7 @@ struct SvgBaseAttribute {
     std::string href;
     std::string id;
     SvgClipAttribute clipState;
+    uint32_t usrConfigVersion = 0;
 
     void InheritFromUse(const SvgBaseAttribute& parent)
     {
@@ -278,6 +279,7 @@ struct SvgAnimateAttribute {
 
 struct SvgStopAttribute {
     GradientColor gradientColor;
+    uint32_t usrConfigVersion = 0;
 };
 
 struct SvgRectAttribute {
@@ -296,6 +298,7 @@ struct SvgMaskAttribute {
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
     SvgLengthScaleUnit maskContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     SvgLengthScaleUnit maskUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    bool featureEnable = false;
 };
 
 struct SvgCircleAttribute {
@@ -331,6 +334,7 @@ struct SvgPatternAttribute {
     SvgLengthScaleUnit patternContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     std::string patternTransform;
     Rect viewBox;
+    uint32_t usrConfigVersion = 0;
 };
 
 struct SvgImageAttribute {
@@ -348,6 +352,7 @@ struct SvgFilterAttribute {
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
     SvgLengthScaleUnit filterUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
     SvgLengthScaleUnit primitiveUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    bool featureEnable = false;
 };
 
 struct SvgFeCommonAttribute {

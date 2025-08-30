@@ -38,7 +38,6 @@ using FuncAnimateFlush = std::function<void()>;
 enum SVG_FEATURE_SUPPORT {
     SVG_FEATURE_SUPPORT_UNDEFINE = 0,
     SVG_FEATURE_SUPPORT_TWO = 2,
-    SVG_FEATURE_UNSUPPORT = 1000,
 };
 class SvgDumpInfo {
 public:

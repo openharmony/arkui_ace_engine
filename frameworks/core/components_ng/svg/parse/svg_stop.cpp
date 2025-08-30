@@ -46,15 +46,15 @@ const Ace::GradientColor& SvgStop::GetGradientColor() const
 
 bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
-    static const LinearMapNode<void (*)(const std::string&, SvgStopAttribute&, uint32_t)> attrs[] = {
+    static const LinearMapNode<void (*)(const std::string&, SvgStopAttribute&)> attrs[] = {
         { SVG_OFFSET,
-            [](const std::string& val, SvgStopAttribute& attribute, uint32_t usrConfigVersion) {
+            [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetDimension(SvgAttributesParser::ParseDimension(val));
             } },
         { DOM_SVG_SRC_STOP_COLOR,
-            [](const std::string& val, SvgStopAttribute& attribute, uint32_t usrConfigVersion) {
+            [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion)) {
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attribute.usrConfigVersion)) {
                     attribute.gradientColor.SetColor(color);
                     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
                         SvgAttributesParser::CheckColorAlpha(val, color);
@@ -67,13 +67,13 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
                 attribute.gradientColor.SetColor(color);
             } },
         { DOM_SVG_SRC_STOP_OPACITY,
-            [](const std::string& val, SvgStopAttribute& attribute, uint32_t usrConfigVersion) {
+            [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetOpacity(SvgAttributesParser::ParseDouble(val));
             } },
         { SVG_STOP_COLOR,
-            [](const std::string& val, SvgStopAttribute& attribute, uint32_t usrConfigVersion) {
+            [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion)) {
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attribute.usrConfigVersion)) {
                     attribute.gradientColor.SetColor(color);
                     return;
                 }
@@ -81,13 +81,14 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
                 attribute.gradientColor.SetColor(color);
             } },
         { SVG_STOP_OPACITY,
-            [](const std::string& val, SvgStopAttribute& attribute, uint32_t usrConfigVersion) {
+            [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetOpacity(SvgAttributesParser::ParseDouble(val));
             } },
     };
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
     if (attrIter != -1) {
-        attrs[attrIter].value(value, stopAttr_, GetUsrConfigVersion());
+        stopAttr_.usrConfigVersion = GetUsrConfigVersion();
+        attrs[attrIter].value(value, stopAttr_);
         return true;
     }
     return false;
