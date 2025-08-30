@@ -26,6 +26,7 @@ group("advanced_ui_component_static") {
       "filter:Filter",
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
+      "selectionmenu:selectionMenu",
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
       "composeListItem:composeListItem",
