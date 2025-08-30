@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
@@ -31,7 +32,10 @@ constexpr int32_t CALL_ARG_3 = 3;
 constexpr int32_t CALL_ARG_4 = 4;
 constexpr int32_t CALL_ARG_5 = 5;
 constexpr int32_t CALL_ARG_6 = 6;
+constexpr int32_t CALL_ARG_7 = 7;
 constexpr char END_CHAR = '\0';
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+}
 
 ArkUINativeModuleValue WebBridge::SetJavaScriptAccess(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -3520,6 +3524,131 @@ ArkUINativeModuleValue WebBridge::ResetGestureFocusMode(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetGestureFocusMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enable = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getWebModifier()->setEnableDataDetector(nativeNode, enable);
+    } else {
+        GetArkUINodeModifiers()->getWebModifier()->resetEnableDataDetector(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetEnableDataDetector(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void ParseAIEntityColorAndPreview(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    TextDetectConfig textDetectConfig;
+    Local<JSValueRef> entityColorArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor);
+    arkUITextDetectConfig.entityColor = textDetectConfig.entityColor.GetValue();
+
+    Local<JSValueRef> entityDecorationTypeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
+    Local<JSValueRef> entityDecorationColorArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_5);
+    Local<JSValueRef> entityDecorationStyleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_6);
+    arkUITextDetectConfig.entityDecorationType = static_cast<int32_t>(textDetectConfig.entityDecorationType);
+    arkUITextDetectConfig.entityDecorationColor = arkUITextDetectConfig.entityColor;
+    arkUITextDetectConfig.entityDecorationStyle = static_cast<int32_t>(textDetectConfig.entityDecorationStyle);
+
+    if (entityDecorationTypeArg->IsInt()) {
+        arkUITextDetectConfig.entityDecorationType = entityDecorationTypeArg->Int32Value(vm);
+    }
+    if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor)) {
+        arkUITextDetectConfig.entityDecorationColor = textDetectConfig.entityDecorationColor.GetValue();
+    }
+    if (entityDecorationStyleArg->IsInt()) {
+        arkUITextDetectConfig.entityDecorationStyle = entityDecorationStyleArg->Int32Value(vm);
+    }
+
+    Local<JSValueRef> enablePreviewMenu = runtimeCallInfo->GetCallArgRef(CALL_ARG_7);
+    auto enablePreviewMenuValue = false;
+    if (enablePreviewMenu->IsBoolean()) {
+        enablePreviewMenuValue = enablePreviewMenu->ToBoolean(vm)->Value();
+    }
+    arkUITextDetectConfig.entityEnablePreviewMenu = enablePreviewMenuValue;
+}
+
+ArkUINativeModuleValue WebBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> typesArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (!typesArg->IsArray(vm)) {
+        nodeModifiers->getWebModifier()->resetDataDetectorConfigWithEvent(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
+    std::string types;
+    auto array = panda::Local<panda::ArrayRef>(typesArg);
+    for (size_t i = 0; i < array->Length(vm); i++) {
+        auto value = panda::ArrayRef::GetValueAt(vm, array, i);
+        auto index = value->Int32Value(vm);
+        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        if (i != 0) {
+            types.append(",");
+        }
+        types.append(TEXT_DETECT_TYPES[index]);
+    }
+    arkUITextDetectConfig.types = types.c_str();
+    std::function<void(const std::string&)> callback;
+    if (callbackArg->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+        callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            panda::Local<panda::JSValueRef> params[CALL_ARG_1] = {
+                panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+            func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+        };
+        arkUITextDetectConfig.onResult = reinterpret_cast<void*>(&callback);
+    }
+    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig);
+    nodeModifiers->getWebModifier()->setDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetDataDetectorConfigWithEvent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

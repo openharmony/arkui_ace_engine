@@ -5162,6 +5162,11 @@ struct ArkUIWebModifier {
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
     void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGestureFocusMode)(ArkUINodeHandle node);
+    void (*setEnableDataDetector)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableDataDetector)(ArkUINodeHandle node);
+    void (*setDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
+    void (*resetDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setOnSslErrorEventReceive)(ArkUINodeHandle node, void* callback);
     void (*resetOnSslErrorEventReceive)(ArkUINodeHandle node);
     void (*setOnClientAuthenticationRequest)(ArkUINodeHandle node, void* callback);

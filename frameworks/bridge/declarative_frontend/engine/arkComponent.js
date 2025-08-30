@@ -31390,6 +31390,27 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
     return this;
   }
+  enableDataDetector(enable) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDataDetectorModifier.identity, WebEnableDataDetectorModifier, enable);
+    return this;
+  }
+  dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    let detectorConfig = new TextDataDetectorConfig();
+    detectorConfig.types = config.types;
+    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    detectorConfig.color = config.color;
+    if (config.decoration) {
+      detectorConfig.decorationType = config.decoration.type;
+      detectorConfig.decorationColor = config.decoration.color;
+      detectorConfig.decorationStyle = config.decoration.style;
+    }
+    detectorConfig.enablePreviewMenu = config.enablePreviewMenu;
+    modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, detectorConfig);
+    return this;
+  }
   gestureFocusMode(mode) {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
@@ -32733,6 +32754,35 @@ class WebOnDataResubmittedModifier extends ModifierWithKey {
   }
 }
 WebOnDataResubmittedModifier.identity = Symbol('webOnDataResubmittedModifier');
+
+class WebEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableDataDetector(node, this.value);
+    }
+  }
+}
+WebEnableDataDetectorModifier.identity = Symbol('webEnableDataDetectorModifier');
+
+class WebDataDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle, this.value.enablePreviewMenu);
+    }
+  }
+}
+WebDataDetectorConfigModifier.identity = Symbol('webDataDetectorConfigModifier');
 
 class WebGestureFocusModeModifier extends ModifierWithKey {
   constructor(value) {
