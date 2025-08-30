@@ -1,5 +1,5 @@
 ## components
-- Same build structure as unit tets. Pipeline, rendering, animations are mocked.
+- Same build structure as unit test. Pipeline, rendering, animations are mocked.
 - Benchmarks performance of component code: creation and layout.
 - Independent from other libraries. Can compile with native x86 toolchain.
 
