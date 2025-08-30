@@ -117,7 +117,11 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
     RefPtr<RenderContext> renderContext = RenderContext::Create();
     auto paintProperty = richEditorPattern->CreatePaintProperty();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
-    auto paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(richEditorPattern->CreateNodePaintMethod());
+    richEditorPattern->OnAttachToFrameNode();
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(contentPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
     paintMethod->SetPreviewTextDecoration(AceType::RawPtr(paintWrapper));
     auto overlayMod =
         AceType::DynamicCast<RichEditorOverlayModifier>(paintMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper)));

@@ -28,7 +28,8 @@ class RichEditorOverlayModifier : public TextOverlayModifier {
 
 public:
     RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
-        const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
+        const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier,
+        WeakPtr<ScrollEdgeEffect>&& edgeEffect, bool isContentNode = false);
     void SetCaretOffsetAndHeight(const OffsetF& cursorOffset, float height);
     void SetFloatingCaretOffset(const OffsetF& cursorOffset);
     void SetCaretColor(uint32_t caretColor);
@@ -51,14 +52,17 @@ public:
     OffsetF GetCaretOffset() const;
     bool GetFloatCaretLanding() const;
     void onDraw(DrawingContext& drawingContext) override;
+    void DrawContent(DrawingContext& drawingContext);
     void UpdateScrollBar(PaintWrapper* paintWrapper);
     void StartFloatingCaretLand(const OffsetF& originCaretOffset);
+    void ChangeOverlay();
 private:
     void PaintPreviewTextDecoration(DrawingContext& drawingContext) const;
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintFloatingCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
+    void DrawScrollBar(DrawingContext& drawingContext);
 
     RefPtr<PropertyBool> caretVisible_;
     RefPtr<PropertyBool> originCaretVisible_;
@@ -79,8 +83,10 @@ private:
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RefPtr<PropertyFloat> previewTextUnderlineWidth_;
     RefPtr<PropertyBool> showPreviewTextDecoration_;
+    RefPtr<PropertyBool> changeOverlay_;
     PreviewTextStyle previewTextStyle_;
     bool caretLanding_ = false;
+    bool isContentNode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG
