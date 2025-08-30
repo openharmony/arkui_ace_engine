@@ -14,14 +14,17 @@
  */
 
 #include "base/utils/measure_util.h"
-#include "core/components/common/properties/text_style.h"
-#include "frameworks/core/components/font/constants_converter.h"
-#include "frameworks/core/components/font/rosen_font_collection.h"
-#include "frameworks/core/components/text/text_theme.h"
+
 #include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "ui/base/utils/utils.h"
+
+#include "base/i18n/localization.h"
+#include "core/components/common/properties/text_style.h"
+#include "frameworks/core/components/font/constants_converter.h"
+#include "frameworks/core/components/font/rosen_font_collection.h"
+#include "frameworks/core/components/text/text_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -74,6 +77,7 @@ Rosen::TextStyle prepareTextStyleForMeasure(const MeasureContext& context)
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
+    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
@@ -124,6 +128,7 @@ double MeasureTextInner(const MeasureContext& context)
 {
     using namespace Constants;
     Rosen::TypographyStyle style;
+    style.locale = Localization::GetInstance()->GetFontLocale();
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("fontCollection is null");
@@ -140,6 +145,7 @@ double MeasureTextInner(const MeasureContext& context)
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
+    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
@@ -184,6 +190,7 @@ Size MeasureTextSizeInner(const MeasureContext& context)
         style.maxLines = context.maxlines;
     }
     style.wordBreakType = static_cast<Rosen::WordBreakType>(context.wordBreak);
+    style.locale = Localization::GetInstance()->GetFontLocale();
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
 
     Rosen::TextStyle txtStyle = prepareTextStyleForMeasure(context);
