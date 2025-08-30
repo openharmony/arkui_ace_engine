@@ -31,6 +31,7 @@ public:
     static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
     static bool IsString(ani_env* env, ani_object obj);
     static bool IsNumber(ani_env* env, ani_object obj);
+    static bool IsFunction(ani_env* env, ani_object obj);
     static bool IsUndefined(ani_env* env, ani_object obj);
     static ani_object GetUndefined(ani_env* env);
     static std::optional<ani_string> StdStringToANIString(ani_env *env, std::string str);

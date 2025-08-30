@@ -165,13 +165,13 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
-
     native static _DragController_getDragPreview(): dragController.DragPreview
-
-    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
-
+    native static _DragController_setForegroundColor(
+        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
+    native static _DragController_cleanDragAction(dragActionptr: KPointer): void
+    native static _DragController_cleanDragPreview(dragPreviewptr: KPointer): void
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
