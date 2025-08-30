@@ -2443,4 +2443,20 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftPressAction001, TestSize.Level1)
     textPattern->HandleMouseLeftPressAction(info, textOffset);
     EXPECT_NE(textPattern->blockPress_, true);
 }
+
+/**
+ * @tc.name: HandleSetStyledString01
+ * @tc.desc: Test UpdateStyledStringByColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSetStyledString01, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->UpdateStyledStringByColorMode();
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"1234455");
+    textPattern->SetStyledString(spanString);
+}
 } // namespace OHOS::Ace::NG

@@ -5349,18 +5349,8 @@ void TextPattern::OnColorConfigurationUpdate()
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
-    if (isSpanStringMode_) {
-        for (const auto& item : spans_) {
-            if (!item) {
-                continue;
-            }
-            item->fontStyle->UpdateColorByResourceId();
-            if (item->backgroundStyle) {
-                item->backgroundStyle->UpdateColorByResourceId();
-            }
-        }
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+
+    UpdateStyledStringByColorMode();
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
 }
 
@@ -5381,6 +5371,23 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
     return false;
+}
+
+void TextPattern::UpdateStyledStringByColorMode()
+{
+    CHECK_NULL_VOID(isSpanStringMode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& item : spans_) {
+        if (!item) {
+            continue;
+        }
+        item->fontStyle->UpdateColorByResourceId();
+        if (item->backgroundStyle) {
+            item->backgroundStyle->UpdateColorByResourceId();
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 // return: whether the offset is valid, return false if invalid
@@ -5986,6 +5993,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
             "TextPattern::SetStyledString[id:%d][size:%d]", host->GetId(), static_cast<int32_t>(spans_.size()));
     }
     ProcessSpanString();
+    UpdateStyledStringByColorMode();
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
