@@ -8959,13 +8959,13 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         return;
     }
     size_t i = 0;
+    double density = usePx ? 1.0 : PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        density = 1.0;
+    }
     for (auto& touchPoint : touchPointes) {
         if (i >= MAX_POINTS) {
             break;
-        }
-        double density = usePx ? 1.0 : PipelineBase::GetCurrentDensity();
-        if (NearZero(density)) {
-            density = 1.0;
         }
         points[i].id = touchPoint.id;
         points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
@@ -9417,17 +9417,10 @@ void SetCommonOnSizeChange(ArkUINodeHandle node, void* userData)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(userData);
         event.componentAsyncEvent.subKind = ON_SIZE_CHANGE;
-        auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
         event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
-        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX());
-        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY());
-
-        auto localOffset = rect.GetOffset();
-        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
-        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
-        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
-        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
 
         SendArkUIAsyncCommonEvent(&event);
     };
@@ -9443,7 +9436,7 @@ void UnregisterCommonOnSizeChange(ArkUINodeHandle node)
 }
 
 void SetCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node, void* userData,
-    ArkUI_Float32* values, ArkUI_Int32 size)
+    ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Float32 expectedUpdateInterval)
 {
     ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -9460,7 +9453,8 @@ void SetCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node, void* us
         event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
         SendArkUIAsyncCommonEvent(&event);
     };
-    ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, 0);
+    ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(frameNode,
+        onEvent, ratioList, expectedUpdateInterval);
 }
 
 void UnregisterCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node)

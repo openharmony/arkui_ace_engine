@@ -56,10 +56,6 @@ struct ArkUI_ColorAnimatableProperty {
     ArkUIPropertyHandle rsPropertyHandle = nullptr;
 };
 
-typedef enum {
-
-} ArkUI_RSPropertyType;
-
 /**
  * @brief Defines the rect shape.
  *

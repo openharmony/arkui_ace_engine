@@ -8592,13 +8592,16 @@ HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest001, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto Button = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
     auto callback = [](ArkUI_NodeEvent *event) {};
 
-    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(Button, NODE_ON_CLICK, nullptr, callback);
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_CLICK_EVENT, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_CLICK_EVENT, nullptr, callback);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_CLICK, nullptr, callback);
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_CLICK_EVENT);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -8610,14 +8613,203 @@ HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest002, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto Button = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
 
-    auto ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(Button, NODE_ON_CLICK);
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_TOUCH_EVENT, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_TOUCH_EVENT, nullptr, callback);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(Button, NODE_DISPATCH_KEY_EVENT);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_TOUCH_EVENT);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest003
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_EVENT_ON_APPEAR, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_EVENT_ON_APPEAR, nullptr, callback);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(nullptr, NODE_ON_CLICK);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_EVENT_ON_APPEAR);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest004
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_EVENT_ON_DISAPPEAR, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_EVENT_ON_DISAPPEAR, nullptr, callback);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_EVENT_ON_DISAPPEAR);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest005
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest005, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_KEY_EVENT, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_KEY_EVENT, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_KEY_EVENT);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest006
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest006, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_FOCUS, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_FOCUS, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_FOCUS);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest007
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest007, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_BLUR, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_BLUR, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_BLUR);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest008
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest008, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_HOVER, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_HOVER, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_HOVER);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest009
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest009, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_MOUSE, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_MOUSE, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_MOUSE);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest010
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest010, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_SIZE_CHANGE, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NativeModule_RegisterCommonEvent(nullptr, NODE_ON_SIZE_CHANGE, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_SIZE_CHANGE);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest011
+ * @tc.desc: Test Common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest011, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+    auto callback = [](ArkUI_NodeEvent *event) {};
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_CLICK, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE);
+    ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_CLICK);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE);
 }
 
 /**
