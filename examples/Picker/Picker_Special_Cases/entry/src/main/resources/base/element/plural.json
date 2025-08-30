@@ -1,0 +1,23 @@
+{
+  "plural": [
+    {
+      "name": "minors_temp_user_age",
+      "value": [
+        {
+          "quantity": "one",
+          "value": "%d year old",
+          "attr": {
+            "priority": "LT"
+          }
+        },
+        {
+          "quantity": "other",
+          "value": "%d years old",
+          "attr": {
+            "priority": "LT"
+          }
+        }
+      ]
+    }
+  ]
+}
