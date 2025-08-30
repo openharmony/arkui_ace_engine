@@ -329,10 +329,16 @@ struct ArkUIAniCommonModifier {
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
     void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
 };
+struct  ArkUICustomNodeInfo {
+    std::function<void()> onPageShowFunc;
+    std::function<void()> onPageHideFunc;
+    std::function<bool()> onBackPressedFunc;
+    std::function<void()> pageTransitionFunc;
+    std::function<void()> onCleanupFunc;
+    std::function<std::string()> onDumpInspectorFunc;
+};
 struct ArkUIAniCustomNodeModifier {
-    ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-        std::function<bool()>&& onBackPress, std::function<void()>&& pageTransitionFunc,
-        std::function<void()>&& onCleanupFunc, std::function<std::string()>&& onDumpInspectorFunc);
+    ani_long (*constructCustomNode)(ani_int id, ArkUICustomNodeInfo&& customNodeInfo);
     void (*requestFrame)();
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);

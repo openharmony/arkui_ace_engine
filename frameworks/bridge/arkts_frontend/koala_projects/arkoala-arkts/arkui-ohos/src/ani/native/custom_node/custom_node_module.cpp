@@ -136,10 +136,16 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return AniUtils::ANIStringToStdString(env, aniStr);
     };
 
-    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(
-        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress), std::move(pageTransition),
-        std::move(onCleanupFunc), std::move(onDumpInspector)
-    );
+    struct ArkUICustomNodeInfo customNodeInfo {
+        .onPageShowFunc = std::move(onPageShow),
+        .onPageHideFunc = std::move(onPageHide),
+        .onBackPressedFunc = std::move(onBackPress),
+        .pageTransitionFunc = std::move(pageTransition),
+        .onCleanupFunc = std::move(onCleanupFunc),
+        .onDumpInspectorFunc = std::move(onDumpInspector),
+    };
+    
+    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, std::move(customNodeInfo));
     return customNode;
 }
 
