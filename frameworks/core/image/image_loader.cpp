@@ -14,15 +14,17 @@
  */
 
 #include "core/image/image_loader.h"
-#ifdef ACE_UNITTEST
-#include <unistd.h>
-#endif
+
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #ifdef USE_NEW_SKIA
 #include "src/base/SkBase64.h"
 #else
 #include "include/utils/SkBase64.h"
 #endif
+#include "fcntl.h"
+#include "sys/stat.h"
+#include "sys/types.h"
+#include "unistd.h"
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
@@ -243,28 +245,28 @@ std::shared_ptr<RSData> FileImageLoader::BuildImageData(const std::shared_ptr<RS
 #endif
 }
 
-std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
-    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
+std::string FileImageLoader::ParseFilePath(
+    const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& loadResultInfo)
 {
     auto& errorInfo = loadResultInfo.errorInfo;
     const auto& src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
-    ACE_SCOPED_TRACE("LoadImageData %s", imageDfxConfig.ToStringWithSrc().c_str());
+    ACE_SCOPED_TRACE("ParseFilePath %s", imageDfxConfig.ToStringWithSrc().c_str());
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
         // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
         // "/data/data/{bundleName}/files/imagename.png"
         auto bundleName = Container::CurrentBundleName();
         if (bundleName.empty()) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "bundleName is empty, LoadImageData for internal source fail! %{private}s-%{public}s.",
+                "bundleName is empty, ParseFilePath for internal source fail! %{private}s-%{public}s.",
                 imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
-            return nullptr;
+            return std::string();
         }
         if (!StringUtils::StartWith(filePath, "app/")) { // "app/" is infix of internal path
             TAG_LOGW(AceLogTag::ACE_IMAGE, "internal path format is wrong. path is %{private}s-%{public}s.",
                 src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
-            return nullptr;
+            return std::string();
         }
         filePath = std::string("/data/data/") // head of absolute path
                        .append(bundleName)
@@ -276,26 +278,59 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
     if (filePath.length() > PATH_MAX) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "path is too long. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_PATH_TOO_LONG, "path is too long." };
+        return std::string();
+    }
+    return filePath;
+}
+
+std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
+{
+    auto& errorInfo = loadResultInfo.errorInfo;
+    auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
+    ACE_SCOPED_TRACE("LoadImageData %s", imageDfxConfig.ToStringWithSrc().c_str());
+    auto filePath = ParseFilePath(imageSourceInfo, loadResultInfo);
+    if (filePath.empty()) {
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
     realpath(filePath.c_str(), realPath);
-    auto result = RSData::MakeFromFileName(realPath);
-    if (!result) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "read data failed, filePath: %{private}s, realPath: %{private}s, "
-            "src: %{private}s, fail reason: %{private}s.%{public}s.",
-            filePath.c_str(), src.c_str(), realPath, strerror(errno), imageDfxConfig.ToStringWithoutSrc().c_str());
+    auto fd = open(realPath, O_RDONLY);
+    if (fd == -1) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "failed to open file, %{private}s", realPath);
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
         return nullptr;
-    } else {
-        loadResultInfo.fileSize = result->GetSize();
-        ACE_SCOPED_TRACE("LoadImageData result %s - %d", imageDfxConfig.ToStringWithSrc().c_str(),
-            static_cast<int32_t>(result->GetSize()));
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Read data %{private}s - %{public}s : %{public}d", realPath,
-            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->GetSize()));
     }
-    return BuildImageData(result);
+    struct stat statBuf;
+    auto statRes = fstat(fd, &statBuf);
+    if (statRes != 0) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "failed to get file stat, %{private}s", realPath);
+        close(fd);
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        return nullptr;
+    }
+    auto fileSize = statBuf.st_size;
+    auto buffer = std::unique_ptr<void, decltype(&std::free)>(std::malloc(fileSize), std::free);
+    if (!buffer) {
+        close(fd);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "malloc memory failed, %{private}s", realPath);
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        return nullptr;
+    }
+    auto readSize = read(fd, buffer.get(), fileSize);
+    close(fd);
+    if (readSize < fileSize) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "read data failed, readSize = %{public}d, fileSize = %{public}d, realPath = %{private}s",
+            static_cast<int32_t>(readSize), static_cast<int32_t>(fileSize), realPath);
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        return nullptr;
+    }
+    // Create RSData from the read data.
+    loadResultInfo.fileSize = fileSize;
+    auto result = std::make_shared<RSData>();
+    result->BuildFromMalloc(buffer.release(), fileSize);
+    return result;
 }
 
 std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
