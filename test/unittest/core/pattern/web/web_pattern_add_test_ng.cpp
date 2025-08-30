@@ -1253,4 +1253,31 @@ HWTEST_F(WebPatternAddTestNg, handleDragCancelTask001, TestSize.Level1)
     EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
+
+/**
+ * @tc.name: handleDragCancelTask001
+ * @tc.desc: handleOnDragEnterId001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, handleOnDragEnterId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<OHOS::Ace::NG::WebEventHub> eventHub = AceType::MakeRefPtr<OHOS::Ace::NG::WebEventHub>();
+    webPattern->InitWebEventHubDragDropStart(eventHub);
+    std::string extraParams = "123";
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, nullptr, extraParams);
+    EXPECT_FALSE(webPattern->isDragging_);
+#endif
+}
 } // namespace OHOS::Ace::NG
