@@ -634,7 +634,7 @@ void SetNavDestinationOnShown(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onShown = reinterpret_cast<std::function<void()>*>(callback);
+        auto onShown = reinterpret_cast<std::function<void(int32_t)>*>(callback);
         NavDestinationModelNG::SetOnShown(frameNode, std::move(*onShown));
     } else {
         NavDestinationModelNG::SetOnShown(frameNode, nullptr);
@@ -653,7 +653,7 @@ void SetNavDestinationOnHidden(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onHidden = reinterpret_cast<std::function<void()>*>(callback);
+        auto onHidden = reinterpret_cast<std::function<void(int32_t)>*>(callback);
         NavDestinationModelNG::SetOnHidden(frameNode, std::move(*onHidden));
     } else {
         NavDestinationModelNG::SetOnHidden(frameNode, nullptr);

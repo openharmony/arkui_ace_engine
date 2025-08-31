@@ -128,6 +128,13 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
         lifecycleIndex++;
         stack->SetLifecycleIndex(lifecycleIndex);
     };
+    std::function<void(int32_t)>&& showHideCallback = [stack = stack, expectValue = expectValue](int32_t reason) {
+        auto lifecycleIndex = stack->GetLifecycleIndex();
+        EXPECT_EQ(lifecycleIndex, expectValue);
+        lifecycleIndex++;
+        stack->SetLifecycleIndex(lifecycleIndex);
+    };
+
     switch (lifecycle) {
         case NavDestinationLifecycle::ON_WILL_APPEAR: {
             eventHub->SetOnWillAppear(callback);
@@ -142,7 +149,7 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
             break;
         }
         case NavDestinationLifecycle::ON_SHOW: {
-            eventHub->SetOnShown(std::move(callback));
+            eventHub->SetOnShown(std::move(showHideCallback));
             break;
         }
         case NavDestinationLifecycle::ON_WILL_HIDE: {
@@ -150,7 +157,7 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
             break;
         }
         case NavDestinationLifecycle::ON_HIDE: {
-            eventHub->SetOnHidden(std::move(callback));
+            eventHub->SetOnHidden(std::move(showHideCallback));
             break;
         }
         case NavDestinationLifecycle::ON_WILL_DISAPPEAR: {

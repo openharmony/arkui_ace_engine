@@ -90,8 +90,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetMenusWithBuilder(void (*build
 CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges);
 CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetSystemBarStyle(uint32_t styleColor);
 
-CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnShown(void (*callback)());
-CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnHidden(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnShown(void (*callback)(int32_t));
+CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnHidden(void (*callback)(int32_t));
 CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnWillAppear(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnWillShow(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkNavdestinationSetOnWillHide(void (*callback)());

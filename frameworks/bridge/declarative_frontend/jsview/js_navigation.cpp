@@ -438,7 +438,21 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
     JSClass<JSNavigation>::StaticMethod("splitPlaceholder", &JSNavigation::SetSplitPlaceholder);
+    JSClass<JSNavigation>::StaticMethod("enableShowHideWithContentCover",
+        &JSNavigation::SetEnableShowHideWithContentCover);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSNavigation::SetEnableShowHideWithContentCover(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    bool isEnable = true;
+    if (info[0]->IsBoolean()) {
+        isEnable = info[0]->ToBoolean();
+    }
+    NavigationModel::GetInstance()->SetEnableShowHideWithContentCover(isEnable);
 }
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)

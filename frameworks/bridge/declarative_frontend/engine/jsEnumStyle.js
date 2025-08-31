@@ -1197,6 +1197,13 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
+let VisibilityChangeReason;
+(function (VisibilityChangeReason) {
+  VisibilityChangeReason[VisibilityChangeReason.TRANSITION = 0] = 'TRANSITION';
+  VisibilityChangeReason[VisibilityChangeReason.CONTENT_COVER = 1] = 'CONTENT_COVER';
+  VisibilityChangeReason[VisibilityChangeReason.APP_STATE = 2] = 'APP_STATE';
+}(VisibilityChangeReason || (VisibilityChangeReason = {})));
+
 let NavigationOperation;
 (function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = 'PUSH';

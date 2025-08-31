@@ -71,8 +71,8 @@ public:
     virtual void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) {}
     virtual void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) = 0;
-    virtual void SetOnShown(std::function<void()>&& onShow) = 0;
-    virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
+    virtual void SetOnShown(std::function<void(int32_t)>&& onShow) = 0;
+    virtual void SetOnHidden(std::function<void(int32_t)>&& onHidden) = 0;
     virtual void SetOnWillAppear(std::function<void()>&& willAppear) = 0;
     virtual void SetOnWillShow(std::function<void()>&& willShow) = 0;
     virtual void SetOnWillHide(std::function<void()>&& willHide) = 0;

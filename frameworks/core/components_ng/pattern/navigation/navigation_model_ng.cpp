@@ -3134,4 +3134,19 @@ void NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(
     CHECK_NULL_VOID(navBarEventHub);
     navBarEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
 }
+
+void NavigationModelNG::SetEnableShowHideWithContentCover(bool isEnable)
+{
+    NavigationModelNG::SetEnableShowHideWithContentCover(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode(), isEnable);
+}
+
+void NavigationModelNG::SetEnableShowHideWithContentCover(FrameNode* frameNode, bool isEnable)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigation);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableShowHideWithContentCover(isEnable);
+}
 } // namespace OHOS::Ace::NG

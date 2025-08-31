@@ -5054,7 +5054,7 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
     }
 }
 
-void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow)
 {
     CHECK_RUN_ON(UI);
     auto iter = pageToNavigationNodes_.find(pageId);
@@ -5062,7 +5062,7 @@ void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
         return;
     }
     for (auto navigationNode : iter->second) {
-        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
+        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true, isFromWindow);
     }
 }
 

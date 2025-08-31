@@ -743,7 +743,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
     context_->DeleteNavigationNode(std::to_string(childId));
     context_->AddNavigationNode(nodeId, AceType::WeakClaim(AceType::RawPtr(node)));
     context_->RemoveNavigationNode(nodeId, nodeId);
-    context_->FirePageChanged(nodeId, false);
+    context_->FirePageChanged(nodeId, false, true);
     bool isEntry = false;
     EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node, isEntry), nullptr);
 }

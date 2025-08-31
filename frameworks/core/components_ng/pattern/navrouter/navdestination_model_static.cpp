@@ -335,7 +335,7 @@ void NavDestinationModelStatic::SetHideTitleBar(FrameNode* frameNode, bool hideT
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
 }
 
-void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
+void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<void(int32_t)>&& onShow)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
@@ -343,7 +343,7 @@ void NavDestinationModelStatic::SetOnShown(FrameNode* frameNode, std::function<v
     navDestinationEventHub->SetOnShown(onShow);
 }
 
-void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
+void NavDestinationModelStatic::SetOnHidden(FrameNode* frameNode, std::function<void(int32_t)>&& onHidden)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
