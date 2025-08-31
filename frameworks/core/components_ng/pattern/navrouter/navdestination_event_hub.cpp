@@ -14,6 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
 void NavDestinationEventHub::FireOnDisappear()
@@ -58,7 +59,8 @@ void NavDestinationEventHub::FireAutoSave()
     container->RequestAutoSave(node);
 }
 
-void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std::string& param)
+void NavDestinationEventHub::FireOnShownEvent(
+    const std::string& name, const std::string& param, NavDestVisibilityChangeReason reason)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
@@ -70,7 +72,7 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
         NavDestinationState::ON_SHOWN);
     if (onShownEvent_) {
         auto onShownEvent = onShownEvent_;
-        onShownEvent();
+        onShownEvent(static_cast<int32_t>(reason));
     }
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(true);
@@ -94,7 +96,7 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
     pipelineContext->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(navDestination));
 }
 
-void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
+void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestVisibilityChangeReason reason)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
@@ -105,7 +107,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_HIDDEN);
     if (onHiddenEvent_) {
-        onHiddenEvent_();
+        onHiddenEvent_(static_cast<int32_t>(reason));
     }
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(false);

@@ -553,7 +553,7 @@ public:
 
     void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
-    void FirePageChanged(int32_t pageId, bool isOnShow);
+    void FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow);
 
     bool HasDifferentDirectionGesture() const;
 

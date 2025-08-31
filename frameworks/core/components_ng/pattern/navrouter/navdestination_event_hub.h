@@ -53,19 +53,19 @@ public:
         isActivated_ = isActivated;
     }
 
-    void SetOnShown(const std::function<void()>& onShown)
+    void SetOnShown(const std::function<void(int32_t)>& onShown)
     {
         onShownEvent_ = onShown;
     }
 
-    void FireOnShownEvent(const std::string& name, const std::string& param);
+    void FireOnShownEvent(const std::string& name, const std::string& param, NavDestVisibilityChangeReason reason);
 
-    void SetOnHidden(const std::function<void()>& onHidden)
+    void SetOnHidden(const std::function<void(int32_t)>& onHidden)
     {
         onHiddenEvent_ = onHidden;
     }
 
-    void FireOnHiddenEvent(const std::string& name);
+    void FireOnHiddenEvent(const std::string& name, NavDestVisibilityChangeReason reason);
 
     void SetOnBackPressed(const std::function<bool()>& onBackPressed)
     {
@@ -212,15 +212,15 @@ private:
     void FireAutoSave();
 
     OnStateChangeEvent onStateChangeEvent_;
-    std::function<void()> onShownEvent_;
-    std::function<void()> onHiddenEvent_;
     std::function<void()> onWillAppear_;
     std::function<void()> onWillShow_;
     std::function<void()> onWillHide_;
     std::function<void()> onWillDisAppear_;
     std::function<bool()> onBackPressedEvent_;
-    std::function<void(int32_t)> onInactive_;
     std::function<void(int32_t)> onActive_;
+    std::function<void(int32_t)> onInactive_;
+    std::function<void(int32_t)> onShownEvent_;
+    std::function<void(int32_t)> onHiddenEvent_;
     NavDestinationOnNewParamCallback onNewParamCallback_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;

@@ -429,14 +429,15 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 
     auto onShownCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.onShown");
-        PipelineContext::SetCallBackNode(node);
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Make(ToJSValue("undefined"));
-        func->ExecuteJS(1, params);
-    };
+    auto onShown =
+        [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), node = targetNode](int32_t reason) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("NavDestination.onShown");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+            func->ExecuteJS(1, params);
+        };
     NavDestinationModel::GetInstance()->SetOnShown(std::move(onShown));
     info.ReturnSelf();
 }
@@ -448,12 +449,15 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
     }
     auto onHiddenCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHidden = [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback), node = targetNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.onHidden");
-        PipelineContext::SetCallBackNode(node);
-        func->ExecuteJS();
-    };
+    auto onHidden =
+        [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback), node = targetNode](int32_t reason) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("NavDestination.onHidden");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+            func->ExecuteJS(1, params);
+        };
     NavDestinationModel::GetInstance()->SetOnHidden(std::move(onHidden));
     info.ReturnSelf();
 }

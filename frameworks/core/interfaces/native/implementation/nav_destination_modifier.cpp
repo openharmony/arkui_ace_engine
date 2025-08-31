@@ -85,7 +85,7 @@ void OnShownImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
+    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
         arkCallback.Invoke();
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
@@ -100,7 +100,7 @@ void OnHiddenImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) { arkCallback.Invoke(); };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void OnBackPressedImpl(Ark_NativePointer node,

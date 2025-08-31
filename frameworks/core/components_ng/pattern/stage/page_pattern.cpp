@@ -270,7 +270,7 @@ void PagePattern::OnShow(bool isFromWindow)
     }
     NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), true);
+        context->FirePageChanged(pageInfo_->GetPageId(), true, isFromWindow);
         NotifyNavigationLifecycle(true, isFromWindow);
     }
     UpdatePageParam();
@@ -335,7 +335,7 @@ void PagePattern::OnHide(bool isFromWindow)
     CHECK_NULL_VOID(host);
     if (pageInfo_) {
         NotifyNavigationLifecycle(false, isFromWindow);
-        context->FirePageChanged(pageInfo_->GetPageId(), false);
+        context->FirePageChanged(pageInfo_->GetPageId(), false, isFromWindow);
     }
     host->SetJSViewActive(false);
     isOnShow_ = false;
