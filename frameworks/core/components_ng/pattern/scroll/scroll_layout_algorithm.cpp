@@ -188,6 +188,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float zoomScale = scroll->GetZoomScale();
     auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
+    float lastScrollableDistance = scrollableDistance_;
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
         scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
     } else {
@@ -206,6 +207,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
             currentOffset_ = Positive(currentOffset_) ? 0.0f : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+        }
+    } else if (LessNotEqual(scrollableDistance_, lastScrollableDistance)) {
+        if (GreatOrEqual(scrollableDistance_, 0.f) && LessOrEqual(-currentOffset_, lastScrollableDistance) &&
+            GreatNotEqual(-currentOffset_, scrollableDistance_)) {
+            currentOffset_ = -scrollableDistance_;
         }
     }
     viewPortExtent_ = childSize;

@@ -2698,7 +2698,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity,  const RefPtr<Nesta
                      "IsAtBottom:%u, velocity:%f, id:%d, tag:%s",
         isOutOfBoundary, needFlingAtEdge, edgeEffect, IsAtTop(), IsAtBottom(), velocity,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    if (!isOutOfBoundary && needFlingAtEdge) {
+    if (!isOutOfBoundary && (needFlingAtEdge || !GetCanOverScroll())) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
