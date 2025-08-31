@@ -1777,18 +1777,23 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
      * @tc.steps: step1. Create grid with gridItem frame node tree.
      * @tc.expected: instance is not null.
      */
+    MockContainer::SetUp();
     auto gridNode = CreateGridNodeWithChild(DEFAULT_CHILD_COUNT, GridItemStyle::NONE);
     ASSERT_NE(gridNode, nullptr);
     auto gestureEventHub = gridNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
     auto eventHub = gridNode->GetEventHub<GridEventHub>();
+    gridNode->instanceId_ = MockContainer::CurrentId();
 
     /**
      * @tc.steps: step2. create taskExecutor to fire task callBack.
      * @tc.expected: taskExecutor is not null.
      */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
+    container->pipelineContext_ = context;
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto taskExecutor = context->GetTaskExecutor();
     ASSERT_NE(taskExecutor, nullptr);
@@ -1801,7 +1806,6 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
      * @tc.steps: step3. Invoke GetDragCallback to get function and fire this function.
      * @tc.expected: fire function success.
      */
-    MockContainer::SetUp();
     int32_t callbackInfo = 0;
     eventHub->SetOnDragEnd([&callbackInfo](const RefPtr<OHOS::Ace::DragEvent>& /*dragEvent*/) {
         callbackInfo = 1;
