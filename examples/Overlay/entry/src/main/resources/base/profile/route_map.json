@@ -357,6 +357,21 @@
       "buildFunction": "PopupBigBuilder"
     },
     {
+      "name": "AdvancedPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/AdvancedPopup.ets",
+      "buildFunction": "AdvancePopupBuilder"
+    },
+    {
+      "name": "PopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupTest.ets",
+      "buildFunction": "PopupTestBuilder"
+    },
+    {
+      "name": "MenuComplex",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
+      "buildFunction": "MenuComplexBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"
