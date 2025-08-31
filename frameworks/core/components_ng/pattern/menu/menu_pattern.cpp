@@ -2517,11 +2517,21 @@ float MenuPattern::GetSelectMenuWidth()
     return finalWidth;
 }
 
+RefPtr<FrameNode> MenuPattern::GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == tag) {
+        return AceType::DynamicCast<FrameNode>(node);
+    }
+    return GetFirstNodeWithTagInParent(node->GetParent(), tag);
+}
+
 void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover)
 {
     CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto pattern = DynamicCast<FrameNode>(parent)->GetPattern<MenuItemGroupPattern>();
+    auto menuItemGroup = GetFirstNodeWithTagInParent(parent, V2::MENU_ITEM_GROUP_ETS_TAG);
+    if (menuItemGroup) {
+        auto pattern = menuItemGroup->GetPattern<MenuItemGroupPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->OnIntItemPressed(index, press);
     }

@@ -807,6 +807,7 @@ private:
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
     void OnAttachToMainTree() override;
     void BuildDivider();
+    RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
