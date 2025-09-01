@@ -462,6 +462,18 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level1)
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
     richEditorModel.SetOnCut(std::move(onCutWithEvent));
 
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::CUT);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    richEditorModel.SetOnWillChange(onWillChange);
+
+    std::string str = "testHandleOnCut";
+    AddSpan(str);
+    richEditorPattern->UpdateSelector(0, static_cast<int32_t>(str.length()));
+
     /**
      * @tc.steps: step2. call the callback function
      * @tc.expected: UpdateType_ and isEventCalled is valid
@@ -475,6 +487,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->HandleOnCut();
+    EXPECT_EQ(changeReason, TextChangeReason::CUT); // not preventDefault
     EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
     EXPECT_EQ(isEventCalled, true);
 }
