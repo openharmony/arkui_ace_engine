@@ -62,7 +62,7 @@ class Util {
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
-  public static isResourceType(resource: ResourceStr | undefined | null): boolean {
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
     if (!resource) {
       return false;
     }
@@ -80,13 +80,13 @@ export class ToolBarV2SymbolGlyph {
   @Trace
   public activated?: SymbolGlyphModifier;
 
-  constructor(options: ToolBarSymbolGlyphOptions) {
+  constructor(options: ToolBarV2SymbolGlyphOptions) {
     this.normal = options.normal;
     this.activated = options.activated;
   }
 }
 
-export interface ToolBarSymbolGlyphOptions {
+export interface ToolBarV2SymbolGlyphOptions {
   normal: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
 }
@@ -277,7 +277,6 @@ export struct ToolBarV2 {
   @Local
   theme: ToolBarV2Theme = new ToolBarV2Theme();
 
-  publicMore: Resource = $r('sys.symbol.dot_grid_2x2');
   gestureItem: ToolBarV2Item =
     new ToolBarV2Item({
       content: new ToolBarV2ItemText({
@@ -323,7 +322,7 @@ export struct ToolBarV2 {
       text: $r('sys.string.ohos_toolbar_more'),
     }),
     icon: new ToolBarV2ItemImage({
-      src: this.publicMore
+      src: PUBLIC_MORE
     })
   })
   private moreText: Resource = $r('sys.string.ohos_toolbar_more');
@@ -352,7 +351,7 @@ export struct ToolBarV2 {
   MoreTabBuilder(index: number): void {
     Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
       Column() {
-        SymbolGlyph(this.publicMore)
+        SymbolGlyph(PUBLIC_MORE)
           .fontSize(IMAGE_SIZE)
           .fontColor([this.theme.iconPrimaryColor])
           .draggable(false)
