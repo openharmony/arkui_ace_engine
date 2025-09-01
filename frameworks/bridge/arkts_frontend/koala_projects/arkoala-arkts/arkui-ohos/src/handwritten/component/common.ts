@@ -375,25 +375,30 @@ export class ClickEventTransfer {
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
-        clickEvent.target.area.width = widthValue;
         const heightValue = areaValue.getProperty("height").toNumber();
-        clickEvent.target.area.height = heightValue;
         const positionValue = areaValue.getProperty("position");
         const positionXValue = positionValue.getProperty("x").toNumber();
-        clickEvent.target.area.position.x = positionXValue;
         const positionYValue = positionValue.getProperty("y").toNumber();
-        clickEvent.target.area.position.y = positionYValue;
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
-        clickEvent.target.area.globalPosition.x = globalPositionXValue;
         const globalPositionYValue = positionValue.getProperty("y").toNumber();
-        clickEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
-        if (idValue.isUndefined()) {
-            clickEvent.target.id = undefined;
-        } else {
-            clickEvent.target.id = idValue.toString();
-        }
+        const target: EventTarget = {
+            area: {
+                width: widthValue,
+                height: heightValue,
+                position: {
+                    x: positionXValue,
+                    y: positionYValue
+                },
+                globalPosition: {
+                    x: globalPositionXValue,
+                    y: globalPositionYValue
+                }
+            },
+            id: idValue.isUndefined() ? undefined : idValue.toString()
+        };
+        clickEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
         clickEvent.timestamp = timestampValue;
         const sourceValue = esValue.getProperty("source").toNumber();
@@ -501,25 +506,30 @@ export class HoverEventTransfer {
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
-        hoverEvent.target.area.width = widthValue;
         const heightValue = areaValue.getProperty("height").toNumber();
-        hoverEvent.target.area.height = heightValue;
         const positionValue = areaValue.getProperty("position");
         const positionXValue = positionValue.getProperty("x").toNumber();
-        hoverEvent.target.area.position.x = positionXValue;
         const positionYValue = positionValue.getProperty("y").toNumber();
-        hoverEvent.target.area.position.y = positionYValue;
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
-        hoverEvent.target.area.globalPosition.x = globalPositionXValue;
         const globalPositionYValue = positionValue.getProperty("y").toNumber();
-        hoverEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
-        if (idValue.isUndefined()) {
-            hoverEvent.target.id = undefined;
-        } else {
-            hoverEvent.target.id = idValue.toString();
-        }
+        const target: EventTarget = {
+            area: {
+                width: widthValue,
+                height: heightValue,
+                position: {
+                    x: positionXValue,
+                    y: positionYValue
+                },
+                globalPosition: {
+                    x: globalPositionXValue,
+                    y: globalPositionYValue
+                }
+            },
+            id: idValue.isUndefined() ? undefined : idValue.toString()
+        };
+        hoverEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
         hoverEvent.timestamp = timestampValue;
         const sourceValue = esValue.getProperty("source").toNumber();
@@ -664,25 +674,30 @@ export class MouseEventTransfer {
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
-        mouseEvent.target.area.width = widthValue;
         const heightValue = areaValue.getProperty("height").toNumber();
-        mouseEvent.target.area.height = heightValue;
         const positionValue = areaValue.getProperty("position");
         const positionXValue = positionValue.getProperty("x").toNumber();
-        mouseEvent.target.area.position.x = positionXValue;
         const positionYValue = positionValue.getProperty("y").toNumber();
-        mouseEvent.target.area.position.y = positionYValue;
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
-        mouseEvent.target.area.globalPosition.x = globalPositionXValue;
         const globalPositionYValue = positionValue.getProperty("y").toNumber();
-        mouseEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
-        if (idValue.isUndefined()) {
-            mouseEvent.target.id = undefined;
-        } else {
-            mouseEvent.target.id = idValue.toString();
-        }
+        const target: EventTarget = {
+            area: {
+                width: widthValue,
+                height: heightValue,
+                position: {
+                    x: positionXValue,
+                    y: positionYValue
+                },
+                globalPosition: {
+                    x: globalPositionXValue,
+                    y: globalPositionYValue
+                }
+            },
+            id: idValue.isUndefined() ? undefined : idValue.toString()
+        };
+        mouseEvent.target = target;
         const pressedButtonsValue = esValue.getProperty("pressedButtons");
         for (let button of pressedButtonsValue) {
             mouseEvent.pressedButtons?.push(TypeChecker.MouseButton_FromNumeric(button.invokeMethod("valueOf").toNumber() as int32))
@@ -768,25 +783,30 @@ export class TouchEventTransfer {
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
-        touchEvent.target.area.width = widthValue;
         const heightValue = areaValue.getProperty("height").toNumber();
-        touchEvent.target.area.height = heightValue;
         const positionValue = areaValue.getProperty("position");
         const positionXValue = positionValue.getProperty("x").toNumber();
-        touchEvent.target.area.position.x = positionXValue;
         const positionYValue = positionValue.getProperty("y").toNumber();
-        touchEvent.target.area.position.y = positionYValue;
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
-        touchEvent.target.area.globalPosition.x = globalPositionXValue;
         const globalPositionYValue = positionValue.getProperty("y").toNumber();
-        touchEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
-        if (idValue.isUndefined()) {
-            touchEvent.target.id = undefined;
-        } else {
-            touchEvent.target.id = idValue.toString();
-        }
+        const target: EventTarget = {
+            area: {
+                width: widthValue,
+                height: heightValue,
+                position: {
+                    x: positionXValue,
+                    y: positionYValue
+                },
+                globalPosition: {
+                    x: globalPositionXValue,
+                    y: globalPositionYValue
+                }
+            },
+            id: idValue.isUndefined() ? undefined : idValue.toString()
+        };
+        touchEvent.target = target;
         const pressureValue = esValue.getProperty("pressure").toNumber();
         touchEvent.pressure = pressureValue;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
@@ -964,25 +984,30 @@ export class AxisEventTransfer {
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
-        axisEvent.target.area.width = widthValue;
         const heightValue = areaValue.getProperty("height").toNumber();
-        axisEvent.target.area.height = heightValue;
         const positionValue = areaValue.getProperty("position");
         const positionXValue = positionValue.getProperty("x").toNumber();
-        axisEvent.target.area.position.x = positionXValue;
         const positionYValue = positionValue.getProperty("y").toNumber();
-        axisEvent.target.area.position.y = positionYValue;
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
-        axisEvent.target.area.globalPosition.x = globalPositionXValue;
         const globalPositionYValue = positionValue.getProperty("y").toNumber();
-        axisEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
-        if (idValue.isUndefined()) {
-            axisEvent.target.id = undefined;
-        } else {
-            axisEvent.target.id = idValue.toString();
-        }
+        const target: EventTarget = {
+            area: {
+                width: widthValue,
+                height: heightValue,
+                position: {
+                    x: positionXValue,
+                    y: positionYValue
+                },
+                globalPosition: {
+                    x: globalPositionXValue,
+                    y: globalPositionYValue
+                }
+            },
+            id: idValue.isUndefined() ? undefined : idValue.toString()
+        };
+        axisEvent.target = target;
         const pressureValue = esValue.getProperty("pressure").toNumber();
         axisEvent.pressure = pressureValue;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
