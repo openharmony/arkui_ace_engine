@@ -399,14 +399,22 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign001, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Scroll Up, the delta is small
-     * @tc.expected: The item(index:2) align to start
+     * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 1, velocity);
-    EXPECT_TRUE(TickPosition(-609.5f));
+    EXPECT_TRUE(TickPosition(-619.5f));
+    EXPECT_TRUE(TickPosition(-620.0f));
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of DEVIATION_HEIGHT
+     * @tc.expected: The item(index:6) align to start
+     */
+    DragAction(frameNode_, startOffset, 11, velocity);
+    EXPECT_TRUE(TickPosition(-604.5f));
     EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
-     * @tc.steps: step6. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
+     * @tc.steps: step7. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 50, velocity);
@@ -414,15 +422,15 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign001, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
-     * @tc.steps: step7. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
-     * @tc.expected: The item(index:1) align to start
+     * @tc.steps: step8. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
+     * @tc.expected: The item(index:5) align to start
      */
     DragAction(frameNode_, startOffset, 51, velocity);
     EXPECT_TRUE(TickPosition(-524.5f));
     EXPECT_TRUE(TickPosition(-500.0f));
 
     /**
-     * @tc.steps: step8. Drag end with velocity and over the edge
+     * @tc.steps: step9. Drag end with velocity and over the edge
      * @tc.expected: Align start
      */
     DragAction(frameNode_, startOffset, 100, 500);
@@ -451,16 +459,24 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Scroll Down, the delta is small
-     * @tc.expected: The item(index:3) align to end
+     * @tc.expected: Align start
      */
     Offset startOffset = Offset();
     float velocity = 0;
     DragAction(frameNode_, startOffset, -1, velocity);
-    EXPECT_TRUE(TickPosition(-10.5f));
+    EXPECT_TRUE(TickPosition(-0.5f));
+    EXPECT_TRUE(TickPosition(0));
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of DEVIATION_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    DragAction(frameNode_, startOffset, -11, velocity);
+    EXPECT_TRUE(TickPosition(-15.5f));
     EXPECT_TRUE(TickPosition(-20.0f));
 
     /**
-     * @tc.steps: step3. Scroll Down, the delta less than half of ITEM_MAIN_SIZE
+     * @tc.steps: step4. Scroll Down, the delta less than half of ITEM_MAIN_SIZE
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, -49, velocity);
@@ -468,7 +484,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-20.0f));
 
     /**
-     * @tc.steps: step4. Scroll Down, the delta greater than half of ITEM_MAIN_SIZE
+     * @tc.steps: step5. Scroll Down, the delta greater than half of ITEM_MAIN_SIZE
      * @tc.expected: The item(index:4) align to end
      */
     DragAction(frameNode_, startOffset, -50, velocity);
@@ -476,7 +492,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-120.0f));
 
     /**
-     * @tc.steps: step5. Drag end with velocity and over the edge
+     * @tc.steps: step6. Drag end with velocity and over the edge
      * @tc.expected: Align end
      */
     DragAction(frameNode_, startOffset, -100, -600);
@@ -484,7 +500,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-620.0f));
 
     /**
-     * @tc.steps: step6. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
+     * @tc.steps: step7. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 50, velocity);
@@ -492,7 +508,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-620.0f));
 
     /**
-     * @tc.steps: step7. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
+     * @tc.steps: step8. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
      * @tc.expected: The item(index:3) align to end
      */
     DragAction(frameNode_, startOffset, 51, velocity);
@@ -500,7 +516,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-520.0f));
 
     /**
-     * @tc.steps: step8. Drag end with velocity and over the edge
+     * @tc.steps: step9. Drag end with velocity and over the edge
      * @tc.expected: Align start
      */
     DragAction(frameNode_, startOffset, 100, 600);
@@ -744,16 +760,24 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Scroll Down, the delta is small
-     * @tc.expected: The item(index:3) align to end
+     * @tc.expected: Align start
      */
     Offset startOffset = Offset();
     float velocity = 0;
     DragAction(frameNode_, startOffset, -1, velocity);
-    EXPECT_TRUE(TickPosition(-10.5f));
+    EXPECT_TRUE(TickPosition(-0.5f));
+    EXPECT_TRUE(TickPosition(0));
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta greater than half of DEVIATION_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    DragAction(frameNode_, startOffset, -11, velocity);
+    EXPECT_TRUE(TickPosition(-15.5f));
     EXPECT_TRUE(TickPosition(-20.0f));
 
     /**
-     * @tc.steps: step2. Scroll Down, the delta less than half of big item
+     * @tc.steps: step3. Scroll Down, the delta less than half of big item
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, -74, velocity);
@@ -761,7 +785,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-20.0f));
 
     /**
-     * @tc.steps: step3. Scroll Down, the delta greater than half of big item
+     * @tc.steps: step4. Scroll Down, the delta greater than half of big item
      * @tc.expected: The item(index:4) align to end
      */
     DragAction(frameNode_, startOffset, -75, velocity);
@@ -769,7 +793,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-170.0f));
 
     /**
-     * @tc.steps: step4. Scroll Up, the delta less than half of big item
+     * @tc.steps: step5. Scroll Up, the delta less than half of big item
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 75, velocity);
@@ -777,7 +801,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-170.0f));
 
     /**
-     * @tc.steps: step5. Scroll Up, the delta greater than half of big item
+     * @tc.steps: step6. Scroll Up, the delta greater than half of big item
      * @tc.expected: The item(index:3) align to end
      */
     DragAction(frameNode_, startOffset, 76, velocity);
