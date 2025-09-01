@@ -22,6 +22,7 @@
 #define private public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -68,6 +69,18 @@ public:
     RefPtr<FrameNode> CreateFolder(const std::function<void(FolderStackModelNG)>& callback)
     {
         FolderStackModelNG model;
+        model.Create();
+        if (callback) {
+            callback(model);
+        }
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
+
+    RefPtr<FrameNode> CreateStack(const std::function<void(StackModelNG)>& callback)
+    {
+        StackModelNG model;
         model.Create();
         if (callback) {
             callback(model);
@@ -684,6 +697,52 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent001, TestSize.Level0)
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
         << frameNode->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
+        << folder1->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: FolderStackTestNgMatchParent002
+ * @tc.desc: Test folderStack match parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+
+    RefPtr<FrameNode> folder;
+    RefPtr<FrameNode> folder1;
+
+    auto stack = CreateStack([this, &folder, &folder1](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        folder = CreateFolder([this, &folder1](FolderStackModelNG model) {
+            folder1 = CreateFolder([this, &folder1](FolderStackModelNG model) {});
+        });
+    });
+    ASSERT_NE(folder, nullptr);
+    auto layoutProperty = folder->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    auto childLayoutProperty = folder1->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    FlushUITasks(stack);
+
+    EXPECT_EQ(folder->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
+        << folder->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
     EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
         << folder1->GetGeometryNode()->GetFrameRect().ToString();
 }
