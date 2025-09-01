@@ -197,10 +197,13 @@ HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_003, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->contextSelectOverlay_ = nullptr;
-
     webPattern->CloseContextSelectionMenu();
-    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
+    auto textBase = WeakPtr<TextBase>();
+    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlayfalse>(textBase);
+    webPattern->contextSelectOverlay_ = contextSelectOverlay;
+    webPattern->CloseContextSelectionMenu();
+    ASSERT_NE(webPattern->contextSelectOverlay_, nullptr);
+    EXPECT_EQ(webPattern->contextSelectOverlay_->IsCurrentMenuVisibile(), false);
 #endif
 }
 
