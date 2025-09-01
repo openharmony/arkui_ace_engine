@@ -373,18 +373,17 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     if (!queryWord.empty()) {
         selectInfo.menuInfo.showSearch = true;
         selectInfo.menuInfo.showTranslate = true;
-        selectInfo.menuInfo.showShare = true;
     } else {
         selectInfo.menuInfo.showSearch = false;
         selectInfo.menuInfo.showTranslate = false;
-        selectInfo.menuInfo.showShare = false;
     }
     selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
         (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
     // should be the last
-    canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+    canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
-    canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
+    canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     DetectSelectedText(detectFlag ? value : std::string());
 }
@@ -1171,7 +1170,7 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showShare != IsNeedMenuShare()) {
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShare())) {
             info->menuInfo.showShare = !info->menuInfo.showShare;
             manager->NotifyUpdateToolBar(true);
         }

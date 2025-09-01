@@ -3082,7 +3082,7 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_001, TestSize.Level1)
     EXPECT_EQ(selectInfo.menuInfo.showShare, false);
     EXPECT_EQ(selectInfo.menuInfo.showSearch, false);
     EXPECT_EQ(selectInfo.menuInfo.showTranslate, false);
-    OHOS::Ace::SetReturnStatus("t");
+    OHOS::Ace::SetReturnStatus("true");
     overlay.SetMenuOptions(selectInfo, params, callback);
     EXPECT_EQ(selectInfo.menuInfo.showShare, true);
     EXPECT_EQ(selectInfo.menuInfo.showSearch, true);
