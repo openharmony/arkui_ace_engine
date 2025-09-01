@@ -291,6 +291,9 @@ void FreeScrollController::HandleOffsetUpdate(const OffsetF& currentValue)
             [weak = WeakClaim(this)]() {
                 auto self = weak.Upgrade();
                 CHECK_NULL_VOID(self);
+                if (self->state_ == State::FLING) {
+                    return; // don't trigger if we transitioned to FLING state
+                }
                 self->HandleAnimationEnd();
             });
         state_ = State::BOUNCE;
