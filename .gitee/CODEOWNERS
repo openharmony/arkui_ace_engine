@@ -2992,6 +2992,7 @@ frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
 frameworks/core/interfaces/native/utility/reverse_converter.cpp @huawei_g_five
+frameworks/core/interfaces/native/utility/reverse_converter_enums.cpp @arkui_architecture
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/common_method_modifier.cpp @arkuiframework
 interfaces/native/BUILD.gn @arkui_architecture
