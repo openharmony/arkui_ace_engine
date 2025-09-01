@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
+Ark_DecorationStyle ConstructImpl(const Ark_DecorationStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
     if (value) {
@@ -72,7 +72,7 @@ const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
 {
     static const GENERATED_ArkUIDecorationStyleAccessor DecorationStyleAccessorImpl {
         DecorationStyleAccessor::DestroyPeerImpl,
-        DecorationStyleAccessor::CtorImpl,
+        DecorationStyleAccessor::ConstructImpl,
         DecorationStyleAccessor::GetFinalizerImpl,
         DecorationStyleAccessor::GetTypeImpl,
         DecorationStyleAccessor::GetColorImpl,

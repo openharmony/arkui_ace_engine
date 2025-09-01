@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_ClientAuthenticationHandler peer)
     peer->handler = nullptr;
     delete peer;
 }
-Ark_ClientAuthenticationHandler CtorImpl()
+Ark_ClientAuthenticationHandler ConstructImpl()
 {
     return new ClientAuthenticationHandlerPeer();
 }
@@ -69,7 +69,7 @@ const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticatio
 {
     static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
         ClientAuthenticationHandlerAccessor::DestroyPeerImpl,
-        ClientAuthenticationHandlerAccessor::CtorImpl,
+        ClientAuthenticationHandlerAccessor::ConstructImpl,
         ClientAuthenticationHandlerAccessor::GetFinalizerImpl,
         ClientAuthenticationHandlerAccessor::Confirm0Impl,
         ClientAuthenticationHandlerAccessor::Confirm1Impl,

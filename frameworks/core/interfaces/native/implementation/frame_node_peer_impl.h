@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
-#include <mutex>
 #include <vector>
 
 #include "ui/base/referenced.h"
@@ -30,8 +29,9 @@ struct FrameNodePeer {
 
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
     int32_t nodeId_ = -1;
+#ifdef WRONG_GEN1
     static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
-    static std::mutex peerMapMutex_;
+#endif
 
     static FrameNodePeer* Create(Ark_UIContext uiContext)
     {
@@ -40,7 +40,7 @@ struct FrameNodePeer {
 
     static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
-        std::lock_guard<std::mutex> lock(peerMapMutex_);
+#ifdef WRONG_GEN1
         auto it = peerMap_.find(src->GetId());
         if (it != peerMap_.end()) {
             return (it->second).get();
@@ -54,6 +54,8 @@ struct FrameNodePeer {
         peerMap_.emplace(src->GetId(), frameNode);
         frameNode->nodeId_ = src->GetId();
         return frameNode.get();
+#endif
+        return nullptr;
     }
 
     static FrameNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
@@ -63,10 +65,11 @@ struct FrameNodePeer {
 
     static void Destroy(FrameNodePeer* peer)
     {
+#ifdef WRONG_GEN1
         if (peer) {
-            std::lock_guard<std::mutex> lock(peerMapMutex_);
             peerMap_.erase(peer->nodeId_);
         }
+#endif
     }
 
     static OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> GetFrameNodeByPeer(FrameNodePeer* peer)

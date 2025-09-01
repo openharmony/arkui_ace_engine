@@ -42,7 +42,7 @@ void DestroyPeerImpl(Ark_PatternLockController peer)
         delete peerImpl;
     }
 }
-Ark_PatternLockController CtorImpl()
+Ark_PatternLockController ConstructImpl()
 {
     return reinterpret_cast<PatternLockControllerPeer *>(new PatternLockControllerPeerImpl());
 }
@@ -71,7 +71,7 @@ const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAcce
 {
     static const GENERATED_ArkUIPatternLockControllerAccessor PatternLockControllerAccessorImpl {
         PatternLockControllerAccessor::DestroyPeerImpl,
-        PatternLockControllerAccessor::CtorImpl,
+        PatternLockControllerAccessor::ConstructImpl,
         PatternLockControllerAccessor::GetFinalizerImpl,
         PatternLockControllerAccessor::ResetImpl,
         PatternLockControllerAccessor::SetChallengeResultImpl,

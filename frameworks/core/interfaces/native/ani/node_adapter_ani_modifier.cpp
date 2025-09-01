@@ -16,7 +16,6 @@
 #include "node_adapter_ani_modifier.h"
 
 #include <array>
-#include <memory>
 
 #include "ui/base/utils/utils.h"
 
@@ -97,7 +96,7 @@ ani_boolean NodeAdapterAttachNodeAdapter(ani_long ptr, ani_long node)
 void NodeAdapterDispose(ani_long ptr)
 {
     auto adapter = reinterpret_cast<UINodeAdapter*>(ptr);
-    CHECK_NULL_VOID(adapter);
+    CHECK_NULL_VOID(ptr);
     adapter->DecRefCount();
 }
 

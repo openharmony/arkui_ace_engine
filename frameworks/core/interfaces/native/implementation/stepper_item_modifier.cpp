@@ -48,8 +48,8 @@ void SetStepperItemOptionsImpl(Ark_NativePointer node)
 }
 } // StepperItemInterfaceModifier
 namespace StepperItemAttributeModifier {
-void PrevLabelImpl(Ark_NativePointer node,
-                   const Opt_String* value)
+void SetPrevLabelImpl(Ark_NativePointer node,
+                      const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -61,8 +61,8 @@ void PrevLabelImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<std::string>(value->value);
     StepperItemModelStatic::SetPrevLabel(frameNode, convValue);
 }
-void NextLabelImpl(Ark_NativePointer node,
-                   const Opt_String* value)
+void SetNextLabelImpl(Ark_NativePointer node,
+                      const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -74,8 +74,8 @@ void NextLabelImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<std::string>(value->value);
     StepperItemModelStatic::SetNextLabel(frameNode, convValue);
 }
-void StatusImpl(Ark_NativePointer node,
-                const Opt_ItemState* value)
+void SetStatusImpl(Ark_NativePointer node,
+                   const Opt_ItemState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -85,7 +85,7 @@ void StatusImpl(Ark_NativePointer node,
             frameNode, StepperItemModelStatic::ITEM_STATE.at(StepperItemModelStatic::ItemState::NORMAL));
         return;
     }
-    auto convValue = value ? Converter::OptConvert<StepperItemModelStatic::ItemState>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<StepperItemModelStatic::ItemState>(value);
     if (convValue.has_value()) {
         StepperItemModelStatic::SetStatus(frameNode, StepperItemModelStatic::ITEM_STATE.at(convValue.value()));
     } else {
@@ -98,9 +98,9 @@ const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()
     static const GENERATED_ArkUIStepperItemModifier ArkUIStepperItemModifierImpl {
         StepperItemModifier::ConstructImpl,
         StepperItemInterfaceModifier::SetStepperItemOptionsImpl,
-        StepperItemAttributeModifier::PrevLabelImpl,
-        StepperItemAttributeModifier::NextLabelImpl,
-        StepperItemAttributeModifier::StatusImpl,
+        StepperItemAttributeModifier::SetPrevLabelImpl,
+        StepperItemAttributeModifier::SetNextLabelImpl,
+        StepperItemAttributeModifier::SetStatusImpl,
     };
     return &ArkUIStepperItemModifierImpl;
 }

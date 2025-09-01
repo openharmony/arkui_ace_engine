@@ -15,19 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/custom/custom_node_static.h"
-#include "core/interfaces/native/implementation/view_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ViewAccessor {
 void DestroyPeerImpl(Ark_View peer)
 {
-    PeerUtils::DestroyPeer(peer);
 }
 Ark_View CtorImpl()
 {
-    return PeerUtils::CreatePeer<ViewPeer>();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,14 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer CreateImpl(Ark_View peer,
                              Ark_NativePointer value)
 {
-    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto viewIdStr = std::to_string(viewId);
-    std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
-    struct NodeKoalaInfo info {
-        .jsViewName = key
-    };
-    auto customNode = NG::CustomNodeStatic::ConstructCustomNode(viewId, std::move(info));
-    return customNode;
+    return {};
 }
 } // ViewAccessor
 const GENERATED_ArkUIViewAccessor* GetViewAccessor()

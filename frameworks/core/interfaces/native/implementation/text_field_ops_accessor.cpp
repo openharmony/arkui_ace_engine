@@ -41,28 +41,9 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
         auto changed = pattern->InitValueText(text.value());
         pattern->SetTextChangedAtCreation(changed);
     }
-    bool typeIsString = value->selector == 0;
-    Opt_Number resourceType = value->value1.type;
-    auto onEvent = [resourceType, typeIsString, arkCallback = CallbackHelper(*callback)]
-        (const std::u16string& content) {
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
         Converter::ConvContext ctx;
-        Ark_ResourceStr arkContent;
-        if (typeIsString) {
-            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
-        } else {
-            auto container = Container::Current();
-            if (!container) {
-                LOGW("container is null");
-                return;
-            }
-            auto u8Content = UtfUtils::Str16DebugToStr8(content);
-            auto arkResourceContent = Converter::ArkCreate<Ark_Resource>(u8Content,
-                ResourceType::STRING, &ctx);
-            arkResourceContent.bundleName = Converter::ArkValue<Ark_String>(container->GetBundleName(), &ctx);
-            arkResourceContent.moduleName = Converter::ArkValue<Ark_String>(container->GetModuleName(), &ctx);
-            arkResourceContent.type = resourceType;
-            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(arkResourceContent, &ctx);
-        }
+        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
         arkCallback.InvokeSync(arkContent);
     };
     TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));

@@ -34,7 +34,6 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
-const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(Ark_CanvasRenderer peer)
@@ -44,7 +43,7 @@ void DestroyPeerImpl(Ark_CanvasRenderer peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_CanvasRenderer CtorImpl()
+Ark_CanvasRenderer ConstructImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
     peerImpl->IncRefCount();
@@ -79,7 +78,7 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -116,7 +115,7 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -165,7 +164,7 @@ void DrawImage2Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
+        [&params, peerImpl](const Ark_image_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -184,8 +183,7 @@ void Clip0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Clip(ruleStr);
 }
 void Clip1Impl(Ark_CanvasRenderer peer,
@@ -196,10 +194,9 @@ void Clip1Impl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
     auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Clip(ruleStr, pathImpl->GetCanvasPath2d());
 }
 void Fill0Impl(Ark_CanvasRenderer peer,
@@ -208,8 +205,7 @@ void Fill0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Fill(ruleStr);
 }
 void Fill1Impl(Ark_CanvasRenderer peer,
@@ -220,29 +216,23 @@ void Fill1Impl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
     auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Fill(ruleStr, pathImpl->GetCanvasPath2d());
 }
-void Stroke0Impl(Ark_CanvasRenderer peer)
+void StrokeImpl(Ark_CanvasRenderer peer,
+                const Opt_Path2D* path)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->Stroke();
-}
-void Stroke1Impl(Ark_CanvasRenderer peer,
-                 Ark_Path2D path)
-{
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(path);
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
-    CHECK_NULL_VOID(pathImpl);
-    peerImpl->Stroke(pathImpl->GetCanvasPath2d());
+    auto optPath = Converter::GetOptPtr(path);
+    RefPtr<CanvasPath2D> arg;
+    if (optPath && optPath.value()) {
+        auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(optPath.value());
+        arg = pathImpl->GetCanvasPath2d();
+    }
+    peerImpl->Stroke(arg);
 }
 Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
                                             const Ark_Number* x0,
@@ -262,7 +252,7 @@ Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
     double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
     auto gradient = peerImpl->CreateLinearGradient(cx0, cy0, cx1, cy1);
     CHECK_NULL_RETURN(gradient, {});
-    auto canvasGradientPeer = GetCanvasGradientAccessor()->ctor();
+    auto canvasGradientPeer = GetCanvasGradientAccessor()->construct();
     CHECK_NULL_RETURN(canvasGradientPeer, {});
     canvasGradientPeer->SetGradient(gradient);
     return canvasGradientPeer;
@@ -276,9 +266,8 @@ Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, invalid);
     CHECK_NULL_RETURN(image, invalid);
-    CHECK_NULL_RETURN(repetition, invalid);
-    auto repeat = Converter::OptConvert<std::string>(*repetition);
-    auto pattern = GetCanvasPatternAccessor()->ctor();
+    auto repeat = Converter::OptConvertPtr<std::string>(repetition);
+    auto pattern = GetCanvasPatternAccessor()->construct();
     peerImpl->CreatePattern(image, pattern, repeat);
     return Converter::ArkValue<Opt_CanvasPattern>(pattern);
 }
@@ -308,7 +297,7 @@ Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
     };
     auto gradient = peerImpl->CreateRadialGradient(params);
     CHECK_NULL_RETURN(gradient, {});
-    auto canvasGradientPeer = GetCanvasGradientAccessor()->ctor();
+    auto canvasGradientPeer = GetCanvasGradientAccessor()->construct();
     CHECK_NULL_RETURN(canvasGradientPeer, {});
     canvasGradientPeer->SetGradient(gradient);
     return canvasGradientPeer;
@@ -328,7 +317,7 @@ Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
     double cy = static_cast<double>(Converter::Convert<float>(*y));
     auto gradient = peerImpl->CreateConicGradient(cx, cy, ca);
     CHECK_NULL_RETURN(gradient, {});
-    auto canvasGradientPeer = GetCanvasGradientAccessor()->ctor();
+    auto canvasGradientPeer = GetCanvasGradientAccessor()->construct();
     CHECK_NULL_RETURN(canvasGradientPeer, {});
     canvasGradientPeer->SetGradient(gradient);
     return canvasGradientPeer;
@@ -355,7 +344,7 @@ Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
 Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
                                    Ark_ImageData imagedata)
@@ -375,7 +364,7 @@ Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
 Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
                                const Ark_Number* sx,
@@ -407,13 +396,13 @@ Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
     auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
     auto arkWidth = Converter::ArkValue<Ark_Number>(width);
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
+    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
 }
-Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
-                             const Ark_Number* sx,
-                             const Ark_Number* sy,
-                             const Ark_Number* sw,
-                             const Ark_Number* sh)
+Ark_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
+                                   const Ark_Number* sx,
+                                   const Ark_Number* sy,
+                                   const Ark_Number* sw,
+                                   const Ark_Number* sh)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -428,7 +417,7 @@ Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
     auto height = static_cast<double>(Converter::Convert<float>(*sh));
     auto pixelMap = peerImpl->GetPixelMap(x, y, width, height);
     CHECK_NULL_RETURN(pixelMap, {});
-    auto pixelMapPeer = GetPixelMapAccessor()->ctor();
+    auto pixelMapPeer = PeerUtils::CreatePeer<image_PixelMapPeer>();
     CHECK_NULL_RETURN(pixelMapPeer, {});
     pixelMapPeer->pixelMap = pixelMap;
     return pixelMapPeer;
@@ -583,13 +572,12 @@ void FillTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(text);
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
     auto valueX = static_cast<double>(Converter::Convert<float>(*x));
     auto valueY = static_cast<double>(Converter::Convert<float>(*y));
-    auto optMaxWidth = Converter::OptConvert<float>(*maxWidth);
+    auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->FillText(valueText, valueX, valueY, optMaxWidth);
 }
 Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
@@ -614,13 +602,12 @@ void StrokeTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(text);
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
     auto valueX = static_cast<double>(Converter::Convert<float>(*x));
     auto valueY = static_cast<double>(Converter::Convert<float>(*y));
-    auto optMaxWidth = Converter::OptConvert<float>(*maxWidth);
+    auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->StrokeText(valueText, valueX, valueY, optMaxWidth);
 }
 Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
@@ -628,7 +615,7 @@ Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(GetMatrix2DAccessor()->ctor());
+    auto matrixPeer = PeerUtils::CreatePeer<Matrix2DPeer>();
     peerImpl->GetTransform(matrixPeer);
     return matrixPeer;
 }
@@ -692,8 +679,8 @@ void SetTransform1Impl(Ark_CanvasRenderer peer,
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl && transform);
-    auto optMatrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    CHECK_NULL_VOID(peerImpl);
+    auto optMatrix = Converter::OptConvertPtr<Ark_Matrix2D>(transform);
     peerImpl->SetTransform(optMatrix);
 }
 void TransformImpl(Ark_CanvasRenderer peer,
@@ -736,14 +723,13 @@ void TranslateImpl(Ark_CanvasRenderer peer,
     peerImpl->Translate(transX, transY);
 }
 void SetPixelMapImpl(Ark_CanvasRenderer peer,
-                     const Opt_PixelMap* value)
+                     const Opt_image_PixelMap* value)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
+    auto opt = Converter::OptConvertPtr<Ark_image_PixelMap>(value);
     CHECK_NULL_VOID(opt);
     auto pixelMapPeer = opt.value();
     CHECK_NULL_VOID(pixelMapPeer);
@@ -838,14 +824,14 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     auto compositeStr = Converter::Convert<std::string>(*globalCompositeOperation);
     peerImpl->SetGlobalCompositeOperation(compositeStr);
 }
-Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFillStyleImpl there is no implementation in controller "
         "for getter method of FillStyle.");
     return {};
 }
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                      const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
+                      const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -857,8 +843,8 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetFillStyle(colorStr);
         },
-        [peerImpl](const Ark_Number& style) {
-            auto colorNum = Converter::Convert<uint32_t>(style);
+        [peerImpl](const Ark_Int32& style) {
+            auto colorNum = Converter::Convert<int32_t>(style);
             peerImpl->SetFillStyle(colorNum);
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
@@ -871,14 +857,14 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         []() {});
 }
-Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetStrokeStyleImpl there is no implementation in controller "
         "for getter method of StrokeStyle.");
     return {};
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                        const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
+                        const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -890,8 +876,8 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetStrokeStyle(colorStr);
         },
-        [peerImpl](const Ark_Number& style) {
-            auto colorNum = Converter::Convert<uint32_t>(style);
+        [peerImpl](const Ark_Int32& style) {
+            auto colorNum = Converter::Convert<int32_t>(style);
             peerImpl->SetStrokeStyle(colorNum);
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
@@ -1168,7 +1154,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
 {
     static const GENERATED_ArkUICanvasRendererAccessor CanvasRendererAccessorImpl {
         CanvasRendererAccessor::DestroyPeerImpl,
-        CanvasRendererAccessor::CtorImpl,
+        CanvasRendererAccessor::ConstructImpl,
         CanvasRendererAccessor::GetFinalizerImpl,
         CanvasRendererAccessor::DrawImage0Impl,
         CanvasRendererAccessor::DrawImage1Impl,
@@ -1178,8 +1164,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::Clip1Impl,
         CanvasRendererAccessor::Fill0Impl,
         CanvasRendererAccessor::Fill1Impl,
-        CanvasRendererAccessor::Stroke0Impl,
-        CanvasRendererAccessor::Stroke1Impl,
+        CanvasRendererAccessor::StrokeImpl,
         CanvasRendererAccessor::CreateLinearGradientImpl,
         CanvasRendererAccessor::CreatePatternImpl,
         CanvasRendererAccessor::CreateRadialGradientImpl,

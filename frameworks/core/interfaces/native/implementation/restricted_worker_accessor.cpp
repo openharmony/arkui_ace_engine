@@ -22,10 +22,10 @@ namespace RestrictedWorkerAccessor {
 void DestroyPeerImpl(Ark_RestrictedWorker peer)
 {
 }
-Ark_RestrictedWorker CtorImpl(const Ark_String* scriptURL,
-                              const Opt_WorkerOptions* options)
+Ark_RestrictedWorker ConstructImpl(const Ark_String* scriptURL,
+                                   const Opt_WorkerOptions* options)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,13 +52,13 @@ void PostMessageWithSharedSendableImpl(Ark_VMContext vmContext,
 void OnImpl(Ark_VMContext vmContext,
             Ark_RestrictedWorker peer,
             const Ark_String* Type,
-            Ark_WorkerEventListener listener)
+            const WorkerEventListener* listener)
 {
 }
 void OnceImpl(Ark_VMContext vmContext,
               Ark_RestrictedWorker peer,
               const Ark_String* Type,
-              Ark_WorkerEventListener listener)
+              const WorkerEventListener* listener)
 {
 }
 void OffImpl(Ark_VMContext vmContext,
@@ -74,7 +74,7 @@ void TerminateImpl(Ark_VMContext vmContext,
 void AddEventListenerImpl(Ark_VMContext vmContext,
                           Ark_RestrictedWorker peer,
                           const Ark_String* Type,
-                          Ark_WorkerEventListener listener)
+                          const WorkerEventListener* listener)
 {
 }
 Ark_Boolean DispatchEventImpl(Ark_VMContext vmContext,
@@ -109,7 +109,7 @@ Opt_RestrictedWorker_onexit_Callback GetOnexitImpl(Ark_RestrictedWorker peer)
     return {};
 }
 void SetOnexitImpl(Ark_RestrictedWorker peer,
-                   const RestrictedWorker_onexit_Callback* onexit)
+                   const Opt_RestrictedWorker_onexit_Callback* onexit)
 {
 }
 Opt_RestrictedWorker_onerror_Callback GetOnerrorImpl(Ark_RestrictedWorker peer)
@@ -117,7 +117,7 @@ Opt_RestrictedWorker_onerror_Callback GetOnerrorImpl(Ark_RestrictedWorker peer)
     return {};
 }
 void SetOnerrorImpl(Ark_RestrictedWorker peer,
-                    const RestrictedWorker_onerror_Callback* onerror)
+                    const Opt_RestrictedWorker_onerror_Callback* onerror)
 {
 }
 Opt_RestrictedWorker_onmessage_Callback GetOnmessageImpl(Ark_RestrictedWorker peer)
@@ -125,7 +125,7 @@ Opt_RestrictedWorker_onmessage_Callback GetOnmessageImpl(Ark_RestrictedWorker pe
     return {};
 }
 void SetOnmessageImpl(Ark_RestrictedWorker peer,
-                      const RestrictedWorker_onmessage_Callback* onmessage)
+                      const Opt_RestrictedWorker_onmessage_Callback* onmessage)
 {
 }
 Opt_RestrictedWorker_onmessage_Callback GetOnmessageerrorImpl(Ark_RestrictedWorker peer)
@@ -133,7 +133,7 @@ Opt_RestrictedWorker_onmessage_Callback GetOnmessageerrorImpl(Ark_RestrictedWork
     return {};
 }
 void SetOnmessageerrorImpl(Ark_RestrictedWorker peer,
-                           const RestrictedWorker_onmessage_Callback* onmessageerror)
+                           const Opt_RestrictedWorker_onmessage_Callback* onmessageerror)
 {
 }
 } // RestrictedWorkerAccessor
@@ -141,7 +141,7 @@ const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor()
 {
     static const GENERATED_ArkUIRestrictedWorkerAccessor RestrictedWorkerAccessorImpl {
         RestrictedWorkerAccessor::DestroyPeerImpl,
-        RestrictedWorkerAccessor::CtorImpl,
+        RestrictedWorkerAccessor::ConstructImpl,
         RestrictedWorkerAccessor::GetFinalizerImpl,
         RestrictedWorkerAccessor::PostMessage0Impl,
         RestrictedWorkerAccessor::PostMessage1Impl,

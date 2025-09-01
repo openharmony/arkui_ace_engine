@@ -31,7 +31,7 @@ void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_GestureRecognizer CtorImpl()
+Ark_GestureRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<GestureRecognizerPeer>();
 }
@@ -92,7 +92,7 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
     auto recognizer = peer->GetRecognizer().Upgrade();
     CHECK_NULL_RETURN(recognizer, nullptr);
     auto attachNode = recognizer->GetAttachedNode().Upgrade();
-    CHECK_NULL_RETURN(attachNode, GetEventTargetInfoAccessor()->ctor());
+    CHECK_NULL_RETURN(attachNode, GetEventTargetInfoAccessor()->construct());
     RefPtr<Pattern> pattern;
     if (auto swiperPattern = attachNode->GetPattern<SwiperPattern>()) {
         pattern = swiperPattern;
@@ -101,12 +101,12 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
     }
     Ark_EventTargetInfo result{};
     if (pattern) {
-        auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->ctor();
+        auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->construct();
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
         result = scrollableTargetInfoPeer;
     } else {
-        auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
+        auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->construct();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
         eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
@@ -139,7 +139,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
     static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
         GestureRecognizerAccessor::DestroyPeerImpl,
-        GestureRecognizerAccessor::CtorImpl,
+        GestureRecognizerAccessor::ConstructImpl,
         GestureRecognizerAccessor::GetFinalizerImpl,
         GestureRecognizerAccessor::GetTagImpl,
         GestureRecognizerAccessor::GetTypeImpl,

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_BaseGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaseGestureEvent CtorImpl()
+Ark_BaseGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<BaseGestureEventPeerImpl>();
 }
@@ -61,11 +61,10 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {
     static const GENERATED_ArkUIBaseGestureEventAccessor BaseGestureEventAccessorImpl {
         BaseGestureEventAccessor::DestroyPeerImpl,
-        BaseGestureEventAccessor::CtorImpl,
+        BaseGestureEventAccessor::ConstructImpl,
         BaseGestureEventAccessor::GetFinalizerImpl,
         BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
-        BaseGestureEventAccessor::GetTypeImpl
     };
     return &BaseGestureEventAccessorImpl;
 }

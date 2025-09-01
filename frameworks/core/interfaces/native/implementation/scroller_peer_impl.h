@@ -19,7 +19,6 @@
 #include "core/common/container_consts.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
-#include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -38,7 +37,7 @@ public:
     Ark_OffsetResult TriggerCurrentOffset();
     void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
-    void TriggerScrollBy(const Opt_Length* dx, const Opt_Length* dy);
+    void TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset);
     Ark_Boolean TriggerIsAtEnd();
     Ark_RectResult TriggerGetItemRect(const Ark_Number* index);
     Ark_Int32 TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y);
@@ -50,13 +49,6 @@ public:
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
-        auto oldController = controllerWeak_.Upgrade();
-        if (oldController) {
-            oldController->SetObserverManager(nullptr);
-        }
-        if (controller) {
-            controller->SetObserverManager(observerMgr_);
-        }
         controllerWeak_ = WeakPtr(controller);
     }
 
@@ -80,16 +72,6 @@ public:
         return instanceId_;
     }
 
-    void AddObserver(const ScrollerObserver& observer, int32_t id)
-    {
-        observerMgr_->AddObserver(observer, id);
-    }
- 
-    void RemoveObserver(int32_t id)
-    {
-        observerMgr_->RemoveObserver(id);
-    }
-
 private:
     WeakPtr<ScrollControllerBase> controllerWeak_;
     WeakPtr<ScrollProxy> scrollBarProxyWeak_;
@@ -97,8 +79,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ScrollerPeerImpl);
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
-
-    RefPtr<ScrollerObserverManager> observerMgr_ = MakeRefPtr<ScrollerObserverManager>();
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

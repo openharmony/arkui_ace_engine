@@ -15,13 +15,15 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UNIFIED_DATA_ACCESSOR_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UNIFIED_DATA_ACCESSOR_PEER_IMPL_H
 
-#include "core/common/udmf/unified_data.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/unified_data.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct UnifiedDataPeer {
-    UnifiedDataPeer() = default;
-    virtual ~UnifiedDataPeer() = default;
-
+struct unifiedDataChannel_UnifiedDataPeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+
+protected:
+    unifiedDataChannel_UnifiedDataPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UNIFIED_DATA_ACCESSOR_PEER_IMPL_H

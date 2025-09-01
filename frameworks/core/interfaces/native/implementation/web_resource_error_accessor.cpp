@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_WebResourceError peer)
 {
     delete peer;
 }
-Ark_WebResourceError CtorImpl()
+Ark_WebResourceError ConstructImpl()
 {
     return new WebResourceErrorPeer();
 }
@@ -40,18 +40,18 @@ Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
     result = peer->handler->GetInfo();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
+Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Int32>(peer->handler->GetCode());
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetCode());
 }
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
 {
     static const GENERATED_ArkUIWebResourceErrorAccessor WebResourceErrorAccessorImpl {
         WebResourceErrorAccessor::DestroyPeerImpl,
-        WebResourceErrorAccessor::CtorImpl,
+        WebResourceErrorAccessor::ConstructImpl,
         WebResourceErrorAccessor::GetFinalizerImpl,
         WebResourceErrorAccessor::GetErrorInfoImpl,
         WebResourceErrorAccessor::GetErrorCodeImpl,

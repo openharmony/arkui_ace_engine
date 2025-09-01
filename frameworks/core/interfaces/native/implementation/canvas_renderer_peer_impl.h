@@ -74,7 +74,7 @@ public:
     static RefPtr<CanvasPath2D> MakePath2D();
     void DrawImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
     void DrawSvgImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
-    void DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params);
+    void DrawPixelMap(image_PixelMapPeer* pixelMap, const DrawImageParam& params);
     void BeginPath();
     void Clip(const std::optional<std::string>& ruleStr);
     void Clip(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path);

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_TextAreaController peer)
 {
     delete peer;
 }
-Ark_TextAreaController CtorImpl()
+Ark_TextAreaController ConstructImpl()
 {
     return new TextAreaControllerPeer();
 }
@@ -44,7 +44,7 @@ void SetTextSelectionImpl(Ark_TextAreaController peer,
                           const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->controller_->SetTextSelection(
         Converter::Convert<int32_t>(*selectionStart),
         Converter::Convert<int32_t>(*selectionEnd),
@@ -60,7 +60,7 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
 {
     static const GENERATED_ArkUITextAreaControllerAccessor TextAreaControllerAccessorImpl {
         TextAreaControllerAccessor::DestroyPeerImpl,
-        TextAreaControllerAccessor::CtorImpl,
+        TextAreaControllerAccessor::ConstructImpl,
         TextAreaControllerAccessor::GetFinalizerImpl,
         TextAreaControllerAccessor::CaretPositionImpl,
         TextAreaControllerAccessor::SetTextSelectionImpl,

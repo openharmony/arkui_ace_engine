@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
@@ -111,7 +110,7 @@ template<>
 BadgeParameters Convert(const Ark_BadgeParamWithString& src)
 {
     BadgeParameters dst = ConverterHelper(src);
-    dst.badgeValue = Converter::Convert<std::string>(src.value);
+    dst.badgeValue = Converter::OptConvert<std::string>(src.value);
     return dst;
 }
 
@@ -138,37 +137,34 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // BadgeModifier
 namespace BadgeInterfaceModifier {
-template<typename T>
-void SetBadgeParamBase(Ark_NativePointer node, const T* value)
+
+BadgeParameters ParseBadgeParameter(const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
+{
+    if (value->selector == SELECTOR_ID_0) {
+        return  Converter::Convert<BadgeParameters>(value->value0);
+    }
+    return Converter::Convert<BadgeParameters>(value->value1);
+}
+
+void SetBadgeOptionsImpl(Ark_NativePointer node,
+                         const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    BadgeParameters badgeParameters = Converter::Convert<BadgeParameters>(*value);
+    BadgeParameters badgeParameters = ParseBadgeParameter(value);
     bool isDefaultFontSize = !badgeParameters.badgeFontSize.has_value();
     bool isDefaultBadgeSize = !badgeParameters.badgeCircleSize.has_value();
 
     BadgeModelNG::SetBadgeParam(frameNode, badgeParameters, isDefaultFontSize, isDefaultBadgeSize);
-}
-
-void SetBadgeOptions0Impl(Ark_NativePointer node,
-                          const Ark_BadgeParamWithNumber* value)
-{
-    SetBadgeParamBase(node, value);
-}
-void SetBadgeOptions1Impl(Ark_NativePointer node,
-                          const Ark_BadgeParamWithString* value)
-{
-    SetBadgeParamBase(node, value);
 }
 } // BadgeInterfaceModifier
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier()
 {
     static const GENERATED_ArkUIBadgeModifier ArkUIBadgeModifierImpl {
         BadgeModifier::ConstructImpl,
-        BadgeInterfaceModifier::SetBadgeOptions0Impl,
-        BadgeInterfaceModifier::SetBadgeOptions1Impl,
+        BadgeInterfaceModifier::SetBadgeOptionsImpl,
     };
     return &ArkUIBadgeModifierImpl;
 }

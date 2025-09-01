@@ -24,18 +24,12 @@ void EmitClickEventImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetEmitClickEvent(frameNode, convValue);
 }
 void EmitTextInputEventImpl(Ark_NativePointer node,
                             const Ark_String* text)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetEmitTextInputEvent(frameNode, convValue);
 }
 } // EventEmulatorAccessor
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()

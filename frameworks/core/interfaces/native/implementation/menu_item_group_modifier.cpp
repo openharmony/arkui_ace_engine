@@ -17,7 +17,6 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupModifier {
@@ -36,7 +35,7 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkOptions = Converter::OptConvert<Ark_MenuItemGroupOptions>(*value);
+    auto arkOptions = Converter::OptConvertPtr<Ark_MenuItemGroupOptions>(value);
     CHECK_NULL_VOID(arkOptions);
     Converter::VisitUnion(arkOptions.value().header,
         [frameNode, node](const Ark_ResourceStr& value) {

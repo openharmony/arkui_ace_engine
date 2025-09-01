@@ -56,7 +56,7 @@ void DestroyPeerImpl(Ark_MouseEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_MouseEvent CtorImpl()
+Ark_MouseEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<MouseEventPeer>();
 }
@@ -200,54 +200,6 @@ void SetWindowYImpl(Ark_MouseEvent peer,
     globalLocation.SetY(yConvert, animation);
     info->SetGlobalLocation(globalLocation);
 }
-Ark_Number GetScreenXImpl(Ark_MouseEvent peer)
-{
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& globalLocation = info->GetGlobalLocation();
-    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(value);
-}
-void SetScreenXImpl(Ark_MouseEvent peer,
-                    const Ark_Number* screenX)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(screenX);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    auto globalLocation = info->GetGlobalLocation();
-    const auto animation = globalLocation.GetXAnimationOption();
-    auto value = Converter::Convert<float>(*screenX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetX(xConvert, animation);
-    info->SetGlobalLocation(globalLocation);
-}
-Ark_Number GetScreenYImpl(Ark_MouseEvent peer)
-{
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& globalLocation = info->GetGlobalLocation();
-    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(value);
-}
-void SetScreenYImpl(Ark_MouseEvent peer,
-                    const Ark_Number* screenY)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(screenY);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    auto globalLocation = info->GetGlobalLocation();
-    const auto animation = globalLocation.GetYAnimationOption();
-    auto value = Converter::Convert<float>(*screenY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetY(yConvert, animation);
-    info->SetGlobalLocation(globalLocation);
-}
 Ark_Number GetXImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
@@ -323,15 +275,16 @@ Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
     return Converter::ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaX()));
 }
 void SetRawDeltaXImpl(Ark_MouseEvent peer,
-                      const Ark_Number* rawDeltaX)
+                      const Opt_Number* rawDeltaX)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(rawDeltaX);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto value = Converter::Convert<float>(*rawDeltaX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    info->SetRawDeltaX(xConvert);
+    auto valueX = Converter::OptConvertPtr<float>(rawDeltaX);
+    if (valueX) {
+        info->SetRawDeltaX(valueX.value());
+    }
 }
 Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
@@ -342,15 +295,16 @@ Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
     return Converter::ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaY()));
 }
 void SetRawDeltaYImpl(Ark_MouseEvent peer,
-                      const Ark_Number* rawDeltaY)
+                      const Opt_Number* rawDeltaY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(rawDeltaY);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto value = Converter::Convert<float>(*rawDeltaY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    info->SetRawDeltaY(yConvert);
+    auto valueY = Converter::OptConvertPtr<float>(rawDeltaY);
+    if (valueY) {
+        info->SetRawDeltaX(valueY.value());
+    }
 }
 Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
 {
@@ -361,27 +315,30 @@ Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
     return Converter::ArkValue<Opt_Array_MouseButton>(info->GetPressedButtons(), Converter::FC);
 }
 void SetPressedButtonsImpl(Ark_MouseEvent peer,
-                           const Array_MouseButton* pressedButtons)
+                           const Opt_Array_MouseButton* pressedButtons)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(pressedButtons);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     std::vector<MouseButton> buttons;
-    for (int i = 0; i < pressedButtons->length; ++i) {
-        auto mouseButton = Converter::OptConvert<MouseButton>(pressedButtons->array[i]);
-        if (mouseButton) {
-            buttons.push_back(mouseButton.value());
+    auto arrOpt  = Converter::OptConvertPtr<Array_MouseButton>(pressedButtons);
+    if (arrOpt) {
+        for (int i = 0; i < arrOpt->length; ++i) {
+            auto mouseButton = Converter::OptConvert<MouseButton>(arrOpt->array[i]);
+            if (mouseButton) {
+                buttons.push_back(mouseButton.value());
+            }
         }
+        info->SetPressedButtons(buttons);
     }
-    info->SetPressedButtons(buttons);
 }
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
 {
     static const GENERATED_ArkUIMouseEventAccessor MouseEventAccessorImpl {
         MouseEventAccessor::DestroyPeerImpl,
-        MouseEventAccessor::CtorImpl,
+        MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
@@ -395,10 +352,6 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetWindowXImpl,
         MouseEventAccessor::GetWindowYImpl,
         MouseEventAccessor::SetWindowYImpl,
-        MouseEventAccessor::GetScreenXImpl,
-        MouseEventAccessor::SetScreenXImpl,
-        MouseEventAccessor::GetScreenYImpl,
-        MouseEventAccessor::SetScreenYImpl,
         MouseEventAccessor::GetXImpl,
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,

@@ -29,6 +29,7 @@ Ark_NativePointer RegisterNavBarWidthCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(value, nullptr);
     auto width = Converter::OptConvert<Dimension>(*value);
     if (width.has_value() && width->IsNegative()) {
         width->SetValue(DEFAULT_NAV_BAR_WIDTH);
