@@ -713,7 +713,7 @@ bool IsLongPreviewMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& para
 
 void WebPattern::ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
-    auto onPreviewMenuAppear = [onAppear = std::move(param->menuParam.onDisappear),
+    auto onPreviewMenuAppear = [onAppear = std::move(param->menuParam.onAppear),
                                 onMenuShow = param->onMenuShow]() {
         TAG_LOGD(AceLogTag::ACE_WEB, "onLongPreviewMenuAppear");
         if (onAppear) {
