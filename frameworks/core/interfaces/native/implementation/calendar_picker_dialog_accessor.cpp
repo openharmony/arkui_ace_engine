@@ -102,11 +102,15 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     std::vector<ButtonInfo> buttonInfos;
     auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
     if (acceptButtonInfo.has_value()) {
-        buttonInfos.push_back(acceptButtonInfo.value());
+        buttonInfos.emplace_back(acceptButtonInfo.value());
+        buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonInfo = Converter::OptConvert<ButtonInfo>(options.cancelButtonStyle);
     if (cancelButtonInfo.has_value()) {
-        buttonInfos.push_back(cancelButtonInfo.value());
+        buttonInfos.emplace_back(cancelButtonInfo.value());
     }
     return buttonInfos;
 }
