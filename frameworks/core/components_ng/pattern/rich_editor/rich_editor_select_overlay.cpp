@@ -149,12 +149,12 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(pattern->HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!pattern->spans_.empty());
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
+    auto contentHost = pattern->GetContentHost();
+    CHECK_NULL_VOID(contentHost);
     // the handle position is calculated based on the middle of the handle height.
     auto handleOffset = GetHandleReferenceOffset(handleRect);
     UpdateSelectorOnHandleMove(handleOffset, isFirst);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
@@ -221,8 +221,8 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     CHECK_NULL_VOID(pattern);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d, isSingle=%{public}d",
         handleRect.ToString().c_str(), isFirstHandle, IsSingleHandle());
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
+    auto contentHost = pattern->GetContentHost();
+    CHECK_NULL_VOID(contentHost);
     auto& textSelector = pattern->textSelector_;
     auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
     auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
@@ -251,7 +251,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM | DIRTY_ASK_CELIA);
     ProcessOverlay({ .animation = true, .requestCode = recreateAfterMoveDone_ ? REQUEST_RECREATE : 0 });
     recreateAfterMoveDone_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 std::string RichEditorSelectOverlay::GetSelectedText()

@@ -538,7 +538,7 @@ HWTEST_F(RichEditorTouchTestNg, TestRichEditorUpdateSelectionByTouchMove001, Tes
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto richOffset = Offset(40, 30);
     richEditorPattern->UpdateSelectionByTouchMove(richOffset);
-    auto host = richEditorPattern->GetHost();
+    auto host = richEditorPattern->GetContentHost();
     ASSERT_NE(host, nullptr);
     ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
 }
