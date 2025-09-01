@@ -489,6 +489,7 @@ bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
 void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
+    session_->SetLeashWindowAlpha(true);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "hide startWindow: %{public}d", session_->GetPersistentId());
 
     ContainerScope scope(instanceId_);
