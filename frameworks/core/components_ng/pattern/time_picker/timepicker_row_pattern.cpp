@@ -815,35 +815,16 @@ bool TimePickerRowPattern::CheckHourIndexAtEnd(uint32_t amPmIndex, uint32_t hour
 }
 
 bool TimePickerRowPattern::IsNeedToRebuildColumn(bool isHour, bool isAdd,
-    int32_t amPmIndexInt, int32_t hourIndexInt, int32_t minuteIndexInt)
+    uint32_t amPmIndex, uint32_t hourIndex, uint32_t minuteIndex)
 {
-    uint32_t amPmIndex = static_cast<uint32_t>(amPmIndexInt);
-    uint32_t hourIndex = static_cast<uint32_t>(hourIndexInt);
     bool atStartHour = CheckHourIndexAtStart(amPmIndex, hourIndex, false);
-    bool nextStartHour = CheckHourIndexAtStart(amPmIndex, hourIndex, true);
     bool atEndHour = CheckHourIndexAtEnd(amPmIndex, hourIndex, false);
-    bool prevEndHour = CheckHourIndexAtEnd(amPmIndex, hourIndex, true);
     if (isHour) {           // process hour column change
-        if (atStartHour || atEndHour || (nextStartHour && isAdd) || (prevEndHour && !isAdd)) {
+        if (atStartHour || atEndHour ||
+            (CheckHourIndexAtStart(amPmIndex, hourIndex, true) && isAdd) ||
+            (CheckHourIndexAtEnd(amPmIndex, hourIndex, true) && !isAdd)) {
+            // atStartHour or atEndHour or from startHour to startHour + 1 or from endHour to endHour - 1
             return true;
-        }
-    } else {
-        uint32_t minuteIndex = static_cast<uint32_t>(minuteIndexInt);
-        if (!hasSecond_) {
-            return false;
-        }
-        if (atStartHour && minuteIndex == INDEX_MINUTE_STRAT) {
-            return true;    // at start minute
-        }
-        if (atStartHour && minuteIndex == INDEX_MINUTE_STRAT + 1 && isAdd) {
-            return true;    // from start minute to start minute + 1
-        }
-        uint32_t endIndex = endTime_.GetMinute() - 1;
-        if (atEndHour && minuteIndex == endIndex) {
-            return true;    // at end minute
-        }
-        if (atEndHour and minuteIndex == endIndex - 1 && !isAdd) {
-            return true;    // from end minute to end minute - 1
         }
     }
     return false;
@@ -871,14 +852,14 @@ void TimePickerRowPattern::HandleColumnsChangeTimeRange(const RefPtr<FrameNode>&
             CHECK_NULL_VOID(amPmColumnPattern);
             amPmColumnPattern->FlushCurrentOptions();
         } else if (tag == hourColumn || tag == minuteColumn) {
-            int32_t amPmIndex = 0;
+            uint32_t amPmIndex = 0;
             if (!GetHour24()) {
                 auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
                 CHECK_NULL_VOID(amPmColumnPattern);
                 amPmIndex = amPmColumnPattern->GetCurrentIndex();
             }
-            int32_t hourIndex = hourColumnPattern->GetCurrentIndex();
-            int32_t minuteIndex = minuteColumnPattern->GetCurrentIndex();
+            uint32_t hourIndex = hourColumnPattern->GetCurrentIndex();
+            uint32_t minuteIndex = minuteColumnPattern->GetCurrentIndex();
             if (!IsNeedToRebuildColumn(tag == hourColumn, isAdd, amPmIndex, hourIndex, minuteIndex)) {
                 return;
             }

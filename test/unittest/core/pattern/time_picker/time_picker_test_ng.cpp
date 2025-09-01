@@ -7491,4 +7491,43 @@ HWTEST_F(TimePickerPatternTestNg, SetHour24Test001, TestSize.Level0)
     TimePickerModelNG::SetHour24(frameNode, false);
     EXPECT_FALSE(timePickerRowPattern->GetCachedHour24());
 }
+
+/**
+ * @tc.name: IsNeedToRebuildColumn001
+ * @tc.desc: Test IsNeedToRebuildColumn return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, IsNeedToRebuildColumn001, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_TRUE(timePickerRowPattern->IsNeedToRebuildColumn(true, true, 0, 0, 0));
+    EXPECT_TRUE(timePickerRowPattern->IsNeedToRebuildColumn(true, true, 1, 11, 0));
+    EXPECT_TRUE(timePickerRowPattern->IsNeedToRebuildColumn(true, true, 0, 1, 0));
+    EXPECT_TRUE(timePickerRowPattern->IsNeedToRebuildColumn(true, false, 1, 10, 0));
+}
+
+/**
+ * @tc.name: IsNeedToRebuildColumn002
+ * @tc.desc: Test IsNeedToRebuildColumn return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, IsNeedToRebuildColumn002, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_FALSE(timePickerRowPattern->IsNeedToRebuildColumn(true, true, 1, 0, 0));
+    EXPECT_FALSE(timePickerRowPattern->IsNeedToRebuildColumn(true, false, 0, 1, 0));
+    EXPECT_FALSE(timePickerRowPattern->IsNeedToRebuildColumn(false, true, 0, 0, 0));
+}
 } // namespace OHOS::Ace::NG
