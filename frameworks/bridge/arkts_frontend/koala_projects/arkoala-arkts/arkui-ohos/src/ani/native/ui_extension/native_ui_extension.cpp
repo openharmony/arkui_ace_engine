@@ -128,7 +128,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionProxy(ani_env *env)
         ani_native_function{"_Send_Data_Sync", nullptr, reinterpret_cast<void *>(SendDataSync)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "BindNativeUiExtensionProxy Class_BindNativeMethods failed,"
             " className: %{public}s", className);

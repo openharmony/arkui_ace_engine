@@ -1179,7 +1179,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
     if (bindRst != ANI_OK) {
-        HILOGE("Bind native methonds failed, bindRst:%{public}d", bindRst);
+        HILOGE("Bind static native methods failed, bindRst:%{public}d", bindRst);
         return bindRst;
     }
     *result = ANI_VERSION_1;
