@@ -252,6 +252,7 @@ RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateSecurityComponentL
     auto buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, nullptr);
     auto buttonWrapper = CreateLayoutWrapper(buttonNode);
+    CHECK_NULL_RETURN(buttonWrapper, nullptr);
     auto buttonAlgorithm = AceType::MakeRefPtr<MockSecurityComponentButtonLayoutAlgorithm>();
     CHECK_NULL_RETURN(buttonAlgorithm, nullptr);
     buttonWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(buttonAlgorithm));
