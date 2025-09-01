@@ -355,7 +355,7 @@ export struct SubHeaderV2 {
       if (Util.isSymbolResource($$.iconOptions)) {
         SymbolGlyphChild({
           icon: $$.iconOptions,
-          fontColor: [this.subHeaderV2Theme.leftIconColor],
+          fontColor: this.subHeaderV2Theme.leftIconColor,
           changeSymbolWidth: (result: SizeResult) => {
             this.symbolWidth = result.width;
           }
@@ -612,7 +612,10 @@ export struct SubHeaderV2 {
     if (!this.operationItems || (this.operationItems as SubHeaderV2OperationItem[]).length <= 0) {
       return '';
     }
-    if ((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription &&
+    if (Util.isResourceType((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
+        ((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription as Resource).id);
+    } else if ((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription &&
       (this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription !== '') {
       return (this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityDescription as string;
     }
@@ -873,14 +876,12 @@ export struct SubHeaderV2 {
       ForEach(this.operationItems as SubHeaderV2OperationItem[], (item: SubHeaderV2OperationItem, index: number) => {
         if (index <= INDEX_TWO) {
           SingleIconStyle({
-            item: {
-              iconOptions: this.operationItems?.[index.toInt()].content,
-              action: this.operationItems?.[index.toInt()].action,
-              defaultFocus: this.operationItems?.[index.toInt()].defaultFocus,
-              accessibilityLevel: this.operationItems?.[index.toInt()].accessibilityLevel,
-              accessibilityText: this.operationItems?.[index.toInt()].accessibilityText,
-              accessibilityDescription: this.operationItems?.[index.toInt()].accessibilityDescription,
-            },
+            iconOptions: this.operationItems?.[index.toInt()].content,
+            action: this.operationItems?.[index.toInt()].action,
+            defaultFocus: this.operationItems?.[index.toInt()].defaultFocus,
+            accessibilityLevel: this.operationItems?.[index.toInt()].accessibilityLevel,
+            accessibilityText: this.operationItems?.[index.toInt()].accessibilityText,
+            accessibilityDescription: this.operationItems?.[index.toInt()].accessibilityDescription,
             isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
           })
         } else {
@@ -992,7 +993,10 @@ export struct SubHeaderV2 {
     if (!this.operationItems || (this.operationItems as SubHeaderV2OperationItem[]).length <= 0) {
       return '';
     }
-    if ((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText &&
+    if (Util.isResourceType((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync(((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText as Resource).id);
+    } else if ((this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText &&
       (this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText !== '') {
       return (this.operationItems as SubHeaderV2OperationItem[])[0].accessibilityText as string;
     } else {
@@ -1119,7 +1123,7 @@ export struct SubHeaderV2 {
 @ComponentV2
 struct SymbolGlyphChild {
   @Param @Require icon: SubHeaderV2IconType;
-  @Param @Require fontColor: ResourceColor[];
+  @Param @Require fontColor: ResourceColor;
   @Event changeSymbolWidth: (result: SizeResult) => void = () => {
   };
   result: SizeResult = {
@@ -1165,7 +1169,7 @@ struct SymbolGlyphChild {
     Column() {
       SymbolGlyph(this.getSymbolGlyphResource())
         .fontSize(LEFT_ICON_SIZE)
-        .fontColor(this.fontColor)
+        .fontColor([this.fontColor])
         .attributeModifier(this.getSymbolGlyphModifier())
         .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) } as LocalizedMargin)
         .flexShrink(0)
@@ -1177,38 +1181,49 @@ struct SymbolGlyphChild {
 struct SingleIconStyle {
   @Local bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @Local isFocus: boolean = false;
-  @Param item: ContentIconOption | null = null;
+  @Param iconOptions?: SubHeaderV2IconType | undefined = undefined;
+  @Param action?: (() => void) | undefined = undefined;
+  @Param defaultFocus?: boolean | undefined = undefined;
+  @Param accessibilityLevel?: string | undefined = undefined;
+  @Param accessibilityText?: ResourceStr | undefined = undefined;
+  @Param accessibilityDescription?: ResourceStr | undefined = undefined;
   @Consumer('subHeaderV2Theme') subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   @Param isSingleIcon: boolean = true;
 
   private getRightIconAccessibilityText(): string | undefined {
-    if (this.item?.accessibilityText) {
-      return this.item?.accessibilityText as string;
+    if (Util.isResourceType(this.accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.accessibilityText as Resource).id);
+    } else if (this.accessibilityText) {
+      return this.accessibilityText as string;
     }
     return '';
   }
 
   private getRightIconAccessibilityLevel(): string {
-    if (this.item?.accessibilityLevel && this.item?.accessibilityLevel !== '') {
-      return this.item?.accessibilityLevel as string;
+    if (this.accessibilityLevel && this.accessibilityLevel !== '') {
+      return this.accessibilityLevel as string;
     }
     return 'auto';
   }
 
   private getRightIconAccessibilityDescription(): string | undefined {
-    if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
-      return this.item?.accessibilityDescription as string;
+    if (Util.isResourceType(this.accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.accessibilityDescription as Resource).id);
+    } else if (this.accessibilityDescription && this.accessibilityDescription !== '') {
+      return this.accessibilityDescription as string;
     }
     return '';
   }
 
   build() {
-    if (this.item && this.item?.iconOptions) {
+    if (this.iconOptions) {
       Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
         this.IconZone();
       }
       .focusable(true)
-      .defaultFocus(this.item?.defaultFocus)
+      .defaultFocus(this.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
       .align(Alignment.Center)
@@ -1243,8 +1258,8 @@ struct SingleIconStyle {
       })
       .responseRegion(this.iconResponseRegion())
       .onClick((event: ClickEvent) => {
-        if (this.item?.action) {
-          (this.item?.action as () => void)();
+        if (this.action) {
+          (this.action as () => void)();
         }
       })
       .margin({
@@ -1272,30 +1287,30 @@ struct SingleIconStyle {
   }
 
   private getSymbolGlyphResource(): Resource | undefined {
-    if (this.item?.iconOptions && (this.item?.iconOptions instanceof Resource)) {
-      return this.item?.iconOptions as Resource;
+    if (this.iconOptions && (this.iconOptions instanceof Resource)) {
+      return this.iconOptions as Resource;
     }
     return undefined;
   }
 
   private getSymbolGlyphModifier(): SymbolGlyphModifier | undefined {
-    if (this.item?.iconOptions && (this.item?.iconOptions instanceof SymbolGlyphModifier)) {
-      return this.item?.iconOptions as SymbolGlyphModifier;
+    if (this.iconOptions && (this.iconOptions instanceof SymbolGlyphModifier)) {
+      return this.iconOptions as SymbolGlyphModifier;
     }
     return undefined;
   }
 
   @Builder
   IconZone(): void {
-    if (this.item && this.item?.iconOptions) {
-      if (Util.isSymbolResource(this.item?.iconOptions)) {
+    if (this.iconOptions) {
+      if (Util.isSymbolResource(this.iconOptions)) {
         SymbolGlyph(this.getSymbolGlyphResource())
           .fontSize(RIGHT_SINGLE_ICON_SIZE)
           .fontColor([this.subHeaderTheme.rightIconColor])
           .attributeModifier(this.getSymbolGlyphModifier())
           .focusable(true)
       } else {
-        Image(this.item?.iconOptions as ResourceStr)
+        Image(this.iconOptions as ResourceStr)
           .fillColor(this.subHeaderTheme.rightIconColor)
           .width(RIGHT_SINGLE_ICON_SIZE)
           .height(RIGHT_SINGLE_ICON_SIZE)
