@@ -23,6 +23,7 @@ import {
   Padding, ButtonOptions, SymbolGlyphModifier, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
   GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback, ClassCastError
 } from '@ohos.arkui.component';
+import display from '@ohos.display'
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
@@ -69,6 +70,14 @@ enum ItemType {
   Icon,
   LeftIcon,
 }
+
+const PUBLIC_CANCEL = $r('sys.symbol.xmark');
+
+const PUBLIC_OK = $r('sys.symbol.checkmark');
+
+const PUBLIC_BACK = $r('sys.symbol.chevron_backward');
+
+const PUBLIC_IMAGE_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 const DEFAULT_TITLE_BAR_HEIGHT: number = 56;
 const DEFAULT_TITLE_PADDING: number = 2;
@@ -164,8 +173,6 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 
 @Component
 export struct EditableTitleBar {
-  PUBLIC_BACK: ResourceStr = $r('sys.symbol.chevron_backward');
-  PUBLIC_CANCEL: ResourceStr = $r('sys.symbol.xmark');
   leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
   title: ResourceStr = '';
   subtitle?: ResourceStr = '';
@@ -305,7 +312,7 @@ export struct EditableTitleBar {
     if (this.leftIconStyle === EditableLeftIconType.Back) {
       ImageMenuItem({
         item: {
-          value: this.PUBLIC_BACK,
+          value: PUBLIC_BACK,
           isEnabled: true,
           action: () => {
             if (this.onCancel) {
@@ -323,7 +330,7 @@ export struct EditableTitleBar {
     } else {
       ImageMenuItem({
         item: {
-          value: this.PUBLIC_CANCEL,
+          value: PUBLIC_CANCEL,
           isEnabled: true,
           action: () => {
             if (this.onCancel) {
@@ -420,7 +427,6 @@ export struct EditableTitleBar {
 
 @Component
 struct EditableTitleBarMenuSection {
-  PUBLIC_OK: ResourceStr = $r('sys.symbol.checkmark');
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
@@ -446,7 +452,7 @@ struct EditableTitleBarMenuSection {
         if (this.isSaveEnabled) {
           ImageMenuItem({
             item: {
-              value: this.PUBLIC_OK,
+              value: PUBLIC_OK,
               isEnabled: true,
               action: () => {
                 if (this.onSave) {
@@ -469,10 +475,6 @@ struct EditableTitleBarMenuSection {
 
 @Component
 struct ImageMenuItem {
-  PUBLIC_BACK: ResourceStr = $r('sys.symbol.chevron_backward');
-  PUBLIC_OK: ResourceStr = $r('sys.symbol.checkmark');
-  PUBLIC_CANCEL: ResourceStr = $r('sys.symbol.xmark');
-  PUBLIC_IMAGE_BACK: ResourceStr = $r('sys.media.ohos_ic_compnent_titlebar_back');
   item: EditableTitleBarMenuItem = {
     value: '',
     isEnabled: true,
@@ -516,11 +518,11 @@ struct ImageMenuItem {
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
-    if (this.item.value === this.PUBLIC_OK) {
+    if (this.item.value === PUBLIC_OK) {
       return $r('sys.string.icon_save');
-    } else if (this.item.value === this.PUBLIC_CANCEL) {
+    } else if (this.item.value === PUBLIC_CANCEL) {
       return $r('sys.string.icon_cancel');
-    } else if (this.item.value === this.PUBLIC_BACK) {
+    } else if (this.item.value === PUBLIC_BACK) {
       return $r('sys.string.icon_back');
     } else {
       return this.item.label ? this.item.label as ResourceStr : '' as ResourceStr;
@@ -649,11 +651,11 @@ struct ImageMenuItem {
   }
 
   private getAccessibilityReadText(): string | undefined {
-    if (this.item.value === this.PUBLIC_OK) {
+    if (this.item.value === PUBLIC_OK) {
       return this.getStringByNameSync('icon_save');
-    } else if (this.item.value === this.PUBLIC_CANCEL) {
+    } else if (this.item.value === PUBLIC_CANCEL) {
       return this.getStringByNameSync('icon_cancel');
-    } else if (this.item.value === this.PUBLIC_BACK) {
+    } else if (this.item.value === PUBLIC_BACK) {
       return this.getStringByNameSync('icon_back');
     } else if (this.item.accessibilityText) {
       return this.toStringFormat(this.item.accessibilityText) as string;
@@ -708,7 +710,7 @@ struct ImageMenuItem {
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
-            .matchTextDirection(this.item.value === this.PUBLIC_IMAGE_BACK ? true : false)
+            .matchTextDirection(this.item.value === PUBLIC_IMAGE_BACK ? true : false)
             .width($r('sys.float.titlebar_icon_width'))
             .height($r('sys.float.titlebar_icon_height'))
             .focusable(this.item.isEnabled)
@@ -1023,6 +1025,17 @@ struct EditableTitleBarDialog {
   }
 }
 
+const densityPixels: number = ((): number => {
+  try {
+    let densityPixels: number = display.getDefaultDisplaySync().densityPixels;
+    return densityPixels;
+  } catch (error) {
+    let code = (error as ClassCastError)?.code;
+    let message = (error as ClassCastError)?.message;
+    return 1;
+  }
+})();
+
 /**
  * get resource size
  *
@@ -1035,7 +1048,7 @@ function getNumberByResource(resourceId: number, defaultNumber: number): number 
     if (resourceNumber === 0) {
       return defaultNumber;
     } else {
-      return resourceNumber;
+      return resourceNumber / densityPixels;
     }
   } catch (error) {
     let code: number = (error as ClassCastError).code;
