@@ -343,7 +343,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
     focusHub->RequestFocusImmediately();
     EXPECT_EQ(richEditorPattern->isEditing_, false);
     richEditorPattern->MouseRightFocus(info);
-    EXPECT_EQ(richEditorPattern->isEditing_, true);
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
 }
 
 /**
@@ -364,6 +364,30 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level1)
     MouseInfo info;
     richEditorPattern->MouseRightFocus(info);
     EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
+}
+
+/**
+ * @tc.name: MouseRightFocus007
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus007, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(u"test1");
+    AddImageSpan();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->moveLength_ = 0;
+    richEditorPattern->isEditing_ = false;
+    MouseInfo info;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
 }
 
 /**
