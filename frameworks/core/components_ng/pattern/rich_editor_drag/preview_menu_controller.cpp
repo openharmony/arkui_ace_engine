@@ -218,7 +218,9 @@ void PreviewMenuController::MountUIExtensionNode(const RefPtr<FrameNode>& previe
     std::string abilityName;
     std::map<std::string, std::string> params;
     CreateWantConfig(type, bundleName, abilityName, params, AIparams);
-    PreviewNodeClickCallback(type, previewNode, AIparams, std::move(disappearCallback));
+    // 第一次使用：创建副本供 PreviewNodeClickCallback 使用
+    auto callbackCopy = disappearCallback;
+    PreviewNodeClickCallback(type, previewNode, AIparams, std::move(callbackCopy));
     auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     CHECK_NULL_VOID(wantWrap);
     wantWrap->SetWantParam(params);

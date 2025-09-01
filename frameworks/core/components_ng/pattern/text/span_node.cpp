@@ -798,6 +798,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
     auto symbolSpanStyle = textStyle;
     auto symbolUnicode = GetSymbolUnicode();
     symbolSpanStyle.SetTextStyleUid(nodeId_);
+    symbolSpanStyle.SetSymbolUid(nodeId_);
     if (fontStyle || textLineStyle) {
         UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
         if (fontStyle && fontStyle->HasFontWeight()) {
