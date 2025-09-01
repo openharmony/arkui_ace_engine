@@ -164,7 +164,7 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
-        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
     });
 }
 
