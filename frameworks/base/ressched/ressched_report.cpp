@@ -147,14 +147,14 @@ void ResSchedReport::TriggerModuleSerializer()
         container->TriggerModuleSerializer();
     };
     if (createPageCount == MODULE_SERIALIZER_COUNT) {
-        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        taskExecutor->PostTask(std::move(serializerTask), TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
         triggerExecuted = true;
         delayTask_.Cancel();
         return;
     }
-    auto task = [taskExecutor, serializerTask]() {
+    auto task = [taskExecutor, originTask = std::move(serializerTask)]() {
         if (!triggerExecuted) {
-            taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+            taskExecutor->PostTask(originTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
             triggerExecuted = true;
         }
     };
@@ -304,7 +304,9 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
 {
     if (!triggerExecuted) {
         auto curContainer = Container::Current();
+        CHECK_NULL_VOID(curContainer);
         auto taskExecutor = curContainer->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         auto serializerTask = [weak = WeakPtr<Container>(curContainer)]() {
             auto container = weak.Upgrade();
             if (!container) {
@@ -313,7 +315,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
             }
             container->TriggerModuleSerializer();
         };
-        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        taskExecutor->PostTask(std::move(serializerTask), TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
         triggerExecuted = true;
     }
     switch (touchEvent.type) {
