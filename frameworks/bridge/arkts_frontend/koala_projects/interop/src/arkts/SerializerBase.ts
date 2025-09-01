@@ -36,6 +36,10 @@ export final class RuntimeType {
     static readonly MATERIALIZED = 9
 }
 
+export function registerCallback(value: object): int32 {
+    throw new Error("Should no longer be used")
+}
+
 /**
  * Value representing object type in serialized data.
  * Must be synced with "enum Tags" in C++.
@@ -52,7 +56,6 @@ export enum Tags {
 
 const VALUE_TRUE: number = 1
 const VALUE_FALSE: number = 0
-const MAX_SAFE_INT32: number = 2147483647
 
 export function runtimeType<T>(value: T): int32 {
     if (value === undefined)
@@ -87,11 +90,6 @@ export function runtimeType<T>(value: T): int32 {
     return RuntimeType.OBJECT
 }
 
-export function registerCallback(value: object): int32 {
-    // TODO: fix me!
-    return 42
-}
-
 export function toPeerPtr(value: object): pointer {
     if (value instanceof MaterializedBase) {
         const peer = (value as MaterializedBase).getPeer()
@@ -120,7 +118,7 @@ export abstract class CustomSerializer {
 
 class DateSerializer extends CustomSerializer {
     constructor() {
-        super(new Array<string>("Date" as string))
+        super(new Array<string>("Date"))
     }
 
     serialize(serializer: SerializerBase, value: object, kind: string): void {
@@ -134,6 +132,25 @@ export class SerializerBase implements Disposable {
     private _buffer: KSerializerBuffer
     private _length: int32
     private _last: int64
+
+    private static pool: SerializerBase[] = [
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+    ]
+    private static poolTop = 0
+
+    static hold(): SerializerBase {
+        if (SerializerBase.poolTop === SerializerBase.pool.length) {
+            throw new Error("Pool empty! Release one of taken serializers")
+        }
+        return SerializerBase.pool[SerializerBase.poolTop++]
+    }
 
     private static customSerializers: CustomSerializer | undefined = new DateSerializer()
     static registerCustomSerializer(serializer: CustomSerializer) {
@@ -159,6 +176,10 @@ export class SerializerBase implements Disposable {
     public release() {
         this.releaseResources()
         this._position = this._buffer
+        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
+            throw new Error("Serializers should be release in LIFO order")
+        }
+        SerializerBase.poolTop--
     }
     public final dispose() {
         InteropNativeModule._Free(this._buffer)
@@ -236,8 +257,8 @@ export class SerializerBase implements Disposable {
     }
     final holdAndWriteCallbackForPromise<T>(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<T>, ResourceId] {
         let resourceId: ResourceId = 0
-        const promise = new Promise<T>((resolve: (value: T|PromiseLike<T>) => void, reject: (err: Error) => void) => {
-            const callback = (value?: T|undefined, err?: string[] | undefined) => {
+        const promise = new Promise<T>((resolve: (value: T | PromiseLike<T>) => void, reject: (err: Error) => void) => {
+            const callback = (value?: T | undefined, err?: string[] | undefined) => {
                 if (err !== undefined)
                     reject(new Error(err!.join(';')))
                 else
@@ -247,7 +268,7 @@ export class SerializerBase implements Disposable {
         })
         return [promise, resourceId]
     }
-    final holdAndWriteObject(obj:object, hold: pointer = 0, release: pointer = 0): ResourceId {
+    final holdAndWriteObject(obj: object, hold: pointer = 0, release: pointer = 0): ResourceId {
         const resourceId = ResourceHolder.instance().registerAndHold(obj)
         this.addHeldResource(resourceId)
         this.writeInt32(resourceId)
@@ -281,21 +302,15 @@ export class SerializerBase implements Disposable {
             }
             current = current!.next
         }
-        this.writeInt8(Tags.UNDEFINED as int32)
-    }
-    final writeFunction(value: Object) {
-        this.writeInt32(registerCallback(value))
+        this.writeInt8(Tags.UNDEFINED.valueOf())
     }
     final writeTag(tag: int32): void {
         this.writeInt8(tag)
     }
-    final writeNumber(value: number|undefined) {
+    final writeNumber(value: number | undefined) {
         if (value == undefined) {
             this.writeTag(Tags.UNDEFINED)
             return
-        }
-        if (value > MAX_SAFE_INT32) {
-            throw new Error(`bug: ${value} is illegal`)
         }
         if (Number.isInteger(value)) {
             this.writeTag(Tags.INT32)
@@ -327,7 +342,6 @@ export class SerializerBase implements Disposable {
             pos = this._position
             newPos = pos + 4
         }
-
         unsafeMemory.writeInt32(pos, value)
         this._position = newPos
     }
@@ -339,7 +353,6 @@ export class SerializerBase implements Disposable {
             pos = this._position
             newPos = pos + 8
         }
-
         unsafeMemory.writeInt64(pos, value)
         this._position = newPos
     }
@@ -351,7 +364,6 @@ export class SerializerBase implements Disposable {
             pos = this._position
             newPos = pos + 4
         }
-
         unsafeMemory.writeFloat32(pos, value)
         this._position = newPos
     }
@@ -363,14 +375,13 @@ export class SerializerBase implements Disposable {
             pos = this._position
             newPos = pos + 8
         }
-
         unsafeMemory.writeFloat64(pos, value)
         this._position = newPos
     }
     final writePointer(value: pointer) {
         this.writeInt64(value)
     }
-    final writeBoolean(value: boolean|undefined) {
+    final writeBoolean(value: boolean | undefined) {
         let pos = this._position
         let newPos = pos + 1
         if (newPos > this._last) {
@@ -381,35 +392,33 @@ export class SerializerBase implements Disposable {
         this._position = newPos
 
         if (value == undefined)
-            unsafeMemory.writeInt8(pos, Tags.UNDEFINED as byte);
+            unsafeMemory.writeInt8(pos, Tags.UNDEFINED);
         else if (value == true)
-            unsafeMemory.writeInt8(pos, VALUE_TRUE as byte);
+            unsafeMemory.writeInt8(pos, VALUE_TRUE.toByte());
         else if (value == false)
-            unsafeMemory.writeInt8(pos, VALUE_FALSE as byte);
+            unsafeMemory.writeInt8(pos, VALUE_FALSE.toByte());
     }
     final writeString(value: string) {
         const encodedLength = unsafeMemory.getStringSizeInBytes(value)
-        const stringLenOccupiedBytes = 4
-        // Every character occupies 2 bytes when it is an utf16 string, and 1 byte when only contains latin.
-        const terminatorLen = encodedLength == value.length ? 1 : 2
-        const needCapacity = stringLenOccupiedBytes + encodedLength + terminatorLen
+
         let pos = this._position
-        if (pos + needCapacity > this._last) {
-            this.updateCapacity(needCapacity)
+        if (pos + encodedLength + 5 > this._last) {
+            this.updateCapacity(encodedLength + 5)
             pos = this._position
         }
 
-        unsafeMemory.writeInt32(pos, encodedLength + terminatorLen)
-
         if (encodedLength > 0)
-            unsafeMemory.writeString(pos + stringLenOccupiedBytes, value)
-
-        this._position = pos + needCapacity
+            unsafeMemory.writeString(pos + 4, value)
+        // NOTE: add \0 for supporting C char* reading from buffer for utf8-strings,
+        // need check native part fot utf16 cases and probably change this solution.
+        unsafeMemory.writeInt8(pos + encodedLength + 4, 0)
+        unsafeMemory.writeInt32(pos, encodedLength + 1)
+        this._position = pos + encodedLength + 4 + 1
     }
-    //TODO: Needs to be implemented
-    final writeBuffer(value: NativeBuffer) {
+    final writeBuffer(value: ArrayBuffer) {
         this.holdAndWriteObject(value)
-        this.writePointer(value.data)
-        this.writeInt64(value.length)
+        const ptr = InteropNativeModule._GetNativeBufferPointer(value)
+        this.writePointer(ptr)
+        this.writeInt64(value.byteLength)
     }
 }

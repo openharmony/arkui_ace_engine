@@ -15,6 +15,7 @@
 
 #include "search_module.h"
 
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "load.h"
 #include "log/log.h"

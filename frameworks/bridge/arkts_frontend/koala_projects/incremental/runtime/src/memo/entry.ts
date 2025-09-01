@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler } from "@koalaui/common"
+import { KoalaCallsiteKey, KoalaCallsiteKeys } from "@koalaui/common"
+import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, StateContext } from "../states/State"
+import { ComputableState, StateContext, StateManager } from "../states/State"
 import { IncrementalNode } from "../tree/IncrementalNode"
 
 /**
- * @param manager - a state manager
  * @param node - a root node for the composition
  * @param update - a memo-function to build and update the composition
+ * @param manager - a state manager
  * @returns updatable state with the given node as the composition root
  * @internal
  */
@@ -29,15 +30,15 @@ export function memoRoot<Node extends IncrementalNode>(
     node: Node,
     /** @memo */
     update: (node: Node) => void,
+    manager: StateManager = GlobalStateManager.instance
 ): ComputableState<Node> {
-    const manager = GlobalStateManager.instance
     return manager.updatableNode<Node>(node, (context: StateContext) => {
-        KoalaProfiler.counters?.buildRootEnter()
+        RuntimeProfiler.instance?.buildRootEnter()
         const frozen = manager.frozen
         manager.frozen = true // states are frozen during recomposition
         memoEntry1<Node, void>(context, KoalaCallsiteKeys.empty, update, node)
         manager.frozen = frozen
-        KoalaProfiler.counters?.buildRootExit()
+        RuntimeProfiler.instance?.buildRootExit()
     })
 }
 

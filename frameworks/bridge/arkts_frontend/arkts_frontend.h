@@ -360,12 +360,11 @@ public:
     }
 
     void* GetEnv() override;
-    ani_vm *GetVM() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange() override;
-protected:
+private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_vm* vm_ = nullptr;

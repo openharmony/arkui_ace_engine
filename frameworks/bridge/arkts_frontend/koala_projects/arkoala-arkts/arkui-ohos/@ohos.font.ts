@@ -14,9 +14,9 @@
  */
 
 import { Resource } from "global.resource"
-import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
+import { GlobalScope_ohos_font } from 'arkui/framework'
 
-export namespace font {
+namespace font {
 
 export interface FontOptions {
     familyName: string | Resource;
@@ -69,14 +69,7 @@ export interface UIFontConfig {
 }
 
 function getUIFontConfig() : UIFontConfig {
-    return GlobalScope_ohos_font.getInternalUIFontConfig();
+    throw new Error("TBD")
 }
 }
-export type FontOptions = font.FontOptions;
-export type FontInfo = font.FontInfo;
-export type UIFontFallbackInfo = font.UIFontFallbackInfo;
-export type UIFontAliasInfo = font.UIFontAliasInfo;
-export type UIFontAdjustInfo = font.UIFontAdjustInfo;
-export type UIFontGenericInfo = font.UIFontGenericInfo;
-export type UIFontFallbackGroupInfo = font.UIFontFallbackGroupInfo;
-export type UIFontConfig = font.UIFontConfig;
+export default font;

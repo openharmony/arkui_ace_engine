@@ -27,7 +27,6 @@
 
 namespace OHOS::Ace {
 using CreateArktsFrontendFunc = Frontend* (*)(const void*);
-using CreateArktsDynamicFrontendFunc = Frontend* (*)(const void*);
 using CreateArktsPluginFrontendFunc = PluginFrontend* (*)(const void*);
 using CreateAniReferenceFunc = void* (*)(const void*, const void*);
 using DeleteAniReferenceFunc = void (*)(const void*, const void*);
@@ -40,7 +39,6 @@ public:
         return instance;
     }
     Frontend* CreatArkTsFrontend(const void* sharedRuntime);
-    Frontend* CreatArkTsDynamicFrontend(const void* sharedRuntime);
     void* CreateAniReference(const void* runtime, const void* storage);
     void DeleteAniReference(const void* runtime, const void* storage);
     PluginFrontend* CreateArktsPluginFrontend(const void* sharedRuntime);
@@ -61,7 +59,6 @@ private:
 
     LIBHANDLE handle_ = nullptr;
     CreateArktsFrontendFunc createArktsFrontendFunc_ = nullptr;
-    CreateArktsDynamicFrontendFunc createArktsDynamicFrontendFunc_ = nullptr;
     CreateAniReferenceFunc createAniReferenceFunc_ = nullptr;
     DeleteAniReferenceFunc deleteAniReferenceFunc_ = nullptr;
     CreateArktsPluginFrontendFunc createArktsPluginFrontendFunc_ = nullptr;

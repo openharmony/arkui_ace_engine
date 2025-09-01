@@ -58,7 +58,7 @@ char* StageArena::strdup(const char* string)
     auto* arena = StageArena::instance();
     auto size = strlen(string) + 1;
     char* memory = (char*)arena->alloc(size);
-    memcpy_s(memory, size, string, size);
+    memcpy(memory, string, size);
     return memory;
 }
 

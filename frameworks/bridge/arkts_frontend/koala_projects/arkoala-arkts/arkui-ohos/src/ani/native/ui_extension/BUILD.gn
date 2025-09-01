@@ -27,8 +27,6 @@ ohos_shared_library("arkuiuiextension_ani") {
   include_dirs = [ "//foundation/arkui/ace_engine/frameworks" ]
   sources = [
     "../utils/ani_utils.cpp",
-    "ani_callback_info.cpp",
-    "native_dynamic_module.cpp",
     "native_ui_extension.cpp",
   ]
   external_deps = [

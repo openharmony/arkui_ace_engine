@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+export { observableProxy, ObservableClass, TrackableProps } from "@koalaui/compat"
+
 export {
     AnimatedState,
     ImplicitAnimationProvider,
@@ -65,12 +67,13 @@ export {
     transition,
 } from "./animation/TimeAnimation"
 
+export { RuntimeProfiler } from "./common/RuntimeProfiler"
+
 export {
     memoBind,
     memoBind2,
     memoPartialBind2_1,
     memoPartialBind3_2,
-    MemoCallbackContext,
 } from "./memo/bind"
 export {
     OnChange,
@@ -139,31 +142,34 @@ export {
     CONTEXT_ROOT_SCOPE,
     ComputableState,
     ControlledScope,
+    createStateManager,
     Equivalent,
+    InternalScope,
     MutableState,
     State,
     StateContext,
     StateManager,
-    ValueTracker,
-    createStateManager,
     StateManagerImpl,
     StateImpl,
-    InternalScope,
+    ValueTracker,
 } from "./states/State"
+
 export {
     __context,
     __id,
     __key,
+    __hash,
     __memo_context_type,
     __memo_id_type,
     __memo_transformed,
     __memo_transformed_before,
     __memo_transformed_after,
 } from "./internals"
-export { Dependencies } from "./states/Dependency"
+export { Dependency, StateToScopes } from "./states/Dependency"
 
 export { IncrementalNode } from "./tree/IncrementalNode"
 export { PrimeNumbers } from "./tree/PrimeNumbers"
 export { ReadonlyTreeNode } from "./tree/ReadonlyTreeNode"
 export { TreeNode } from "./tree/TreeNode"
 export { TreePath } from "./tree/TreePath"
+

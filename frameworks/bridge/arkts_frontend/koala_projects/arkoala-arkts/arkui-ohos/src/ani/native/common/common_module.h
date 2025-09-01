@@ -43,8 +43,6 @@ ani_int GetNodeIdWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr);
 ani_long CreateRenderNodePeerWithNodePtr(ani_env* env, ani_object obj, ani_long ptr);
 ani_long ToColorLong(ani_env* env, ani_object obj, ani_int color);
 ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color);
-ani_int CreateWindowFreeContainer(ani_env *env, [[maybe_unused]]ani_object object, ani_object context);
-void DestroyWindowFreeContainer([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object object, ani_int id);
 ani_int CheckIsUIThread(ani_env* env, ani_object obj, ani_int id);
 ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);

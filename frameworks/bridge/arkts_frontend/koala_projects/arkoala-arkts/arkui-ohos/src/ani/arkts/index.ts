@@ -14,6 +14,5 @@
  */
 
 export * from "./ArkUIAniModule"
-export * from "./ui_extension/ArkUIAniDynamicModal"
 export * from "./ui_extension/ArkUIAniUiextensionModal"
 export * from "./ArkUIAniCustomNodeModule"

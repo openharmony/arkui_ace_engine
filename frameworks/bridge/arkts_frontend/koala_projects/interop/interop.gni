@@ -26,6 +26,7 @@ koalaui_interop_files = [
   "src/arkts/ResourceManager.ts",
   "src/arkts/SerializerBase.ts",
   "src/arkts/callback.ts",
+  "src/arkts/events.ts",
   "src/arkts/index.ts",
   "src/arkts/loadLibraries.ts",
 ]
