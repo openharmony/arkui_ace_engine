@@ -114,7 +114,7 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
     { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION,
         [](const AccessibilityActionParam& param) {
-            auto switchFunc = param.accessibilityProperty->GetAndReturnSwitchEditableModeFunc();
+            auto switchFunc = param.accessibilityProperty->GetSwitchEditableModeFunc();
             if (switchFunc) {
                 switchFunc(true);
             }

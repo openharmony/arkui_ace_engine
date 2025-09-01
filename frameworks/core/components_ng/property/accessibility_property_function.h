@@ -62,14 +62,14 @@ public: \
         } \
         accessibilityTextActionInnerFunction_->Set##TYPE(action##TYPE); \
     } \
-    bool CheckAndReturnRegister##TYPE() const \
+    bool CheckRegister##TYPE() const \
     { \
         if (!accessibilityTextActionInnerFunction_.has_value()) { \
             return false; \
         } \
         return accessibilityTextActionInnerFunction_->CheckRegister##TYPE(); \
     } \
-    Action##TYPE GetAndReturn##TYPE##Func() const \
+    Action##TYPE Get##TYPE##Func() const \
     {  \
         if (!accessibilityTextActionInnerFunction_.has_value()) { \
             return nullptr; \
@@ -98,8 +98,7 @@ using ActionSwitchEditableMode = std::function<void(bool switchToEditable)>;
  * @attention
  * @since
  */
-class ACE_FORCE_EXPORT AccessibilityTextActionInnerFunction {
-
+class AccessibilityTextActionInnerFunction {
     DEFINE_ACTION_FUNCTIONS(SwitchEditableMode);
 
 public:
