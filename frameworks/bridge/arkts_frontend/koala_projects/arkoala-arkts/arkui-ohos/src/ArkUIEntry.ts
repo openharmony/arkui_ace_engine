@@ -470,6 +470,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
+        registerSyncCallbackProcessor()
     }
 }
 
