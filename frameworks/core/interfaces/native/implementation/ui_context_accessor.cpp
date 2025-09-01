@@ -22,7 +22,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -27,8 +27,9 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
-#include "arkoala_api_generated.h"
 
+#include "arkoala_api_generated.h"
+#include "rect_shape_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>

@@ -15,10 +15,10 @@
 
 #include <cerrno>
 #include <cstdint>
-#include "arkoala_api_generated.h"
 
 #include "converter.h"
 
+// SORTED_SECTION
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
@@ -26,17 +26,21 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
-#include "core/interfaces/native/implementation/linear_gradient_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/level_order_peer.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"

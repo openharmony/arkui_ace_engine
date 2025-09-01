@@ -23,7 +23,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -47,13 +47,13 @@ const Ark_Boolean ARK_TRUE = Converter::ArkValue<Ark_Boolean>(true);
 } // namespace
 
 class FrameNodeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIFrameNodeAccessor,
-                                  &GENERATED_ArkUIAccessors::getFrameNodeAccessor, FrameNodePeer> {
+                                  &GENERATED_ArkUIAccessors::getFrameNodeAccessor, ::FrameNodePeer> {
 public:
     void* CreatePeerInstance() override
     {
         return accessor_->ctor(nullptr);
     }
-    void DestroyPeer(FrameNodePeer* peer)
+    void DestroyPeer(::FrameNodePeer* peer)
     {
         finalyzer_(peer);
         peer = nullptr;
