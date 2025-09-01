@@ -758,7 +758,7 @@ OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
         CHECK_NULL_VOID(recognizer);
         auto node = recognizer->GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(node);
-        node->OnAccessibilityEvent(eventType);
+        node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     };
     return callback;
 }
