@@ -705,6 +705,69 @@ SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
 void DynamicComponentRendererImpl::UpdateViewportConfig(
     const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
 {
+    if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        UpdateDynamicViewportConfig(size, density, orientation, animationOpt, offset);
+        return;
+    }
+
+    UpdateIsolatedViewportConfig(size, density, orientation, animationOpt, offset);
+}
+
+void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size, float density,
+    int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto adaptiveSize = ComputeAdaptiveSize(size);
+    ViewportConfig vpConfig(adaptiveSize.Width(), adaptiveSize.Height(), density);
+    vpConfig.SetPosition(0, 0);
+    vpConfig.SetOrientation(orientation);
+    TAG_LOGI(aceLogTag_, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
+        uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
+
+    auto option = CopyAnimationOption(animationOpt);
+    auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_, offset]() {
+        auto renderer = weak.Upgrade();
+        CHECK_NULL_VOID(renderer);
+        auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
+        CHECK_NULL_VOID(uiContent);
+        ContainerScope scope(uiContent->GetInstanceId());
+        ViewportConfig config(vpConfig.Width(), vpConfig.Height(), vpConfig.Density());
+        config.SetPosition(vpConfig.Left(), vpConfig.Top());
+        config.SetOrientation(vpConfig.Orientation());
+        if (renderer->uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            renderer->UpdateParentOffsetToWindow(offset);
+            config.SetPosition(offset.GetX(), offset.GetY());
+        }
+        if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()
+            && renderer->density_ == config.Density()) {
+            TAG_LOGW(aceLogTag, "card viewport not changed");
+            return;
+        }
+        renderer->viewport_.SetWidth(config.Width());
+        renderer->viewport_.SetHeight(config.Height());
+        renderer->density_ = config.Density();
+        TAG_LOGI(aceLogTag, "update card viewport: [%{public}d x %{public}d]",
+            config.Width(), config.Height());
+        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, *option);
+    };
+    bool contentReady = false;
+    {
+        std::lock_guard<std::mutex> lock(contentReadyMutex_);
+        contentReady = contentReady_;
+        if (!contentReady) {
+            contentReadyCallback_ = std::move(task);
+        }
+    }
+    if (contentReady) {
+        auto taskExecutor = GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
+    }
+}
+
+void DynamicComponentRendererImpl::UpdateIsolatedViewportConfig(const SizeF& size, float density,
+    int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
+{
     CHECK_NULL_VOID(uiContent_);
     auto adaptiveSize = ComputeAdaptiveSize(size);
     ViewportConfig vpConfig(adaptiveSize.Width(), adaptiveSize.Height(), density);
