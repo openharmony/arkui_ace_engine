@@ -25,7 +25,7 @@ import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } 
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId, PageInfo }
     from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime'
@@ -77,6 +77,7 @@ import { ComponentContent } from "arkui/ComponentContent"
 import { CommonMethodHandWritten } from "./CommonHandWritten"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 import { uiObserver } from "@ohos/arkui/observer"
+import { PathStackUtils } from 'arkui/handwritten/ArkNavPathStack'
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1476,6 +1477,24 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return ret;
     }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        const navDestinationInfo = ArkUIAniModule._CustomNode_QueryNavDestinationInfo1(Double.toInt(id));
+        const routerPageInfo = ArkUIAniModule._CustomNode_QueryRouterPageInfo1(Double.toInt(id));
+        if (navDestinationInfo) {
+            let param = PathStackUtils.getParamByNavDestinationId(navDestinationInfo.navDestinationId);
+            navDestinationInfo.param = param ? param! : undefined;
+        }
+        if (routerPageInfo) {
+            routerPageInfo.context = this;
+        }
+        let pageInfo: PageInfo = {
+            navDestinationInfo: navDestinationInfo,
+            routerPageInfo: routerPageInfo
+        }
+        return pageInfo;
+    }
+    
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
