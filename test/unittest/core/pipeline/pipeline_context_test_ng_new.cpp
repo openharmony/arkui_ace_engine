@@ -1889,10 +1889,10 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
     EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 2);
 
     /**
-     * @tc.steps4: Call FlushTaskWithCheck.
+     * @tc.steps4: Call FlushAfterModifierTask.
      * @tc.expected: afterModifierTasks_ in the taskScheduler size is 0.
      */
-    taskScheduler.FlushTaskWithCheck();
+    taskScheduler.FlushAfterModifierTask();
     EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 0);
 }
 
