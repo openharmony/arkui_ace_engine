@@ -1735,6 +1735,16 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 }
 
 template<>
+RectF Convert(const Ark_Rect& src)
+{
+    auto left = Converter::Convert<float>(src.left);
+    auto top = Converter::Convert<float>(src.top);
+    auto right = Converter::Convert<float>(src.right);
+    auto bottom = Converter::Convert<float>(src.bottom);
+    return RectF(left, top, right - left, bottom - top);
+}
+
+template<>
 RefPtr<BasicShape> Convert(const Ark_CircleShape& src)
 {
     CHECK_NULL_RETURN(src, nullptr);

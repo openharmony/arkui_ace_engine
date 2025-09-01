@@ -40,15 +40,6 @@ void AssignCast(std::optional<Ace::TextDirection>& dst, const Ark_TextDirection&
     }
 }
 template<>
-NG::RectF Convert(const Ark_Rect& src)
-{
-    auto left = Converter::Convert<float>(src.left);
-    auto top = Converter::Convert<float>(src.top);
-    auto right = Converter::Convert<float>(src.right);
-    auto bottom = Converter::Convert<float>(src.bottom);
-    return NG::RectF(left, top, right - left, bottom - top);
-}
-template<>
 ParagraphManager::TextBox Convert(const Ark_TextBox& src)
 {
     ParagraphManager::TextBox dst;

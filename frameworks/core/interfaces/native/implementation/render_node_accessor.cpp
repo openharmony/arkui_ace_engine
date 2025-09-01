@@ -50,16 +50,6 @@ Converter::Circle Convert(const Ark_Circle& src)
 }
 
 template<>
-OHOS::Ace::NG::RectF Convert(const Ark_Rect& value)
-{
-    auto left = Converter::Convert<float>(value.left);
-    auto top = Converter::Convert<float>(value.top);
-    auto right = Converter::Convert<float>(value.right);
-    auto bottom = Converter::Convert<float>(value.bottom);
-    return { left, top, right - left, bottom - top };
-}
-
-template<>
 OHOS::Ace::NG::RoundRect Convert(const Ark_RoundRect& value)
 {
     auto rect = Converter::Convert<RectF>(value.rect);

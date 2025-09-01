@@ -53,7 +53,7 @@ public:
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
         } else if (width.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -64,7 +64,7 @@ public:
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
         } else if (height.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
