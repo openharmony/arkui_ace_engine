@@ -3084,6 +3084,7 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_001, TestSize.Level1)
     EXPECT_EQ(selectInfo.menuInfo.showTranslate, false);
     OHOS::Ace::SetReturnStatus("true");
     overlay.SetMenuOptions(selectInfo, params, callback);
+    overlay.OnMenuItemAction(OptionMenuActionId::SHARE, OptionMenuType::TOUCH_MENU);
     EXPECT_EQ(selectInfo.menuInfo.showShare, true);
     EXPECT_EQ(selectInfo.menuInfo.showSearch, true);
     EXPECT_EQ(selectInfo.menuInfo.showTranslate, true);
