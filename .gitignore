@@ -16,5 +16,6 @@ lite/ui/
 .clangd
 __pycache__/
 output/
+test/benchmark/reports/
 # placeholder for generated file
 frameworks/core/components/theme/theme_constants_defines.h
