@@ -642,7 +642,6 @@ ohos_source_set("ace_core_animation") {
     "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
-    "$ace_root/test/mock/adapter/mock_want_wrap.cpp",
     "$ace_root/test/mock/core/animation/mock_animator.cpp",
     "$ace_root/test/mock/core/animation/mock_scheduler.cpp",
   ]
