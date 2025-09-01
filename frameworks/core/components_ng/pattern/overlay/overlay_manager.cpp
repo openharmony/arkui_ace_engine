@@ -9064,6 +9064,9 @@ bool OverlayManager::IsNeedAvoidFoldCrease(
             TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
             return false;
         }
+        // Must get the HalfFoldHoverStatus from the main pipeline.
+        pipeline = DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(pipeline, false);
     }
     // Check is half fold status
     auto halfFoldStatus = expandDisplay ? container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD
