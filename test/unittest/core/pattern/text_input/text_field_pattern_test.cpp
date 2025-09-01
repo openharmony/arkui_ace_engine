@@ -1829,8 +1829,11 @@ HWTEST_F(TextFieldPatternTest, TextPattern079, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    DirtySwapConfig config;
+    pattern->OnSyncGeometryNode(config);
 
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern->OnSyncGeometryNode(config);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
     pattern->ProcNormalInlineStateInBlurEvent();
