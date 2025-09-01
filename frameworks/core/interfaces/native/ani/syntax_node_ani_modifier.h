@@ -17,22 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_SYNTAX_NODE_ANI_MODIFIER_H
 
 #include "core/interfaces/ani/ani_api.h"
-#include "core/components_ng/syntax/arkoala_syntax_node.h"
 
 namespace OHOS::Ace::NG {
 
 ani_long ConstructSyntaxNode(ani_int id)
 {
-    auto node = AceType::MakeRefPtr<ArkoalaSyntaxNode>(id);
-    CHECK_NULL_RETURN(node, 0);
-    node->IncRefCount();
-    return reinterpret_cast<ani_long>(AceType::RawPtr(node));
+    return 0;
 }
 
 const ArkUIAniSyntaxNodeModifier* GetSyntaxNodeAniModifier()
 {
-    static const ArkUIAniSyntaxNodeModifier impl = { .constructSyntaxNode = ConstructSyntaxNode };
-    return &impl;
+    return nullptr;
 }
 
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,9 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#ifndef __linux__
 #include <charconv>
+#endif
 
 #include "interop-types.h"
 #include "interop-logging.h"
@@ -566,7 +568,7 @@ inline void WriteToString(std::string *result, InteropFloat32 value)
   char buf[20];
   interop_snprintf(buf, sizeof buf, "%f", value);
   result->append(buf);
-#else
+#elif !defined(__linux__)
   std::string storage;
   storage.resize(20);
   // We use to_chars() to avoid locale issues.
@@ -583,7 +585,7 @@ inline void WriteToString(std::string *result, InteropFloat64 value)
   char buf[20];
   interop_snprintf(buf, sizeof buf, "%f", value);
   result->append(buf);
-#else
+#elif !defined(__linux__)
   std::string storage;
   storage.resize(20);
   // We use to_chars() to avoid locale issues.

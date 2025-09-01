@@ -281,7 +281,7 @@ ResourceConverter::ParamType::value_type Convert(const Ark_String& src)
 template<>
 ResourceConverter::ParamType::value_type Convert(const Ark_Int32& src)
 {
-    return Convert<int32_t>(src);
+    return static_cast<int64_t>(Convert<int32_t>(src));
 }
 
 template<>

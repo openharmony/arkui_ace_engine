@@ -277,5 +277,5 @@ export function borderRadiuses(all: number): Corners<number> {
   return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
 }
 
-export type BorderRadiuses = Corners<number>;
+export type NodeBorderRadiuses = Corners<number>;
 export type Offset = Vector2;
