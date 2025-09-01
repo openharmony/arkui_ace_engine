@@ -120,10 +120,10 @@ export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
         keyGenerator?: (item: T, index: number) => string): this {
         return this;
     }
-    onMove(handler: OnMoveHandler | undefined): this {
+    onMove(handler?: OnMoveHandler): this {
         return this;
     }
-    onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this {
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         return this;
     }
 }
@@ -132,15 +132,15 @@ export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent impleme
     /** @memo */
     itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
     keyGenerator?: (item: T, index: number) => string = undefined;
-    onMoveEvent: OnMoveHandler | undefined = undefined;
-    itemDragEvent: ItemDragEventHandler | undefined = undefined;
+    onMoveEvent?: OnMoveHandler = undefined;
+    itemDragEvent?: ItemDragEventHandler = undefined;
 
-    public onMove(handler: OnMoveHandler | undefined): this {
+    public onMove(handler?: OnMoveHandler): this {
         this.onMoveEvent = handler;
         return this;
     }
 
-    public onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this {
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         this.onMoveEvent = handler;
         this.itemDragEvent = eventHandler;
         return this;

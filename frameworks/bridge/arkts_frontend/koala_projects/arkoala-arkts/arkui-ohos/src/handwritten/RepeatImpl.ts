@@ -21,8 +21,9 @@ import { KPointer } from '@koalaui/interop';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback, Repeat } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
-import { OnMoveHandler, ItemDragEventHandler } from "../component"
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from "../component"
 import { LazyForEachImplForOptions } from './LazyForEachImpl';
+import { NodeHolder } from "./LazyForEachImpl"
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
@@ -41,7 +42,8 @@ export function RepeatImplForOptions<T>(
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
     if (repeat.disableVirtualScroll_) {
-        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_,
+            repeat.onMove_, repeat.itemDragEvent_);
     } else {
         const repeatId = __id();
         const node = contextNode<PeerNode>();
@@ -292,15 +294,20 @@ function virtualRender<T>(
         attributes.onMove_, attributes.itemDragEvent_);
 }
 
+function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
+
 /** @memo */
 function nonVirtualRender<T>(arr: RepeatArray<T>,
     /** @memo */
     itemGenerator: RepeatItemBuilder<T>,
-    keyGenerator?: (element: T, index: number) => string
+    keyGenerator?: (element: T, index: number) => string,
+    onMove?: OnMoveHandler,
+    itemDragEvent?: ItemDragEventHandler,
 ): void {
     if (keyGenerator && typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }
+    let nodeHolder = remember(() => new NodeHolder())
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
     /** @memo */
@@ -312,5 +319,12 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     };
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
         RepeatByArray<T>(arr, keyGen, action);
+            nodeHolder.node = node;
     });
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(),
+        onMoveFromTo, onMove, itemDragEvent);
 }

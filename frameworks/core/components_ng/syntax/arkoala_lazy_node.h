@@ -99,40 +99,10 @@ private:
     }
 
     // convert index by moveFromTo_.
-    int32_t ConvertFromToIndex(int32_t index) const
-    {
-        if (!moveFromTo_) {
-            return index;
-        }
-        if (moveFromTo_.value().second == index) {
-            return moveFromTo_.value().first;
-        }
-        if (moveFromTo_.value().first <= index && index < moveFromTo_.value().second) {
-            return index + 1;
-        }
-        if (moveFromTo_.value().second < index && index <= moveFromTo_.value().first) {
-            return index - 1;
-        }
-        return index;
-    }
+    int32_t ConvertFromToIndex(int32_t index) const;
 
     // revert converted-index to origin index.
-    int32_t ConvertFromToIndexRevert(int32_t index) const
-    {
-        if (!moveFromTo_) {
-            return index;
-        }
-        if (moveFromTo_.value().first == index) {
-            return moveFromTo_.value().second;
-        }
-        if (moveFromTo_.value().first < index && index <= moveFromTo_.value().second) {
-            return index - 1;
-        }
-        if (moveFromTo_.value().second <= index && index < moveFromTo_.value().first) {
-            return index + 1;
-        }
-        return index;
-    }
+    int32_t ConvertFromToIndexRevert(int32_t index) const;
 
     UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> items_;
     CreateItemCb createItem_;
