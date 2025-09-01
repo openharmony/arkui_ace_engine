@@ -2399,8 +2399,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetSpace(Dimension(SPACE));
-    model.SetCachedCount(2, true);
+    model.SetCachedCount(1, true);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         CreateListItem();
@@ -2416,13 +2415,15 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
     EXPECT_NE(repeat, nullptr);
     auto listPattern = frameNode_->GetPattern<ListPattern>();
-    FlushIdleTask(listPattern);
+    FlushUITasks();
+    const int64_t time = GetSysTimestamp();
+    auto pipeline = listPattern->GetContext();
+    pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+
     int32_t childrenCount = repeat->GetChildren().size();
-    EXPECT_EQ(childrenCount, 6);
+    EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
-    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
-    EXPECT_EQ(cachedItem->IsActive(), true);
-    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
+    EXPECT_EQ(cachedItem->IsActive(), false);
 
     /**
      * @tc.steps: step2. Update item4 size
@@ -2435,9 +2436,12 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
     cachedItem->SetLayoutDirtyMarked(true);
     cachedItem->CreateLayoutTask();
-    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 550);
-    FlushUITasks(frameNode_);
-    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 600);
+    EXPECT_EQ(sizeChanged, false);
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+
+    FlushUITasks();
+    EXPECT_EQ(sizeChanged, true);
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 400);
 }
 
 /**
