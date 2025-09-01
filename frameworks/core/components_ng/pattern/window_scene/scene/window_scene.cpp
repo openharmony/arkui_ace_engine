@@ -404,6 +404,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self->session_);
         if (self->session_->GetHidingStartingWindow()) {
             self->session_->SetHidingStartingWindow(false);
+            self->session_->SetLeashWindowAlpha(false);
             self->session_->SetBufferAvailable(true, true);
         }
         auto surfaceNode = self->session_->GetSurfaceNode();
