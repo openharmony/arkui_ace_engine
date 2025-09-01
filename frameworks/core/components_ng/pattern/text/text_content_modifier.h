@@ -114,7 +114,7 @@ public:
     void ContentModifierDump();
     void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
         const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host);
-
+    void SetRacePercentFloat(float value);
 protected:
     OffsetF GetPaintOffset() const
     {

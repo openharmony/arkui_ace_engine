@@ -1222,11 +1222,21 @@ TextDirection TextContentModifier::GetTextRaceDirectionByContent() const
         TextDirection::RTL : TextDirection::LTR;
 }
 
+void TextContentModifier::SetRacePercentFloat(float value)
+{
+    CHECK_NULL_VOID(racePercentFloat_);
+    racePercentFloat_->Set(value);
+}
+
 void TextContentModifier::ResetTextRacePercent()
 {
     if (GetTextRaceDirection() == TextDirection::LTR) {
         // LTR start 0%
-        racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetRacePercentFloat(RACE_MOVE_PERCENT_MIN);
+        });
         marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + RACE_MOVE_PERCENT_MIN;
         return;
     }
@@ -1251,7 +1261,11 @@ void TextContentModifier::ResetTextRacePercent()
             RACE_MOVE_PERCENT_MAX;
     }
     marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + racePercentFloat;
-    racePercentFloat_->Set(racePercentFloat);
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), racePercentFloat]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->SetRacePercentFloat(racePercentFloat);
+    });
 }
 
 void TextContentModifier::ContentChange()
