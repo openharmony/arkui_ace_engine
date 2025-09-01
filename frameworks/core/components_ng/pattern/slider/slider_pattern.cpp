@@ -177,6 +177,10 @@ void SliderPattern::OnModifyDone()
         pattern->InitEvent();
     };
     context->AddBuildFinishCallBack(callback);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    InitPanEvent(gestureHub);
 }
 
 void SliderPattern::InitEvent()
@@ -192,7 +196,6 @@ void SliderPattern::InitEvent()
     CHECK_NULL_VOID(inputEventHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
-    InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
