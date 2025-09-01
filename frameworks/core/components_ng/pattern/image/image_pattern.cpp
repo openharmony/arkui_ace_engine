@@ -109,7 +109,7 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
-constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
+constexpr uint32_t MAX_SRC_LENGTH = 200; // prevent the Base64 image format from too long.
 constexpr int32_t IMAGE_LOAD_FAIL = 0;
 constexpr int32_t IMAGE_LOAD_SUCCESS = 1;
 

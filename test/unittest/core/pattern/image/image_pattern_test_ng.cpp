@@ -1420,6 +1420,28 @@ HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TestCreateImageDfxConfig001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestCreateImageDfxConfig001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call CreateImageDfxConfig.
+     * @tc.expected:
+     */
+    auto imageDfxConfig = imagePattern->CreateImageDfxConfig(ImageSourceInfo(""));
+    EXPECT_EQ(imageDfxConfig.imageSrc_, "empty source");
+}
+
+/**
  * @tc.name: GetImageInterpolation001
  * @tc.desc: Get Image Interpolation.
  * @tc.type: FUNC
