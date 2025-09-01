@@ -131,7 +131,9 @@ ColorMode Container::CurrentColorMode()
 
 std::string Container::CurrentBundleName()
 {
-    return "";
+    auto container = MockContainer::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
 }
 
 void MockContainer::SetMockColorMode(ColorMode mode)
