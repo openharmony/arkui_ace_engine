@@ -17,9 +17,10 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
+#include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace {
-using CreateDownloadManagerFunc = DownloadManager* (*)();
+using CreateDownloadManagerFunc = DownloadManager* (*)(const char* path);
 std::unique_ptr<DownloadManager> DownloadManager::instance_ = nullptr;
 constexpr char CREATE_DOWNLOAD_MANAGER_FUNC[] = "OHOS_ACE_CreateDownloadManager";
 constexpr char ACE_NET_WORK_NAME[] = "libace_network.z.so";
@@ -38,7 +39,8 @@ DownloadManager* CreateDownloadManager()
         return nullptr;
     }
 
-    auto* manager = entry();
+    auto path = ImageFileCache::GetInstance().GetImageCacheFilePath();
+    auto* manager = entry(path.c_str());
     return manager;
 }
 
