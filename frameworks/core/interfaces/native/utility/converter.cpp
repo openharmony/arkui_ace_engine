@@ -2585,6 +2585,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
         info.fontFamily = fontfamiliesOpt->families;
     }
     info.fontWeight = OptConvert<FontWeight>(src.fontWeight);
+    info.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.fontStyle);
 
     info.backgroundColor = OptConvert<Color>(src.backgroundColor);
     info.borderRadius = OptConvert<BorderRadiusProperty>(src.borderRadius);
