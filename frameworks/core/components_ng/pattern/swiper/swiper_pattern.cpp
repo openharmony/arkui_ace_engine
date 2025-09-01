@@ -6482,6 +6482,10 @@ void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
+        if (swiperPattern->isTouchDown_) {
+            // When remove touch event, if the up state is not issued, it will be triggered.
+            swiperPattern->HandleTouchUp();
+        }
         if (!disableSwipe) {
             gestureHub->RemovePanEvent(swiperPattern->panEvent_);
         }
