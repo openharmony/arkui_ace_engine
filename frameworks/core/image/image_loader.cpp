@@ -283,6 +283,62 @@ std::string FileImageLoader::ParseFilePath(
     return filePath;
 }
 
+#if defined(PREVIEW) 
+std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
+{
+    auto& errorInfo = loadResultInfo.errorInfo;
+    const auto& src = imageSourceInfo.GetSrc();
+    std::string filePath = RemovePathHead(src);
+    auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
+    ACE_SCOPED_TRACE("LoadImageData %s", imageDfxConfig.ToStringWithSrc().c_str());
+    if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
+        // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
+        // "/data/data/{bundleName}/files/imagename.png"
+        auto bundleName = Container::CurrentBundleName();
+        if (bundleName.empty()) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "bundleName is empty, LoadImageData for internal source fail! %{private}s-%{public}s.",
+                imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            return nullptr;
+        }
+        if (!StringUtils::StartWith(filePath, "app/")) { // "app/" is infix of internal path
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "internal path format is wrong. path is %{private}s-%{public}s.",
+                src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            return nullptr;
+        }
+        filePath = std::string("/data/data/") // head of absolute path
+                       .append(bundleName)
+                       .append("/files/")           // infix of absolute path
+                       .append(filePath.substr(4)); // 4 is the length of "app/" from "internal://app/"
+    } else if (imageSourceInfo.GetSrcType() == SrcType::FILE) {
+        filePath = FileUriHelper::GetRealPath(src);
+    }
+    if (filePath.length() > PATH_MAX) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "path is too long. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_PATH_TOO_LONG, "path is too long." };
+        return nullptr;
+    }
+    char realPath[PATH_MAX] = { 0x00 };
+    realpath(filePath.c_str(), realPath);
+    auto result = RSData::MakeFromFileName(realPath);
+    if (!result) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "read data failed, filePath: %{private}s, realPath: %{private}s, "
+            "src: %{private}s, fail reason: %{private}s.%{public}s.",
+            filePath.c_str(), src.c_str(), realPath, strerror(errno), imageDfxConfig.ToStringWithoutSrc().c_str());
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        return nullptr;
+    } else {
+        loadResultInfo.fileSize = result->GetSize();
+        ACE_SCOPED_TRACE("LoadImageData result %s - %d", imageDfxConfig.ToStringWithSrc().c_str(),
+            static_cast<int32_t>(result->GetSize()));
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Read data %{private}s - %{public}s : %{public}d", realPath,
+            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->GetSize()));
+    }
+    return BuildImageData(result);
+}
+#else
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
     NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
 {
@@ -332,6 +388,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
     result->BuildFromMalloc(buffer.release(), fileSize);
     return result;
 }
+#endif
 
 std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
     NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
