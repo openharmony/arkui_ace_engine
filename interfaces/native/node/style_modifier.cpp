@@ -2239,23 +2239,22 @@ const ArkUI_AttributeItem* GetClip(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
-int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+bool SetClipShapeWithObject(
+    ArkUI_NodeHandle node, const ArkUI_AttributeItem* item, ArkUIFullNodeAPI* fullImpl, ArkUI_Int32 unit)
 {
-    if (item->size == 0) {
-        return ERROR_CODE_PARAM_INVALID;
+    if (item->object != nullptr && item->size == NUM_1) {
+        auto shapeObject = reinterpret_cast<ArkUIRenderNodeClipOption*>(item->object);
+        CHECK_NULL_RETURN(shapeObject, false);
+        return fullImpl->getNodeModifiers()->getCommonModifier()->setClipShapeWithObject(
+            node->uiNodeHandle, ShapeToString(item->value[0].i32).c_str(), shapeObject, unit);
     }
-    if (!InRegion(NUM_0, NUM_3, item->value[NUM_0].i32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto* fullImpl = GetFullImpl();
-    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     if (item->value[0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH) {
         if (item->string == nullptr) {
-            return ERROR_CODE_PARAM_INVALID;
+            return false;
         }
         ArkUI_Float32 pathAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
-            return ERROR_CODE_PARAM_INVALID;
+            return false;
         } else {
             pathAttributes[NUM_0] = item->value[NUM_1].f32;
             pathAttributes[NUM_1] = item->value[NUM_2].f32;
@@ -2266,14 +2265,27 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         ArkUI_Float32 attributes[item->size - NUM_1];
         for (int i = NUM_1; i < item->size; i++) {
             if (LessNotEqual(item->value[i].f32, 0.0f)) {
-                return ERROR_CODE_PARAM_INVALID;
-            } else {
-                attributes[i - NUM_1] = item->value[i].f32;
+                return false;
             }
+            attributes[i - NUM_1] = item->value[i].f32;
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setClipShape(
             node->uiNodeHandle, ShapeToString(item->value[0].i32).c_str(), attributes, item->size - NUM_1, unit);
     }
+    return true;
+}
+
+int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!InRegion(NUM_0, NUM_3, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    CHECK_EQUAL_RETURN(SetClipShapeWithObject(node, item, fullImpl, unit), false, ERROR_CODE_PARAM_INVALID);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2299,14 +2311,20 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
         g_numberValues[NUM_6].f32 = options.bottomLeftRadius;
         g_numberValues[NUM_7].f32 = options.topRightRadius;
         g_numberValues[NUM_8].f32 = options.bottomRightRadius;
+        g_numberValues[NUM_9].f32 = options.offsetX;
+        g_numberValues[NUM_10].f32 = options.offsetY;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::CIRCLE)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
+        g_numberValues[NUM_3].f32 = options.offsetX;
+        g_numberValues[NUM_4].f32 = options.offsetY;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::ELLIPSE)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
+        g_numberValues[NUM_3].f32 = options.offsetX;
+        g_numberValues[NUM_4].f32 = options.offsetY;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::PATH)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH);
         g_numberValues[NUM_1].f32 = options.width;
