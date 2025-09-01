@@ -49,10 +49,7 @@ public:
         updateRange_ = std::move(update);
     }
 
-    void MoveData(int32_t from, int32_t to) final
-    {
-        items_.Swap(from, to);
-    }
+    void MoveData(int32_t from, int32_t to) final;
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
 
@@ -83,11 +80,67 @@ public:
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type);
 
+    // used for drag move operation.
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetOnMoveFromTo(std::function<void(int32_t, int32_t)>&& onMoveFromTo);
+    void SetItemDragEvent(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+    void FireOnMove(int32_t from, int32_t to) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChildrenDragManager(bool init);
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
+
 private:
+    void UpdateMoveFromTo(int32_t from, int32_t to);
+    void UpdateItemsForOnMove();
+    void ResetMoveFromTo()
+    {
+        moveFromTo_.reset();
+    }
+
+    // convert index by moveFromTo_.
+    int32_t ConvertFromToIndex(int32_t index) const
+    {
+        if (!moveFromTo_) {
+            return index;
+        }
+        if (moveFromTo_.value().second == index) {
+            return moveFromTo_.value().first;
+        }
+        if (moveFromTo_.value().first <= index && index < moveFromTo_.value().second) {
+            return index + 1;
+        }
+        if (moveFromTo_.value().second < index && index <= moveFromTo_.value().first) {
+            return index - 1;
+        }
+        return index;
+    }
+
+    // revert converted-index to origin index.
+    int32_t ConvertFromToIndexRevert(int32_t index) const
+    {
+        if (!moveFromTo_) {
+            return index;
+        }
+        if (moveFromTo_.value().first == index) {
+            return moveFromTo_.value().second;
+        }
+        if (moveFromTo_.value().first < index && index <= moveFromTo_.value().second) {
+            return index - 1;
+        }
+        if (moveFromTo_.value().second <= index && index < moveFromTo_.value().first) {
+            return index + 1;
+        }
+        return index;
+    }
+
     UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> items_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
+    std::function<void(int32_t, int32_t)> onMoveFromTo_;
     int32_t totalCount_ = 0;
+    // record (from, to), only valid during dragging item.
+    std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_LAZY_NODE_H

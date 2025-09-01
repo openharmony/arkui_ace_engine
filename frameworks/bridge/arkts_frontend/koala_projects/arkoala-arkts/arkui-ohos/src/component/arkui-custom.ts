@@ -32,6 +32,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame, Size } from "../Graphics"
 import { TouchEvent, DragItemInfo, CustomBuilder, OnDragEventCallback, PreviewConfiguration, DropOptions, OverlayOptions } from "./common"
 import { DragEvent } from '../component'
+import { OnMoveHandler, ItemDragEventHandler } from "./common"
 
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
@@ -247,6 +248,15 @@ export class LazyForEachOps {
         LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
         return
     }
+    public static SyncOnMoveOps(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo,
+        onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const node_casted = node as (KPointer)
+        const onMoveFromToOps_casted = onMoveFromToOps as (Callback_OnMoveFromTo)
+        const onMoveOps_casted = onMoveOps as (OnMoveHandler | undefined)
+        const onMoveDragEventOps_casted = onMoveDragEventOps as (ItemDragEventHandler | undefined)
+        LazyForEachOps.SyncOnMoveOps_serialize(node_casted, onMoveFromToOps_casted, onMoveOps_casted, onMoveDragEventOps_casted)
+        return
+    }
     private static NeedMoreElements_serialize(node: KPointer, mark: KPointer, direction: int32): KPointer {
         const retval  = ArkUIGeneratedNativeModule._LazyForEachOps_NeedMoreElements(node, mark, direction)
         return retval
@@ -271,6 +281,27 @@ export class LazyForEachOps {
         thisSerializer.holdAndWriteCallback(creator)
         thisSerializer.holdAndWriteCallback(updater)
         ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static SyncOnMoveOps_serialize(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo,
+        onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onMoveFromToOps)
+        if (onMoveOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveOpsTmpValue = onMoveOps!
+            thisSerializer.holdAndWriteCallback(onMoveOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (onMoveDragEventOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveDragEventOpsTmpValue = onMoveDragEventOps!
+            thisSerializer.writeItemDragEventHandler(onMoveDragEventOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -1203,6 +1234,7 @@ export type Context_getGroupDir_Callback = (result: string) => void;
 
 export type Callback_RangeUpdate = (start: int32, end: int32) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
+export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
 export interface LengthMetricsCustom {
     unit: number;
     value: number;

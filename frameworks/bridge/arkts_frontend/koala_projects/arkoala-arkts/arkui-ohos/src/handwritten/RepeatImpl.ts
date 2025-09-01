@@ -21,6 +21,7 @@ import { KPointer } from '@koalaui/interop';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback, Repeat } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
+import { OnMoveHandler, ItemDragEventHandler } from "../component"
 import { LazyForEachImplForOptions } from './LazyForEachImpl';
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
@@ -159,10 +160,24 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     userDefinedTotal_?: number; // if totalCount is specified
     onLazyLoading_?: (index: number) => void;
+    onMove_?: OnMoveHandler;
+    itemDragEvent_?: ItemDragEventHandler;
 
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
     setRepeatOptions(arr: RepeatArray<T>): this {
+        return this;
+    }
+
+    onMove(handler: OnMoveHandler | undefined): this {
+        this.onMove_ = handler;
+        return this;
+    }
+
+    onMove(handler: OnMoveHandler | undefined,
+        eventHandler: ItemDragEventHandler | undefined): this {
+        this.onMove_ = handler;
+        this.itemDragEvent_ = eventHandler;
         return this;
     }
 
@@ -273,7 +288,8 @@ function virtualRender<T>(
             itemBuilder(ri);
         }
     };
-    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true,
+        attributes.onMove_, attributes.itemDragEvent_);
 }
 
 /** @memo */

@@ -9005,8 +9005,6 @@ export interface ItemDragEventHandler {
     onMoveThrough?: OnMoveHandler;
     onDrop?: ((index: number) => void);
 }
-export interface DynamicNode<T> {
-}
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
     effectEdge?: number;

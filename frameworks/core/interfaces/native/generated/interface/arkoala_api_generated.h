@@ -1294,6 +1294,8 @@ typedef struct Callback_OnInterceptRequestEvent_WebResourceResponse Callback_OnI
 typedef struct Opt_Callback_OnInterceptRequestEvent_WebResourceResponse Opt_Callback_OnInterceptRequestEvent_WebResourceResponse;
 typedef struct Callback_OnLoadInterceptEvent_Boolean Callback_OnLoadInterceptEvent_Boolean;
 typedef struct Opt_Callback_OnLoadInterceptEvent_Boolean Opt_Callback_OnLoadInterceptEvent_Boolean;
+typedef struct Callback_OnMoveFromTo Callback_OnMoveFromTo;
+typedef struct Opt_Callback_OnMoveFromTo Opt_Callback_OnMoveFromTo;
 typedef struct Callback_OnOverScrollEvent_Void Callback_OnOverScrollEvent_Void;
 typedef struct Opt_Callback_OnOverScrollEvent_Void Opt_Callback_OnOverScrollEvent_Void;
 typedef struct Callback_OnPageBeginEvent_Void Callback_OnPageBeginEvent_Void;
@@ -2018,6 +2020,8 @@ typedef struct Ark_IntelligentTrackingPreventionDetails Ark_IntelligentTrackingP
 typedef struct Opt_IntelligentTrackingPreventionDetails Opt_IntelligentTrackingPreventionDetails;
 typedef struct Ark_InvertOptions Ark_InvertOptions;
 typedef struct Opt_InvertOptions Opt_InvertOptions;
+typedef struct Ark_ItemDragEventHandler Ark_ItemDragEventHandler;
+typedef struct Opt_ItemDragEventHandler Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo Opt_ItemDragInfo;
 typedef struct Ark_KeyboardOptions Ark_KeyboardOptions;
@@ -10236,6 +10240,16 @@ typedef struct Opt_Callback_OnLoadInterceptEvent_Boolean {
     Ark_Tag tag;
     Callback_OnLoadInterceptEvent_Boolean value;
 } Opt_Callback_OnLoadInterceptEvent_Boolean;
+typedef struct Callback_OnMoveFromTo {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
+} Callback_OnMoveFromTo;
+typedef struct Opt_Callback_OnMoveFromTo {
+    Ark_Tag tag;
+    Callback_OnMoveFromTo value;
+} Opt_Callback_OnMoveFromTo;
 typedef struct Callback_OnOverScrollEvent_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_OnOverScrollEvent parameter);
@@ -13403,6 +13417,17 @@ typedef struct Opt_InvertOptions {
     Ark_Tag tag;
     Ark_InvertOptions value;
 } Opt_InvertOptions;
+typedef struct Ark_ItemDragEventHandler {
+    /* kind: Interface */
+    Opt_Callback_Number_Void onLongPress;
+    Opt_Callback_Number_Void onDragStart;
+    Opt_OnMoveHandler onMoveThrough;
+    Opt_Callback_Number_Void onDrop;
+} Ark_ItemDragEventHandler;
+typedef struct Opt_ItemDragEventHandler {
+    Ark_Tag tag;
+    Ark_ItemDragEventHandler value;
+} Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo {
     Ark_Number x;
     Ark_Number y;
@@ -24479,6 +24504,10 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                  Ark_Int32 totalCount,
                  const Callback_CreateItem* creator,
                  const Callback_RangeUpdate* updater);
+    void (*SyncOnMoveOps)(Ark_NativePointer node,
+                        const Callback_OnMoveFromTo* onMoveFromToOps,
+                        const Opt_OnMoveHandler* onMoveOps,
+                        const Opt_ItemDragEventHandler* onMoveDragEventOps);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUISystemOpsAccessor {

@@ -197,6 +197,7 @@ import { LevelOrderInternal, LevelMode, ImmersiveMode, LevelOrder } from "@ohos/
 import { PointerStyle, DataSyncOptions } from '#external'
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 import { uiObserver } from "@ohos/arkui/observer"
+import { ItemDragEventHandler } from "./../common"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -20157,6 +20158,84 @@ export class Deserializer extends DeserializerBase {
         }
         const onOffsetChange_result : ((index: number) => void) | undefined = onOffsetChange_buf
         let value : SwipeActionOptions = ({start: start_result, end: end_result, edgeEffect: edgeEffect_result, onOffsetChange: onOffsetChange_result} as SwipeActionOptions)
+        return value
+    }
+    readItemDragEventHandler(): ItemDragEventHandler {
+        let valueDeserializer: Deserializer = this
+        const onLongPressTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onLongPressTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onLongPressTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onLongPressTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onLongPressTmpBuf = (value0: number): void => {
+                const onLongPressTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
+                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onLongPressTmpResult: ((value0: number) => void) | undefined|undefined = onLongPressTmpBuf
+        const onDragStartTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onDragStartTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDragStartTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDragStartTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onDragStartTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onDragStartTmpBuf = (value0: number): void => {
+                const onDragStartTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
+                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDragStartTmpResult: ((value0: number) => void) | undefined|undefined = onDragStartTmpBuf
+        const onMoveThroughTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onMoveThroughTmpBuf: OnMoveHandler | undefined|undefined = undefined
+        if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMoveThroughTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onMoveThroughTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onMoveThroughTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onMoveThroughTmpBuf = (from: number, to: number): void => {
+                const onMoveThroughTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                InteropNativeModule._CallCallbackSync(-1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
+                onMoveThroughTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMoveThroughTmpResult: OnMoveHandler | undefined|undefined = onMoveThroughTmpBuf
+        const onDropTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onDropTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDropTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDropTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onDropTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onDropTmpBuf = (value0: number): void => {
+                const onDropTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
+                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDropTmpResult: ((value0: number) => void) | undefined|undefined = onDropTmpBuf
+        let value: ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
         return value
     }
     readSwipeGestureEvent(): SwipeGestureEvent {
