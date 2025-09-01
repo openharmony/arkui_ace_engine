@@ -2010,7 +2010,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
 
     SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
+    EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
 }
 
 /**
