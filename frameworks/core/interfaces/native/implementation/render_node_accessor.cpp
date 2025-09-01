@@ -1006,7 +1006,16 @@ void SetFrameImpl(Ark_RenderNode peer, const Ark_Frame* frame)
 }
 Ark_Vector2 GetPivotImpl(Ark_RenderNode peer)
 {
-    return {};
+    // The value is a floating point number in the range [0.0, 1.0], and the default value is 0.5.
+    auto defaultPivot = DimensionOffset(Dimension(0.5f), Dimension(0.5f));
+    auto errorValue = Converter::ArkValue<Ark_Vector2>(defaultPivot);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto renderContext = GetRenderContext(frameNode, false);
+    CHECK_NULL_RETURN(renderContext, errorValue);
+    auto pivot = renderContext->GetTransformCenterValue(defaultPivot);
+    return Converter::ArkValue<Ark_Vector2>(pivot);
 }
 void SetPivotImpl(Ark_RenderNode peer, const Ark_Vector2* pivot)
 {
@@ -1014,19 +1023,26 @@ void SetPivotImpl(Ark_RenderNode peer, const Ark_Vector2* pivot)
         LOGW("This renderNode is nullptr when SetPivot !");
         return;
     }
-    auto pivotX = Converter::Convert<float>(pivot->x);
-    auto pivotY = Converter::Convert<float>(pivot->y);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetRenderPivot(pivotX, pivotY);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(pivot);
+
+    auto pivotConv = Converter::Convert<VectorF>(*pivot);
+    auto x = GreatOrEqual(pivotConv.x, 0.f) && LessOrEqual(pivotConv.x, 1.f) ? pivotConv.x : 0.5f;
+    auto y = GreatOrEqual(pivotConv.y, 0.f) && LessOrEqual(pivotConv.y, 1.f) ? pivotConv.y : 0.5f;
+    ViewAbstractModelStatic::SetPivot(Referenced::RawPtr(frameNode), DimensionOffset(Dimension(x), Dimension(y)));
 }
 Ark_Vector2 GetScaleImpl(Ark_RenderNode peer)
 {
-    return {};
+    // The default value is { x: 1, y: 1 }.
+    auto errorValue = Converter::ArkValue<Ark_Vector2>(VectorF(1.f, 1.f));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto scaleValue = ViewAbstract::GetScale(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_Vector2>(scaleValue);
 }
 void SetScaleImpl(Ark_RenderNode peer, const Ark_Vector2* scale)
 {
@@ -1034,18 +1050,26 @@ void SetScaleImpl(Ark_RenderNode peer, const Ark_Vector2* scale)
         LOGW("This renderNode is nullptr when SetScale !");
         return;
     }
-    auto scaleX = Converter::Convert<float>(scale->x);
-    auto scaleY = Converter::Convert<float>(scale->y);
+
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetScale(scaleX, scaleY);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(scale);
+
+    auto scaleConv = Converter::Convert<VectorF>(*scale);
+    auto x = GreatOrEqual(scaleConv.x, 0.f) ? scaleConv.x : 1.f;
+    auto y = GreatOrEqual(scaleConv.y, 0.f) ? scaleConv.y : 1.f;
+    ViewAbstract::SetScale(Referenced::RawPtr(frameNode), VectorF(x, y));
 }
 Ark_Vector2 GetTranslationImpl(Ark_RenderNode peer)
 {
-    return {};
+    // The default value is { x: 0, y: 0 }.
+    auto errorValue = Converter::ArkValue<Ark_Vector2>(VectorF(0.f, 0.f));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto translateValue = ViewAbstract::GetTranslate(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_Vector2>(translateValue);
 }
 void SetTranslationImpl(Ark_RenderNode peer, const Ark_Vector2* translation)
 {
@@ -1053,20 +1077,27 @@ void SetTranslationImpl(Ark_RenderNode peer, const Ark_Vector2* translation)
         LOGW("This renderNode is nullptr when SetTranslation !");
         return;
     }
-    auto translationX = Converter::Convert<float>(translation->x);
-    auto translationY = Converter::Convert<float>(translation->y);
-    float translateZ = 0.0f;
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetTranslate(translationX, translationY, translateZ);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(translation);
+
+    auto translateConv = Converter::Convert<VectorF>(*translation);
+    auto x = GreatOrEqual(translateConv.x, 0.f) ? translateConv.x : 0.f;
+    auto y = GreatOrEqual(translateConv.y, 0.f) ? translateConv.y : 0.f;
+    ViewAbstract::SetTranslate(Referenced::RawPtr(frameNode),
+        TranslateOptions(CalcDimension(x), CalcDimension(y), CalcDimension(0.f)));
 }
 Ark_Vector3 GetRotationImpl(Ark_RenderNode peer)
 {
-    return {};
+    // The default value is { x: 0, y: 0, z: 0}.
+    auto errorValue = Converter::ArkValue<Ark_Vector3>(Vector3F(0.f, 0.f, 0.f));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto rotateValue = ViewAbstract::GetRotate(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_Vector3>(Vector3F(rotateValue.x, rotateValue.y, rotateValue.z));
 }
 void SetRotationImpl(Ark_RenderNode peer, const Ark_Vector3* rotation, const Ark_Int32 unitValue)
 {
@@ -1074,24 +1105,31 @@ void SetRotationImpl(Ark_RenderNode peer, const Ark_Vector3* rotation, const Ark
         LOGW("This renderNode is nullptr when SetRotation !");
         return;
     }
-    auto rotationX = Converter::Convert<float>(rotation->x);
-    auto rotationY = Converter::Convert<float>(rotation->y);
-    auto rotationZ = Converter::Convert<float>(rotation->z);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(rotation);
+
     DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    Dimension first = Dimension(rotationX, unit);
-    Dimension second = Dimension(rotationY, unit);
-    Dimension third = Dimension(rotationZ, unit);
-    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
-    renderContext->RequestNextFrame();
+    auto rotationConv = Converter::Convert<Vector3F>(*rotation);
+    auto x = Dimension(GreatOrEqual(rotationConv.x, 0.f) ? rotationConv.x : 0.f, unit);
+    auto y = Dimension(GreatOrEqual(rotationConv.y, 0.f) ? rotationConv.y : 0.f, unit);
+    auto z = Dimension(GreatOrEqual(rotationConv.z, 0.f) ? rotationConv.z : 0.f, unit);
+    ViewAbstract::SetRotate(Referenced::RawPtr(frameNode),
+        Vector5F(x.ConvertToPx(), y.ConvertToPx(), z.ConvertToPx(), 0.f, 0.f)
+    );
 }
 Ark_Matrix4 GetTransformImpl(Ark_RenderNode peer)
 {
-    return {};
+    // The default value is [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    auto errorValue = Converter::ArkValue<Ark_Matrix4>(
+        Matrix4(1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto transformValue = ViewAbstract::GetTransform(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_Matrix4>(transformValue);
 }
 void SetTransformImpl(Ark_RenderNode peer, const Ark_Matrix4* transform)
 {
@@ -1099,32 +1137,27 @@ void SetTransformImpl(Ark_RenderNode peer, const Ark_Matrix4* transform)
         LOGW("This renderNode is nullptr when SetTransform !");
         return;
     }
-    auto value0 = Converter::Convert<float>(transform->value0);
-    auto value1 = Converter::Convert<float>(transform->value1);
-    auto value2 = Converter::Convert<float>(transform->value2);
-    auto value3 = Converter::Convert<float>(transform->value3);
-    auto value4 = Converter::Convert<float>(transform->value4);
-    auto value5 = Converter::Convert<float>(transform->value5);
-    auto value6 = Converter::Convert<float>(transform->value6);
-    auto value7 = Converter::Convert<float>(transform->value7);
-    auto value8 = Converter::Convert<float>(transform->value8);
-    auto value9 = Converter::Convert<float>(transform->value9);
-    auto value10 = Converter::Convert<float>(transform->value10);
-    auto value11 = Converter::Convert<float>(transform->value11);
-    auto value12 = Converter::Convert<float>(transform->value12);
-    auto value13 = Converter::Convert<float>(transform->value13);
-    auto value14 = Converter::Convert<float>(transform->value14);
-    auto value15 = Converter::Convert<float>(transform->value15);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto matrix4 = std::make_optional<Matrix4>(value0, value4, value8, value12, value1, value5, value9, value13, value2,
-        value6, value10, value14, value3, value7, value11, value15);
-    NG::ViewAbstractModelStatic::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(transform);
+
+    auto transformConv = Converter::Convert<Matrix4>(*transform);
+    ViewAbstractModelStatic::SetTransformMatrix(Referenced::RawPtr(frameNode), transformConv);
 }
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(Color::TRANSPARENT.GetValue()));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto color = shadow.value().GetColor();
+        return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(color.GetValue()));
+    }
+    return errorValue;
 }
 void SetShadowColorImpl(Ark_RenderNode peer, const Ark_Number* shadowColor)
 {
@@ -1132,18 +1165,36 @@ void SetShadowColorImpl(Ark_RenderNode peer, const Ark_Number* shadowColor)
         LOGW("This renderNode is nullptr when SetShadowColor !");
         return;
     }
-    auto colorValue = Converter::Convert<uint32_t>(*shadowColor);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetShadowColor(colorValue);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(shadowColor);
+
+    auto colorConv = Converter::Convert<int32_t>(*shadowColor);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto color = Color(colorConv);
+        if (peer->shadowAlpha.has_value()) {
+            color = color.ChangeAlpha(peer->shadowAlpha.value());
+        }
+        shadow->SetColor(color);
+        std::vector<Shadow> shadows { shadow.value() };
+        ViewAbstractModelStatic::SetBackShadow(Referenced::RawPtr(frameNode), shadows);
+    }
 }
 Ark_Vector2 GetShadowOffsetImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Vector2>(Offset(0, 0));
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto offset = shadow.value().GetOffset();
+        return Converter::ArkValue<Ark_Vector2>(offset);
+    }
+    return errorValue;
 }
 void SetShadowOffsetImpl(Ark_RenderNode peer, const Ark_Vector2* shadowOffset, const Ark_Int32 unitValue)
 {
@@ -1151,22 +1202,28 @@ void SetShadowOffsetImpl(Ark_RenderNode peer, const Ark_Vector2* shadowOffset, c
         LOGW("This renderNode is nullptr when SetShadowOffset !");
         return;
     }
-    auto offsetX = Converter::Convert<float>(shadowOffset->x);
-    auto offsetY = Converter::Convert<float>(shadowOffset->y);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(shadowOffset);
+
     DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    Dimension first = Dimension(offsetX, unit);
-    Dimension second = Dimension(offsetY, unit);
-    renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
-    renderContext->RequestNextFrame();
+    auto offsetConv = Converter::Convert<Offset>(*shadowOffset);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        Dimension first = Dimension(offsetConv.GetX(), unit);
+        Dimension second = Dimension(offsetConv.GetY(), unit);
+        shadow->SetOffset(Offset(first.ConvertToPx(), second.ConvertToPx()));
+        std::vector<Shadow> shadows { shadow.value() };
+        ViewAbstractModelStatic::SetBackShadow(Referenced::RawPtr(frameNode), shadows);
+    }
 }
 Ark_String GetLabelImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_String>("", Converter::FC);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_String>(peer->label, Converter::FC);
 }
 void SetLabelImpl(Ark_RenderNode peer, const Ark_String* label)
 {
@@ -1174,17 +1231,25 @@ void SetLabelImpl(Ark_RenderNode peer, const Ark_String* label)
         LOGW("This renderNode is nullptr when SetLabel !");
         return;
     }
-    auto labelValue = Converter::Convert<std::string>(*label);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(label);
+    auto labelConv = Converter::Convert<std::string>(*label);
     auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetLabel(std::string(labelValue));
+    pattern->SetLabel(labelConv);
+    peer->label = labelConv;
 }
 Ark_Number GetShadowAlphaImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errorValue);
+    if (peer->shadowAlpha.has_value()) {
+        return Converter::ArkValue<Ark_Number>(peer->shadowAlpha.value());
+    }
+    return errorValue;
 }
 void SetShadowAlphaImpl(Ark_RenderNode peer, const Ark_Number* shadowAlpha)
 {
@@ -1192,18 +1257,37 @@ void SetShadowAlphaImpl(Ark_RenderNode peer, const Ark_Number* shadowAlpha)
         LOGW("This renderNode is nullptr when SetShadowAlpha !");
         return;
     }
-    auto alphaValue = Converter::Convert<float>(*shadowAlpha);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetShadowAlpha(alphaValue);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(shadowAlpha);
+
+    auto alphaConv = Converter::Convert<uint32_t>(*shadowAlpha);
+    peer->shadowAlpha = alphaConv;
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto color = shadow.value().GetColor();
+        if (peer->shadowAlpha.has_value()) {
+            color = color.ChangeAlpha(peer->shadowAlpha.value());
+        }
+        shadow->SetColor(color);
+        std::vector<Shadow> shadows { shadow.value() };
+        ViewAbstractModelStatic::SetBackShadow(Referenced::RawPtr(frameNode), shadows);
+    }
 }
 Ark_Number GetShadowElevationImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0.f);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto elevation = shadow.value().GetElevation();
+        return Converter::ArkValue<Ark_Number>(elevation);
+    }
+    return errorValue;
 }
 void SetShadowElevationImpl(Ark_RenderNode peer, const Ark_Number* shadowElevation)
 {
@@ -1211,18 +1295,32 @@ void SetShadowElevationImpl(Ark_RenderNode peer, const Ark_Number* shadowElevati
         LOGW("This renderNode is nullptr when SetShadowElevation !");
         return;
     }
-    auto elevationValue = Converter::Convert<float>(*shadowElevation);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetShadowElevation(elevationValue);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(shadowElevation);
+
+    auto elevationConv = Converter::Convert<float>(*shadowElevation);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        shadow->SetElevation(elevationConv);
+        std::vector<Shadow> shadows { shadow.value() };
+        ViewAbstractModelStatic::SetBackShadow(Referenced::RawPtr(frameNode), shadows);
+    }
 }
 Ark_Number GetShadowRadiusImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0.f);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        auto radius = shadow.value().GetBlurRadius();
+        return Converter::ArkValue<Ark_Number>(radius);
+    }
+    return errorValue;
 }
 void SetShadowRadiusImpl(Ark_RenderNode peer, const Ark_Number* shadowRadius)
 {
@@ -1230,18 +1328,28 @@ void SetShadowRadiusImpl(Ark_RenderNode peer, const Ark_Number* shadowRadius)
         LOGW("This renderNode is nullptr when SetShadowRadius !");
         return;
     }
-    auto radiusValue = Converter::Convert<float>(*shadowRadius);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetShadowRadius(radiusValue);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(shadowRadius);
+
+    auto radiusConv = Converter::Convert<float>(*shadowRadius);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(frameNode));
+    if (shadow.has_value()) {
+        shadow->SetBlurRadius(radiusConv);
+        std::vector<Shadow> shadows { shadow.value() };
+        ViewAbstractModelStatic::SetBackShadow(Referenced::RawPtr(frameNode), shadows);
+    }
 }
 Ark_EdgeStyles GetBorderStyleImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_EdgeStyles>(BorderStyleProperty());
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto value = ViewAbstract::GetBorderStyle(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_EdgeStyles>(value);
 }
 void SetBorderStyleImpl(Ark_RenderNode peer, const Ark_EdgeStyles* borderStyle)
 {
@@ -1249,20 +1357,23 @@ void SetBorderStyleImpl(Ark_RenderNode peer, const Ark_EdgeStyles* borderStyle)
         LOGW("This renderNode is nullptr when SetBorderStyle !");
         return;
     }
-    auto left = borderStyle->left.value;
-    auto right = borderStyle->right.value;
-    auto top = borderStyle->top.value;
-    auto bottom = borderStyle->bottom.value;
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(borderStyle);
 
-    auto borderStyleProperty = Converter::Convert<BorderStyleProperty>(*borderStyle);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, borderStyleProperty, frameNode);
+    auto value = Converter::Convert<BorderStyleProperty>(*borderStyle);
+    ViewAbstractModelStatic::SetBorderStyle(Referenced::RawPtr(frameNode), value);
 }
 Ark_EdgesNumber GetBorderWidthImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_EdgesNumber>(BorderWidthProperty());
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto value = ViewAbstract::GetBorderWidth(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_EdgesNumber>(value);
 }
 void SetBorderWidthImpl(Ark_RenderNode peer, const Ark_EdgesNumber* borderWidth, const Ark_Int32 unitValue)
 {
@@ -1270,29 +1381,42 @@ void SetBorderWidthImpl(Ark_RenderNode peer, const Ark_EdgesNumber* borderWidth,
         LOGW("This renderNode is nullptr when SetBorderWidth !");
         return;
     }
-    auto left = Converter::Convert<Dimension>(borderWidth->left.value);
-    auto right = Converter::Convert<Dimension>(borderWidth->right.value);
-    auto top = Converter::Convert<Dimension>(borderWidth->top.value);
-    auto bottom = Converter::Convert<Dimension>(borderWidth->bottom.value);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(borderWidth);
+
     auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    BorderWidthProperty borderWidthProperty { .leftDimen = Dimension(left.Value(), unit),
-        .topDimen = Dimension(top.Value(), unit),
-        .rightDimen = Dimension(right.Value(), unit),
-        .bottomDimen = Dimension(bottom.Value(), unit),
-        .multiValued = true };
-    layoutProperty->UpdateBorderWidth(borderWidthProperty);
-    frameNode->MarkDirtyNode();
-    renderContext->SetBorderWidth(borderWidthProperty);
+    auto value = Converter::Convert<BorderWidthProperty>(*borderWidth);
+    if (value.leftDimen) {
+        value.leftDimen->SetUnit(unit);
+    }
+    if (value.topDimen) {
+        value.topDimen->SetUnit(unit);
+    }
+    if (value.rightDimen) {
+        value.rightDimen->SetUnit(unit);
+    }
+    if (value.bottomDimen) {
+        value.bottomDimen->SetUnit(unit);
+    }
+    ViewAbstractModelStatic::SetBorderWidth(Referenced::RawPtr(frameNode), value);
 }
 Ark_EdgesNumber GetBorderColorImpl(Ark_RenderNode peer)
 {
-    return {};
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = {
+        defaultColor, defaultColor, defaultColor, defaultColor, std::nullopt, std::nullopt
+    };
+    auto errorValue = Converter::ArkValue<Ark_EdgesNumber>(borderColors);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto value = ViewAbstract::GetBorderColor(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_EdgesNumber>(value);
 }
 void SetBorderColorImpl(Ark_RenderNode peer, const Ark_EdgesNumber* borderColor)
 {
@@ -1300,25 +1424,23 @@ void SetBorderColorImpl(Ark_RenderNode peer, const Ark_EdgesNumber* borderColor)
         LOGW("This renderNode is nullptr when SetBorderColor !");
         return;
     }
-    auto left = Converter::Convert<uint32_t>(borderColor->left.value);
-    auto right = Converter::Convert<uint32_t>(borderColor->right.value);
-    auto top = Converter::Convert<uint32_t>(borderColor->top.value);
-    auto bottom = Converter::Convert<uint32_t>(borderColor->bottom.value);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderColorProperty borderColorProperty { .leftColor = Color(left),
-        .rightColor = Color(right),
-        .topColor = Color(top),
-        .bottomColor = Color(bottom),
-        .multiValued = true };
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(borderColor);
+
+    auto value = Converter::Convert<BorderColorProperty>(*borderColor);
+    ViewAbstractModelStatic::SetBorderColor(Referenced::RawPtr(frameNode), value);
 }
 Ark_BorderRadiuses_graphics GetBorderRadiusImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_BorderRadiuses_graphics>(BorderRadiusProperty());
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto value = ViewAbstract::GetBorderRadius(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_BorderRadiuses_graphics>(value);
 }
 void SetBorderRadiusImpl(Ark_RenderNode peer, const Ark_BorderRadiuses_graphics* borderRadius, Ark_Int32 unitValue)
 {
@@ -1326,19 +1448,27 @@ void SetBorderRadiusImpl(Ark_RenderNode peer, const Ark_BorderRadiuses_graphics*
         LOGW("This renderNode is nullptr when SetBorderRadius !");
         return;
     }
-    auto topLeft = Converter::Convert<float>(borderRadius->topLeft);
-    auto topRight = Converter::Convert<float>(borderRadius->topRight);
-    auto bottomLeft = Converter::Convert<float>(borderRadius->bottomLeft);
-    auto bottomRight = Converter::Convert<float>(borderRadius->bottomRight);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    CHECK_NULL_VOID(borderRadius);
+
     DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    BorderRadiusProperty borderRadiusProperty(
-        Dimension(topLeft, unit), Dimension(topRight, unit), Dimension(bottomRight, unit), Dimension(bottomLeft, unit));
-    renderContext->UpdateBorderRadius(borderRadiusProperty);
+    auto value = Converter::Convert<BorderRadiusProperty>(*borderRadius);
+    if (value.radiusTopLeft) {
+        value.radiusTopLeft->SetUnit(unit);
+    }
+    if (value.radiusTopRight) {
+        value.radiusTopRight->SetUnit(unit);
+    }
+    if (value.radiusBottomRight) {
+        value.radiusBottomRight->SetUnit(unit);
+    }
+    if (value.radiusBottomLeft) {
+        value.radiusBottomLeft->SetUnit(unit);
+    }
+    ViewAbstractModelStatic::SetBorderRadius(Referenced::RawPtr(frameNode), value);
 }
 Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
 {
