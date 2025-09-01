@@ -1,6 +1,6 @@
 @Entry
 @Component
-struct ContextMenuExample {
+struct MenuDivider {
   @Builder MenuBuilder() {
     Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
       Text('Test menu item 1')

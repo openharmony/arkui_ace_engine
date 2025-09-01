@@ -1,6 +1,6 @@
 @Entry
 @Component
-struct bindMenuExample {
+struct MenuSelect{
   build() {
     Column() {
       Text('click for Menu').fontSize(25)
