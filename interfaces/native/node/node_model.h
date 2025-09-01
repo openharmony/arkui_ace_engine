@@ -192,5 +192,8 @@ ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
 std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);
 void RegisterBindNativeNode(ArkUI_NodeHandle node);
+bool MakeCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, void* userData,
+    void (*callback)(ArkUI_NodeEvent* event));
+bool ClearCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H
