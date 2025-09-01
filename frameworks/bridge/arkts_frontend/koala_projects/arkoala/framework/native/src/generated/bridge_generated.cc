@@ -3074,6 +3074,20 @@ void impl_CommonMethod_onAccessibilityHover(Ark_NativePointer thisPtr, KSerializ
         GetNodeModifiers()->getCommonMethodModifier()->setOnAccessibilityHover(self, (const Opt_AccessibilityCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_onAccessibilityHover, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_onAccessibilityHoverTransparent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_AccessibilityTransparentCallback value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_AccessibilityTransparentCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_AccessibilityTransparentCallback))))};;
+        }
+        Opt_AccessibilityTransparentCallback value_value = value_value_buf;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnAccessibilityHoverTransparent(self, (const Opt_AccessibilityTransparentCallback*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_onAccessibilityHoverTransparent, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_hoverEffect(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

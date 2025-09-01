@@ -3245,6 +3245,7 @@ void WithOptional(const name& src, T call) { \
 ASSIGN_OPT(Opt_Int32)
 ASSIGN_OPT(Opt_AccessibilityCallback)
 ASSIGN_OPT(Opt_AccessibilityFocusCallback)
+ASSIGN_OPT(Opt_AccessibilityTransparentCallback)
 ASSIGN_OPT(Opt_AccessibilityHoverType)
 ASSIGN_OPT(Opt_AccessibilityRoleType)
 ASSIGN_OPT(Opt_AccessibilitySamePageMode)

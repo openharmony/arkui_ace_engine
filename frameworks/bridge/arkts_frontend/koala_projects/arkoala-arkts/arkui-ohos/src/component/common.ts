@@ -3067,6 +3067,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     hoverEffectAttribute(value: HoverEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -7833,6 +7845,7 @@ export interface CommonMethod {
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {return this;}
     onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {return this;}
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {return this;}
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {return this;}
     hoverEffect(value: HoverEffect | undefined): this {return this;}
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
@@ -8063,6 +8076,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((parameter: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
@@ -8306,6 +8320,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
         return this
     }
     public hoverEffect(value: HoverEffect | undefined): this {
@@ -9043,6 +9060,7 @@ export interface KeyframeState {
 export type Callback<T,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<number>;
     expectedUpdateInterval?: number;
@@ -9538,6 +9556,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("hoverEffect")) {
             const value_casted = value as (HoverEffect | undefined)
             this.getPeer()?.hoverEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {       
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.onAccessibilityHoverTransparentAttribute(value_casted)
             return this
         }
         return this

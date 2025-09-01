@@ -332,6 +332,9 @@ export class CommonMethodModifier implements CommonMethod {
   _onHoverMove_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _onHoverMove_value?: ((parameter: HoverEvent) => void) | undefined
 
+  _onAccessibilityHoverTransparent_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+  _onAccessibilityHoverTransparent_value?: ((event: TouchEvent) => void) | undefined
+
   _onMouse_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _onMouse_value?: ((event: MouseEvent) => void) | undefined
 
@@ -1288,6 +1291,15 @@ export class CommonMethodModifier implements CommonMethod {
       this._onHoverMove_flag = AttributeUpdaterFlag.UPDATE
     } else {
       this._onHoverMove_flag = AttributeUpdaterFlag.SKIP
+    }
+    return this
+  }
+  public onAccessibilityHoverTransparent(value: ((event: TouchEvent) => void) | undefined): this {
+    if (this._onAccessibilityHoverTransparent_flag === AttributeUpdaterFlag.INITIAL || this._onAccessibilityHoverTransparent_value !== value || !Type.of(value).isPrimitive()) {
+      this._onAccessibilityHoverTransparent_value = value
+      this._onAccessibilityHoverTransparent_flag = AttributeUpdaterFlag.UPDATE
+    } else {
+      this._onAccessibilityHoverTransparent_flag = AttributeUpdaterFlag.SKIP
     }
     return this
   }
@@ -3187,6 +3199,23 @@ export class CommonMethodModifier implements CommonMethod {
         }
       }
     }
+    if (this._onAccessibilityHoverTransparent_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (this._onAccessibilityHoverTransparent_flag) {
+        case AttributeUpdaterFlag.UPDATE: {
+          peerNode.onAccessibilityHoverTransparentAttribute((this._onAccessibilityHoverTransparent_value as ((event: TouchEvent) => void) | undefined))
+          this._onAccessibilityHoverTransparent_flag = AttributeUpdaterFlag.RESET
+          break
+        }
+        case AttributeUpdaterFlag.SKIP: {
+          this._onAccessibilityHoverTransparent_flag = AttributeUpdaterFlag.RESET
+          break
+        }
+        default: {
+          this._onAccessibilityHoverTransparent_flag = AttributeUpdaterFlag.INITIAL
+          peerNode.onAccessibilityHoverTransparentAttribute(undefined)
+        }
+      }
+    }
     if (this._onMouse_flag != AttributeUpdaterFlag.INITIAL) {
       switch (this._onMouse_flag) {
         case AttributeUpdaterFlag.UPDATE: {
@@ -4981,6 +5010,18 @@ export class CommonMethodModifier implements CommonMethod {
          }
          default: {
            this.onHoverMove(undefined)
+         }
+       }
+     }
+     if (value._onAccessibilityHoverTransparent_flag != AttributeUpdaterFlag.INITIAL) {
+       switch (value._onAccessibilityHoverTransparent_flag) {
+         case AttributeUpdaterFlag.UPDATE:
+         case AttributeUpdaterFlag.SKIP: {
+           this.onAccessibilityHoverTransparent(value._onAccessibilityHoverTransparent_value)
+           break
+         }
+         default: {
+           this.onAccessibilityHoverTransparent(undefined)
          }
        }
      }
