@@ -2144,8 +2144,11 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDi
     CHECK_NULL_VOID(wrapper);
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    if (!(isDirty && host->IsGeometrySizeChange() && !host->IsActive())) {
+    if (!(isDirty && host->IsGeometrySizeChange())) {
         host->ForceSyncGeometryNode();
+    } else if (host->IsActive()) {
+        DirtySwapConfig emptyConfig;
+        host->SyncGeometryNode(true, emptyConfig);
     }
     host->ResetLayoutAlgorithm();
     host->RebuildRenderContextTree();
@@ -2241,8 +2244,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
             cachedCount++;
         }
         ExpandWithSafeAreaPadding(wrapper);
+        wrapper->SetActive(show);
         SyncGeometry(wrapper, isDirty);
-        wrapper->SetActive(false);
         curIndex++;
     }
     return curIndex - 1;
@@ -2288,8 +2291,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
             cachedCount++;
         }
         ExpandWithSafeAreaPadding(wrapper);
+        wrapper->SetActive(show);
         SyncGeometry(wrapper, isDirty);
-        wrapper->SetActive(false);
         curIndex--;
     }
     return curIndex + 1;
