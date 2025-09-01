@@ -422,8 +422,6 @@ void NavDestinationLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
     CHECK_NULL_VOID(navDestinationLayoutPropety);
     auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     CHECK_NULL_VOID(contentNode);
-    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
-    CHECK_NULL_VOID(parent);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty->IsIgnoreOptsValid());
     IgnoreLayoutSafeAreaOpts& opts = *(contentLayoutProperty->GetIgnoreLayoutSafeAreaOpts());
