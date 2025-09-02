@@ -60,7 +60,7 @@ typedef enum {
     S_NODE_ON_HOVER_MOVE = 1 << 10,      // 0x00000400 callback of NODE_ON_HOVER_MOVE
     S_GESTURE_TOUCH_EVENT = 1 << 11,     // 0x00000800 gesture triggered by touch
     S_GESTURE_AXIS_EVENT = 1 << 12,      // 0x00001000 gesture triggered by axis
-    S_GESTURE_MOUSE_EVENT = 1 << 13,     // 0x00002000 gesutre triggered by mouse
+    S_GESTURE_MOUSE_EVENT = 1 << 13,     // 0x00002000 gesture triggered by mouse
     S_GESTURE_CLICK_EVENT = 1 << 14,     // 0x00004000 click or tap gesture triggered by keyboard
     S_NXC_ON_TOUCH_INTERCEPT = 1 << 15,  // 0x00008000 nativeXComponent OnTouchIntercept
     S_NXC_DISPATCH_AXIS_EVENT = 1 << 16, // 0x00010000 nativeXComponent UIAxisEventCallback

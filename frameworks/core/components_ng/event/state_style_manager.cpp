@@ -306,7 +306,7 @@ bool StateStyleManager::GetCustomNodeFromNavgation(
             return true;
         }
         auto customParent = DynamicCast<CustomNode>(navDestinationCustomNode);
-        CHECK_NULL_RETURN(navDestinationCustomNode, false);
+        CHECK_NULL_RETURN(customParent, false);
         node = customParent->GetParent();
     }
     return false;

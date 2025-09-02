@@ -74,7 +74,7 @@ RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParams(napi_env env, nap
         udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
         return udDataLoadParams;
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "convert udmf data load params failed.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "dataLoadParamsNapi convert2NativeValue failed");
     return nullptr;
 }
 

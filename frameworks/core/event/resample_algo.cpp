@@ -221,8 +221,8 @@ bool ResampleAlgo::GetResamplePointerEvent(std::vector<T>& events,
     resample.globalDisplayY = Lerp(iter->globalDisplayY, nextIter->globalDisplayY, alpha);
     std::chrono::nanoseconds nanoseconds(resampleTime);
     resample.time = TimeStamp(nanoseconds);
-    slope.inputXDeltaSlope = (nextIter->x - iter->x) * ONE_S_IN_NS / delta;
-    slope.inputYDeltaSlope = (nextIter->y - iter->y) * ONE_S_IN_NS / delta;
+    slope.inputXDeltaSlope = (nextIter->x - iter->x) / delta;
+    slope.inputYDeltaSlope = (nextIter->y - iter->y) / delta;
     return true;
 }
 
