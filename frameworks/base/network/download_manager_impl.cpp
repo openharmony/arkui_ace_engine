@@ -53,7 +53,10 @@ using NetStackTaskStatus = NetStack::HttpClient::TaskStatus;
 
 class ACE_FORCE_EXPORT DownloadManagerImpl : public DownloadManager {
 public:
-    DownloadManagerImpl() = default;
+    explicit DownloadManagerImpl(const std::string& path)
+    {
+        Request::Preload::SetFileCachePath(path);
+    }
     ~DownloadManagerImpl()
     {
         if (isCurl_) {
@@ -563,8 +566,8 @@ private:
     bool isCurl_ = false;
 };
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateDownloadManager()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateDownloadManager(const char* path)
 {
-    return new DownloadManagerImpl();
+    return new DownloadManagerImpl(std::string(path));
 }
 } // namespace OHOS::Ace
