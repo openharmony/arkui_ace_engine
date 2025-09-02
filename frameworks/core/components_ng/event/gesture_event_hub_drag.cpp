@@ -1242,9 +1242,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback()
     auto callback = [id = frameNode->GetInstanceId(), weak = AceType::WeakClaim(this)]
         (const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto taskScheduler = pipeline->GetTaskExecutor();
+        auto container = Container::GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto taskScheduler = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([id, weak, notifyMessage]() {
                 auto gestureEventHub = weak.Upgrade();

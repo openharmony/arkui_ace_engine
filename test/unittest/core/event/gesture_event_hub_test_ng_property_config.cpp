@@ -1795,6 +1795,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     container->pipelineContext_ = context;
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    container->taskExecutor_ = context->taskExecutor_;
     auto taskExecutor = context->GetTaskExecutor();
     ASSERT_NE(taskExecutor, nullptr);
     auto dragDropManager = context->GetDragDropManager();

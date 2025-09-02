@@ -1601,7 +1601,8 @@ HWTEST_F(LayoutPropertyTestNgTwo, GetAlignPositionWithDirectionTest001, TestSize
         */
         auto offset = Alignment::GetAlignPositionWithDirection(parentSize, childSize,
             testCase.align, testCase.direction);
-        EXPECT_EQ(offset, testCase.expectedResult);
+        EXPECT_FLOAT_EQ(offset.GetX(), testCase.expectedResult.GetX());
+        EXPECT_FLOAT_EQ(offset.GetY(), testCase.expectedResult.GetY());
     }
 }
 }
