@@ -11270,6 +11270,7 @@ std::tuple<int32_t, int32_t, RefPtr<SpanItem>> RichEditorPattern::GetTargetSpanI
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "target cannot insert, move right, spanIndex=%{public}d", spanIndex);
     }
     bool replaceInsert = textSelector_.IsValid() && changeValue.GetChangeReason() == TextChangeReason::INPUT;
+    replaceInsert |= previewTextRecord_.needReplaceText;
     if (replaceInsert && moveRight && targetSpanItem) { // is replace & left side cannot insert & right side can insert
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "replaceInsert, moveRight");
         while (targetSpanItem && allDelSpanSet.count(RawPtr(targetSpanItem)) != 0) { // current span is all deleted
