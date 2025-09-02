@@ -51,6 +51,15 @@ struct AISpan {
     {
         return start == span.start && end == span.end && content == span.content && type == span.type;
     }
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << "start: " << start << ",";
+        ss << "end: " << end << ",";
+        ss << "content: " << content << ",";
+        ss << "type: " << static_cast<int>(type) << "\n";
+        return ss.str();
+    }
 };
 class DataDetectorAdapter : public AceType {
     DECLARE_ACE_TYPE(DataDetectorAdapter, AceType);

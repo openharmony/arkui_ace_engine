@@ -4590,6 +4590,24 @@ HWTEST_F(TextTestNg, ProcessSpanString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessSpanString003
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ProcessSpanString003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
+    */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
+    pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    pattern->dataDetectorAdapter_->textForAI_ = pattern->textForDisplay_;
+    pattern->ProcessSpanString();
+    EXPECT_EQ(pattern->textForDisplay_.length(), 0);
+}
+
+/**
  * @tc.name: UpdateParagraphBySpan002
  * @tc.desc: Test the maxlines of UpdateParagraphBySpan
  * @tc.type: FUNC

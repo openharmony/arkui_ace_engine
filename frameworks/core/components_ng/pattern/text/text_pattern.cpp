@@ -6066,6 +6066,7 @@ void TextPattern::ProcessSpanString()
     childNodes_.clear();
     // styled string perf can be optimized via create as requirement
     CHECK_NULL_VOID(GetDataDetectorAdapter());
+    auto savedTextForAI = dataDetectorAdapter_->textForAI_;
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
     hasSpanStringLongPressEvent_ = false;
@@ -6099,7 +6100,7 @@ void TextPattern::ProcessSpanString()
         }
         textForDisplay_ += span->content;
     }
-    if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
+    if (dataDetectorAdapter_->textForAI_ != textForDisplay_ || savedTextForAI != dataDetectorAdapter_->textForAI_) {
         dataDetectorAdapter_->aiDetectInitialized_ = false;
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
