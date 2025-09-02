@@ -33,27 +33,28 @@ export class RenderNodeTransfer {
     private transProperty2Static(inVal: ESValue, rn: RenderNode): void {
         rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
-        rn.borderStyle = {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<BorderStyle>;
+        if (styleVal) {
+            rn.borderStyle = styleVal as Edges<BorderStyle>;
+        }
         let borderWidthVal = TransferUtil.getPropBorderNoExcept(inVal, "borderWidthValue");
-        rn.borderWidth = borderWidthVal as Edges<number>;
-
+        if (borderWidthVal) {
+            rn.borderWidth = borderWidthVal as Edges<number>;
+        }
         let borderColorVal = TransferUtil.getPropEdgesColor(inVal, "borderColorValue");
-        rn.borderColor = borderColorVal as Edges<number>;
-
+        if (borderColorVal) {
+            rn.borderColor = borderColorVal as Edges<number>;
+        }
         let borderRadiusVal = TransferUtil.getPropCornersNoExcept(inVal, "borderRadiusValue");
-        rn.borderRadius = borderRadiusVal as Corners<number>;
-
+        if (borderRadiusVal) {
+            rn.borderRadius = borderRadiusVal as Corners<number>;
+        }
         let maskVal = TransferUtil.getPropShapeMask(inVal, "shapeMaskValue");
-        if (maskVal !== undefined) {
+        if (maskVal) {
             rn.shapeMask = maskVal as ShapeMask;
-        } else {
-            rn.shapeMask = new ShapeMask();
         }
         let clipVal = TransferUtil.getPropShapeClip(inVal, "shapeClipValue");
-        if (clipVal !== undefined) {
+        if (clipVal) {
             rn.shapeClip = clipVal as ShapeClip;
-        } else {
-            rn.shapeClip = new ShapeClip();
         }
         let colorVal = TransferUtil.getPropColorInt(inVal, "backgroundColorValue");
         if (colorVal !== undefined) {
@@ -162,14 +163,29 @@ export class RenderNodeTransfer {
     }
 
     private transferProperty2Dynamic(inRn: RenderNode, outJs: ESValue) {
+        console.log("testTag. 2D prop...");
         // [peer, type, nodePtrVal, nodeId, _nativeRef ] init on constructor, apiTargetVersion not need
         TransferUtil.setPropNumber('lengthMetricsUnitValue', inRn.lengthMetricsUnit, outJs);
-        TransferUtil.setPropEdgeStyle('borderStyleValue', inRn.borderStyle, outJs);
-        TransferUtil.setPropEdges('borderWidthValue', inRn.borderWidth, outJs);
-        TransferUtil.setPropEdgesColor('borderColorValue', inRn.borderColor, outJs);
-        TransferUtil.setPropCorners('borderRadiusValue', inRn.borderRadius, outJs);
-        TransferUtil.setPropShapeMask('shapeMaskValue', inRn.shapeMask, outJs);
-        TransferUtil.setPropShapeClip('shapeClipValue', inRn.shapeClip, outJs);
+
+        if (inRn.borderStyle) {
+            TransferUtil.setPropEdgeStyle('borderStyleValue', inRn.borderStyle!, outJs);
+        }
+        if (inRn.borderWidth) {
+            TransferUtil.setPropEdges('borderWidthValue', inRn.borderWidth!, outJs);
+        }
+        if (inRn.borderColor) {
+            TransferUtil.setPropEdgesColor('borderColorValue', inRn.borderColor!, outJs);
+        }
+        if (inRn.borderRadius) {
+            TransferUtil.setPropCorners('borderRadiusValue', inRn.borderRadius!, outJs);
+        }
+        if (inRn.shapeMask) {
+            TransferUtil.setPropShapeMask('shapeMaskValue', inRn.shapeMask!, outJs);
+        }
+        if (inRn.shapeClip) {
+            TransferUtil.setPropShapeClip('shapeClipValue', inRn.shapeClip!, outJs);
+        }
+
         TransferUtil.setPropColorLong('backgroundColorValue', inRn.backgroundColor, outJs);
         TransferUtil.setPropBool('clipToFrameValue', inRn.clipToFrame, outJs);
         TransferUtil.setPropFrame('frameValue', inRn.frame, outJs);
@@ -277,7 +293,7 @@ export class RenderNodeTransfer {
         if (input === null) {
             throw new Error("The input is not object, convert fail.");
         }
-    
+
         const trans = new RenderNodeTransfer();
         return trans.transfer2D(input);
     }
