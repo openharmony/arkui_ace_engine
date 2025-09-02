@@ -1394,6 +1394,23 @@ HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TestCreateImageDfxConfig002
+ * @tc.desc: Verify srcType is correctly mapped from ImageSourceInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestCreateImageDfxConfig002, TestSize.Level0)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo info("http://example.com/test.png");
+    auto imageDfxConfig = imagePattern->CreateImageDfxConfig(info);
+    EXPECT_EQ(imageDfxConfig.srcType_, static_cast<int32_t>(info.GetSrcType()));
+}
+
+/**
  * @tc.name: ImageHandleCopyTest001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC

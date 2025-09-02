@@ -71,6 +71,10 @@ std::string PixelMapOhos::GetId()
 {
     return "";
 }
+uint32_t PixelMapOhos::GetUniqueId()
+{
+    return -1;
+}
 std::string PixelMapOhos::GetModifyId()
 {
     return "";
