@@ -1434,4 +1434,21 @@ HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.
     richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
 }
 
+/**
+ * @tc.name: ToggleMenu001
+ * @tc.desc: test ToggleMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    WeakPtr<TextBase> textBase;
+    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
+    richEditorPattern->selectOverlay_->isShowMenu_ = false;
+    richEditorPattern->selectOverlay_->needRefreshMenu_ = false;
+    richEditorPattern->selectOverlay_->ToggleMenu();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->isShowMenu_);
+}
 } // namespace OHOS::Ace::NG
