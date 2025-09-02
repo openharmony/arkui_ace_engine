@@ -3395,7 +3395,7 @@ class TransitionModifier extends ModifierWithKey {
       getUINativeModule().common.resetTransition(node);
     }
     else {
-      getUINativeModule().common.setTransition(node, this.value);
+      getUINativeModule().common.setTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
 }
@@ -4502,8 +4502,13 @@ class ArkComponent {
   animation(value) {
     throw new Error('Method not implemented.');
   }
-  transition(value) {
-    modifierWithKey(this._modifiersWithKeys, TransitionModifier.identity, TransitionModifier, value);
+  transition(value, callback) {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, TransitionModifier.identity, TransitionModifier, arkTransition);
     return this;
   }
   gesture(gesture, mask) {
@@ -8443,7 +8448,7 @@ class ImageTransitionModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().image.resetImageTransition(node);
     } else {
-      getUINativeModule().image.setImageTransition(node, this.value);
+      getUINativeModule().image.setImageTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
 }
@@ -8683,7 +8688,23 @@ class ImageOnFinishModifier extends ModifierWithKey {
   }
 }
 ImageOnFinishModifier.identity = Symbol('imageOnFinish');
-
+class ImageSupportSvg2Modifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetSupportSvg2(node);
+    }
+    else {
+      getUINativeModule().image.setSupportSvg2(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageSupportSvg2Modifier.identity = Symbol('supportSvg2');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8795,8 +8816,13 @@ class ArkImageComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ImageOpacityModifier.identity, ImageOpacityModifier, value);
     return this;
   }
-  transition(value) {
-    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+  transition(value, callback) {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, arkTransition);
     return this;
   }
   dynamicRangeMode(value) {
@@ -8827,6 +8853,11 @@ class ArkImageComponent extends ArkComponent {
   analyzerConfig(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
+    return this;
+  }
+  supportSvg2(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
     return this;
   }
 }
@@ -12432,7 +12463,7 @@ class ArkSpanComponent {
   animation(value) {
     throw new Error('Method not implemented.');
   }
-  transition(value) {
+  transition(value, callback) {
     throw new Error('Method not implemented.');
   }
   gesture(gesture, mask) {
@@ -18401,7 +18432,7 @@ class VideoTransitionModifier extends ModifierWithKey {
       getUINativeModule().video.resetTransition(node);
     }
     else {
-      getUINativeModule().video.setTransition(node, this.value);
+      getUINativeModule().video.setTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
   checkObjectDiff() {
@@ -18637,8 +18668,13 @@ class ArkVideoComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, VideoOpacityModifier.identity, VideoOpacityModifier, value);
     return this;
   }
-  transition(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoTransitionModifier.identity, VideoTransitionModifier, value);
+  transition(value, callback) {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, VideoTransitionModifier.identity, VideoTransitionModifier, arkTransition);
     return this;
   }
   onStart(callback) {
@@ -18941,6 +18977,15 @@ class ArkSharedTransition {
   }
   isEqual(another) {
     return (this.id === another.id) && (this.options === another.options);
+  }
+}
+class ArkTransition {
+  constructor() {
+    this.transitionEffect = undefined;
+    this.callback = undefined;
+  }
+  isEqual(another) {
+    return (this.transitionEffect === another.transitionEffect) && (this.callback === another.callback);
   }
 }
 class ArkEdgeEffect {
@@ -31369,6 +31414,27 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
     return this;
   }
+  enableDataDetector(enable) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDataDetectorModifier.identity, WebEnableDataDetectorModifier, enable);
+    return this;
+  }
+  dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
+    let detectorConfig = new TextDataDetectorConfig();
+    detectorConfig.types = config.types;
+    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    detectorConfig.color = config.color;
+    if (config.decoration) {
+      detectorConfig.decorationType = config.decoration.type;
+      detectorConfig.decorationColor = config.decoration.color;
+      detectorConfig.decorationStyle = config.decoration.style;
+    }
+    detectorConfig.enablePreviewMenu = config.enablePreviewMenu;
+    modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, detectorConfig);
+    return this;
+  }
   gestureFocusMode(mode) {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
@@ -32712,6 +32778,35 @@ class WebOnDataResubmittedModifier extends ModifierWithKey {
   }
 }
 WebOnDataResubmittedModifier.identity = Symbol('webOnDataResubmittedModifier');
+
+class WebEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableDataDetector(node, this.value);
+    }
+  }
+}
+WebEnableDataDetectorModifier.identity = Symbol('webEnableDataDetectorModifier');
+
+class WebDataDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle, this.value.enablePreviewMenu);
+    }
+  }
+}
+WebDataDetectorConfigModifier.identity = Symbol('webDataDetectorConfigModifier');
 
 class WebGestureFocusModeModifier extends ModifierWithKey {
   constructor(value) {

@@ -107,6 +107,38 @@ void RosenRenderContext::SetFrontBlurFilterMultiThread()
     node->PostAfterAttachMainTreeTask(task);
 }
 
+void RosenRenderContext::SetPositionToRSNodeMultiThread()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rsNode_);
+    auto rect = AdjustPaintRect();
+    if (!rect.GetSize().IsPositive()) {
+        return;
+    }
+    paintRect_ = rect;
+    if (frameNode->ParentExpansive() && !frameNode->SelfExpansive()) {
+        // Dynamically modify position, need consider parent expand
+        frameNode->AdjustNotExpandNode();
+        rect = paintRect_;
+    }
+    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    if (useContentRectForRSFrame_) {
+        SetContentRectToFrame(rect);
+    } else {
+        rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    }
+    if (frameOffset_.has_value()) {
+        rsNode_->SetFrame(
+            rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(), rect.Width(), rect.Height());
+    }
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(frameNode), rect]() {
+        auto host = weak.Upgrade();
+        host->OnSyncGeometryFrameFinish(rect);
+        ElementRegister::GetInstance()->ReSyncGeometryTransition(host);
+    });
+}
+
 void RosenRenderContext::AnimateHoverEffectScaleMultiThread(bool isHovered)
 {
     auto host = GetHost();

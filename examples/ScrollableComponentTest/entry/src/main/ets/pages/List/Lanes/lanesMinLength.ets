@@ -165,7 +165,7 @@ struct ListItemGroupExample {
         })
       }
       .lanes({
-        minLength: Math.max(0, this.changeList[this.changeIndex] || 0),
+        minLength: this.changeList[this.changeIndex] ? Number(this.changeList[this.changeIndex]) : 0,
         maxLength: 100,
       })
       .width('90%')

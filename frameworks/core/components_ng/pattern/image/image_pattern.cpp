@@ -109,7 +109,7 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
-constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
+constexpr uint32_t MAX_SRC_LENGTH = 200; // prevent the Base64 image format from too long.
 constexpr int32_t IMAGE_LOAD_FAIL = 0;
 constexpr int32_t IMAGE_LOAD_SUCCESS = 1;
 
@@ -887,6 +887,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
         src, std::move(loadNotifier), syncLoad_, isSceneBoardWindow_, imageDfxConfig_);
+    loadingCtx_->SetSupportSvg2(supportSvg2_);
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{private}s", imageDfxConfig_.ToStringWithSrc().c_str());
@@ -914,6 +915,7 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
         altImageDfxConfig_ = CreateImageDfxConfig(altImageSourceInfo);
         altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
             altImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altImageDfxConfig_);
+        altLoadingCtx_->SetSupportSvg2(supportSvg2_);
         altLoadingCtx_->LoadImageData();
     }
 }
@@ -1966,6 +1968,7 @@ void ImagePattern::DumpSvgInfo()
 {
     DumpLog::GetInstance().AddDesc("---- SVG Related Dump ----");
     DumpLog::GetInstance().AddDesc("Your SVG related log description here");
+    DumpLog::GetInstance().AddDesc(std::string("SupportSvg2:").append(supportSvg2_?"True":"False"));
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();

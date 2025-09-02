@@ -65,6 +65,7 @@ constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
 constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
+constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1991,6 +1992,47 @@ void ResetGestureFocusMode(ArkUINodeHandle node)
     WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
 }
 
+void SetEnableDataDetector(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDataDetector(frameNode, value);
+}
+
+void ResetEnableDataDetector(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDataDetector(frameNode, DEFAULT_ENABLE_DATA_DETECTOR);
+}
+
+void SetDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    detectConfig.types = arkUITextDetectConfig->types;
+    if (arkUITextDetectConfig->onResult) {
+        detectConfig.onResult =
+            std::move(*(reinterpret_cast<std::function<void(const std::string&)>*>(arkUITextDetectConfig->onResult)));
+    }
+    detectConfig.entityColor = Color(arkUITextDetectConfig->entityColor);
+    detectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
+    detectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
+    detectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    detectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
+    WebModelNG::SetDataDetectorConfig(frameNode, detectConfig);
+}
+
+void ResetDataDetectorConfigWithEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    WebModelNG::SetDataDetectorConfig(frameNode, detectConfig);
+}
+
 void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2362,6 +2404,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setEnableDataDetector = SetEnableDataDetector,
+        .resetEnableDataDetector = ResetEnableDataDetector,
+        .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
+        .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
@@ -2573,6 +2619,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setEnableDataDetector = SetEnableDataDetector,
+        .resetEnableDataDetector = ResetEnableDataDetector,
+        .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
+        .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,

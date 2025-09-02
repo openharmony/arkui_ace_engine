@@ -284,6 +284,39 @@ HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CloseKeyboard002
+ * @tc.desc: test CloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->textSelector_.ResetAiSelected();
+    richEditorPattern->HandleTouchUpAfterLongPress();
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
+ * @tc.name: CloseKeyboard003
+ * @tc.desc: test CloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->HandleTouchCancelAfterLongPress();
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
  * @tc.name: RequestKeyboardToEdit001
  * @tc.desc: test RequestKeyboardToEdit
  * @tc.type: FUNC

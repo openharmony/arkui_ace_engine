@@ -1837,8 +1837,5 @@ export default function Stepper1() {
       done();
 
     })
-    /**
-     * 测试组件borderImage.width.bottom
-     */
   })
 }

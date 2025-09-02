@@ -690,7 +690,7 @@ public:
     bool IsStartEndTimeDefined();
     bool CheckHourIndexAtStart(uint32_t amPmIndex, uint32_t hourIndex, bool nextStart);
     bool CheckHourIndexAtEnd(uint32_t amPmIndex, uint32_t hourIndex, bool prevEnd);
-    bool IsNeedToRebuildColumn(bool isHour, bool isAdd, int32_t amPmIndex, int32_t hourIndex, int32_t minuteIndex);
+    bool IsNeedToRebuildColumn(bool isHour, bool isAdd, uint32_t amPmIndex, uint32_t hourIndex, uint32_t minuteIndex);
     void UpdateUserSetSelectColor();
     void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
     void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
@@ -842,8 +842,8 @@ private:
     std::vector<std::string> definedAMHours_;
     std::vector<std::string> definedPMHours_;
     std::vector<std::string> defined24Hours_;
-    uint32_t oldHourValue_;
-    uint32_t oldMinuteValue_;
+    uint32_t oldHourValue_ = 0;
+    uint32_t oldMinuteValue_ = 0;
     std::string selectedColumnId_;
     bool isUserSetSelectColor_ = false;
     bool isClearFocus_ = true;

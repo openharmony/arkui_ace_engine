@@ -997,7 +997,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
         napi_close_handle_scope(env, scope);
         return;
     }
-    auto& holder = iter->second;
+    auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnWillClick(gestureEventInfo, clickInfo, frameNode);
     }
@@ -1145,7 +1145,7 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
         napi_close_handle_scope(env, scope);
         return;
     }
-    auto& holder = iter->second;
+    auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnDidClick(gestureEventInfo, clickInfo, frameNode);
     }
@@ -1633,7 +1633,7 @@ void UIObserver::HandlePanGestureAccept(NG::AbilityContextInfo& info, const Gest
         napi_close_handle_scope(env, scope);
         return;
     }
-    auto& holder = iter->second;
+    auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->OnPanGestureStateChange(gestureEventInfo, current, frameNode);
     }

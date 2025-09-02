@@ -55,6 +55,7 @@ private:
     std::optional<SizeF> LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
         std::optional<NG::LayoutPolicyProperty> layoutPolicy);
 
+    PaddingPropertyF GetBorderWidth(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

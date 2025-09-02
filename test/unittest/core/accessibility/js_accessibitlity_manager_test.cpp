@@ -3508,6 +3508,57 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExecuteActionNG002
+ * @tc.desc: Test func ExecuteActionNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    MockPipelineContext::SetUp();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    root->AddChild(frameNode);
+    /**
+     * @tc.steps: step2. test func ExecuteActionNG
+     */
+    bool processFlag = false;
+
+    const std::map<std::string, std::string> actionArguments {};
+    auto result = jsAccessibilityManager->ExecuteActionNG(
+        frameNode->GetAccessibilityId(), actionArguments,
+        ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, context, 0);
+    EXPECT_EQ(processFlag, false);
+    accessibilityProperty->SetSwitchEditableMode (
+        [&] (bool switchToEditable) {
+            processFlag = true;
+        }
+    );
+    result = jsAccessibilityManager->ExecuteActionNG(
+        frameNode->GetAccessibilityId(), actionArguments,
+        ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, context, 0);
+    EXPECT_EQ(processFlag, true);
+
+    root->RemoveChild(frameNode);
+    MockPipelineContext::TearDown();
+}
+
+/**
  * @tc.name: ReleaseCacheEvent001
  * @tc.desc: Test func ReleaseCacheEvent
  * @tc.type: FUNC
@@ -3679,4 +3730,24 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     MockPipelineContext::TearDown();
 }
 
+
+/**
+ * @tc.name: JsAccessibilityManager021
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, sendAccessibilitEvent001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    bool accessibilityEnableBackup = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    frameNode->OnAccessibilityEvent(
+            AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
+    MockPipelineContext::TearDown();
+}
 } // namespace OHOS::Ace::NG

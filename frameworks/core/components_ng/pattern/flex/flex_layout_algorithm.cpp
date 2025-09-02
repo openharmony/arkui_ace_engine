@@ -55,6 +55,11 @@ bool IsStartTopLeft(FlexDirection direction, TextDirection textDirection)
     }
 }
 
+bool IsStartTopLeftIncludeMainAxis(FlexDirection direction, TextDirection textDirection, FlexAlign mainAxisAlign)
+{
+    return IsStartTopLeft(direction, textDirection) && (mainAxisAlign != FlexAlign::FLEX_END);
+}
+
 FlexDirection ReverseFlexDirection(FlexDirection direction)
 {
     switch (direction) {
@@ -1416,8 +1421,9 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
         CalcMainExpand(childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN), sae, true,
             isExpandConstraintNeeded);
         offsetX = originOffset.GetX();
-        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.left.value_or(0.0f)
-                                                                                      : -sae.right.value_or(0.0f))
+        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeftIncludeMainAxis(direction_, textDir_, mainAxisAlign_)
+                                                        ? sae.left.value_or(0.0f)
+                                                        : -sae.right.value_or(0.0f))
                                               : 0.0f;
         offsetX -= offsetEdgeExpand;
         if (!CheckReCalcMainExpand(GetSelfAlign(childLayoutWrapper))) {
@@ -1431,8 +1437,9 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
         CalcMainExpand(childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN), sae, false,
             isExpandConstraintNeeded);
         offsetY = originOffset.GetY();
-        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.top.value_or(0.0f)
-                                                                                      : -sae.bottom.value_or(0.0f))
+        offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeftIncludeMainAxis(direction_, textDir_, mainAxisAlign_)
+                                                        ? sae.top.value_or(0.0f)
+                                                        : -sae.bottom.value_or(0.0f))
                                               : 0.0f;
         offsetY -= offsetEdgeExpand;
         if (!CheckReCalcMainExpand(GetSelfAlign(childLayoutWrapper))) {

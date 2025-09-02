@@ -672,15 +672,6 @@ void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, 
     }
 }
 
-std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
-{
-    auto textFieldPattern = GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, std::nullopt);
-    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, std::nullopt);
-    return paintProperty->GetCursorColor();
-}
-
 void TextFieldSelectOverlay::UpdateAllHandlesOffset()
 {
     if (dragHandleIndex_ == DragHandleIndex::NONE) {
@@ -727,6 +718,15 @@ bool TextFieldSelectOverlay::AllowShare()
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->AllowCopy();
+}
+
+std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
+{
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, std::nullopt);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    return paintProperty->GetCursorColor();
 }
 
 bool TextFieldSelectOverlay::IsStopBackPress() const

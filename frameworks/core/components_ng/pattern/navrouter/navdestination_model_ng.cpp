@@ -863,7 +863,7 @@ void NavDestinationModelNG::UpdateTitleHeight(
     titleBarPattern->AddResObj("navDestination.title.customtitle", resObj, std::move(updateFunc));
 }
 
-void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
+void NavDestinationModelNG::SetOnShown(std::function<void(int32_t)>&& onShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -873,7 +873,7 @@ void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
     navDestinationEventHub->SetOnShown(onShow);
 }
 
-void NavDestinationModelNG::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
+void NavDestinationModelNG::SetOnShown(FrameNode* frameNode, std::function<void(int32_t)>&& onShow)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
@@ -882,7 +882,7 @@ void NavDestinationModelNG::SetOnShown(FrameNode* frameNode, std::function<void(
     navDestinationEventHub->SetOnShown(onShow);
 }
 
-void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
+void NavDestinationModelNG::SetOnHidden(std::function<void(int32_t)>&& onHidden)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -892,7 +892,7 @@ void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
     navDestinationEventHub->SetOnHidden(onHidden);
 }
 
-void NavDestinationModelNG::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
+void NavDestinationModelNG::SetOnHidden(FrameNode* frameNode, std::function<void(int32_t)>&& onHidden)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(

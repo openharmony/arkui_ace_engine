@@ -4081,6 +4081,14 @@
     },
     {
         "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent"
+    },
+    {
+        "first_introduced": "21",
         "name": "OH_ArkUI_PositionEdges_Create"
     },
     {

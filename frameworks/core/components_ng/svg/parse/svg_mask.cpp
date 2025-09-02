@@ -18,6 +18,7 @@
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -135,7 +136,7 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
         { SVG_HEIGHT,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.height);
+                SvgAttributesParser::ParseDimension(val, attr.height, attr.featureEnable);
             } },
         { SVG_MASK_CONTENT_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
@@ -144,7 +145,7 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                if (!attr.featureEnable) {
                     attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
                         SvgLengthScaleUnit::USER_SPACE_ON_USE;
                     return;
@@ -154,21 +155,22 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.width);
+                SvgAttributesParser::ParseDimension(val, attr.width, attr.featureEnable);
             } },
         { SVG_X,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.x);
+                SvgAttributesParser::ParseDimension(val, attr.x, attr.featureEnable);
             } },
         { SVG_Y,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                SvgAttributesParser::ParseDimension(val, attr.y);
+                SvgAttributesParser::ParseDimension(val, attr.y, attr.featureEnable);
             } },
     };
     std::string key = name;
     StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
+        maskAttr_.featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion());
         attrs[attrIter].value(value, maskAttr_);
         return true;
     }

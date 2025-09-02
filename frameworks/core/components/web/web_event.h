@@ -1515,6 +1515,8 @@ public:
     virtual std::string GetSelectionText() const = 0;
     virtual void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const {}
     virtual bool IsAILink() const { return false; }
+    virtual int GetSourceTypeV2() const { return 0; }
+    virtual int GetMediaTypeV2() const { return 0; }
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {

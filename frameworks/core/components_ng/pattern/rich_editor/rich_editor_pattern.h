@@ -1401,6 +1401,9 @@ public:
 
     bool IsShortCutBlocked() override { return IsDragging(); }
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
+    void MarkContentNodeForRender();
+    void CreateRichEditorOverlayModifier();
+    RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
 
 protected:
     bool CanStartAITask() const override;
@@ -1771,7 +1774,9 @@ private:
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void ReportComponentChangeEvent();
-
+    // hostOverlayMod_ is the overlay modifier of rich editor,
+    // while overlayMod_ is the overlay modifier of rich editor content node.
+    RefPtr<TextOverlayModifier> hostOverlayMod_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else

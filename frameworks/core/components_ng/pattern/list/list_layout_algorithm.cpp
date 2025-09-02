@@ -2144,8 +2144,11 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDi
     CHECK_NULL_VOID(wrapper);
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    if (!(isDirty && host->IsGeometrySizeChange() && !host->IsActive())) {
+    if (!(isDirty && host->IsGeometrySizeChange())) {
         host->ForceSyncGeometryNode();
+    } else if (host->IsActive()) {
+        DirtySwapConfig emptyConfig;
+        host->SyncGeometryNode(true, emptyConfig);
     }
     host->ResetLayoutAlgorithm();
     host->RebuildRenderContextTree();
@@ -2241,8 +2244,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
             cachedCount++;
         }
         ExpandWithSafeAreaPadding(wrapper);
+        wrapper->SetActive(show);
         SyncGeometry(wrapper, isDirty);
-        wrapper->SetActive(false);
         curIndex++;
     }
     return curIndex - 1;
@@ -2288,8 +2291,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
             cachedCount++;
         }
         ExpandWithSafeAreaPadding(wrapper);
+        wrapper->SetActive(show);
         SyncGeometry(wrapper, isDirty);
-        wrapper->SetActive(false);
         curIndex--;
     }
     return curIndex + 1;
@@ -2542,10 +2545,33 @@ void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsStart(
 {
     float stopOnScreen = GetStopOnScreenOffset(ScrollSnapAlign::START);
     float itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    std::optional<float> threshold;
+    if (GetEndIndex() == totalItemCount_ - 1) {
+        // Bottom-aligned threshold
+        threshold = contentStartOffset_ + GetEndPosition() - (contentMainSize_ - contentEndOffset_);
+    }
     for (const auto& positionInfo : itemPosition_) {
         auto startPos = positionInfo.second.startPos - itemHeight / 2.0f - spaceWidth_;
         itemHeight = positionInfo.second.endPos - positionInfo.second.startPos;
         auto endPos = positionInfo.second.startPos + itemHeight / 2.0f;
+        if (threshold.has_value() && threshold.value() < positionInfo.second.startPos) {
+            // Already bottom aligned
+            if (endIndex < 0) {
+                endIndex = positionInfo.first;
+            }
+            if (currIndex < 0) {
+                currIndex = positionInfo.first;
+            }
+            break;
+        }
+        if (threshold.has_value() && threshold.value() < positionInfo.second.endPos) {
+            // To calculate whether to align the start position of the item or to the bottom of the list
+            endPos = (threshold.value() + positionInfo.second.startPos) / 2.0f;
+            itemHeight += positionInfo.second.endPos - threshold.value();
+        }
+        if (endIndex < 0 && LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos)) {
+            break;
+        }
         if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
             LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
             endIndex = positionInfo.first;
@@ -2584,10 +2610,33 @@ void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsEnd(
 {
     float stopOnScreen = GetStopOnScreenOffset(ScrollSnapAlign::END);
     float itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+    std::optional<float> threshold;
+    if (GetStartIndex() == 0) {
+        // Top-aligned threshold
+        threshold = (contentMainSize_ - contentEndOffset_) + GetStartPosition() - contentStartOffset_;
+    }
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         auto endPos = pos->second.endPos + itemHeight / 2.0f + spaceWidth_;
         itemHeight = pos->second.endPos - pos->second.startPos;
         auto startPos = pos->second.endPos - itemHeight / 2.0f;
+        if (threshold.has_value() && threshold.value() > pos->second.endPos) {
+            // Already top aligned
+            if (endIndex < 0) {
+                endIndex = pos->first;
+            }
+            if (currIndex < 0) {
+                currIndex = pos->first;
+            }
+            break;
+        }
+        if (threshold.has_value() && threshold.value() > pos->second.startPos) {
+            // To calculate whether to align the end position of the item or to the top of the list
+            startPos = (threshold.value() + pos->second.endPos) / 2.0f;
+            itemHeight += pos->second.startPos - threshold.value();
+        }
+        if (endIndex < 0 && GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            break;
+        }
         if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
             LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
             endIndex = pos->first;

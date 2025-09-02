@@ -43,6 +43,8 @@ declare class RepeatNative {
   static createNewChildFinish(id: string): void;
   static afterAddChild(): void;
   static onMove(handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
+  static reuse(index: number): void;
+  static recycle(index: number): void;
 }
 
 // Repeat.virtualScroll maps to C++ RepeatVirtualScrollNode 

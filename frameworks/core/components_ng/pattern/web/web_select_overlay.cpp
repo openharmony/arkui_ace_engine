@@ -1152,6 +1152,10 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
         selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
     }
     selectInfo.computeMenuOffset = webSelectInfo_.computeMenuOffset;
+
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CopySelectionMenuParams(selectInfo, WebElementType::TEXT, ResponseType::LONG_PRESS);
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(
@@ -1266,6 +1270,7 @@ bool WebSelectOverlay::IsSingleHandle()
 
 void WebSelectOverlay::OnHandleIsHidden()
 {
+    isShowHandle_ = false;
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateSingleHandleVisible(false);

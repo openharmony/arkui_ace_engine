@@ -854,7 +854,7 @@ void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigati
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 
-void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {

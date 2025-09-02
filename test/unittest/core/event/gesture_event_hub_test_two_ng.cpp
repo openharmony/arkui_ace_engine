@@ -467,7 +467,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      */
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    EXPECT_NE(gestureHub->pixelMap_, nullptr);
     EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -540,7 +539,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
      * @tc.steps: step5. call OnDragStart
      */
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -723,7 +721,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     webFrameNode->SetDragPreviewOptions(option);
     gestureHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();

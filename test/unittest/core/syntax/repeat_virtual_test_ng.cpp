@@ -1955,4 +1955,40 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest061, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetId(), 2);
 }
+
+/**
+ * @tc.name: RepeatNodeCacheTest062
+ * @tc.desc: Test for OnReuse OnRecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest062, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    EXPECT_EQ(repeatNode->GetTag(), V2::JS_REPEAT_ETS_TAG);
+
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    repeatNode->SetParent(node);
+    auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    repeatNode->children_ = { childNode };
+    EXPECT_GT(repeatNode->children_.size(), 0);
+
+    std::list<std::string> ids2 = FOR_REPEAT_IDS;
+    repeatNode->SetIds(std::move(ids2));
+    repeatNode->CreateTempItems();
+    repeatNode->RecycleChild(0);
+    repeatNode->RecycleChild(1);
+    repeatNode->ReuseChild(0);
+    repeatNode->ReuseChild(1);
+    EXPECT_GT(repeatNode->tempChildrenOfRepeat_.size(), 0);
+
+    std::list<int32_t> arr;
+    arr.push_back(0);
+    repeatNode->FinishRepeatRender(arr);
+    EXPECT_EQ(repeatNode->tempChildren_.size(), 0);
+    EXPECT_EQ(repeatNode->tempChildrenOfRepeat_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

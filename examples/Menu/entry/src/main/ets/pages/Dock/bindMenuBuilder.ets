@@ -1,6 +1,6 @@
 @Entry
 @Component
-struct bindMenuBuilderExample {
+struct MenuBuilder {
 
   @Builder MenuBuilder() {
     Menu() {

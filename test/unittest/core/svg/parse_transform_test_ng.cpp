@@ -1463,11 +1463,11 @@ HWTEST_F(SvgTransformTestNg, SvgNodeTest001, TestSize.Level1)
  */
 HWTEST_F(SvgTransformTestNg, SvgNodeTest002, TestSize.Level1)
 {
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto svgNode = AceType::MakeRefPtr<SvgNode>();
     EXPECT_NE(svgNode, nullptr);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    svgNode->SetContext(svgContext);
     svgNode->SetAttr("clipPathUnits", "objectBoundingBox");
     EXPECT_EQ(svgNode->attributes_.clipState.GetClipPathUnits(), SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
     svgNode->SetAttr("clipPathUnits", "objectBoundingBox222");
@@ -1476,7 +1476,6 @@ HWTEST_F(SvgTransformTestNg, SvgNodeTest002, TestSize.Level1)
     svgNode->SetAttr("stroke", "aliceblue");
     svgNode->SetAttr("stroke", "none");
     EXPECT_EQ(svgNode->attributes_.strokeState.GetHref(), "url(https://www.baidu.com)");
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

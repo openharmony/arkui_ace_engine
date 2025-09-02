@@ -279,11 +279,6 @@ void MenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isNeedDivider_ = false;
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    RefPtr<UINode> previousNode = nullptr;
-    UpdateMenuItemChildren(uiNode, previousNode);
-    RemoveLastNodeDivider(previousNode);
     ResetThemeByInnerMenuCount();
     auto menuWrapperNode = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapperNode);
@@ -492,6 +487,41 @@ void MenuPattern::UpdateSelectIndex(int32_t index)
     FireBuilder();
 }
 
+void MenuPattern::OnAttachToMainTree()
+{
+    AddBuildDividerTask();
+}
+
+void MenuPattern::AddBuildDividerTask()
+{
+    if (buildDividerTaskAdded_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->BuildDivider();
+        };
+    buildDividerTaskAdded_ = true;
+    pipeline->AddBuildFinishCallBack(std::move(callback));
+}
+
+void MenuPattern::BuildDivider()
+{
+    buildDividerTaskAdded_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isNeedDivider_ = false;
+    auto uiNode = AceType::DynamicCast<UINode>(host);
+    RefPtr<UINode> previousNode = nullptr;
+    UpdateMenuItemChildren(uiNode, previousNode);
+    RemoveLastNodeDivider(previousNode);
+}
+
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     // determine menu type based on sibling menu count
@@ -510,11 +540,6 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ResetNeedDivider();
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    RefPtr<UINode> previousNode = nullptr;
-    UpdateMenuItemChildren(uiNode, previousNode);
-    RemoveLastNodeDivider(previousNode);
     SetAccessibilityAction();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
@@ -2492,11 +2517,21 @@ float MenuPattern::GetSelectMenuWidth()
     return finalWidth;
 }
 
+RefPtr<FrameNode> MenuPattern::GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == tag) {
+        return AceType::DynamicCast<FrameNode>(node);
+    }
+    return GetFirstNodeWithTagInParent(node->GetParent(), tag);
+}
+
 void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover)
 {
     CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto pattern = DynamicCast<FrameNode>(parent)->GetPattern<MenuItemGroupPattern>();
+    auto menuItemGroup = GetFirstNodeWithTagInParent(parent, V2::MENU_ITEM_GROUP_ETS_TAG);
+    if (menuItemGroup) {
+        auto pattern = menuItemGroup->GetPattern<MenuItemGroupPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->OnIntItemPressed(index, press);
     }

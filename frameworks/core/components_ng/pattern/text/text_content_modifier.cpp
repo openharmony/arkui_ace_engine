@@ -171,6 +171,12 @@ void TextContentModifier::SetDefaultSymbolColor(const TextStyle& textStyle)
     AttachProperty(animatableSymbolColor_);
 }
 
+void TextContentModifier::SetSymbolColors(const LinearVector<LinearColor>& value)
+{
+    CHECK_NULL_VOID(animatableSymbolColor_);
+    animatableSymbolColor_->Set(value);
+}
+
 LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color>& colorList)
 {
     LinearVector<LinearColor> colors;
@@ -994,13 +1000,23 @@ void TextContentModifier::TextColorModifier(const Color& value)
 
 void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool isReset)
 {
+    auto colors = Convert2VectorLinearColor(value);
     if (!isReset) {
-        symbolColors_ = Convert2VectorLinearColor(value);
+        symbolColors_ = colors;
     } else {
         symbolColors_ = std::nullopt;
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
-    animatableSymbolColor_->Set(Convert2VectorLinearColor(value));
+    auto animatableColors = animatableSymbolColor_->Get();
+    if (colors.size() != animatableColors.size()) {
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), colors]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetSymbolColors(colors);
+        });
+    } else {
+        animatableSymbolColor_->Set(colors);
+    }
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
@@ -1206,11 +1222,21 @@ TextDirection TextContentModifier::GetTextRaceDirectionByContent() const
         TextDirection::RTL : TextDirection::LTR;
 }
 
+void TextContentModifier::SetRacePercentFloat(float value)
+{
+    CHECK_NULL_VOID(racePercentFloat_);
+    racePercentFloat_->Set(value);
+}
+
 void TextContentModifier::ResetTextRacePercent()
 {
     if (GetTextRaceDirection() == TextDirection::LTR) {
         // LTR start 0%
-        racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetRacePercentFloat(RACE_MOVE_PERCENT_MIN);
+        });
         marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + RACE_MOVE_PERCENT_MIN;
         return;
     }
@@ -1235,7 +1261,11 @@ void TextContentModifier::ResetTextRacePercent()
             RACE_MOVE_PERCENT_MAX;
     }
     marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + racePercentFloat;
-    racePercentFloat_->Set(racePercentFloat);
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), racePercentFloat]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->SetRacePercentFloat(racePercentFloat);
+    });
 }
 
 void TextContentModifier::ContentChange()

@@ -65,7 +65,7 @@ class ACE_EXPORT DragDropManager : public virtual AceType {
 
 public:
     DragDropManager();
-    ~DragDropManager() override = default;
+    ~DragDropManager();
 
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);

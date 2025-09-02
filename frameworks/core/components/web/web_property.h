@@ -86,12 +86,17 @@ enum class WebKeyboardAvoidMode : int32_t {
 };
 
 enum class WebElementType : int32_t {
-    TEXT = 0,
-    IMAGE,
-    LINK,
+    IMAGE = 1,
+    LINK = 2,
+    TEXT = 3,
     MIXED,
     AILINK,
     NONE,
+};
+
+enum class WebResponseType : int32_t {
+    LONG_PRESS = 1,
+    RIGHT_CLICK = 2
 };
 
 enum class WebBypassVsyncCondition : int32_t {
@@ -105,12 +110,15 @@ enum class GestureFocusMode : int32_t {
 };
 
 struct WebPreviewSelectionMenuParam {
-    WebElementType type;
-    ResponseType responseType;
-    std::function<void()> menuBuilder;
-    std::function<void()> previewBuilder;
+    WebElementType type = WebElementType::NONE;
+    ResponseType responseType = ResponseType::LONG_PRESS;
+    std::function<void()> menuBuilder = nullptr;
+    std::function<void()> previewBuilder = nullptr;
     NG::MenuParam menuParam;
+    std::function<void()> onMenuShow = nullptr;
+    std::function<void()> onMenuHide = nullptr;
 
+    WebPreviewSelectionMenuParam() = default;
     WebPreviewSelectionMenuParam(const WebElementType& _type, const ResponseType& _responseType,
         const std::function<void()>& _menuBuilder, const std::function<void()>& _previewBuilder,
         const NG::MenuParam& _menuParam)

@@ -65,6 +65,9 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
         themeStyle->GetAttr<double>("page_transition_amplitude_ratio", DEFAULT_AMPLITUDE_RATIO);
     theme->dragPanDistanceMouse_ =
         pattern->GetAttr<Dimension>("app_theme_drag_pan_distance_mouse", 1.0_vp);
+    theme->clickDistanceThreshold_ = pattern->GetAttr<Dimension>(
+        "app_theme_click_distancethreshold", Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::VP));
+    theme->panDistanceThresholdForDragDrop_ = pattern->GetAttr<Dimension>("app_theme_drag_distancethreshold", 10.0_vp);
     return theme;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace

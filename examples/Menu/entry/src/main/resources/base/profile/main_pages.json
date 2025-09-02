@@ -175,6 +175,26 @@
     "pages/Dock/bindMenu1",
     "pages/Dock/bindMenuBuilder1",
     "pages/Dock/bindContextMenu1",
-    "pages/Dock/menuList"
+    "pages/Dock/menuList",
+
+    "pages/MenuUX/Index",
+    "pages/MenuUX/Preview_Search",
+    "pages/MenuUX/enabledNull",
+    "pages/MenuUX/enabledTrue",
+    "pages/MenuUX/enabledFalse",
+    "pages/MenuUX/enabled",
+    "pages/MenuUX/previewNONE",
+    "pages/MenuUX/previewIMAGE1",
+    "pages/MenuUX/previewIMAGE2",
+    "pages/MenuUX/previewClickIMAGE",
+    "pages/MenuUX/previewCustomBuilder",
+    "pages/MenuUX/previewCustomBuilder2",
+    "pages/MenuUX/previewCustomBuilder3",
+    "pages/MenuUX/previewCustomBuilder4",
+    "pages/MenuUX/previewIMAGEDrag",
+    "pages/MenuUX/previewBurDrag",
+    "pages/MenuUX/previewIMAGESet",
+    "pages/MenuUX/previewBurSet",
+    "pages/MenuUX/btnMenu"
   ]
 }

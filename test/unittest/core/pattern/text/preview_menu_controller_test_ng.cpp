@@ -80,17 +80,17 @@ void PreviewMenuControllerTest::VerifyContactAndAddressNodeProperties(
     auto&& calcLayoutConstraint = flexLayoutProperty->GetCalcLayoutConstraint();
     // Verify size constraints
     auto calcMinSize = calcLayoutConstraint->minSize;
-    EXPECT_EQ(calcMinSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+    EXPECT_EQ(calcMinSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
 
     auto calcMaxSize = calcLayoutConstraint->maxSize;
-    EXPECT_EQ(calcMaxSize->Width(), CalcLength(PREVIEW_MAX_WIDTH));
-    EXPECT_EQ(calcMaxSize->Height(), CalcLength(PREVIEW_MAX_WIDTH));
+    EXPECT_EQ(calcMaxSize->Width(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+    EXPECT_EQ(calcMaxSize->Height(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
 
     // Verify special handling for phone/email types
     if (type == TextDataDetectType::EMAIL || type == TextDataDetectType::PHONE_NUMBER) {
         auto idealSize = calcLayoutConstraint->selfIdealSize;
         ASSERT_TRUE(idealSize.has_value());
-        EXPECT_EQ(idealSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+        EXPECT_EQ(idealSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
     } else {
         auto idealSize = calcLayoutConstraint->selfIdealSize;
         EXPECT_FALSE(idealSize.has_value());
@@ -302,7 +302,7 @@ HWTEST_F(PreviewMenuControllerTest, DateTimeClickCallbackTest001, TestSize.Level
     ASSERT_NE(pipeline, nullptr);
 
     std::map<std::string, std::string> aiParams = { { "date", "2023-01-01" } };
-    PreviewMenuController::PreviewNodeClickCallback(TextDataDetectType::DATE_TIME, previewNode, aiParams);
+    PreviewMenuController::PreviewNodeClickCallback(TextDataDetectType::DATE_TIME, previewNode, aiParams, nullptr);
 
     // 触发点击事件
     auto gestureHub = previewNode->GetOrCreateGestureEventHub();
@@ -419,7 +419,7 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingPreviewNodeTest001, TestSize.Le
 
     // Execute the function
     auto frameNode = controller.CreateLinkingPreviewNode();
-    
+
     // Verify node creation
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::FLEX_ETS_TAG);
@@ -437,18 +437,60 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingPreviewNodeTest001, TestSize.Le
     EXPECT_TRUE(maxSize.has_value());
     EXPECT_TRUE(maxSize->Width().has_value());
     EXPECT_TRUE(maxSize->Height().has_value());
-    EXPECT_EQ(maxSize->Height(), CalcLength(PREVIEW_MAX_WIDTH));
-    EXPECT_EQ(maxSize->Width(), CalcLength(PREVIEW_MAX_WIDTH));
+    EXPECT_EQ(maxSize->Height(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+    EXPECT_EQ(maxSize->Width(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
 
     auto minSize = calcLayoutConstraint->minSize;
     EXPECT_TRUE(minSize.has_value());
     EXPECT_TRUE(minSize->Height().has_value());
-    EXPECT_EQ(minSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+    EXPECT_EQ(minSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
 
     // Verify ideal size
     auto idealSize = calcLayoutConstraint->selfIdealSize;
     EXPECT_TRUE(idealSize.has_value());
     EXPECT_TRUE(idealSize->Height().has_value());
     EXPECT_EQ(idealSize->Height(), CalcLength(Dimension(PERCENT_FULL, DimensionUnit::PERCENT)));
+}
+
+/**
+ * @tc.name: CreateWantParams_PhoneNumber
+ * @tc.desc: Test CreateWantParams with PHONE_NUMBER type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateWantParams_PhoneNumber, TestSize.Level1)
+{
+    // Given
+    TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
+    std::string content = "13800138000";
+
+    std::map<std::string, std::string> AIparams;
+    // When
+    PreviewMenuController::CreateWantParams(type, content, AIparams);
+
+    // Then
+    EXPECT_EQ(AIparams.size(), 1);
+    EXPECT_EQ(AIparams["phoneNumber"], "13800138000");
+    EXPECT_EQ(AIparams.find("email"), AIparams.end());
+}
+
+/**
+ * @tc.name: CreateWantParams_Email
+ * @tc.desc: Test CreateWantParams with EMAIL type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateWantParams_Email, TestSize.Level1)
+{
+    // Given
+    TextDataDetectType type = TextDataDetectType::EMAIL;
+    std::string content = "test@example.com";
+
+    std::map<std::string, std::string> AIparams;
+    // When
+    PreviewMenuController::CreateWantParams(type, content, AIparams);
+
+    // Then
+    EXPECT_EQ(AIparams.size(), 1);
+    EXPECT_EQ(AIparams["email"], "test@example.com");
+    EXPECT_EQ(AIparams.find("phoneNumber"), AIparams.end());
 }
 } // namespace OHOS::Ace::NG

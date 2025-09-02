@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "PickerSpecialCases"
+    },
+    {
+      "name": "zero_age",
+      "value": "< %d>"
+    },
+    {
+      "name": "font_size",
+      "value": "36fp"
+    },
+    {
+      "name": "font_family",
+      "value": "HarmonyHeiTi"
+    },
+    {
+      "name": "border_radius",
+      "value": "40"
+    }
+  ]
+}

@@ -489,6 +489,7 @@ bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
 void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
+    session_->SetLeashWindowAlpha(true);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "hide startWindow: %{public}d", session_->GetPersistentId());
 
     ContainerScope scope(instanceId_);
@@ -671,7 +672,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         const bool matchSnapshot = isSavingSnapshot || hasSnapshot;
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
-        auto windowRotation = static_cast<uint32_t>(session_->GetWindowOrientation());
+        auto windowRotation = session_->GetWindowSnapshotOrientation();
         if (matchSnapshot && (!freeMultiWindow)) {
             auto orientation = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
             pattern->SetOrientation(orientation);

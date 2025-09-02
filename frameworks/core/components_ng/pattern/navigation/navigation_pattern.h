@@ -317,16 +317,17 @@ public:
 
     void OnNavBarStateChange(bool modeChange);
 
-    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
+    static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst, bool isFromWindow);
 
     static void FireNavigationLifecycle(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle,
         NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
 
-    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+    static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow, bool isFromWindow);
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
-    static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
+    static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle,
+        NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
 
     static bool CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode);
     static bool CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode);
@@ -340,10 +341,8 @@ public:
     void FireOnInactiveLifecycle(const RefPtr<NavDestinationGroupNode>& curDestination,
         NavDestinationActiveReason reason);
 
-    void FireOnShowLifecycle(const RefPtr<NavDestinationGroupNode>& curDestination);
-
-    // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
-    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
+    void FireOnShowLifecycle(
+        const RefPtr<NavDestinationGroupNode>& curDestination, NavDestVisibilityChangeReason reason);
     void NotifyPageHide(const std::string& pageName);
     void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
@@ -383,7 +382,7 @@ public:
     void RemoveFromDumpManager();
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode, NavDestinationLifecycle lifecycle,
-        NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
+        NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
     void SetParentCustomNode(const RefPtr<UINode>& parentNode)
@@ -573,14 +572,27 @@ public:
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
     bool IsHomeDestinationVisible();
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
-        NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
+        NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
 
     bool CheckNeedCreate(int32_t index);
+
+    void SetEnableShowHideWithContentCover(bool isEnable)
+    {
+        enableShowHideWithContentCover_ = isEnable;
+    }
+
+    bool GetEnableShowHideWithContentCover() const
+    {
+        return enableShowHideWithContentCover_;
+    }
+
 private:
+    void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
+        NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
     void ClearNavigationCustomTransition();
     bool IsDestinationNeedHideInPush(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavDestinationGroupNode>& destNode) const;
-    void FirePrimaryNodesLifecycle(NavDestinationLifecycle lifecycle);
+    void FirePrimaryNodesLifecycle(NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason);
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -642,7 +654,7 @@ private:
     void FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& layoutWrapper);
     void NotifyPageShow(const std::string& pageName);
     void ProcessPageShowEvent();
-    int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
+    int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
@@ -827,6 +839,7 @@ private:
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
     bool isTransitionAnimationAborted_ = false;
+    bool enableShowHideWithContentCover_ = true;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;

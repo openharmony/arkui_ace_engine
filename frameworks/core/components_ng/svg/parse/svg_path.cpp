@@ -36,38 +36,43 @@ bool SvgPath::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     return false;
 }
 
-Rect SvgPath::GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule)
+RSRecordingPath SvgPath::GetPath(const SvgLengthScaleRule& lengthRule)
 {
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        return path_.value();
+    }
+    lengthRule_ = lengthRule;
+    RSRecordingPath out;
     if (lengthRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
         LOGD("SvgPath::GetobjectBoundingBox : objectBoundingBox");
-        return lengthRule.GetContainerRect();
+        auto obb = lengthRule.GetContainerRect();
+        if (GreatNotEqual(obb.Width(), 0.0) && GreatNotEqual(obb.Height(), 0.0)) {
+            RSMatrix matrix;
+            /* Setup matrix  for converting the points in path */
+            matrix.SetScaleTranslate(obb.Width(), obb.Height(), obb.Left(), obb.Top());
+            RSRecordingPath tmp;
+            tmp.BuildFromSVGString(d_);
+            /* convert the points in Path with the matrixs */
+            tmp.TransformWithPerspectiveClip(matrix, &out, false);
+            path_ = out;
+            return out;
+        }
     }
-    LOGD("SvgPath::GetobjectBoundingBox : userSpaceOnUse");
-    Rect objectBoundingBox(0, 0, 1, 1);
-    return objectBoundingBox;
+    out.BuildFromSVGString(d_);
+    path_ = out;
+    return out;
 }
 
 RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && !lengthRule.GetPathTransform()) {
-        return path_.value();
-    }
-    RSRecordingPath tmp;
     RSRecordingPath out;
-    Rect objectBoundingBox = GetobjectBoundingBox(lengthRule);
-    RSMatrix matrix;
-    /* Setup matrix  for converting the points in path */
-    matrix.SetScaleTranslate(objectBoundingBox.Width(), objectBoundingBox.Height(), objectBoundingBox.Left(),
-        objectBoundingBox.Top());
-
-    if (!d_.empty()) {
-        tmp.BuildFromSVGString(d_);
-        /* convert the points in Path with the matrixs */
-        tmp.TransformWithPerspectiveClip(matrix, &out, false);
-        if (attributes_.fillState.IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVENTODD);
-        }
+    if (d_.empty()) {
+        return out;
+    }
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    out = GetPath(lengthRule);
+    if (attributes_.fillState.IsEvenodd()) {
+        out.SetFillStyle(RSPathFillType::EVENTODD);
     }
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {

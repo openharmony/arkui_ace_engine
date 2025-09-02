@@ -96,6 +96,15 @@ public:
             theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
                 static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
             theme->searchFocusPadding_ = pattern->GetAttr<Dimension>("search_focus_glow_padding", 0.0_vp);
+            theme->searchNormalColor_ = pattern->GetAttr<Color>("search_normal_color", Color::TRANSPARENT);
+            theme->searchCancelButtonHoverColor_ =
+                pattern->GetAttr<Color>("search_cancel_button_hover_color", Color());
+            theme->searchCancelButtonPressColor_ =
+                pattern->GetAttr<Color>("search_cancel_button_press_color", Color());
+            theme->searchCancelButtonFocusColor_ =
+                pattern->GetAttr<Color>("search_cancel_button_focus_color", Color());
+            theme->searchCancelButtonFocusPadding_ =
+                pattern->GetAttr<Dimension>("search_cancel_button_focus_padding", 0.0_vp);
             ParsePatternIconTheme(pattern, theme);
         }
 
@@ -332,6 +341,31 @@ public:
         return searchFocusPadding_;
     }
 
+    const Color& GetSearchNormalColor() const
+    {
+        return searchNormalColor_;
+    }
+
+    const Color& GetSearchCancelButtonHoverColor() const
+    {
+        return searchCancelButtonHoverColor_;
+    }
+
+    const Color& GetSearchCancelButtonPressColor() const
+    {
+        return searchCancelButtonPressColor_;
+    }
+
+    const Color& GetSearchCancelButtonFocusColor() const
+    {
+        return searchCancelButtonFocusColor_;
+    }
+
+    const Dimension& GetSearchCancelButtonFocusPadding() const
+    {
+        return searchCancelButtonFocusPadding_;
+    }
+
 protected:
     SearchTheme() = default;
     TextStyle textStyle_;
@@ -377,6 +411,11 @@ private:
     bool needFocusBox_ = false;
     Dimension searchFocusPadding_;
     Dimension buttonFontSize_;
+    Color searchNormalColor_;
+    Color searchCancelButtonHoverColor_;
+    Color searchCancelButtonPressColor_;
+    Color searchCancelButtonFocusColor_;
+    Dimension searchCancelButtonFocusPadding_;
 };
 
 } // namespace OHOS::Ace

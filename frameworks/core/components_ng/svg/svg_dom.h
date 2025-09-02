@@ -85,7 +85,7 @@ private:
     void ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void SyncRSNode(const RefPtr<RenderNode>& renderNode);
     void InitStyles();
-    std::string IntToHexString(const int number);
+    std::string IntToHexString(const uint8_t number);
     RefPtr<SvgContext> svgContext_;
     RefPtr<SvgNode> root_;
     Rect viewBox_;

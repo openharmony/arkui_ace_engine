@@ -177,6 +177,10 @@ void SliderPattern::OnModifyDone()
         pattern->InitEvent();
     };
     context->AddBuildFinishCallBack(callback);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    InitPanEvent(gestureHub);
 }
 
 void SliderPattern::InitEvent()
@@ -192,7 +196,6 @@ void SliderPattern::InitEvent()
     CHECK_NULL_VOID(inputEventHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
-    InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -2080,14 +2083,14 @@ void SliderPattern::LayoutImageNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void SliderPattern::UpdateImagePositionX(float centerX)
+void SliderPattern::UpdateImagePosition(const PointF& imageCenter)
 {
     CHECK_NULL_VOID(imageFrameNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerX, blocksize = blockSize_]() {
+    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), imageCenter, blocksize = blockSize_]() {
         auto imageNode = weakNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
         const auto& renderContext = imageNode->GetRenderContext();
@@ -2095,29 +2098,8 @@ void SliderPattern::UpdateImagePositionX(float centerX)
         const auto& geometryNode = imageNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto offset = geometryNode->GetMarginFrameOffset();
-        offset.SetX(centerX - blocksize.Width() * HALF);
-        geometryNode->SetMarginFrameOffset(offset);
-        renderContext->SavePaintRect();
-        renderContext->SyncGeometryProperties(nullptr);
-    });
-}
-
-void SliderPattern::UpdateImagePositionY(float centerY)
-{
-    CHECK_NULL_VOID(imageFrameNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerY, blocksize = blockSize_]() {
-        auto imageNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(imageNode);
-        const auto& renderContext = imageNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        const auto& geometryNode = imageNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto offset = geometryNode->GetMarginFrameOffset();
-        offset.SetY(centerY - blocksize.Height() * HALF);
+        offset.SetX(imageCenter.GetX() - blocksize.Width() * HALF);
+        offset.SetY(imageCenter.GetY() - blocksize.Height() * HALF);
         geometryNode->SetMarginFrameOffset(offset);
         renderContext->SavePaintRect();
         renderContext->SyncGeometryProperties(nullptr);

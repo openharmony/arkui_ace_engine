@@ -54,23 +54,29 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgEllipse::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
-        return path_.value();
-    }
-    auto rx = GreatNotEqual(ellipseAttr_.rx.Value(), 0.0) ?
-        GetMeasuredLength(ellipseAttr_.rx, lengthRule, SvgLengthType::HORIZONTAL) : 0.0;
-    auto ry = GreatNotEqual(ellipseAttr_.ry.Value(), 0.0) ?
-        GetMeasuredLength(ellipseAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
-    /*if Ellipse x or y invalid, default cirlce*/
-    rx = GreatNotEqual(rx, 0.0) ? rx : ry;
-    ry = GreatNotEqual(ry, 0.0) ? ry : rx;
     RSRecordingPath path;
-    RSScalar left = GetMeasuredPosition(ellipseAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL) - rx;
-    RSScalar top = GetMeasuredPosition(ellipseAttr_.cy, lengthRule, SvgLengthType::VERTICAL) - ry;
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        path = path_.value();
+    } else {
+        auto rx = GreatNotEqual(ellipseAttr_.rx.Value(), 0.0) ?
+            GetMeasuredLength(ellipseAttr_.rx, lengthRule, SvgLengthType::HORIZONTAL) : 0.0;
+        auto ry = GreatNotEqual(ellipseAttr_.ry.Value(), 0.0) ?
+            GetMeasuredLength(ellipseAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
+        /*if Ellipse x or y invalid, default cirlce*/
+        if (!GreatNotEqual(rx, 0.0) && !GreatNotEqual(ry, 0.0)) {
+            return path;
+        }
+        rx = GreatNotEqual(rx, 0.0) ? rx : ry;
+        ry = GreatNotEqual(ry, 0.0) ? ry : rx;
+        RSScalar left = GetMeasuredPosition(ellipseAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL) - rx;
+        RSScalar top = GetMeasuredPosition(ellipseAttr_.cy, lengthRule, SvgLengthType::VERTICAL) - ry;
 
-    RSRect rect = RSRect(left, top, rx + rx + left, ry + ry + top);
-    path.AddOval(rect);
+        RSRect rect = RSRect(left, top, rx + rx + left, ry + ry + top);
+        path.AddOval(rect);
+        lengthRule_ = lengthRule;
+        path_ = path;
+    }
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {
         ApplyTransform(path);

@@ -37,9 +37,15 @@ RSRecordingPath SvgG::AsPath(const Size& viewPort) const
 RSRecordingPath SvgG::AsPath(const SvgLengthScaleRule& lengthRule)
 {
     RSRecordingPath path;
-    for (const auto& child : children_) {
-        auto childPath = child->AsPath(lengthRule);
-        path.Op(path, childPath, RSPathOp::UNION);
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        path = path_.value();
+    } else {
+        for (const auto& child : children_) {
+            auto childPath = child->AsPath(lengthRule);
+            path.Op(path, childPath, RSPathOp::UNION);
+        }
+        lengthRule_ = lengthRule;
+        path_ = path;
     }
     ApplyTransform(path, lengthRule);
     return path;
@@ -58,8 +64,8 @@ void SvgG::ApplyOpacity(RSCanvas& canvas)
 
 void SvgG::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
-    ApplyOpacity(canvas);
     SvgNode::OnDraw(canvas, lengthRule);
+    ApplyOpacity(canvas);
     return;
 }
 

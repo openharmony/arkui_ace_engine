@@ -23,4 +23,9 @@ RsProfilerNodeMountCallback LayoutInspector::GetRsProfilerNodeMountCallback()
 {
     return rsProfilerNodeMountCallback_;
 }
+
+bool LayoutInspector::GetEnableNodeTrace()
+{
+    return false;
+}
 } // namespace OHOS::Ace

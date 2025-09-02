@@ -813,6 +813,7 @@ public:
         return gestureFocusMode_ == GestureFocusMode::DEFAULT;
     }
 
+    void ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
     std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
@@ -844,6 +845,7 @@ public:
     void SetSurfaceDensity(double density);
     void InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
     void UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
+    void SetImeShow(bool visible);
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
@@ -891,6 +893,10 @@ public:
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
     bool IsShowHandle();
+
+    void OnCloseContextMenu();
+    bool CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
+        const WebElementType& elementType, const ResponseType& responseType);
 
     bool IsShowAIWrite();
     int GetSelectStartIndex() const;

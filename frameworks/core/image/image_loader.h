@@ -71,9 +71,11 @@ public:
     FileImageLoader() = default;
     ~FileImageLoader() override = default;
     std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+        NG::ImageLoadResultInfo& loadResultInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     std::shared_ptr<RSData> BuildImageData(const std::shared_ptr<RSData>& result);
+private:
+    std::string ParseFilePath(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& loadResultInfo);
 };
 
 // data provider image loader.

@@ -6482,6 +6482,10 @@ void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
+        if (swiperPattern->isTouchDown_) {
+            // When remove touch event, if the up state is not issued, it will be triggered.
+            swiperPattern->HandleTouchUp();
+        }
         if (!disableSwipe) {
             gestureHub->RemovePanEvent(swiperPattern->panEvent_);
         }
@@ -6767,7 +6771,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     auto currentIndex = GetLoopIndex(currentIndex_);
     auto totalCount = TotalCount();
     auto displayCount = GetDisplayCount();
-    bool commTouchBottom = (currentFirstIndex == totalCount - 1);
+    bool commTouchBottom = (currentFirstIndex == 0);
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);

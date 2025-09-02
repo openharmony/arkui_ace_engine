@@ -675,9 +675,8 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecorati
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
-    }
-    // If the span type is Font and the span is from HTML, directly add it to the spansMap_ and apply it.
-    else if (span->GetSpanType() == SpanType::Font && isFromHtml) {
+    } else if (span->GetSpanType() == SpanType::Font && isFromHtml) {
+        // If the span type is Font and the span is from HTML, directly add it to the spansMap_ and apply it.
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;

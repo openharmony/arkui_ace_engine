@@ -515,6 +515,7 @@ struct SelectItem {
   @Consume selectedItemPosition: LocalizedEdges
   @Consume zoomScaleArray: number[]
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
+  @Prop isSegmentFocusStyleCustomized: boolean;
 
   build() {
     if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0) {
@@ -527,7 +528,8 @@ struct SelectItem {
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
+        .shadow(this.isSegmentFocusStyleCustomized ? undefined :
+          resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
           0) as ShadowStyle)
     }
   }
@@ -956,7 +958,7 @@ struct SegmentButtonItemArrayComponent {
     .direction(this.options.direction)
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
-    // Currently, isSegmentFocusStyleCustomized is set to true only on TV. 
+    // Currently, isSegmentFocusStyleCustomized is set to true only on TV.
     // Since the TV requires the use of the built-in focus style, the custom focus style is hidden.
     .visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None)
   }
@@ -1479,7 +1481,8 @@ export struct SegmentButton {
             SelectItem({
               optionsArray: this.options.buttons,
               options: this.options,
-              selectedIndexes: $selectedIndexes
+              selectedIndexes: $selectedIndexes,
+              isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized()
             })
           }
         }

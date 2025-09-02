@@ -108,6 +108,7 @@ public:
     virtual bool GetIsAnimation() = 0;
     virtual void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) = 0;
     virtual void SetImageFillSetByUser(bool value) = 0;
+    virtual void SetSupportSvg2(bool enable) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;

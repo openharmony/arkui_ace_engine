@@ -1176,7 +1176,8 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private getFocusPriority(repeatItem: RepeatItem<SegmentButtonV2Item>): FocusPriority | undefined {
-    return Math.min(...this.selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
+    const selectedIndexes = this.selectedIndexes ?? [];
+    return Math.min(...selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
 
   getItems(): SegmentButtonV2Items {

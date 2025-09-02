@@ -57,7 +57,7 @@ public:
             auto hasColor = propScrollBarColor_.has_value();
             auto scrollBarColor = propScrollBarColor_.value_or(Color());
             CHECK_NULL_VOID(!hasColor || scrollBarColor != value ||
-                !NearEqual(scrollBarColor.GetResourceId(), value.GetResourceId()));
+                scrollBarColor.GetResourceId() != value.GetResourceId());
             propScrollBarColor_ = value;
             UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
             return;

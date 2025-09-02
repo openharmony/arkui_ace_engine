@@ -1584,7 +1584,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle001, TestSize.Le
     ASSERT_NE(destEventHub, nullptr);
     // unchanged, just for Branch Coverage
     destEventHub->state_ = NavDestinationState::ON_SHOWN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_ACTIVE);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_ACTIVE, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_SHOWN);
 }
 
@@ -1615,7 +1615,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle002, TestSize.Le
     navNode->lastStandardIndex_ = 0;
     // unchanged, just for Branch Coverage
     destEventHub->state_ = NavDestinationState::ON_SHOWN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_SHOWN);
 }
 
@@ -1657,7 +1657,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle003, TestSize.Le
     pattern->primaryNodes_.push_back(WeakPtr(dest));
 
     destEventHub->state_ = NavDestinationState::ON_HIDDEN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_TRUE(destPattern->GetIsOnShow());
     EXPECT_TRUE(destPattern->IsActive());
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_ACTIVE);
@@ -1701,7 +1701,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle004, TestSize.Le
     pattern->primaryNodes_.push_back(WeakPtr(dest));
     // unchanged, just for Branch Coverage
     destEventHub->state_ = NavDestinationState::ON_HIDDEN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_TRUE(destPattern->GetIsOnShow());
     EXPECT_TRUE(destPattern->IsActive());
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_HIDDEN);
@@ -1743,7 +1743,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle005, TestSize.Le
     pattern->primaryNodes_.clear();
     pattern->primaryNodes_.push_back(WeakPtr(dest));
     destEventHub->state_ = NavDestinationState::ON_SHOWN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_FALSE(destPattern->GetIsOnShow());
     EXPECT_FALSE(destPattern->IsActive());
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_HIDDEN);
@@ -1786,7 +1786,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle006, TestSize.Le
     pattern->primaryNodes_.push_back(WeakPtr(dest));
     // unchanged, just for Branch Coverage
     destEventHub->state_ = NavDestinationState::ON_SHOWN;
-    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE);
+    pattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
     EXPECT_FALSE(destPattern->GetIsOnShow());
     EXPECT_FALSE(destPattern->IsActive());
     EXPECT_EQ(destEventHub->state_, NavDestinationState::ON_SHOWN);

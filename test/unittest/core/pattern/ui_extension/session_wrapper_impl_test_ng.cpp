@@ -216,6 +216,10 @@ HWTEST_F(SessionWrapperImplTestNg, SessionWrapperImplTestNg003, TestSize.Level1)
     ASSERT_EQ(sessionWrapper->transaction_.lock(), nullptr);
 
     rsTransaction = std::make_shared<Rosen::RSTransaction>();
+    sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
+    ASSERT_EQ(sessionWrapper->transaction_.lock(), nullptr);
+    sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::ROTATION, rsTransaction);
+    ASSERT_EQ(sessionWrapper->transaction_.lock(), rsTransaction);
     sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::SNAPSHOT_ROTATION, rsTransaction);
     ASSERT_EQ(sessionWrapper->transaction_.lock(), rsTransaction);
 #endif

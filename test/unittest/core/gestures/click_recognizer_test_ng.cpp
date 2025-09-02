@@ -2194,4 +2194,42 @@ HWTEST_F(ClickRecognizerTestNg, ResetStatusInHandleOverdueDeadlineTest001, TestS
     triggerClickRecognizer->ResetStatusInHandleOverdueDeadline();
     EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 3);
 }
+
+/*
+ * @tc.name: SetDistanceThresholdTest001
+ * @tc.desc: Test SetDistanceThreshold
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, SetDistanceThresholdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT, 0);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+    double distanceThreshold = 1.0;
+    double unvailedDistanceThreshold = -1.0;
+
+    /**
+     * @tc.steps: step2. call IsPointInRegion function and compare result.
+     * @tc.steps: case1: distanceThreshold is 1.0.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.SetScreenX(DEFAULT_DOUBLE_100);
+    touchEvent.SetScreenY(DEFAULT_DOUBLE_100);
+    clickRecognizer->SetDistanceThreshold(distanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), distanceThreshold);
+    clickRecognizer->SetDistanceThreshold(Dimension(distanceThreshold, DimensionUnit::PX));
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), distanceThreshold);
+    clickRecognizer->SetDistanceThreshold(std::numeric_limits<double>::infinity());
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX));
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(unvailedDistanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(Dimension(unvailedDistanceThreshold, DimensionUnit::PX));
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+}
+
 } // namespace OHOS::Ace::NG

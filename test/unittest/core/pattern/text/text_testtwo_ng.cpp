@@ -1476,8 +1476,8 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     info.action_ = MouseAction::RELEASE;
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;

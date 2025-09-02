@@ -56,7 +56,8 @@ struct TouchPoint final {
     int32_t width;
     int32_t height;
     int32_t operatingHand = 0;
-
+    int32_t xReverse = 0;
+    int32_t yReverse = 0;
     void CovertId();
     int32_t GetOriginalReCovertId() const;
 };
@@ -113,7 +114,8 @@ struct TouchEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isPassThroughMode = false;
-
+    int32_t xReverse = 0;
+    int32_t yReverse = 0;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;
@@ -152,6 +154,8 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetWidth(int32_t width);
     TouchEvent& SetHeight(int32_t height);
     TouchEvent& SetOperatingHand(int32_t operatingHand);
+    TouchEvent& SetXReverse(int32_t xReverse);
+    TouchEvent& SetYReverse(int32_t yReverse);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

@@ -213,6 +213,14 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
+void MenuItemPattern::OnAttachToMainTree()
+{
+    auto menuPattern = GetMenuPattern();
+    CHECK_NULL_VOID(menuPattern);
+    // flush divider render when new item mount to tree
+    menuPattern->AddBuildDividerTask();
+}
+
 void MenuItemPattern::CreateBottomDivider()
 {
     if (bottomDivider_) {

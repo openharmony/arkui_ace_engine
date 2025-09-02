@@ -32,42 +32,6 @@ export default function Stepper2() {
       await StepperStart(done)
     })
     /**
-     * 测试组件borderImage.width.top
-     */
-    it('ArkUI_Stepper_Comp_0159', 0, async (done: Function) => {
-      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
-      await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
-      await searchParentBlock('borderImage.width.top', false, '基础属性', '通用属性1')
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-        id: 'Stepper',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('borderImage', JsonType.value),
-        ],
-        assertEqual: '{"source":"","slice":"0.00vp","width":"left: [0.00px] right: [0.00px] top: [300.00vp] bottom: [0.00px]","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-        id: 'Stepper',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('borderWidth', JsonType.value),
-        ],
-        assertEqual: '0.00px'
-      })
-
-      done();
-
-    })
-    /**
      * 测试组件borderImage.width.bottom
      */
     it('ArkUI_Stepper_Comp_0160', 0, async (done: Function) => {

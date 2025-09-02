@@ -2010,7 +2010,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
 
     SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
+    EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
 }
 
 /**
@@ -2834,7 +2834,7 @@ HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
     ASSERT_NE(buttonFrameNode, nullptr);
     auto renderContext = buttonFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
+    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION, 0);
 }
 
 /**

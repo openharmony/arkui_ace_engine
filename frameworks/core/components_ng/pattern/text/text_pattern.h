@@ -921,6 +921,8 @@ public:
         return true;
     }
 
+    void UpdateStyledStringByColorMode();
+
 protected:
     int32_t GetClickedSpanPosition()
     {

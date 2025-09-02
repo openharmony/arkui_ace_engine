@@ -3676,8 +3676,8 @@ int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event
     }
     auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
     if (touchEvent) {
-        delete touchEvent;
-        touchEvent = nullptr;
+        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        fullImpl->getNodeModifiers()->getCommonModifier()->destroyTouchEvent(touchEvent);
     }
     delete event;
     event = nullptr;
@@ -3740,7 +3740,7 @@ int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent*
     if (!touchEvent) {
         RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    touchEvent->action = actionType;
+    touchEvent->action = OHOS::Ace::NodeModel::ConvertToOriginTouchActionType(actionType);
     RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 

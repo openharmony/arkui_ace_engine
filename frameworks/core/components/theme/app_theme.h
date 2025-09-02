@@ -158,6 +158,15 @@ public:
         return dragPanDistanceMouse_;
     }
 
+    Dimension GetClickDistanceThreshold() const
+    {
+        return clickDistanceThreshold_;
+    }
+
+    Dimension GetPanDistanceThresholdForDragDrop() const
+    {
+        return panDistanceThresholdForDragDrop_;
+    }
 protected:
     AppTheme() = default;
 
@@ -181,6 +190,8 @@ private:
     bool focusHandleClick_ = true;
     float pageTransitionAmplitudeRatio_ = DEFAULT_AMPLITUDE_RATIO;
     Dimension dragPanDistanceMouse_ = 1.0_vp; // General distance to accept pan gesture for dragging by mouse
+    Dimension clickDistanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    Dimension panDistanceThresholdForDragDrop_ = 10.0_vp;
 };
 
 } // namespace OHOS::Ace

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/svg/svg_ulils.h"
+#include "core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,5 +42,13 @@ void SvgUtils::CalculateSvgConentSize(Size& svgContentSize, const Size& svgConta
     }
     svgContentSize.SetWidth(svgSize.Width());
     svgContentSize.SetHeight(svgSize.Height());
+}
+
+bool SvgUtils::IsFeatureEnable(uint32_t featureVersion, uint32_t usrConfigVersion)
+{
+    if (usrConfigVersion >= featureVersion) {
+        return true;
+    }
+    return false;
 }
 }

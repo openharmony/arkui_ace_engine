@@ -2510,7 +2510,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnContextMenuShow_001, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(menuParam, menuResult);
     webPattern->contextSelectOverlay_ = nullptr;
     webPattern->OnContextMenuShow(eventInfo, false, true);
-    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
+    EXPECT_EQ(webPattern->curContextMenuResult_, true);
 #endif
 }
 } // namespace OHOS::Ace::NG

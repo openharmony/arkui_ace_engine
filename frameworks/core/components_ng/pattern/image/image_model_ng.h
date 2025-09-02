@@ -80,6 +80,7 @@ public:
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
     void SetImageFillSetByUser(bool value) override;
+    void SetSupportSvg2(bool enable) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -160,6 +161,8 @@ public:
     static void SetAltResource(FrameNode* frameNode, void* resource);
     static void CreateWithResourceObj(
         FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
+    static void SetSupportSvg2(FrameNode* frameNode, bool enable);
+    static void ResetSupportSvg2(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

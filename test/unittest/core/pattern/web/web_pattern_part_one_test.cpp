@@ -45,6 +45,7 @@ public:
     MOCK_METHOD(int, GetInputFieldType, (), (const, override));
     MOCK_METHOD(std::string, GetSelectionText, (), (const, override));
     MOCK_METHOD(bool, IsAILink, (), (const, override));
+    MOCK_METHOD(int, GetSourceTypeV2, (), (const, override));
 };
 
 class MockWebContextSelectOverlay : public WebContextSelectOverlay {
@@ -168,35 +169,8 @@ HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto textBase = WeakPtr<TextBase>();
-    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlay>(textBase);
-    webPattern->contextSelectOverlay_ = contextSelectOverlay;
-
     webPattern->CloseContextSelectionMenu();
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
-#endif
-}
-
-/**
- * @tc.name: CloseContextSelectionMenu_002
- * @tc.desc: CloseContextSelectionMenu.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto textBase = WeakPtr<TextBase>();
-    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlayfalse>(textBase);
+    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlay>(textBase);
     webPattern->contextSelectOverlay_ = contextSelectOverlay;
 
     webPattern->CloseContextSelectionMenu();
@@ -223,10 +197,13 @@ HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_003, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->contextSelectOverlay_ = nullptr;
-
     webPattern->CloseContextSelectionMenu();
-    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
+    auto textBase = WeakPtr<TextBase>();
+    auto contextSelectOverlay = AceType::MakeRefPtr<MockWebContextSelectOverlayfalse>(textBase);
+    webPattern->contextSelectOverlay_ = contextSelectOverlay;
+    webPattern->CloseContextSelectionMenu();
+    ASSERT_NE(webPattern->contextSelectOverlay_, nullptr);
+    EXPECT_EQ(webPattern->contextSelectOverlay_->IsCurrentMenuVisibile(), false);
 #endif
 }
 
@@ -253,7 +230,7 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_001, TestSize.Level1)
     webPattern->contextSelectOverlay_ = nullptr;
 
     webPattern->OnContextMenuShow(emptyInfo);
-    EXPECT_EQ(webPattern->contextSelectOverlay_, nullptr);
+    EXPECT_EQ(webPattern->curContextMenuResult_, false);
 #endif
 }
 
@@ -285,9 +262,7 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_002, TestSize.Level1)
     auto emptyInfo = std::make_shared<ContextMenuEvent>(param_, result_);
 
     webPattern->OnContextMenuShow(emptyInfo);
-    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
-    EXPECT_EQ(webPattern->contextMenuParam_, nullptr);
-    EXPECT_EQ(webPattern->contextMenuResult_, nullptr);
+    EXPECT_EQ(webPattern->curContextMenuResult_, false);
 #endif
 }
 
@@ -437,6 +412,47 @@ HWTEST_F(WebPatternPartOneTest, ShowPreviewMenu_001, TestSize.Level1)
     webPattern->ShowPreviewMenu(WebElementType::AILINK);
     webPattern->ShowPreviewMenu(WebElementType::AILINK);
     webPattern->ShowPreviewMenu(WebElementType::AILINK);
+#endif
+}
+
+/**
+ * @tc.name: ShowSelectTextMenu_001
+ * @tc.desc: ShowSelectTextMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, ShowSelectTextMenu_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->contextMenuParam_ = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto adapter = webPattern->GetDataDetectorAdapter();
+    adapter->InitAIMenu();
+    adapter->config_.enable = true;
+    adapter->config_.enablePreview = true;
+
+    auto param_ = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    webPattern->contextMenuParam_ = param_;
+    EXPECT_CALL(*param_, GetSourceTypeV2())
+        .WillOnce(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE))
+        .WillOnce(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS))
+        .WillOnce(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_TAP))
+        .WillRepeatedly(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE));
+
+    webPattern->ShowPreviewMenu(WebElementType::TEXT);
+    webPattern->ShowPreviewMenu(WebElementType::TEXT);
+    webPattern->ShowPreviewMenu(WebElementType::TEXT);
+    webPattern->ShowPreviewMenu(WebElementType::TEXT);
 #endif
 }
 

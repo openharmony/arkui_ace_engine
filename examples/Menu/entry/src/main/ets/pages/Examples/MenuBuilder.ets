@@ -15,7 +15,7 @@
  
 @Entry
 @Component
-struct MenuBuilder {
+struct MenuForEachBuilder {
   @State listData: number[] = [0, 0, 0]
 
   @Builder MenuBuilder() {

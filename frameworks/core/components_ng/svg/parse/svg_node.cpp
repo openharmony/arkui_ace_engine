@@ -30,6 +30,7 @@
 #include "core/components_ng/svg/parse/svg_gradient.h"
 #include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -178,7 +179,8 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 Color color;
-                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attrs.usrConfigVersion);
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color, featureEnable)) {
                     attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
                     attrs.fillState.SetIsFillNone(val == VALUE_NONE);
                     return;
@@ -244,7 +246,8 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 Color color;
-                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attrs.usrConfigVersion);
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color, featureEnable)) {
                     attrs.strokeState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
                     return;
                 }
@@ -355,6 +358,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
     };
     auto attrIter = BinarySearchFindIndex(SVG_BASE_ATTRS, ArraySize(SVG_BASE_ATTRS), name.c_str());
     if (attrIter != -1) {
+        attributes_.usrConfigVersion = GetUsrConfigVersion();
         SVG_BASE_ATTRS[attrIter].value(value, attributes_);
     }
 }
@@ -768,7 +772,12 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPor
                 return value.Value() * height;
             }
             if (type == SvgLengthType::OTHER) {
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                uint32_t usrConfigVersion = SVG_FEATURE_SUPPORT_UNDEFINE;
+                auto svgContext = svgContext_.Upgrade();
+                if (svgContext) {
+                    usrConfigVersion = svgContext->GetUsrConfigVersion();
+                }
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, usrConfigVersion)) {
                     return value.Value() * sqrt(width * height);
                 }
                 return value.Value() * std::sqrt(width * width + height * height) / std::sqrt(2.0f);
@@ -1040,5 +1049,15 @@ void SvgNode::ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& le
     Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule);
     auto matrix = NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot, lengthRule);
     path.Transform(RosenSvgPainter::ToDrawingMatrix(matrix));
+}
+
+uint32_t SvgNode::GetUsrConfigVersion()
+{
+    uint32_t usrConfigVersion = SVG_FEATURE_SUPPORT_UNDEFINE;
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext) {
+        usrConfigVersion = svgContext->GetUsrConfigVersion();
+    }
+    return usrConfigVersion;
 }
 } // namespace OHOS::Ace::NG

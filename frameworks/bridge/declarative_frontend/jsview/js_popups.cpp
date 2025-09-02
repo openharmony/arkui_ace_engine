@@ -681,7 +681,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 {
     ParsePopupCommonParam(info, popupObj, popupParam);
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
-    if (popupParam) {
+    if (popupParam && messageVal->IsString()) {
         popupParam->SetMessage(messageVal->ToString());
     }
 
@@ -1099,7 +1099,14 @@ void JSViewPopups::ParseMenuShowInSubWindowParam(
         }
     }
     if (showInSubWindowValue->IsBoolean()) {
-        menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        bool showInSubBoolean = showInSubWindowValue->ToBoolean();
+#if defined(PREVIEW)
+        if (showInSubBoolean) {
+            LOGI("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+            showInSubBoolean = false;
+        }
+#endif
+        menuParam.isShowInSubWindow = showInSubBoolean;
     }
 }
 

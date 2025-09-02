@@ -199,15 +199,13 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(int32_t content
     linearLayoutProperty->UpdatePadding(padding);
     linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 
-    CreateDateNode(contentId, settingData);
+    CreateDateNode(contentNode, settingData);
     contentNode->MarkModifyDone();
     return contentNode;
 }
 
-void CalendarPickerModelNG::CreateDateNode(int32_t contentId, const CalendarSettingData& settingData)
+void CalendarPickerModelNG::CreateDateNode(RefPtr<FrameNode>& contentNode, const CalendarSettingData& settingData)
 {
-    auto contentNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(contentNode);
     std::map<std::size_t, std::string> order = GetDateNodeOrder(settingData);
 

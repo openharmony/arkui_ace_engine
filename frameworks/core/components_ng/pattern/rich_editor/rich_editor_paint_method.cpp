@@ -28,9 +28,36 @@ RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, co
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-    TextPaintMethod::UpdateOverlayModifier(paintWrapper);
+    CHECK_NULL_VOID(paintWrapper);
     auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    if (richEditorPattern) {
+        auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+        CHECK_NULL_VOID(overlayMod);
+        overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
+        overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
+        overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
+        overlayMod->ChangeOverlay();
+        if (!richEditorPattern->HasFocus()) {
+            overlayMod->UpdateScrollBar(paintWrapper);
+        } else {
+            auto geometryNode = paintWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto frameSize = geometryNode->GetFrameSize();
+            overlayMod->SetFrameSize(frameSize);
+            overlayMod->UpdateScrollBar(paintWrapper);
+            overlayMod->SetIsClip(false);
+        }
+        return;
+    }
+    UpdateContentOverlayModifier(paintWrapper);
+}
+void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrapper)
+{
+    auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
+    TextPaintMethod::UpdateOverlayModifier(paintWrapper);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
@@ -42,12 +69,13 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         overlayMod->SetCaretVisible(false);
         overlayMod->SetFloatingCaretVisible(false);
         const auto& selection = richEditorPattern->GetTextSelector();
+        std::vector<RectF> selectedRects;
         if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
             auto contentRect = richEditorPattern->GetTextContentRect();
             auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-            std::vector<RectF> selectedRects = CalculateSelectedRect(rects, contentRect.Width());
-            overlayMod->SetSelectedRects(selectedRects);
+            selectedRects = CalculateSelectedRect(rects, contentRect.Width());
         }
+        overlayMod->SetSelectedRects(selectedRects);
         return;
     }
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
@@ -70,7 +98,9 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
 void RichEditorPaintMethod::SetCaretState(PaintWrapper* paintWrapper)
 {
-    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
@@ -108,7 +138,9 @@ std::vector<RectF> RichEditorPaintMethod::CalculateSelectedRect(
 
 void RichEditorPaintMethod::SetPreviewTextDecoration(PaintWrapper* paintWrapper)
 {
-    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
@@ -120,7 +152,9 @@ void RichEditorPaintMethod::SetPreviewTextDecoration(PaintWrapper* paintWrapper)
 
 void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
 {
-    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(contentPattern);
+    auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);

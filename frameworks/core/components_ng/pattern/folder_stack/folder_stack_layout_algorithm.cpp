@@ -237,12 +237,48 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     auto windowMode = windowManager->GetWindowMode();
     auto realWidth = frameSize.Width() + padding.Width();
     auto realHeight = frameSize.Height() + padding.Height();
-    if (!NearEqual(realWidth, pipeline->GetRootWidth() - safeArea.left_.Length() - safeArea.right_.Length()) ||
-        !NearEqual(realHeight, pipeline->GetRootHeight() - safeArea.top_.Length() - safeArea.bottom_.Length()) ||
+    auto rootWidth = pipeline->GetRootWidth();
+    auto rootHeight = pipeline->GetRootHeight();
+    SizeF fullScreen = { rootWidth - safeArea.left_.Length() - safeArea.right_.Length(),
+        rootHeight - safeArea.top_.Length() - safeArea.bottom_.Length() };
+    if (CheckExpandConstraintFullScreen(
+        foldStackLayoutProperty, realWidth, realHeight, safeArea, windowMode, fullScreen)) {
+        return true;
+    }
+    if (!NearEqual(realWidth, rootWidth - safeArea.left_.Length() - safeArea.right_.Length()) ||
+        !NearEqual(realHeight, rootHeight - safeArea.top_.Length() - safeArea.bottom_.Length()) ||
         windowMode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         return false;
     }
     return true;
+}
+
+bool FolderStackLayoutAlgorithm::CheckExpandConstraintFullScreen(
+    const RefPtr<FolderStackLayoutProperty>& foldStackLayoutProperty, const float& realWidth, const float& realHeight,
+    const SafeAreaInsets& safeArea, WindowMode windowMode, SizeF fullScreen)
+{
+    CHECK_NULL_RETURN(foldStackLayoutProperty, false);
+    if (foldStackLayoutProperty->IsExpandConstraintNeeded()) {
+        return false;
+    }
+    const auto& ignoreOpts = foldStackLayoutProperty->GenIgnoreOpts();
+    if (ignoreOpts.edges & NG::LAYOUT_SAFE_AREA_EDGE_TOP) {
+        fullScreen.AddHeight(safeArea.top_.Length());
+    }
+    if (ignoreOpts.edges & NG::LAYOUT_SAFE_AREA_EDGE_START) {
+        fullScreen.AddWidth(safeArea.left_.Length());
+    }
+    if (ignoreOpts.edges & NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
+        fullScreen.AddHeight(safeArea.bottom_.Length());
+    }
+    if (ignoreOpts.edges & NG::LAYOUT_SAFE_AREA_EDGE_END) {
+        fullScreen.AddWidth(safeArea.right_.Length());
+    }
+    if (NearEqual(realWidth, fullScreen.Width()) && NearEqual(realHeight, fullScreen.Height()) &&
+        windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        return true;
+    }
+    return false;
 }
 
 void FolderStackLayoutAlgorithm::AdjustNodeTree(const RefPtr<FolderStackGroupNode>& hostNode)
@@ -373,14 +409,22 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
 void FolderStackLayoutAlgorithm::MatchParentWhenChildrenMatch(
     LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& controlPartsLayoutWrapper)
 {
+    CHECK_NULL_VOID(controlPartsLayoutWrapper);
+    const auto& controlPartsLayoutProperty = controlPartsLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(controlPartsLayoutProperty);
+    controlPartsLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    controlPartsLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     for (auto&& child : controlPartsLayoutWrapper->GetAllChildrenWithBuild()) {
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_CONTINUE(childLayoutProperty);
         auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
         if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
-            const auto& controlPartsLayoutProperty = controlPartsLayoutWrapper->GetLayoutProperty();
-            CHECK_NULL_CONTINUE(controlPartsLayoutProperty);
-            controlPartsLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+            if (layoutPolicy->IsWidthMatch()) {
+                controlPartsLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            }
+            if (layoutPolicy->IsHeightMatch()) {
+                controlPartsLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            }
         }
     }
 }

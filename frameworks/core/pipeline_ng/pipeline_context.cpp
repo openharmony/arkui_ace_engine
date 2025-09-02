@@ -40,6 +40,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -3062,8 +3063,9 @@ void PipelineContext::OnTouchEvent(
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
         auto touchTestResults = eventManager_->touchTestResults_;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
-            scalePoint, eventManager_->touchTestResults_)) {
+        if (scalePoint.sourceTool == SourceTool::PEN &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
+                scalePoint, eventManager_->touchTestResults_)) {
             eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
             return;
         }
@@ -3160,9 +3162,24 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         NotifyDragTouchEvent(scalePoint, node);
-        touchEvents_.emplace_back(point);
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            std::list<TouchEvent> touchEvents;
+            touchEvents.push_back(point);
+            ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
+            touchEvents_.emplace_back(touchEvents.back());
+        } else {
+            touchEvents_.emplace_back(point);
+        }
+
         hasIdleTasks_ = true;
-        RequestFrame();
+        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount())) {
+            FlushVsync(static_cast<uint64_t>(GetSysTimestamp()), GetFrameCount());
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(GetFrameCount());
+        } else {
+            RequestFrame();
+            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
+        }
         return;
     }
 
@@ -3775,7 +3792,9 @@ void PipelineContext::ConsumeTouchEvents(
     std::unordered_set<int32_t> ids;
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
-
+    if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+        ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
+    }
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
@@ -3803,10 +3822,22 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
-        if (it != newIdTouchPoints.end()) {
-            touchEvents.emplace_back(it->second);
+        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
+            TouchEvent resultPoint;
+            TouchEvent resamplePoint;
+            TouchEvent& tpPoint = idToTouchPoints[touchId];
+            if (it != newIdTouchPoints.end()) {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(true, tpPoint, it->second, resultPoint);
+            } else {
+                ResSchedTouchOptimizer::GetInstance().DispatchPointSelect(false, tpPoint, resamplePoint, resultPoint);
+            }
+            touchEvents.emplace_back(resultPoint);
         } else {
-            touchEvents.emplace_back(idToTouchPoints[touchId]);
+            if (it != newIdTouchPoints.end()) {
+                touchEvents.emplace_back(it->second);
+            } else {
+                touchEvents.emplace_back(idToTouchPoints[touchId]);
+            }
         }
         ids.erase(touchId);
     }
@@ -5023,7 +5054,7 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
     }
 }
 
-void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow)
 {
     CHECK_RUN_ON(UI);
     auto iter = pageToNavigationNodes_.find(pageId);
@@ -5031,7 +5062,7 @@ void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
         return;
     }
     for (auto navigationNode : iter->second) {
-        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
+        NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true, isFromWindow);
     }
 }
 

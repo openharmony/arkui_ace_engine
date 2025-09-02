@@ -409,6 +409,11 @@ public:
     void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
     void OnColorModeChange(uint32_t colorMode) override;
 
+    void SetSupportSvg2(bool enable)
+    {
+        supportSvg2_ = enable;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -628,6 +633,7 @@ private:
     bool isNeedReset_ = false;
     bool hasSetPixelMapMemoryName_ = false;
     bool previousVisibility_ = false;
+    bool supportSvg2_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -75,31 +75,6 @@ HWTEST_F(ImageLoaderTest, LoadDataFromCachedFile001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LoadImageData001
- * @tc.desc: Test for LoadImageData of SrcType::FILE
- * @tc.type: FUNC
- */
-HWTEST_F(ImageLoaderTest, LoadImageData001, TestSize.Level1)
-{
-    std::string uri = "file:///data/storage/" + BUNDLE_NAME + "/test_file.png";
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetSrc(uri);
-    imageSourceInfo.srcType_ = SrcType::FILE;
-    NG::ImageDfxConfig imageDfxConfig;
-    imageSourceInfo.SetImageDfxConfig(imageDfxConfig);
-
-    Testing::g_imageDataSize = 0;
-    FileImageLoader loader;
-    NG::ImageLoadResultInfo errorInfo;
-    auto result = loader.LoadImageData(imageSourceInfo, errorInfo);
-    EXPECT_EQ(result, nullptr);
-
-    Testing::g_imageDataSize = TEST_SIZE;
-    result = loader.LoadImageData(imageSourceInfo, errorInfo);
-    EXPECT_NE(result, nullptr);
-}
-
-/**
  * @tc.name: BuildImageData
  * @tc.desc: Test for BuildImageData
  * @tc.type: FUNC

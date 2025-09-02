@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
+#include <cmath>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -221,7 +222,7 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         ParseJsString(args, fontWeight);
     }
@@ -467,7 +468,8 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         ParseJsInt32(args, value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
@@ -745,18 +747,13 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("TextDecorationColor", resObj, result);
     }
-    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
-    if (styleValue->IsNumber()) {
-        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    }
-    float lineThicknessScale = 1.0f;
-    if (thicknessScaleValue->IsNumber()) {
-        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
-    }
+    auto style =
+        styleValue->IsNumber() ? styleValue->ToNumber<int32_t>() : static_cast<int32_t>(DEFAULT_TEXT_DECORATION_STYLE);
+    float lineThicknessScale = thicknessScaleValue->IsNumber() ? thicknessScaleValue->ToNumber<float>() : 1.0f;
     lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
     TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }

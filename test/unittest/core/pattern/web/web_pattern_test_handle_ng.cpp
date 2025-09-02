@@ -1525,4 +1525,27 @@ HWTEST_F(WebPatternTestHandle, OnDirtyLayoutWrapperSwap008, TestSize.Level1)
     EXPECT_FALSE(webPattern->isKeyboardInSafeArea_);
 #endif
 }
+
+/**
+ * @tc.name: SetImeShow001
+ * @tc.desc: SetImeShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, SetImeShow001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->SetImeShow(true);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,10 @@ using ClassStyleMap = std::unordered_map<std::string, AttrMap>;
 using FuncNormalizeToPx = std::function<double(const Dimension&)>;
 using FuncAnimateFlush = std::function<void()>;
 
+enum SVG_FEATURE_SUPPORT {
+    SVG_FEATURE_SUPPORT_UNDEFINE = 0,
+    SVG_FEATURE_SUPPORT_TWO = 2,
+};
 class SvgDumpInfo {
 public:
     SvgDumpInfo(Size contentSize, std::string drawTime) : contentSize_(contentSize), drawTime_(drawTime) {}
@@ -138,15 +142,24 @@ public:
     }
     std::string GetDumpInfo();
     std::string GetCurrentTimeString();
-    void SetFillColor(std::optional<Color>& fillColor)
+    void SetFillColor(const std::optional<Color>& fillColor)
     {
         fillColor_ = fillColor;
     }
-    std::optional<Color>& GetFillColor()
+    const std::optional<Color>& GetFillColor()
     {
         return fillColor_;
     }
     Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, SvgLengthScaleRule& boxMeasureRule);
+    void SetUsrConfigVersion(uint32_t version)
+    {
+        usrConfigVersion_ = version;
+    }
+
+    uint32_t GetUsrConfigVersion() const
+    {
+        return usrConfigVersion_;
+    }
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
     // weak references to animators in svgDom
@@ -162,6 +175,7 @@ private:
     bool hasRecordedPath_ = false;
     SvgDumpInfo dumpInfo_;
     std::optional<Color> fillColor_;
+    uint32_t usrConfigVersion_ = SVG_FEATURE_SUPPORT_UNDEFINE;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG

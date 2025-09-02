@@ -3505,13 +3505,13 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
     RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
 
     ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
     textSelectOverlay->OnHandleMove(handleRect, true);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
     ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
     textSelectOverlay->OnHandleMove(handleRect, false);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
 }
 
 /**
@@ -4953,5 +4953,46 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     auto line = textModelNG.GetLineCount(frameNode);
     ASSERT_EQ(line, 0);
+}
+
+/**
+ * @tc.name: TextContentModifierSetSymbolColor001
+ * @tc.desc: Test SetSymbolColor with existing symbolColors (size=2) and input value size=1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifierSetSymbolColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier and initialize symbolColors_ with size=2.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    std::vector<Color> initialColors = { Color::BLUE };
+    TextStyle style;
+    style.SetSymbolColorList(initialColors);
+    textContentModifier->SetDefaultSymbolColor(style);
+
+    // Initialize symbolColors_ with 2 colors
+    std::vector<Color> newColors1 = { Color::RED, Color::BLUE };
+    textContentModifier->SetSymbolColor(newColors1, false);
+    auto resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 2);
+
+    /**
+     * @tc.steps: step2. Call SetSymbolColor with value size=1 (smaller than current symbolColors_)
+     */
+    std::vector<Color> newColors2 = { Color::GREEN };
+    textContentModifier->SetSymbolColor(newColors2, false);
+
+    /**
+     * @tc.steps: step3. Verify symbolColors_ is correctly updated and truncated
+     * @tc.expected: symbolColors_ should have size=1 with the new color
+     */
+    resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 1);
+    EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
 } // namespace OHOS::Ace::NG

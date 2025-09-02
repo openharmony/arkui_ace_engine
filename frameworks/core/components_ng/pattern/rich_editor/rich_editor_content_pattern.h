@@ -69,12 +69,12 @@ public:
             contentMod_ = MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_,
                 &(richEditorPattern->paragraphs_), WeakClaim(this));
         }
-
+        richEditorPattern->CreateRichEditorOverlayModifier();
         if (richEditorPattern->GetIsCustomFont()) {
             contentMod_->SetIsCustomFont(true);
         }
         return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &(richEditorPattern->paragraphs_),
-            richEditorPattern->baselineOffset_, contentMod_, nullptr);
+            richEditorPattern->baselineOffset_, contentMod_, richEditorPattern->GetOverlayModifier());
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override

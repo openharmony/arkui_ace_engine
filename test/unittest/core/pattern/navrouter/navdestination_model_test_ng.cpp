@@ -1216,7 +1216,7 @@ HWTEST_F(NavDestinationModelTestNg, SetOnHiddenTest001, TestSize.Level1)
         AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navdestinationNode, nullptr);
     bool isCallbackCalled = false;
-    NavDestinationModelNG::SetOnHidden(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+    NavDestinationModelNG::SetOnHidden(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled](int32_t reason) {
         isCallbackCalled = true;
     });
     /**
@@ -1226,7 +1226,7 @@ HWTEST_F(NavDestinationModelTestNg, SetOnHiddenTest001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onHiddenEvent_, nullptr);
     ASSERT_EQ(isCallbackCalled, false);
-    eventHub->onHiddenEvent_();
+    eventHub->onHiddenEvent_(0);
     ASSERT_EQ(isCallbackCalled, true);
 }
 
@@ -1270,7 +1270,7 @@ HWTEST_F(NavDestinationModelTestNg, SetOnShownTest001, TestSize.Level1)
         AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navdestinationNode, nullptr);
     bool isCallbackCalled = false;
-    NavDestinationModelNG::SetOnShown(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+    NavDestinationModelNG::SetOnShown(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled](int32_t reason) {
         isCallbackCalled = true;
     });
     /**
@@ -1280,7 +1280,7 @@ HWTEST_F(NavDestinationModelTestNg, SetOnShownTest001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onShownEvent_, nullptr);
     ASSERT_EQ(isCallbackCalled, false);
-    eventHub->onShownEvent_();
+    eventHub->onShownEvent_(0);
     ASSERT_EQ(isCallbackCalled, true);
 }
 

@@ -166,6 +166,11 @@ public:
         return onProgressCallback_;
     }
 
+    void SetSupportSvg2(bool enable)
+    {
+        src_.SetSupportSvg2(enable);
+    }
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \

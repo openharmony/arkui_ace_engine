@@ -385,6 +385,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkTransition {
+  transitionEffect: TransitionOptions | TransitionEffect | undefined;
+  callback: ((transitionIn: boolean) => void) | undefined;
+  constructor() {
+    this.transitionEffect = undefined;
+    this.callback = undefined;
+  }
+  isEqual(another: ArkTransition): boolean {
+    return (this.transitionEffect === another.transitionEffect) && (this.callback === another.callback);
+  }
+}
+
 class ArkBindTipsOptions {
   message: ResourceStr | StyledString | undefined;
   options: TipsOptions | undefined;

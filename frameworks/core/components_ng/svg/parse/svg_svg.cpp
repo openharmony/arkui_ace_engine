@@ -17,6 +17,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -104,7 +105,8 @@ void SvgSvg::AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPor
     float translateY = 0.0f;
     RSRect clipRect(0.0f, 0.0f, svgSize.Width(), svgSize.Height());
     canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+
+    if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion())) {
         scaleX = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
         scaleY = scaleX;
         translateX = (svgSize.Width() - viewBox.Width() * scaleX) * HALF;

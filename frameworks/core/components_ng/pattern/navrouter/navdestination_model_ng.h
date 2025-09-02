@@ -54,8 +54,8 @@ public:
     void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) override;
     void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) override;
-    void SetOnShown(std::function<void()>&& onShow) override;
-    void SetOnHidden(std::function<void()>&& onHidden) override;
+    void SetOnShown(std::function<void(int32_t)>&& onShow) override;
+    void SetOnHidden(std::function<void(int32_t)>&& onHidden) override;
     void SetOnWillAppear(std::function<void()>&& willAppear) override;
     void SetOnWillShow(std::function<void()>&& willShow) override;
     void SetOnWillHide(std::function<void()>&& willHide) override;
@@ -124,8 +124,8 @@ public:
         FrameNode* frameNode, std::function<void(float, float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
     static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
-    static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
-    static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
+    static void SetOnShown(FrameNode* frameNode, std::function<void(int32_t)>&& onShow);
+    static void SetOnHidden(FrameNode* frameNode, std::function<void(int32_t)>&& onHidden);
     static void SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear);
     static void SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow);
     static void SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide);

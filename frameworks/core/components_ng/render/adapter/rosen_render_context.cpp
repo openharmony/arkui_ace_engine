@@ -43,6 +43,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/common/ace_engine.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
@@ -446,6 +447,10 @@ void RosenRenderContext::AddFrameNodeInfoToRsNode()
         rsNode_->SetInstanceId(Container::CurrentId());
         auto frameNodePtr = GetHost();
         CHECK_NULL_VOID(frameNodePtr);
+        if (LayoutInspector::GetEnableNodeTrace()) {
+            ACE_SCOPED_TRACE("FrameNode[%d], tag: %s, RsNode: [%s]",
+                frameNodePtr->GetId(), frameNodePtr->GetTag().c_str(), std::to_string(rsNode_->GetId()).c_str());
+        }
         rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
     }
 }
@@ -3946,6 +3951,7 @@ void RosenRenderContext::SetPositionToRSNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetPositionToRSNode); // call SetPositionToRSNodeMultiThread() by multi thread
     CHECK_NULL_VOID(rsNode_);
     auto rect = AdjustPaintRect();
     if (!rect.GetSize().IsPositive()) {

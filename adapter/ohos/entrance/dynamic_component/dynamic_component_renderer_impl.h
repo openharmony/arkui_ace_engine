@@ -127,6 +127,12 @@ private:
     void BuildDynamicInitialConfig(DynamicInitialConfig& dynamicInitialConfig);
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
+    void UpdateIsolatedViewportConfig(
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset);
+    void UpdateDynamicViewportConfig(
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset);
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

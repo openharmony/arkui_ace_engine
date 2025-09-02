@@ -188,7 +188,7 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
     }
     if (nativePtr->commonEventListeners) {
         auto commonEventListenersSet =
-            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(nativePtr->eventListeners);
+            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(nativePtr->commonEventListeners);
         if (commonEventListenersSet) {
             commonEventListenersSet->clear();
         }
@@ -1028,6 +1028,55 @@ void RegisterBindNativeNode(ArkUI_NodeHandle node)
 {
     CHECK_NULL_VOID(node);
     g_nodeSet.emplace(node);
+}
+
+bool MakeCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, void* userData,
+    void (*callback)(ArkUI_NodeEvent* event))
+{
+    if (!node->commonEventListeners) {
+        node->commonEventListeners = new std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>();
+    }
+    auto eventListenersMap =
+        reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(node->commonEventListeners);
+    if (!eventListenersMap) {
+        return false;
+    }
+    auto* extraParam = new InnerEventExtraParam({ 0, node, userData });
+    if (node->extraCommonData) {
+        auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+        auto result = extraData->eventMap.try_emplace(eventType, extraParam);
+        if (!result.second) {
+            result.first->second->targetId = 0;
+            result.first->second->userData = userData;
+            delete extraParam;
+        }
+    } else {
+        node->extraCommonData = new ExtraData();
+        auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+        extraData->eventMap[eventType] = extraParam;
+    }
+    eventListenersMap->insert({eventType, callback});
+    return true;
+}
+
+bool ClearCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType)
+{
+    if (!node->extraCommonData) {
+        return false;
+    }
+    auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+    auto& eventMap = extraData->eventMap;
+    auto innerEventExtraParam = eventMap.find(eventType);
+    if (innerEventExtraParam == eventMap.end()) {
+        return false;
+    }
+    delete innerEventExtraParam->second;
+    eventMap.erase(innerEventExtraParam);
+    if (eventMap.empty()) {
+        delete extraData;
+        node->extraCommonData = nullptr;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NodeModel
 

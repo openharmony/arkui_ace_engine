@@ -21,6 +21,7 @@
 #include "core/image/image_source_info.h"
 #include "core/common/ace_application_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -196,7 +197,7 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     auto scaleY = 0.0f;
     auto offsetX = 0.0f;
     auto offsetY = 0.0f;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion())) {
         scaleX = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
         scaleY = scaleX;
         auto spaceX = viewBox.Width() - realSize.Width() * scaleX;
