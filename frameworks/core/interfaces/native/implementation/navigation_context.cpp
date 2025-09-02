@@ -533,7 +533,7 @@ bool NavigationStack::IsEmpty()
 
 void NavigationStack::Pop()
 {
-    // PathStack::Pop(true);
+    PathStack::Pop(true);
 }
 
 void NavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
