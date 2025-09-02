@@ -784,7 +784,7 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
         auto pattern = frameNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSwiperArrowParameters(swiperArrowParameters);
-        CreateArrowWithResourceObj(swiperArrowParameters);
+        CreateArrowWithResourceObj(swiperArrowParameters, frameNode);
     }
 }
 
@@ -1776,6 +1776,13 @@ void SwiperModelNG::CreateDigitWithResourceObj(FrameNode* frameNode,
 void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    CreateArrowWithResourceObj(swiperArrowParameters, swiperNode);
+}
+
+void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters,
+    FrameNode* swiperNode)
+{
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
