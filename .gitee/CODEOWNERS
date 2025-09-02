@@ -3438,6 +3438,7 @@ test/unittest/interfaces/form_render/ @form_framework
 frameworks/bridge/arkts_frontend/koala_mirror/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/generated/arkoala_api_generated.h @ArkUI-idlize
 
 [Koala mirror]
 test/unittest/capi/ @huaweimaxuchu
