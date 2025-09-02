@@ -169,6 +169,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedVisibilityChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedMouse, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedObjectParamChange, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);

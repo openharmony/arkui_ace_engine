@@ -52,6 +52,7 @@ struct WebEvent : Event {
     EventMarker nativeEmbedLifecycleChangeId;
     EventMarker nativeEmbedVisibilityChangeId;
     EventMarker nativeEmbedGestureEventId;
+    EventMarker nativeEmbedObjectParamChangeId;
     EventMarker renderProcessNotRespondingId;
     EventMarker renderProcessRespondingId;
     EventMarker viewportFitChangedId;
@@ -399,6 +400,18 @@ public:
         return event.nativeEmbedVisibilityChangeId;
     }
     
+    void SetNativeEmbedObjectParamChangeId(const EventMarker& embedObjectParamChangeId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.nativeEmbedObjectParamChangeId = embedObjectParamChangeId;
+    }
+
+    const EventMarker& GetNativeEmbedObjectParamChangeId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.nativeEmbedObjectParamChangeId;
+    }
+
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);

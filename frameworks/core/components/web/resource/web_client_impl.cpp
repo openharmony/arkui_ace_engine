@@ -1078,6 +1078,14 @@ void WebClientImpl::OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbe
     delegate->OnNativeEmbedMouseEvent(event);
 }
 
+void WebClientImpl::OnNativeEmbedObjectParamChange(std::shared_ptr<NWeb::NWebNativeEmbedParamDataInfo> paramDataInfo)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnNativeEmbedObjectParamChange(paramDataInfo);
+}
+
 void WebClientImpl::OnRootLayerChanged(int width, int height)
 {
     auto delegate = webDelegate_.Upgrade();

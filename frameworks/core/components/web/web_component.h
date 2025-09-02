@@ -1153,6 +1153,17 @@ public:
         return declaration_->GetNativeEmbedGestureEventId();
     }
 
+    void SetNativeEmbedObjectParamChangeId(const EventMarker& embedObjectParamChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedObjectParamChangeId(embedObjectParamChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedObjectParamChangeId() const
+    {
+        return declaration_->GetNativeEmbedObjectParamChangeId();
+    }
+
     void SetRenderProcessNotRespondingId(const EventMarker& renderNotRespondingId)
     {
         CHECK_NULL_VOID(declaration_);

@@ -153,6 +153,7 @@ public:
     static void OnNativeEmbedVisibilityChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void OnNativeEmbedMouseEvent(const JSCallbackInfo& args);
+    static void OnNativeEmbedObjectParamChange(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);

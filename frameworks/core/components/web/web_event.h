@@ -46,6 +46,12 @@ enum class NativeEmbedStatus {
     LEAVE_BFCACHE = 4
 };
 
+enum class NativeEmbedParamStatus {
+    ADD = 0,
+    UPDATE = 1,
+    DELETE = 2,
+};
+
 enum class NavigationType {
     NAVIGATION_TYPE_UNKNOWN = 0,
     NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY = 1,
@@ -2051,6 +2057,44 @@ public:
 private:
     bool visibility_;
     std::string embed_id_ = "";
+};
+
+struct NativeEmbedParamItem final {
+    NativeEmbedParamStatus status;
+    std::string id = "";
+    std::string name = "";
+    std::string value = "";
+};
+
+class ACE_EXPORT NativeEmbedParamDataInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbedParamDataInfo, BaseEventInfo)
+
+public:
+    NativeEmbedParamDataInfo(const std::string& embedId, const std::string& objectAttributeId,
+        const std::vector<NativeEmbedParamItem>& paramItems)
+        : BaseEventInfo("NativeEmbedParamDataInfo"), embedId_(embedId),
+        objectAttributeId_(objectAttributeId), paramItems_(paramItems) {}
+    ~NativeEmbedParamDataInfo() = default;
+
+    const std::string& GetEmbedId() const
+    {
+        return embedId_;
+    }
+
+    const std::string& GetObjectAttributeId() const
+    {
+        return objectAttributeId_;
+    }
+
+    const std::vector<NativeEmbedParamItem> GetParamItems() const
+    {
+        return paramItems_;
+    }
+
+private:
+    std::string embedId_ = "";
+    std::string objectAttributeId_ = "";
+    std::vector<NativeEmbedParamItem> paramItems_;
 };
 
 class ACE_EXPORT RenderProcessNotRespondingEvent : public BaseEventInfo {

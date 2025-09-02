@@ -2147,6 +2147,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onNativeEmbedVisibilityChange", &JSWeb::OnNativeEmbedVisibilityChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedMouseEvent", &JSWeb::OnNativeEmbedMouseEvent);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedObjectParamChange", &JSWeb::OnNativeEmbedObjectParamChange);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
@@ -5809,6 +5810,56 @@ void JSWeb::OnNativeEmbedMouseEvent(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetNativeEmbedMouseEventId(jsCallback);
+}
+
+JSRef<JSObject> CreateParamItem(const NativeEmbedParamItem& paramItem)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> paramItemObj = objectTemplate->NewInstance();
+    paramItemObj->SetProperty("status", static_cast<int32_t>(paramItem.status));
+    paramItemObj->SetProperty("id", paramItem.id);
+    paramItemObj->SetProperty("name", paramItem.name);
+    paramItemObj->SetProperty("value", paramItem.value);
+    return paramItemObj;
+}
+
+JSRef<JSVal> EmbedObjectParamChangeToJSValue(const NativeEmbedParamDataInfo& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("embedId", eventInfo.GetEmbedId());
+    obj->SetProperty("objectAttributeId", eventInfo.GetObjectAttributeId());
+    uint32_t index = 0;
+    JSRef<JSArray> paramItemsArr = JSRef<JSArray>::New();
+    const std::vector<NativeEmbedParamItem>& paramItems = eventInfo.GetParamItems();
+    for (const NativeEmbedParamItem& paramItem : paramItems) {
+        JSRef<JSObject> param = CreateParamItem(paramItem);
+        paramItemsArr->SetValueAt(index++, param);
+    }
+    obj->SetPropertyObject("paramItems", paramItemsArr);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnNativeEmbedObjectParamChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbedParamDataInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), EmbedObjectParamChangeToJSValue);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                            const BaseEventInfo* info) {
+        int32_t instanceId = Container::CurrentIdSafely();
+        auto webNode = node.Upgrade();
+        if (webNode) {
+            instanceId = webNode->GetInstanceId();
+        }
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedParamDataInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedObjectParamChangeId(jsCallback);
 }
 
 JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
