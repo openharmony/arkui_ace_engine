@@ -4261,7 +4261,7 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(contentDraw);
     rsNode_->DrawOnNode(
-        Rosen::RSModifierType::CONTENT_STYLE,
+        Rosen::ModifierNG::RSModifierType::CONTENT_STYLE,
         [contentDraw = std::move(contentDraw)](std::shared_ptr<RSCanvas> canvas) {
             CHECK_NULL_VOID(canvas);
             contentDraw(*canvas);
@@ -4300,7 +4300,7 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
-    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
+    rsNode_->DrawOnNode(Rosen::ModifierNG::RSModifierType::FOREGROUND_STYLE,
         [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
             CHECK_NULL_VOID(canvas);
             foregroundDraw(*canvas);
@@ -4312,7 +4312,7 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(overlayDraw);
     rsNode_->DrawOnNode(
-        Rosen::RSModifierType::OVERLAY_STYLE,
+        Rosen::ModifierNG::RSModifierType::OVERLAY_STYLE,
         [overlayDraw = std::move(overlayDraw)](std::shared_ptr<RSCanvas> canvas) {
             CHECK_NULL_VOID(canvas);
             overlayDraw(*canvas);
