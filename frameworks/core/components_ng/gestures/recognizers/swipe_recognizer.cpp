@@ -78,8 +78,6 @@ void SwipeRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
@@ -390,7 +388,6 @@ void SwipeRecognizer::OnResetStatus()
     globalPoint_ = Point();
     prevAngle_ = std::nullopt;
     matchedTouch_.clear();
-    localMatrix_.clear();
 }
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)

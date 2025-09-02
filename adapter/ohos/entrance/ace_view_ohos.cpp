@@ -147,7 +147,6 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK) {
         view->ProcessFocusAxisEvent(pointerEvent);
     }
-
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         int32_t toolType = MMI::PointerEvent::TOOL_TYPE_MOUSE;
         if (!GetPointerEventToolType(pointerEvent, toolType)) {
@@ -413,7 +412,6 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
             std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
             markEnabled);
     };
-
     if (NG::EventInfoConvertor::IfNeedMouseTransform() &&
         ProcessMouseEventWithTouch(pointerEvent, event, node, markProcess)) {
         return;
@@ -511,7 +509,7 @@ bool AceViewOhos::ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEv
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, 0.0);
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, 0.0);
         ConvertAxisEventToTouchEvent(fakeAxisRawEvt, event, axisFakePntEvt_);
-        // fakeAxisRawEvt aciton will be update lately, use original pointerEvent.
+        // fakeAxisRawEvt action will be update lately, use original pointerEvent.
         event.SetPointerEvent(pointerEvent);
         touchEventCallback_(event, nullptr, node);
         fakeAxisRawEvt->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, axisScrollVertBak);
