@@ -129,7 +129,6 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     float sliderLength =
         CalculateSliderLength(width, height, direction, mode, (pattern->HasPrefix() || pattern->HasSuffix()));
     if (layoutPolicy.has_value() && (layoutPolicy->IsFix() || layoutPolicy->IsWrap())) {
-        LOGE("Hwl wrap_fix 02 width =  %{public}f, height =  %{public}f", width, height);
         return SizeF(0.0, 0.0);
     }
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
