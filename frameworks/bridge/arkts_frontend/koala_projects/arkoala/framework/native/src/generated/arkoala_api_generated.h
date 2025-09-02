@@ -4872,6 +4872,7 @@ typedef struct Opt_KeySource {
     Ark_KeySource value;
 } Opt_KeySource;
 typedef enum Ark_KeyType {
+    ARK_KEY_TYPE_UNKNOWN = -1,
     ARK_KEY_TYPE_DOWN = 0,
     ARK_KEY_TYPE_UP = 1,
 } Ark_KeyType;
