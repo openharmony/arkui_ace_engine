@@ -32,6 +32,8 @@ public:
     static ArkUINativeModuleValue ResetOnSelect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetListItemInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetListItemInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Expand(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Collapse(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

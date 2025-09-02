@@ -4317,3 +4317,9 @@ let ReplaceEffectType;
   ReplaceEffectType[ReplaceEffectType.CROSS_FADE = 1] = 'CROSS_FADE';
   ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
 })(ReplaceEffectType || (ReplaceEffectType = {}));
+
+let ListItemSwipeActionDirection;
+(function (ListItemSwipeActionDirection) {
+  ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
+  ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
+})(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));

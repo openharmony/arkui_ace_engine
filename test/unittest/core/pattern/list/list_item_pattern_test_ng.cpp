@@ -18,6 +18,9 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
@@ -28,6 +31,15 @@ using namespace testing::ext;
 
 class ListItemPatternTestNg : public TestNG {
 public:
+    RefPtr<FrameNode> CreateSwipeNode()
+    {
+        auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto button = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        button->MountToParent(column);
+        return column;
+    };
 };
 
 /**
@@ -404,5 +416,149 @@ HWTEST_F(ListItemPatternTestNg, HandleDragEnd003, TestSize.Level1)
     listItemPattern->HandleDragEnd(info);
     EXPECT_TRUE(listPattern->canReplaceSwiperItem_);
     EXPECT_FALSE(listItemPattern->isDragging_);
+}
+
+/**
+ * @tc.name: ExpandSwipeAction001
+ * @tc.desc: Test ListItemPattern ExpandSwipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listItem = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
+    ASSERT_NE(listItem, nullptr);
+    auto list =
+        FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listPattern);
+    ASSERT_NE(list, nullptr);
+    listItem->MountToParent(list);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    listItem->SetActive(true);
+    listItemPattern->axis_ = Axis::VERTICAL;
+    listItemPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(.0f, .0f, .0f, nullptr);
+    listItemPattern->springController_ = CREATE_ANIMATOR(MockPipelineContext::GetCurrentContext());
+    listItemPattern->SetStartNode(CreateSwipeNode());
+    listItemPattern->SetEndNode(CreateSwipeNode());
+    auto layoutProperty = listItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0f), CalcLength(1.0f)));
+    /**
+     * @tc.desc: ListItem isn't on tree.
+     */
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
+    /**
+     * @tc.desc: ListItem is on tree.
+     */
+    listItem->onMainTree_ = true;
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: ExpandSwipeAction002
+ * @tc.desc: Test ListItemPattern ExpandSwipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction002, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listItem = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
+    ASSERT_NE(listItem, nullptr);
+    auto list =
+        FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listPattern);
+    ASSERT_NE(list, nullptr);
+    listItem->MountToParent(list);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    listItemPattern->axis_ = Axis::VERTICAL;
+    listItem->onMainTree_ = true;
+    listItem->SetActive(true);
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
+
+    listItemPattern->SetStartNode(CreateSwipeNode());
+    listItemPattern->SetEndNode(CreateSwipeNode());
+    /**
+     * @tc.desc: The goal direction has no size.
+     */
+    listItemPattern->startNodeSize_ = .0f;
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
+    /**
+     * @tc.desc: The target direction already has a size.
+     */
+    listItemPattern->endNodeSize_ = 1.0f;
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: CollapseSwipeAction001
+ * @tc.desc: Test ListItemPattern CollapseSwipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, CollapseSwipeAction001, TestSize.Level1)
+{
+    /**
+     * @tc.desc: Create ListItem node.
+     */
+    MockPipelineContext::SetUp();
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listItem = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
+    ASSERT_NE(listItem, nullptr);
+    auto list =
+        FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listPattern);
+    ASSERT_NE(list, nullptr);
+    listItem->MountToParent(list);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    listItem->SetActive(true);
+    listItemPattern->axis_ = Axis::VERTICAL;
+    listItemPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(.0f, .0f, .0f, nullptr);
+    listItemPattern->springController_ = CREATE_ANIMATOR(MockPipelineContext::GetCurrentContext());
+    listItemPattern->SetStartNode(CreateSwipeNode());
+    listItemPattern->SetEndNode(CreateSwipeNode());
+    /**
+     * @tc.desc: ListItem is on tree.
+     */
+    listItem->onMainTree_ = true;
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
+    ListItemModelNG::CollapseSwipeAction(AceType::RawPtr(listItem));
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
+
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
+    ListItemModelNG::CollapseSwipeAction(AceType::RawPtr(listItem));
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

@@ -256,6 +256,24 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize
     return option->mainSize[index];
 }
 
+int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListItemSwipeActionDirection direction)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+
+    return fullImpl->getNodeModifiers()->getListItemModifier()->expand(
+        node->uiNodeHandle, static_cast<int32_t>(direction));
+}
+
+int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+
+    return fullImpl->getNodeModifiers()->getListItemModifier()->collapse(node->uiNodeHandle);
+}
 #ifdef __cplusplus
 };
 #endif

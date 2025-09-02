@@ -123,6 +123,9 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
         layoutAlgorithm->SetCanUpdateCurOffset();
         layoutAlgorithm->SetItemChildCrossSize(GetContentSize().CrossSize(axis_));
     }
+    if (expandSwipeAction_) {
+        layoutAlgorithm->SetExpandSwipeAction(expandSwipeAction_.value());
+    }
     return layoutAlgorithm;
 }
 
@@ -141,8 +144,12 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
+    } else if (expandSwipeAction_ && host->IsActive()) {
+        ExpandSwipeActionWithAnimate(expandSwipeAction_.value());
     } else if (layoutAlgorithm->GetCurOffsetUpdated()) {
         float newOffset = layoutAlgorithm->GetCurOffset();
         FireSwipeActionOffsetChange(curOffset_, newOffset);
@@ -152,6 +159,7 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         pendingSwipeFunc_();
         pendingSwipeFunc_ = nullptr;
     }
+    expandSwipeAction_.reset();
     return false;
 }
 
@@ -325,6 +333,53 @@ void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
 {
     onFinishEvent_ = onFinishCallback;
     ResetSwipeStatus(true);
+}
+
+void ListItemPattern::ExpandSwipeAction(ListItemSwipeActionDirection direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_EQUAL_VOID(host->IsOnMainTree(), false);
+    CHECK_EQUAL_VOID(host->IsActive(), false);
+    auto targetIndex = direction == ListItemSwipeActionDirection::START ? ListItemSwipeIndex::SWIPER_END
+                                                                        : ListItemSwipeIndex::SWIPER_START;
+    CHECK_EQUAL_VOID(targetIndex, swiperIndex_);
+    auto nodeIndex = direction == ListItemSwipeActionDirection::START ? endNodeIndex_ : startNodeIndex_;
+    CHECK_EQUAL_VOID(nodeIndex, -1);
+    auto targetSize = targetIndex == ListItemSwipeIndex::SWIPER_START ? startNodeSize_ : -endNodeSize_;
+    if (!NearZero(targetSize)) {
+        ExpandSwipeActionWithAnimate(targetIndex);
+        return;
+    }
+    expandSwipeAction_ = std::make_optional<ListItemSwipeIndex>(targetIndex);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ListItemPattern::ExpandSwipeActionWithAnimate(ListItemSwipeIndex index)
+{
+    float offset = index == ListItemSwipeIndex::SWIPER_START ? startNodeSize_ : -endNodeSize_;
+    auto listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    listPattern->StopAnimate();
+    auto oldSwiperItem = listPattern->GetSwiperItem().Upgrade();
+    if (oldSwiperItem && oldSwiperItem->GetSwipeActionState() == SwipeActionState::EXPANDED) {
+        oldSwiperItem->CloseSwipeAction(nullptr);
+    }
+    FireSwipeActionStateChange(index);
+    float velocity = 0.0f;
+    if (springMotion_) {
+        velocity = springMotion_->GetCurrentVelocity();
+    }
+    if (springController_ && !springController_->IsStopped()) {
+        // clear stop listener before stop
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
+    StartSpringMotion(curOffset_, offset, velocity, true);
+    listPattern->SetSwiperItem(AceType::WeakClaim(this));
+    listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
 }
 
 void ListItemPattern::OnModifyDone()
