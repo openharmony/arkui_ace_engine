@@ -367,7 +367,6 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showCopyAll = true;
     }
     bool detectFlag = !isSelectAll_;
-
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -379,10 +378,10 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     }
     selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
         (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
-    // should be the last
-    canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+    bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
-    canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
+    canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) && !queryWord.empty();
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     DetectSelectedText(detectFlag ? value : std::string());
 }
@@ -889,6 +888,11 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             pattern->CloseSelectOverlay();
             SelectCancel();
             break;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
+            pattern->CloseSelectOverlay();
+            SelectCancel();
+            break;
         case OptionMenuActionId::AI_WRITE:
             pattern->GetHandleInfo(webSelectInfo_);
             pattern->HandleOnAIWrite();
@@ -1168,7 +1172,7 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() && IsNeedMenuShare())) {
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShare())) {
             info->menuInfo.showShare = !info->menuInfo.showShare;
             manager->NotifyUpdateToolBar(true);
         }
