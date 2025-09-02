@@ -21,7 +21,7 @@
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
-#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED

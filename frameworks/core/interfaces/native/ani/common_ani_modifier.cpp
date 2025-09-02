@@ -42,7 +42,7 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
-#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"

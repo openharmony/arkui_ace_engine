@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/interfaces/native/implementation/frame_node_peer.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

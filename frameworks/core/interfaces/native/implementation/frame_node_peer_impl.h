@@ -12,23 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_FRAME_NODE_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_FRAME_NODE_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
 #include <mutex>
 #include <vector>
 
 #include "ui/base/referenced.h"
-#include "core/components_ng/base/frame_node.h"
 
-namespace OHOS::Ace {
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
+
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
     int32_t nodeId_ = -1;
-    inline static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
-    inline static std::mutex peerMapMutex_;
+    static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
+    static std::mutex peerMapMutex_;
+
+    static FrameNodePeer* Create(Ark_UIContext uiContext)
+    {
+        return new FrameNodePeer;
+    }
 
     static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
     {
@@ -74,6 +82,10 @@ struct FrameNodePeer {
             return nullptr;
         }
     }
+
+    RenderNodePeer* GetRenderNodePeer()
+    {
+        return OHOS::Ace::NG::PeerUtils::CreatePeer<RenderNodePeer>(GetFrameNodeByPeer(this));
+    }
 };
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_FRAME_NODE_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

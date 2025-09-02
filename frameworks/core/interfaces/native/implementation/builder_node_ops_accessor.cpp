@@ -17,7 +17,7 @@
 
 #include "arkoala_api_generated.h"
 #include "builder_node_ops_peer.h"
-#include "frame_node_peer.h"
+#include "frame_node_peer_impl.h"
 #include "ui/base/utils/utils.h"
 
 #include "base/geometry/ng/size_t.h"

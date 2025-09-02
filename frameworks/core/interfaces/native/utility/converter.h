@@ -64,7 +64,11 @@
 #include "core/components_v2/list/list_properties.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
@@ -487,9 +491,9 @@ namespace Converter {
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
-    template<> BorderColorProperty Convert(const Ark_EdgesNumber& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
+    template<> BorderColorProperty Convert(const Ark_EdgesNumber& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Length& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
