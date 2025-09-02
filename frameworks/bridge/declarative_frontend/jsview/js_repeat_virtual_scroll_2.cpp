@@ -86,6 +86,9 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
             return std::pair<uint32_t, uint32_t>(0, 0);
         }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
+        if (!jsArr->GetValueAt(0)->IsNumber() || !jsArr->GetValueAt(1)->IsNumber()) {
+            return std::pair<uint32_t, uint32_t>(0, 0);
+        }
         return std::pair<uint32_t, uint32_t>(
             jsArr->GetValueAt(0)->ToNumber<uint32_t>(), jsArr->GetValueAt(1)->ToNumber<uint32_t>());
     };
@@ -259,10 +262,14 @@ void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
     std::map<int32_t, uint32_t> l1Rid4Index;
     for (size_t i = 0; i < arrayOfPairs->Length(); i++) {
         JSRef<JSArray> pair = arrayOfPairs->GetValueAt(i);
-        auto index = pair->GetValueAt(0)->ToNumber<int32_t>();
-        auto rid = pair->GetValueAt(1)->ToNumber<uint32_t>();
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... index: %{public}d rid: %{public}d", index, static_cast<uint32_t>(rid));
-        l1Rid4Index[index] = rid;
+        auto indexVal = pair->GetValueAt(0);
+        auto ridVal = pair->GetValueAt(1);
+        if (indexVal->IsNumber() && ridVal->IsNumber()) {
+            auto index = indexVal->ToNumber<int32_t>();
+            auto rid = ridVal->ToNumber<uint32_t>();
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... index: %{public}d rid: %{public}d", index, rid);
+            l1Rid4Index[index] = rid;
+        }
     }
 
     auto arrayOfRidNeedToRecycle = JSRef<JSArray>::Cast(info[PARAM_RECYCLE_RID]);
