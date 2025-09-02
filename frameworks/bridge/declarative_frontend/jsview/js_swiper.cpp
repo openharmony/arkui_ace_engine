@@ -473,7 +473,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize, resObj)) {
-        if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0) ||
+        if (LessOrEqual(fontSize.Value(), 0.0) || (size->IsNumber() && LessOrEqual(size->ToNumber<double>(), 0.0)) ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
         }
@@ -731,11 +731,12 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
     if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         auto valObj = jsObj->GetProperty("value");
-        if (valObj->IsUndefined() || valObj->IsNull()) {
+        auto unitObj = jsObj->GetProperty("unit");
+        if (!valObj->IsNumber() || !unitObj->IsNumber()) {
             return false;
         }
         double value = valObj->ToNumber<double>();
-        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        auto unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
         auto jsRes = jsObj->GetProperty("res");
         if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
@@ -767,8 +768,13 @@ bool JSSwiper::ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result)
     }
     if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        double value = jsObj->GetProperty("value")->ToNumber<double>();
-        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        auto valObj = jsObj->GetProperty("value");
+        auto unitObj = jsObj->GetProperty("unit");
+        if (!valObj->IsNumber() || !unitObj->IsNumber()) {
+            return false;
+        }
+        double value = valObj->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
         return true;
     }
