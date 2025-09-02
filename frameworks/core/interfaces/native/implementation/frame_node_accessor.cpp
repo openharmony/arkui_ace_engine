@@ -28,7 +28,8 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/property/property.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/implementation/view_model_bridge.h"
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -52,8 +53,6 @@ typedef enum {
     ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
 } ArkUIDirtyFlag;
 } // namespace OHOS::Ace::NG
-std::map<int32_t, std::shared_ptr<FrameNodePeer>> FrameNodePeer::peerMap_;
-std::mutex FrameNodePeer::peerMapMutex_;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -92,7 +91,7 @@ Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
     node->SetExclusiveEventForChild(true);
     node->SetIsArkTsFrameNode(true);
     auto peer = FrameNodePeer::Create(node);
-    return peer;
+    return static_cast<Ark_FrameNode>(peer);
 }
 
 Ark_NativePointer GetFinalizerImpl()
@@ -212,7 +211,7 @@ Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
     auto expandModeInt = Converter::Convert<int32_t>(*expandMode);
     auto child = GetChildNode(peerNode, indexInt, expandModeInt);
     CHECK_NULL_RETURN(child, nullptr);
-    return FrameNodePeer::Create(child);
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(child));
 }
 
 Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
@@ -222,7 +221,7 @@ Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
     peerNode->GetAllChildrenWithBuild(false);
     auto child = peerNode->GetFrameNodeChildByIndex(0, false, true);
     CHECK_NULL_RETURN(child, nullptr);
-    return FrameNodePeer::Create(AceType::DynamicCast<FrameNode>(child));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(AceType::DynamicCast<FrameNode>(child)));
 }
 
 RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
@@ -246,7 +245,7 @@ Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(index > -1, nullptr);
     auto sibling = parent->GetFrameNodeChildByIndex(index + 1, false, true);
     CHECK_NULL_RETURN(sibling, nullptr);
-    return FrameNodePeer::Create(sibling);
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(sibling));
 }
 
 Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
@@ -260,7 +259,7 @@ Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(index > 0, nullptr);
     auto sibling = parent->GetFrameNodeChildByIndex(index - 1, false, true);
     CHECK_NULL_RETURN(sibling, nullptr);
-    return FrameNodePeer::Create(sibling);
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(sibling));
 }
 
 Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
@@ -269,7 +268,7 @@ Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, nullptr);
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_RETURN(parent, nullptr);
-    return FrameNodePeer::Create(parent);
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(parent));
 }
 
 Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
@@ -314,7 +313,7 @@ Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
     auto valueName = Converter::Convert<std::string>(*name);
     auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
     CHECK_NULL_RETURN(node, nullptr);
-    return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node)));
 }
 
 void MoveToImpl(Ark_FrameNode peer, Ark_FrameNode targetParent, const Ark_Number* index)
@@ -390,7 +389,7 @@ Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
     }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(valueId);
     CHECK_NULL_RETURN(node, nullptr);
-    return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node)));
 }
 
 Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
@@ -399,7 +398,7 @@ Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
     auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(idInt);
     CHECK_NULL_RETURN(node, nullptr);
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
-    return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef)));
 }
 
 Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
@@ -424,7 +423,7 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     }
     CHECK_NULL_RETURN(node, nullptr);
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
-    return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef)));
 }
 Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
 {
@@ -455,7 +454,7 @@ void RecycleImpl(Ark_FrameNode peer)
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    return peer->GetRenderNodePeer();
+    return PeerUtils::CreatePeer<RenderNodePeer>(FrameNodePeer::GetFrameNodeByPeer(peer));
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
 {
@@ -586,7 +585,7 @@ Ark_FrameNode CreateByRawPtrImpl(void* rawPtr)
     frameNode->SetExclusiveEventForChild(true);
     frameNode->SetIsArkTsFrameNode(true);
     auto peer = FrameNodePeer::Create(frameNode);
-    return peer;
+    return static_cast<Ark_FrameNode>(peer);
 }
 
 void* unWrapRawPtrImpl(Ark_FrameNode peerNode)
@@ -670,7 +669,7 @@ Ark_FrameNode CreateTypedFrameNodeImpl(const Ark_String* type)
     auto newNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
     newNode->SetIsArkTsFrameNode(true);
     newNode->DecRefCount();
-    return FrameNodePeer::Create(newNode);
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(newNode));
 }
 
 Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)

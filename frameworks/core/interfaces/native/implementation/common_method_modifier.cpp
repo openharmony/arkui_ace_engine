@@ -78,6 +78,8 @@
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "base/log/log_wrapper.h"
 
+#include "circle_shape_peer.h"
+
 using namespace OHOS::Ace::NG::Converter;
 
 namespace {

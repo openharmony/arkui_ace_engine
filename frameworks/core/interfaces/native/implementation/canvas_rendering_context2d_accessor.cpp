@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
-#include "frame_node_peer_impl.h"
+#include "frame_node_peer.h"
 #include "ui_context_accessor_peer.h"
 #include "arkoala_api_generated.h"
 
@@ -125,7 +125,7 @@ Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
-    return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(nullptr));
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()

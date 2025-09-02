@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "accessor_test_base.h"
 #include "node_api.h"

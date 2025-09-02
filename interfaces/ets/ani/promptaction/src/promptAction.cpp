@@ -36,9 +36,11 @@
 #include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/core/components_ng/pattern/overlay/overlay_manager.h"
 #include "frameworks/core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
+
+using OHOS::Ace::FrameNodePeer;
 
 namespace OHOS::Ace::NG {
 bool ContainerIsService()
@@ -273,7 +275,7 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
     ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogContent enter.");
-    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    FrameNodePeer* peerNode = (FrameNodePeer*)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
         OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
@@ -349,7 +351,7 @@ static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_
 static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object options)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] UpdateCustomDialog enter.");
-    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    FrameNodePeer* peerNode = (FrameNodePeer*)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
         OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
@@ -395,7 +397,7 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
 static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialogContent enter.");
-    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    FrameNodePeer* peerNode = (FrameNodePeer*)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
         OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
@@ -442,7 +444,7 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
-    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    FrameNodePeer* peerNode = (FrameNodePeer*)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
         OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
