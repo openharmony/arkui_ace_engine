@@ -183,6 +183,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
     context_->onVisibleAreaChangeNodeIds_.emplace(customNode_->GetId());
     context_->onVisibleAreaChangeNodeIds_.emplace(ElementRegister::UndefinedElementId);
     EXPECT_EQ(context_->onVisibleAreaChangeNodeIds_.size(), DEFAULT_SIZE3);
+    EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
 
     /**
      * @tc.steps4: Call the function FlushVsync with isEtsCard=false.
