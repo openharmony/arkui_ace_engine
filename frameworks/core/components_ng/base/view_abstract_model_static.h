@@ -53,7 +53,7 @@ public:
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
         } else if (width.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -64,7 +64,7 @@ public:
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
         } else if (height.Unit() == DimensionUnit::NONE) {
-            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
@@ -231,6 +231,11 @@ public:
         Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
         ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetTabStop(FrameNode* frameNode, const std::optional<bool>& value)
+    {
+        ViewAbstract::SetTabStop(frameNode, value.value_or(false));
     }
 
     static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
