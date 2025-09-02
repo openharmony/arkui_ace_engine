@@ -72,7 +72,6 @@ export class ArkUIAniModule {
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
-    native static _SyntaxNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -297,4 +296,7 @@ export class ArkUIAniModule {
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
     native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+
+    native static _SyntaxItem_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt): KPointer
 }

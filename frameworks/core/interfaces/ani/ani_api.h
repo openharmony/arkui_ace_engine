@@ -377,9 +377,6 @@ struct ArkUIAniContentSlotModifier {
 struct ArkUIAniLazyForEachNodeModifier {
     ani_long (*constructLazyForEachNode)(ani_int);
 };
-struct ArkUIAniSyntaxNodeModifier {
-    ani_long (*constructSyntaxNode)(ani_int);
-};
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
 };
@@ -493,6 +490,13 @@ struct ArkUIAniCanvasModifier {
         ani_double dirtyHeight);
 };
 
+struct ArkUIAniSyntaxItemModifier {
+    ani_long (*constructSyntaxItem)(ani_int);
+};
+struct ArkUIAniForEachNodeModifier {
+    ani_long (*constructForEachNode)(ani_int);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -501,7 +505,6 @@ struct ArkUIAniModifiers {
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
-    const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
@@ -521,6 +524,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
+    const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
+    const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

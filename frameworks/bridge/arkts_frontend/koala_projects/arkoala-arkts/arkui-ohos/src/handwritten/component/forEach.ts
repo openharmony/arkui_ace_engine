@@ -16,9 +16,10 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
-import { RepeatByArray, memoEntry2, __context } from '@koalaui/runtime';
+import { int32, hashCodeFromString } from '@koalaui/common';
+import { memoEntry2, __context, NodeAttach } from '@koalaui/runtime';
 import { InteropNativeModule } from '@koalaui/interop';
+import { SyntaxItemPeer, ForEachNodePeer } from '../handwritten/RepeatImpl';
 
 /** @memo */
 export function ForEach<T>(
@@ -49,11 +50,17 @@ export function ForEach<T>(
         const length: number = array.length;
         const key = (element: T, index: int32): int32 => keyGenerator ? hashCodeFromString(keyGenerator!(element, (index as number))) : index;
         /** @memo */
-        const action = (element: T, index: int32): void => { itemGenerator(element, (index as number)); };
+        const action = (element: T, index: int32): void => {
+            NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
+                itemGenerator(element, (index as number));
+            });
+        };
         for (let i = 0; i < length; i++) {
             const e: T = array[i];
             memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i);
         }
     }
-    createAndUpdate();
+    NodeAttach(() => ForEachNodePeer.create(), (node: ForEachNodePeer) => {
+        createAndUpdate();
+    });
 }

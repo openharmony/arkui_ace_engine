@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/syntax/arkoala_syntax_node.h"
+#include "core/components_ng/syntax/arkoala_syntax_item.h"
 
 namespace OHOS::Ace::NG {
 
-ArkoalaSyntaxNode::ArkoalaSyntaxNode(int32_t nodeId) : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, nodeId) {}
+ArkoalaSyntaxItem::ArkoalaSyntaxItem(int32_t nodeId) : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, nodeId) {}
 
 } // namespace OHOS::Ace::NG

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SYNTAX_MODULE_H
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SYNTAX_MODULE_H
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_FOR_EACH_MODULE_H
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_FOR_EACH_MODULE_H
 
 #include <memory>
 
@@ -22,16 +22,16 @@
 
 namespace OHOS::Ace::Ani {
 
-ani_long ConstructSyntaxItem(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj)
+ani_long ConstructForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return 0;
     }
 
-    ani_long node = modifier->getSyntaxItemAniModifier()->constructSyntaxItem(id);
+    ani_long node = modifier->getForEachNodeAniModifier()->constructForEachNode(id);
     return node;
 }
 
 } // namespace OHOS::Ace::Ani
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_SYNTAX_MODULE_H
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_FOR_EACH_MODULE_H
