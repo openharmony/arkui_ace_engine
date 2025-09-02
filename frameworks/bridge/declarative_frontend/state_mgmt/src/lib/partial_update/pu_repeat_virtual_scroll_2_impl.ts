@@ -732,9 +732,10 @@ class __RepeatVirtualScroll2Impl<T> {
                 continue;
             }
 
+            this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
+
             if (newActiveDataItemAtActiveIndex.state === ActiveDataItem.NoValue) {
                 stateMgmtConsole.debug(`new index ${activeIndex} missing in updated source array.`);
-                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
                 continue;
             }
 
@@ -760,10 +761,12 @@ class __RepeatVirtualScroll2Impl<T> {
 
                 // index has changed, update it in RepeatItem
                 const ridMeta = this.meta4Rid_.get(movedDataItem.rid);
+                if (!ridMeta) {
+                    continue;
+                }
                 stateMgmtConsole.debug(`new index ${activeIndex} / old index ${movedDataItem.oldIndexStr}: `,
                     `keep in L1: rid ${movedDataItem.rid}, unchanged ttype '${newActiveDataItemAtActiveIndex.ttype}'`);
                 ridMeta.repeatItem_.updateIndex(activeIndex);
-                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
 
                 // the data item is handled, remove it from old active data range
                 // so we do not use it again
@@ -772,7 +775,6 @@ class __RepeatVirtualScroll2Impl<T> {
                 // update is needed for this data item
                 // either because dataItem is new, or new ttype needs to used
                 stateMgmtConsole.debug(`need update for index ${activeIndex}`);
-                this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
             }
         } // for new data items in active range
     }
@@ -972,7 +974,8 @@ class __RepeatVirtualScroll2Impl<T> {
             return -1;
         }
         for (const rid of this.spareRid_) {
-            if (this.meta4Rid_.get(rid).ttype_ === ttype) {
+            const ridMeta = this.meta4Rid_.get(rid);
+            if (ridMeta && ridMeta.ttype_ === ttype) {
                 stateMgmtConsole.debug(`canUpdate: Found spare rid ${rid} for ttype '${ttype}'`);
                 return rid;
             }
@@ -1002,7 +1005,8 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // just find a matching RID
         for (const rid of this.spareRid_) {
-            if (this.meta4Rid_.get(rid).ttype_ === ttype) {
+            const ridMeta = this.meta4Rid_.get(rid);
+            if (ridMeta && ridMeta.ttype_ === ttype) {
                 stateMgmtConsole.debug(`canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}'`);
                 return rid;
             }
@@ -1642,7 +1646,11 @@ class __RepeatVirtualScroll2Impl<T> {
         // avoid delete on iterated Set, copy into Array
         const spareRid1 : Array<number> = Array.from(this.spareRid_);
         for (const rid of spareRid1) {
-            const ttype: string = this.meta4Rid_.get(rid).ttype_;
+            const ridMeta = this.meta4Rid_.get(rid);
+            if (!ridMeta) {
+                continue;
+            }
+            const ttype: string = ridMeta.ttype_;
             if (availableCachedCount[ttype] === 0) {
                 // purge rid
                 this.purgeNode(rid);
