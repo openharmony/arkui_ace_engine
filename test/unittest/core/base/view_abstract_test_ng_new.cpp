@@ -2324,4 +2324,23 @@ HWTEST_F(ViewAbstractTestNg, RegisterLocalizedBorderColor, TestSize.Level1)
     ViewAbstractModelNG::RegisterLocalizedBorderColor("", borderColors, nullptr);
     EXPECT_EQ(borderColors.resMap_.size(), 4);
 }
+
+/**
+ * @tc.name: backgroundImagePostionCheckDiff
+ * @tc.desc: Test backgroundImagePostionCheckDiff
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, backgroundImagePostionCheckDiff, TestSize.Level1)
+{
+    BackgroundImagePosition backgroundImagePosition1;
+    BackgroundImagePosition backgroundImagePosition2;
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
+    auto animatableDimension = AnimatableDimension(50.0);
+    backgroundImagePosition1.SetPercentX(animatableDimension);
+    EXPECT_FALSE(backgroundImagePosition1 == backgroundImagePosition2);
+    backgroundImagePosition2.SetPercentX(animatableDimension);
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
+    backgroundImagePosition1.SetIsAlign(true);
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
+}
 } // namespace OHOS::Ace::NG
