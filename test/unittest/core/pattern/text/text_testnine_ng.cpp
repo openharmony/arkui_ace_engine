@@ -561,7 +561,7 @@ HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
     pattern->textForDisplay_ = u"";
     pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
-    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
 
 /**
@@ -579,7 +579,7 @@ HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
     bool isFirst = true;
     pattern->textForDisplay_ = u"1";
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
-    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
 
 /**

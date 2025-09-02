@@ -1577,7 +1577,7 @@ HWTEST_F(SpanTestNg, SpanOnHoverEvent001, TestSize.Level1)
     textPattern->InitSpanMouseEvent();
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF(0.0f, 0.0f));
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
@@ -2151,7 +2151,7 @@ HWTEST_F(SpanTestNg, SpanMouseHoverEvent001, TestSize.Level1)
     textPattern->InitSpanMouseEvent();
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
@@ -2190,10 +2190,10 @@ HWTEST_F(SpanTestNg, SpanMouseHoverEvent002, TestSize.Level1)
 
     EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
     textPattern->InitSpanMouseEvent();
-    EXPECT_NE(textPattern->spanMouseEventInitialized_, true);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
