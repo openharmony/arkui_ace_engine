@@ -147,7 +147,9 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
         for (size_t i = 0; i < jsArr->Length(); i++) {
-            list.emplace_back(jsArr->GetValueAt(i)->ToString());
+            if (jsArr->GetValueAt(i)->IsString()) {
+                list.emplace_back(jsArr->GetValueAt(i)->ToString());
+            }
         }
         return list;
     };
@@ -166,7 +168,9 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
         for (size_t i = 0; i < jsArr->Length(); i++) {
-            list.emplace_back(jsArr->GetValueAt(i)->ToString());
+            if (jsArr->GetValueAt(i)->IsString()) {
+                list.emplace_back(jsArr->GetValueAt(i)->ToString());
+            }
         }
         return list;
     };
