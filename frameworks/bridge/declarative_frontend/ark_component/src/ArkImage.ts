@@ -531,8 +531,8 @@ class ImageOpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class ImageTransitionModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class ImageTransitionModifier extends ModifierWithKey<ArkTransition> {
+  constructor(value: ArkTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('imageTransition');
@@ -540,7 +540,7 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
     if (reset) {
       getUINativeModule().image.resetImageTransition(node);
     } else {
-      getUINativeModule().image.setImageTransition(node, this.value);
+      getUINativeModule().image.setImageTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
 }
@@ -862,8 +862,13 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageOpacityModifier.identity, ImageOpacityModifier, value);
     return this;
   }
-  transition(value: TransitionOptions | TransitionEffect): this {
-    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+  transition(value: TransitionOptions | TransitionEffect, callback: (transitionIn: boolean) => void): this {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, arkTransition);
     return this;
   }
   dynamicRangeMode(value: DynamicRangeMode): this {
