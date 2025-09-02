@@ -43,7 +43,6 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;     // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
-constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
 constexpr size_t URL_SAVE_LENGTH = 15;
 constexpr size_t URL_KEEP_TOTAL_LENGTH = 30;
 constexpr int32_t NEED_MASK_INDEX = 3;
@@ -1393,23 +1392,9 @@ bool ImagePattern::RecycleImageData()
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    // when image component is [onShow], do not clean image data
-    if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetTrimMemRecycle(false);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s OnNotifyMemoryLevel %{public}d.",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str(), level);
-    rsRenderContext->RemoveContentModifier(contentMod_);
-    contentMod_ = nullptr;
-    loadingCtx_ = nullptr;
-    image_ = nullptr;
-    altLoadingCtx_ = nullptr;
-    altImage_ = nullptr;
+    // Intentionally left blank: no handling for memory level in current version.
+    // This is a placeholder for future memory optimization logic.
+    return;
 }
 
 // when recycle image component, release the pixelmap resource
