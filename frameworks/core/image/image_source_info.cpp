@@ -347,9 +347,9 @@ std::string ImageSourceInfo::ToString(bool isNeedTruncated) const
         int32_t h = pixmap_->GetHeight();
         int32_t totalSize = pixmap_->GetByteCount();
         auto rowStride = pixmap_->GetRowStride();
-        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId() +
-               "details: _w" + std::to_string(w) + "_h" + std::to_string(h) + "_rowStride" + std::to_string(rowStride) +
-               "_byteCount" + std::to_string(totalSize);
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> uniqueId: ") +
+               std::to_string(pixmap_->GetUniqueId()) + "details: _w" + std::to_string(w) + "_h" + std::to_string(h) +
+               "_rowStride" + std::to_string(rowStride) + "_byteCount" + std::to_string(totalSize);
     }
     return std::string("empty source");
 }

@@ -191,6 +191,10 @@ public:
     {
         return "";
     }
+    uint32_t GetUniqueId()
+    {
+        return -1;
+    }
     std::string GetModifyId() override
     {
         return "";

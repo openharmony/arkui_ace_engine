@@ -245,6 +245,7 @@ public:
     virtual void* GetPixelManager() const = 0;
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;
+    virtual uint32_t GetUniqueId() = 0;
     virtual std::string GetModifyId() = 0;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() = 0;
     virtual void* GetWritablePixels() const = 0;

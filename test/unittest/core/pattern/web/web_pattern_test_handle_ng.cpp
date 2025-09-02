@@ -75,6 +75,7 @@ public:
     MOCK_METHOD(void*, GetPixelManager, (), (const, override));
     MOCK_METHOD(void*, GetRawPixelMapPtr, (), (const, override));
     MOCK_METHOD(std::string, GetId, (), (override));
+    MOCK_METHOD(uint32_t, GetUniqueId, (), (override));
     MOCK_METHOD(std::string, GetModifyId, (), (override));
     MOCK_METHOD(std::shared_ptr<Media::PixelMap>, GetPixelMapSharedPtr, (), (override));
     MOCK_METHOD(void*, GetWritablePixels, (), (const, override));

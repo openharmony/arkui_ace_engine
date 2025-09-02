@@ -363,6 +363,12 @@ std::string PixelMapOhos::GetId()
     return strm.str();
 }
 
+uint32_t PixelMapOhos::GetUniqueId()
+{
+    CHECK_NULL_RETURN(pixmap_, -1);
+    return pixmap_->GetUniqueId();
+}
+
 std::string PixelMapOhos::GetModifyId()
 {
     return {};
