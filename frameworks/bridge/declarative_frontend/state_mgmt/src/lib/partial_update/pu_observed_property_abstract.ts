@@ -70,6 +70,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.decoratorInfo_ = decorate;
   }
 
+  public debugInfoWithoutId(): string {
+    return `${this.decoratorInfo_} ${this.info_} owned by @Component ${this.owningView_?.constructor.name}`;
+  }
+
   // dump info about variable decorator to string
   // e.g. @State, @Link, etc.
   public debugInfoDecorator() : string {
