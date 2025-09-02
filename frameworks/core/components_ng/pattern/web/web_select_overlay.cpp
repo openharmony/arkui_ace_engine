@@ -1270,6 +1270,7 @@ bool WebSelectOverlay::IsSingleHandle()
 
 void WebSelectOverlay::OnHandleIsHidden()
 {
+    isShowHandle_ = false;
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateSingleHandleVisible(false);

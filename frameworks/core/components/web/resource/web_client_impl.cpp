@@ -1568,4 +1568,11 @@ void WebClientImpl::SetImeShow(bool visible)
     CHECK_NULL_VOID(delegate);
     delegate->SetImeShow(visible);
 }
+
+bool WebClientImpl::IsShowHandle()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->IsShowHandle();
+}
 } // namespace OHOS::Ace

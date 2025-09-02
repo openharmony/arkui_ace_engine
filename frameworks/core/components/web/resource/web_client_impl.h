@@ -340,6 +340,7 @@ public:
                                         uint32_t width,
                                         uint32_t height) override;
     void SetImeShow(bool visible) override;
+    bool IsShowHandle() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
