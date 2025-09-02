@@ -161,9 +161,9 @@ enum class RequestFocusReason {
     MOUSE,
     SYSTEM,
     DRAG_ENTER,
-    DRAG_SELECT
+    DRAG_SELECT,
+    SWITCH_EDITABLE
 };
-
 
 // reason for needToRequestKeyboardInner_ change
 enum class RequestKeyboardInnerChangeReason {
