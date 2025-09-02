@@ -1876,6 +1876,51 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleVelocity_003, TestSi
 }
 
 /**
+ * @tc.name: FilterScrollEventHandleVelocity_004
+ * @tc.desc: FilterScrollEventHandleVelocity with parent over scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, FilterScrollEventHandleVelocity_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::VERTICAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    webPattern->nestedScroll_.scrollUp = NestedScrollMode::PARENT_FIRST;
+    webPattern->SetNestedScrollParent(parent);
+    EXPECT_CALL(*parent, NestedScrollOutOfBoundary()).Times(1).WillOnce(Return(true));
+    EXPECT_FALSE(webPattern->FilterScrollEventHandleVelocity(2.0f));
+    EXPECT_NE(webPattern->dragEndRecursiveParent_.Upgrade(), nullptr);
+    GestureEvent event;
+    webPattern->HandleFlingMove(event);
+    EXPECT_EQ(webPattern->dragEndRecursiveParent_.Upgrade(), nullptr);
+
+    EXPECT_CALL(*parent, NestedScrollOutOfBoundary()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*parent, HandleScrollVelocity).Times(1).WillOnce(Return(true));
+    webPattern->isSelfReachEdge_ = true;
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleVelocity(2.0f));
+
+    EXPECT_CALL(*parent, NestedScrollOutOfBoundary()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*parent, HandleScrollVelocity).Times(1).WillOnce(Return(true));
+    webPattern->isSelfReachEdge_ = false;
+    webPattern->isParentReverseReachEdge_ = true;
+    EXPECT_TRUE(webPattern->FilterScrollEventHandleVelocity(2.0f));
+#endif
+}
+
+/**
  * @tc.name: InitSlideUpdateListener_001
  * @tc.desc: InitSlideUpdateListener.
  * @tc.type: FUNC
