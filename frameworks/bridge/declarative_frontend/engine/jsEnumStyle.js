@@ -3104,7 +3104,7 @@ class NavPathStack {
     }
     try {
       let serializeCount = 0;
-      const MAX_COUNT = 1000;
+      const MAX_COUNT = 10000;
       const serializeFilter = (key, value) => {
         serializeCount++;
         if (serializeCount > MAX_COUNT) {
