@@ -98,8 +98,8 @@ public:
 protected:
     bool AllowTranslate() override;
     bool AllowSearch() override;
-    bool AllowShare() override;
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
+    bool AllowShare() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
