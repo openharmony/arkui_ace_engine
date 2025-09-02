@@ -659,7 +659,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 {
     ParsePopupCommonParam(info, popupObj, popupParam);
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
-    if (popupParam && messageVal->IsString()) {
+    if (popupParam) {
         popupParam->SetMessage(messageVal->ToString());
     }
 
