@@ -79,7 +79,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
         jsStyle = paramObject->GetProperty("style");
     }
 
-    auto progressStyle = ProgressStyle::Ring;
+    auto progressStyle = ProgressStyle::Linear;
     if (jsStyle->IsNumber()) {
         progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
     }
