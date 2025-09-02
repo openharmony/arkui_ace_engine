@@ -159,7 +159,7 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 const std::string ACTION_APPDETAIL = "ohos.want.action.appdetail";
 const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
-const std::string ACRION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
+const std::string ACTION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
 const std::string ABILITYNAME_CALENDAR = "MainAbility";
 const std::string ACTION_PARAM = "action";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
@@ -2512,7 +2512,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             for (const auto& param : params) {
                 want.SetParam(param.first, param.second);
             }
-            want.SetParam(ACTION_PARAM, ACRION_CALENDAR);
+            want.SetParam(ACTION_PARAM, ACTION_CALENDAR);
             if (container->IsUIExtensionWindow()) {
                 auto uiExtensionContext =
                     OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
