@@ -125,7 +125,8 @@ WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
         finalBreakpoints = configBreakpoints;
     }
     double density = pipeline->GetCurrentDensity();
-    return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetPageWidth());
+    return GetCalcWidthBreakpoint(
+        finalBreakpoints, density, pipeline->CalcPageWidth(pipeline->GetDisplayWindowRectInfo().GetSize().Width()));
 }
 
 GridSizeType GridContainerUtils::ProcessGridSizeType(

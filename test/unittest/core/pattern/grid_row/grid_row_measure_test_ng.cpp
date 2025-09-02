@@ -1726,4 +1726,239 @@ HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize,
     // Assuming CalcBreakPoint returns 3 for windowWidth = 1000
     EXPECT_EQ(result, V2::GridSizeType::LG);
 }
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize01
+ * @tc.desc: Test ProcessGridSizeType Return XS When Window Size is 319
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize01, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 319, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::XS);
+}
+
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize02
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 320
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize02, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 320, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize03
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 321
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize03, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 321, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize04
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 599
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize04, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 599, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize05
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 600
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize05, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 600, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    // Assuming CalcBreakPoint returns 3 for windowWidth = 601
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize06
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 601
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize06, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 601, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize07
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 839
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize07, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 839, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize08
+ * @tc.desc: Test ProcessGridSizeType Return LG When Window Size is 840
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize08, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 840, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::LG);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize09
+ * @tc.desc: Test ProcessGridSizeType Return LG When Window Size is 841
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize09, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 841, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::LG);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize_SelfDefine_01
+ * @tc.desc: Test ProcessGridSizeType Return XL When Window Size is 500 And
+ *           breakpoints.assign({ "100vp", "200vp","300vp", "400vp", "600vp" })
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize_SelfDefine_01, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    breakpoints.breakpoints.assign({ "100px", "200px", "300px", "400px", "600px" });
+    breakpoints.userDefine = true;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 500, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::XL);
+}
 } // namespace OHOS::Ace::NG
