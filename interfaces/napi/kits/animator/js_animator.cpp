@@ -915,7 +915,18 @@ static napi_value JSCreateAnimatorTransfer(napi_env env, napi_callback_info info
 
     int64_t addr = 0;
     napi_get_value_int64(env, argv, &addr);
-    AnimatorResult* animatorResult = reinterpret_cast<AnimatorResult*>(addr);
+    auto animatorResultPre = reinterpret_cast<AnimatorResultBase*>(addr);
+    if (animatorResultPre == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "jsAnimator null animatorResult");
+        return nullptr;
+    }
+    auto option = animatorResultPre->GetAnimatorOption();
+    auto motion = animatorResultPre->GetMotion();
+    auto animator = animatorResultPre->GetAnimator();
+    auto animatorResult = new AnimatorResult();
+    animatorResult->SetMotion(motion);
+    animatorResult->SetAnimatorOption(option);
+    animatorResult->SetAnimator(animator);
     return CreateAnimator(env, animatorResult);
 }
 
