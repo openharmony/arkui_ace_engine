@@ -4933,7 +4933,7 @@ export class CommonMethodModifier implements CommonMethod {
        switch (value._backgroundImage_flag) {
          case AttributeUpdaterFlag.UPDATE:
          case AttributeUpdaterFlag.SKIP: {
-           this.backgroundImage(value._backgroundImage_src, this._backgroundImage_repeat)
+           this.backgroundImage(value._backgroundImage_src, value._backgroundImage_repeat)
            break
          }
          default: {
