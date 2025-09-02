@@ -2228,7 +2228,8 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
   getFocusPriority(repeatItem) {
-    return Math.min(...this.selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
+    const selectedIndexes = this.selectedIndexes ?? [];
+    return Math.min(...selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
   getItems() {
     return this.items ?? EMPTY_ITEMS;
