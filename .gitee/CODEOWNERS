@@ -2610,6 +2610,9 @@ frameworks/core/components_ng/svg/ @arkui_image
 frameworks/core/components_ng/syntax/ @arkuieco3
 frameworks/core/components_ng/property/accessibility_property.cpp @arkuiabilitygroup
 frameworks/core/components_ng/property/accessibility_property.h @arkuiabilitygroup
+frameworks/core/components_ng/property/accessibility_property_function.h @arkuiabilitygroup
+frameworks/core/components_ng/property/accessibility_property_helper @arkuiabilitygroup
+frameworks/core/components_ng/property/accessibility_property_mutilthread.cpp  @arkuiabilitygroup
 frameworks/core/components_ng/property/attraction_effect.h @arkuiframework
 frameworks/core/components_ng/property/border_property.cpp @arkuilayout
 frameworks/core/components_ng/property/border_property.h @arkuilayout
