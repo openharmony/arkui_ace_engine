@@ -114,6 +114,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
     { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION,
         [](const AccessibilityActionParam& param) {
+            auto switchFunc = param.accessibilityProperty->GetAndReturnSwitchEditableModeFunc();
+            if (switchFunc) {
+                switchFunc(true);
+            }
             return param.accessibilityProperty->ActActionSetIndex(static_cast<int32_t>(param.setCursorIndex));
         } },
     { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK,
