@@ -164,14 +164,8 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
             return;
         }
         JSRef<JSArray> tempColors = jsColor->GetValueAt(i);
-        double value = 0.0;
-        if (tempColors->GetValueAt(1)->IsNumber()) {
-            value = tempColors->GetValueAt(1)->ToNumber<double>();
-        }
-        float weight = 0.0;
-        if (tempColors->GetValueAt(1)->IsNumber()) {
-            weight = tempColors->GetValueAt(1)->ToNumber<float>();
-        }
+        double value = tempColors->GetValueAt(1)->ToNumber<double>();
+        float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
             selectedColor = ERROR_COLOR;
@@ -227,10 +221,7 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             }
             auto tempColors = JSRef<JSArray>::Cast(jsValue);
             // Get weight
-            float weight = 0.0;
-            if (tempColors->GetValueAt(1)->IsNumber()) {
-                weight = tempColors->GetValueAt(1)->ToNumber<float>();
-            }
+            float weight = tempColors->GetValueAt(1)->ToNumber<float>();
             if (NonPositive(weight)) {
                 continue;
             }

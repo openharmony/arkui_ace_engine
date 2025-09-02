@@ -79,10 +79,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
         jsStyle = paramObject->GetProperty("style");
     }
 
-    auto progressStyle = ProgressStyle::Ring;
-    if (jsStyle->IsNumber()) {
-        progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
-    }
+    auto progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
     if (progressStyle == ProgressStyle::Eclipse) {
         g_progressType = ProgressType::MOON;
     } else if (progressStyle == ProgressStyle::Ring) {
@@ -213,7 +210,7 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
     RefPtr<ResourceObject> strokeWidthResObj;
     auto jsStrokeWidth = paramObject->GetProperty(attrsProgressStrokeWidth);
     if (!CheckLength(
-        jsStrokeWidth, strokeWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressStrokeWidth, strokeWidthResObj)) {
+            jsStrokeWidth, strokeWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressStrokeWidth, strokeWidthResObj)) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -237,8 +234,7 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
     CalcDimension scaleWidthDimension;
     RefPtr<ResourceObject> scaleWidthResObj;
     auto jsScaleWidth = paramObject->GetProperty(attrsProgressScaleWidth);
-    if (!CheckLength(
-        jsScaleWidth, scaleWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressScaleWidth, scaleWidthResObj)) {
+    if (!CheckLength(jsScaleWidth, scaleWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressScaleWidth, scaleWidthResObj)) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
 
