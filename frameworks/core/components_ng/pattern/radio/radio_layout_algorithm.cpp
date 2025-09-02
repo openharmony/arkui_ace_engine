@@ -190,8 +190,8 @@ std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const Lay
     CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
     auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
     auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
-    auto defaultLenght = defaultWidth_ - 2 * horizontalPadding_;
-    auto defaultSize = SizeF(defaultLenght, defaultLenght);
+    auto defaultLength = defaultWidth_ - 2 * horizontalPadding_;
+    auto defaultSize = SizeF(defaultLength, defaultLength);
     if (layoutPolicy->IsWidthFix() && layoutPolicy->IsHeightFix()) {
         return defaultSize;
     } else if (layoutPolicy->IsWidthFix()) {
@@ -216,22 +216,22 @@ std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsWrapContent(const Layou
     auto width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
     auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
     auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
-    auto defaultLenght = defaultWidth_ - 2 * horizontalPadding_;
-    auto defaultSize = SizeF(defaultLenght, defaultLenght);
+    auto defaultLength = defaultWidth_ - 2 * horizontalPadding_;
+    auto defaultSize = SizeF(defaultLength, defaultLength);
     auto parentMinLength = std::min(width, height);
     if (layoutPolicy->IsWidthWrap() && layoutPolicy->IsHeightWrap()) {
-        auto length = std::min(parentMinLength, defaultLenght);
+        auto length = std::min(parentMinLength, defaultLength);
         return SizeF(length, length);
     } else if (layoutPolicy->IsWidthWrap()) {
         if (!contentConstraint.selfIdealSize.Height().has_value()) {
-            auto length = std::min(parentMinLength, defaultLenght);
+            auto length = std::min(parentMinLength, defaultLength);
             return SizeF(length, length);
         }
         auto length = std::min(parentMinLength, selfHeight);
         return SizeF(length, length);
     } else if (layoutPolicy->IsHeightWrap()) {
         if (!contentConstraint.selfIdealSize.Width().has_value()) {
-            auto length = std::min(parentMinLength, defaultLenght);
+            auto length = std::min(parentMinLength, defaultLength);
             return SizeF(length, length);
         }
         auto length = std::min(parentMinLength, selfWidth);
