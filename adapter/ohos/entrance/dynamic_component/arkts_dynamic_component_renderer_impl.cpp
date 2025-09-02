@@ -19,13 +19,13 @@
 #include <memory>
 
 #include "accessibility_element_info.h"
+#include "arkts_dynamic_renderer_loader.h"
 #include "arkts_dynamic_uicontent_impl.h"
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
@@ -179,7 +179,13 @@ void ArktsDynamicComponentRendererImpl::CreateDynamicContent()
     CHECK_NULL_VOID(container);
     auto hostAbilityContext = container->GetAbilityContext();
     hostJsContext_  = container->GetJsContext();
-    auto taskWrapper = std::make_shared<EaWorkerTaskWrapperImpl>(hostInstanceId_, dynamicParam_.workerId);
+    std::shared_ptr<TaskWrapper> taskWrapper;
+    taskWrapper.reset(ArktsDynamicRendererLoader::GetInstance().CreatEaWorkerTaskWrapper(
+        hostInstanceId_, dynamicParam_.workerId));
+    if (taskWrapper == nullptr) {
+        TAG_LOGE(aceLogTag_, "CreatEaWorkerTaskWrapper failed");
+        return;
+    }
     taskWrapper->Call([weak = WeakClaim(this), hostAbilityContext]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
@@ -237,7 +243,8 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
     param.isFormRender = true;
     param.aceLogTag = aceLogTag_;
     uiContent_ = ArktsDynamicUIContentImpl::Create(abilityContext,
-        EaWorkerTaskWrapperImpl::GetCurrentAniEnv(), VMType::ARK_NATIVE, param);
+        ArktsDynamicRendererLoader::GetInstance().GetCurrentThreadAniEnv(),
+        VMType::ARK_NATIVE, param);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->SetUIContentType(uIContentType_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();

@@ -64,9 +64,13 @@ template("arkts_frontend") {
       "arkts_plugin_frontend.cpp",
       "entry/arkts_entry_loader.cpp",
     ]
+
+    sources += [ "$ace_root/adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.cpp" ]
     external_deps = [
       "hilog:libhilog",
       "runtime_core:ani",
+      "runtime_core:ani_helpers",
+      "runtime_core:libarkruntime",
     ]
 
     subsystem_name = ace_engine_subsystem
@@ -84,6 +88,7 @@ template("arkts_frontend_loader") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
+      "$ace_root/adapter/ohos/entrance/dynamic_component/arkts_dynamic_renderer_loader.cpp",
       "arkts_frontend_loader.cpp",
     ]
   }
