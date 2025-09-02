@@ -162,20 +162,20 @@ void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
     // move the child in children_ list.
     auto& children = ModifyChildren();
     if (children.empty()) {
-        TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "children is empty.");
+        TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "children is empty.");
         return;
     }
     auto startIter = children.begin();
     auto startOpt = items_.GetKey(*startIter);
     if (!startOpt.has_value()) {
-        TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "cannot find start child in items.");
+        TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "cannot find start child in items.");
         return;
     }
     int32_t childrenStartIndex = ConvertFromToIndexRevert(startOpt.value());
     auto fromIter = children.begin();
     std::advance(fromIter, from - childrenStartIndex);
     if (fromIter == children.end()) {
-        TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "from index out of range.");
+        TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "from index out of range.");
         return;
     }
     auto child = *fromIter;
@@ -263,6 +263,40 @@ void ArkoalaLazyNode::UpdateItemsForOnMove()
         int32_t newIndex = ConvertFromToIndexRevert(index);
         items_.Put(newIndex, node);
     }
+}
+
+int32_t ArkoalaLazyNode::ConvertFromToIndex(int32_t index) const
+{
+    if (!moveFromTo_) {
+        return index;
+    }
+    if (moveFromTo_.value().second == index) {
+        return moveFromTo_.value().first;
+    }
+    if (moveFromTo_.value().first <= index && index < moveFromTo_.value().second) {
+        return index + 1;
+    }
+    if (moveFromTo_.value().second < index && index <= moveFromTo_.value().first) {
+        return index - 1;
+    }
+    return index;
+}
+
+int32_t ArkoalaLazyNode::ConvertFromToIndexRevert(int32_t index) const
+{
+    if (!moveFromTo_) {
+        return index;
+    }
+    if (moveFromTo_.value().first == index) {
+        return moveFromTo_.value().second;
+    }
+    if (moveFromTo_.value().first < index && index <= moveFromTo_.value().second) {
+        return index - 1;
+    }
+    if (moveFromTo_.value().second <= index && index < moveFromTo_.value().first) {
+        return index + 1;
+    }
+    return index;
 }
 
 void ArkoalaLazyNode::InitDragManager(const RefPtr<FrameNode>& child)

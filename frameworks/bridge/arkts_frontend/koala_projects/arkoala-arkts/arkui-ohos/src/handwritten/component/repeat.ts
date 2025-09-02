@@ -52,8 +52,8 @@ export interface RepeatAttribute<T> extends CommonMethod, DynamicNode {
     virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
     template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
     templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
-    onMove(handler: OnMoveHandler | undefined): this;
-    onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this;
+    onMove(handler?: OnMoveHandler): this;
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
@@ -87,10 +87,10 @@ export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements R
     public templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T> {
         return this;
     };
-    public onMove(handler: OnMoveHandler | undefined): this {
+    public onMove(handler?: OnMoveHandler): this {
         return this;
     }
-    public onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this {
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         return this;
     }
 }

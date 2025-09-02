@@ -90,7 +90,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
-class NodeHolder {
+export class NodeHolder {
     node?: PeerNode
 }
 
