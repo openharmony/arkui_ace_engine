@@ -8426,6 +8426,8 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
     CHECK_NULL_VOID(pipeline->UsingCaretAvoidMode());
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
@@ -8437,7 +8439,9 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
         return;
     }
     SetLastCaretPos(caretPos);
-    textFieldManager->SetHeight(GetCaretRect().Height());
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    textFieldManager->SetHeight(NearZero(caretHeight) ?
+        richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
