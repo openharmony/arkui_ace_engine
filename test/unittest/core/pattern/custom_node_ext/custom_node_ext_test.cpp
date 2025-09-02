@@ -471,4 +471,27 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnWindowSizeChangedCallback001, Te
         std::move(onWindowSizeChangedCallbackFunction));
     ASSERT_NE(pattern->onWindowSizeChangedCallback_, nullptr);
 }
+
+/**
+ * @tc.name: CustomNodeExtSetOnWindowSizeChangedCallback002
+ * @tc.desc: Test the set of OnWindowSizeChangedCallback in CustomNodeExt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnWindowSizeChangedCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNodeExt Create function.
+     * @tc.expected: Create CustomNodeExt.
+     */
+    auto customExtFrameNode = CreateNode();
+    ASSERT_NE(customExtFrameNode, nullptr);
+    auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. CustomNodeExtPattern init status
+     * @tc.expected: onWindowSizeChangedCallback_ doesn't have value.
+     */
+    ASSERT_EQ(pattern->onWindowSizeChangedCallback_, nullptr);
+}
 } // namespace OHOS::Ace::NG
