@@ -15,7 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("divider_test_ng") {
   type = "new"
-  module_name = "Component-layout"
+  module_name = "Component-Layout"
   module_output = ""
   sources = [
     "divider_base_test_ng.cpp",

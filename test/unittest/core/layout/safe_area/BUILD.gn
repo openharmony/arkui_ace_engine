@@ -15,7 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("safeArea_test_expandSafeArea_ng") {
   type = "new"
-  module_name = "Component-layout"
+  module_name = "Component-Layout"
   module_output = "layout"
   sources = [ "expand_safe_area_test_ng.cpp" ]
 }
