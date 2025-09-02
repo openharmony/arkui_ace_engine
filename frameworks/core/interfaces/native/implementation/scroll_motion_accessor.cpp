@@ -22,11 +22,11 @@ namespace ScrollMotionAccessor {
 void DestroyPeerImpl(Ark_ScrollMotion peer)
 {
 }
-Ark_ScrollMotion CtorImpl(const Ark_Number* position,
-                          const Ark_Number* velocity,
-                          const Ark_Number* min,
-                          const Ark_Number* max,
-                          Ark_SpringProp prop)
+Ark_ScrollMotion ConstructImpl(const Ark_Number* position,
+                               const Ark_Number* velocity,
+                               const Ark_Number* min,
+                               const Ark_Number* max,
+                               Ark_SpringProp prop)
 {
     return {};
 }
@@ -39,7 +39,7 @@ const GENERATED_ArkUIScrollMotionAccessor* GetScrollMotionAccessor()
 {
     static const GENERATED_ArkUIScrollMotionAccessor ScrollMotionAccessorImpl {
         ScrollMotionAccessor::DestroyPeerImpl,
-        ScrollMotionAccessor::CtorImpl,
+        ScrollMotionAccessor::ConstructImpl,
         ScrollMotionAccessor::GetFinalizerImpl,
     };
     return &ScrollMotionAccessorImpl;

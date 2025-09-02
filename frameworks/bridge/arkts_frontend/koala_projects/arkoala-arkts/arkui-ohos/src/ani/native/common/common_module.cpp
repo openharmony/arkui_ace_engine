@@ -15,12 +15,6 @@
 
 #include "common_module.h"
 
-#if !defined(PREVIEW)
-#define OHOS_AAFWK_HILOG_TAG_WRAPPER_H
-#include "ani_base_context.h"
-#include "canvas_ani/ani_canvas.h"
-#endif
-
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -28,21 +22,17 @@
 
 #include "ani.h"
 #include "load.h"
+#include "log/log.h"
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
-#include "arkoala/framework/native/src/resource_color_helper.h"
+// #include "arkoala/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
-namespace {
-const int32_t FLAG_DRAW_FRONT = 1;
-const int32_t FLAG_DRAW_CONTENT = 1 << 1;
-const int32_t FLAG_DRAW_BEHIND = 1 << 2;
-}
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
     CHECK_NULL_RETURN(vm, ANI_ERROR);
@@ -132,268 +122,23 @@ ani_int GetFocusedInstanceId([[maybe_unused]] ani_env* env)
     return modifier->getCommonAniModifier()->getFocusedInstanceId();
 }
 
-ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
-{
-    ani_status status;
-    ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
-        HILOGE("FindClass Size failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
-        HILOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
-        return nullptr;
-    }
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getCommonAniModifier()) {
-        return nullptr;
-    }
-    ani_object sizeObject;
-    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
-    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
-    if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
-        HILOGE("New Size object failed, %{public}d", status);
-        return nullptr;
-    }
-    return sizeObject;
-}
-
-ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& context)
-{
-    ani_status status;
-    ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
-        HILOGE("FindClass Size failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
-        HILOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_object sizeInPixelObject;
-    ani_float widthInPixel = context.width;
-    ani_float heightInPixel = context.height;
-    if ((status = env->Object_New(
-        sizeInPixelClass, sizeInPixelCtor, &sizeInPixelObject, widthInPixel, heightInPixel)) != ANI_OK) {
-        HILOGE("New SizeInPixel object failed, %{public}d", status);
-        return nullptr;
-    }
-    return sizeInPixelObject;
-}
-
-ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
-{
-    ani_status status;
-    ani_object result = nullptr;
-
-    // DrawContext object
-    ani_class drawContextClass;
-    if ((status = env->FindClass("Larkui/Graphics/DrawContext;", &drawContextClass)) != ANI_OK) {
-        HILOGE("FindClass DrawContext failed, %{public}d", status);
-        return nullptr;
-    }
-    ani_method drawContextCtor;
-    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":V", &drawContextCtor)) != ANI_OK) {
-        HILOGE("Class_FindMethod drawContextClass ctor failed, %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Object_New(drawContextClass, drawContextCtor, &result)) != ANI_OK) {
-        HILOGE("New DrawContext object failed, %{public}d", status);
-        return nullptr;
-    }
-
-    // Size object
-    ani_object sizeObject = CreateSizeObject(env, context);
-    env->Object_SetPropertyByName_Ref(result, "size_", (ani_ref)sizeObject);
-
-    // sizeInPixel Object
-    ani_object sizeInPixelObject = CreateSizeInPixelObject(env, context);
-    env->Object_SetPropertyByName_Ref(result, "sizeInPixel_", (ani_ref)sizeInPixelObject);
-
-    // canvas Object
-#if !defined(PREVIEW)
-    ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
-    if (!aniCanvas) {
-        HILOGE("Create AniCanvas failed !");
-    }
-    env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
-#endif
-
-    return result;
-}
-
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawCallbackFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
-{
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                HILOGW("Create drawing context failed !");
-                return;
-            }
-            std::vector<ani_ref> params = {};
-            params.emplace_back((ani_ref)drawingContext);
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
-}
-
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+    if (!modifier) {
         return;
     }
-    ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-    void* fnDrawCallbackFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawCallbackFun = nullptr;
-    ani_ref fnObjGlobalRef = static_cast<ani_ref>(fnObj);
-    auto fndDrawCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjGlobalRef);
-    drawCallbackFun = ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
-    if (drawCallbackFun != nullptr) {
-        fnDrawCallbackFun = static_cast<void*>(drawCallbackFun.get());
-    }
-
-    modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnDrawCallbackFun);
-}
-
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawBehindFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
-{
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
-}
-
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawContentFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
-{
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
-}
-
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawFrontFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
-{
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            auto drawingContext = CreateDrawingContext(env, context);
-            if (!drawingContext) {
-                return;
-            }
-            env->Object_CallMethodByName_Void(
-                reinterpret_cast<ani_fn_object>(object), "drawFront",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
-            std::vector<ani_ref> params = {};
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
+    modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnObj);
 }
 
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getArkUIAniDrawModifier() || !env) {
+    if (!modifier) {
         return;
     }
-    if (drawModifier == nullptr) {
-        // fnObj should not be nullptr;
-        HILOGE("DrawModifier is undefined.");
-        abort();
-    }
-    ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-    ani_ref drawModifierRef;
-    env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifier), &drawModifierRef);
-    void* fnDrawBehindFun = nullptr;
-    void* fnDrawContentFun = nullptr;
-    void* fnDrawFrontFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawBehindFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawContentFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawFrontFun = nullptr;
-    if (flag & FLAG_DRAW_BEHIND) {
-        auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
-        drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
-    }
-    if (flag & FLAG_DRAW_CONTENT) {
-        auto fnDrawContentAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
-        drawContentFun = ConvertFnObjDrawContentFun(vm, fnDrawContentAni, drawModifierRef);
-    }
-    if (flag & FLAG_DRAW_FRONT) {
-        auto fnDrawFrontAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
-        drawFrontFun = ConvertFnObjDrawFrontFun(vm, fnDrawFrontAni, drawModifierRef);
-    }
-    if (drawBehindFun != nullptr) {
-        fnDrawBehindFun = static_cast<void*>(drawBehindFun.get());
-    }
-    if (drawContentFun != nullptr) {
-        fnDrawContentFun = static_cast<void*>(drawContentFun.get());
-    }
-    if (drawFrontFun != nullptr) {
-        fnDrawFrontFun = static_cast<void*>(drawFrontFun.get());
-    }
-    modifier->getArkUIAniDrawModifier()->setDrawModifier(ptr, flag,
-        fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun);
+    modifier->getArkUIAniDrawModifier()->setDrawModifier(env, ptr, flag, drawModifier);
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -466,59 +211,6 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
         env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
 #endif
 }
-std::shared_ptr<std::function<void(NG::LayoutConstraintF & layoutConstraint)>> ConvertFnObjMeasureFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
-{
-    return std::make_shared<std::function<void(NG::LayoutConstraintF & layoutConstraint)>>(
-        [vm, callbackAni](const NG::LayoutConstraintF& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            std::vector<ani_ref> params = {};
-            auto width1 = AniUtils::FloatToNumberObject(env, context.maxSize.Width());
-            auto height1 = AniUtils::FloatToNumberObject(env, context.maxSize.Height());
-            auto width2 = AniUtils::FloatToNumberObject(env, context.minSize.Width());
-            auto height2 = AniUtils::FloatToNumberObject(env, context.minSize.Height());
-            auto width3 = AniUtils::FloatToNumberObject(env, context.percentReference.Width());
-            auto height3 = AniUtils::FloatToNumberObject(env, context.percentReference.Height());
-            params.emplace_back((ani_ref)width1);
-            params.emplace_back((ani_ref)height1);
-            params.emplace_back((ani_ref)width2);
-            params.emplace_back((ani_ref)height2);
-            params.emplace_back((ani_ref)width3);
-            params.emplace_back((ani_ref)height3);
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
-}
-
-std::shared_ptr<std::function<void(NG::OffsetF& position)>> ConvertFnObjLayoutFun(ani_vm* vm,
-    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
-{
-    return std::make_shared<std::function<void(NG::OffsetF& position)>>(
-        [vm, callbackAni](const NG::OffsetF& context) -> void {
-            CHECK_NULL_VOID(vm);
-            CHECK_NULL_VOID(callbackAni);
-            ani_env* env = nullptr;
-            auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-            CHECK_NULL_VOID(env);
-
-            std::vector<ani_ref> params = {};
-            params.emplace_back((ani_ref)AniUtils::CreateDoubleObject(env, context.GetX()));
-            params.emplace_back((ani_ref)AniUtils::CreateDoubleObject(env, context.GetY()));
-            ani_ref ret = nullptr;
-            callbackAni->Call(env, params.size(), params.data(), &ret);
-            if (attachCurrentThreadStatus == ANI_OK) {
-                vm->DetachCurrentThread();
-            }
-        });
-}
 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
@@ -527,35 +219,7 @@ void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return;
     }
-    auto customFuncExisted = false;
-    ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-    void* fnMeasureFun = nullptr;
-    void* fnLayoutFun = nullptr;
-    std::shared_ptr<std::function<void(NG::LayoutConstraintF & layoutConstraint)>> fnObjMeasureFun = nullptr;
-    std::shared_ptr<std::function<void(NG::OffsetF& position)>> fnObjLayoutFun = nullptr;
-    if (fnObjMeasure != nullptr) {
-        customFuncExisted = true;
-        ani_ref fnObjMeasureAniRef = static_cast<ani_ref>(fnObjMeasure);
-        auto fnObjMeasureAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjMeasureAniRef);
-        fnObjMeasureFun = ConvertFnObjMeasureFun(vm, fnObjMeasureAni);
-    }
-    if (fnObjLayout != nullptr) {
-        customFuncExisted = true;
-        ani_ref fnObjLayoutAniRef = static_cast<ani_ref>(fnObjLayout);
-        auto fnObjLayoutAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjLayoutAniRef);
-        fnObjLayoutFun = ConvertFnObjLayoutFun(vm, fnObjLayoutAni);
-    }
-    if (!customFuncExisted) {
-        return;
-    }
-    if (fnObjMeasureFun != nullptr) {
-        fnMeasureFun = static_cast<void*>(fnObjMeasureFun.get());
-    }
-    if (fnObjLayoutFun != nullptr) {
-        fnLayoutFun = static_cast<void*>(fnObjLayoutFun.get());
-    }
-    modifier->getCommonAniModifier()->setCustomCallback(ptr, fnMeasureFun, fnLayoutFun);
+    modifier->getCommonAniModifier()->setCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
 }
 
 ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity)
@@ -611,29 +275,6 @@ ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color)
     return clr;
 }
 
-ani_int CreateWindowFreeContainer(ani_env *env, [[maybe_unused]]ani_object object, ani_object context)
-{
-#if !defined(PREVIEW)
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return -1;
-    }
-    auto nativeContext = OHOS::AbilityRuntime::GetStageModeContext(env, context);
-    return modifier->getCommonAniModifier()->createWindowFreeContainer(env, nativeContext);
-#else
-    return -1;
-#endif
-}
-
-void DestroyWindowFreeContainer([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object object, ani_int id)
-{
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    modifier->getCommonAniModifier()->destroyWindowFreeContainer(id);
-}
-
 ani_int CheckIsUIThread([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -657,7 +298,7 @@ void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr)
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return;
     }
-    modifier->getCommonAniModifier()->onMeasureInnerMeasure(ptr);
+    modifier->getCommonAniModifier()->onMeasureInnerMeasure(env, ptr);
 }
 
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr)
@@ -666,7 +307,7 @@ void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr)
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return;
     }
-    modifier->getCommonAniModifier()->onLayoutInnerLayout(ptr);
+    modifier->getCommonAniModifier()->onLayoutInnerLayout(env, ptr);
 }
 
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
@@ -744,7 +385,7 @@ void SetCustomPropertyCallBack(
     ConvertGetCallbackFun(vm, getCallbackFun, getCallbackAni);
 
     modifier->getCommonAniModifier()->setCustomPropertyCallBack(
-        frameNode, std::move(removeCallbackFun), std::move(getCallbackFun));
+        env, frameNode, std::move(removeCallbackFun), std::move(getCallbackFun));
 }
 
 ani_string GetCustomProperty(
@@ -917,8 +558,7 @@ void EventTargetInfoAccessorWithId(ani_env* env, [[maybe_unused]] ani_object obj
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return;
     }
-    auto idValue = AniUtils::ANIStringToStdString(env, id);
-    return modifier->getCommonAniModifier()->eventTargetInfoAccessorWithId(env, input, idValue);
+    return modifier->getCommonAniModifier()->eventTargetInfoAccessorWithId(env, input, id);
 }
 void* CreateScrollableTargetInfoAccessor(ani_env* env, [[maybe_unused]] ani_object obj)
 {
@@ -934,8 +574,7 @@ void ScrollableTargetInfoAccessorWithId(ani_env* env, [[maybe_unused]] ani_objec
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return;
     }
-    auto idValue = AniUtils::ANIStringToStdString(env, id);
-    return modifier->getCommonAniModifier()->scrollableTargetInfoAccessorWithId(env, input, idValue);
+    return modifier->getCommonAniModifier()->scrollableTargetInfoAccessorWithId(env, input, id);
 }
 void ScrollableTargetInfoAccessorWithPointer(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long input, ani_long pointer)
@@ -1091,12 +730,12 @@ ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src)
 
 void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
-    modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    // modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 
 void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
@@ -1110,12 +749,12 @@ void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
 
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
-    modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
+    // modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
 }
 
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode)
@@ -1145,47 +784,16 @@ void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId)
     modifier->getCommonAniModifier()->setThemeScopeId(env, themeScopeId);
 }
 
-std::shared_ptr<std::function<void()>> ConvertOnThemeScopeDestroyFun(
-    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
-{
-    return std::make_shared<std::function<void()>>([vm, callbackAni]() {
-        CHECK_NULL_VOID(vm);
-        CHECK_NULL_VOID(callbackAni);
-        ani_env* env = nullptr;
-        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
-        CHECK_NULL_VOID(env);
-
-        std::vector<ani_ref> args = {};
-        ani_ref ret = nullptr;
-        callbackAni->Call(env, args.size(), args.data(), &ret);
-        if (attachCurrentThreadStatus == ANI_OK) {
-            vm->DetachCurrentThread();
-        }
-    });
-}
-
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
     ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
-    void* fnOnThemeScopeDestroyFun = nullptr;
-    ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-    std::shared_ptr<std::function<void()>> onThemeScopeDestroyFun = nullptr;
-    if (onThemeScopeDestroy) {
-        ani_ref onThemeScopeDestroyAniRef = static_cast<ani_ref>(onThemeScopeDestroy);
-        auto onThemeScopeDestroyAni = std::make_shared<CommonModuleCallbackAni>(env, onThemeScopeDestroyAniRef);
-        onThemeScopeDestroyFun = ConvertOnThemeScopeDestroyFun(vm, onThemeScopeDestroyAni);
-    }
-    if (onThemeScopeDestroyFun != nullptr) {
-        fnOnThemeScopeDestroyFun = static_cast<void*>(onThemeScopeDestroyFun.get());
-    }
-    modifier->getCommonAniModifier()->createAndBindTheme(
-        env, themeScopeId, themeId, colors, colorMode, fnOnThemeScopeDestroyFun);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    // modifier->getCommonAniModifier()->createAndBindTheme(
+    //     env, themeScopeId, themeId, colors, colorMode, onThemeScopeDestroy);
 }
 
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent)

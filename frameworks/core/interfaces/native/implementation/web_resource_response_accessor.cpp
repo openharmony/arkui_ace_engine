@@ -21,7 +21,7 @@
 #include "arkoala_api_generated.h"
 
 namespace {
-const Ark_Int32 BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Int32>(400);
+const Ark_Number BAD_REQUEST = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(400);
 const int32_t RESPONSE_DATA_TYPE_STRING = 0;
 const int32_t RESPONSE_DATA_TYPE_NUMBER = 1;
 const int32_t RESPONSE_DATA_TYPE_RESOURCE = 2;
@@ -34,11 +34,9 @@ void DestroyPeerImpl(Ark_WebResourceResponse peer)
 {
     delete peer;
 }
-Ark_WebResourceResponse CtorImpl()
+Ark_WebResourceResponse ConstructImpl()
 {
-    Ark_WebResourceResponse peer = new WebResourceResponsePeer();
-    peer->handler = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::WebResponse>();
-    return peer;
+    return new WebResourceResponsePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -51,26 +49,26 @@ Ark_String GetResponseDataImpl(Ark_WebResourceResponse peer)
     result  = peer->handler->GetData();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Opt_Union_String_Int32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
+Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
 {
-    Opt_Union_String_Int32_Buffer_Resource result {};
+    Opt_Union_String_Number_Buffer_Resource result {};
     CHECK_NULL_RETURN(peer && peer->handler, result);
     if (peer->responseDataType) {
         switch (peer->responseDataType.value()) {
             case RESPONSE_DATA_TYPE_STRING:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_String>(
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_String>(
                     peer->handler->GetData(), Converter::FC);
             case RESPONSE_DATA_TYPE_NUMBER:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Int32>(
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Number>(
                     peer->handler->GetFileHandle());
             case RESPONSE_DATA_TYPE_RESOURCE:
                 if (peer->responseDataResEx) {
-                    return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Resource>(
+                    return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Resource>(
                         peer->responseDataResEx.value());
                 }
                 break;
             case RESPONSE_DATA_TYPE_BUFFER:
-                return Converter::ArkUnion<Opt_Union_String_Int32_Buffer_Resource, Ark_Buffer>(
+                return Converter::ArkUnion<Opt_Union_String_Number_Buffer_Resource, Ark_Buffer>(
                     peer->handler->GetData(), Converter::FC);
             default:
                 break;
@@ -113,13 +111,13 @@ Array_Header GetResponseHeaderImpl(Ark_WebResourceResponse peer)
     }
     return Converter::ArkValue<Array_Header>(result, Converter::FC);
 }
-Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
+Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, BAD_REQUEST);
-    return Converter::ArkValue<Ark_Int32>(peer->handler->GetStatusCode());
+    return Converter::ArkValue<Ark_Number>(peer->handler->GetStatusCode());
 }
 void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                         const Ark_Union_String_Int32_Resource_Buffer* data)
+                         const Ark_Union_String_Number_Resource_Buffer* data)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
@@ -129,7 +127,7 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
             peer->handler->SetData(str);
             peer->responseDataType = RESPONSE_DATA_TYPE_STRING;
         },
-        [peer](const Ark_Int32& responseData) {
+        [peer](const Ark_Number& responseData) {
             int32_t fd = Converter::Convert<int32_t>(responseData);
             peer->handler->SetFileHandle(fd);
             peer->responseDataType = RESPONSE_DATA_TYPE_NUMBER;
@@ -195,7 +193,7 @@ void SetResponseHeaderImpl(Ark_WebResourceResponse peer,
     }
 }
 void SetResponseCodeImpl(Ark_WebResourceResponse peer,
-                         const Ark_Int32* code)
+                         const Ark_Number* code)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(code);
@@ -219,7 +217,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
 {
     static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
         WebResourceResponseAccessor::DestroyPeerImpl,
-        WebResourceResponseAccessor::CtorImpl,
+        WebResourceResponseAccessor::ConstructImpl,
         WebResourceResponseAccessor::GetFinalizerImpl,
         WebResourceResponseAccessor::GetResponseDataImpl,
         WebResourceResponseAccessor::GetResponseDataExImpl,

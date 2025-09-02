@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_TapRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_TapRecognizer CtorImpl()
+Ark_TapRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<TapRecognizerPeer>();
 }
@@ -44,7 +44,7 @@ const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()
 {
     static const GENERATED_ArkUITapRecognizerAccessor TapRecognizerAccessorImpl {
         TapRecognizerAccessor::DestroyPeerImpl,
-        TapRecognizerAccessor::CtorImpl,
+        TapRecognizerAccessor::ConstructImpl,
         TapRecognizerAccessor::GetFinalizerImpl,
         TapRecognizerAccessor::GetTapCountImpl,
     };

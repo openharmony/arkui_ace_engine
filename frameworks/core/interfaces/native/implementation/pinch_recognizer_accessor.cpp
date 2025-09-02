@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_PinchRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PinchRecognizer CtorImpl()
+Ark_PinchRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<PinchRecognizerPeer>();
 }
@@ -44,7 +44,7 @@ const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()
 {
     static const GENERATED_ArkUIPinchRecognizerAccessor PinchRecognizerAccessorImpl {
         PinchRecognizerAccessor::DestroyPeerImpl,
-        PinchRecognizerAccessor::CtorImpl,
+        PinchRecognizerAccessor::ConstructImpl,
         PinchRecognizerAccessor::GetFinalizerImpl,
         PinchRecognizerAccessor::GetDistanceImpl,
     };

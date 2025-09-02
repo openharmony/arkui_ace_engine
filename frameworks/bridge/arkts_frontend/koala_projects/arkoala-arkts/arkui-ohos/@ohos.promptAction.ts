@@ -15,17 +15,17 @@
 
 import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase } from "@koalaui/interop"
 import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
-    BorderRadiuses } from 'arkui/component/units';
+    BorderRadiuses } from 'arkui/framework'
 import { Callback } from '@ohos.base';
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
-    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/component/common';
-import { AsyncCallback, CustomBuilder } from 'arkui/component';
-import { DialogAlignment } from 'arkui/component/alertDialog';
-import { DismissDialogAction } from 'arkui/component/actionSheet';
-import { BorderStyle, Alignment } from 'arkui/component/enums';
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/framework'
+import { CustomBuilder } from 'arkui/framework'
+import { DialogAlignment } from 'arkui/framework'
+import { DismissDialogAction } from 'arkui/framework'
+import { BorderStyle, Alignment } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
-import { ArkUIGeneratedNativeModule } from "#components"
+import { AsyncCallback } from 'arkui/base';
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -54,11 +54,10 @@ export class LevelOrder implements MaterializedBase {
         this.peer = new Finalizable(peerPtr!, LevelOrder.getFinalizer())
     }
     static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_construct()
-        return retval
+        throw new Error("No impl");
     }
     static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._LevelOrder_getFinalizer()
+        throw new Error("No impl");
     }
     public static clamp(order: number): LevelOrder {
         const order_casted = order as (number)
@@ -68,13 +67,10 @@ export class LevelOrder implements MaterializedBase {
         return this.getOrder_serialize()
     }
     private static clamp_serialize(order: number): LevelOrder {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_clamp(order)
-        const obj : LevelOrder = LevelOrderInternal.fromPtr(retval)
-        return obj
+        throw new Error("No impl");
     }
     private getOrder_serialize(): number {
-        const retval = ArkUIGeneratedNativeModule._LevelOrder_getOrder(this.peer!.ptr)
-        return retval
+        throw new Error("No impl");
     }
 }
 
@@ -191,10 +187,10 @@ declare namespace promptAction {
         maskTransition?: TransitionEffect;
         maskColor?: ResourceColor;
         onWillDismiss?: Callback<DismissDialogAction>;
-        onDidAppear?: ((data: undefined) => void);
-        onDidDisappear?: ((data: undefined) => void);
-        onWillAppear?: ((data: undefined) => void);
-        onWillDisappear?: ((data: undefined) => void);
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
         keyboardAvoidMode?: KeyboardAvoidMode;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
@@ -226,12 +222,6 @@ declare namespace promptAction {
         borderStyle?: BorderStyle | EdgeStyles;
         backgroundBlurStyle?: BlurStyle;
         shadow?: ShadowOptions | ShadowStyle;
-    }
-
-    export interface DialogBuilderOptions {
-        builder?: KPointer;
-        destroyFunc?: ((ptr: KPointer) => void);
-        builderWithId?: ((dialogId: number) => KPointer);
     }
 
     export class DialogController extends CommonController {}
@@ -274,7 +264,7 @@ declare namespace promptAction {
     export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
+    export function openCustomDialog(builder: KPointer, options: CustomDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;
@@ -286,13 +276,11 @@ declare namespace promptAction {
     export function openCustomDialogWithController(content: KPointer, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
+    export function presentCustomDialog(builder: KPointer, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function getTopOrder(): number | undefined;
     export function getBottomOrder(): number | undefined;
-
-    export function getDialogController(content: KPointer): DialogController | undefined;
 }
 
 export default promptAction

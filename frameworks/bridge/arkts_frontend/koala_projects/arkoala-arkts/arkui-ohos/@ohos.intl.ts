@@ -86,21 +86,21 @@ declare namespace intl {
         style?: string;
         numberingSystem?: string;
         useGrouping?: boolean;
-        minimumIntegerDigits?: int;
-        minimumFractionDigits?: int;
-        maximumFractionDigits?: int;
-        minimumSignificantDigits?: int;
-        maximumSignificantDigits?: int;
+        minimumIntegerDigits?: number;
+        minimumFractionDigits?: number;
+        maximumFractionDigits?: number;
+        minimumSignificantDigits?: number;
+        maximumSignificantDigits?: number;
         roundingPriority?: string;
-        roundingIncrement?: int;
+        roundingIncrement?: number;
         roundingMode?: string;
     }
 
     export class NumberFormat {
         constructor();
         constructor(locale: string | Array<string>, options?: NumberOptions);
-        format(number: double): string;
-        formatRange(startRange: double, endRange: double): string;
+        format(number: number): string;
+        formatRange(startRange: number, endRange: number): string;
         resolvedOptions(): NumberOptions;
     }
 
@@ -117,24 +117,24 @@ declare namespace intl {
     export class Collator {
         constructor();
         constructor(locale: string | Array<string>, options?: CollatorOptions);
-        compare(first: string, second: string): int;
+        compare(first: string, second: string): number;
         resolvedOptions(): CollatorOptions;
     }
 
     export interface PluralRulesOptions {
         localeMatcher?: string;
         type?: string;
-        minimumIntegerDigits?: int;
-        minimumFractionDigits?: int;
-        maximumFractionDigits?: int;
-        minimumSignificantDigits?: int;
-        maximumSignificantDigits?: int;
+        minimumIntegerDigits?: number;
+        minimumFractionDigits?: number;
+        maximumFractionDigits?: number;
+        minimumSignificantDigits?: number;
+        maximumSignificantDigits?: number;
     }
 
     export class PluralRules {
         constructor();
         constructor(locale: string | Array<string>, options?: PluralRulesOptions);
-        select(n: double): string;
+        select(n: number): string;
     }
 
     export interface RelativeTimeFormatInputOptions {
@@ -152,16 +152,16 @@ declare namespace intl {
 
     export interface RelativeTimeFormatPart {
         type: string;
-        value: string;
+        value: number;
         unit?: string;
     }
 
     export class RelativeTimeFormat {
         constructor();
         constructor(locale: string | Array<string>, options?: RelativeTimeFormatInputOptions);
-        format(value: double, unit: string): string;
-        formatToParts(value: double, unit: string): Array<RelativeTimeFormatPart>;
+        format(value: number, unit: string): string;
+        formatToParts(value: number, unit: string): Array<RelativeTimeFormatPart>;
         resolvedOptions(): RelativeTimeFormatResolvedOptions;
     }
 }
-export type DateTimeOptions = intl.DateTimeOptions;
+export default intl;

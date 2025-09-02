@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { SizeOptions } from "arkui/component/units"
-import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
+import { SizeOptions } from 'arkui/framework'
+import { GlobalScope_ohos_measure_utils } from 'arkui/framework'
 import { Resource } from "global.resource"
-import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "arkui/component/enums"
+import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from 'arkui/framework'
 
 export interface MeasureOptions {
     textContent: string | Resource;
@@ -38,9 +38,9 @@ export interface MeasureOptions {
 
 export class MeasureText {
     public static measureText(options: MeasureOptions) : number {
-        return GlobalScope_ohos_measure_utils.measureText(options);
+        throw new Error("TBD")
     }
     public static measureTextSize(options: MeasureOptions) : SizeOptions {
-        return GlobalScope_ohos_measure_utils.measureTextSize(options);
+        throw new Error("TBD")
     }
 }

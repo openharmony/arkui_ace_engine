@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_ColorFilter peer)
         peer = nullptr;
     }
 }
-Ark_ColorFilter CtorImpl(const Array_Number* value)
+Ark_ColorFilter ConstructImpl(const Array_Number* value)
 {
     auto peer = new ColorFilterPeer();
     CHECK_NULL_RETURN(value, peer);
@@ -49,9 +49,10 @@ const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
 {
     static const GENERATED_ArkUIColorFilterAccessor ColorFilterAccessorImpl {
         ColorFilterAccessor::DestroyPeerImpl,
-        ColorFilterAccessor::CtorImpl,
+        ColorFilterAccessor::ConstructImpl,
         ColorFilterAccessor::GetFinalizerImpl,
     };
     return &ColorFilterAccessorImpl;
 }
+
 }

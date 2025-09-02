@@ -28,6 +28,18 @@ struct NavigationTransitionProxyPeer {
     {
         handler = handlerIn;
     }
+    void SetUpdateProgressCallback(const std::function<void(const float&)>&& callback)
+    {
+        updateProgress_ = std::move(callback);
+    }
+    void FireUpdateProgress(const float& progress)
+    {
+        if (updateProgress_) {
+            updateProgress_(progress);
+        }
+    }
+private:
+    std::function<void(const float& progress)> updateProgress_ = nullptr;
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_TRANSITION_PROXY_PEER_H

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SslErrorHandler peer)
 {
     delete peer;
 }
-Ark_SslErrorHandler CtorImpl()
+Ark_SslErrorHandler ConstructImpl()
 {
     return new SslErrorHandlerPeer();
 }
@@ -47,7 +47,7 @@ const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
 {
     static const GENERATED_ArkUISslErrorHandlerAccessor SslErrorHandlerAccessorImpl {
         SslErrorHandlerAccessor::DestroyPeerImpl,
-        SslErrorHandlerAccessor::CtorImpl,
+        SslErrorHandlerAccessor::ConstructImpl,
         SslErrorHandlerAccessor::GetFinalizerImpl,
         SslErrorHandlerAccessor::HandleConfirmImpl,
         SslErrorHandlerAccessor::HandleCancelImpl,

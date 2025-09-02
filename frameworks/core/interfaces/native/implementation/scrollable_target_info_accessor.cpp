@@ -29,7 +29,7 @@ void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_ScrollableTargetInfo CtorImpl()
+Ark_ScrollableTargetInfo ConstructImpl()
 {
     auto peer = AceType::MakeRefPtr<ScrollableTargetInfoPeer>();
     peer->IncRefCount();
@@ -70,7 +70,7 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
 {
     static const GENERATED_ArkUIScrollableTargetInfoAccessor ScrollableTargetInfoAccessorImpl {
         ScrollableTargetInfoAccessor::DestroyPeerImpl,
-        ScrollableTargetInfoAccessor::CtorImpl,
+        ScrollableTargetInfoAccessor::ConstructImpl,
         ScrollableTargetInfoAccessor::GetFinalizerImpl,
         ScrollableTargetInfoAccessor::IsBeginImpl,
         ScrollableTargetInfoAccessor::IsEndImpl,

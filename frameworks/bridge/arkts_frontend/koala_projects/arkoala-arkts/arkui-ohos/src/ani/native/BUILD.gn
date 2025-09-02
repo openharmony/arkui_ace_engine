@@ -21,25 +21,7 @@ group("ace_ani_native_package") {
     "custom:arkuicustomnode_group",
     ]
 }
-config("ani_utils_common_config") {
-  include_dirs = [
-    "./"
-  ]
-}
-ohos_source_set("ani_utils_common") {
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 
-  configs = [ "$ace_root:ace_config" ]
-  public_configs = [ ":ani_utils_common_config" ]
-  sources = [
-    "utils/ani_utils.cpp",
-  ]
-
-  external_deps = [
-    "runtime_core:ani",
-  ]
-}
 ohos_shared_library("arkoala_native_ani") {
   shlib_type = "ani"
   subsystem_name = ace_engine_subsystem
@@ -50,7 +32,7 @@ ohos_shared_library("arkoala_native_ani") {
     "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/"
   ]
 
-  deps = [ ":ani_utils_common" ]
+  deps = []
   if (!build_ohos_sdk) {
     deps += ["$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"]
   }
@@ -73,6 +55,7 @@ ohos_shared_library("arkoala_native_ani") {
     "shape/shape_module_methods.cpp",
     "styled_string/styled_string_module.cpp",
     "utils/ani_trace.cpp",
+    "utils/ani_utils.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
     "rich_editor/rich_editor_module.cpp",
@@ -82,13 +65,8 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
     "condition_scope/condition_scope.cpp",
-    "UINode/uinode_module_methods.cpp",
     "node_adapter/node_adapter_module.cpp",
   ]
-
-  if (defined(model_component_support) && model_component_support) {
-    sources += [ "component3d/component3d_module_methods.cpp" ]
-  }
 
   external_deps = [
     "graphic_2d:drawing_ani",
@@ -102,15 +80,6 @@ ohos_shared_library("arkoala_native_ani") {
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
   ]
-  if (!build_ohos_sdk) {
-    external_deps += [
-      "ability_runtime:abilitykit_native",
-      "ability_runtime:ani_base_context",
-    ]
-  }
-  if (defined(model_component_support) && model_component_support) {
-    external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
-  }
 
   configs = [ "$ace_root:ace_config" ]
   defines = []
@@ -154,13 +123,7 @@ if (use_linux) {
       "napi:ace_napi",
       "runtime_core:ani",
     ]
-    if (!build_ohos_sdk) {
-      external_deps += [
-        "ability_runtime:abilitykit_native",
-        "ability_runtime:ani_base_context",
-      ]
-    }
-
+  
     configs = [ "$ace_root:ace_config" ]
     defines = []
     if (pixel_map_support) {

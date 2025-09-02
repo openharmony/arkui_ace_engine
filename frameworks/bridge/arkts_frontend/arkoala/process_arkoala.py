@@ -30,7 +30,7 @@ import shutil
 import subprocess
 from typing import Dict, List
 
-from preprocess import merge_component
+from preprocess import merge_component, merge_generated_files
 
 class Paths:
     def __init__(self):
@@ -54,13 +54,28 @@ def pre_processing(path: Paths):
     start_time = time.time()
     target_path = os.path.join(
         path.project_path, "arkui-preprocessed")
+    
+    destination_path = os.path.join(target_path, "src")
+    generated_path = os.path.join(target_path, "generated")
 
-    handwritten_path = os.path.join(target_path, "src", "handwritten", "component")
-    generated_path = os.path.join(target_path, "src", "component")
-    merge_component(handwritten_path, generated_path)
+    merge_generated_files(generated_path, destination_path)
 
-    if os.path.exists(handwritten_path):
-        shutil.rmtree(handwritten_path)
+    if os.path.exists(generated_path):
+        shutil.rmtree(generated_path)
+
+    # handwritten_component_path = os.path.join(target_path, "src.old")
+    hooks_component_path = os.path.join(target_path, "src", "hooks", "hooks.old")
+
+    # handwritten_component_path = os.path.join(target_path, "src", "handwritten", "component")
+    # generated_component_path = os.path.join(target_path, "src", "component")
+    # merge_component(handwritten_component_path, generated_component_path)
+
+    # if os.path.exists(handwritten_component_path):
+    #     shutil.rmtree(handwritten_component_path)
+
+    if os.path.exists(hooks_component_path):
+        shutil.rmtree(hooks_component_path)
+
     src_path = os.path.join(target_path, "src")
     dist_path = os.path.join(target_path, "arkui")
     # rename "src" to "arkui"

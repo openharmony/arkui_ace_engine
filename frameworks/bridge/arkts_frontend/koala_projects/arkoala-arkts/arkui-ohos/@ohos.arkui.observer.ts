@@ -1,10 +1,10 @@
 import { ResourceStr } from '/arkui/component/units';
-import { NavPathStack } from 'arkui/component/navigation';
+import { NavPathStack } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
-import { NavDestinationMode } from 'arkui/component/navDestination';
+import { NavDestinationMode } from 'arkui/framework'
 
-export declare namespace uiObserver {
+declare namespace uiObserver {
     export class DensityInfo {
         density: number;
     }
@@ -28,8 +28,6 @@ export declare namespace uiObserver {
         ON_WILL_HIDE = 5,
         ON_WILL_APPEAR = 6,
         ON_WILL_DISAPPEAR = 7,
-        ON_ACTIVE = 8,
-        ON_INACTIVE = 9,
         ON_BACKPRESS = 100
     }
 
@@ -69,3 +67,5 @@ export declare namespace uiObserver {
         navigationId: ResourceStr;
     }
 }
+
+export default uiObserver;

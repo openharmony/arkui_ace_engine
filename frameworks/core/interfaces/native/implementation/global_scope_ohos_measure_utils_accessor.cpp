@@ -33,18 +33,6 @@ void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_Number& src)
 }
 
 template<>
-void AssignCast(std::optional<TextAlign>& dst, const Ark_Number& src)
-{
-    auto alignValue = Converter::Convert<int32_t>(src);
-    if (alignValue > static_cast<int32_t>(ARK_TEXT_ALIGN_JUSTIFY) ||
-        alignValue < static_cast<int32_t>(ARK_TEXT_ALIGN_CENTER)) {
-        return;
-    }
-    auto arkTextAlign = static_cast<Ark_TextAlign>(alignValue);
-    dst = Converter::OptConvert<TextAlign>(arkTextAlign);
-}
-
-template<>
 void AssignCast(std::optional<TextOverflow>& dst, const Ark_Number& src)
 {
     auto overflowValue = Converter::Convert<int32_t>(src);
@@ -173,6 +161,7 @@ std::string ConvertToFontWeight(const Opt_Union_Number_String_FontWeight& src)
 }
 Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
 {
+#ifdef WRONG_GEN1
     MeasureContext context;
     auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
                             ? DimensionUnit::FP
@@ -195,9 +184,12 @@ Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
     context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
     auto textWidth = MeasureUtil::MeasureText(context);
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(textWidth));
+#endif
+    return {};
 }
 Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
 {
+#ifdef WRONG_GEN1
     MeasureContext context;
     auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
                             ? DimensionUnit::FP
@@ -223,6 +215,8 @@ Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
         .width = Converter::ArkValue<Opt_Length>(textSize.Width()),
         .height = Converter::ArkValue<Opt_Length>(textSize.Height())
     };
+#endif
+    return {};
 }
 } // GlobalScope_ohos_measure_utilsAccessor
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor()

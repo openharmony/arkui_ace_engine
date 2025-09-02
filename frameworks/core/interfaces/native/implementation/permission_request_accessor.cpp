@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_PermissionRequest peer)
 {
     delete peer;
 }
-Ark_PermissionRequest CtorImpl()
+Ark_PermissionRequest ConstructImpl()
 {
     return new PermissionRequestPeer();
 }
@@ -65,7 +65,7 @@ const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
 {
     static const GENERATED_ArkUIPermissionRequestAccessor PermissionRequestAccessorImpl {
         PermissionRequestAccessor::DestroyPeerImpl,
-        PermissionRequestAccessor::CtorImpl,
+        PermissionRequestAccessor::ConstructImpl,
         PermissionRequestAccessor::GetFinalizerImpl,
         PermissionRequestAccessor::DenyImpl,
         PermissionRequestAccessor::GetOriginImpl,
