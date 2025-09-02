@@ -18,7 +18,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-static uint32_t ERROR_UINT_CODE = -1;
+static const uint32_t ERROR_UINT_CODE = -1;
 static const float ERROR_FLOAT_CODE = -1.0f;
 static const int32_t ERROR_INT_CODE = -1;
 static std::string groupNameValue;
