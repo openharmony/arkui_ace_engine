@@ -20,6 +20,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,9 +33,6 @@ RefPtr<SvgNode> SvgPattern::Create()
 
 void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-    if (!patternAttr_.width.IsValid() || !patternAttr_.height.IsValid()) {
-        return;
-    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
         auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
@@ -49,7 +47,7 @@ void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, c
     auto actualY = boundingBoxRect_.Height() * patternAttr_.y.Value();
     RSRect clipRect(actualX, actualY, actualX + actualWdith, actualY + actualHeight);
     canvas.ClipRect(clipRect, RSClipOp::INTERSECT, true);
-    
+
     if (patternAttr_.patternContentUnits != SvgLengthScaleUnit::USER_SPACE_ON_USE) {
         auto scaleX = static_cast<float>(boundingBoxRect_.Width() / patternAttr_.width.Value());
         auto scaleY = static_cast<float>(boundingBoxRect_.Height() / patternAttr_.height.Value());
@@ -94,6 +92,18 @@ void SvgPattern::OnPatternEffect(RSCanvas& canvas, RSBrush& brush,
     canvas.Restore();
 }
 
+static void ParsePatternContentUnits(const std::string& val, SvgPatternAttribute& attr)
+{
+    auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attr.usrConfigVersion);
+    if (!featureEnable) {
+        attr.patternContentUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
+            SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+        return;
+    }
+    attr.patternContentUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+        SvgLengthScaleUnit::USER_SPACE_ON_USE;
+}
+
 bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgPatternAttribute&)> attrs[] = {
@@ -101,11 +111,7 @@ bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_PATTERN_CONTENT_UNITS,
-            [](const std::string& val, SvgPatternAttribute& attr) {
-                attr.patternContentUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
-                    SvgLengthScaleUnit::USER_SPACE_ON_USE;
-            } },
+        { SVG_PATTERN_CONTENT_UNITS, ParsePatternContentUnits},
         { SVG_PATTERN_UNITS,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.patternUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
@@ -140,6 +146,7 @@ bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::
     StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
+        patternAttr_.usrConfigVersion = GetUsrConfigVersion();
         attrs[attrIter].value(value, patternAttr_);
         return true;
     }
