@@ -65,7 +65,6 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
     SetPreviewTextDecoration(paintWrapper);
     if (!richEditorPattern->HasFocus()) {
-        overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
         overlayMod->SetFloatingCaretVisible(false);
         const auto& selection = richEditorPattern->GetTextSelector();
@@ -92,7 +91,6 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetSelectedRects(selectedRects);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     overlayMod->SetFrameSize(frameSize);
-    overlayMod->UpdateScrollBar(paintWrapper);
     overlayMod->SetIsClip(false);
 }
 

@@ -8322,7 +8322,6 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     StartTwinkling();
-    RequestKeyboardToEdit();
 }
 
 void RichEditorPattern::FireOnSelect(int32_t selectStart, int32_t selectEnd)
