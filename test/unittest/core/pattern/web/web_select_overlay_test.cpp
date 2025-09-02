@@ -5747,7 +5747,6 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest011, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto insertHandle = nullptr;
-    ASSERT_EQ(insertHandle, nullptr);
     auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
     ASSERT_NE(startSelectionHandle, nullptr);
     auto endSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
