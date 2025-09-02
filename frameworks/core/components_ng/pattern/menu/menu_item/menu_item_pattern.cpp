@@ -2366,6 +2366,7 @@ void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textPropert
         textProperty->UpdateTextMarqueeFadeout(true);
         textProperty->UpdateTextMarqueeStart(false);
     }
+    CHECK_NULL_VOID(theme);
     textProperty->UpdateWordBreak(theme->GetWordBreak());
 }
 
