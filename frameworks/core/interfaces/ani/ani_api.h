@@ -135,18 +135,31 @@ struct ArkUIDragNotifyMessage {
 
 struct ArkUIDragPreviewOption {
     bool isScaleEnabled = true;
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelectionEnabled = false;
     bool isNumber = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
+    bool isDragPreviewEnabled = true;
+    bool isDefaultDragItemGrayEffectEnabled = false;
+    bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
+    bool isMultiTiled = false;
+    bool isLiftingDisabled = false;
+    bool isTouchPointCalculationBasedOnFinalPreviewEnable = false;
+    int32_t sizeChangeEffect = 0;
     union {
         ArkUI_Int32 badgeNumber;
         bool isShowBadge = true;
     };
+    std::function<void(void* ptr)> modifier;
     void ResetDragPreviewMode()
     {
         isScaleEnabled = true;
         isDefaultShadowEnabled = false;
         isDefaultRadiusEnabled = false;
+        isDefaultDragItemGrayEffectEnabled = false;
+        isMultiTiled = false;
     }
 };
 
@@ -289,6 +302,7 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
     void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
+    void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
 };
 struct ArkUIAniCommonModifier {

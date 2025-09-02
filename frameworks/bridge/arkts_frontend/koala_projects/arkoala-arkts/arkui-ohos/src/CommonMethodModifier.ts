@@ -30,6 +30,7 @@ import { ResourceStr } from './component/units'
 import { PixelMap } from '#external'
 import { hookModifierBackgroundImageImpl } from './handwritten/ArkBackgroundImageImpl'
 import { hookCustomPropertyImpl } from "./handwritten/CommonHandWritten"
+import { BorderRadiuses, LocalizedBorderRadiuses } from "./component/units"
 
 export enum AttributeUpdaterFlag {
     INITIAL = 0,
@@ -194,6 +195,9 @@ export class CommonMethodModifier implements CommonMethod {
 
    _customProperty_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
    _customPropertyMap?: Map<string, CustomProperty>
+
+   _borderRadius_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+   _borderRadius_value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
 
    public width(value: Length | LayoutPolicy | undefined): this {
      if (this._width_flag === AttributeUpdaterFlag.INITIAL || this._width0_value !== value || !Type.of(value).isPrimitive()) {
@@ -653,6 +657,15 @@ export class CommonMethodModifier implements CommonMethod {
     this._customPropertyMap!.set(name, value);
     this._customProperty_flag = AttributeUpdaterFlag.UPDATE;
     return this;
+  }
+  public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+    if (this._borderRadius_flag === AttributeUpdaterFlag.INITIAL || this._borderRadius_value !== value) {
+      this._borderRadius_value = value
+      this._borderRadius_flag = AttributeUpdaterFlag.UPDATE
+    } else {
+      this._borderRadius_flag = AttributeUpdaterFlag.SKIP
+    }
+    return this
   }
    applyModifierPatch(node: PeerNode): void {
      const peerNode: ArkCommonMethodPeer = node as ArkCommonMethodPeer
@@ -1517,6 +1530,23 @@ export class CommonMethodModifier implements CommonMethod {
          }
        }
      }
+     if (this._borderRadius_flag !== AttributeUpdaterFlag.INITIAL) {
+       switch (this._borderRadius_flag) {
+         case AttributeUpdaterFlag.UPDATE: {
+           peerNode.borderRadiusAttribute(this._borderRadius_value)
+           this._borderRadius_flag = AttributeUpdaterFlag.RESET
+           break;
+         }
+         case AttributeUpdaterFlag.SKIP: {
+           this._borderRadius_flag = AttributeUpdaterFlag.RESET
+           break;
+         }
+         default: {
+           this._borderRadius_flag = AttributeUpdaterFlag.INITIAL
+           peerNode.borderRadiusAttribute(undefined)
+         }
+       }
+     }
    }
    mergeModifier(value: CommonMethodModifier): void {
      if (value._width_flag != AttributeUpdaterFlag.INITIAL) {
@@ -2138,5 +2168,17 @@ if (value._backgroundImage_flag != AttributeUpdaterFlag.INITIAL) {
          }
        }
      }
+     if (value._borderRadius_flag !== AttributeUpdaterFlag.INITIAL) {
+      switch (value._borderRadius_flag) {
+        case AttributeUpdaterFlag.UPDATE:
+        case AttributeUpdaterFlag.SKIP: {
+          this.borderRadius(value._borderRadius_value)
+          break;
+        }
+        default: {
+          this.borderRadius(undefined)
+        }
+      }
+    }
    }
 }

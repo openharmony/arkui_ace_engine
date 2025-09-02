@@ -29,7 +29,7 @@ import { Context, ContextInternal, StateStylesOps } from "./arkui-custom"
 import { ComponentContent } from 'arkui/ComponentContent'
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { ImageModifier } from "./arkui-external"
+import { ImageModifier } from "../ImageModifier"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
@@ -61,7 +61,8 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
-import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading,
+    hookDragPreviewOptions } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl,
@@ -5922,25 +5923,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_chainMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dragPreviewOptionsAttribute(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeDragPreviewOptions(value_value)
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeDragInteractionOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -11258,9 +11240,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
         if (this.checkPriority("dragPreviewOptions")) {
-            const value_casted = value as (DragPreviewOptions | undefined)
-            const options_casted = options as (DragInteractionOptions)
-            this.getPeer()?.dragPreviewOptionsAttribute(value_casted, options_casted)
+            hookDragPreviewOptions(this, value, options)
             return this
         }
         return this

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "drag_controller_module.h"
+#include "drag_and_drop/native_drag_drop_global.h"
 #include "load.h"
 #include "log/log.h"
 #include "pixel_map_taihe_ani.h"
@@ -577,125 +578,6 @@ bool CheckAndParseFirstParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx, 
     return ParseDragItemInfoParam(env, asyncCtx, dragItemInfo);
 }
 
-bool SetDragPreviewOptionMode(
-    ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object dragPreviewMode, bool& isAuto)
-{
-    if (isAuto) {
-        return true;
-    }
-    ani_int dragPreviewModeAni;
-    ani_status status = ANI_OK;
-    if ((status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(dragPreviewMode), &dragPreviewModeAni)) !=
-        ANI_OK) {
-        HILOGE("AceDrag, get dragPreviewMode enum failed. status = %{public}d", status);
-        return false;
-    }
-    auto mode = static_cast<NG::DragPreviewMode>(dragPreviewModeAni);
-    switch (mode) {
-        case NG::DragPreviewMode::AUTO:
-            asyncCtx.dragPreviewOption.ResetDragPreviewMode();
-            isAuto = true;
-            break;
-        case NG::DragPreviewMode::DISABLE_SCALE:
-            asyncCtx.dragPreviewOption.isScaleEnabled = false;
-            break;
-        case NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW:
-            asyncCtx.dragPreviewOption.isDefaultShadowEnabled = true;
-            break;
-        case NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS:
-            asyncCtx.dragPreviewOption.isDefaultRadiusEnabled = true;
-            break;
-        default:
-            HILOGW("AceDrag, invalid dragPreviewMode value: %{public}d", mode);
-            break;
-    }
-    return true;
-}
-
-bool ParseNumberBadge(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object numberBadgeAni)
-{
-    ani_status status = ANI_OK;
-    if (AniUtils::IsClassObject(env, numberBadgeAni, "Lstd/core/Boolean;")) {
-        asyncCtx.dragPreviewOption.isNumber = false;
-        ani_boolean aniValue;
-        if (env->Object_CallMethodByName_Boolean(numberBadgeAni, "unboxed", nullptr, &aniValue) == ANI_OK) {
-            asyncCtx.dragPreviewOption.isShowBadge = static_cast<bool>(aniValue);
-        }
-    } else if (AniUtils::IsClassObject(env, numberBadgeAni, "Lstd/core/Numeric;")) {
-        ani_double numberValue;
-        if ((status = env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(numberBadgeAni), "unboxed", ":D", &numberValue)) != ANI_OK) {
-            HILOGE("AceDrag, Object_CallMethodByName_Double failed. status = %{public}d", status);
-        }
-        auto number = static_cast<double>(numberValue);
-        if (number < 0 || number > INT_MAX) {
-            asyncCtx.dragPreviewOption.isNumber = false;
-            asyncCtx.dragPreviewOption.isShowBadge = true;
-        } else {
-            asyncCtx.dragPreviewOption.isNumber = true;
-            asyncCtx.dragPreviewOption.badgeNumber = static_cast<int32_t>(number);
-        }
-    } else if (!AniUtils::IsUndefined(env, numberBadgeAni)) {
-        HILOGE("AceDrag, numberBadge type is wrong.");
-        return false;
-    }
-    return true;
-}
-
-bool ParseModifier(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object modifierObj)
-{
-    if (AniUtils::IsUndefined(env, modifierObj)) {
-        return true;
-    }
-
-    ani_ref modifierFunc;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(modifierObj, "applyImageModifierToNode", &modifierFunc)) {
-        return false;
-    }
-    // modifierFunc may have two args
-    if (!AniUtils::IsClassObject(env, modifierFunc, "Lstd/core/Function2;")) {
-        HILOGE("AceDrag, applyImageModifierToNode is not a function object.");
-        return false;
-    }
-    //to do imageModifier
-    return true;
-}
-
-bool ParseDragPreviewMode(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object previewModeObj)
-{
-    if (AniUtils::IsUndefined(env, previewModeObj)) {
-        return true;
-    }
-    bool isAuto = false;
-    if (AniUtils::IsClassObject(env, previewModeObj, "Lescompat/Array;")) {
-        ani_double lengthAni;
-        if (ANI_OK != env->Object_GetPropertyByName_Double(previewModeObj, "length", &lengthAni)) {
-            HILOGE("AceDrag, Object_GetPropertyByName_Double failed.");
-            return false;
-        }
-        int32_t lengthInt = static_cast<int32_t>(lengthAni);
-        for (int32_t i = 0; i < lengthInt; i++) {
-            ani_ref modeRef;
-            if (ANI_OK != env->Object_CallMethodByName_Ref(
-                previewModeObj, "$_get", "I:Lstd/core/Object;", &modeRef, (ani_int)i)) {
-                HILOGE("AceDrag, Object_CallMethodByName_Ref failed.");
-                return false;
-            }
-            if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {
-                continue;
-            }
-            if (!SetDragPreviewOptionMode(env, asyncCtx, static_cast<ani_object>(modeRef), isAuto)) {
-                HILOGE("AceDrag, SetDragPreviewOptionMode failed.");
-                return false;
-            }
-        }
-    } else if (!SetDragPreviewOptionMode(env, asyncCtx, previewModeObj, isAuto)) {
-        HILOGE("AceDrag, SetDragPreviewOptionMode failed.");
-        return false;
-    }
-    return true;
-}
-
 bool ParsePreviewOptions(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object previewOptions)
 {
     CHECK_NULL_RETURN(env, false);
@@ -705,32 +587,20 @@ bool ParsePreviewOptions(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_o
     asyncCtx.dragPreviewOption.isNumber = false;
     asyncCtx.dragPreviewOption.isShowBadge = true;
 
-    ani_ref modeAni;
-    ani_ref numberBadgeAni;
-    ani_ref modifierAni;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(previewOptions, "mode", &modeAni)) {
-        HILOGE("AceDrag, get mode parameter failed.");
+    if (!ParseDragPreviewMode(env, asyncCtx.dragPreviewOption, previewOptions)) {
+        HILOGE("AceDrag, Parse DragPreviewMode failed.");
         return false;
     }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(previewOptions, "numberBadge", &numberBadgeAni)) {
-        HILOGE("AceDrag, get numberBadge parameter failed.");
+    if (!ParseDragPreviewModifier(env, asyncCtx.dragPreviewOption, previewOptions)) {
+        HILOGE("AceDrag, Parse DragPreviewModifier failed.");
         return false;
     }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(previewOptions, "modifier", &modifierAni)) {
-        HILOGE("AceDrag, get modifier parameter failed.");
+    if (!ParseNumberBadge(env, asyncCtx.dragPreviewOption, previewOptions)) {
+        HILOGE("AceDrag, Parse NumberBadge failed.");
         return false;
     }
-
-    if (!ParseDragPreviewMode(env, asyncCtx, static_cast<ani_object>(modeAni))) {
-        HILOGE("AceDrag, parse mode parameter failed.");
-        return false;
-    }
-    if (!ParseNumberBadge(env, asyncCtx, static_cast<ani_object>(numberBadgeAni))) {
-        HILOGE("AceDrag, parse numberBadge parameter failed.");
-        return false;
-    }
-    if (!ParseModifier(env, asyncCtx, static_cast<ani_object>(modifierAni))) {
-        HILOGE("AceDrag, parse modifier parameter failed.");
+    if (!ParseSizeChangeEffect(env, asyncCtx.dragPreviewOption, previewOptions)) {
+        HILOGE("AceDrag, Parse SizeChangeEffect failed.");
         return false;
     }
     return true;
