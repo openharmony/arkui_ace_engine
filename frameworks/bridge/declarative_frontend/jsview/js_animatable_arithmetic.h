@@ -53,7 +53,7 @@ public:
     RefPtr<CustomAnimatableArithmetic> Add(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
         RefPtr<JSAnimatableArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
-        if (!rhs) {
+        if (!rhs || addFunc_.IsEmpty()) {
             return {};
         }
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
@@ -69,7 +69,7 @@ public:
     RefPtr<CustomAnimatableArithmetic> Minus(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
         RefPtr<JSAnimatableArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
-        if (!rhs) {
+        if (!rhs || minusFunc_.IsEmpty()) {
             return {};
         }
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
@@ -84,6 +84,9 @@ public:
 
     RefPtr<CustomAnimatableArithmetic> Multiply(const float scale) const override
     {
+        if (multiplyFunc_.IsEmpty()) {
+            return {};
+        }
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
         JSRef<JSVal> argv[1] = { JSRef<JSVal>::Make(ToJSValue(scale)) };
         auto retVal = multiplyFunc_->Call(jsObject_, 1, argv);
@@ -97,7 +100,7 @@ public:
     bool IsEqual(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
         RefPtr<JSAnimatableArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
-        if (!rhs) {
+        if (!rhs || equalsFunc_.IsEmpty()) {
             return false;
         }
 
