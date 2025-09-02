@@ -32,23 +32,23 @@ const auto DEFAULT_ARK_UNIT = Ark_LengthMetricsUnit::ARK_LENGTH_METRICS_UNIT_DEF
 const std::string EXP_PATH = "CMDS:M0 0 L600 0";
 const std::string EXP_TRANSFORM = "TRANSFORM:100.000000,2.350000,5.420000,10.250000,12.340000,56.730000";
 
-std::vector<double> numberTestPlan = { 100, 10.25, 2.35, 5.42, 12.34, 56.73 };
-std::vector<std ::string> addPathTestPlan = {
+const std::vector<double> numberTestPlan = { 100, 10.25, 2.35, 5.42, 12.34, 56.73 };
+const std::vector<std ::string> addPathTestPlan = {
     EXP_PATH + " " + EXP_TRANSFORM + " ",
     EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " ",
     EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " ",
 };
-std::vector<std::tuple<std::string, std::string>> pathTestPlan = {
+const std::vector<std::tuple<std::string, std::string>> pathTestPlan = {
     { "M0 0 L600 0", "CMDS:M0 0 L600 0 " },
     { "M0 0 L100 0", "CMDS:M0 0 L100 0 " },
     { "", "CMDS: " },
 };
-std::vector<std::tuple<Ark_LengthMetricsUnit, Ace::CanvasUnit>> unitTestPlan = {
+const std::vector<std::tuple<Ark_LengthMetricsUnit, Ace::CanvasUnit>> unitTestPlan = {
     { ARK_LENGTH_METRICS_UNIT_DEFAULT, Ace::CanvasUnit::DEFAULT },
     { ARK_LENGTH_METRICS_UNIT_PX, Ace::CanvasUnit::PX },
     { static_cast<Ark_LengthMetricsUnit>(-1), Ace::CanvasUnit::DEFAULT },
 };
-std::vector<std::tuple<Ark_String, std::string>> pathStringTestPlan = {
+const std::vector<std::tuple<Ark_String, std::string>> pathStringTestPlan = {
     { Converter::ArkValue<Ark_String>("M0 0 L600 0 "), "CMDS:M0 0 L600 0  " },
     { Converter::ArkValue<Ark_String>("M0 0 L100 0 "), "CMDS:M0 0 L100 0  " },
     { Converter::ArkValue<Ark_String>(""), "" },
