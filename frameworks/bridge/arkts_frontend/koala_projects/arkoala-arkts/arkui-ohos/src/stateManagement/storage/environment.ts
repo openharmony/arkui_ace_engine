@@ -14,6 +14,7 @@
  */
 import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
+import { ColorMode, LayoutDirection } from './storageProperty';
 
 interface IAniEnvironment {
     getAccessibilityEnabled(): boolean;
@@ -105,6 +106,11 @@ class Environment {
                 break;
             case 'colorMode':
                 tmp = Environment.getOrCreate().aniEnvironment.getColorMode();
+                if (tmp ) {
+                    tmp = ColorMode.DARK;
+                } else {
+                    tmp = ColorMode.LIGHT;
+                }
                 break;
             case 'fontScale':
                 tmp = Environment.getOrCreate().aniEnvironment.getFontScale();
@@ -114,6 +120,13 @@ class Environment {
                 break;
             case 'layoutDirection':
                 tmp = Environment.getOrCreate().aniEnvironment.getLayoutDirection();
+                if (tmp === '0') {
+                    tmp = LayoutDirection.LTR;
+                } else if (tmp === '1') {
+                    tmp = LayoutDirection.RTL;
+                } else {
+                    tmp = LayoutDirection.Auto;
+                }
                 break;
             case 'languageCode':
                 tmp = Environment.getOrCreate().aniEnvironment.getLanguageCode();
