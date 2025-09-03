@@ -959,6 +959,41 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContext001, TestSize.Level1)
 #endif
 }
 
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContext002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnAttachContext
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->uiExtensionManager_ = nullptr;
+    auto newInstanceId = pipelineContext->GetInstanceId();
+    ASSERT_NE(newInstanceId, pattern->instanceId_);
+    pattern->UnRegisterEvent(newInstanceId);
+    ASSERT_EQ(pattern->hasDetachContext_, true);
+    pattern->OnAttachContext(AceType::RawPtr(pipelineContext));
+    ASSERT_EQ(pattern->hasDetachContext_, false);
+#endif
+}
+
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
  * @tc.desc: Test the method of pattern UpdateSessionInstanceId
