@@ -46,7 +46,7 @@ void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **resul
     CHECK_NULL_VOID(vm);
     ani_status status = ANI_OK;
     if (!attachCurrentThread) {
-        ani_option interopEnabled {"--interop=enable", nullptr};
+        ani_option interopEnabled {"--interop=disable", nullptr};
         ani_options aniArgs {1, &interopEnabled};
         status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, result);
         if (status == ANI_OK) {
