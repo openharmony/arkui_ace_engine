@@ -34,12 +34,13 @@ void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeVa
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorStyledStringController peer)
 {
     delete peer;
 }
-Ark_RichEditorStyledStringController ConstructImpl()
+Ark_RichEditorStyledStringController CtorImpl()
 {
     return new RichEditorStyledStringControllerPeer();
 }
@@ -56,7 +57,8 @@ void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
 }
 Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
-    auto mutableString = PeerUtils::CreatePeer<MutableStyledStringPeer>();
+    auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(
+        GetMutableStyledStringAccessor()->ctor(nullptr, nullptr));
     CHECK_NULL_RETURN(peer && mutableString, mutableString);
     mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
     return mutableString;
@@ -85,7 +87,7 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
         };
         peer->SetOnWillChange(std::move(onWillChange));
     } while (0);
-
+    
     // SetOnDidChange
     do {
         auto optValue = Converter::GetOpt(listener->onDidChange);
@@ -107,7 +109,7 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
 {
     static const GENERATED_ArkUIRichEditorStyledStringControllerAccessor RichEditorStyledStringControllerAccessorImpl {
         RichEditorStyledStringControllerAccessor::DestroyPeerImpl,
-        RichEditorStyledStringControllerAccessor::ConstructImpl,
+        RichEditorStyledStringControllerAccessor::CtorImpl,
         RichEditorStyledStringControllerAccessor::GetFinalizerImpl,
         RichEditorStyledStringControllerAccessor::SetStyledStringImpl,
         RichEditorStyledStringControllerAccessor::GetStyledStringImpl,

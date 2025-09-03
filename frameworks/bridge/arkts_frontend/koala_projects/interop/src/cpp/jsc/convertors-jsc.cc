@@ -16,16 +16,10 @@
 #include <MacTypes.h>
 #include <_types/_uint32_t.h>
 #include <_types/_uint8_t.h>
+#include <assert.h>
 #include <cstdint>
 
 #include "convertors-jsc.h"
-
-#include "interop-logging.h"
-#include "interop-utils.h"
-
-// See https://github.com/BabylonJS/BabylonNative/blob/master/Dependencies/napi/napi-direct/source/js_native_api_javascriptcore.cc
-// for convertors logic.
-
 
 KInt* getInt32Elements(JSContextRef context, const JSValueRef arguments) {
     return getTypedElements<KInt>(context, arguments);
@@ -61,7 +55,7 @@ int32_t getInt32(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
@@ -74,7 +68,7 @@ uint32_t getUInt32(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
@@ -87,7 +81,7 @@ uint8_t getUInt8(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
@@ -138,7 +132,7 @@ static JSObjectRef getBigIntFromParts(JSContextRef context) {
 static JSValueRef u64ToBigInt(JSContextRef context, uint64_t value) {
     JSValueRef bigint;
 #ifdef KOALA_JSC_USE_CALLBACK_CAST
-    // Improve: benchmark this
+    // TODO benchmark this
     JSObjectRef bigIntFromParts = getBigIntFromParts(context);
     JSValueRef parts[2] = {
         JSValueMakeNumber(context, (double) (value >> 32)),
@@ -147,7 +141,7 @@ static JSValueRef u64ToBigInt(JSContextRef context, uint64_t value) {
     bigint = JSObjectCallAsFunction(context, bigIntFromParts, nullptr, 2, parts, nullptr);
 #else
     char buffer[128] = {0};
-    interop_snprintf(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
+    std::snprintf(buffer, sizeof(buffer) - 1, "%zun", (size_t) value);
     JSStringRef script = JSStringCreateWithUTF8CString(buffer);
     bigint = JSEvaluateScript(context, script, nullptr, nullptr, 0, nullptr);
     JSStringRelease(script);
@@ -160,10 +154,10 @@ static uint64_t bigIntToU64(JSContextRef ctx, JSValueRef value) {
     JSStringRef strRef = JSValueToStringCopy(ctx, value, nullptr);
     size_t len = JSStringGetUTF8CString(strRef, buf, sizeof(buf));
     JSStringRelease(strRef);
-    ASSERT(len < sizeof(buf));
+    assert(len < sizeof(buf));
     char* suf;
     uint64_t numValue = std::strtoull(buf, &suf, 10);
-    ASSERT(*suf == '\0');
+    assert(*suf == '\0');
     return numValue;
 }
 
@@ -177,8 +171,8 @@ KNativePointerArray getPointerElements(JSContextRef context, JSValueRef value) {
         return nullptr;
     }
 
-    ASSERT(JSValueIsObject(context, value));
-    ASSERT(JSValueGetTypedArrayType(context, value, nullptr) == kJSTypedArrayTypeBigUint64Array);
+    assert(JSValueIsObject(context, value));
+    assert(JSValueGetTypedArrayType(context, value, nullptr) == kJSTypedArrayTypeBigUint64Array);
 
     JSObjectRef typedArray = JSValueToObject(context, value, nullptr);
     return reinterpret_cast<KNativePointerArray>(JSObjectGetTypedArrayBytesPtr(context, typedArray, nullptr));
@@ -190,23 +184,11 @@ KFloat getFloat(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
     return static_cast<KFloat>(result);
-}
-
-KDouble getDouble(JSContextRef context, JSValueRef value) {
-    JSValueRef exception {};
-    if (JSValueIsNull(context, value)) {
-        return 0;
-    }
-    if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
-        return 0;
-    }
-    return JSValueToNumber(context, value, &exception);
 }
 
 KShort getShort(JSContextRef context, JSValueRef value) {
@@ -215,7 +197,7 @@ KShort getShort(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
@@ -228,7 +210,7 @@ KUShort getUShort(JSContextRef context, JSValueRef value) {
         return 0;
     }
     if (JSValueIsUndefined(context, value)) {
-        ASSERT(false);
+        assert(false);
         return 0;
     }
     double result = JSValueToNumber(context, value, &exception);
@@ -269,10 +251,6 @@ JSValueRef makePointer(JSContextRef context, KNativePointer value) {
 }
 
 JSValueRef makeFloat(JSContextRef context, KFloat value) {
-    return JSValueMakeNumber(context, value);
-}
-
-JSValueRef makeDouble(JSContextRef context, KDouble value) {
     return JSValueMakeNumber(context, value);
 }
 

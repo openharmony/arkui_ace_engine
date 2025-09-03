@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
 {
     auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
     std::optional<Dimension> offset;
@@ -53,7 +53,7 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
 {
     static const GENERATED_ArkUIBaselineOffsetStyleAccessor BaselineOffsetStyleAccessorImpl {
         BaselineOffsetStyleAccessor::DestroyPeerImpl,
-        BaselineOffsetStyleAccessor::ConstructImpl,
+        BaselineOffsetStyleAccessor::CtorImpl,
         BaselineOffsetStyleAccessor::GetFinalizerImpl,
         BaselineOffsetStyleAccessor::GetBaselineOffsetImpl,
     };

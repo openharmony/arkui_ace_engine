@@ -23,7 +23,7 @@ void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
     delete peer;
 }
-Ark_SwiperContentTransitionProxy ConstructImpl()
+Ark_SwiperContentTransitionProxy CtorImpl()
 {
     return new SwiperContentTransitionProxyPeer();
 }
@@ -93,7 +93,7 @@ const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTrans
 {
     static const GENERATED_ArkUISwiperContentTransitionProxyAccessor SwiperContentTransitionProxyAccessorImpl {
         SwiperContentTransitionProxyAccessor::DestroyPeerImpl,
-        SwiperContentTransitionProxyAccessor::ConstructImpl,
+        SwiperContentTransitionProxyAccessor::CtorImpl,
         SwiperContentTransitionProxyAccessor::GetFinalizerImpl,
         SwiperContentTransitionProxyAccessor::FinishTransitionImpl,
         SwiperContentTransitionProxyAccessor::GetSelectedIndexImpl,

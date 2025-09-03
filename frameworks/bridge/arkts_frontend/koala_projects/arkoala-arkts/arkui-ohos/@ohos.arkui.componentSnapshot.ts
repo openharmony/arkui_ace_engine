@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AsyncCallback } from 'arkui/base';
+import { AsyncCallback } from 'arkui/component';
 import { PixelMap } from "#external";
 
 export declare namespace componentSnapshot {

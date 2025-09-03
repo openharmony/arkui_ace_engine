@@ -26,6 +26,7 @@ import curves from "@ohos.curves"
 
 export * from "@ohos.base"
 export * from "@ohos.arkui.drawableDescriptor"
+export { Scene } from "@ohos.graphics.scene"
 
 export type TranslateOption = matrix4.TranslateOption
 export type ScaleOption = matrix4.ScaleOption
@@ -46,3 +47,5 @@ export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary
 export type DataSyncOptions = unifiedDataChannel.GetDataParams
 export type UniformDataType = uniformTypeDescriptor.UniformDataType
+export type UIAbilityContext = common.UIAbilityContext
+export type ExtensionContext = common.ExtensionContext

@@ -19,6 +19,7 @@
 #include "image_analyzer_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -33,7 +34,6 @@ void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
             break;
     }
 }
-
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -45,7 +45,7 @@ void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_ImageAnalyzerController ConstructImpl()
+Ark_ImageAnalyzerController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ImageAnalyzerControllerPeer>();
     peerImpl->IncRefCount();
@@ -66,7 +66,7 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
 {
     static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
         ImageAnalyzerControllerAccessor::DestroyPeerImpl,
-        ImageAnalyzerControllerAccessor::ConstructImpl,
+        ImageAnalyzerControllerAccessor::CtorImpl,
         ImageAnalyzerControllerAccessor::GetFinalizerImpl,
         ImageAnalyzerControllerAccessor::GetImageAnalyzerSupportTypesImpl,
     };

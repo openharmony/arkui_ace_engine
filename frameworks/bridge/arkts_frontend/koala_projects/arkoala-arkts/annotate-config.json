@@ -2,7 +2,7 @@
 	"inputDir": "./arkui-ohos",
 	"outputDir": "./arkui-preprocessed",
 	"include": [
-        "./arkui-ohos/**/*.ts", "./arkui-ohos/*.ts", "./arkui-ohos/**/*.ets"
+        "./arkui-ohos/**/*.ts", "./arkui-ohos/*.ts"
     ],
 	"exclude": [
 		"./arkui-ohos/src/ani/ts/*.ts",

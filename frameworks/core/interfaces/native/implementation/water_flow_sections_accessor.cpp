@@ -55,7 +55,7 @@ std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
     }
     return dst;
 }
-void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src, ConvContext *ctx)
+void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src)
 {
     dst.itemsCount = Converter::ArkValue<Ark_Number>(src.itemsCount);
     dst.crossCount = Converter::ArkValue<Opt_Number>(src.crossCount);
@@ -67,9 +67,9 @@ void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& s
     auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex,
                                                    std::function<void(Ark_Number, Callback_Number_Void)>>(cb);
     dst.onGetItemMainSizeByIndex = Converter::ArkValue<Opt_GetItemMainSizeByIndex>(rc);
-    dst.columnsGap = Converter::ArkValue<Opt_Dimension>(src.columnsGap, ctx);
-    dst.rowsGap = Converter::ArkValue<Opt_Dimension>(src.rowsGap, ctx);
-    dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin, ctx);
+    dst.columnsGap = Converter::ArkValue<Opt_Length>(src.columnsGap);
+    dst.rowsGap = Converter::ArkValue<Opt_Length>(src.rowsGap);
+    dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin);
 }
 }
 
@@ -79,7 +79,7 @@ void DestroyPeerImpl(Ark_WaterFlowSections peer)
 {
     delete peer;
 }
-Ark_WaterFlowSections ConstructImpl()
+Ark_WaterFlowSections CtorImpl()
 {
     return new WaterFlowSectionsPeer();
 }
@@ -95,9 +95,9 @@ Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
     CHECK_NULL_RETURN(start, false);
-    auto deleteCountOpt = Converter::OptConvertPtr<int32_t>(deleteCount);
+    auto deleteCountOpt = Converter::OptConvert<int32_t>(*deleteCount);
     auto delCnt = deleteCountOpt ? deleteCountOpt.value() : 0;
-    auto sectionsOpt = Converter::OptConvertPtr<Array_SectionOptions>(sections);
+    auto sectionsOpt = sections ? Converter::OptConvert<Array_SectionOptions>(*sections) : std::nullopt;
     if (sectionsOpt) {
         auto sections = Converter::OptConvert<std::vector<WaterFlowSections::Section>>(*sectionsOpt);
         peer->GetController()->ChangeData(Converter::Convert<int32_t>(*start), delCnt, sections.value());
@@ -151,7 +151,7 @@ const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()
 {
     static const GENERATED_ArkUIWaterFlowSectionsAccessor WaterFlowSectionsAccessorImpl {
         WaterFlowSectionsAccessor::DestroyPeerImpl,
-        WaterFlowSectionsAccessor::ConstructImpl,
+        WaterFlowSectionsAccessor::CtorImpl,
         WaterFlowSectionsAccessor::GetFinalizerImpl,
         WaterFlowSectionsAccessor::SpliceImpl,
         WaterFlowSectionsAccessor::PushImpl,

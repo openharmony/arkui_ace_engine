@@ -15,13 +15,13 @@
 
 import { float64, int32, int8 } from "./types"
 
-// Improve: this can be a performance disaster
+// TODO: this can be a performance disaster
 // just wait for the library to provide the proper functionality.
 export function asArray<T>(value: T[]): Array<T> {
     return Array.of<T>(...value)
 }
 
-// Improve: this can be a performance disaster
+// TODO: this can be a performance disaster
 // just wait for the library to provide the proper functionality.
 export function Array_from_set<T>(set: Set<T>): Array<T> {
     const array = new Array<T>() // to avoid creation of undefined content
@@ -32,7 +32,7 @@ export function Array_from_set<T>(set: Set<T>): Array<T> {
     return array
 }
 
-// Improve: this can be a performance disaster
+// TODO: this can be a performance disaster
 // just wait for the library to provide the proper functionality.
 export function Array_from_int32(data: Int32Array): number[] {
     const result: number[] = []
@@ -42,7 +42,7 @@ export function Array_from_int32(data: Int32Array): number[] {
     return result
 }
 
-// Improve: this can be a performance disaster
+// TODO: this can be a performance disaster
 // just wait for the library to provide the proper functionality.
 export function Array_from_number(data: float64[]): Array<float64> {
     const result = new Array<number>(data.length)
@@ -52,8 +52,7 @@ export function Array_from_number(data: float64[]): Array<float64> {
     return result
 }
 
-export function int8Array(size: int32): FixedArray<int8> {
-    const array: FixedArray<int8> = new int8[size]
-    return array
+export function int8Array(size: int32): int8[] {
+    return new int8[size]
 }
 

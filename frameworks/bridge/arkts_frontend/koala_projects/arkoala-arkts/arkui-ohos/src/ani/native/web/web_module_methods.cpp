@@ -124,7 +124,7 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
         ani_int nwebId;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Int(
-            reinterpret_cast<ani_object>(object), "getWebId", ":I", &nwebId) != ANI_OK) {
+            reinterpret_cast<ani_object>(object), "innerGetWebId", ":I", &nwebId) != ANI_OK) {
             return -1;
         }
         return static_cast<int32_t>(nwebId);

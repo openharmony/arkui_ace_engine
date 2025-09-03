@@ -54,7 +54,7 @@ export abstract class ArrayDecoder<T> {
 }
 
 
-// Improve: the semicolons after methods in these interfaces are to
+// TODO: the semicolons after methods in these interfaces are to
 // workaround ArkTS compiler parser bug
 export interface CallbackRegistry {
     registerCallback(callback: any, obj: any): KPointer;

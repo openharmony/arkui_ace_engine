@@ -97,7 +97,7 @@ public:
     {
         return ViewAbstract::GetWindowHeightBreakpoint();
     }
-
+    
     static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
     {
         ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
@@ -279,7 +279,7 @@ public:
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
-    static void SetBias(FrameNode* frameNode, const std::optional<float>& horizontal,
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
         const std::optional<float>& vertical);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);

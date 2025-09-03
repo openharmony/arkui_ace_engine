@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BackgroundColorStyle ConstructImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
+Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
     auto peer = PeerUtils::CreatePeer<BackgroundColorStylePeer>();
     TextBackgroundStyle style = textBackgroundStyle
@@ -52,7 +52,7 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
 {
     static const GENERATED_ArkUIBackgroundColorStyleAccessor BackgroundColorStyleAccessorImpl {
         BackgroundColorStyleAccessor::DestroyPeerImpl,
-        BackgroundColorStyleAccessor::ConstructImpl,
+        BackgroundColorStyleAccessor::CtorImpl,
         BackgroundColorStyleAccessor::GetFinalizerImpl,
         BackgroundColorStyleAccessor::GetTextBackgroundStyleImpl,
     };

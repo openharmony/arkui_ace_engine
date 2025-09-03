@@ -30,9 +30,6 @@ export class ResourceHolder {
     private static nextResourceId: ResourceId = 100 
     private resources: Map<ResourceId, ResourceInfo> = new Map<ResourceId, ResourceInfo>()
     private static _instance: ResourceHolder|undefined = undefined
-    private static disposables = new Array<Disposable>();
-    private static disposablesSize = 0
-
     static instance(): ResourceHolder {
         if (ResourceHolder._instance == undefined) {
             ResourceHolder._instance = new ResourceHolder()
@@ -41,18 +38,21 @@ export class ResourceHolder {
     }
 
     public hold(resourceId: ResourceId) {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists, can not hold`)
+        }
         this.resources.get(resourceId)!.holdersCount++
     }
 
     public release(resourceId: ResourceId) {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists, can not release`)
+        }
         const resource = this.resources.get(resourceId)!
         resource.holdersCount--
-        if (resource.holdersCount <= 0)
+        if (resource.holdersCount <= 0) {
             this.resources.delete(resourceId)
+        }
     }
 
     public registerAndHold(resource: object): ResourceId {
@@ -65,42 +65,13 @@ export class ResourceHolder {
     }
 
     public get(resourceId: ResourceId): object {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists`)
+        }
         return this.resources.get(resourceId)!.resource
     }
 
     public has(resourceId: ResourceId): boolean {
         return this.resources.has(resourceId)
-    }
-
-    static register(resource: Disposable) {
-        if (ResourceHolder.disposablesSize < ResourceHolder.disposables.length) {
-            ResourceHolder.disposables[ResourceHolder.disposablesSize] = resource
-        } else {
-            ResourceHolder.disposables.push(resource)
-        }
-        ResourceHolder.disposablesSize++
-    }
-
-    static unregister(resource: Disposable) {
-        const index = ResourceHolder.disposables.indexOf(resource);
-        if (index !== -1 && index < ResourceHolder.disposablesSize) {
-            if (index !== ResourceHolder.disposablesSize - 1) {
-                ResourceHolder.disposables[index] = ResourceHolder.disposables[ResourceHolder.disposablesSize - 1];
-            }
-            ResourceHolder.disposablesSize--;
-        }
-    }
-
-    static disposeAll() {
-        for (let i = 0; i < ResourceHolder.disposablesSize; ++i) {
-            ResourceHolder.disposables[i].dispose()
-        }
-        ResourceHolder.disposablesSize = 0
-    }
-
-    static compactDisposables() {
-        ResourceHolder.disposables = ResourceHolder.disposables.slice(0, ResourceHolder.disposablesSize);
     }
 }

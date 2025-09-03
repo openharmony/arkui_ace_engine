@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_GestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_GestureEvent ConstructImpl()
+Ark_GestureEvent CtorImpl()
 {
     return PeerUtils::CreatePeer<GestureEventPeer>();
 }
@@ -289,7 +289,7 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
 {
     static const GENERATED_ArkUIGestureEventAccessor GestureEventAccessorImpl {
         GestureEventAccessor::DestroyPeerImpl,
-        GestureEventAccessor::ConstructImpl,
+        GestureEventAccessor::CtorImpl,
         GestureEventAccessor::GetFinalizerImpl,
         GestureEventAccessor::GetRepeatImpl,
         GestureEventAccessor::SetRepeatImpl,

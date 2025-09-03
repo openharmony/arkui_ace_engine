@@ -22,9 +22,9 @@ namespace MeasurableAccessor {
 void DestroyPeerImpl(Ark_Measurable peer)
 {
 }
-Ark_Measurable ConstructImpl()
+Ark_Measurable CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,7 +52,7 @@ Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
     return {};
 }
 void SetUniqueIdImpl(Ark_Measurable peer,
-                     const Opt_Number* uniqueId)
+                     const Ark_Number* uniqueId)
 {
 }
 } // MeasurableAccessor
@@ -60,7 +60,7 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
 {
     static const GENERATED_ArkUIMeasurableAccessor MeasurableAccessorImpl {
         MeasurableAccessor::DestroyPeerImpl,
-        MeasurableAccessor::ConstructImpl,
+        MeasurableAccessor::CtorImpl,
         MeasurableAccessor::GetFinalizerImpl,
         MeasurableAccessor::MeasureImpl,
         MeasurableAccessor::GetMarginImpl,

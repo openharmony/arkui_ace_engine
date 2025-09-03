@@ -28,6 +28,3 @@ export @interface memo_stable {}
 
 @Retention({policy: "SOURCE"})
 export @interface memo_skip {}
-
-@Retention({policy: "SOURCE"})
-export @interface memo_wrap {}

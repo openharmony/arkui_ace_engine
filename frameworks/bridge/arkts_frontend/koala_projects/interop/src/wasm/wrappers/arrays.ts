@@ -32,7 +32,7 @@ export function encodeToData(string: string): Uint8Array {
 
 type Heap = { readonly buffer: ArrayBuffer }
 
-// Improve: actually memory allocation primitives are defined for a specific intance instance,
+// TODO actually memory allocation primitives are defined for a specific intance instance,
 // refactor me
 declare const _heaps: {
     HEAP8(): Heap;

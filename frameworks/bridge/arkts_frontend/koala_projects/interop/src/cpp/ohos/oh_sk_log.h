@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef OH_SK_LOG_H
-#define OH_SK_LOG_H
+#pragma once
 
 #include <hilog/log.h>
 
@@ -56,5 +55,3 @@ const char* oh_sk_log_type_str(oh_sk_log_type type);
 #define OH_SK_LOG_FATAL_A(msg, ...) OH_LOG_Print(LOG_APP, LOG_FATAL, 0xFF00, "Koala", msg, ##__VA_ARGS__)
 
 #endif
-
-#endif // OH_SK_LOG_H

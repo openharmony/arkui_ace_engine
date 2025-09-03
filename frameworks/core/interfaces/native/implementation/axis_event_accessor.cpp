@@ -41,7 +41,7 @@ void DestroyPeerImpl(Ark_AxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_AxisEvent ConstructImpl()
+Ark_AxisEvent CtorImpl()
 {
     return PeerUtils::CreatePeer<AxisEventPeer>();
 }
@@ -71,7 +71,7 @@ Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_AxisAction>(AxisAction::NONE);
+    const auto errValue = static_cast<Ark_AxisAction>(-1);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
@@ -84,10 +84,7 @@ void SetActionImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto aceAxisAction = Converter::OptConvert<AxisAction>(action);
-    if (aceAxisAction) {
-        info->SetAction(aceAxisAction.value());
-    }
+    info->SetAction(Converter::OptConvert<AxisAction>(action).value_or(AxisAction::NONE));
 }
 Ark_Number GetDisplayXImpl(Ark_AxisEvent peer)
 {
@@ -131,7 +128,7 @@ void SetDisplayYImpl(Ark_AxisEvent peer,
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto screenLocation = info->GetScreenLocation();
-    const auto animation = screenLocation.GetXAnimationOption();
+    const auto animation = screenLocation.GetYAnimationOption();
     auto value = Converter::Convert<float>(*displayY);
     auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
     screenLocation.SetY(yConvert, animation);
@@ -242,7 +239,7 @@ Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
     return Converter::ArkValue<Opt_Number>(info->GetScrollStep());
 }
 void SetScrollStepImpl(Ark_AxisEvent peer,
-                       const Opt_Number* scrollStep)
+                       const Ark_Number* scrollStep)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(scrollStep);
@@ -273,7 +270,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
 {
     static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
         AxisEventAccessor::DestroyPeerImpl,
-        AxisEventAccessor::ConstructImpl,
+        AxisEventAccessor::CtorImpl,
         AxisEventAccessor::GetFinalizerImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,

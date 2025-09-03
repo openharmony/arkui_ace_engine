@@ -26,9 +26,7 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
-    return LeadingMarginSize(
-        OptConvert<Dimension>(src.value0).value_or(Dimension()),
-        OptConvert<Dimension>(src.value1).value_or(Dimension()));
+    return LeadingMarginSize(Convert<Dimension>(src.value0), Convert<Dimension>(src.value1));
 }
 template<>
 OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
@@ -64,11 +62,12 @@ void DestroyPeerImpl(Ark_ParagraphStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ParagraphStyle ConstructImpl(const Opt_ParagraphStyleInterface* value)
+Ark_ParagraphStyle CtorImpl(const Opt_ParagraphStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<ParagraphStylePeer>();
+    CHECK_NULL_RETURN(value, peer);
 
-    SpanParagraphStyle paragraph = Converter::OptConvertPtr<SpanParagraphStyle>(value).value_or(SpanParagraphStyle());
+    SpanParagraphStyle paragraph = Converter::OptConvert<SpanParagraphStyle>(*value).value_or(SpanParagraphStyle());
     peer->span = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraph);
 
     return peer;
@@ -146,7 +145,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
 {
     static const GENERATED_ArkUIParagraphStyleAccessor ParagraphStyleAccessorImpl {
         ParagraphStyleAccessor::DestroyPeerImpl,
-        ParagraphStyleAccessor::ConstructImpl,
+        ParagraphStyleAccessor::CtorImpl,
         ParagraphStyleAccessor::GetFinalizerImpl,
         ParagraphStyleAccessor::GetTextAlignImpl,
         ParagraphStyleAccessor::GetTextIndentImpl,

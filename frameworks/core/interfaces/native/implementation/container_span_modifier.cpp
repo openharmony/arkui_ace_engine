@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_static.h"
@@ -25,6 +26,9 @@ namespace ContainerSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components ContainerSpan used in ParallelizeUI");
+    }
     auto spanNode = SpanModelStatic::CreateContainerSpanNode(id);
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
@@ -38,14 +42,14 @@ void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 }
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
-void SetTextBackgroundStyleImpl(Ark_NativePointer node,
-                                const Opt_TextBackgroundStyle* value)
+void TextBackgroundStyleImpl(Ark_NativePointer node,
+                             const Opt_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
+    auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
@@ -56,7 +60,7 @@ const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
     static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
         ContainerSpanModifier::ConstructImpl,
         ContainerSpanInterfaceModifier::SetContainerSpanOptionsImpl,
-        ContainerSpanAttributeModifier::SetTextBackgroundStyleImpl,
+        ContainerSpanAttributeModifier::TextBackgroundStyleImpl,
     };
     return &ArkUIContainerSpanModifierImpl;
 }

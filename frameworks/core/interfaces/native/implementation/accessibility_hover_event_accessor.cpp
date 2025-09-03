@@ -28,7 +28,7 @@ void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_AccessibilityHoverEvent ConstructImpl()
+Ark_AccessibilityHoverEvent CtorImpl()
 {
     return PeerUtils::CreatePeer<AccessibilityHoverEventPeer>();
 }
@@ -202,7 +202,7 @@ const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEvent
 {
     static const GENERATED_ArkUIAccessibilityHoverEventAccessor AccessibilityHoverEventAccessorImpl {
         AccessibilityHoverEventAccessor::DestroyPeerImpl,
-        AccessibilityHoverEventAccessor::ConstructImpl,
+        AccessibilityHoverEventAccessor::CtorImpl,
         AccessibilityHoverEventAccessor::GetFinalizerImpl,
         AccessibilityHoverEventAccessor::GetTypeImpl,
         AccessibilityHoverEventAccessor::SetTypeImpl,

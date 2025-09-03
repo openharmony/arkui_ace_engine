@@ -1,35 +1,35 @@
-import { Position, SizeOptions, Length, ResourceColor } from 'arkui/framework'
-export interface ShapeSize {
+import { Position, SizeOptions, Length, ResourceColor } from "arkui/component/units";
+interface ShapeSize {
 
     width?: number | string;
 
     height?: number | string;
 }
 
-export interface RectShapeOptions extends ShapeSize {
+interface RectShapeOptions extends ShapeSize {
 
     radius?: number | string | Array<number | string>;
 }
 
-export interface RoundRectShapeOptions extends ShapeSize {
+interface RoundRectShapeOptions extends ShapeSize {
 
     radiusWidth?: number | string;
 
     radiusHeight?: number | string;
 }
 
-export interface PathShapeOptions {
+interface PathShapeOptions {
 
     commands?: string;
 }
 
-export declare class CommonShapeMethod<T> {
+declare class CommonShapeMethod<T> {
     public offset(offset: Position): T;
     public fill(color: ResourceColor): T;
     public position(position: Position): T;
 }
 
-export declare class BaseShape<T> extends CommonShapeMethod<T> {
+declare class BaseShape<T> extends CommonShapeMethod<T> {
     public width(width: Length): T;
     public height(height: Length): T;
     public size(size: SizeOptions): T;

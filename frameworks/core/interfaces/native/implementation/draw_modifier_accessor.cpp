@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_DrawModifier peer)
     peer->drawModifier = nullptr;
     delete peer;
 }
-Ark_DrawModifier ConstructImpl()
+Ark_DrawModifier CtorImpl()
 {
     auto peer = new DrawModifierPeer();
     peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
@@ -36,6 +36,21 @@ Ark_DrawModifier ConstructImpl()
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+void DrawBehindImpl(Ark_DrawModifier peer,
+                    const Ark_DrawContext* drawContext)
+{
+    LOGE("DrawModifierAccessor::DrawBehindImpl - is not implemented");
+}
+void DrawContentImpl(Ark_DrawModifier peer,
+                     const Ark_DrawContext* drawContext)
+{
+    LOGE("DrawModifierAccessor::DrawContentImpl - is not implemented");
+}
+void DrawFrontImpl(Ark_DrawModifier peer,
+                   const Ark_DrawContext* drawContext)
+{
+    LOGE("DrawModifierAccessor::DrawFrontImpl - is not implemented");
 }
 void InvalidateImpl(Ark_DrawModifier peer)
 {
@@ -50,34 +65,17 @@ void InvalidateImpl(Ark_DrawModifier peer)
         }
     }
 }
-Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
-{
-    return {};
-}
-void SetDrawBehind_callbackImpl(Ark_DrawModifier peer,
-                                const Callback_DrawContext_Void* drawBehind_callback)
-{
-}
-Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
-{
-    return {};
-}
-void SetDrawContent_callbackImpl(Ark_DrawModifier peer,
-                                 const Callback_DrawContext_Void* drawContent_callback)
-{
-}
 } // DrawModifierAccessor
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
 {
     static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
         DrawModifierAccessor::DestroyPeerImpl,
-        DrawModifierAccessor::ConstructImpl,
+        DrawModifierAccessor::CtorImpl,
         DrawModifierAccessor::GetFinalizerImpl,
+        DrawModifierAccessor::DrawBehindImpl,
+        DrawModifierAccessor::DrawContentImpl,
+        DrawModifierAccessor::DrawFrontImpl,
         DrawModifierAccessor::InvalidateImpl,
-        DrawModifierAccessor::GetDrawBehind_callbackImpl,
-        DrawModifierAccessor::SetDrawBehind_callbackImpl,
-        DrawModifierAccessor::GetDrawContent_callbackImpl,
-        DrawModifierAccessor::SetDrawContent_callbackImpl,
     };
     return &DrawModifierAccessorImpl;
 }

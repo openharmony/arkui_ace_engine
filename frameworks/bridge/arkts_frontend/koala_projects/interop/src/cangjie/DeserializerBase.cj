@@ -29,34 +29,20 @@ public class CallbackResource {
 }
 
 public open class DeserializerBase {
-    private var position: Int32 = 0
-    public var length: Int32 = 96 // make private
-    public var buffer: pointer // make private
+    private var position = 0
+    private var length = 96
+    private var buffer: Array<UInt8>
 
-    public init(buffer: UInt64, length: Int32) {
+    public init(buffer: Array<UInt8>, length: Int64) {
         this.buffer = buffer
         this.length = length
     }
-    public init(buffer: Array<UInt8>, length: Int32) {
-        this.buffer = InteropNativeModule._Malloc(length)
-        for (i in 0..length) {
-            DeserializerBase.writeu8(this.buffer, i, length, buffer[Int64(i)])
-        }
-        this.length = length
+
+    public func asArray(position: Int64, length: Int64): ArrayList<UInt8> {
+        return ArrayList<UInt8>()
     }
 
-    private static func writeu8(buffer: pointer, offset: Int32, length: Int32, value: UInt8): Unit {
-        InteropNativeModule._WriteByte(buffer, Int64(offset), Int64(length), Int32(value))
-    }
-    private static func readu8(buffer: pointer, offset: Int32, length: Int32): Int32 {
-        return InteropNativeModule._ReadByte(buffer, Int64(offset), Int64(length))
-    }
-
-    public func asBuffer(): pointer {
-        return this.buffer
-    }
-
-    public func currentPosition(): Int32 {
+    public func currentPosition(): Int64 {
         return this.position
     }
 
@@ -64,7 +50,7 @@ public open class DeserializerBase {
         this.position = 0
     }
 
-    private func checkCapacity(value: Int32) {
+    private func checkCapacity(value: Int64) {
         if (value > this.length) {
             throw Exception("${value} is less than remaining buffer length")
         }
@@ -72,75 +58,61 @@ public open class DeserializerBase {
 
     public func readInt8(): Int8 {
         this.checkCapacity(1)
-        var res = DeserializerBase.readu8(this.buffer, this.position, this.length)
+        let res = Int8.readLittleEndian(this.buffer[this.position..this.position+1])
         this.position += 1
-        return Int8(res)
+        return res
     }
 
     public func readInt32(): Int32 {
         this.checkCapacity(4)
-        let arr = Array<UInt8>(4, {i => UInt8(DeserializerBase.readu8(this.buffer, this.position + Int32(i), this.length))})
+        let res = Int32.readLittleEndian(this.buffer[this.position..this.position+4])
         this.position += 4
-        return Int32.readLittleEndian(arr)
+        return res
     }
 
     public func readInt64(): Int64 {
         this.checkCapacity(8)
-        let arr = Array<UInt8>(8, {i => UInt8(DeserializerBase.readu8(this.buffer, this.position + Int32(i), this.length))})
+        let res = Int64.readLittleEndian(this.buffer[this.position..this.position+8])
         this.position += 8
-        return Int64.readLittleEndian(arr)
+        return res
     }
 
     public func readPointer(): KPointer {
         this.checkCapacity(8)
-        let arr = Array<UInt8>(8, {i => UInt8(DeserializerBase.readu8(this.buffer, this.position + Int32(i), this.length))})
+        let res = UInt64.readLittleEndian(this.buffer[this.position..this.position+8])
         this.position += 8
-        return UInt64.readLittleEndian(arr)
+        return res
     }
 
     public func readFloat32(): Float32 {
         this.checkCapacity(4)
-        let arr = Array<UInt8>(4, {i => UInt8(DeserializerBase.readu8(this.buffer, this.position + Int32(i), this.length))})
+        let res = Float32.readLittleEndian(this.buffer[this.position..this.position+4])
         this.position += 4
-        return Float32.readLittleEndian(arr)
-    }
-    public func readFloat64(): Float64 {
-        this.checkCapacity(8)
-        let arr = Array<UInt8>(8, {i => UInt8(DeserializerBase.readu8(this.buffer, this.position + Int32(i), this.length))})
-        this.position += 8
-        return Float64.readLittleEndian(arr)
+        return res
     }
 
     public func readBoolean(): Bool {
-        var byteVal = DeserializerBase.readu8(this.buffer, this.position, this.length)
+        let res = Bool.readLittleEndian(this.buffer[this.position..this.position+1])
         this.position += 1
-        return byteVal == 1
+        return res
     }
 
+    // readMaterialized(): object {
+    //     const ptr = this.readPointer()
+    //     return { ptr: ptr }
+    // }
+
     public func readString(): String {
-        let length = this.readInt32()
+        let length = Int64(this.readInt32())
         this.checkCapacity(length)
         // read without null-terminated byte
-        let value = InteropNativeModule._Utf8ToString(this.buffer, Int32(this.position), Int32(length))
+        let value = InteropNativeModule._Utf8ToString(this.buffer.toArray(), Int32(this.position), Int32(length))
         this.position += length
         return value
     }
 
-    public func readCustomObject(kind: String): Object {
+    public func readCustomObject(kind: String): Object{
         throw Exception("readCustomObject")
-    }
-
-    public func readObject(): Any {
-        let resource = this.readCallbackResource()
-        return ResourceHolder.instance().get(resource.resourceId)
-    }
-
-    public func readBuffer(): Array<UInt8> {
-        return Array<UInt8>()
-    }
-
-    public func readFunction(): Any {
-        return { => }
     }
 
     public func readNumber(): Float64 {

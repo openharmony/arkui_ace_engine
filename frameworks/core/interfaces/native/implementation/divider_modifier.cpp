@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/utility/converter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/divider/divider_model_ng_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerModifier {
@@ -38,51 +38,57 @@ void SetDividerOptionsImpl(Ark_NativePointer node)
 } // DividerInterfaceModifier
 
 namespace DividerAttributeModifier {
-void SetVerticalImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void VerticalImpl(Ark_NativePointer node,
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     DividerModelNG::SetVertical(frameNode, *convValue);
 }
-void SetColorImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
+
+void ColorImpl(Ark_NativePointer node,
+               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String* value)
+
+void StrokeWidthImpl(Ark_NativePointer node,
+                     const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonPercent(optValue);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
+        optValue.reset();
+    }
     DividerModelNGStatic::StrokeWidth(frameNode, optValue);
 }
-void SetLineCapImpl(Ark_NativePointer node,
-                    const Opt_LineCapStyle* value)
+
+void LineCapImpl(Ark_NativePointer node,
+                 const Opt_LineCapStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvertPtr<LineCap>(value));
+    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvert<LineCap>(*value));
 }
+
 } // DividerAttributeModifier
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {
     static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
         DividerModifier::ConstructImpl,
         DividerInterfaceModifier::SetDividerOptionsImpl,
-        DividerAttributeModifier::SetVerticalImpl,
-        DividerAttributeModifier::SetColorImpl,
-        DividerAttributeModifier::SetStrokeWidthImpl,
-        DividerAttributeModifier::SetLineCapImpl,
+        DividerAttributeModifier::VerticalImpl,
+        DividerAttributeModifier::ColorImpl,
+        DividerAttributeModifier::StrokeWidthImpl,
+        DividerAttributeModifier::LineCapImpl,
     };
     return &ArkUIDividerModifierImpl;
 }

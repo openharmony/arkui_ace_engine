@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_IndicatorComponentController peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_IndicatorComponentController ConstructImpl()
+Ark_IndicatorComponentController CtorImpl()
 {
     return PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
 }
@@ -59,7 +59,7 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
 {
     static const GENERATED_ArkUIIndicatorComponentControllerAccessor IndicatorComponentControllerAccessorImpl {
         IndicatorComponentControllerAccessor::DestroyPeerImpl,
-        IndicatorComponentControllerAccessor::ConstructImpl,
+        IndicatorComponentControllerAccessor::CtorImpl,
         IndicatorComponentControllerAccessor::GetFinalizerImpl,
         IndicatorComponentControllerAccessor::ShowNextImpl,
         IndicatorComponentControllerAccessor::ShowPreviousImpl,

@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_JsResult peer)
 {
     delete peer;
 }
-Ark_JsResult ConstructImpl()
+Ark_JsResult CtorImpl()
 {
     return new JsResultPeer();
 }
@@ -56,7 +56,7 @@ const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
 {
     static const GENERATED_ArkUIJsResultAccessor JsResultAccessorImpl {
         JsResultAccessor::DestroyPeerImpl,
-        JsResultAccessor::ConstructImpl,
+        JsResultAccessor::CtorImpl,
         JsResultAccessor::GetFinalizerImpl,
         JsResultAccessor::HandleCancelImpl,
         JsResultAccessor::HandleConfirmImpl,

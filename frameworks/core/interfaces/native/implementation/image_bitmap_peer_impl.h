@@ -18,16 +18,13 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 struct ImageBitmapPeer : public OHOS::Ace::Referenced {
-protected:
+public:
     ImageBitmapPeer();
     virtual ~ImageBitmapPeer() = default;
-    friend OHOS::Ace::NG::PeerUtils;
 
-public:
     void SetOptions(const std::string& textString, const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelMap = nullptr,
         int32_t unitValue = 0);
     void OnClose();

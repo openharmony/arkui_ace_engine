@@ -25,9 +25,12 @@ void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_HierarchicalSymbolEffect ConstructImpl(const Opt_EffectFillStyle* fillStyle)
+Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
 {
-    auto optFillStyle = Converter::OptConvertPtr<OHOS::Ace::FillStyle>(fillStyle);
+    std::optional<OHOS::Ace::FillStyle> optFillStyle;
+    if (fillStyle) {
+        optFillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
+    }
     return PeerUtils::CreatePeer<HierarchicalSymbolEffectPeer>(optFillStyle);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -49,17 +52,17 @@ Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
     }
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
-                      const Opt_EffectFillStyle* fillStyle)
+                      Ark_EffectFillStyle fillStyle)
 {
     CHECK_NULL_VOID(peer);
-    peer->fillStyle = Converter::OptConvertPtr<OHOS::Ace::FillStyle>(fillStyle);
+    peer->fillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(fillStyle);
 }
 } // HierarchicalSymbolEffectAccessor
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIHierarchicalSymbolEffectAccessor HierarchicalSymbolEffectAccessorImpl {
         HierarchicalSymbolEffectAccessor::DestroyPeerImpl,
-        HierarchicalSymbolEffectAccessor::ConstructImpl,
+        HierarchicalSymbolEffectAccessor::CtorImpl,
         HierarchicalSymbolEffectAccessor::GetFinalizerImpl,
         HierarchicalSymbolEffectAccessor::GetFillStyleImpl,
         HierarchicalSymbolEffectAccessor::SetFillStyleImpl,

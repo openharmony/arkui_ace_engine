@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
+const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
 } // namespace GeneratedModifier
 namespace Converter {
@@ -68,7 +69,7 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
+            [](const Ark_DrawingColorFilter& colorStrategy) {
                 LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
             },
             []() {
@@ -82,7 +83,7 @@ template<>
 RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
 {
     ImageSpanOptions imageOptions;
-    auto resourceStrOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(value.resourceValue);
+    auto resourceStrOpt = Converter::OptConvert<Converter::SimpleResource>(value.resourceValue);
     if (resourceStrOpt.has_value()) {
         imageOptions.bundleName = resourceStrOpt->bundleName;
         imageOptions.moduleName = resourceStrOpt->moduleName;
@@ -101,7 +102,7 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
+            [](const Ark_DrawingColorFilter& colorStrategy) {
                 LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
             },
             []() {
@@ -111,13 +112,25 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 
-void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
+void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src)
 {
     Ark_ImageAttachmentLayoutStyle style = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(src.borderRadius, ctx),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
     };
+    if (src.marginProp) {
+        auto arkMargin = ArkValue<Ark_Padding>(*(src.marginProp));
+        style.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkMargin);
+    }
+    if (src.paddingProp) {
+        auto arkPadding = ArkValue<Ark_Padding>(*(src.paddingProp));
+        style.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding);
+    }
+    if (src.borderRadius) {
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(*src.borderRadius);
+        style.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+    }
     dst = style;
 }
 } // namespace Converter
@@ -130,7 +143,7 @@ void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
 {
     auto peer = PeerUtils::CreatePeer<ImageAttachmentPeer>();
     CHECK_NULL_RETURN(value, peer);
@@ -143,10 +156,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_image_PixelMap GetValueImpl(Ark_ImageAttachment peer)
+Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
 #if defined(PIXEL_MAP_SUPPORTED) || defined(PIXEL_MAP_TEST_SUPPORTED)
-    auto arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
+    auto arkPixelMap = GetPixelMapAccessor()->ctor();
     CHECK_NULL_RETURN(peer && peer->span, arkPixelMap);
     auto pixelMap = peer->span->GetImageSpanOptions().imagePixelMap;
     CHECK_NULL_RETURN(pixelMap, arkPixelMap);
@@ -165,8 +178,8 @@ Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     CHECK_NULL_RETURN(peer->span->GetImageAttribute(), invalid);
     CHECK_NULL_RETURN(peer->span->GetImageAttribute()->size, invalid);
     Ark_SizeOptions size;
-    size.width = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->width, Converter::FC);
-    size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height, Converter::FC);
+    size.width = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->width);
+    size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height);
     return Converter::ArkValue<Opt_SizeOptions>(size);
 }
 Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
@@ -189,7 +202,7 @@ Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
     auto invalid = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
-    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute(), Converter::FC);
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute());
 }
 Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
@@ -203,7 +216,7 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
         ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
         auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
-        auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->construct(&arrayNumber);
+        auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->ctor(&arrayNumber);
         return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {
         LOGE("Arkoala: ImageAttachmentAccessor.GetColorFilter: DrawinColorFilter doesn't supported");
@@ -215,7 +228,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
 {
     static const GENERATED_ArkUIImageAttachmentAccessor ImageAttachmentAccessorImpl {
         ImageAttachmentAccessor::DestroyPeerImpl,
-        ImageAttachmentAccessor::ConstructImpl,
+        ImageAttachmentAccessor::CtorImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
         ImageAttachmentAccessor::GetValueImpl,
         ImageAttachmentAccessor::GetSizeImpl,

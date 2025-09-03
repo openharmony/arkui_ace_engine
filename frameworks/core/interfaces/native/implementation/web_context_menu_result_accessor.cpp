@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
     delete peer;
 }
-Ark_WebContextMenuResult ConstructImpl()
+Ark_WebContextMenuResult CtorImpl()
 {
     return new WebContextMenuResultPeer();
 }
@@ -67,7 +67,7 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
 {
     static const GENERATED_ArkUIWebContextMenuResultAccessor WebContextMenuResultAccessorImpl {
         WebContextMenuResultAccessor::DestroyPeerImpl,
-        WebContextMenuResultAccessor::ConstructImpl,
+        WebContextMenuResultAccessor::CtorImpl,
         WebContextMenuResultAccessor::GetFinalizerImpl,
         WebContextMenuResultAccessor::CloseContextMenuImpl,
         WebContextMenuResultAccessor::CopyImageImpl,

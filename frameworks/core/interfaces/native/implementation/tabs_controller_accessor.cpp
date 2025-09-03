@@ -29,7 +29,7 @@ void DestroyPeerImpl(Ark_TabsController peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_TabsController ConstructImpl()
+Ark_TabsController CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -103,7 +103,7 @@ const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
 {
     static const GENERATED_ArkUITabsControllerAccessor TabsControllerAccessorImpl {
         TabsControllerAccessor::DestroyPeerImpl,
-        TabsControllerAccessor::ConstructImpl,
+        TabsControllerAccessor::CtorImpl,
         TabsControllerAccessor::GetFinalizerImpl,
         TabsControllerAccessor::ChangeIndexImpl,
         TabsControllerAccessor::PreloadItemsImpl,

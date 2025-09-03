@@ -22,9 +22,9 @@ namespace LinearIndicatorControllerAccessor {
 void DestroyPeerImpl(Ark_LinearIndicatorController peer)
 {
 }
-Ark_LinearIndicatorController ConstructImpl()
+Ark_LinearIndicatorController CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -50,7 +50,7 @@ const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorContro
 {
     static const GENERATED_ArkUILinearIndicatorControllerAccessor LinearIndicatorControllerAccessorImpl {
         LinearIndicatorControllerAccessor::DestroyPeerImpl,
-        LinearIndicatorControllerAccessor::ConstructImpl,
+        LinearIndicatorControllerAccessor::CtorImpl,
         LinearIndicatorControllerAccessor::GetFinalizerImpl,
         LinearIndicatorControllerAccessor::SetProgressImpl,
         LinearIndicatorControllerAccessor::StartImpl,

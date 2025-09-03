@@ -23,60 +23,9 @@
 #include "arkoala_api_generated.h"
 #include "text_picker_modifier.h"
 
-#ifdef WRONG_GEN1
-namespace OHOS::Ace::NG {
-namespace {
-std::optional<Converter::PickerValueType> ProcessBindableValue(
-    const Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable& value)
-{
-    std::optional<Converter::PickerValueType> result;
-    Converter::VisitUnion(value,
-        [&result](const Ark_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src);
-        },
-        [&result](const Array_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src);
-        },
-        [&result](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            // Implement callback functionality
-        },
-        [&result](const Ark_Bindable_Array_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            // Implement callback functionality
-        },
-        [] {});
-    return result;
-}
-
-std::optional<Converter::PickerSelectedType> ProcessBindableSelected(
-    const Opt_Union_Number_Array_Number_Bindable_Bindable& value)
-{
-    std::optional<Converter::PickerSelectedType> result;
-    Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
-            result = Converter::OptConvert<Converter::PickerSelectedType>(src);
-        },
-        [&result](const Array_Number& src) {
-            result = Converter::OptConvert<Converter::PickerSelectedType>(src);
-        },
-        [&result](const Ark_Bindable_Number& src) {
-            result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
-            // Implement callback functionality
-        },
-        [&result](const Ark_Bindable_Array_Number& src) {
-            result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
-            // Implement callback functionality
-        },
-        [] {});
-    return result;
-}
-} // namespace
-} // namespace OHOS::Ace::NG
-#endif
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
+
 uint32_t CalculateKind(bool fromRangeContent, const std::vector<NG::RangeContent>& range)
 {
     uint32_t kind = 0;
@@ -93,11 +42,9 @@ uint32_t CalculateKind(bool fromRangeContent, const std::vector<NG::RangeContent
     }
     return kind;
 }
-#ifdef WRONG_GEN1
 void ParseTextPickerOptions(const Ark_TextPickerDialogOptions& src, TextPickerOptions& dst)
 {
-    // parse value
-    auto pickerValueOpt = ProcessBindableValue(src.value);
+    auto pickerValueOpt = Converter::OptConvert<Converter::PickerValueType>(src.value);
     if (pickerValueOpt) {
         auto pickerValue = pickerValueOpt.value();
         dst.hasValue = true;
@@ -108,8 +55,7 @@ void ParseTextPickerOptions(const Ark_TextPickerDialogOptions& src, TextPickerOp
             dst.values = std::move(std::get<std::vector<std::string>>(pickerValue));
         }
     }
-    // parse selected
-    auto pickerSelectedOpt = ProcessBindableSelected(src.selected);
+    auto pickerSelectedOpt = Converter::OptConvert<Converter::PickerSelectedType>(src.selected);
     if (pickerSelectedOpt) {
         auto pickerSelected = pickerSelectedOpt.value();
         dst.hasSelected = true;
@@ -140,9 +86,7 @@ void ParseTextPickerOptions(const Ark_TextPickerDialogOptions& src, TextPickerOp
         }
     }
 }
-#endif
 
-#ifdef WRONG_GEN
 void TextPickerOptions2SettingData(TextPickerOptions& textPickerOptions, TextPickerSettingData& settingData)
 {
     // Verify the data to prevent triggering of exceptions
@@ -215,6 +159,7 @@ void BuildTextPickerSettingData(const Ark_TextPickerDialogOptions& arkOptions,
         settingData.isEnableHapticFeedback = enableHapticFeedback.value();
     }
 }
+
 DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 {
     return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
@@ -376,9 +321,11 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions& opti
     }
     return buttonInfos;
 }
+
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
-    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_TextPickerDialogOptions>(options);
+    CHECK_NULL_VOID(options);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_TextPickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
@@ -390,34 +337,20 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     auto interEvents = BuildSelectInteractiveEvents(arkOptions);
     auto dialogEvents = BuildTextPickerDialogEvents(arkOptions);
     std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
-    // WARNING: don't use, only adapter backend function interface.
+    // WARING: don't use, only adapter backend function interface.
     RefPtr<AceType> pickerText = nullptr;
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
         std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent), std::move(interEvents.changeEvent),
         std::move(interEvents.scrollStopEvent), std::move(interEvents.enterSelectedAreaEvent),
         textPickerDialog, dialogEvents, buttonInfos);
 }
-#endif
-void DestroyPeerImpl(Ark_TextPickerDialog peer)
-{
-}
-Ark_TextPickerDialog ConstructImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 } // TextPickerDialogAccessor
+
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-        TextPickerDialogAccessor::DestroyPeerImpl,
-        TextPickerDialogAccessor::ConstructImpl,
-        TextPickerDialogAccessor::GetFinalizerImpl,
+        TextPickerDialogAccessor::ShowImpl,
     };
     return &TextPickerDialogAccessorImpl;
 }
-
 }

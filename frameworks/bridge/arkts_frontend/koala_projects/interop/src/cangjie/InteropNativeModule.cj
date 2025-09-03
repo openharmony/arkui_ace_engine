@@ -18,11 +18,7 @@ package Interop
 import std.collection.*
 
 foreign {
-        func Malloc(length: Int32): UInt64
-        func Free(data: KPointer): Unit
-        func ReadByte(data: KPointer, index: Int64, length: Int64): Int32
-        func WriteByte(data: KPointer, index: Int64, length: Int64, value: Int32): Unit
-        func ReleaseCallbackResource(resourceId: Int32): Unit
+        func CheckCallbackEvent(buffer: CPointer<UInt8>, bufferLength: Int32): Int32
 
         func GetGroupedLog(index: Int32): UInt64
         func StartGroupedLog(index: Int32): Unit
@@ -33,51 +29,30 @@ foreign {
         func InvokeFinalizer(ptr1: UInt64, ptr2: UInt64): Unit
         func GetPtrVectorElement(ptr1: UInt64, arg: Int32): UInt64
         func StringLength(ptr1: UInt64): Int32
-        func StringData(ptr1: UInt64, array: CPointer<UInt8>, arrayLength: Int32): Unit
+        func StringData(ptr1: UInt64, arr: CPointer<UInt8>, i: Int32): Unit
         func StringMake(str1: CString): UInt64
         func GetPtrVectorSize(ptr1: UInt64): Int32
-        func ManagedStringWrite(str1: CString, array: pointer, arrayLength: Int32, arg: Int32): Int32
+        func ManagedStringWrite(str1: CString, arr: CPointer<UInt8>, arg: Int32): Int32
         func NativeLog(str1: CString): Unit
-        func Utf8ToString(data: pointer, offset: Int32, length: Int32): CString
-        func CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: Int32): Int32
+        func Utf8ToString(data: CPointer<UInt8>, offset: Int32, length: Int32): CString
         func StdStringToString(cstring: UInt64): CString
-        func IncrementNumber(input: Float64): Float64
-        func CallCallback(apikind:Int32, callbackKind: Int32, args: KSerializerBuffer, argsSize: Int32): Unit
-        func CallCallbackSync(apikind:Int32, callbackKind: Int32, args: KSerializerBuffer, argsSize: Int32): Unit
+        func CallCallback(callbackKind: Int32, args: CPointer<UInt8>, argsSize: Int32): Unit
+        func CallCallbackSync(callbackKind: Int32, args: CPointer<UInt8>, argsSize: Int32): Unit
         func CallCallbackResourceHolder(holder: UInt64, resourceId: Int32): Unit
         func CallCallbackResourceReleaser(releaser: UInt64, resourceId: Int32): Unit
-        func CallForeignVM(foreignContext: UInt64, kind: Int32, data: CPointer<UInt8>, length: Int32): Int32
         func LoadVirtualMachine(arg0: Int32, arg1: CString, arg2: CString): Int32
         func RunApplication(arg0: Int32, arg1: Int32): Bool
         func StartApplication(appUrl: CString, appParams: CString): UInt64
-        func EmitEvent(eventType: Int32, target: Int32, arg0: Int32, arg1: Int32): CString
-        func RestartWith(page: CString): Unit
+        func EmitEvent(eventType: Int32, target: Int32, arg0: Int32, arg1: Int32): Unit
 }
 
 public open class InteropNativeModule {
-    public static func _Malloc(length: Int32) {
+    public static func _CheckCallbackEvent(buffer: Array<UInt8>, bufferLength: Int32): Int32 {
         unsafe {
-            return Malloc(length)
-        }
-    }
-    public static func _Free(data: KPointer): Unit {
-        unsafe {
-            Free(data)
-        }
-    }
-    public static func _ReadByte(data: KPointer, index: Int64, length: Int64): Int32 {
-        unsafe {
-            return ReadByte(data, index, length)
-        }
-    }
-    public static func _WriteByte(data: KPointer, index: Int64, length: Int64, value: Int32) {
-        unsafe {
-            WriteByte(data, index, length, value)
-        }
-    }
-    public static func _ReleaseCallbackResource(resourceId: Int32): Unit {
-        unsafe {
-            ReleaseCallbackResource(resourceId)
+            let handle_0 = acquireArrayRawData(buffer)
+            let result = CheckCallbackEvent(handle_0.pointer, bufferLength)
+            releaseArrayRawData(handle_0);
+            return result
         }
     }
     public static func _GetGroupedLog(index: Int32): UInt64 {
@@ -131,10 +106,10 @@ public open class InteropNativeModule {
             return result
         }
     }
-    public static func _StringData(ptr1: UInt64, arr: Array<UInt8>, arrayLength: Int32): Unit {
+    public static func _StringData(ptr1: UInt64, arr: ArrayList<UInt8>, i: Int32): Unit {
         unsafe {
-            let handle_1 = acquireArrayRawData(arr)
-            StringData(ptr1, handle_1.pointer, arrayLength)
+            let handle_1 = acquireArrayRawData(arr.toArray())
+            StringData(ptr1, handle_1.pointer, i)
             releaseArrayRawData(handle_1)
         }
     }
@@ -152,11 +127,13 @@ public open class InteropNativeModule {
             return result
         }
     }
-    public static func _ManagedStringWrite(str1: String, arr: pointer, arrLength: Int32, arg: Int32): Int32 {
+    public static func _ManagedStringWrite(str1: String, arr: ArrayList<UInt8>, arg: Int32): Int32 {
         unsafe {
             let str1 =  LibC.mallocCString(str1)
-            let result = ManagedStringWrite(str1, arr, arrLength, arg)
+            let handle_1 = acquireArrayRawData(arr.toArray())
+            let result = ManagedStringWrite(str1, handle_1.pointer, arg)
             LibC.free(str1)
+            releaseArrayRawData(handle_1)
             return result
         }
     }
@@ -167,15 +144,12 @@ public open class InteropNativeModule {
             LibC.free(str1)
         }
     }
-    public static func _Utf8ToString(data: pointer, offset: Int32, length: Int32): String {
+    public static func _Utf8ToString(data: Array<UInt8>, offset: Int32, length: Int32): String {
         unsafe {
-            let result = Utf8ToString(data, offset, length)
+            let handle_0 = acquireArrayRawData(data)
+            let result = Utf8ToString(handle_0.pointer, offset, length)
+            releaseArrayRawData(handle_0)
             return result.toString()
-        }
-    }
-    public static func _CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: Int32): Int32 {
-        unsafe {
-            return CheckCallbackEvent(buffer, bufferLength)
         }
     }
     public static func _StdStringToString(cstring: UInt64): String {
@@ -184,20 +158,18 @@ public open class InteropNativeModule {
             return result.toString()
         }
     }
-    public static func _IncrementNumber(input: Float64): Float64 {
+    public static func _CallCallback(callbackKind: Int32, args: ArrayList<UInt8>, argsSize: Int32): Unit {
         unsafe {
-            let result = IncrementNumber(input)
-            return result
+            let handle_1 = acquireArrayRawData(args.toArray())
+            CallCallback(callbackKind, handle_1.pointer, argsSize)
+            releaseArrayRawData(handle_1)
         }
     }
-    public static func _CallCallback(apikind: Int32, callbackKind: Int32, args: KSerializerBuffer, argsSize: Int32): Unit {
+    public static func _CallCallbackSync(callbackKind: Int32, args: ArrayList<UInt8>, argsSize: Int32): Unit {
         unsafe {
-            CallCallback(apikind, callbackKind, args, argsSize)
-        }
-    }
-    public static func _CallCallbackSync(apikind: Int32, callbackKind: Int32, args: KSerializerBuffer, argsSize: Int32): Unit {
-        unsafe {
-            CallCallbackSync(apikind, callbackKind, args, argsSize)
+            let handle_1 = acquireArrayRawData(args.toArray())
+            CallCallbackSync(callbackKind, handle_1.pointer, argsSize)
+            releaseArrayRawData(handle_1)
         }
     }
     public static func _CallCallbackResourceHolder(holder: UInt64, resourceId: Int32): Unit {
@@ -210,21 +182,13 @@ public open class InteropNativeModule {
             CallCallbackResourceReleaser(releaser, resourceId)
         }
     }
-    public static func _CallForeignVM(foreignContext: UInt64, kind: Int32, data: ArrayList<UInt8>, length: Int32): Int32 {
-        unsafe {
-            let handle_2 = acquireArrayRawData(data.toArray())
-            let result = CallForeignVM(foreignContext, kind, handle_2.pointer, length)
-            releaseArrayRawData(handle_2)
-            return result
-        }
-    }
     public static func _LoadVirtualMachine(arg0: Int32, arg1: String, arg2: String): Int32 {
         unsafe {
             let arg1 =  LibC.mallocCString(arg1)
             let arg2 =  LibC.mallocCString(arg2)
             let result = LoadVirtualMachine(arg0, arg1, arg2)
             LibC.free(arg1)
-            LibC.free(arg2)
+            LibC.free(arg1)
             return result
         }
     }
@@ -240,21 +204,20 @@ public open class InteropNativeModule {
             let appParams =  LibC.mallocCString(appParams)
             let result = StartApplication(appUrl, appParams)
             LibC.free(appUrl)
-            LibC.free(appParams)
+            LibC.free(appUrl)
             return result
         }
     }
-    public static func _EmitEvent(eventType: Int32, target: Int32, arg0: Int32, arg1: Int32): String {
+    public static func _EmitEvent(eventType: Int32, target: Int32, arg0: Int32, arg1: Int32): Unit {
         unsafe {
-            let result = EmitEvent(eventType, target, arg0, arg1)
-            return result.toString()
+            EmitEvent(eventType, target, arg0, arg1)
         }
     }
-    public static func _RestartWith(page: String): Unit {
+    public static func _StringData(ptr: KPointer, data: Array<UInt8>, arg2: Int32): Unit {
         unsafe {
-            let page =  LibC.mallocCString(page)
-            RestartWith(page)
-            LibC.free(page)
+            let handle_1 = acquireArrayRawData(data)
+            StringData(ptr, handle_1.pointer, arg2)
+            releaseArrayRawData(handle_1)
         }
     }
 }

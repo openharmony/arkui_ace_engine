@@ -36,86 +36,86 @@ void SetAnimatorOptionsImpl(Ark_NativePointer node,
 }
 } // AnimatorInterfaceModifier
 namespace AnimatorAttributeModifier {
-void SetStateImpl(Ark_NativePointer node,
-                  const Opt_AnimationStatus* value)
+void StateImpl(Ark_NativePointer node,
+               const Opt_AnimationStatus* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetDurationImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void SetCurveImpl(Ark_NativePointer node,
-                  const Opt_curves_Curve* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void SetDelayImpl(Ark_NativePointer node,
+void DurationImpl(Ark_NativePointer node,
                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetFillModeImpl(Ark_NativePointer node,
-                     const Opt_FillMode* value)
+void CurveImpl(Ark_NativePointer node,
+               const Opt_Curve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetIterationsImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+void DelayImpl(Ark_NativePointer node,
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetPlayModeImpl(Ark_NativePointer node,
-                     const Opt_PlayMode* value)
+void FillModeImpl(Ark_NativePointer node,
+                  const Opt_FillMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetMotionImpl(Ark_NativePointer node,
-                   const Opt_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
+void IterationsImpl(Ark_NativePointer node,
+                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void PlayModeImpl(Ark_NativePointer node,
+                  const Opt_PlayMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnPauseImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void MotionImpl(Ark_NativePointer node,
+                const Opt_SpringMotion* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnRepeatImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnStartImpl(Ark_NativePointer node,
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnCancelImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnPauseImpl(Ark_NativePointer node,
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnRepeatImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
-void SetOnFrameImpl(Ark_NativePointer node,
-                    const Opt_Callback_Number_Void* value)
+void OnCancelImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+void OnFinishImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+void OnFrameImpl(Ark_NativePointer node,
+                 const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -126,20 +126,20 @@ const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier()
     static const GENERATED_ArkUIAnimatorModifier ArkUIAnimatorModifierImpl {
         AnimatorModifier::ConstructImpl,
         AnimatorInterfaceModifier::SetAnimatorOptionsImpl,
-        AnimatorAttributeModifier::SetStateImpl,
-        AnimatorAttributeModifier::SetDurationImpl,
-        AnimatorAttributeModifier::SetCurveImpl,
-        AnimatorAttributeModifier::SetDelayImpl,
-        AnimatorAttributeModifier::SetFillModeImpl,
-        AnimatorAttributeModifier::SetIterationsImpl,
-        AnimatorAttributeModifier::SetPlayModeImpl,
-        AnimatorAttributeModifier::SetMotionImpl,
-        AnimatorAttributeModifier::SetOnStartImpl,
-        AnimatorAttributeModifier::SetOnPauseImpl,
-        AnimatorAttributeModifier::SetOnRepeatImpl,
-        AnimatorAttributeModifier::SetOnCancelImpl,
-        AnimatorAttributeModifier::SetOnFinishImpl,
-        AnimatorAttributeModifier::SetOnFrameImpl,
+        AnimatorAttributeModifier::StateImpl,
+        AnimatorAttributeModifier::DurationImpl,
+        AnimatorAttributeModifier::CurveImpl,
+        AnimatorAttributeModifier::DelayImpl,
+        AnimatorAttributeModifier::FillModeImpl,
+        AnimatorAttributeModifier::IterationsImpl,
+        AnimatorAttributeModifier::PlayModeImpl,
+        AnimatorAttributeModifier::MotionImpl,
+        AnimatorAttributeModifier::OnStartImpl,
+        AnimatorAttributeModifier::OnPauseImpl,
+        AnimatorAttributeModifier::OnRepeatImpl,
+        AnimatorAttributeModifier::OnCancelImpl,
+        AnimatorAttributeModifier::OnFinishImpl,
+        AnimatorAttributeModifier::OnFrameImpl,
     };
     return &ArkUIAnimatorModifierImpl;
 }

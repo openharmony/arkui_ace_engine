@@ -17,29 +17,39 @@
 #include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
 
-#ifdef WRONG_GEN
-PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& options)
+void ParseDate(const Ark_DatePickerDialogOptions& options, PickerDialogInfo& dialogInfo)
 {
-    PickerDialogInfo dialogInfo;
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, dialogInfo);
+    CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, dialogInfo);
+    CHECK_NULL_VOID(pickerTheme);
     // parse start and end date
     auto parseStartDate = pickerTheme->GetDefaultStartDate();
     auto parseEndDate = pickerTheme->GetDefaultEndDate();
     auto start = Converter::OptConvert<PickerDate>(options.start);
     if (start) {
+        dialogInfo.isStartDate = true;
         parseStartDate = start.value();
     }
     auto end = Converter::OptConvert<PickerDate>(options.end);
     if (end) {
+        dialogInfo.isEndDate = true;
         parseEndDate = end.value();
+    }
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = pickerTheme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = pickerTheme->GetDefaultEndDate();
     }
     if (parseStartDate.ToDays() > parseEndDate.ToDays()) {
         parseStartDate = pickerTheme->GetDefaultStartDate();
@@ -47,12 +57,23 @@ PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& op
     }
     dialogInfo.parseStartDate = parseStartDate;
     dialogInfo.parseEndDate = parseEndDate;
-    // parse selected date
+    dialogInfo.parseSelectedDate = PickerDate();
     auto selectedDate = Converter::OptConvert<PickerDate>(options.selected);
     if (selectedDate) {
         dialogInfo.isSelectedDate = true;
         dialogInfo.parseSelectedDate = selectedDate.value();
     }
+    dialogInfo.pickerTime = PickerTime();
+    auto selectedTime = Converter::OptConvert<PickerTime>(options.selected);
+    if (selectedTime) {
+        dialogInfo.pickerTime = selectedTime.value();
+    }
+}
+
+PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& options)
+{
+    PickerDialogInfo dialogInfo;
+    ParseDate(options, dialogInfo);
     auto alignment =  Converter::OptConvert<DialogAlignment>(options.alignment);
     if (alignment) {
         dialogInfo.alignment = alignment.value();
@@ -76,36 +97,19 @@ PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& op
     return dialogInfo;
 }
 
-void ParseDateInfo(const Ark_DatePickerDialogOptions& options, DatePickerSettingData& settingData)
-{
-    auto start = Converter::OptConvert<PickerDate>(options.start);
-    if (start) {
-        settingData.datePickerProperty["start"] = *start;
-    }
-    auto end = Converter::OptConvert<PickerDate>(options.end);
-    if (end) {
-        settingData.datePickerProperty["end"] = *end;
-    }
-    auto selectedDate = Converter::OptConvert<PickerDate>(options.selected);
-    auto selectedTime = Converter::OptConvert<PickerTime>(options.selected);
-    if (selectedDate) {
-        settingData.datePickerProperty["selected"] = *selectedDate;
-        if (selectedTime) {
-            settingData.timePickerProperty["selected"] = *selectedTime;
-        }
-    }
-}
-
 DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions& options)
 {
-    DatePickerSettingData settingData;
+    DatePickerSettingData settingData = { .isLunar = false, .lunarswitch = false, .showTime = false,
+        .isEnableHapticFeedback = true, .useMilitary = false, .mode = DatePickerMode::DATE };
+
     settingData.isLunar = Converter::OptConvert<bool>(options.lunar).value_or(settingData.isLunar);
     settingData.lunarswitch = Converter::OptConvert<bool>(options.lunarSwitch).value_or(settingData.lunarswitch);
-    auto checkboxSettingData = Converter::OptConvert<CheckboxSettingData>(options.lunarSwitchStyle);
-    if (checkboxSettingData) {
-        settingData.checkboxSettingData = *checkboxSettingData;
+    if (settingData.lunarswitch) {
+        auto checkboxSettingData = Converter::OptConvert<CheckboxSettingData>(options.lunarSwitchStyle);
+        if (checkboxSettingData) {
+            settingData.checkboxSettingData = *checkboxSettingData;
+        }
     }
-    ParseDateInfo(options, settingData);
     settingData.showTime = Converter::OptConvert<bool>(options.showTime).value_or(settingData.showTime);
     settingData.useMilitary = Converter::OptConvert<bool>(options.useMilitaryTime).value_or(settingData.useMilitary);
     auto dateTimeOptions = Converter::OptConvert<DateTimeType>(options.dateTimeOptions);
@@ -168,6 +172,41 @@ PickerDialogEvent BuildPickerDialogEvents(const Ark_DatePickerDialogOptions& opt
     }
     return dialogEvent;
 }
+std::string ConvertDateString(const std::string& info)
+{
+    std::unique_ptr<JsonValue> datePtr = JsonUtil::ParseJsonString(info);
+    CHECK_NULL_RETURN(datePtr, info);
+    int32_t year = 0;
+    auto yearPtr = datePtr->GetValue("year");
+    if (yearPtr && yearPtr->IsNumber()) {
+        year = yearPtr->GetInt();
+    }
+    int32_t month = 0;
+    auto monthPtr = datePtr->GetValue("month");
+    if (monthPtr && monthPtr->IsNumber()) {
+        // 0-11 means 1 to 12 months
+        month = monthPtr->GetInt() + 1;
+    }
+    int32_t day = 0;
+    auto dayPtr = datePtr->GetValue("day");
+    if (dayPtr && dayPtr->IsNumber()) {
+        day = dayPtr->GetInt();
+    }
+    int32_t hour = 0;
+    auto hourPtr = datePtr->GetValue("hour");
+    if (hourPtr && hourPtr->IsNumber()) {
+        hour = hourPtr->GetInt();
+    }
+    int32_t minute = 0;
+    auto minutePtr = datePtr->GetValue("minute");
+    if (minutePtr && minutePtr->IsNumber()) {
+        minute = minutePtr->GetInt();
+    }
+    PickerDateTime dateTime;
+    dateTime.SetDate(PickerDate(year, month, day));
+    dateTime.SetTime(PickerTime(hour, minute, 0));
+    return dateTime.ToString(true);
+}
 
 PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDialogOptions& arkOptions)
 {
@@ -179,28 +218,12 @@ PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDi
             arkCallback.Invoke();
         };
     }
-    // onAccept
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(arkOptions.onAccept);
-    if (acceptCallbackOpt) {
-        events.acceptEvent = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
-            arkCallback.Invoke(result);
-        };
-    }
-    // onChange
-    auto changeCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(arkOptions.onChange);
-    if (changeCallbackOpt) {
-        events.changeEvent = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
-            arkCallback.Invoke(result);
-        };
-    }
     // onDateAccept
     auto dateAcceptCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onDateAccept);
     if (dateAcceptCallbackOpt) {
         events.dateAcceptEvent =
             [arkCallback = CallbackHelper(*dateAcceptCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
+            auto result = Converter::ArkValue<Ark_Date>(ConvertDateString(info));
             arkCallback.Invoke(result);
         };
     }
@@ -209,7 +232,7 @@ PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDi
     if (dateChangeCallbackOpt) {
         events.dateChangeEvent =
             [arkCallback = CallbackHelper(*dateChangeCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
+            auto result = Converter::ArkValue<Ark_Date>(ConvertDateString(info));
             arkCallback.Invoke(result);
         };
     }
@@ -252,26 +275,12 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
         std::move(interEvents.dateAcceptEvent), std::move(interEvents.dateChangeEvent),
         pickType, datePickerDialogEvent, buttonInfos);
 }
-#endif
-void DestroyPeerImpl(Ark_DatePickerDialog peer)
-{
-}
-Ark_DatePickerDialog ConstructImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 } // DatePickerDialogAccessor
 
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
-        DatePickerDialogAccessor::DestroyPeerImpl,
-        DatePickerDialogAccessor::ConstructImpl,
-        DatePickerDialogAccessor::GetFinalizerImpl,
+        DatePickerDialogAccessor::ShowImpl,
     };
     return &DatePickerDialogAccessorImpl;
 }

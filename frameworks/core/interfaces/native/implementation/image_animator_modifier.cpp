@@ -66,14 +66,14 @@ ImageProperties Convert(const Ark_ImageFrameInfo& src)
                 options.bundleName = bundleName;
             }
         },
-        [&options](const Ark_image_PixelMap& srcArkPixelMap) {
+        [&options](const Ark_PixelMap& srcArkPixelMap) {
             options.pixelMap = Converter::Convert<RefPtr<PixelMap>>(srcArkPixelMap);
         },
         []() {}
     );
 
     options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
-    options.height = OptConvert<CalcDimension>(src.height).value_or(CalcDimension(0));
+    options.height = OptConvert<Dimension>(src.height).value_or(CalcDimension(0));
     options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0));
     options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0));
     options.duration = Converter::OptConvert<int32_t>(src.duration).value_or(0);
@@ -99,96 +99,103 @@ void SetImageAnimatorOptionsImpl(Ark_NativePointer node)
 }
 } // ImageAnimatorInterfaceModifier
 namespace ImageAnimatorAttributeModifier {
-void SetImagesImpl(Ark_NativePointer node,
-                   const Opt_Array_ImageFrameInfo* value)
+void ImagesImpl(Ark_NativePointer node,
+                const Opt_Array_ImageFrameInfo* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto images = Converter::OptConvert<std::vector<ImageProperties>>(*value);
     if (!images) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     ImageAnimatorModelNG::SetImages(frameNode, *images);
 }
-void SetStateImpl(Ark_NativePointer node,
-                  const Opt_AnimationStatus* value)
+void StateImpl(Ark_NativePointer node,
+               const Opt_AnimationStatus* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto stateOpt = Converter::OptConvertPtr<int32_t>(value);
+    auto stateOpt = Converter::OptConvert<int32_t>(*value);
     ImageAnimatorModelStatic::SetState(frameNode, stateOpt);
 }
-void SetDurationImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+void DurationImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto durationOpt = Converter::OptConvertPtr<int32_t>(value);
+    auto durationOpt = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateNonNegative(durationOpt);
     ImageAnimatorModelStatic::SetDuration(frameNode, durationOpt);
 }
-void SetReverseImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+void ReverseImpl(Ark_NativePointer node,
+                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     ImageAnimatorModelNG::SetIsReverse(frameNode, *convValue);
 }
-void SetFixedSizeImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+void FixedSizeImpl(Ark_NativePointer node,
+                   const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     ImageAnimatorModelNG::SetFixedSize(frameNode, *convValue);
 }
-void SetFillModeImpl(Ark_NativePointer node,
-                     const Opt_FillMode* value)
+void PreDecodeImpl(Ark_NativePointer node,
+                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fillModeOpt = Converter::OptConvertPtr<int32_t>(value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageAnimatorModelNG::SetPreDecode(frameNode, convValue);
+}
+void FillModeImpl(Ark_NativePointer node,
+                  const Opt_FillMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto fillModeOpt = Converter::OptConvert<int32_t>(*value);
     ImageAnimatorModelStatic::SetFillMode(frameNode, fillModeOpt);
 }
-void SetIterationsImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+void IterationsImpl(Ark_NativePointer node,
+                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto iterationOpt = Converter::OptConvertPtr<int32_t>(value);
+    auto iterationOpt = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateGreatOrEqual(iterationOpt, -1);
     ImageAnimatorModelStatic::SetIteration(frameNode, iterationOpt);
 }
-void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
+void MonitorInvisibleAreaImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     if (!convValue) {
-        // Implement Reset value
         return;
     }
     ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, *convValue);
 }
-void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void OnStartImpl(Ark_NativePointer node,
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -196,14 +203,14 @@ void SetOnStartImpl(Ark_NativePointer node,
     };
     ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onStart));
 }
-void SetOnPauseImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+void OnPauseImpl(Ark_NativePointer node,
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -211,14 +218,14 @@ void SetOnPauseImpl(Ark_NativePointer node,
     };
     ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onPause));
 }
-void SetOnRepeatImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnRepeatImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onRepeat = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -226,14 +233,14 @@ void SetOnRepeatImpl(Ark_NativePointer node,
     };
     ImageAnimatorModelNG::SetOnRepeat(frameNode, onRepeat);
 }
-void SetOnCancelImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnCancelImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onCancel = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -241,14 +248,14 @@ void SetOnCancelImpl(Ark_NativePointer node,
     };
     ImageAnimatorModelNG::SetOnCancel(frameNode, onCancel);
 }
-void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void OnFinishImpl(Ark_NativePointer node,
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
@@ -262,19 +269,20 @@ const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
     static const GENERATED_ArkUIImageAnimatorModifier ArkUIImageAnimatorModifierImpl {
         ImageAnimatorModifier::ConstructImpl,
         ImageAnimatorInterfaceModifier::SetImageAnimatorOptionsImpl,
-        ImageAnimatorAttributeModifier::SetImagesImpl,
-        ImageAnimatorAttributeModifier::SetStateImpl,
-        ImageAnimatorAttributeModifier::SetDurationImpl,
-        ImageAnimatorAttributeModifier::SetReverseImpl,
-        ImageAnimatorAttributeModifier::SetFixedSizeImpl,
-        ImageAnimatorAttributeModifier::SetFillModeImpl,
-        ImageAnimatorAttributeModifier::SetIterationsImpl,
-        ImageAnimatorAttributeModifier::SetMonitorInvisibleAreaImpl,
-        ImageAnimatorAttributeModifier::SetOnStartImpl,
-        ImageAnimatorAttributeModifier::SetOnPauseImpl,
-        ImageAnimatorAttributeModifier::SetOnRepeatImpl,
-        ImageAnimatorAttributeModifier::SetOnCancelImpl,
-        ImageAnimatorAttributeModifier::SetOnFinishImpl,
+        ImageAnimatorAttributeModifier::ImagesImpl,
+        ImageAnimatorAttributeModifier::StateImpl,
+        ImageAnimatorAttributeModifier::DurationImpl,
+        ImageAnimatorAttributeModifier::ReverseImpl,
+        ImageAnimatorAttributeModifier::FixedSizeImpl,
+        ImageAnimatorAttributeModifier::PreDecodeImpl,
+        ImageAnimatorAttributeModifier::FillModeImpl,
+        ImageAnimatorAttributeModifier::IterationsImpl,
+        ImageAnimatorAttributeModifier::MonitorInvisibleAreaImpl,
+        ImageAnimatorAttributeModifier::OnStartImpl,
+        ImageAnimatorAttributeModifier::OnPauseImpl,
+        ImageAnimatorAttributeModifier::OnRepeatImpl,
+        ImageAnimatorAttributeModifier::OnCancelImpl,
+        ImageAnimatorAttributeModifier::OnFinishImpl,
     };
     return &ArkUIImageAnimatorModifierImpl;
 }

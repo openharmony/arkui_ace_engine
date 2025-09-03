@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_TextMenuItemId ConstructImpl()
+Ark_TextMenuItemId CtorImpl()
 {
     return PeerUtils::CreatePeer<TextMenuItemIdPeer>();
 }
@@ -36,7 +36,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextMenuItemId OfImpl(const Ark_ResourceStr* id)
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     CHECK_NULL_RETURN(id, peer);
     peer->id = Converter::OptConvert<std::string>(*id);
     return peer;
@@ -48,61 +48,61 @@ Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
 }
 Ark_TextMenuItemId GetCUTImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_CUT";
     return peer;
 }
 Ark_TextMenuItemId GetCOPYImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_COPY";
     return peer;
 }
 Ark_TextMenuItemId GetPASTEImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_PASTE";
     return peer;
 }
 Ark_TextMenuItemId GetSELECT_ALLImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_SELECT_ALL";
     return peer;
 }
 Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_COLLABORATION_SERVICE";
     return peer;
 }
 Ark_TextMenuItemId GetCAMERA_INPUTImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_CAMERA_INPUT";
     return peer;
 }
 Ark_TextMenuItemId GetAI_WRITERImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_AI_WRITE";
     return peer;
 }
 Ark_TextMenuItemId GetTRANSLATEImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_TRANSLATE";
     return peer;
 }
 Ark_TextMenuItemId GetSEARCHImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_SEARCH";
     return peer;
 }
 Ark_TextMenuItemId GetSHAREImpl()
 {
-    auto peer = ConstructImpl();
+    auto peer = CtorImpl();
     peer->id = "OH_DEFAULT_SHARE";
     return peer;
 }
@@ -111,7 +111,7 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
     static const GENERATED_ArkUITextMenuItemIdAccessor TextMenuItemIdAccessorImpl {
         TextMenuItemIdAccessor::DestroyPeerImpl,
-        TextMenuItemIdAccessor::ConstructImpl,
+        TextMenuItemIdAccessor::CtorImpl,
         TextMenuItemIdAccessor::GetFinalizerImpl,
         TextMenuItemIdAccessor::OfImpl,
         TextMenuItemIdAccessor::EqualsImpl,

@@ -75,22 +75,31 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optGridColOptions = Converter::OptConvertPtr<Ark_GridColOptions>(option);
-    if (optGridColOptions) {
-        auto arkGridColOptions = *optGridColOptions;
-        g_defaultValue = 1;
-        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
+    std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
+    bool reset {false};
+    if (option) {
+        auto optGridColOptions = Converter::OptConvert<Ark_GridColOptions>(*option);
+        if (optGridColOptions) {
+            Ark_GridColOptions arkGridColOptions = optGridColOptions.value();
+            g_defaultValue = 1;
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
+            g_defaultValue = 0;
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
+            g_defaultValue = 0;
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
+        } else {
+            reset = true;
+        }
     } else {
+        reset = true;
+    }
+    if (reset) {
         GridColModelNGStatic::SetSpan(frameNode, std::nullopt);
         GridColModelNGStatic::SetOffset(frameNode, std::nullopt);
         GridColModelNGStatic::SetOrder(frameNode, std::nullopt);
@@ -98,36 +107,48 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 }
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
-void SetSpanImpl(Ark_NativePointer node,
-                 const Opt_Union_Number_GridColColumnOption* value)
+void SpanImpl(Ark_NativePointer node,
+              const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
-    g_defaultValue = 1;
-    gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
+    if (value) {
+        g_defaultValue = 1;
+        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
+    } else {
+        GridColModelNGStatic::SetSpan(frameNode, std::nullopt);
+    }
 }
-void SetGridColOffsetImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_GridColColumnOption* value)
+void GridColOffsetImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
+    if (value) {
+        g_defaultValue = 0;
+        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
+    } else {
+        GridColModelNGStatic::SetOffset(frameNode, std::nullopt);
+    }
 }
-void SetOrderImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_GridColColumnOption* value)
+void OrderImpl(Ark_NativePointer node,
+               const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
+    if (value) {
+        g_defaultValue = 0;
+        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
+    } else {
+        GridColModelNGStatic::SetOrder(frameNode, std::nullopt);
+    }
 }
 } // GridColAttributeModifier
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()
@@ -135,9 +156,9 @@ const GENERATED_ArkUIGridColModifier* GetGridColModifier()
     static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
         GridColModifier::ConstructImpl,
         GridColInterfaceModifier::SetGridColOptionsImpl,
-        GridColAttributeModifier::SetSpanImpl,
-        GridColAttributeModifier::SetGridColOffsetImpl,
-        GridColAttributeModifier::SetOrderImpl,
+        GridColAttributeModifier::SpanImpl,
+        GridColAttributeModifier::GridColOffsetImpl,
+        GridColAttributeModifier::OrderImpl,
     };
     return &ArkUIGridColModifierImpl;
 }

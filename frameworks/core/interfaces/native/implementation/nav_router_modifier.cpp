@@ -54,7 +54,7 @@ void OnStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onStateChangeCallback = [arkCallback = CallbackHelper(*optValue)](const bool isActivated) {

@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
-#include "frame_node_peer_impl.h"
+#include "frame_node_peer.h"
 #include "ui_context_accessor_peer.h"
 #include "arkoala_api_generated.h"
 
@@ -39,9 +39,9 @@ Ark_CanvasRenderingContext2D ConstructImpl(const Opt_RenderingContextSettings* s
     CHECK_NULL_RETURN(settings, {});
     auto peer = Referenced::MakeRefPtr<CanvasRenderingContext2DPeer>();
     peer->IncRefCount();
-    auto optSettings = Converter::GetOptPtr(settings);
+    auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
     auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
-    if (optUnit) {
+    if (unit->tag != INTEROP_TAG_UNDEFINED) {
         peer->SetUnit(optUnit.value());
     }
     peer->SetOptions(optSettings);
@@ -56,8 +56,10 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                          const Opt_Number* quality)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto optType = Converter::OptConvertPtr<std::string>(type);
-    auto optQuality = Converter::OptConvertPtr<float>(quality);
+    CHECK_NULL_RETURN(type, {});
+    CHECK_NULL_RETURN(quality, {});
+    auto optType = Converter::OptConvert<std::string>(*type);
+    auto optQuality = Converter::OptConvert<float>(*quality);
     auto result = peer->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
@@ -84,16 +86,8 @@ void OnOnAttachImpl(Ark_VMContext vmContext,
     auto arkCallback = CallbackHelper(*callback_);
     peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
 }
-void OffOnAttachImpl(Ark_VMContext vmContext,
-                     Ark_CanvasRenderingContext2D peer,
-                     const Opt_Callback_Void* callback_)
-{
-    CHECK_NULL_VOID(peer);
-    auto optCallback = Converter::GetOptPtr(callback_);
-    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
-    peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
-}
-void OnOnDetachImpl(Ark_CanvasRenderingContext2D peer,
+void OnOnDetachImpl(Ark_VMContext vmContext,
+                    Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
@@ -101,11 +95,21 @@ void OnOnDetachImpl(Ark_CanvasRenderingContext2D peer,
     auto arkCallback = CallbackHelper(*callback_);
     peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
-void OffOnDetachImpl(Ark_CanvasRenderingContext2D peer,
+void OffOnAttachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
                      const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
-    auto optCallback = Converter::GetOptPtr(callback_);
+    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+    peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
+}
+void OffOnDetachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
+                     const Opt_Callback_Void* callback_)
+{
+    CHECK_NULL_VOID(peer);
+    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
@@ -114,26 +118,14 @@ Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     return Converter::ArkValue<Ark_Number>(peer->GetHeight());
 }
-void SetHeightImpl(Ark_CanvasRenderingContext2D peer,
-                   const Ark_Number* height)
-{
-}
 Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     return Converter::ArkValue<Ark_Number>(peer->GetWidth());
 }
-void SetWidthImpl(Ark_CanvasRenderingContext2D peer,
-                  const Ark_Number* width)
-{
-}
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
-    return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
-}
-void SetCanvasImpl(Ark_CanvasRenderingContext2D peer,
-                   Ark_FrameNode canvas)
-{
+    return static_cast<Ark_FrameNode>(FrameNodePeer::Create(nullptr));
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
@@ -146,15 +138,12 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::StopImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::OnOnAttachImpl,
-        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
         CanvasRenderingContext2DAccessor::OnOnDetachImpl,
+        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
         CanvasRenderingContext2DAccessor::OffOnDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
-        CanvasRenderingContext2DAccessor::SetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
-        CanvasRenderingContext2DAccessor::SetWidthImpl,
         CanvasRenderingContext2DAccessor::GetCanvasImpl,
-        CanvasRenderingContext2DAccessor::SetCanvasImpl,
     };
     return &CanvasRenderingContext2DAccessorImpl;
 }

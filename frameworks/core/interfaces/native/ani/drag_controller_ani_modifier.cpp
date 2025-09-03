@@ -15,10 +15,7 @@
 
 #include "drag_controller_ani_modifier.h"
 
-#include "drag_controller_utils.h"
-#include "drag_preview.h"
 #include "interaction_manager.h"
-
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "adapter/ohos/capability/udmf/udmf_impl.h"
 #include "core/common/ace_engine.h"
@@ -28,10 +25,13 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "bridge/common/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/subwindow/subwindow.h"
@@ -52,6 +52,9 @@ constexpr int32_t MAX_ESCAPE_NUM = 1;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+using PreviewType = Msdp::DeviceStatus::PreviewType;
+using PreviewStyle = Msdp::DeviceStatus::PreviewStyle;
+using PreviewAnimation = Msdp::DeviceStatus::PreviewAnimation;
 
 enum class DragState { PENDING, SENDING, REJECT, SUCCESS };
 enum class DragStatus { STARTED, ENDED };
@@ -220,6 +223,24 @@ void ConvertDragNotifyMsg(ArkUIDragNotifyMessage& msg, const DragNotifyMsg& drag
         default:
             break;
     }
+}
+
+void ConvertPreviewStyle(PreviewStyle& style, const ArkUIDragPreviewAsync& async)
+{
+    for (const auto& type : async.previewStyle.types) {
+        style.types.push_back(static_cast<PreviewType>(type));
+    }
+    style.foregroundColor = async.previewStyle.foregroundColor;
+    style.opacity = async.previewStyle.opacity;
+    style.radius = async.previewStyle.radius;
+    style.scale = async.previewStyle.scale;
+}
+
+void ConvertDragPreviewAnimation(PreviewAnimation& previewAnimation, const ArkUIDragPreviewAsync& async)
+{
+    previewAnimation.curve = async.previewAnimation.curve;
+    previewAnimation.curveName = async.previewAnimation.curveName;
+    previewAnimation.duration = async.previewAnimation.duration;
 }
 
 void prepareDataForCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
@@ -825,13 +846,31 @@ void UpdatePreviewOptionDefaultAttr(
     NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAsyncContext->dragPreviewOption);
 }
 
-void CreateDragEventPeer(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer)
+void UpdateDragPreviewOptionsFromModifier(std::shared_ptr<DragControllerAsyncCtx> dragAsyncContext,
+    const ArkUIDragControllerAsync& asyncCtx)
+{
+    CHECK_NULL_VOID(dragAsyncContext);
+    if (!asyncCtx.dragPreviewOption.modifier) {
+        return;
+    }
+    auto onApply = [executeFunc =
+        std::move(asyncCtx.dragPreviewOption.modifier)](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto ptr = AceType::RawPtr(node);
+        CHECK_NULL_VOID(executeFunc);
+        executeFunc(ptr);
+    };
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(onApply, dragAsyncContext->dragPreviewOption);
+}
+
+void* CreateDragEventPeer(const ArkUIDragNotifyMessage& dragNotifyMsg)
 {
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     SetDragResult(dragNotifyMsg, dragEvent);
     SetDragBehavior(dragNotifyMsg, dragEvent);
-    auto arkDragInfo = DragEventPeer::Create(dragEvent);
-    dragEventPeer = reinterpret_cast<ani_long>(arkDragInfo);
+    auto dragEventPeer = DragEventPeer::Create(dragEvent);
+    return dragEventPeer;
 }
 
 std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDragControllerAsync& asyncCtx)
@@ -854,6 +893,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
+    UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {
         auto unifiedDataPtr = std::static_pointer_cast<UDMF::UnifiedData>(asyncCtx.unifiedData.GetSharedPtr());
         auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
@@ -873,7 +913,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     return dragAsyncContext;
 }
 
-bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -882,11 +922,13 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }
@@ -894,7 +936,7 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -903,11 +945,13 @@ bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }
@@ -945,81 +989,88 @@ bool ANIHandleDragActionStartDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-// static ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object obj)
-// {
-//     CHECK_NULL_RETURN(env, nullptr);
-//     if (ANI_OK != env->CreateEscapeLocalScope(MAX_ESCAPE_NUM)) {
-//         return nullptr;
-//     }
-//     ani_ref escapedObj;
-//     Ani::DragPreview* dragPreview = new Ani::DragPreview();
-//     CHECK_NULL_RETURN(dragPreview, nullptr);
-//     ani_object dragPreviewObj = {};
-//     dragPreview->AniSerializer(env, dragPreviewObj);
-//     env->DestroyEscapeLocalScope(dragPreviewObj, &escapedObj);
-//     return dragPreviewObj;
-// }
-
-void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr)
+void ANIDragPreviewSetForegroundColor(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx)
 {
-    Ani::DragPreview* ptr = reinterpret_cast<Ani::DragPreview *>(dragPreviewPtr);
-    delete ptr;
-    ptr = nullptr;
-    dragPreviewPtr = 0;
+    auto iter = std::find(asyncCtx.previewStyle.types.begin(),
+        asyncCtx.previewStyle.types.end(), ArkUIPreviewType::FOREGROUND_COLOR);
+    if (iter == asyncCtx.previewStyle.types.end()) {
+        asyncCtx.previewStyle.types.emplace_back(ArkUIPreviewType::FOREGROUND_COLOR);
+    }
+    const auto convColor = Converter::OptConvert<Color>(value);
+    asyncCtx.previewStyle.foregroundColor = convColor->GetValue();
+    PreviewStyle previewStyle { {}, 0, -1, -1, -1 };
+    ConvertPreviewStyle(previewStyle, asyncCtx);
+    if (!asyncCtx.hasAnimation) {
+        auto container = AceEngine::Get().GetContainer(Container::CurrentId());
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [previewStyle]() {
+                int32_t result =
+                    Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdatePreviewStyle(previewStyle);
+                if (result != 0) {
+                    LOGE("AceDrag, update preview style failed. result = %{public}d", result);
+                    return;
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewStyle");
+        asyncCtx.previewStyle.types.clear();
+    }
 }
 
-void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-    ani_object colorObj, ani_long dragPreviewPtr)
+void ANIDragPreviewAnimate(ArkUIDragPreviewAsync& asyncCtx)
 {
-    Ani::DragPreview::SetForegroundColor(env, object, colorObj, dragPreviewPtr);
+    auto container = AceEngine::Get().GetContainer(Container::CurrentId());
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    PreviewAnimation previewAnimation;
+    ConvertDragPreviewAnimation(previewAnimation, asyncCtx);
+    PreviewStyle previewStyle { {}, 0, -1, -1, -1 };
+    ConvertPreviewStyle(previewStyle, asyncCtx);
+    taskExecutor->PostTask(
+        [previewStyle, previewAnimation]() {
+            int32_t ret = Msdp::DeviceStatus::InteractionManager::
+                GetInstance()->UpdatePreviewStyleWithAnimation(previewStyle, previewAnimation);
+            if (ret != 0) {
+                LOGE("AceDrag, update preview style with animation failed. ret = %{public}d", ret);
+                return;
+            };
+        },
+        TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewAnimationStyle");
+    asyncCtx.hasAnimation = false;
+    asyncCtx.previewStyle.types.clear();
 }
 
-void ANIDragPreviewAnimate(
-    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object optionsObj, ani_object handlerObj,
-    ani_long dragPreviewPtr)
-{
-    Ani::DragPreview::Animate(env, object, optionsObj, handlerObj, dragPreviewPtr);
-}
-
-void ANIDragActionSetDragEventStrictReportingEnabled(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable)
+void ANIDragActionSetDragEventStrictReportingEnabled(bool enable)
 {
     ViewAbstractModel::GetInstance()->SetDragEventStrictReportingEnabled(enable);
 }
 
-void ANIDragActionCancelDataLoading(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key)
+void ANIDragActionCancelDataLoading(const char* key)
 {
-    auto keyStr = Ani::ANIUtils_ANIStringToStdString(env, key);
-    ViewAbstractModel::GetInstance()->CancelDataLoading(keyStr);
+    ViewAbstractModel::GetInstance()->CancelDataLoading(key);
 }
 
-void ANIDragActionNotifyDragStartReques(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatusObj)
+void ANIDragActionNotifyDragStartReques(int requestStatus)
 {
-    ani_int requestStatus;
-    if (ANI_OK != env->EnumItem_GetValue_Int(requestStatusObj, &requestStatus)) {
-        return;
-    }
     ViewAbstractModel::GetInstance()->NotifyDragStartRequest(static_cast<Ace::DragStartRequestStatus>(requestStatus));
 }
 
 const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
-    // static const ArkUIAniDragControllerModifier impl = {
-    //     .aniHandleExecuteDrag = NG::ANIHandleExecuteDrag,
-    //     .aniHandleDragAction = NG::ANIHandleDragAction,
-    //     .aniHandleDragActionStartDrag = NG::ANIHandleDragActionStartDrag,
-    //     .createDragEventPeer = NG::CreateDragEventPeer,
-    //     .aniGetDragPreview = NG::ANIGetDragPreview,
-    //     .aniCleanDragPreview = NG::ANICleanDragPreview,
-    //     .aniDragPreviewSetForegroundColor = NG::ANIDragPreviewSetForegroundColor,
-    //     .aniDragPreviewAnimate = NG::ANIDragPreviewAnimate,
-    //     .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,
-    //     .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
-    //     .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
-    // };
-    // return &impl;
-    return nullptr;
+    static const ArkUIAniDragControllerModifier impl = {
+        .aniHandleExecuteDrag = NG::ANIHandleExecuteDrag,
+        .aniHandleDragAction = NG::ANIHandleDragAction,
+        .aniHandleDragActionStartDrag = NG::ANIHandleDragActionStartDrag,
+        .createDragEventPeer = NG::CreateDragEventPeer,
+        .aniDragPreviewSetForegroundColor = NG::ANIDragPreviewSetForegroundColor,
+        .aniDragPreviewAnimate = NG::ANIDragPreviewAnimate,
+        .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,
+        .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
+        .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
+    };
+    return &impl;
 }
 } // namespace OHOS:Ace::NG

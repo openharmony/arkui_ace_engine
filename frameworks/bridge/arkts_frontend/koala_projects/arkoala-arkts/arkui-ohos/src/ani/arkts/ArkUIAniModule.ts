@@ -14,31 +14,31 @@
  */
 
 import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
-import { default as drawing } from "@ohos.graphics.drawing"
+import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "#generated"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
-import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
-// import { XComponentOptionsInternal, XComponentParametersInternal } from "#generated"
-// import { HookDragInfo } from "arkui/handwritten"
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
+import { XComponentOptionsInternal, XComponentParametersInternal } from "arkui/component"
+import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { default as uiObserver }  from "@ohos/arkui/observer"
+import { uiObserver }  from "@ohos/arkui/observer"
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { NodeAdapter } from '../../FrameNode'
+import { Scene } from "@ohos.graphics.scene"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
-    native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
-    native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
+
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
@@ -74,7 +74,6 @@ export class ArkUIAniModule {
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
-    native static _SyntaxNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -135,7 +134,7 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
-    // native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+    native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
     native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
@@ -168,11 +167,9 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
-
     native static _DragController_getDragPreview(): dragController.DragPreview
-
-    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
-
+    native static _DragController_setForegroundColor(
+        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void
@@ -236,12 +233,16 @@ export class ArkUIAniModule {
     native static _Env_GetLanguageCode(): string
 
     // for XComponent
-    // native static _XComponent_SetXComponentOptions(ptr: KPointer, options: XComponentOptionsInternal): void;
-    // native static _XComponent_SetXComponentParameters(ptr: KPointer, params: XComponentParametersInternal): void;
+    native static _XComponent_SetXComponentOptions(ptr: KPointer, options: XComponentOptionsInternal): void;
+    native static _XComponent_SetXComponentParameters(ptr: KPointer, params: XComponentParametersInternal): void;
     native static _XComponent_SetNativeXComponentParameters(ptr: KPointer, params: KInt): void;
     // for ComponentContent
     native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
     native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
+
+    // for UIContext without window
+    native static _CreateWindowFreeContainer(context: common.Context): KInt
+    native static _DestroyWindowFreeContainer(instanceId: KInt): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
@@ -310,6 +311,8 @@ export class ArkUIAniModule {
         onThemeScopeDestroy: () => void
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    native static _UINode_OnUpdateDone(peer: KPointer): void;
+    native static _UINode_SetStatic(peer: KPointer): void;
     
     //NodeAdapter 
     native static _NodeAdapter_Construct( nodeAdapter : NodeAdapter): KPointer
@@ -324,4 +327,9 @@ export class ArkUIAniModule {
     native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
     native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
 
+    native static _SyntaxItem_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt): KPointer
+    // for Component3D
+    native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
+    native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
 }

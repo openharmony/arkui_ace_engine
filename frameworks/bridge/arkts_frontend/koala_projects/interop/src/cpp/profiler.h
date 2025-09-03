@@ -17,15 +17,13 @@
 #define _KOALA_PROFILER_
 
 #include <stdint.h>
-#include <cstdio>
+#include <stdio.h>
 
 #include <unordered_map>
 #include <string>
 #include <vector>
 #include <chrono>
 #include <algorithm>
-
-#include "interop-utils.h"
 
 struct InteropProfilerRecord {
     int64_t time;
@@ -41,7 +39,7 @@ class InteropProfiler {
 
   public:
     static InteropProfiler* instance() {
-        if (!_instance) _instance = new InteropProfiler();
+        if (!_instance) { _instance = new InteropProfiler(); }
         return _instance;
     }
 
@@ -70,7 +68,7 @@ class InteropProfiler {
             auto ns = a.second.time;
             auto count = a.second.count;
             char buffer[1024];
-            interop_snprintf(buffer, sizeof buffer, "for %s[%lld]: %.01f%% (%lld)\n", a.first.c_str(), (long long)count, (double)ns / total * 100.0, (long long)ns);
+            snprintf(buffer, sizeof buffer, "for %s[%lld]: %.01f%% (%lld)\n", a.first.c_str(), (long long)count, (double)ns / total * 100.0, (long long)ns);
             result += buffer;
         });
         return result;

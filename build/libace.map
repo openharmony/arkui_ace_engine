@@ -285,7 +285,6 @@
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
-      OHOS::Ace::ArktsAniUtils::*;
       OHOS::Ace::PluginManager::*;
 
       OHOS::Ace::NG::ViewAbstract::*;

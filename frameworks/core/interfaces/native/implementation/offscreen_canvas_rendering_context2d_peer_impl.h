@@ -15,22 +15,16 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCRN_CANVAS_RENDERING_CNTXT2D_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCRN_CANVAS_RENDERING_CNTXT2D_PEER_H
 
-#include "arkoala_api_generated.h"
 #include "canvas_renderer_peer_impl.h"
-
-#include "core/interfaces/native/utility/peer_utils.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
 class OffscreenCanvasRenderingContext2DPeerImpl : public CanvasRendererPeerImpl {
-protected:
-    OffscreenCanvasRenderingContext2DPeerImpl();
-    ~OffscreenCanvasRenderingContext2DPeerImpl() override
-    {
-        RemoveOptions();
-    }
-
 public:
+    OffscreenCanvasRenderingContext2DPeerImpl();
+    ~OffscreenCanvasRenderingContext2DPeerImpl() override = default;
+
     void SetOptions(double width, double height, const std::optional<RenderingContextSettingsPeer*>& optSettings);
     void RemoveOptions();
     ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
@@ -76,13 +70,4 @@ private:
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
-
-struct OffscreenCanvasRenderingContext2DPeer :
-    public OHOS::Ace::NG::GeneratedModifier::OffscreenCanvasRenderingContext2DPeerImpl {
-protected:
-    OffscreenCanvasRenderingContext2DPeer() = default;
-    ~OffscreenCanvasRenderingContext2DPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
-};
-
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCRN_CANVAS_RENDERING_CNTXT2D_PEER_H

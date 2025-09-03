@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/image/image_source_info.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/image_span_view_static.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
 
@@ -26,6 +27,9 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components ImageSpan used in ParallelizeUI");
+    }
     auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     imageSpanNode->IncRefCount();
@@ -46,36 +50,35 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
 }
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
-void SetVerticalAlignImpl(Ark_NativePointer node,
-                          const Opt_ImageSpanAlignment* value)
+void VerticalAlignImpl(Ark_NativePointer node,
+                       const Opt_ImageSpanAlignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<VerticalAlign>(value);
+    auto convValue = Converter::OptConvert<VerticalAlign>(*value);
     ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
 }
-void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_DrawingColorFilter* value)
+void ColorFilterImpl(Ark_NativePointer node,
+                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
-void SetObjectFitImpl(Ark_NativePointer node,
-                      const Opt_ImageFit* value)
+void ObjectFitImpl(Ark_NativePointer node,
+                   const Opt_ImageFit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<ImageFit>(value);
+    auto convValue = Converter::OptConvert<ImageFit>(*value);
     ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
 }
-void SetOnCompleteImpl(Ark_NativePointer node,
-                       const Opt_ImageCompleteCallback* value)
+void OnCompleteImpl(Ark_NativePointer node,
+                    const Opt_ImageCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onComplete = [arkCallback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
@@ -84,14 +87,14 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     };
     ImageSpanView::SetOnComplete(frameNode, std::move(onComplete));
 }
-void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_ImageErrorCallback* value)
+void OnErrorImpl(Ark_NativePointer node,
+                 const Opt_ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
@@ -100,14 +103,14 @@ void SetOnErrorImpl(Ark_NativePointer node,
     };
     ImageSpanView::SetOnError(frameNode, std::move(onError));
 }
-void SetAltImpl(Ark_NativePointer node,
-                const Opt_image_PixelMap* value)
+void AltImpl(Ark_NativePointer node,
+             const Opt_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto pixelMapPeer = *optValue;
@@ -121,12 +124,12 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
     static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
         ImageSpanModifier::ConstructImpl,
         ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
-        ImageSpanAttributeModifier::SetVerticalAlignImpl,
-        ImageSpanAttributeModifier::SetColorFilterImpl,
-        ImageSpanAttributeModifier::SetObjectFitImpl,
-        ImageSpanAttributeModifier::SetOnCompleteImpl,
-        ImageSpanAttributeModifier::SetOnErrorImpl,
-        ImageSpanAttributeModifier::SetAltImpl,
+        ImageSpanAttributeModifier::VerticalAlignImpl,
+        ImageSpanAttributeModifier::ColorFilterImpl,
+        ImageSpanAttributeModifier::ObjectFitImpl,
+        ImageSpanAttributeModifier::OnCompleteImpl,
+        ImageSpanAttributeModifier::OnErrorImpl,
+        ImageSpanAttributeModifier::AltImpl,
     };
     return &ArkUIImageSpanModifierImpl;
 }

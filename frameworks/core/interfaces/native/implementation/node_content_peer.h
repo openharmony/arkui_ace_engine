@@ -15,19 +15,8 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NODE_CONTENT_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NODE_CONTENT_PEER_H
 
-#include "core/components_ng/syntax/node_content.h"
+#include "frameworks/core/interfaces/native/ani/node_content_peer.h"
 
-struct NodeContentPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::NodeContent> content;
-
-    static NodeContentPeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NodeContent>& src)
-    {
-        auto nodeContent = new NodeContentPeer();
-        nodeContent->content = src;
-        return nodeContent;
-    }
-
-    virtual ~NodeContentPeer() = default;
-};
+struct NodeContentPeer : public OHOS::Ace::NodeContentPeer {};
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NODE_CONTENT_PEER_H

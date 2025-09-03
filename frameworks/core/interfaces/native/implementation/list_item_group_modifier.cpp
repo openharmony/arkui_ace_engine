@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/list/list_item_group_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "frameworks/core/components/list/list_theme.h"
 #include "children_main_size_peer.h"
 
@@ -50,7 +51,8 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkOptions = Converter::OptConvertPtr<Ark_ListItemGroupOptions>(options);
+    CHECK_NULL_VOID(options);
+    auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
     CHECK_NULL_VOID(arkOptions);
     auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
     ListItemGroupModelStatic::SetSpace(frameNode, space);
@@ -81,8 +83,8 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
 }
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
-void SetDividerImpl(Ark_NativePointer node,
-                    const Opt_ListDividerOptions* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Opt_ListDividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -107,14 +109,14 @@ void SetDividerImpl(Ark_NativePointer node,
     }
     ListItemGroupModelStatic::SetDivider(frameNode, dividerAns);
 }
-void SetChildrenMainSizeImpl(Ark_NativePointer node,
-                             const Opt_ChildrenMainSize* value)
+void ChildrenMainSizeImpl(Ark_NativePointer node,
+                          const Opt_ChildrenMainSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto peer = *optValue;
@@ -128,8 +130,8 @@ const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
     static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
         ListItemGroupModifier::ConstructImpl,
         ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
-        ListItemGroupAttributeModifier::SetDividerImpl,
-        ListItemGroupAttributeModifier::SetChildrenMainSizeImpl,
+        ListItemGroupAttributeModifier::DividerImpl,
+        ListItemGroupAttributeModifier::ChildrenMainSizeImpl,
     };
     return &ArkUIListItemGroupModifierImpl;
 }

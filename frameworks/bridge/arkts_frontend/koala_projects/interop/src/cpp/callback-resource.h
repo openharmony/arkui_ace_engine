@@ -19,11 +19,6 @@
 #include <vector>
 #include "interop-types.h"
 
-#ifdef KOALA_WINDOWS
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __attribute__ ((visibility ("default")))
-#endif
 
 class CallbackResourceHolder {
 private:
@@ -42,6 +37,7 @@ public:
 };
 
 struct CallbackBuffer {
+    InteropInt32 kind;
     uint8_t buffer[4096];
     CallbackResourceHolder resourceHolder;
 };
@@ -50,10 +46,12 @@ enum CallbackEventKind {
     Event_CallCallback = 0,
     Event_HoldManagedResource = 1,
     Event_ReleaseManagedResource = 2,
+    Event_CallCallback_Customize = 3,
 };
 
-extern "C" DLL_EXPORT void enqueueCallback(int apiKind, const CallbackBuffer* event);
-extern "C" DLL_EXPORT void holdManagedCallbackResource(InteropInt32 resourceId);
-extern "C" DLL_EXPORT void releaseManagedCallbackResource(InteropInt32 resourceId);
+void enqueueCallback(const CallbackBuffer* event);
+void enqueueCustomCallback(const CallbackBuffer* event);
+void holdManagedCallbackResource(InteropInt32 resourceId);
+void releaseManagedCallbackResource(InteropInt32 resourceId);
 
 #endif

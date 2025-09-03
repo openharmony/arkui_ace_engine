@@ -16,6 +16,7 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_static.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -32,29 +33,37 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 namespace LoadingProgressInterfaceModifier {
 void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
-    // Keep empty, since no options
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
-void SetColorImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
+void ColorImpl(Ark_NativePointer node,
+               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
+    auto color = Converter::OptConvert<Color>(*value);
     LoadingProgressModelStatic::SetColor(frameNode, color);
 }
-void SetEnableLoadingImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void EnableLoadingImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     LoadingProgressModelNG::SetEnableLoading(frameNode, *convValue);
+}
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Opt_ContentModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
@@ -62,8 +71,9 @@ const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
     static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
         LoadingProgressModifier::ConstructImpl,
         LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
-        LoadingProgressAttributeModifier::SetColorImpl,
-        LoadingProgressAttributeModifier::SetEnableLoadingImpl,
+        LoadingProgressAttributeModifier::ColorImpl,
+        LoadingProgressAttributeModifier::EnableLoadingImpl,
+        LoadingProgressAttributeModifier::ContentModifierImpl,
     };
     return &ArkUILoadingProgressModifierImpl;
 }

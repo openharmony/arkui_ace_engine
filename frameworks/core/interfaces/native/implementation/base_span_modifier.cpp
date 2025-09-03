@@ -32,14 +32,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-void SetTextBackgroundStyleImpl(Ark_NativePointer node,
-                                const Opt_TextBackgroundStyle* value)
+void TextBackgroundStyleImpl(Ark_NativePointer node,
+                             const Opt_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
+    auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         TextBackgroundStyle textBackgroundStyle;
         SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, textBackgroundStyle);
         return;
@@ -50,12 +50,12 @@ void SetTextBackgroundStyleImpl(Ark_NativePointer node,
         ImageSpanView::SetPlaceHolderStyle(frameNode, *convValue);
     }
 }
-void SetBaselineOffsetImpl(Ark_NativePointer node,
-                           const Opt_LengthMetrics* value)
+void BaselineOffsetImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonPercent(convValue);
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelStatic::SetBaselineOffset(frameNode, convValue);
@@ -68,8 +68,8 @@ const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()
 {
     static const GENERATED_ArkUIBaseSpanModifier ArkUIBaseSpanModifierImpl {
         BaseSpanModifier::ConstructImpl,
-        BaseSpanModifier::SetTextBackgroundStyleImpl,
-        BaseSpanModifier::SetBaselineOffsetImpl,
+        BaseSpanModifier::TextBackgroundStyleImpl,
+        BaseSpanModifier::BaselineOffsetImpl,
     };
     return &ArkUIBaseSpanModifierImpl;
 }

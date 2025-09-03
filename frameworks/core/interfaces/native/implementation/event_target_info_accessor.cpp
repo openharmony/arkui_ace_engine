@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_EventTargetInfo peer)
     CHECK_NULL_VOID(peer);
     peer->DecRefCount();
 }
-Ark_EventTargetInfo ConstructImpl()
+Ark_EventTargetInfo CtorImpl()
 {
     auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
     peer->IncRefCount();
@@ -53,9 +53,10 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {
     static const GENERATED_ArkUIEventTargetInfoAccessor EventTargetInfoAccessorImpl {
         EventTargetInfoAccessor::DestroyPeerImpl,
-        EventTargetInfoAccessor::ConstructImpl,
+        EventTargetInfoAccessor::CtorImpl,
         EventTargetInfoAccessor::GetFinalizerImpl,
         EventTargetInfoAccessor::GetIdImpl,
+        EventTargetInfoAccessor::IsScrollableComponentImpl,
     };
     return &EventTargetInfoAccessorImpl;
 }
