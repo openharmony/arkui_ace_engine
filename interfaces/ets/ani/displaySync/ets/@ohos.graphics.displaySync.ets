@@ -39,8 +39,8 @@ export namespace displaySync {
     }
 
     constructor(timestamp: long, targetTimestamp: long) {
-        this._timestamp = timestamp;
-        this._targetTimestamp = targetTimestamp;
+      this._timestamp = timestamp;
+      this._targetTimestamp = targetTimestamp;
     }
   }
 
@@ -49,13 +49,13 @@ export namespace displaySync {
   class Cleaner {
     private ptr: long = 0;
     constructor(ptr: long) {
-        this.ptr = ptr;
+      this.ptr = ptr;
     }
     native clean(): void;
   }
 
   export function callback(cleaner: Cleaner): void {
-      cleaner.clean()
+    cleaner.clean()
   }
 
   let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
@@ -65,18 +65,18 @@ export namespace displaySync {
     displaySync: long = 0;
     private cleaner: Cleaner | null = null;
     constructor(result: long) {
-        if (this.displaySync == 0) {
-            this.displaySync = result;
-        }
-        this.registerCleaner(this.displaySync)
+      if (this.displaySync == 0) {
+        this.displaySync = result;
+      }
+      this.registerCleaner(this.displaySync)
     }
 
     registerCleaner(ptr: long): void {
-        this.cleaner = new Cleaner(ptr)
-        destroyRegister.register(this, this.cleaner!, unregisterToken);
+      this.cleaner = new Cleaner(ptr)
+      destroyRegister.register(this, this.cleaner!, unregisterToken);
     }
     unregisterCleaner(): void {
-        destroyRegister.unregister(unregisterToken);
+      destroyRegister.unregister(unregisterToken);
     }
 
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
