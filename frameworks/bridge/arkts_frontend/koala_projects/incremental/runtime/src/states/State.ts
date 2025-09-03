@@ -955,7 +955,6 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         manager.current = undefined // allow to dispose children during recomputation
         while (child != last) {
             if (child === undefined) throw new Error("unexpected")
-            // TEMP: explicit compares to avoid compiler bug
             this.recycleOrDispose(child!!)
             child = child.next
         }
@@ -1071,6 +1070,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     }
 
     private recycleOrDispose(child: ManagedScope): void {
+        // TEMP: explicit compares to avoid compiler bug
         const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child, child.id) == true
         if (recycled) {
             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
