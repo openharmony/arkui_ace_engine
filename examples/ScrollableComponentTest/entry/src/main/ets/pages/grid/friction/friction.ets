@@ -13,8 +13,8 @@ struct GridExample1 {
   private scrolling: boolean = false;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
-    $r('app.string.friction'), $r('app.string.friction1'), 0.9, $r('app.string.friction1'), undefined,
-    $r('app.string.friction1'), null, $r('app.string.friction1'), -9, $r('app.string.friction1'), 0.1,
+    99, 11, 0.9, 11, undefined,
+    11, null, 11, -9, 11, 0.1,
   ];
 
   aboutToAppear() {

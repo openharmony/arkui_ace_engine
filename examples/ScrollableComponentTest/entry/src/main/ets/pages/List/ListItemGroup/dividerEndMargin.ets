@@ -74,8 +74,8 @@ struct ListItemGroupExample {
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
-    $r('app.string.margin'), $r('app.string.margin11'), 70, $r('app.string.margin'), undefined, $r('app.string.margin'),
-    null, $r('app.string.margin'), -60, $r('app.string.margin'), 0
+    30, 38, 70, 30, undefined, 30,
+    null, 30, -60, 30, 0
   ];
 
   build() {
@@ -117,15 +117,9 @@ struct ListItemGroupExample {
   getValidEndMargin(value: number | Resource | undefined | null): number {
     if (typeof value === 'number') {
       return value;
-    } else if (typeof value === 'string') {
-      // 假设字符串是一个数字，尝试解析
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        return parsedValue;
-      }
+    } else {
+      return 0;
     }
-    // 默认值
-    return 0;
   }
 }
 
