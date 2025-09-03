@@ -28,7 +28,7 @@ import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 import { ArkUIAniModule } from 'arkui.ani'
 import { UIContextImpl, ContextRecord } from "./handwritten/UIContextImpl"
-import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
+import { ParallelizeUIImpl } from "../@ohos.arkui.Parallelize"
 import { memorizeUpdatedState } from "./stateManagement/remember"
 
 export enum NodeRenderType {
@@ -278,11 +278,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 const result = setNeedCreate(true);
                 if (this.__buildOptions?.useParallel) {
                     const builder = this.__builder0?.builder;
-                    ParallelizeUI(undefined, {
-                        completed: () => {
-                            this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
-                        }
-                    }, builder);
+                    ParallelizeUIImpl((attributes) => {
+                        attributes.setParallelizeUIOptions({
+                            completed: () => {
+                                this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                            },
+                        });
+                        }, builder);
                 }
                 else {
                     this.__builder0?.builder();
@@ -299,13 +301,18 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                     const builder = () => {
                         this.__builder?.builder(params!.value);
                     }
-                    ParallelizeUI(undefined, {
-                        completed: () => {
-                            const ptr = this.__root!.getPeerPtr()
-                            this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                    ParallelizeUIImpl(
+                        (attributes) => {
+                            attributes.setParallelizeUIOptions({
+                                completed: () => {
+                                    const ptr = this.__root!.getPeerPtr()
+                                    this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                                },
+                                updateUseParallel: this.__updateUseParallel
+                            });
                         },
-                        updateUseParallel: this.__updateUseParallel
-                    }, builder);
+                        builder
+                    );
                 } else {
                     this.__builder?.builder(this.__params!.value);
                 }

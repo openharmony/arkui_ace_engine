@@ -1,6 +1,6 @@
 
 import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
-import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, NodeAttach } from "@koalaui/runtime"
+import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, remember } from "@koalaui/runtime"
 import { PeerNode } from "arkui/PeerNode";
 import { ArkContentSlotPeer } from "arkui/component";
 import { ArkUIGeneratedNativeModule } from "#components"
@@ -10,6 +10,7 @@ import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
 import { ArkUIAniModule } from "arkui.ani"
 import { setNeedCreate } from "arkui/ArkComponentRoot"
 import { AceTrace } from "arkui/AceTrace";
+import { ArkCommonMethodComponent, CommonMethod } from 'arkui/component/common'
 
 
 /** @memo:stable */
@@ -126,32 +127,56 @@ export interface ParallelOption {
     updateUseParallel?: boolean,
 }
 
-/** @memo:stable */
-export interface ParallelAttribute {
+export interface UIParallelAttribute extends CommonMethod {
+    enable?: boolean;
+    updateUseParallel?: boolean;
+
+    setParallelizeUIOptions(options?: ParallelOption): this;
+}
+
+export class ArkParallelComponent extends ArkCommonMethodComponent implements UIParallelAttribute {
+    enable?: boolean = true;
+    initlize?: () => void = undefined;
+    completed?: () => void = undefined;
+    updateUseParallel?: boolean = undefined;
+
+    public setParallelizeUIOptions(options?: ParallelOption): this {
+        this.enable = options?.enable;
+        this.initlize = options?.initlize;
+        this.completed = options?.completed;
+        this.updateUseParallel = options?.updateUseParallel;
+        return this;
+    }
 }
 
 /** @memo */
-export function ParallelizeUI(
+export function ParallelizeUIImpl(
     /** @memo */
-    style: ((attributes: ParallelAttribute) => void) | undefined,
-    options?: ParallelOption | undefined,
+    style: ((attributes: UIParallelAttribute) => void) | undefined,
     /** @memo */
     content_?: () => void,
 ) {
-    const option = rememberDisposable<ParallelOption | undefined>(() => {
-        return options;
-    }, () => { })
-    if (option?.enable === false) {
-        content_?.()
+    const receiver = remember(() => {
+        return new ArkParallelComponent();
+    });
+    style?.(receiver);
+    if (receiver.enable === false) {
+        content_?.();
         return;
     }
-    Serializer.setMultithreadMode()
-    const receiver = rememberDisposable<ParallelNode>(() => {
-        return new ParallelNode(options);
+    Serializer.setMultithreadMode();
+    const parallelNode = rememberDisposable<ParallelNode>(() => {
+        return new ParallelNode({
+            enable: receiver.enable,
+            initlize: receiver.initlize,
+            completed: receiver.completed,
+            updateUseParallel: receiver.updateUseParallel
+        });
     }, (parallelNode: ParallelNode | undefined) => {
-        parallelNode?.dispose()
-    })
+        parallelNode?.dispose();
+    });
+
     if (content_ !== undefined) {
-        receiver.build(content_!, options?.updateUseParallel);
+        parallelNode.build(content_!, receiver.updateUseParallel);
     }
 }
