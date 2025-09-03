@@ -1,0 +1,30 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+koala_mr = {
+    root_path = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror"
+    scripts_path = "$root_path/gn/script"
+    imports_prefix = "$root_path/gn/import"
+    ui2abc_path = "$root_path/ui2abc"
+    libarkts_path = "$ui2abc_path/libarkts"
+    incremental_path = "$root_path/incremental"
+    panda_sdk_path = "$ui2abc_path/build/sdk"
+    es2panda_path = "$panda_sdk_path/ohos_arm64/include/tools/es2panda"
+    interop_path = "$root_path/interop"
+    arkoala_arkts_path = "$root_path/arkoala-arkts"
+    is_rri = false
+}
+
+node_version = "v16.20.2"
+host_arch = "${host_os}-${host_cpu}"
+koala_node_path = rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
