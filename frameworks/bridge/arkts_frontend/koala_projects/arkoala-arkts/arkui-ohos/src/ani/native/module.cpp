@@ -394,6 +394,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawCallback)
         },
         ani_native_function {
+            "_SetFrameNodeDrawCallback",
+            "JLstd/core/Function1;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetFrameNodeDrawCallback)
+        },
+        ani_native_function {
             "_SetDrawModifier",
             "JILarkui/component/common/DrawModifier;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
