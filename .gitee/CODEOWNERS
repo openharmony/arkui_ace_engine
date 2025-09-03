@@ -3060,6 +3060,9 @@ interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
 
+[ANI Interfaces]
+interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @arkuievent
+
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework
 interfaces/inner_api/ace/ace_forward_compatibility.h @arkuiframework
