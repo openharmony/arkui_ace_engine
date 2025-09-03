@@ -584,10 +584,12 @@ namespace Converter {
     template<> Point Convert(const Ark_Tuple_Number_Number& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> PointT<int32_t> Convert(const Ark_Point& src);
+    template<> PreviewText Convert(const Ark_PreviewText& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> Radius Convert(const Ark_Vector2& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> Rect Convert(const Ark_RectResult& src);
+    template<> RectF Convert(const Ark_Rect& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
@@ -664,6 +666,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
+    template<> void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src);
     template<> void AssignCast(std::optional<AxisAction>& dst, const Ark_AxisAction& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src);

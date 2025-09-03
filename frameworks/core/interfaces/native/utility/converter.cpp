@@ -576,6 +576,16 @@ std::optional<bool> ResourceConverter::ToBoolean()
 }
 
 template<>
+PreviewText Convert(const Ark_PreviewText& src)
+{
+    PreviewText previewText = {
+        .value = Convert<std::u16string>(src.value),
+        .offset = Convert<int32_t>(src.offset)
+    };
+    return previewText;
+}
+
+template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
     ScaleOpt scaleOptions;
@@ -1726,6 +1736,16 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
     if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
         dst = val;
     }
+}
+
+template<>
+RectF Convert(const Ark_Rect& src)
+{
+    auto left = Converter::Convert<float>(src.left);
+    auto top = Converter::Convert<float>(src.top);
+    auto right = Converter::Convert<float>(src.right);
+    auto bottom = Converter::Convert<float>(src.bottom);
+    return RectF(left, top, right - left, bottom - top);
 }
 
 template<>
