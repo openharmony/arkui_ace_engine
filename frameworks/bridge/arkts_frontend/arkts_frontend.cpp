@@ -372,40 +372,39 @@ ani_vm *ArktsFrontend::GetVM()
     return vm_;
 }
 
-void* ArktsFrontend::PushExtender(
-    const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
     routerPageInfo.recoverable = recoverable;
-    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback));
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
 void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-    std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+    std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
     routerPageInfo.recoverable = recoverable;
-    auto pageNode =
-        pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), std::move(exitFinishCallback));
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::RunPageExtender(
-    const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
     routerPageInfo.recoverable = recoverable;
-    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback));
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
@@ -457,7 +456,7 @@ void ArktsFrontend::OnShow()
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->OnShow();
+    pagePattern->OnShow(true);
 }
 
 void ArktsFrontend::OnHide()
@@ -467,7 +466,7 @@ void ArktsFrontend::OnHide()
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->OnHide();
+    pagePattern->OnHide(true);
 }
 
 void ArktsFrontend::OpenStateMgmtInterop()
