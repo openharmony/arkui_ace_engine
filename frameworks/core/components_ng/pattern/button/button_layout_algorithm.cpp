@@ -186,6 +186,7 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(buttonTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
+    // label type Without the general ability to use components, pass FIX_AT_IDEAL_SIZE to the child directly.
     auto layoutPolicy = buttonLayoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy && layoutPolicy->IsFix()) {
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
