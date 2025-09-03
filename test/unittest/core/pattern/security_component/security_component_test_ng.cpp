@@ -1824,10 +1824,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
 
     KeyEvent key;
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
+        noExistId, invalidFrameNode, key, [] (int32_t) {}, message), -1);
     key.enhanceData = { 0 };
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
+        noExistId, invalidFrameNode, key, [] (int32_t) {}, message), -1);
 }
 
 /**

@@ -272,6 +272,15 @@ void JSSaveButton::SetTipPosition(const JSCallbackInfo& info)
     SecurityComponentModelNG::SetTipPosition(static_cast<TipPosition>(value));
 }
 
+void JSSaveButton::SetUserCancelEvent(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || (!info[0]->IsBoolean())) {
+        return;
+    }
+    bool userCancelEvent = info[0]->ToBoolean();
+    SecurityComponentModelNG::SetUserCancelEvent(userCancelEvent);
+}
+
 void JSSaveButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSaveButton>::Declare("SaveButton");
@@ -319,6 +328,7 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
     JSClass<JSSaveButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
     JSClass<JSSaveButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
+    JSClass<JSSaveButton>::StaticMethod("userCancelEvent", &JSSaveButton::SetUserCancelEvent);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
