@@ -1557,16 +1557,18 @@ void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(normalColor));
-    } else {
-        pattern->UnRegisterResource("underlineColorNormal");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(normalColor));
+        } else {
+            pattern->UnRegisterResource("underlineColorNormal");
+        }
     }
 }
 
@@ -1583,38 +1585,46 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     }
     if (hasValues[CALL_ARG_0]) {
         userColor.typing = Color(values[CALL_ARG_0]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->typingColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->typingColorObj));
-            pattern->RegisterResource<Color>("underlineColorTyping", resObj, Color(values[CALL_ARG_0]));
-        } else {
-            pattern->UnRegisterResource("underlineColorTyping");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->typingColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->typingColorObj));
+                pattern->RegisterResource<Color>("underlineColorTyping", resObj, Color(values[CALL_ARG_0]));
+            } else {
+                pattern->UnRegisterResource("underlineColorTyping");
+            }
         }
     }
     if (hasValues[CALL_ARG_1]) {
         userColor.normal = Color(values[CALL_ARG_1]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->normalColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->normalColorObj));
-            pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(values[CALL_ARG_1]));
-        } else {
-            pattern->UnRegisterResource("underlineColorNormal");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->normalColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->normalColorObj));
+                pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(values[CALL_ARG_1]));
+            } else {
+                pattern->UnRegisterResource("underlineColorNormal");
+            }
         }
     }
     if (hasValues[CALL_ARG_2]) {
         userColor.error = Color(values[CALL_ARG_2]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->errorColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->errorColorObj));
-            pattern->RegisterResource<Color>("underlineColorError", resObj, Color(values[CALL_ARG_2]));
-        } else {
-            pattern->UnRegisterResource("underlineColorError");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->errorColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->errorColorObj));
+                pattern->RegisterResource<Color>("underlineColorError", resObj, Color(values[CALL_ARG_2]));
+            } else {
+                pattern->UnRegisterResource("underlineColorError");
+            }
         }
     }
     if (hasValues[CALL_ARG_3]) {
         userColor.disable = Color(values[CALL_ARG_3]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->disableColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->disableColorObj));
-            pattern->RegisterResource<Color>("underlineColorDisable", resObj, Color(values[CALL_ARG_3]));
-        } else {
-            pattern->UnRegisterResource("underlineColorDisable");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->disableColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->disableColorObj));
+                pattern->RegisterResource<Color>("underlineColorDisable", resObj, Color(values[CALL_ARG_3]));
+            } else {
+                pattern->UnRegisterResource("underlineColorDisable");
+            }
         }
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);

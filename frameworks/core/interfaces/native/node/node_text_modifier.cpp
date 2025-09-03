@@ -88,7 +88,7 @@ std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 
-FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
+FontWeight ConvertStrToFontWeight(ArkUI_CharPtr weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
@@ -400,9 +400,8 @@ void ResetTextTextOverflow(ArkUINodeHandle node)
     TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
 }
 
-void SetTextDecoration(
-    ArkUINodeHandle node, ArkUI_Int32 decoration,
-    ArkUI_Uint32 color, void* colorRawPtr, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, void* colorRawPtr,
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -582,7 +581,7 @@ void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxFontScale(frameNode, number);
-    NodeModifier::ProcessResourceObj<float>(frameNode, "MinFontScale", number, maxFontScaleRawPtr);
+    NodeModifier::ProcessResourceObj<float>(frameNode, "MaxFontScale", number, maxFontScaleRawPtr);
 }
 
 void ResetTextMaxFontScale(ArkUINodeHandle node)
@@ -712,7 +711,7 @@ void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t
             *(shadow + i) = { static_cast<float>(textShadowVector[i].GetBlurRadius()),
                 static_cast<int32_t>(textShadowVector[i].GetShadowType()), textShadowVector[i].GetColor().GetValue(),
                 textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
-                textShadowVector[i].GetIsFilled() };
+                textShadowVector[i].GetIsFilled()};
         } else {
             *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR), Color::TRANSPARENT.GetValue(), 0.0f, 0.0f,
                 0 };
@@ -942,7 +941,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
-    // set index start
+    //set index start
     uint32_t index = 0;
     for (auto& family : fontFamilies) {
         families += family;
@@ -996,7 +995,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        // set index start
+        //set index start
         std::size_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
@@ -1939,23 +1938,23 @@ const ArkUITextModifier* GetTextModifier()
         .getTextEllipsisMode = GetTextEllipsisMode,
         .setTextFontFeature = SetTextFontFeature,
         .resetTextFontFeature = ResetTextFontFeature,
-        .setTextLineSpacing = SetTextLineSpacing,
-        .getTextLineSpacing = GetTextLineSpacing,
-        .resetTextLineSpacing = ResetTextLineSpacing,
         .getTextFontFeature = GetTextFontFeature,
         .getEnableDataDetector = GetTextDetectEnable,
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
-        .setLineBreakStrategy = SetLineBreakStrategy,
-        .resetLineBreakStrategy = ResetLineBreakStrategy,
-        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
+        .setTextLineSpacing = SetTextLineSpacing,
+        .getTextLineSpacing = GetTextLineSpacing,
+        .resetTextLineSpacing = ResetTextLineSpacing,
         .setTextCaretColor = SetTextCaretColor,
         .getTextCaretColor = GetTextCaretColor,
         .resetTextCaretColor = ResetTextCaretColor,
         .setTextSelectedBackgroundColor = SetTextSelectedBackgroundColor,
         .getTextSelectedBackgroundColor = GetTextSelectedBackgroundColor,
         .resetTextSelectedBackgroundColor = ResetTextSelectedBackgroundColor,
+        .setLineBreakStrategy = SetLineBreakStrategy,
+        .resetLineBreakStrategy = ResetLineBreakStrategy,
+        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
         .setTextContentWithStyledString = SetTextContentWithStyledString,
         .resetTextContentWithStyledString = ResetTextContentWithStyledString,
         .setTextSelection = SetTextSelection,
@@ -1968,12 +1967,12 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextOnCopy = ResetTextOnCopy,
         .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
         .resetTextOnTextSelectionChange = ResetTextOnTextSelectionChange,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextMinFontScale = SetTextMinFontScale,
         .resetTextMinFontScale = ResetTextMinFontScale,
         .setTextMaxFontScale = SetTextMaxFontScale,
         .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
-        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextHalfLeading = SetTextHalfLeading,
         .resetTextHalfLeading = ResetTextHalfLeading,
         .getTextHalfLeading = GetTextHalfLeading,
@@ -1983,15 +1982,15 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextResponseRegion = ResetResponseRegion,
         .setTextEnableHapticFeedback = SetTextEnableHapticFeedback,
         .resetTextEnableHapticFeedback = ResetTextEnableHapticFeedback,
+        .setImmutableFontWeight = SetImmutableFontWeight,
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
-        .setImmutableFontWeight = SetImmutableFontWeight,
+        .getLineCount = GetLineCount,
         .setTextOptimizeTrailingSpace = SetTextOptimizeTrailingSpace,
         .resetTextOptimizeTrailingSpace = ResetTextOptimizeTrailingSpace,
         .getTextOptimizeTrailingSpace = GetTextOptimizeTrailingSpace,
-        .getLineCount = GetLineCount,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .setLinearGradient = SetTextLinearGradient,
@@ -2002,9 +2001,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextVerticalAlign = SetTextVerticalAlign,
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
+        .setColorShaderColor = SetColorShaderColor,
         .setTextContentTransition = SetTextContentTransition,
         .resetTextContentTransition = ResetTextContentTransition,
-        .setColorShaderColor = SetColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

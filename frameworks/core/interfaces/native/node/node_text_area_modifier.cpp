@@ -1267,6 +1267,12 @@ ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
+ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetMaxLines(frameNode);
+}
 ArkUI_Bool GetTextAreaHalfLeading(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1288,13 +1294,6 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     value.Reset();
     bool isOnlyBetweenLines = false;
     TextFieldModelNG::SetLineSpacing(frameNode, value, isOnlyBetweenLines);
-}
-
-ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetMaxLines(frameNode);
 }
 
 void RegisterPaddingResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
