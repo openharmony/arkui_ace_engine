@@ -4275,6 +4275,11 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
     auto contentModifier = AceType::DynamicCast<ContentModifier>(modifier);
     CHECK_NULL_VOID(contentModifier);
+    auto contentTransition = contentModifier->GetContentTransitionParam();
+    auto contentTransitionType = contentTransition == ContentTransitionType::OPACITY
+                                     ? Rosen::ContentTransitionType::OPACITY
+                                     : Rosen::ContentTransitionType::IDENTITY;
+    modifierAdapter->SetContentTransitionParam(contentTransitionType);
     auto rect = contentModifier->GetBoundsRect();
     if (rect.has_value()) {
         std::shared_ptr<Rosen::RectF> overlayRect =

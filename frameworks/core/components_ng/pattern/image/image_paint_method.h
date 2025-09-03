@@ -56,6 +56,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdatePaintMethod(
         const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig = {});
+    bool NeedsContentTransition();
 
 private:
     void UpdatePaintConfig(PaintWrapper* paintWrapper);
