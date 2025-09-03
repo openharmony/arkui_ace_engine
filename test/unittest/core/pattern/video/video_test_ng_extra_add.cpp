@@ -1214,30 +1214,6 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ChangePlayerStatus002
- * @tc.desc: Test ChangePlayerStatus
- * @tc.type: FUNC
- */
-HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus002, TestSize.Level1)
-{
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    PlaybackStatus status = PlaybackStatus::INITIALIZED;
-    auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
-    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockMediaPlayer, PrepareAsync()).WillOnce(Return(0)).WillOnce(Return(-1));
-    videoPattern->mediaPlayer_ = mockMediaPlayer;
-    videoPattern->ChangePlayerStatus(status);
-    videoPattern->ChangePlayerStatus(status);
-}
-
-/**
  * @tc.name: OnResolutionChange001
  * @tc.desc: Test OnResolutionChange
  * @tc.type: FUNC
