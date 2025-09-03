@@ -120,8 +120,6 @@ export function PasteButton(
     /** @memo */
     style: ((attributes: PasteButtonAttribute) => void) | undefined,
     options?: PasteButtonOptions,
-    /** @memo */
-    content_?: (() => void) | undefined,
 ): void {
     const receiver = remember(() => {
         return new ArkPasteButtonComponent()
@@ -129,7 +127,6 @@ export function PasteButton(
     NodeAttach<ArkPasteButtonPeer>((): ArkPasteButtonPeer => ArkPasteButtonPeer.create(receiver), (_: ArkPasteButtonPeer) => {
         receiver.setPasteButtonOptions(options)
         style?.(receiver)
-        content_?.()
         receiver.applyAttributesFinish()
     })
 }
