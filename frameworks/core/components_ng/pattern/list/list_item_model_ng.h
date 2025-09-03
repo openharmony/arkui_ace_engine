@@ -66,6 +66,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
     static void SetStyle(FrameNode* frameNode, V2::ListItemStyle style);
+    static void ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction);
+    static void CollapseSwipeAction(const NG::FrameNode* listItem);
+
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

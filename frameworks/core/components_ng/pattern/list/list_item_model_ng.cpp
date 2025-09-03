@@ -360,4 +360,20 @@ void ListItemModelNG::ParseResObjEndArea(const RefPtr<ResourceObject>& resObj)
     };
     pattern->AddResObj("listItem.EndDeleteAreaDistance", resObj, std::move(updateFunc));
 }
+
+void ListItemModelNG::ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->ExpandSwipeAction(direction);
+}
+
+void ListItemModelNG::CollapseSwipeAction(const NG::FrameNode* listItem)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->CloseSwipeAction(nullptr);
+}
 } // namespace OHOS::Ace::NG

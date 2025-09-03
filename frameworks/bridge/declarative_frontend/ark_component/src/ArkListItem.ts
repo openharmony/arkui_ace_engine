@@ -123,6 +123,15 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
   }
 }
 
+class ListItemSwipeActionManager {
+  static expand(node: FrameNode, direction: ListItemSwipeActionDirection): void {
+    getUINativeModule().listItemSwipeActionManager.expand(node?.nodePtr_, direction);
+  }
+  static collapse(node: FrameNode): void {
+    getUINativeModule().listItemSwipeActionManager.collapse(node?.nodePtr_);
+  }
+}
+
 // @ts-ignore
 globalThis.ListItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

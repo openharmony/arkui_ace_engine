@@ -6038,6 +6038,12 @@ void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> objec
     listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetOnSelect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItem"), listItem);
+    auto listItemSwipeActionManager = panda::ObjectRef::New(vm);
+    listItemSwipeActionManager->Set(vm, panda::StringRef::NewFromUtf8(vm, "expand"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::Expand));
+    listItemSwipeActionManager->Set(vm, panda::StringRef::NewFromUtf8(vm, "collapse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::Collapse));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemSwipeActionManager"), listItemSwipeActionManager);
 }
 
 void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

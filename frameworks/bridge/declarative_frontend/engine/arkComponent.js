@@ -35005,6 +35005,17 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
 }
+
+class ListItemSwipeActionManager {
+  static expand(node, direction) {
+    getUINativeModule().listItemSwipeActionManager.expand(
+      node === null || node === void 0 ? void 0 : node.nodePtr_, direction);
+  }
+  static collapse(node) {
+    getUINativeModule().listItemSwipeActionManager.collapse(node === null || node === void 0 ? void 0 : node.nodePtr_);
+  }
+}
+
 // @ts-ignore
 if (globalThis.ListItem !== undefined) {
   globalThis.ListItem.attributeModifier = function (modifier) {

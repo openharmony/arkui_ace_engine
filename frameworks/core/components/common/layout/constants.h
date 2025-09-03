@@ -1253,6 +1253,11 @@ enum class LayoutType : int32_t {
     MEASURE_FOR_IGNORE = 1,
     LAYOUT_FOR_IGNORE = 2
 };
+
+enum class ListItemSwipeActionDirection {
+    START = 0,
+    END = 1,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

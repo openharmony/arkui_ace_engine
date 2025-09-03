@@ -4055,6 +4055,8 @@ struct ArkUIListItemModifier {
     void (*resetListItemOnSelectCallback)(ArkUINodeHandle node);
     void (*setListItemStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
     void (*resetListItemStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*expand)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    ArkUI_Int32 (*collapse)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {

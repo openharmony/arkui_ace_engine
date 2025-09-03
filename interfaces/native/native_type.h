@@ -2474,6 +2474,11 @@ typedef enum {
      * @since 16
      */
     ARKUI_ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501,
+    /**
+     * @error Parameter error.
+     * @since 21
+     */
+    ARKUI_ERROR_CODE_PARAM_ERROR = 100023,
 } ArkUI_ErrorCode;
 
 /**
@@ -2656,6 +2661,25 @@ typedef enum {
     /** The component fills its content which means its size is as large as its children. */
     ARKUI_LAYOUTPOLICY_FIXATIDEALSIZE,
 } ArkUI_LayoutPolicy;
+
+/**
+ * @brief Define the direction to expand the swipe action.
+ *
+ * @since 21
+ */
+typedef enum {
+    /**
+     * When the List direction is vertical, it indicates the left in LTR mode and right in RTL mode.
+     * When the List direction is horizontal, it indicates the top.
+     */
+    ARKUI_LIST_ITEM_SWIPE_ACTION_DIRECTION_START = 0,
+    /**
+     * When the List direction is vertical, it indicates the right in LTR mode and left in RTL mode.
+     * When the List direction is horizontal, it indicates the bottom.
+     */
+    ARKUI_LIST_ITEM_SWIPE_ACTION_DIRECTION_END = 1,
+} ArkUI_ListItemSwipeActionDirection;
+
 
 /**
  * @brief Defines parameter used by the system font style callback event.
@@ -5365,6 +5389,31 @@ void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value);
  * @since 21
  */
 int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Expand the swipe action.
+ *
+ * @param node List Item node.
+ * @param direction expand direction of swipeAction.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_ERROR} The component type of the node is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node not mounted to component tree.
+ * @since 21
+ */
+int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListItemSwipeActionDirection direction);
+
+/**
+ * @brief Collapse the swipe action.
+ *
+ * @param node List Item node.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_ERROR} The component type of the node is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node not mounted to component tree.
+ * @since 21
+ */
+int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node);
 #ifdef __cplusplus
 };
 #endif

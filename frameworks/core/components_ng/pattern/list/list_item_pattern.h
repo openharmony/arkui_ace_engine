@@ -216,6 +216,8 @@ public:
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+    void ExpandSwipeAction(ListItemSwipeActionDirection direction);
+    void ExpandSwipeActionWithAnimate(ListItemSwipeIndex index);
 
     void FireOnFinishEvent() const
     {
@@ -346,6 +348,7 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
+    std::optional<ListItemSwipeIndex> expandSwipeAction_;
     
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;
 
