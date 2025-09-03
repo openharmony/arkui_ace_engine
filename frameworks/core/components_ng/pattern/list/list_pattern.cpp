@@ -93,7 +93,7 @@ void ListPattern::OnModifyDone()
     }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusDependence(FocusDependence::AUTO);
+    focusHub->SetFocusDependence(FocusDependence::CHILD);
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
