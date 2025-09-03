@@ -19,7 +19,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 
-ArkoalaForEachNode::ArkoalaForEachNode(int32_t nodeId) : ForEachBaseNode(V2::JS_SYNTAX_ITEM_ETS_TAG, nodeId) {}
+ArkoalaForEachNode::ArkoalaForEachNode(int32_t nodeId) : ForEachBaseNode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
 
 void ArkoalaForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
