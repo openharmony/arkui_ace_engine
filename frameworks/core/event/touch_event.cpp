@@ -513,6 +513,11 @@ int32_t TouchEvent::GetEventIdentity() const
     return originalId;
 }
 
+bool TouchEvent::ConvertFromMouse() const
+{
+    return sourceType == SourceType::MOUSE && !(convertInfo.first == UIInputEventType::MOUSE);
+}
+
 void TouchCallBackInfo::SetScreenX(float screenX)
 {
     screenX_ = screenX;

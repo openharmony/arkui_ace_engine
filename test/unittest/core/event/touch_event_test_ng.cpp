@@ -714,4 +714,26 @@ HWTEST_F(TouchEventTestNg, CreateTouchItemInfoTest001, TestSize.Level1)
         EXPECT_EQ(touchesTypes[i], touchPointExpectTypes[i]);
     }
 }
+
+/**
+ * @tc.name: ConvertFromMouseTest001
+ * @tc.desc: TriggerConvertFromMouse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, ConvertFromMouseTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.sourceType = SourceType::NONE;
+    EXPECT_TRUE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.sourceType = SourceType::MOUSE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::NONE;
+    touchEvent.sourceType = SourceType::NONE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::NONE;
+    touchEvent.sourceType = SourceType::MOUSE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+}
 } // namespace OHOS::Ace::NG

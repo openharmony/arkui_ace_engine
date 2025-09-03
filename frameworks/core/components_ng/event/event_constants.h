@@ -156,6 +156,7 @@ enum class UIInputEventType {
     KEY,
     FOCUS_AXIS,
     CROWN,
+    MOUSE,
 };
 
 enum class KeyIntention : int32_t {
