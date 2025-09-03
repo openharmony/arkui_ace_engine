@@ -451,10 +451,12 @@ void SwapGatherNodeToSubwindowInUIExtension(const RefPtr<FrameNode>& menuWrapper
     CHECK_NULL_VOID(rootNode);
     auto subwindowRootNode = menuWrapperNode->GetParent();
     CHECK_NULL_VOID(subwindowRootNode);
+    auto offset = DragDropFuncWrapper::GetFrameNodeOffsetToScreen(gatherNode);
     rootNode->RemoveChild(gatherNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     subwindowRootNode->AddChildBefore(gatherNode, menuWrapperNode);
     gatherNode->OnMountToParentDone();
+    DragDropFuncWrapper::UpdateNodePositionToScreen(gatherNode, offset);
     subwindowRootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
