@@ -267,6 +267,32 @@ HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRTLWithItemSmallThanColumn
+ * @tc.desc: Test rtl layout of fixed grid with item small than column
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutRTLWithItemSmallThanColumn, TestSize.Level1)
+{
+    float itemWidth = 40.f;
+    GridModelNG model = CreateGrid();
+    model.SetIsRTL(TextDirection::RTL);
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItems(12, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    int32_t colsNumber = 4;
+    auto colLens = WIDTH / colsNumber;
+    for (int32_t index = 0; index < 10; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = WIDTH - index % colsNumber * colLens - colLens + (colLens - itemWidth) / 2;
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
  * @tc.name: AdaptiveLayoutRTL001
  * @tc.desc: Test property AdaptiveLayout with GridDirection Row and Direction RTL
  * @tc.type: FUNC
