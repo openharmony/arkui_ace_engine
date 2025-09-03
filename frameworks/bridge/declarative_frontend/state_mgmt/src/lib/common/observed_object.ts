@@ -112,19 +112,28 @@ class SubscribableHandler {
   static readonly ENABLE_V2_COMPATIBLE = Symbol('_____enablev2_compatible');
   static readonly MAKE_V1_OBSERVED = Symbol('___makev1_observed__');
 
-  private owningProperties_: Set<number>;
+  private owningProperties_?: Set<number>;
   private readCbFunc_?: PropertyReadCbFunc;
   private obSelf_?: ObservedPropertyAbstractPU<any>;
   protected enableV2Compatible_ : boolean;
 
   constructor(owningProperty: IPropertySubscriber) {
-    this.owningProperties_ = new Set<number>();
-
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
     this.enableV2Compatible_ = false;
     stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
+  }
+
+  getOrCreateOwningProperties(): Set<number> {
+    if (!this.owningProperties_) {
+      this.owningProperties_ = new Set<number>();
+    }
+    return this.owningProperties_;
+  }
+
+  getOwningProperties(): Set<number> | undefined {
+    return this.owningProperties_;
   }
 
   protected isPropertyTracked(obj: Object, property: string): boolean {
@@ -136,7 +145,7 @@ class SubscribableHandler {
   addOwningProperty(subscriber: IPropertySubscriber): void {
     if (subscriber) {
       stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`);
-      this.owningProperties_.add(subscriber.id__());
+      this.getOrCreateOwningProperties().add(subscriber.id__());
     } else {
       stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber.`);
     }
@@ -151,12 +160,12 @@ class SubscribableHandler {
 
   public removeOwningPropertyById(subscriberId: number): void {
     stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
-    this.owningProperties_.delete(subscriberId);
+    this.getOwningProperties()?.delete(subscriberId);
   }
 
   protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`);
-    this.owningProperties_.forEach((subscribedId) => {
+    this.getOwningProperties()?.forEach((subscribedId) => {
       const owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (!owningProperty) {
         stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
@@ -181,7 +190,7 @@ class SubscribableHandler {
 
   protected notifyTrackedObjectPropertyHasChanged(propName: string): void {
     stateMgmtConsole.debug(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged '@Track ${propName}'.`);
-    this.owningProperties_.forEach((subscribedId) => {
+    this.getOwningProperties()?.forEach((subscribedId) => {
       const owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (owningProperty && 'onTrackedObjectPropertyHasChangedPU' in owningProperty) {
         // PU code path with observed object property change tracking optimization
@@ -206,7 +215,7 @@ class SubscribableHandler {
           case ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT:
             return target;
           case SubscribableHandler.COUNT_SUBSCRIBERS:
-            return this.owningProperties_.size;
+            return this.getOwningProperties() ? this.getOwningProperties()!.size : 0;
           case ObserveV2.SYMBOL_REFS:
           case ObserveV2.V2_DECO_META:
           case ObserveV2.SYMBOL_MAKE_OBSERVED:
