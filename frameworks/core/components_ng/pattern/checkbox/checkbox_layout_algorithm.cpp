@@ -41,11 +41,8 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            host->GetGeometryNode()->ResetContent();
-        } else {
-            host->GetGeometryNode()->Reset();
-        }
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
+            host->GetGeometryNode()->ResetContent() : host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     InitializeParam(host);
