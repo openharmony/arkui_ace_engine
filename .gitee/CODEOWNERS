@@ -2046,6 +2046,7 @@ frameworks/core/components/common/properties/text_style.h @huawei_g_five
 frameworks/core/components/common/properties/text_style_parser.cpp @huawei_g_five
 frameworks/core/components/common/properties/text_style_parser.h @huawei_g_five
 frameworks/core/components/common/properties/tween_option.h @arkuiframework
+frameworks/core/components/common/properties/background_image.h @arkuievent
 frameworks/core/components/common/rotation/ @arkui_superman
 frameworks/core/components/components.gni @arkui_architecture
 frameworks/core/components/container_modal/ @arkuievent
