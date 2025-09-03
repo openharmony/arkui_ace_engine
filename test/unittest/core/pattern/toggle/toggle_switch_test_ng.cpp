@@ -1890,8 +1890,8 @@ HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest002, TestSize.Level1)
     float frameHeight = 0.0f;
     switchLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty,
         frameWidth, frameHeight);
-    EXPECT_EQ(frameWidth, TEST_ZERO);
-    EXPECT_EQ(frameHeight, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
 }
 
 /**
@@ -2035,8 +2035,8 @@ HWTEST_F(ToggleSwitchTestNg, ToggleWrapContentTest002, TestSize.Level1)
     float frameHeight = 0.0f;
     switchLayoutAlgorithm->LayoutPolicyIsWrapContent(contentConstraint, layoutPolicyProperty,
         frameWidth, frameHeight);
-    EXPECT_EQ(frameWidth, TEST_ZERO);
-    EXPECT_EQ(frameHeight, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
 }
 
 /**

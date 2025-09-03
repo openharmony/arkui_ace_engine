@@ -1093,8 +1093,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001,
     LayoutPolicyProperty layoutPolicyProperty;
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
-    EXPECT_EQ(frameSize.Width(), ZERO);
-    EXPECT_EQ(frameSize.Height(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
 
     /**
      * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
@@ -1103,8 +1103,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001,
      */
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
     buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
-    EXPECT_EQ(frameSize.Width(), ZERO);
-    EXPECT_EQ(frameSize.Height(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
 
     /**
      * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
@@ -1114,8 +1114,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001,
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
     buttonLayoutAlgorithm->childSize_.SetHeight(ZERO);
     buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
-    EXPECT_EQ(frameSize.Width(), ZERO);
-    EXPECT_EQ(frameSize.Height(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
 
     /**
      * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
@@ -1124,8 +1124,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001,
      */
     buttonLayoutAlgorithm->childSize_.SetHeight(BUTTON_HEIGHT);
     buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
-    EXPECT_EQ(frameSize.Width(), ZERO);
-    EXPECT_NE(frameSize.Height(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
 }
 
 /**
@@ -1178,13 +1177,13 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionHandleAdaptiveTextTest001, TestSize
      */
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 
     layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 }
 

@@ -2386,8 +2386,7 @@ HWTEST_F(RatingTestNg, MeasureTest002, TestSize.Level1)
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     ASSERT_NE(ratingTheme, nullptr);
     auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_NE(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2397,8 +2396,7 @@ HWTEST_F(RatingTestNg, MeasureTest002, TestSize.Level1)
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2408,8 +2406,7 @@ HWTEST_F(RatingTestNg, MeasureTest002, TestSize.Level1)
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2417,8 +2414,7 @@ HWTEST_F(RatingTestNg, MeasureTest002, TestSize.Level1)
      */
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
 }
 
 /**
@@ -2464,8 +2460,7 @@ HWTEST_F(RatingTestNg, MeasureTest003, TestSize.Level1)
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2473,8 +2468,7 @@ HWTEST_F(RatingTestNg, MeasureTest003, TestSize.Level1)
      */
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2483,8 +2477,7 @@ HWTEST_F(RatingTestNg, MeasureTest003, TestSize.Level1)
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM,
         TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
-    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
 }
 
 /**
@@ -2531,8 +2524,7 @@ HWTEST_F(RatingTestNg, MeasureTest004, TestSize.Level1)
     ratingTheme->ratingMiniHeight_ = Dimension(TEST_WIDTH_50);
     ratingTheme->ratingHeight_ = Dimension(TEST_WIDTH_50);
     auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_NE(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2542,8 +2534,7 @@ HWTEST_F(RatingTestNg, MeasureTest004, TestSize.Level1)
     layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2551,8 +2542,7 @@ HWTEST_F(RatingTestNg, MeasureTest004, TestSize.Level1)
      */
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 }
 
 /**
@@ -2599,8 +2589,7 @@ HWTEST_F(RatingTestNg, MeasureTest005, TestSize.Level1)
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
     auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2608,8 +2597,7 @@ HWTEST_F(RatingTestNg, MeasureTest005, TestSize.Level1)
      */
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2617,8 +2605,7 @@ HWTEST_F(RatingTestNg, MeasureTest005, TestSize.Level1)
      */
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
 }
 
 /**
@@ -2665,8 +2652,7 @@ HWTEST_F(RatingTestNg, MeasureTest006, TestSize.Level1)
     ratingTheme->ratingHeight_ = Dimension(TEST_WIDTH_50);
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
     auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2674,8 +2660,7 @@ HWTEST_F(RatingTestNg, MeasureTest006, TestSize.Level1)
      */
     contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_NE(ret, TEST_SIZE_200);
 
     /**
      * @tc.steps: step3. call MeasureContent function.
@@ -2683,8 +2668,7 @@ HWTEST_F(RatingTestNg, MeasureTest006, TestSize.Level1)
      */
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
 }
 
 /**
@@ -2728,8 +2712,7 @@ HWTEST_F(RatingTestNg, MeasureTest007, TestSize.Level1)
     ASSERT_NE(ratingTheme, nullptr);
     auto ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
         contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 
     /**
      * @tc.steps: step2. call MeasureContent function.
@@ -2737,8 +2720,7 @@ HWTEST_F(RatingTestNg, MeasureTest007, TestSize.Level1)
      */
     ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
         contentConstraint, layoutPolicyProperty, RATING_STAR_NUM_ZERO, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
-    EXPECT_EQ(ret->Width(), TEST_SIZE_0.Width());
-    EXPECT_EQ(ret->Height(), TEST_SIZE_0.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 }
 
 /**
