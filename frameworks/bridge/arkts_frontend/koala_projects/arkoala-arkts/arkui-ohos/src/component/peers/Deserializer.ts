@@ -12990,14 +12990,14 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const controller_result : WebKeyboardController = (valueDeserializer.readWebKeyboardController() as WebKeyboardController)
         const attributes_buf_size : int32 = valueDeserializer.readInt32()
-        let attributes_buf : Map<string, string> = new Map<string, string>()
+        let attributes_buf : Record<string, string> = {}
         // TODO: TS map resize
         for (let attributes_buf_i = 0; attributes_buf_i < attributes_buf_size; attributes_buf_i++) {
             const attributes_buf_key : string = (valueDeserializer.readString() as string)
             const attributes_buf_value : string = (valueDeserializer.readString() as string)
-            attributes_buf.set(attributes_buf_key, attributes_buf_value)
+            attributes_buf[attributes_buf_key] = attributes_buf_value
         }
-        const attributes_result : Map<string, string> = attributes_buf
+        const attributes_result : Record<string, string> = attributes_buf
         let value : WebKeyboardCallbackInfo = ({controller: controller_result, attributes: attributes_result} as WebKeyboardCallbackInfo)
         return value
     }
