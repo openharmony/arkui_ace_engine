@@ -2184,6 +2184,27 @@ HWTEST_F(TextFieldUXTest, TextInputHalfLeading001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextInputHalfLeading002
+ * @tc.desc: test TextInput halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHalfLeading002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set halfLeading false
+     * @tc.expected: halfLeading is false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(false);
+    });
+
+    /**
+     * @tc.step: step2. test halfLeading
+     */
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), false);
+}
+
+/**
  * @tc.name: TextInputTextDecoration001
  * @tc.desc: test TextInput decoration
  * @tc.type: FUNC
@@ -2457,5 +2478,117 @@ HWTEST_F(TextFieldUXTest, TextInputMaxFontScale001, TestSize.Level1)
      * @tc.step: step2. test maxFontScale
      */
     EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
+}
+
+/**
+ * @tc.name: AutoCapTypeToString001
+ * @tc.desc: test testInput AutoCapTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, AutoCapTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set NONE
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::NONE);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.NONE");
+
+    /**
+     * @tc.step: step3. Set WORDS
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::WORDS);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.WORDS");
+
+    /**
+     * @tc.step: step4. Set SENTENCES
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.SENTENCES");
+
+    /**
+     * @tc.step: step5. Set ALL_CHARACTERS
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::ALL_CHARACTERS);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.ALL_CHARACTERS");
+}
+
+/**
+ * @tc.name: accessibilityProperty001
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    std::string contentStr = "12345678";
+    CreateTextField(contentStr, "", [](TextFieldModelNG model) { model.SetType(TextInputType::UNSPECIFIED); });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, contentStr);
+}
+
+/**
+ * @tc.name: accessibilityProperty003
+ * @tc.desc: test textInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, "");
+}
+
+/**
+ * @tc.name: accessibilityProperty004
+ * @tc.desc: test textInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    std::string contentStr = "12345678";
+    CreateTextField(contentStr, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordText(true);
+    });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, contentStr);
 }
 } // namespace OHOS::Ace::NG
