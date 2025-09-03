@@ -1746,6 +1746,33 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg036, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperModelTestNg037
+ * @tc.desc: indicator Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, SwiperModelTestNg037, TestSize.Level1)
+{
+    auto restFunc = []() {};
+    CreateWithItem([restFunc](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetJSIndicatorController(restFunc);
+        swiperModel.ResetJSIndicatorController();
+    });
+
+    IndicatorModelNG model;
+    model.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorController_ = indicatorPattern->GetIndicatorController();
+    EXPECT_NE(indicatorController_, nullptr);
+    indicatorController_->SetSwiperNode(frameNode_);
+    FlushUITasks(indicatorNode_);
+}
+
+/**
  * @tc.name: OnKeyEvent001
  * @tc.desc: OnKeyEvent
  * @tc.type: FUNC
