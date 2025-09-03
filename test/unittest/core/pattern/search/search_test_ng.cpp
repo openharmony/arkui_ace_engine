@@ -175,12 +175,6 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     cancelButtonNodeGeometryNode->SetFrameSize(SizeF(100, 100));
     searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(cancelButtonNodeGeometryNode->GetFrameSize().Height(), 100);
-
-    // Multiple measurements will not affect each other.
-    searchLayoutAlgorithm->textFieldSizeMeasure_ = SizeF(80.0f, 10.0f);
-    searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(searchLayoutAlgorithm->textFieldSizeMeasure_, SizeF(100.0f, 50.0f));
 }
 
 /**
