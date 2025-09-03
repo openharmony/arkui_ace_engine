@@ -498,10 +498,6 @@ int WebDelegate::GetHitTestResult()
     return false;
 }
 void WebDelegate::GetHitTestValue(HitTestResult& result) {}
-int WebDelegate::GetProgress()
-{
-    return false;
-}
 int WebDelegate::GetPageHeight()
 {
     return false;

@@ -41,7 +41,6 @@ public:
     void GetHitTestResult(const JSCallbackInfo& args);
     void GetHitTestValue(const JSCallbackInfo& args);
     void GetCookieManager(const JSCallbackInfo& args);
-    void GetProgress(const JSCallbackInfo& args);
     void GetPageHeight(const JSCallbackInfo& args);
     void GetTitle(const JSCallbackInfo& args);
     void CreateWebMessagePorts(const JSCallbackInfo& args);
