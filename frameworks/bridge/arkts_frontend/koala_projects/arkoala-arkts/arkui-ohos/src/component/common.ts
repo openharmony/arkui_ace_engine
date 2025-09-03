@@ -8030,7 +8030,8 @@ export interface CommonMethod {
     hoverEffect(value: HoverEffect | undefined): this {return this;}
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
-    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
+    onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {return this;}
+    onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
     onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {return this;}
     onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
     onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
@@ -8508,7 +8509,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
@@ -9760,7 +9764,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {
+        if (this.checkPriority("onKeyEvent")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (((parameter: KeyEvent) => void) | undefined)
+                this.getPeer()?.onKeyEvent0Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
