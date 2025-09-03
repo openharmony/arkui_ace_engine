@@ -2226,7 +2226,7 @@ let ItemProperty = class ItemProperty {
   constructor() {
     this.fontColor = segmentButtonTheme.FONT_COLOR;
     this.fontSize = segmentButtonTheme.FONT_SIZE;
-    this.fontWeight = initFontWeight(FontWeight.Regular)
+    this.fontWeight = FontWeight.Regular;
     this.isSelected = false;
   }
 };
