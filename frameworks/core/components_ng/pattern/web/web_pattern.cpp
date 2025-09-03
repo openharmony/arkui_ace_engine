@@ -707,8 +707,9 @@ bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 
 bool IsLongPreviewMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
-    return param->previewBuilder && param->responseType == ResponseType::LONG_PRESS &&
-        param->type != WebElementType::TEXT;
+    return param->type == WebElementType::AILINK ||
+        (param->previewBuilder && param->responseType == ResponseType::LONG_PRESS &&
+            param->type != WebElementType::TEXT);
 }
 
 void WebPattern::ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)

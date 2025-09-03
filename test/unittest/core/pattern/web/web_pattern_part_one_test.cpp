@@ -434,7 +434,6 @@ HWTEST_F(WebPatternPartOneTest, ShowSelectTextMenu_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-
     webPattern->contextMenuParam_ = AceType::MakeRefPtr<MockWebContextMenuParam>();
     auto adapter = webPattern->GetDataDetectorAdapter();
     adapter->InitAIMenu();
