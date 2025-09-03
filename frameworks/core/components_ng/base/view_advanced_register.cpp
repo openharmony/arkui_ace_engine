@@ -22,12 +22,12 @@
 #endif
 
 namespace OHOS::Ace::NG {
-thread_local ViewAdvancedRegister* ViewAdvancedRegister::instance_ = nullptr;
+thread_local std::shared_ptr<ViewAdvancedRegister> ViewAdvancedRegister::instance_ = nullptr;
 
-ViewAdvancedRegister* ViewAdvancedRegister::GetInstance()
+std::shared_ptr<ViewAdvancedRegister> ViewAdvancedRegister::GetInstance()
 {
     if (ViewAdvancedRegister::instance_ == nullptr) {
-        ViewAdvancedRegister::instance_ = new ViewAdvancedRegister();
+        ViewAdvancedRegister::instance_ = std::make_shared<ViewAdvancedRegister>();
     }
     return ViewAdvancedRegister::instance_;
 }
