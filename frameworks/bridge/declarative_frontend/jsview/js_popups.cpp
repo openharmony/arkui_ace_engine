@@ -268,10 +268,10 @@ void SetPopupBorderWidthInfo(
             return;
         }
     }
-
     if (popupBorderWidth.Value() < 0) {
         return;
     }
+
     if (OUTER_BORDER_WIDTH == borderWidthParamFlag) {
         popupParam->SetOutlineWidthObject(widthResObj);
         popupParam->SetOutlineWidth(popupBorderWidth);
@@ -670,6 +670,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetAvoidTarget(static_cast<AvoidanceMode>(avoidTargetNumValue));
         }
     }
+    
     SetPopupBorderWidthInfo(popupObj, popupParam, OUTER_BORDER_WIDTH);
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
@@ -1587,7 +1588,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.previewTransition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
         }
         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
-            menuParam.hasPreviewTransitionEffect ||menuParam.hasTransitionEffect ||
+            menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
@@ -3089,7 +3090,6 @@ void JSViewPopups::ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthV
     ParseMenuOutlineWidthWithResourceObj(leftResObj, rightResObj, topResObj, bottomResObj, outlineWidth);
     menuParam.outlineWidth = outlineWidth;
 }
-
 void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(
     const RefPtr<ResourceObject>& borderWidthResObj, NG::BorderWidthProperty& outlineWidth)
 {
@@ -3102,7 +3102,6 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(
         outlineWidth.AddResource("outlineWidth.width", borderWidthResObj, std::move(updateFunc));
     }
 }
-
 void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObject>& leftResObj,
     const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& topResObj,
     const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth)
