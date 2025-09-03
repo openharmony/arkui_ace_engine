@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_NODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_NODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_ITEM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_ITEM_H
 #include <cstdint>
 #include <functional>
 
@@ -24,12 +24,12 @@
 
 namespace OHOS::Ace::NG {
 
-class ArkoalaSyntaxNode : public UINode {
-    DECLARE_ACE_TYPE(ArkoalaSyntaxNode, UINode);
+class ArkoalaSyntaxItem : public UINode {
+    DECLARE_ACE_TYPE(ArkoalaSyntaxItem, UINode);
 
 public:
-    explicit ArkoalaSyntaxNode(int32_t id);
-    ~ArkoalaSyntaxNode() override = default;
+    explicit ArkoalaSyntaxItem(int32_t id);
+    ~ArkoalaSyntaxItem() override = default;
 
     bool IsAtomicNode() const final
     {
@@ -37,9 +37,9 @@ public:
     }
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(ArkoalaSyntaxNode);
+    ACE_DISALLOW_COPY_AND_MOVE(ArkoalaSyntaxItem);
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_NODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_SYNTAX_ITEM_H
 

@@ -37,7 +37,8 @@
 #include "xcomponent_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
 #include "condition_scope_ani_modifier.h"
-#include "syntax_node_ani_modifier.h"
+#include "syntax_item_ani_modifier.h"
+#include "for_each_node_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -69,7 +70,8 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
         .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
         .getCanvasAniModifier = OHOS::Ace::NG::GetCanvasAniModifier,
-        .getSyntaxNodeAniModifier = OHOS::Ace::NG::GetSyntaxNodeAniModifier,
+        .getSyntaxItemAniModifier = OHOS::Ace::NG::GetSyntaxItemAniModifier,
+        .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
     };
     return &impl;
 }
