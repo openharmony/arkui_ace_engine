@@ -333,7 +333,9 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     if (colorVal) {
         SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
     }
-    SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    if (textDecorationStyle) {
+        SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
     SpanModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
 
