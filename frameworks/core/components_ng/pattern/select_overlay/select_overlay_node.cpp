@@ -2869,11 +2869,11 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     CHECK_NULL_RETURN(theme, systemItemParams);
     auto isUsingMouse = info->isUsingMouse;
     auto menuInfo = info->menuInfo;
+    AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
     AddMenuItemParamIf(
         menuInfo.showCopy || isUsingMouse, OH_DEFAULT_COPY, theme->GetCopyLabel(), systemItemParams);
     AddMenuItemParamIf(
         menuInfo.showPaste || isUsingMouse, OH_DEFAULT_PASTE, theme->GetPasteLabel(), systemItemParams);
-    AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showCopyAll || isUsingMouse, OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel(),
         systemItemParams);
     // Below is advanced options, consider support disableMenuItems and disableSystemServiceMenuItems by TextSystemMenu
