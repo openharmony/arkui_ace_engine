@@ -138,6 +138,7 @@ interface LabelTheme {
   localizedSmallMargin: LocalizedMargin;
   defaultFontSize: Dimension;
   fontWeight: Resource;
+  activatedFontWeight: Resource;
 }
 
 interface ChipNodeOpacity {
@@ -158,6 +159,8 @@ interface ChipNodeTheme {
   minLabelWidth: Dimension;
   normalHeight: Dimension;
   smallHeight: Dimension;
+  activatedNormalHeight: Dimension;
+  activatedSmallHeight: Dimension;
   enabled: boolean;
   activated: boolean;
   backgroundColor: ResourceColor;
@@ -176,8 +179,11 @@ interface ChipNodeTheme {
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
+  activatedBorderWidth: Dimension;
   localizedNormalPadding: LocalizedPadding;
   localizedSmallPadding: LocalizedPadding;
+  localizedActivatedNormalPadding: LocalizedPadding;
+  localizedActivatedSmallPadding: LocalizedPadding;
   hoverBlendColor: ResourceColor;
   pressedBlendColor: ResourceColor;
   opacity: ChipNodeOpacity;
@@ -272,6 +278,7 @@ export struct ChipComponent {
       activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
       fontFamily: 'HarmonyOS Sans',
       fontWeight: $r('sys.float.chip_text_font_weight'),
+      activatedFontWeight: $r('sys.float.chip_activated_text_font_weight'),
       normalMargin: {
         left: 6,
         right: 6,
@@ -327,6 +334,8 @@ export struct ChipComponent {
       minLabelWidth: 12,
       normalHeight: $r('sys.float.chip_normal_height'),
       smallHeight: $r('sys.float.chip_small_height'),
+      activatedNormalHeight: $r('sys.float.chip_activated_normal_height'),
+      activatedSmallHeight: $r('sys.float.chip_activated_small_height'),
       enabled: true,
       activated: false,
       backgroundColor: $r('sys.color.chip_background_color'),
@@ -338,6 +347,7 @@ export struct ChipComponent {
       activatedBorderColor: $r('sys.color.chip_activated_border_color'),
       normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
       smallBorderRadius: $r('sys.float.chip_border_radius_small'),
+      activatedBorderWidth: $r('sys.float.chip_activated_border_width'),
       borderWidth: 2,
       focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
       focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
@@ -350,6 +360,18 @@ export struct ChipComponent {
       localizedSmallPadding: {
         start: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
         end: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
+        top: LengthMetrics.vp(4),
+        bottom: LengthMetrics.vp(4)
+      },
+      localizedActivatedNormalPadding: {
+        start: LengthMetrics.resource($r('sys.float.chip_activated_normal_text_padding')),
+        end: LengthMetrics.resource($r('sys.float.chip_activated_normal_text_padding')),
+        top: LengthMetrics.vp(4),
+        bottom: LengthMetrics.vp(4)
+      },
+      localizedActivatedSmallPadding: {
+        start: LengthMetrics.resource($r('sys.float.chip_activated_small_text_padding')),
+        end: LengthMetrics.resource($r('sys.float.chip_activated_small_text_padding')),
         top: LengthMetrics.vp(4),
         bottom: LengthMetrics.vp(4)
       },
@@ -596,7 +618,7 @@ export struct ChipComponent {
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
     .backgroundColor(this.getChipBackgroundColor())
-    .borderWidth(this.theme.chipNode.defaultBorderWidth)
+    .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
     .scale(this.chipScale)
@@ -877,14 +899,20 @@ export struct ChipComponent {
     const constraintSize: ConstraintSizeOptions = {};
     if (typeof this.chipSize === 'string') {
       constraintSize.maxWidth = this.getChipMaxWidth();
-      constraintSize.minHeight =
-        this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
+      if (this.chipSize === ChipSize.SMALL) {
+        constraintSize.minHeight =
+          this.isChipActivated() ? this.theme.chipNode.activatedSmallHeight : this.theme.chipNode.smallHeight;
+      } else {
+        constraintSize.minHeight =
+          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+      }
     } else {
       if (typeof this.chipSize?.width === 'undefined' || !this.isValidLength(this.chipSize.width)) {
         constraintSize.maxWidth = this.getChipMaxWidth();
       }
       if (typeof this.chipSize?.height === 'undefined' || !this.isValidLength(this.chipSize.height)) {
-        constraintSize.minHeight = this.theme.chipNode.normalHeight;
+        constraintSize.minHeight = 
+          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
       }
     }
     return constraintSize;
@@ -925,8 +953,12 @@ export struct ChipComponent {
   }
 
   getChipPadding(): Length | Padding | LocalizedPadding {
-    return this.isSmallChipSize() ? this.theme.chipNode.localizedSmallPadding :
-    this.theme.chipNode.localizedNormalPadding;
+    let chipTheme = this.theme.chipNode;
+    if (this.isSmallChipSize()) {
+      return this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+    } else {
+      return this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+    }
   }
 
   getLabelMargin(): Length | Padding | LocalizedPadding {
@@ -988,7 +1020,7 @@ export struct ChipComponent {
 
   getLabelFontWeight(): string | number | FontWeight {
     if (this.isChipActivated()) {
-      return FontWeight.Medium;
+      return this.resourceToNumber(this.theme.label.activatedFontWeight, FontWeight.Medium) as FontWeight;
     }
     return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular) as FontWeight;
   }
@@ -1013,6 +1045,11 @@ export struct ChipComponent {
   private getChipNodeBorderColor(): ResourceColor {
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
+  }
+
+  private getChipNodeBorderWidth(): Dimension {
+    let themeChipNode = this.theme.chipNode;
+    return this.isChipActivated() ? themeChipNode.activatedBorderWidth : themeChipNode.defaultBorderWidth;
   }
 
   getLabelFontColor(): ResourceColor {

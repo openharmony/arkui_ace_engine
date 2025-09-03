@@ -256,6 +256,13 @@ export class ChipComponent extends ViewPU {
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
+        activatedFontWeight: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.chip_activated_text_font_weight'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
         normalMargin: {
           left: 6,
           right: 6,
@@ -435,6 +442,20 @@ export class ChipComponent extends ViewPU {
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
+        activatedNormalHeight: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.chip_activated_normal_height'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
+        activatedSmallHeight: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.chip_activated_small_height'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
         enabled: true,
         activated: false,
         backgroundColor: {
@@ -494,6 +515,13 @@ export class ChipComponent extends ViewPU {
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
+        activatedBorderWidth: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.chip_activated_border_width'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
         borderWidth: 2,
         focusBtnScaleX: {
           id: -1,
@@ -539,6 +567,42 @@ export class ChipComponent extends ViewPU {
             id: -1,
             type: 10002,
             params: ['sys.float.chip_small_text_padding'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          }),
+          top: LengthMetrics.vp(4),
+          bottom: LengthMetrics.vp(4),
+        },
+        localizedActivatedNormalPadding: {
+          start: LengthMetrics.resource({
+            id: -1,
+            type: 10002,
+            params: ['sys.float.chip_activated_normal_text_padding'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          }),
+          end: LengthMetrics.resource({
+            id: -1,
+            type: 10002,
+            params: ['sys.float.chip_activated_normal_text_padding'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          }),
+          top: LengthMetrics.vp(4),
+          bottom: LengthMetrics.vp(4),
+        },
+        localizedActivatedSmallPadding: {
+          start: LengthMetrics.resource({
+            id: -1,
+            type: 10002,
+            params: ['sys.float.chip_activated_small_text_padding'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          }),
+          end: LengthMetrics.resource({
+            id: -1,
+            type: 10002,
+            params: ['sys.float.chip_activated_small_text_padding'],
             bundleName: '__harDefaultBundleName__',
             moduleName: '__harDefaultModuleName__',
           }),
@@ -1045,7 +1109,7 @@ export class ChipComponent extends ViewPU {
       Button.enabled(this.isChipEnabled());
       Button.direction(this.chipDirection);
       Button.backgroundColor(this.getChipBackgroundColor());
-      Button.borderWidth(this.theme.chipNode.defaultBorderWidth);
+      Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
       Button.scale(ObservedObject.GetRawObject(this.chipScale));
@@ -1474,14 +1538,20 @@ export class ChipComponent extends ViewPU {
     const constraintSize = {};
     if (typeof this.chipSize === 'string') {
       constraintSize.maxWidth = this.getChipMaxWidth();
-      constraintSize.minHeight =
-        this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
+      if (this.chipSize === ChipSize.SMALL) {
+        constraintSize.minHeight =
+          this.isChipActivated() ? this.theme.chipNode.activatedSmallHeight : this.theme.chipNode.smallHeight;
+      } else {
+        constraintSize.minHeight =
+          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+      }
     } else {
       if (typeof this.chipSize?.width === 'undefined' || !this.isValidLength(this.chipSize.width)) {
         constraintSize.maxWidth = this.getChipMaxWidth();
       }
       if (typeof this.chipSize?.height === 'undefined' || !this.isValidLength(this.chipSize.height)) {
-        constraintSize.minHeight = this.theme.chipNode.normalHeight;
+        constraintSize.minHeight =
+          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
       }
     }
     return constraintSize;
@@ -1517,9 +1587,12 @@ export class ChipComponent extends ViewPU {
     return chipSize;
   }
   getChipPadding() {
-    return this.isSmallChipSize()
-      ? this.theme.chipNode.localizedSmallPadding
-      : this.theme.chipNode.localizedNormalPadding;
+    const chipTheme = this.theme.chipNode;
+    if (this.isSmallChipSize()) {
+      return this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+    } else {
+      return this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+    }
   }
   getLabelMargin() {
     const localizedLabelMargin = {
@@ -1579,7 +1652,7 @@ export class ChipComponent extends ViewPU {
   }
   getLabelFontWeight() {
     if (this.isChipActivated()) {
-      return FontWeight.Medium;
+      return this.resourceToNumber(this.theme.label.activatedFontWeight, FontWeight.Medium);
     }
     return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular);
   }
@@ -1600,6 +1673,10 @@ export class ChipComponent extends ViewPU {
   getChipNodeBorderColor() {
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
+  }
+  getChipNodeBorderWidth() {
+    let themeChipNode = this.theme.chipNode;
+    return this.isChipActivated() ? themeChipNode.activatedBorderWidth : themeChipNode.defaultBorderWidth;
   }
   getLabelFontColor() {
     if (this.isChipActivated()) {
