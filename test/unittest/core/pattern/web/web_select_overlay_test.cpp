@@ -6527,4 +6527,100 @@ HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest, TestSize.Level1)
     MockPipelineContext::TearDown();
     EXPECT_TRUE(ret && ret1 && ret2);
 }
+
+/**
+ * @tc.name: ComputeSelectAreaRect
+ * @tc.desc: Test ComputeSelectAreaRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest000, TestSize.Level1)
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    OffsetF offset = webPattern->GetCoordinatePoint().value_or(OffsetF());
+    SizeF size = {1000.0, 1000.0};
+    auto geometryNode = webFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(size);
+
+    RectF data = {100.0, 100.0, 400.0, 400.0};
+    RectF selectArea = data;
+    WebSelectOverlay overlay(webPattern);
+    auto ret = overlay.ComputeSelectAreaRect(selectArea);
+    bool x = NearEqual(ret.GetX(), selectArea.GetX() + offset.GetX());
+    bool y = NearEqual(ret.GetY(), selectArea.GetY() + offset.GetY());
+    EXPECT_TRUE(x & y);
+}
+
+/**
+ * @tc.name: ComputeSelectAreaRect
+ * @tc.desc: Test ComputeSelectAreaRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest001, TestSize.Level1)
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    OffsetF offset = webPattern->GetCoordinatePoint().value_or(OffsetF());
+    SizeF size = {50.0, 50.0};
+    auto geometryNode = webFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(size);
+
+    RectF data = {100.0, 100.0, 400.0, 400.0};
+    RectF selectArea = data;
+    WebSelectOverlay overlay(webPattern);
+    auto ret = overlay.ComputeSelectAreaRect(selectArea);
+    bool x = NearEqual(ret.GetX(), selectArea.GetX() + offset.GetX());
+    bool y = NearEqual(ret.GetY(), selectArea.GetY() + offset.GetY());
+    EXPECT_TRUE(x & y);
+}
+
+/**
+ * @tc.name: ComputeSelectAreaRect
+ * @tc.desc: Test ComputeSelectAreaRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest002, TestSize.Level1)
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    OffsetF offset = webPattern->GetCoordinatePoint().value_or(OffsetF());
+    SizeF size = {50.0, 50.0};
+    auto geometryNode = webFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(size);
+
+    RectF data = {100.0, -100.0, 400.0, 400.0};
+    RectF selectArea = data;
+    WebSelectOverlay overlay(webPattern);
+    auto ret = overlay.ComputeSelectAreaRect(selectArea);
+    bool x = NearEqual(ret.GetX(), selectArea.GetX() + offset.GetX());
+    bool y = NearEqual(ret.GetY(), selectArea.GetY() + offset.GetY());
+    EXPECT_TRUE(x & y);
+}
 } // namespace OHOS::Ace::NG
