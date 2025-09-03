@@ -162,9 +162,9 @@ class SynchedPropertyNestedObjectPU<C extends Object>
           this.staticWatchId = InteropExtractorModule.createWatchFunc(callback, this.obsObject_);
         }
       } else {
-        stateMgmtConsole.applicationWarn(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is not
+        stateMgmtConsole.frequentApplicationError(`${this.debugInfoWithoutId()} set/init (method setValueInternal): assigned value is not
           be decorated by @Observed. Value changes will not be observed and UI will not update.`);
-      }
+    }
     }
     return true;
   }

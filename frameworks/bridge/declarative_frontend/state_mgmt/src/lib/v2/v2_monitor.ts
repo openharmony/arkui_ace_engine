@@ -330,11 +330,15 @@ public notifyChangeForEachPath(pathId: number): number {
       if (obj && typeof obj === 'object' && Reflect.has(obj, prop)) {
         obj = obj[prop];
       } else {
-        isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
+        isInit && stateMgmtConsole.frequentApplicationError(`${this.debugInfo()} path ${monitoredValue.path} initialize not found, make sure it exists!`);
         return [false, undefined];
       }
     }
     return [true, obj as unknown as T];
+  }
+
+  public debugInfo(): string {
+    return `@Monitor ${this.monitorFunction.name} owned by ${this.target_.constructor.name}`;
   }
 
   public static clearWatchesFromTarget(target: Object): void {

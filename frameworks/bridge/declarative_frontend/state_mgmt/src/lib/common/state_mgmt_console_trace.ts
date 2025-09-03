@@ -26,6 +26,14 @@ enum LogTag {
 }
 
 class stateMgmtConsole {
+  private static startTimer: boolean = false;
+
+  private static errorLogFrequency: Map<string, number> = new Map<string, number>();
+
+  private static errorLogFlag: Set<string> = new Set<string>();
+
+  private static MAX_LOG_TYPES: number = 3000;
+
   public static log(...args: any): void {
     aceConsole.log(LogTag.STATE_MGMT, ...args);
   }
@@ -52,6 +60,32 @@ class stateMgmtConsole {
   public static applicationWarn(...args: any): void {
     aceConsole.warn(LogTag.STATE_MGMT, ...args);
   }
+
+  public static frequentApplicationError(msg: string): void {
+    if (!stateMgmtConsole.startTimer) {
+      stateMgmtConsole.startTimer = true;
+      setTimeout(() => {
+        stateMgmtConsole.errorLogFlag.clear();
+        stateMgmtConsole.startTimer = false;
+      }, 20000);
+    }
+    const count = stateMgmtConsole.errorLogFrequency.get(msg);
+    stateMgmtConsole.errorLogFrequency.set(msg, count ? count + 1 : 1);
+    if (!stateMgmtConsole.errorLogFlag.has(msg)) {
+      stateMgmtConsole.errorLogFlag.add(msg);
+      if (count) {
+        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR:`, msg, `Current log drops ${count + 1} line(s).`);
+      } else {
+        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR:`, msg);
+      }
+    }
+
+    if (stateMgmtConsole.errorLogFrequency.size > stateMgmtConsole.MAX_LOG_TYPES) {
+      aceConsole.error(LogTag.STATE_MGMT, `There are more than ${stateMgmtConsole.errorLogFrequency.size} different kinds application error logs, please check the previous log printed.`);
+      stateMgmtConsole.errorLogFrequency.clear();
+    }
+  }
+
   public static featureCombinationError(msg: string): void {
     aceConsole.warn(LogTag.STATE_MGMT, msg);
   }
