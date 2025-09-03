@@ -1536,7 +1536,7 @@ export struct SegmentButton {
     })
     .accessibilityLevel('no')
     .priorityGesture(
-      GestureGroup(GestureMode.Parallel,
+      GestureGroup(GestureMode.Exclusive,
         TapGesture()
           .onAction((event: GestureEvent) => {
             if (this.isGestureInProgress) {
