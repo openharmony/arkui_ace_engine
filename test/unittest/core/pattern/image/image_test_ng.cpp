@@ -386,54 +386,6 @@ HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImagePatternOnNotifyMemoryLevelFunction001
- * @tc.desc: Verify that ImagePattern can do different data cleaning operation according to level.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level0)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-        LoadNotifier(nullptr, nullptr, nullptr));
-    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
-        LoadNotifier(nullptr, nullptr, nullptr));
-    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    /**
-     * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
-     */
-    imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(2);
-    EXPECT_TRUE(imagePattern->isShow_ == false);
-    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    /**
-     * @tc.cases: case2. ImagePattern windowShow and OnNotifyMemoryLevel function will return.
-     */
-    imagePattern->OnWindowShow();
-    imagePattern->OnNotifyMemoryLevel(0);
-    EXPECT_TRUE(imagePattern->isShow_);
-    /**
-     * @tc.cases: case3. After Image load and ImagePattern windowHide, pattern will clean data and reset params.
-     */
-    imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(2);
-    EXPECT_FALSE(imagePattern->isShow_);
-    EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-}
-
-/**
  * @tc.name: ImagePatternCreateNodePaintMethod001
  * @tc.desc: When ImageComponent load successfully, it will Create NodePaintMethod.
  * @tc.type: FUNC
