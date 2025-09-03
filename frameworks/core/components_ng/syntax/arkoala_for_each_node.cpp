@@ -22,6 +22,14 @@ namespace OHOS::Ace::NG {
 ArkoalaForEachNode::ArkoalaForEachNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
     isRepeat ? V2::JS_REPEAT_ETS_TAG : V2::JS_FOR_EACH_ETS_TAG, nodeId), isRepeat_(isRepeat) {}
 
+void ArkoalaForEachNode::FinishRender()
+{
+    TAG_LOGD(AceLogTag::ACE_FOREACH, "nodeId:%{public}d FinishRender() ...", GetId());
+    if (auto frameNode = GetParentFrameNode()) {
+        frameNode->ChildrenUpdatedFrom(0);
+    }
+}
+
 void ArkoalaForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
     if (onMove && !onMoveEvent_) {

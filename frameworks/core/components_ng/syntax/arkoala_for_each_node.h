@@ -37,6 +37,8 @@ public:
         return false;
     }
 
+    void FinishRender();
+
     // used for drag move operation.
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
     void MoveData(int32_t from, int32_t to) final;

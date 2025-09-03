@@ -1217,6 +1217,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
         },
         ani_native_function {
+            "_ForEach_FinishRender",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ForEachFinishRender)
+        },
+        ani_native_function {
             "_Component3D_SetScene",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetScene)

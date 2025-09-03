@@ -705,7 +705,8 @@ struct ArkUIAniSyntaxItemModifier {
     ani_long (*constructSyntaxItem)(ani_int);
 };
 struct ArkUIAniForEachNodeModifier {
-    ani_long (*constructForEachNode)(ani_int, ani_boolean);
+    ani_long (*construct)(ani_int, ani_boolean);
+    void (*finishRender)(ani_long);
 };
 
 struct ArkUIAniComponent3DModifier {

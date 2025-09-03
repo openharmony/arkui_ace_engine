@@ -345,9 +345,10 @@ export class ArkUIAniModule {
     native static _NodeAdapter_NotifyItemInserted(ptr : KPointer, start : number, count : number) : void
     native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
     native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
-
+    // for ForEach
     native static _SyntaxItem_Construct(id: KInt): KPointer
     native static _ForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
+    native static _ForEach_FinishRender(peerPtr: KPointer): void
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void

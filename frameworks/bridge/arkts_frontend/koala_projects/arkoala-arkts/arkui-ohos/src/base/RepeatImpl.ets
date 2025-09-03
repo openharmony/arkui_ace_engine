@@ -299,6 +299,7 @@ function virtualRender<T>(
         attributes.onMove_, attributes.itemDragEvent_);
 }
 
+// onMoveFromTo has no operation in non-virtual mode
 function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
@@ -326,4 +327,6 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
         RepeatByArray<T>(arr, keyGen, action);
         nodeHolder.node = node;
     });
+
+    ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }
