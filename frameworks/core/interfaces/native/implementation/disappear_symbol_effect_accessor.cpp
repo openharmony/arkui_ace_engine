@@ -25,9 +25,12 @@ void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_DisappearSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
+Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
     return PeerUtils::CreatePeer<DisappearSymbolEffectPeer>(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -41,17 +44,17 @@ Opt_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_DisappearSymbolEffect peer,
-                  const Opt_EffectScope* scope)
+                  Ark_EffectScope scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // DisappearSymbolEffectAccessor
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIDisappearSymbolEffectAccessor DisappearSymbolEffectAccessorImpl {
         DisappearSymbolEffectAccessor::DestroyPeerImpl,
-        DisappearSymbolEffectAccessor::ConstructImpl,
+        DisappearSymbolEffectAccessor::CtorImpl,
         DisappearSymbolEffectAccessor::GetFinalizerImpl,
         DisappearSymbolEffectAccessor::GetScopeImpl,
         DisappearSymbolEffectAccessor::SetScopeImpl,

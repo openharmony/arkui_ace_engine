@@ -16,18 +16,8 @@
 #pragma once
 
 #include "core/components_ng/gestures/pinch_gesture.h"
-#include "gesture_peer.h"
-
-struct PinchGestureInterfacePeer : public GesturePeer {
+ 
+struct PinchGestureInterfacePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::PinchGesture> gesture;
-
-    inline OHOS::Ace::RefPtr<OHOS::Ace::NG::Gesture> GetGesture() override
-    {
-        return gesture;
-    }
-
-protected:
-    PinchGestureInterfacePeer() = default;
-    ~PinchGestureInterfacePeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };
+ 

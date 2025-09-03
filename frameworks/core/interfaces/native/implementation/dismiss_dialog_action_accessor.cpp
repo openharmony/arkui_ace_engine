@@ -20,20 +20,17 @@
 #include "core/interfaces/native/implementation/dismiss_dialog_action_peer.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
-constexpr auto DEFAULT_REASON = BindSheetDismissReason::CLOSE_BUTTON;
-} // namespace OHOS::Ace::NG
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DismissDialogActionAccessor {
 void DestroyPeerImpl(Ark_DismissDialogAction peer)
 {
+    CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
 Ark_DismissDialogAction ConstructImpl()
 {
     auto peer = PeerUtils::CreatePeer<DismissDialogActionPeer>();
-    peer->reason = DEFAULT_REASON;
+    peer->reason = BindSheetDismissReason::CLOSE_BUTTON;
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -46,7 +43,7 @@ void DismissImpl(Ark_DismissDialogAction peer)
 }
 Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
 {
-    auto defaultVal = Converter::ArkValue<Ark_DismissReason>(DEFAULT_REASON);
+    auto defaultVal = Converter::ArkValue<Ark_DismissReason>(BindSheetDismissReason::CLOSE_BUTTON);
     if (peer) {
         defaultVal = Converter::ArkValue<Ark_DismissReason>(peer->reason);
     }
@@ -56,7 +53,7 @@ void SetReasonImpl(Ark_DismissDialogAction peer,
                    Ark_DismissReason reason)
 {
     CHECK_NULL_VOID(peer);
-    peer->reason = Converter::OptConvert<BindSheetDismissReason>(reason).value_or(DEFAULT_REASON);
+    peer->reason = Converter::Convert<BindSheetDismissReason>(reason);
 }
 } // DismissDialogActionAccessor
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
@@ -71,5 +68,4 @@ const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor
     };
     return &DismissDialogActionAccessorImpl;
 }
-
 }

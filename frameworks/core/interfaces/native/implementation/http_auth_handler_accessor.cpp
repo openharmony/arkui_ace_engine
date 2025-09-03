@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_HttpAuthHandler peer)
 {
     delete peer;
 }
-Ark_HttpAuthHandler ConstructImpl()
+Ark_HttpAuthHandler CtorImpl()
 {
     return new HttpAuthHandlerPeer();
 }
@@ -59,7 +59,7 @@ const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
 {
     static const GENERATED_ArkUIHttpAuthHandlerAccessor HttpAuthHandlerAccessorImpl {
         HttpAuthHandlerAccessor::DestroyPeerImpl,
-        HttpAuthHandlerAccessor::ConstructImpl,
+        HttpAuthHandlerAccessor::CtorImpl,
         HttpAuthHandlerAccessor::GetFinalizerImpl,
         HttpAuthHandlerAccessor::ConfirmImpl,
         HttpAuthHandlerAccessor::CancelImpl,

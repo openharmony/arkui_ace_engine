@@ -20,10 +20,8 @@
 #include "base/image/drawing_color_filter.h"
 #include "base/log/log.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
+
 namespace OHOS::Ace::NG {
-
-
 
 void SetPixelMap(ArkUINodeHandle node, void* pixelMap)
 {
@@ -52,11 +50,6 @@ void SetDrawingColorFilter(ArkUINodeHandle node, void* aniColorFilter)
     ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
 }
 
-void* GetPixelMapPeer(void* pixelMapPtr)
-{
-    return reinterpret_cast<void*>(image_PixelMapPeer::Create(PixelMap::CreatePixelMap(pixelMapPtr)));
-}
-
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
@@ -64,7 +57,6 @@ const ArkUIAniImageModifier* GetImageAniModifier()
         .setDrawableDescriptor = OHOS::Ace::NG::SetDrawableDescriptor,
         .setResizableLattice = OHOS::Ace::NG::SetResizableLattice,
         .setDrawingColorFilter = OHOS::Ace::NG::SetDrawingColorFilter,
-        .getPixelMapPeer = OHOS::Ace::NG::GetPixelMapPeer,
     };
     return &impl;
 }

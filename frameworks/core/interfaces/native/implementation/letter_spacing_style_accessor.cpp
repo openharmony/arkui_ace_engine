@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
     auto peer = PeerUtils::CreatePeer<LetterSpacingStylePeer>();
     std::optional<Dimension> spacing;
@@ -53,7 +53,7 @@ const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
 {
     static const GENERATED_ArkUILetterSpacingStyleAccessor LetterSpacingStyleAccessorImpl {
         LetterSpacingStyleAccessor::DestroyPeerImpl,
-        LetterSpacingStyleAccessor::ConstructImpl,
+        LetterSpacingStyleAccessor::CtorImpl,
         LetterSpacingStyleAccessor::GetFinalizerImpl,
         LetterSpacingStyleAccessor::GetLetterSpacingImpl,
     };

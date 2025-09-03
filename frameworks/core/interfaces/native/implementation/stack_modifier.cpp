@@ -56,28 +56,28 @@ void SetStackOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opts = Converter::OptConvertPtr<StackOptions>(options);
+    auto opts = Converter::OptConvert<StackOptions>(*options);
     auto align = opts ? opts->alignContent : std::nullopt;
-    // Implement Reset value
+    // TODO: Reset value
     StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
 }
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
-void SetAlignContentImpl(Ark_NativePointer node,
-                         const Opt_Alignment* value)
+void AlignContentImpl(Ark_NativePointer node,
+                      const Opt_Alignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // Implement Reset value
+    // TODO: Reset value
     StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(*value, Alignment::CENTER));
 }
-void SetPointLightImpl(Ark_NativePointer node,
-                       const Opt_PointLightStyle* value)
+void PointLightImpl(Ark_NativePointer node,
+                    const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -113,7 +113,8 @@ const GENERATED_ArkUIStackModifier* GetStackModifier()
     static const GENERATED_ArkUIStackModifier ArkUIStackModifierImpl {
         StackModifier::ConstructImpl,
         StackInterfaceModifier::SetStackOptionsImpl,
-        StackAttributeModifier::SetAlignContentImpl,
+        StackAttributeModifier::AlignContentImpl,
+        StackAttributeModifier::PointLightImpl,
     };
     return &ArkUIStackModifierImpl;
 }

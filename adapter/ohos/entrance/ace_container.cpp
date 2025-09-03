@@ -652,13 +652,13 @@ void AceContainer::InitializeFrontend()
         }
     } else if (type_ == FrontendType::ARK_TS) {
         if (isDynamicRender_) {
-            // LOGI("Init Dynamic Renderer ARK_TS Frontend");
-            // auto arktsDynamicFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsDynamicFrontend(sharedRuntime_);
-            // if (arktsDynamicFrontend == nullptr) {
-            //     LOGE("Create arktsDynamicFrontend failed.");
-            //     return;
-            // }
-            // frontend_ = arktsDynamicFrontend;
+            LOGI("Init Dynamic Renderer ARK_TS Frontend");
+            auto arktsDynamicFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsDynamicFrontend(sharedRuntime_);
+            if (arktsDynamicFrontend == nullptr) {
+                LOGE("Create arktsDynamicFrontend failed.");
+                return;
+            }
+            frontend_ = arktsDynamicFrontend;
         } else {
             LOGI("Init ARK_TS Frontend");
             auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);

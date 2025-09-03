@@ -143,6 +143,43 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragInfo dragInfo)
     frameNode->SetDragPreview(info);
 }
 
+void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreviewOption options)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DragPreviewOption previewOptions;
+    previewOptions.isScaleEnabled = options.isScaleEnabled;
+    previewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    previewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+    previewOptions.isNumber = options.isNumber;
+    previewOptions.isDefaultShadowEnabled = options.isDefaultShadowEnabled;
+    previewOptions.isDefaultRadiusEnabled = options.isDefaultRadiusEnabled;
+    previewOptions.isDragPreviewEnabled = options.isDragPreviewEnabled;
+    previewOptions.isDefaultDragItemGrayEffectEnabled = options.isDefaultDragItemGrayEffectEnabled;
+    previewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+    previewOptions.enableHapticFeedback = options.enableHapticFeedback;
+    previewOptions.isMultiTiled = options.isMultiTiled;
+    previewOptions.isLiftingDisabled = options.isLiftingDisabled;
+    previewOptions.isTouchPointCalculationBasedOnFinalPreviewEnable =
+       options.isTouchPointCalculationBasedOnFinalPreviewEnable;
+    previewOptions.sizeChangeEffect = static_cast<DraggingSizeChangeEffect>(options.sizeChangeEffect);
+    if (options.modifier) {
+        previewOptions.onApply = [executeFunc = std::move(options.modifier)](WeakPtr<FrameNode> frameNode) {
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto ptr = AceType::RawPtr(node);
+            CHECK_NULL_VOID(executeFunc);
+            executeFunc(ptr);
+        };
+    }
+    if (previewOptions.isNumber) {
+        previewOptions.badgeNumber = options.badgeNumber;
+    } else {
+        previewOptions.isShowBadge = options.isShowBadge;
+    }
+    frameNode->SetDragPreviewOptions(previewOptions);
+}
+
 const char* GetUdKey(ani_ref event)
 {
     auto peer = reinterpret_cast<Ark_DragEvent>(event);
@@ -165,6 +202,7 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragAllowDropNull = OHOS::Ace::NG::SetDragAllowDropNull,
         .setDragAllowDrop = OHOS::Ace::NG::SetDragAllowDrop,
         .setDragPreview = OHOS::Ace::NG::SetDragPreview,
+        .setDragPreviewOptions = OHOS::Ace::NG::SetDragPreviewOptions,
         .getUdKey = OHOS::Ace::NG::GetUdKey,
     };
     return &impl;

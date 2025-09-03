@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef CONVERTORS_JNI_H
-#define CONVERTORS_JNI_H
+#pragma once
 
 #ifdef KOALA_JNI
 
 #include <jni.h>
+#include <assert.h>
 
 #include <cmath>
 #include <unordered_map>
@@ -27,7 +27,7 @@
 #include <tuple>
 
 #include "koala-types.h"
-#include "interop-utils.h"
+#include "securec.h"
 
 #define KOALA_JNI_CALL(type) extern "C" JNIEXPORT type JNICALL
 
@@ -86,7 +86,7 @@ struct InteropTypeConverter<KStringPtr> {
     static inline KStringPtr convertFrom0(JNIEnv* env, InteropType value) {
         if (value == nullptr) return KStringPtr();
         jboolean isCopy;
-        // Improve: use GetStringCritical() instead and utf-8 encode manually.
+        // TODO: use GetStringCritical() instead and utf-8 encode manually.
 		    const char* str_value = env->GetStringUTFChars(value, &isCopy);
         int len = env->GetStringUTFLength(value);
         KStringPtr result(str_value, len, false);
@@ -148,10 +148,11 @@ struct SlowInteropTypeConverter<KInteropBuffer> {
         return result;
     }
     static InteropType convertTo(JNIEnv* env, KInteropBuffer value) {
-      int bufferLength = value.length;
-      jarray result = env->NewByteArray(bufferLength);
+      jarray result = env->NewByteArray(value.length);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      interop_memcpy(data, bufferLength, value.data, bufferLength);
+      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
+        return;
+      }
       env->ReleasePrimitiveArrayCritical(result, data, 0);
       return result;
     }
@@ -165,12 +166,13 @@ struct SlowInteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = jarray;
     static inline KInteropReturnBuffer convertFrom(JNIEnv* env, InteropType value) = delete;
     static InteropType convertTo(JNIEnv* env, KInteropReturnBuffer value) {
-      int bufferLength = value.length;
-      jarray result = env->NewByteArray(bufferLength);
+      jarray result = env->NewByteArray(value.length);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      interop_memcpy(data, bufferLength, value.data, bufferLength);
+      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
+        return;
+      }
       env->ReleasePrimitiveArrayCritical(result, data, 0);
-      value.dispose(value.data, bufferLength);
+      value.dispose(value.data, value.length);
       return result;
     }
     static inline void release(JNIEnv* env, InteropType value, const KInteropReturnBuffer& converted) = delete;
@@ -294,6 +296,31 @@ struct SlowInteropTypeConverter<KInteropNumber> {
         return value.asDouble();
     }
     static void release(JNIEnv* env, InteropType value, KInteropNumber converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KLength> {
+    using InteropType = jstring;
+    static KLength convertFrom(JNIEnv* env, InteropType value) {
+        KLength result { 0 };
+
+        if (value == nullptr) {
+            result.type = -1; // ARK_RUNTIME_UNEXPECTED
+            return result;
+        }
+        jboolean isCopy;
+        const char* str_value = env->GetStringUTFChars(value, &isCopy);
+        int len = env->GetStringLength(value);
+        KStringPtr kStr(str_value, len, false);
+        parseKLength(kStr, &result);
+        env->ReleaseStringUTFChars(value, str_value);
+        result.type = 2; // ARK_RUNTIME_STRING
+        result.resource = 0;
+
+        return result;
+    }
+    static InteropType convertTo(JNIEnv* env, KLength value) = delete;
+    static inline void release(JNIEnv* env, InteropType value, KLength converted) {}
 };
 
 template <typename Type>
@@ -1516,5 +1543,3 @@ void getKoalaJniCallbackDispatcher(jclass* clazz, jmethodID* method);
   } while (0)
 
 #endif  // KOALA_JNI_CALL
-
-#endif // CONVERTORS_JNI_H

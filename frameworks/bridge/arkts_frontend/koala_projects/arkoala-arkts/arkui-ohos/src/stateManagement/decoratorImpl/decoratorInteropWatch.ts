@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 import { WatchFuncType, WatchFunc } from '../index';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
-import { UIContextUtil } from 'arkui/base/UIContextUtil';
+import { UIContextImpl } from 'arkui/handwritten/UIContextImpl';
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
 
 export class InteropWatchFunc extends WatchFunc {
     checkThread: () => boolean = () => {

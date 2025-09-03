@@ -17,7 +17,7 @@ import { finalizerRegister, finalizerUnregister, Thunk } from "@koalaui/common"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { pointer, nullptr } from "./InteropTypes"
 
-class NativeThunk implements Thunk {
+export class NativeThunk implements Thunk {
     finalizer: pointer
     obj: pointer
     name: string|undefined
@@ -49,24 +49,19 @@ export class Finalizable {
     finalizer: pointer
     cleaner: NativeThunk|undefined = undefined
     managed: boolean
-
-    constructor(ptr: pointer, finalizer: pointer) {
-        this.init(ptr, finalizer, true)
-    }
-
-    constructor(ptr: pointer, finalizer: pointer, managed: boolean) {
-        this.init(ptr, finalizer, managed)
-    }
-
-    init(ptr: pointer, finalizer: pointer, managed: boolean) {
+    constructor(ptr: pointer, finalizer: pointer, managed: boolean = true) {
         this.ptr = ptr
         this.finalizer = finalizer
         this.managed = managed
         const handle = undefined
 
-        if (managed) {
-            if (this.ptr == nullptr) throw new Error("Can't have nullptr ptr ${}")
-            if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
+        if (this.managed) {
+            if (this.ptr == nullptr) {
+                throw new Error("Can't have nullptr ptr ${}")
+            }
+            if (this.finalizer == nullptr) {
+                throw new Error("Managed finalizer is 0")
+            }
 
             const thunk = new NativeThunk(ptr, finalizer, handle)
             finalizerRegister(this, thunk)
@@ -89,15 +84,18 @@ export class Finalizable {
 
     release(): pointer {
         finalizerUnregister(this)
-        if (this.cleaner)
+        if (this.cleaner) {
             this.cleaner!.obj = nullptr
+        }
         let result = this.ptr
         this.ptr = nullptr
         return result
     }
 
     resetPeer(pointer: pointer) {
-        if (this.managed) throw new Error("Can only reset peer for an unmanaged object")
+        if (this.managed) {
+            throw new Error("Can only reset peer for an unmanaged object")
+        }
         this.ptr = pointer
     }
 

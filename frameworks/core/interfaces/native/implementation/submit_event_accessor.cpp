@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_SubmitEvent ConstructImpl()
+Ark_SubmitEvent CtorImpl()
 {
     return PeerUtils::CreatePeer<SubmitEventPeer>();
 }
@@ -59,7 +59,7 @@ const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
 {
     static const GENERATED_ArkUISubmitEventAccessor SubmitEventAccessorImpl {
         SubmitEventAccessor::DestroyPeerImpl,
-        SubmitEventAccessor::ConstructImpl,
+        SubmitEventAccessor::CtorImpl,
         SubmitEventAccessor::GetFinalizerImpl,
         SubmitEventAccessor::KeepEditableStateImpl,
         SubmitEventAccessor::GetTextImpl,

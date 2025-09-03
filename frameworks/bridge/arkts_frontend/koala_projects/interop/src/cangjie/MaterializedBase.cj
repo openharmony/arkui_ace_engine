@@ -24,11 +24,6 @@ public open class Finalizable {
     }
 }
 
-public open class MaterializedBaseTag {
-    static var NOP = MaterializedBaseTag()
-    private init() { }
-}
-
 public interface MaterializedBase {
     public func getPeer(): ?Finalizable
 

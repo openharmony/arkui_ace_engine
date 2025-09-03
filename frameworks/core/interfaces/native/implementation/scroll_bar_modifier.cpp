@@ -35,23 +35,25 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto scrollerPeer = value->scroller;
-    auto scrollProxy = ScrollBarModelStatic::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
-    scrollerPeer->SetScrollBarProxy(scrollProxy);
-    const auto direction = Converter::OptConvert<Axis>(value->direction);
+    if (value) {
+        auto scrollerPeer = value->scroller;
+        auto scrollProxy = ScrollBarModelStatic::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
+        scrollerPeer->SetScrollBarProxy(scrollProxy);
+    }
+    const auto direction = value ? Converter::OptConvert<Axis>(value->direction) : std::nullopt;
     ScrollBarModelStatic::SetDirection(frameNode, direction);
-    const auto state = Converter::OptConvert<DisplayMode>(value->state);
+    const auto state = value ? Converter::OptConvert<DisplayMode>(value->state) : std::nullopt;
     ScrollBarModelStatic::SetState(frameNode, state);
 }
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
-void SetEnableNestedScrollImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
+void EnableNestedScrollImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier
@@ -60,7 +62,7 @@ const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
     static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
         ScrollBarModifier::ConstructImpl,
         ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
-        ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
+        ScrollBarAttributeModifier::EnableNestedScrollImpl,
     };
     return &ArkUIScrollBarModifierImpl;
 }

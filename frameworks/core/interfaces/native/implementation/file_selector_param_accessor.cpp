@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_FileSelectorParam peer)
 {
     delete peer;
 }
-Ark_FileSelectorParam ConstructImpl()
+Ark_FileSelectorParam CtorImpl()
 {
     return new FileSelectorParamPeer();
 }
@@ -68,7 +68,7 @@ const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
 {
     static const GENERATED_ArkUIFileSelectorParamAccessor FileSelectorParamAccessorImpl {
         FileSelectorParamAccessor::DestroyPeerImpl,
-        FileSelectorParamAccessor::ConstructImpl,
+        FileSelectorParamAccessor::CtorImpl,
         FileSelectorParamAccessor::GetFinalizerImpl,
         FileSelectorParamAccessor::GetTitleImpl,
         FileSelectorParamAccessor::GetModeImpl,

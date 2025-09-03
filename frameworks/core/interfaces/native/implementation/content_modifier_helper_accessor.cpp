@@ -22,18 +22,17 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContentModifierHelperAccessor {
-void ContentModifierButtonImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const ButtonModifierBuilder* builder)
+void ContentModifierButtonImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const ButtonModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     ButtonModelNG::SetBuilderFunc(frameNode,
@@ -59,17 +58,18 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
             return nullptr;
         });
 }
+
 void ResetContentModifierButtonImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierCheckBoxImpl(Ark_NativePointer node,
-                                 const Ark_Object* contentModifier,
-                                 const CheckBoxModifierBuilder* builder)
+
+void ContentModifierCheckBoxImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const CheckBoxModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     CheckBoxModelNG::SetBuilderFunc(frameNode,
@@ -80,7 +80,7 @@ void ContentModifierCheckBoxImpl(Ark_NativePointer node,
             checkboxConfig.selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
             checkboxConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
             checkboxConfig.triggerChange =
-                CallbackKeeper::DefineBooleanCallback<Callback_Boolean_Void>([weakNode](Ark_Boolean change) {
+                CallbackKeeper::DefineBooleanCallback<Callback_Boolean_Void>([weakNode](bool change) {
                     auto checkboxNode = weakNode.Upgrade();
                     CHECK_NULL_VOID(checkboxNode);
                     CheckBoxModelNG::SetChangeValue(AceType::RawPtr(checkboxNode), change);
@@ -94,65 +94,18 @@ void ContentModifierCheckBoxImpl(Ark_NativePointer node,
             return nullptr;
         });
 }
+
 void ResetContentModifierCheckBoxImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierDataPanelImpl(Ark_NativePointer node,
-                                  const Ark_Object* contentModifier,
-                                  const DataPanelModifierBuilder* builder)
+
+void ContentModifierRadioImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const RadioModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierDataPanelImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierGaugeImpl(Ark_NativePointer node,
-                              const Ark_Object* contentModifier,
-                              const GaugeModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierGaugeImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierLoadingProgressImpl(Ark_NativePointer node,
-                                        const Ark_Object* contentModifier,
-                                        const LoadingProgressModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierLoadingProgressImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierProgressImpl(Ark_NativePointer node,
-                                 const Ark_Object* contentModifier,
-                                 const ProgressModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierProgressImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierRadioImpl(Ark_NativePointer node,
-                              const Ark_Object* contentModifier,
-                              const RadioModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     RadioModelNG::SetBuilderFunc(frameNode,
@@ -179,15 +132,15 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
 }
 void ResetContentModifierRadioImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierRatingImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const RatingModifierBuilder* builder)
+
+void ContentModifierRatingImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const RatingModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     RatingModelNG::SetBuilderFunc(frameNode,
@@ -215,29 +168,18 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
             return nullptr;
         });
 }
+
 void ResetContentModifierRatingImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierMenuItemImpl(Ark_NativePointer node,
-                                 const Ark_Object* contentModifier,
-                                 const MenuItemModifierBuilder* builder)
+
+void ContentModifierSliderImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const SliderModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierSliderImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const SliderModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     SliderModelNG::SetBuilderFunc(frameNode,
@@ -266,41 +208,18 @@ void ContentModifierSliderImpl(Ark_NativePointer node,
             return nullptr;
         });
 }
+
 void ResetContentModifierSliderImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierTextClockImpl(Ark_NativePointer node,
-                                  const Ark_Object* contentModifier,
-                                  const TextClockModifierBuilder* builder)
+
+void ContentModifierToggleImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const ToggleModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierTextClockImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierTextTimerImpl(Ark_NativePointer node,
-                                  const Ark_Object* contentModifier,
-                                  const TextTimerModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void ContentModifierToggleImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const ToggleModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto weakNode = AceType::WeakClaim(frameNode);
     ToggleModelNG::SetBuilderFunc(frameNode,
@@ -326,11 +245,11 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
 }
 void ResetContentModifierToggleImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-} // ContentModifierHelperAccessor
+} // namespace ContentModifierHelperAccessor
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
 {
     static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
@@ -338,30 +257,16 @@ const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAcce
         ContentModifierHelperAccessor::ResetContentModifierButtonImpl,
         ContentModifierHelperAccessor::ContentModifierCheckBoxImpl,
         ContentModifierHelperAccessor::ResetContentModifierCheckBoxImpl,
-        ContentModifierHelperAccessor::ContentModifierDataPanelImpl,
-        ContentModifierHelperAccessor::ResetContentModifierDataPanelImpl,
-        ContentModifierHelperAccessor::ContentModifierGaugeImpl,
-        ContentModifierHelperAccessor::ResetContentModifierGaugeImpl,
-        ContentModifierHelperAccessor::ContentModifierLoadingProgressImpl,
-        ContentModifierHelperAccessor::ResetContentModifierLoadingProgressImpl,
-        ContentModifierHelperAccessor::ContentModifierProgressImpl,
-        ContentModifierHelperAccessor::ResetContentModifierProgressImpl,
         ContentModifierHelperAccessor::ContentModifierRadioImpl,
         ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
         ContentModifierHelperAccessor::ContentModifierRatingImpl,
         ContentModifierHelperAccessor::ResetContentModifierRatingImpl,
-        ContentModifierHelperAccessor::ContentModifierMenuItemImpl,
-        ContentModifierHelperAccessor::ResetContentModifierMenuItemImpl,
         ContentModifierHelperAccessor::ContentModifierSliderImpl,
         ContentModifierHelperAccessor::ResetContentModifierSliderImpl,
-        ContentModifierHelperAccessor::ContentModifierTextClockImpl,
-        ContentModifierHelperAccessor::ResetContentModifierTextClockImpl,
-        ContentModifierHelperAccessor::ContentModifierTextTimerImpl,
-        ContentModifierHelperAccessor::ResetContentModifierTextTimerImpl,
         ContentModifierHelperAccessor::ContentModifierToggleImpl,
         ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
     };
     return &ContentModifierHelperAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

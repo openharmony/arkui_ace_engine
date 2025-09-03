@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_TextBaseController peer)
     CHECK_NULL_VOID(peer);
     delete peer;
 }
-Ark_TextBaseController ConstructImpl()
+Ark_TextBaseController CtorImpl()
 {
     LOGE("TextBaseControllerPeer is an abstract class.");
     return nullptr;
@@ -43,7 +43,7 @@ void SetSelectionImpl(Ark_TextBaseController peer,
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd);
     auto selectionStartConv = Converter::Convert<int32_t>(*selectionStart);
     auto selectionEndConv = Converter::Convert<int32_t>(*selectionEnd);
-    auto optionsConv = Converter::OptConvertPtr<SelectionOptions>(options);
+    auto optionsConv = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
     peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }
 void CloseSelectionMenuImpl(Ark_TextBaseController peer)
@@ -54,7 +54,7 @@ void CloseSelectionMenuImpl(Ark_TextBaseController peer)
 Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
 {
     CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->construct());
+    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
     return layoutManagerPeer;
@@ -64,7 +64,7 @@ const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
 {
     static const GENERATED_ArkUITextBaseControllerAccessor TextBaseControllerAccessorImpl {
         TextBaseControllerAccessor::DestroyPeerImpl,
-        TextBaseControllerAccessor::ConstructImpl,
+        TextBaseControllerAccessor::CtorImpl,
         TextBaseControllerAccessor::GetFinalizerImpl,
         TextBaseControllerAccessor::SetSelectionImpl,
         TextBaseControllerAccessor::CloseSelectionMenuImpl,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,112 +13,96 @@
  * limitations under the License.
  */
 
-import { UID, Unique, UniqueMap, UniqueSet } from "../common/Unique"
-
-let uidCounter: UID = 0
+const SKIP_FRAMES = 10
 
 /** This interface represents an unique observer that can be notified that some changes. */
 export interface Dependency {
-    /** Returns dependencies to all used states. */
-    readonly states: ScopeToStates | undefined
+    /** Returns `true` if the dependency is no longer actual. */
+    readonly obsolete: boolean
+
+    /** Notifies the dependency that it should be invalidated. */
+    invalidate(): void
 }
 
-/** This class is intended to store dependencies to all scopes. */
-export class StateToScopes implements Unique {
-    private readonly _uid: UID = ++uidCounter
-    private readonly dependencies = new UniqueSet<ScopeToStates>
+/** This class allows to store and update all dependencies. */
+export class Dependencies {
+    private frame = 0
+    private dependencies: Set<Dependency> | undefined = undefined
+    private latest: Dependency | undefined = undefined
 
-    get uid(): UID {
-        return this._uid
-    }
-
+    /** Returns `true` if there are no dependencies to invalidate. */
     get empty(): boolean {
-        return this.dependencies.empty
+        const dependencies = this.dependencies
+        return dependencies
+            ? (dependencies.size == 0)
+            : (this.latest === undefined)
     }
 
-    /** @param dependency - a dependency to add */
-    add(dependency: ScopeToStates) {
-        this.dependencies.add(dependency)
+    /** @param dependency - a dependency to invalidate */
+    register(dependency?: Dependency): void {
+        if (dependency === undefined || dependency == this.latest || dependency.obsolete) {
+            return
+        }
+        let dependencies = this.dependencies
+        if (dependencies) {
+            dependencies.add(dependency)
+        } else {
+            const latest = this.latest
+            if (latest) {
+                dependencies = new Set<Dependency>()
+                dependencies.add(latest)
+                dependencies.add(dependency)
+                this.dependencies = dependencies
+            }
+        }
+        this.latest = dependency
     }
 
-    /** @param dependency - a dependency to remove */
-    remove(dependency: ScopeToStates) {
-        this.dependencies.delete(dependency)
-    }
-
-    /** Removes all dependecies. */
-    clear(): undefined {
-        this.dependencies.forEach((dependency: ScopeToStates) => { dependency.remove(this) })
-        this.dependencies.clear()
-        return undefined
-    }
-
-    /** Iterates through all dependecies and invalidates them. */
-    invalidate() {
-        this.dependencies.forEach(invalidateScope)
-    }
-
-    invalidateIf(predicate: (element: ScopeToStates) => boolean) {
-        this.dependencies.forEach((dependency: ScopeToStates) => {
-            if (predicate(dependency)) dependency.invalidate()
-        })
-    }
-
-    /** @param dependency - a dependency to register */
-    register(dependency?: Dependency) {
-        const that = dependency?.states
-        if (that) {
-            this.add(that)
-            that.add(this)
+    /** Invalidates all dependencies and removes obsolete ones. */
+    updateDependencies(invalidate: boolean): void {
+        if (++this.frame < SKIP_FRAMES && !invalidate) {
+            return
+        }
+        this.frame = 0
+        const dependencies = this.dependencies
+        if (dependencies) {
+            let disposed: Array<Dependency> | undefined = undefined
+            const it = dependencies.values()
+            while (true) {
+                const result = it.next()
+                if (result.done) {
+                    break
+                }
+                const dependency = result.value as Dependency
+                if (!updateDependency(invalidate, dependency)) {
+                    if (disposed) {
+                        disposed.push(dependency)
+                    } else {
+                        disposed = Array.of<Dependency>(dependency)
+                    }
+                }
+            }
+            if (disposed) {
+                let index = disposed.length
+                while (0 < index--) {
+                    dependencies.delete(disposed[index])
+                }
+            }
+        } else {
+            const latest = this.latest
+            if (latest !== undefined && !updateDependency(invalidate, latest)) {
+                this.latest = undefined
+            }
         }
     }
 }
 
-/** This class is intended to store dependencies to all used states. */
-export class ScopeToStates implements Unique {
-    private readonly _uid: UID = ++uidCounter
-    private marker: boolean = false
-    private readonly dependencies = new UniqueMap<StateToScopes, Boolean>
-
-    readonly invalidate: () => void
-
-    constructor(invalidate: () => void) {
-        this.invalidate = invalidate
+function updateDependency(invalidate: boolean, dependency: Dependency): boolean {
+    if (dependency.obsolete) {
+        return false
     }
-
-    get uid(): UID {
-        return this._uid
+    if (invalidate) {
+        dependency.invalidate()
     }
-
-    /** @param dependency - a dependency to add */
-    add(dependency: StateToScopes) {
-        this.dependencies.set(dependency, this.marker)
-    }
-
-    /** @param dependency - a dependency to remove */
-    remove(dependency: StateToScopes) {
-        this.dependencies.delete(dependency)
-    }
-
-    /** Removes all dependecies. */
-    clear(): undefined {
-        this.dependencies.forEach((dependency: StateToScopes) => { dependency.remove(this) })
-        this.dependencies.clear()
-        return undefined
-    }
-
-    /** Removes all dependecies, which were not used since previous call. */
-    reset() {
-        const current = this.marker
-        this.marker = !current
-        this.dependencies.deleteIf((dependency: StateToScopes, marker: Boolean) => {
-            if (current == marker) return false
-            dependency.remove(this)
-            return true
-        })
-    }
-}
-
-function invalidateScope(dependency: ScopeToStates) {
-    dependency.invalidate()
+    return true
 }

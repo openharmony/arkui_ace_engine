@@ -22,19 +22,17 @@ namespace SceneAccessor {
 void DestroyPeerImpl(Ark_Scene peer)
 {
 }
-Ark_Scene ConstructImpl()
+Ark_Scene CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void LoadImpl(Ark_VMContext vmContext,
-              Ark_AsyncWorkerPtr asyncWorker,
-              const Opt_ResourceStr* uri,
-              const Callback_Opt_Scene_Opt_Array_String_Void* outputArgumentForReturningPromise)
+Ark_Scene LoadImpl(const Opt_ResourceStr* uri)
 {
+    return {};
 }
 void DestroyImpl(Ark_Scene peer)
 {
@@ -44,7 +42,7 @@ const GENERATED_ArkUISceneAccessor* GetSceneAccessor()
 {
     static const GENERATED_ArkUISceneAccessor SceneAccessorImpl {
         SceneAccessor::DestroyPeerImpl,
-        SceneAccessor::ConstructImpl,
+        SceneAccessor::CtorImpl,
         SceneAccessor::GetFinalizerImpl,
         SceneAccessor::LoadImpl,
         SceneAccessor::DestroyImpl,

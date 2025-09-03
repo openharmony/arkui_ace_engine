@@ -16,6 +16,7 @@
 #include "node_adapter_ani_modifier.h"
 
 #include <array>
+#include <memory>
 
 #include "ui/base/utils/utils.h"
 
@@ -23,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
 namespace OHOS::Ace::NG {
@@ -96,7 +97,7 @@ ani_boolean NodeAdapterAttachNodeAdapter(ani_long ptr, ani_long node)
 void NodeAdapterDispose(ani_long ptr)
 {
     auto adapter = reinterpret_cast<UINodeAdapter*>(ptr);
-    CHECK_NULL_VOID(ptr);
+    CHECK_NULL_VOID(adapter);
     adapter->DecRefCount();
 }
 

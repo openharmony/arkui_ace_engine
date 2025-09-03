@@ -35,7 +35,7 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_CustomNode_Construct",
             nullptr,
@@ -43,8 +43,8 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
         },
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        HILOGE("BindNativeCustomComponentComponent Class_BindNativeMethods failed,"
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+        HILOGE("BindNativeCustomComponentComponent Class_BindStaticNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
     };
@@ -95,7 +95,7 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
 
         ani_boolean released;
         ani_ref localRef;
-        
+
         if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
             return;
         }

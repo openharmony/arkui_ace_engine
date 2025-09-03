@@ -33,7 +33,7 @@ export class AtomicRef<Value> {
      * @returns the previous value
      */
     getAndSet(value: Value): Value {
-        // Improve: replace with the implementation from ArkTS language when it is ready
+        // TODO: replace with the implementation from ArkTS language when it is ready
         const result = this.value
         this.value = value
         return result

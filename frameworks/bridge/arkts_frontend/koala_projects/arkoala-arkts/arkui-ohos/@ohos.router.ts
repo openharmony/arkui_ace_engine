@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import { Router } from "arkui/base"
+import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
+import { Router } from "arkui/handwritten"
 import { PeerNode } from "arkui/PeerNode"
 import { UserViewBuilder } from "arkui/UserView"
 import { ComputableState, State, IncrementalNode } from "@koalaui/runtime"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
-import { UIContextUtil } from "arkui/base/UIContextUtil"
+import { UIContextImpl } from "arkui/handwritten/UIContextImpl";
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
 namespace router {
     export interface RouterOptions {
@@ -44,7 +45,11 @@ namespace router {
     }
 
     export function error(prefix: string, e: Object|null|undefined): string {
-        throw new Error("TBD")
+        if (e instanceof Error) {
+            return `${prefix}: ${e} ${e.stack}`
+        } else {
+            return `${prefix}: ${e}`
+        }
     }
 
     let pageEntries: Map<string, string>
@@ -55,65 +60,98 @@ namespace router {
     }
 
     export function getParams(): Object {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getParams()
     }
 
     export function clear(): void {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.clear()
     }
 
     export function getLength(): string {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getLength();
     }
 
     export function getState(): RouterState {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getState();
     }
 
-    export function getStateByIndex(index: int): RouterState | undefined {
-        throw new Error("TBD")
+    export function getStateByIndex(index: number): RouterState | undefined {
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getStateByIndex(index);
     }
 
     export function getStateByUrl(url: string): Array<RouterState> {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getStateByUrl(url);
     }
 
     export function showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.showAlertBeforeBackPage(options);
     }
 
     export function hideAlertBeforeBackPage(): void {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.hideAlertBeforeBackPage();
     }
 
     export function pushUrl(options: RouterOptions): void {
-        throw new Error("TBD")
+        InteropNativeModule._NativeLog("AceRouter:enter ohos pushUrl " + options.url)
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.push(options)
     }
 
     export function replaceUrl(options: RouterOptions): void {
-        throw new Error("TBD")
+        InteropNativeModule._NativeLog("AceRouter:enter ohos replaceUrl " + options.url)
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.replace(options)
     }
 
     export function push(options: RouterOptions): void {
-        throw new Error("TBD")
+        InteropNativeModule._NativeLog("AceRouter:enter ohos push " + options.url)
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.push(options)
     }
 
     export function back(options?: RouterOptions): void {
-        throw new Error("TBD")
+        InteropNativeModule._NativeLog("AceRouter:enter ohos back")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.back(options)
     }
 
-    export function UpdateVisiblePagePeerNode(node: PeerNode, index: int = -1): void {
-        throw new Error("TBD")
+    export function UpdateVisiblePagePeerNode(node: PeerNode, index: number = -1): void {
+        InteropNativeModule._NativeLog("AceRouter:enter ohos UpdateVisiblePagePeerNode")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.UpdateVisiblePagePeerNode(node, index);
     }
 
     export function getStateRoot(): ComputableState<IncrementalNode> {
-        throw new Error("TBD")
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        return globalRouterImp!.getEntryRootValue();
     }
 
     export function runPage(options: RouterOptions, builder: UserViewBuilder): void {
-        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const globalRouterImpl = uiContext.getRouter().getRouter();
-        globalRouterImpl.runStartPage(options, builder);
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.runStartPage(options, builder)
     }
 }
 

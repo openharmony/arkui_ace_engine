@@ -5,22 +5,16 @@
         "baseUrl": "./arkui-preprocessed",
         "paths": {
             "#components": [
-                "./arkui/framework/arkts"
+                "./arkui/component/arkts"
             ],
             "#external": [
                 "./arkui/external/arkts"
             ],
-            "#stateMgmtTool": [
-                "./arkui/stateManagement/tools/arkts"
-            ],
-            "#handwritten": [
-                "./arkui/"
-            ],
-            "#generated": [
-                "./arkui/framework"
-            ],
             "arkui.ani": [
                 "./arkui/ani/arkts"
+            ],
+            "arkui": [
+                "./arkui/"
             ],
             "arkui/*": [
                 "./arkui/*"
@@ -37,14 +31,17 @@
             "@koalaui/runtime": [
                 "../../incremental/runtime/ets-processed"
             ],
-            "@koalaui/runtime/annotations": [
-                "../../incremental/runtime/annotations"
-            ],
-            "@koalaui/builderLambda": [
-                "./arkui/annotations"
+            "@ohos.arkui.stateManagement": [
+                "./arkui/stateManagement/index.ets"
             ],
             "arkui.stateManagement.runtime": [
                 "./arkui/stateManagement/runtime"
+            ],
+            "@koalaui/runtime/annotations": [
+                "../../incremental/runtime/annotations"
+            ],
+            "@component_handwritten/*": [
+                "./arkui/component/*"
             ],
             "@ohos/animator": [
                 "@ohos.animator.ets"
@@ -52,17 +49,32 @@
             "@ohos/arkui/UIContext": [
                 "@ohos.arkui.UIContext.ets"
             ],
+            "@ohos.arkui.UIContext": [
+                "@ohos.arkui.UIContext.ets"
+            ],
+            "@ohos.arkui.node": [
+                "./arkui/ohos.arkui.node.ets"
+            ],
             "@ohos/measure": [
                 "@ohos.measure.ets"
             ],
             "@ohos/font": [
                 "@ohos.font.ets"
             ],
+            "global/resource": [
+                "global/resource/resource.ets"
+            ],
             "@ohos/router": [
                 "@ohos.router.ets"
             ],
             "@ohos/arkui/observer": [
                 "@ohos.arkui.observer.ets"
+            ],
+            "@ohos/graphics/common2D": [
+                "@ohos.graphics.common2D.ets"
+            ],
+            "@ohos/graphics/drawing": [
+                "@ohos.graphics.drawing.ets"
             ],
             "@ohos/intl": [
                 "@ohos.intl.ets"
@@ -88,55 +100,39 @@
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
             ],
+            "@ohos/arkui/shape": [
+                "@ohos.arkui.shape.ets"
+            ],
             "@ohos/mediaquery": [
                 "@ohos.mediaquery.ets"
+            ],
+            "@ohos.multimodalInput.intentionCode": [
+                "@ohos.multimodalInput.intentionCode.ets"
             ],
             "@ohos/arkui/dragController": [
                 "@ohos.arkui.dragController.ets"
             ],
-            "arkui.Graphics": [
-                "./arkui/Graphics.ets"
+            "#stateMgmtTool": [
+                "./arkui/stateManagement/tools/arkts"
             ],
-            "arkui.FrameNode": [
-                "./arkui/FrameNode.ets"
+            "@ohos/arkui/Parallelize": [
+                "./@ohos.arkui.Parallelize.ets"
             ],
-            "arkui.ComponentContent": [
-                "./arkui/ComponentContent.ets"
-            ],
-            "arkui.BuilderNode": [
-                "./arkui/BuilderNode.ets"
-            ],
-            "arkui.SymbolGlyphModifier": [
-                "./arkui/SymbolGlyphModifier.ets"
-            ],
-            "arkui.Content": [
-                "./arkui/Content.ets"
-            ],
-            "arkui.NodeController": [
-                "./arkui/NodeController.ets"
-            ],
-            "arkui.NodeContent": [
-                "./arkui/NodeContent.ets"
-            ],
-            "arkui.RenderNode": [
-                "./arkui/RenderNode.ets"
-            ],
-            "arkui.UserView": [
-                "./arkui/UserView.ets"
+            "@ohos/arkui/theme": [
+                "@ohos.arkui.theme.ets"
             ],
             "@ohos.arkui.component": [
-                "./arkui/framework"
-            ],
-            "@ohos.arkui.stateManagement": [
-                "./arkui/stateManagement"
+                "./arkui/component"
             ]
         }
     },
     "include": [
         "./arkui-preprocessed/arkui/**/*.ets",
-        "./arkui-preprocessed/@ohos.*.ets"
+        "./arkui-preprocessed/@ohos.*.ets",
+        "./arkui-processed/global/**/*.ets"
     ],
     "exclude": [
-        "./arkui-preprocessed/arkui/framework/main.ets"
+        "./arkui-preprocessed/arkui/component/main.ets",
+        "./arkui-preprocessed/arkui/index-test.d.ets"
     ]
 }

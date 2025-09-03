@@ -21,7 +21,7 @@ export function isFunction(object?: Object): boolean {
     return typeof object === 'function'
 }
 
-// Improve: this is to match arkts counterpart
+// TODO: this is to match arkts counterpart
 export function functionOverValue<Value>(value: Value|(()=>Value)): boolean {
     return typeof value === 'function'
 }

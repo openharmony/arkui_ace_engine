@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
 
 namespace OHOS::Ace::NG {
@@ -61,24 +62,25 @@ void SetColumnSplitOptionsImpl(Ark_NativePointer node)
 }
 } // ColumnSplitInterfaceModifier
 namespace ColumnSplitAttributeModifier {
-void SetResizeableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+void ResizeableImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, *convValue);
 }
-void SetDividerImpl(Ark_NativePointer node,
-                    const Opt_ColumnSplitDividerStyle* value)
+void DividerImpl(Ark_NativePointer node,
+                 const Opt_ColumnSplitDividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto divider = Converter::OptConvertPtr<ColumnSplitDivider>(value);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<ColumnSplitDivider>(*value);
     LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
@@ -87,8 +89,8 @@ const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()
     static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
         ColumnSplitModifier::ConstructImpl,
         ColumnSplitInterfaceModifier::SetColumnSplitOptionsImpl,
-        ColumnSplitAttributeModifier::SetResizeableImpl,
-        ColumnSplitAttributeModifier::SetDividerImpl,
+        ColumnSplitAttributeModifier::ResizeableImpl,
+        ColumnSplitAttributeModifier::DividerImpl,
     };
     return &ArkUIColumnSplitModifierImpl;
 }

@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef CONVERTORS_CJ_H
-#define CONVERTORS_CJ_H
+#pragma once
 
 #include <cmath>
+#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
 
 #include "koala-types.h"
-#include "interop-logging.h"
 
 #define KOALA_INTEROP_EXPORT extern "C"
 
@@ -83,7 +82,7 @@ struct InteropTypeConverter<KStringPtr> {
     }
 };
 
-// Improve: Rewrite all others to typed convertors.
+// TODO: Rewrite all others to typed convertors.
 
 #define KOALA_INTEROP_0(name, Ret)                                         \
 KOALA_INTEROP_EXPORT InteropTypeConverter<Ret>::InteropType name() {                                          \
@@ -930,14 +929,12 @@ KOALA_INTEROP_EXPORT void name(InteropTypeConverter<P0>::InteropType _p0,  \
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     /* Improve: implement*/  ASSERT(false); \
+     /* TODO: implement*/  assert(false); \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-     /* Improve: implement*/  ASSERT(false); \
+     /* TODO: implement*/  assert(false); \
      return __VA_ARGS__; \
    } while (0)
-
-#endif // CONVERTORS_CJ_H

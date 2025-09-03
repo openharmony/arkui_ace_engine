@@ -20,12 +20,12 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
-struct TextStylePeer {
+struct TextStyle_styled_stringPeer {
     OHOS::Ace::RefPtr<OHOS::Ace::FontSpan> span;
 
 protected:
-    TextStylePeer() = default;
-    ~TextStylePeer() = default;
+    TextStyle_styled_stringPeer() = default;
+    ~TextStyle_styled_stringPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
 

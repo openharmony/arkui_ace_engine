@@ -19,8 +19,40 @@
 #include "ani.h"
 #include <string>
 #include "./../log/log.h"
+#include "ui/base/macros.h"
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
+
+#define ANI_CALL(env, call, onFail...)                                                                 \
+    if (env) {                                                                                         \
+        const char* aniErr[] = {                                                                       \
+            "ANI_OK",                                                                                  \
+            "ANI_ERROR",                                                                               \
+            "ANI_INVALID_ARGS",                                                                        \
+            "ANI_INVALID_TYPE",                                                                        \
+            "ANI_INVALID_DESCRIPTOR",                                                                  \
+            "ANI_INCORRECT_REF",                                                                       \
+            "ANI_PENDING_ERROR",                                                                       \
+            "ANI_NOT_FOUND",                                                                           \
+            "ANI_ALREADY_BINDED",                                                                      \
+            "ANI_OUT_OF_REF",                                                                          \
+            "ANI_OUT_OF_MEMORY",                                                                       \
+            "ANI_OUT_OF_RANGE",                                                                        \
+            "ANI_BUFFER_TO_SMALL",                                                                     \
+            "ANI_INVALID_VERSION",                                                                     \
+            "ANI_AMBIGUOUS",                                                                           \
+        };                                                                                             \
+        ani_status ret;                                                                                \
+        if ((ret = (env)->call) != ANI_OK) {                                                           \
+            LOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                     \
+                static_cast<size_t>(ret) < std::extent_v<decltype(aniErr)> ? aniErr[ret] : "ANI_???"); \
+            if (ret == ANI_PENDING_ERROR) {                                                            \
+                Ani::AniUtils::ClearAniPendingError(env);                                              \
+            }                                                                                          \
+            onFail;                                                                                    \
+        }                                                                                              \
+    }
+
 namespace OHOS::Ace::Ani {
 class AniUtils {
 public:
@@ -32,9 +64,12 @@ public:
     static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
     static bool IsString(ani_env* env, ani_object obj);
     static bool IsNumber(ani_env* env, ani_object obj);
+    static bool IsFunction(ani_env* env, ani_object obj);
     static bool IsUndefined(ani_env* env, ani_object obj);
     static ani_object GetUndefined(ani_env* env);
     static std::optional<ani_string> StdStringToANIString(ani_env *env, std::string str);
+    static bool GetStringByName(
+        ani_env *env, ani_object param, const char *name, std::string &value);
     static ani_ref CreateBusinessError(ani_env* env, const char *msg, ani_int code);
     static void AniThrow(ani_env* env, const char *errMsg, int32_t code);
     static bool IsClassObject(ani_env *env, ani_ref object_ref, const char *class_descriptor);
@@ -45,6 +80,33 @@ public:
     // The return value means the parse result. True means success.
     // If the ref is undefined, it will return false.
     static bool GetOptionalDouble(ani_env* env, ani_ref value, double& result);
+    /**
+     * Get std/core/Double.
+     */
+    static ani_object CreateDoubleObject(ani_env* env, double value);
+    /**
+     * Get std/core/Double by float.
+     */
+    static ani_object FloatToNumberObject(ani_env* env, const float& value);
+    /**
+     * Create std/core/Boolean.
+     */
+    static int32_t CreateAniBoolean(ani_env* env, bool value, ani_object& result);
+
+    /**
+     * Get AbcRuntimeLinkder to load application class.
+     */
+    static int32_t GetNearestNonBootRuntimeLinker(ani_env*, ani_ref& result);
+
+    /**
+     * Clear ani pending error.
+     */
+    static void ClearAniPendingError(ani_env* env);
+
+    /**
+     * Get ani env from ani vm.
+     */
+    static ani_env* GetAniEnv(ani_vm* vm);
 };
 } // namespace OHOS::Ace::Ani
 

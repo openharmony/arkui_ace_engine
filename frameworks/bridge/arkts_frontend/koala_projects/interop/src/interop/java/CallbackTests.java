@@ -22,10 +22,10 @@ import java.util.function.Function;
 import org.koalaui.arkoala.NativeModule;
 
 public class CallbackTests {
-    // Improve: where tests will be located?
+    // Todo: where tests will be located?
 
     public class TestUtils {
-        // Improve: where test utils will be located?
+        // Todo: where test utils will be located?
         public static <T> void assertEquals(String name, T expected, T actual) {
             if (!expected.equals(actual)) {
                 System.out.printf("TEST %s FAIL:\n  EXPECTED \"%s\"\n  ACTUAL   \"%s\"\n", name, expected.toString(), actual.toString());

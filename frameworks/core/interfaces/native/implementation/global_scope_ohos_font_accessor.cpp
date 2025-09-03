@@ -20,12 +20,12 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src)
+void AssignCast(std::optional<SimpleResource>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
     auto resourceString = converter.ToString();
     if (resourceString) {
-        Ark_Resource_Simple temp;
+        SimpleResource temp;
         temp.content = resourceString.value();
         temp.bundleName = converter.BundleName();
         temp.moduleName = converter.ModuleName();
@@ -36,11 +36,11 @@ void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src
     }
 }
 template<>
-void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src)
+void AssignCast(std::optional<SimpleResource>& dst, const Ark_String& src)
 {
     std::string str = Converter::Convert<std::string>(src);
     if (!str.empty()) {
-        Ark_Resource_Simple temp;
+        SimpleResource temp;
         temp.content = str;
         dst = temp;
     }
@@ -49,9 +49,8 @@ void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
-void RegisterFontImpl(const Ark_CustomObject* options)
+void RegisterFontImpl(const Ark_FontOptions* options)
 {
-#ifdef WRONG_GEN1
     CHECK_NULL_VOID(options);
     std::string familyName;
     std::string familySrc;
@@ -60,7 +59,7 @@ void RegisterFontImpl(const Ark_CustomObject* options)
     if (auto familyNameOpt = Converter::OptConvert<Converter::FontFamilies>(options->familyName); familyNameOpt) {
         familyName = !familyNameOpt->families.empty() ? familyNameOpt->families.front() : "";
     }
-    if (auto familySrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(options->familySrc);
+    if (auto familySrcOpt = Converter::OptConvert<Converter::SimpleResource>(options->familySrc);
         familySrcOpt) {
         familySrc = familySrcOpt->content;
         bundleName = familySrcOpt->bundleName;
@@ -70,7 +69,6 @@ void RegisterFontImpl(const Ark_CustomObject* options)
     if (pipeline) {
         pipeline->RegisterFont(familyName, familySrc, bundleName, moduleName);
     }
-#endif
 }
 Array_String GetSystemFontListImpl()
 {
@@ -81,9 +79,8 @@ Array_String GetSystemFontListImpl()
     }
     return Converter::ArkValue<Array_String>(fontList, Converter::FC);
 }
-Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
 {
-#ifdef WRONG_GEN1
     FontInfo fontInfo;
     auto fontNameCasted = Converter::Convert<std::string>(*fontName);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
@@ -91,8 +88,15 @@ Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
         pipeline->GetSystemFont(fontNameCasted, fontInfo);
     }
     return Converter::ArkValue<Ark_FontInfo>(fontInfo, Converter::FC);
-#endif
-    return {};
+}
+Ark_UIFontConfig GetUIFontConfigImpl()
+{
+    FontConfigJsonInfo fontConfigJsonInfo;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->GetUIFontConfig(fontConfigJsonInfo);
+    }
+    return Converter::ArkValue<Ark_UIFontConfig>(fontConfigJsonInfo, Converter::FC);
 }
 } // GlobalScope_ohos_fontAccessor
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
@@ -101,6 +105,7 @@ const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAcce
         GlobalScope_ohos_fontAccessor::RegisterFontImpl,
         GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
         GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+        GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
     };
     return &GlobalScope_ohos_fontAccessorImpl;
 }

@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_PixelMapMock peer)
 {
     delete peer;
 }
-Ark_PixelMapMock ConstructImpl()
+Ark_PixelMapMock CtorImpl()
 {
     return new PixelMapMockPeer();
 }
@@ -42,7 +42,7 @@ const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
 {
     static const GENERATED_ArkUIPixelMapMockAccessor PixelMapMockAccessorImpl {
         PixelMapMockAccessor::DestroyPeerImpl,
-        PixelMapMockAccessor::ConstructImpl,
+        PixelMapMockAccessor::CtorImpl,
         PixelMapMockAccessor::GetFinalizerImpl,
         PixelMapMockAccessor::ReleaseImpl,
     };

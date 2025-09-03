@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "canvas_renderer_peer_impl.h"
 
 #include "arkoala_api_generated.h"
@@ -173,7 +170,7 @@ void CanvasRendererPeerImpl::DrawSvgImage(ImageBitmapPeer* bitmap, const DrawIma
     imageInfo.imageFit = bitmap->GetImageFit();
     renderingContext2DModel_->DrawSvgImage(imageInfo);
 }
-void CanvasRendererPeerImpl::DrawPixelMap(image_PixelMapPeer* pixelMap, const DrawImageParam& params)
+void CanvasRendererPeerImpl::DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(pixelMap);
@@ -325,7 +322,7 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
         gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * ACE_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;

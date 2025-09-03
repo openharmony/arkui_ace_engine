@@ -60,7 +60,8 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvertPtr<PolygonOptions>(options);
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<PolygonOptions>(*options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
     ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
@@ -69,12 +70,26 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
-void SetPointsImpl(Ark_NativePointer node,
-                   const Opt_Array_ShapePoint* value)
+void PointsImpl(Ark_NativePointer node,
+                const Opt_Array_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto points = Converter::OptConvertPtr<ShapePoints>(value);
+    CHECK_NULL_VOID(value);
+    std::optional<ShapePoints> points;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        std::vector<ShapePoint> shapePointArray;
+        for (int32_t i = 0; i < value->value.length; ++i) {
+            auto arkPoint = value->value.array[i];
+            ShapePoint point = {0.0_vp, 0.0_vp};
+            auto x = Converter::OptConvertFromArkLength(arkPoint.value0, DimensionUnit::VP);
+            auto y = Converter::OptConvertFromArkLength(arkPoint.value1, DimensionUnit::VP);
+            point.first = x.value_or(0.0_vp);
+            point.second = y.value_or(0.0_vp);
+            shapePointArray.emplace_back(point);
+        }
+        points = std::make_optional<ShapePoints>(shapePointArray);
+    }
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }
@@ -86,7 +101,7 @@ const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
     static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
         PolygonModifier::ConstructImpl,
         PolygonInterfaceModifier::SetPolygonOptionsImpl,
-        PolygonAttributeModifier::SetPointsImpl,
+        PolygonAttributeModifier::PointsImpl,
     };
     return &ArkUIPolygonModifierImpl;
 }

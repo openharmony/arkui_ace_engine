@@ -26,7 +26,10 @@ function goldenSetup(resDir, testDir) {
     const argGenGolden = "--gen-golden"
     for (let str of process.argv) {
         if (str.startsWith(argGenGolden)) {
-            process.env.KOALAUI_TEST_GOLDEN_GEN_DIR = path.relative(root, path.resolve(testRoot, "test", "resources", "golden"))
+            process.env.KOALAUI_TEST_GOLDEN_GEN_DIR = path.relative(
+              root,
+              path.resolve(testRoot, "test", "resources", "golden")
+            );
             if (str.length > argGenGolden.length + 1) {
                 const gdir = str.substring(argGenGolden.length + 1);
                 if (gdir.length > 0 && gdir != "true") {

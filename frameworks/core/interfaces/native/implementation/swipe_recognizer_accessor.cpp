@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SwipeRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_SwipeRecognizer ConstructImpl()
+Ark_SwipeRecognizer CtorImpl()
 {
     return PeerUtils::CreatePeer<SwipeRecognizerPeer>();
 }
@@ -49,7 +49,7 @@ const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()
 {
     static const GENERATED_ArkUISwipeRecognizerAccessor SwipeRecognizerAccessorImpl {
         SwipeRecognizerAccessor::DestroyPeerImpl,
-        SwipeRecognizerAccessor::ConstructImpl,
+        SwipeRecognizerAccessor::CtorImpl,
         SwipeRecognizerAccessor::GetFinalizerImpl,
         SwipeRecognizerAccessor::GetVelocityThresholdImpl,
         SwipeRecognizerAccessor::GetDirectionImpl,

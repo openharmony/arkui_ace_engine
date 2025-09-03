@@ -32,6 +32,16 @@ bool CheckSwiperParameters(SwiperParameters& p);
 void CheckSwiperDigitalParameters(SwiperDigitalParameters& p);
 } // namespace OHOS::Ace::NG::SwiperAttributeModifierInternal
 
+namespace OHOS::Ace::NG::Converter {
+template<> SwiperDigitalParameters Convert(const Ark_DigitIndicator& src);
+template<> SwiperParameters Convert(const Ark_DotIndicator& src);
+} // namespace OHOS::Ace::NG::Converter
+
+namespace OHOS::Ace::NG::SwiperAttributeModifierInternal {
+bool CheckSwiperParameters(SwiperParameters& p);
+void CheckSwiperDigitalParameters(SwiperDigitalParameters& p);
+} // namespace OHOS::Ace::NG::SwiperAttributeModifierInternal
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -49,10 +59,11 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(controller);
 
     // obtain the peer of external IndicatorController
     Ark_IndicatorComponentController peerImplPtr{};
-    if (auto opt = Converter::OptConvertPtr<Ark_IndicatorComponentController>(controller); opt) {
+    if (auto opt = Converter::OptConvert<Ark_IndicatorComponentController>(*controller); opt) {
         peerImplPtr = *opt;
     }
     CHECK_NULL_VOID(peerImplPtr);
@@ -66,26 +77,28 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 }
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
-void SetInitialIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+void InitialIndexImpl(Ark_NativePointer node,
+                      const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceVal = Converter::OptConvertPtr<int32_t>(value);
+    CHECK_NULL_VOID(value);
+    auto aceVal = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateNonNegative(aceVal);
     IndicatorModelStatic::SetInitialIndex(frameNode, aceVal);
 }
-void SetCountImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void CountImpl(Ark_NativePointer node,
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceVal = Converter::OptConvertPtr<int32_t>(value);
+    CHECK_NULL_VOID(value);
+    auto aceVal = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateNonNegative(aceVal);
     IndicatorModelStatic::SetCount(frameNode, aceVal);
 }
-void SetStyleImpl(Ark_NativePointer node,
-                  const Opt_Union_DotIndicator_DigitIndicator* value)
+void StyleImpl(Ark_NativePointer node,
+               const Opt_Union_DotIndicator_DigitIndicator* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,24 +124,24 @@ void SetStyleImpl(Ark_NativePointer node,
             IndicatorModelStatic::SetShowIndicator(frameNode, false);
         });
 }
-void SetLoopImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void LoopImpl(Ark_NativePointer node,
+              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value).value_or(true);
     IndicatorModelStatic::SetLoop(frameNode, convValue);
 }
-void SetVerticalImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void VerticalImpl(Ark_NativePointer node,
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value).value_or(false);
     IndicatorModelStatic::SetDirection(frameNode, convValue ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
-void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Void* value)
+void OnChangeImpl(Ark_NativePointer node,
+                  const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,12 +166,12 @@ const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()
     static const GENERATED_ArkUIIndicatorComponentModifier ArkUIIndicatorComponentModifierImpl {
         IndicatorComponentModifier::ConstructImpl,
         IndicatorComponentInterfaceModifier::SetIndicatorComponentOptionsImpl,
-        IndicatorComponentAttributeModifier::SetInitialIndexImpl,
-        IndicatorComponentAttributeModifier::SetCountImpl,
-        IndicatorComponentAttributeModifier::SetStyleImpl,
-        IndicatorComponentAttributeModifier::SetLoopImpl,
-        IndicatorComponentAttributeModifier::SetVerticalImpl,
-        IndicatorComponentAttributeModifier::SetOnChangeImpl,
+        IndicatorComponentAttributeModifier::InitialIndexImpl,
+        IndicatorComponentAttributeModifier::CountImpl,
+        IndicatorComponentAttributeModifier::StyleImpl,
+        IndicatorComponentAttributeModifier::LoopImpl,
+        IndicatorComponentAttributeModifier::VerticalImpl,
+        IndicatorComponentAttributeModifier::OnChangeImpl,
     };
     return &ArkUIIndicatorComponentModifierImpl;
 }

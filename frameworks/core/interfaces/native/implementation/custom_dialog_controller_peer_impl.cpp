@@ -217,19 +217,21 @@ void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction
     AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
-void CustomDialogControllerPeerImpl::SetWidth(std::optional<Dimension> width)
+void CustomDialogControllerPeerImpl::SetWidth(Opt_Length width)
 {
-    Validator::ValidateNonNegative(width);
-    if (width) {
-        dialogProperties_.width = *width;
+    auto result = Converter::OptConvert<Dimension>(width);
+    Validator::ValidateNonNegative(result);
+    if (result) {
+        dialogProperties_.width = result.value();
     }
 }
 
-void CustomDialogControllerPeerImpl::SetHeight(std::optional<Dimension> height)
+void CustomDialogControllerPeerImpl::SetHeight(Opt_Length height)
 {
-    Validator::ValidateNonNegative(height);
-    if (height) {
-        dialogProperties_.height = *height;
+    auto result = Converter::OptConvert<Dimension>(height);
+    Validator::ValidateNonNegative(result);
+    if (result) {
+        dialogProperties_.height = result.value();
     }
 }
 
@@ -364,9 +366,7 @@ void CustomDialogControllerPeerImpl::SetImersiveMode(Opt_ImmersiveMode immersive
 
 void CustomDialogControllerPeerImpl::SetLevelOrder(Opt_LevelOrder levelOrder)
 {
-    // the levelOrder is accessor in C-API v.132
-    auto result = Converter::OptConvert<double>(levelOrder);
-    dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
+    dialogProperties_.levelOrder = Converter::OptConvert<double>(levelOrder);
 }
 
 void CustomDialogControllerPeerImpl::SetFocusable(Opt_Boolean focusable)

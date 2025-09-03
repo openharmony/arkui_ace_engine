@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -37,14 +38,14 @@ void SetRowSplitOptionsImpl(Ark_NativePointer node)
 }
 } // RowSplitInterfaceModifier
 namespace RowSplitAttributeModifier {
-void SetResizeableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+void ResizeableImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
@@ -55,7 +56,7 @@ const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
     static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
         RowSplitModifier::ConstructImpl,
         RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
-        RowSplitAttributeModifier::SetResizeableImpl,
+        RowSplitAttributeModifier::ResizeableImpl,
     };
     return &ArkUIRowSplitModifierImpl;
 }

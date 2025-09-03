@@ -26,12 +26,9 @@ import { ComputableState, MutableState, State, StateContext } from "../states/St
  * which value is changed according to the given animation.
  */
 export interface AnimatedState<Value> extends State<Value> {
-    getAnimation(): TimeAnimation<Value>
-    setAnimation(value: TimeAnimation<Value>): void
+    animation: TimeAnimation<Value>
     readonly running: boolean
-    getPaused(): boolean
-    setPaused(value: boolean): void
-
+    paused: boolean
 }
 
 /**
@@ -42,7 +39,11 @@ export interface AnimatedState<Value> extends State<Value> {
  * @param timeProvider - custom time provider for testing purposes
  * @returns animated state with the specified animation
  */
-export function animatedState<V>(animation: TimeAnimation<V>, startNow: boolean = false, timeProvider?: () => int64): AnimatedState<V> {
+export function animatedState<V>(
+    animation: TimeAnimation<V>,
+    startNow: boolean = false,
+    timeProvider?: () => int64
+): AnimatedState<V> {
     return new AnimatedStateImpl<V>(animation, startNow, timeProvider)
 }
 
@@ -54,8 +55,7 @@ export function animatedState<V>(animation: TimeAnimation<V>, startNow: boolean 
  * to change the current value to the target one.
  */
 export interface MutableAnimatedState<Value> extends MutableState<Value> {
-    getAnimation(): TimeAnimation<Value>
-    setAnimation(value: TimeAnimation<Value>): void
+    animation: TimeAnimation<Value>
     readonly running: boolean
 }
 
@@ -66,7 +66,10 @@ export interface MutableAnimatedState<Value> extends MutableState<Value> {
  * @param animationProvider - factory producing a new animation from the current value and the target one
  * @returns a mutable state that automatically animates the value as it changes
  */
-export function mutableAnimatedState<Value>(initial: Value, animationProvider: ImplicitAnimationProvider<Value>): MutableAnimatedState<Value> {
+export function mutableAnimatedState<Value>(
+    initial: Value,
+    animationProvider: ImplicitAnimationProvider<Value>
+): MutableAnimatedState<Value> {
     return new MutableAnimatedStateImpl<Value>(initial, animationProvider)
 }
 
@@ -96,7 +99,10 @@ export interface StateAnimator<Parameter, Value> {
  * @param animationProvider - factory producing a new animation when parameter changed
  * @returns state animator with the animation created for given parameter
  */
-export function stateAnimator<P, V>(parameter: P, animationProvider: ParametrizedAnimationProvider<P, V>): StateAnimator<P, V> {
+export function stateAnimator<P, V>(
+    parameter: P,
+    animationProvider: ParametrizedAnimationProvider<P, V>
+): StateAnimator<P, V> {
     return new StateAnimatorImpl<P, V>(parameter, animationProvider)
 }
 
@@ -141,32 +147,38 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
         return this.runningState.value
     }
 
-    getPaused(): boolean {
+    get paused(): boolean {
         return this.pausedState.value
     }
 
-    setPaused(paused: boolean) {
+    set paused(paused: boolean) {
         this.pausedState.value = paused
     }
 
-    getAnimation(): TimeAnimation<Value> {
+    get animation(): TimeAnimation<Value> {
         return this.myAnimation
     }
 
-    setAnimation(animation: TimeAnimation<Value>): void {
-        if (this.myAnimation === animation) return // nothing to change
+    set animation(animation: TimeAnimation<Value>) {
+        if (this.myAnimation === animation) {
+            return // nothing to change
+        }
         this.myAnimation = animation
-        if (!this.getPaused()) animation.onStart(this.timeProvider())
+        if (!this.paused) {
+            animation.onStart(this.timeProvider())
+        }
     }
 
-    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider: (() => int64)|undefined) {
+    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider?: () => int64) {
         const manager = GlobalStateManager.instance
         if (timeProvider) {
             this.timeProvider = timeProvider
         } else {
             this.timeProvider = (): int64 => {
                 const timer = getAnimationTimer(manager)
-                if (timer) return timer.value
+                if (timer) {
+                    return timer.value
+                }
                 console.log("global animation timer is not specified yet")
                 return 0
             }
@@ -180,22 +192,22 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
                 const paused = this.pausedState.value
                 if (this.pausedState.modified) {
                     if (paused) {
-                        this.getAnimation().onPause(time)
+                        this.animation.onPause(time)
                     } else {
-                        this.getAnimation().onStart(time)
+                        this.animation.onStart(time)
                     }
                 }
                 // compute value from the time provided
-                let newValue = this.getAnimation().getValue(time)
+                let newValue = this.animation.getValue(time)
                 this.action?.(newValue)
                 return newValue
             } finally {
                 // update running state if needed
-                this.runningState.value = this.getAnimation().running
+                this.runningState.value = this.animation.running
             }
         })
         if (startNow) {
-            this.getAnimation().onStart(this.timeProvider())
+            this.animation.onStart(this.timeProvider())
         }
     }
 
@@ -216,7 +228,7 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     constructor(initial: Value, animationProvider: ImplicitAnimationProvider<Value>) {
-        this.animatedState = new AnimatedStateImpl<Value>(constAnimation(initial), true, undefined)
+        this.animatedState = new AnimatedStateImpl<Value>(constAnimation(initial), true)
         this.animationProvider = animationProvider
     }
 
@@ -233,19 +245,19 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     set value(value: Value) {
-        this.animatedState.setAnimation(this.animationProvider(this.animatedState.value, value))
+        this.animatedState.animation = this.animationProvider(this.value, value)
     }
 
     get running(): boolean {
         return this.animatedState.running
     }
 
-    getAnimation(): TimeAnimation<Value> {
-        return this.animatedState.getAnimation()
+    get animation(): TimeAnimation<Value> {
+        return this.animatedState.animation
     }
 
-    setAnimation(animation: TimeAnimation<Value>): void {
-        this.animatedState.setAnimation(animation)
+    set animation(animation: TimeAnimation<Value>) {
+        this.animatedState.animation = animation
     }
 }
 
@@ -257,7 +269,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
 
     constructor(parameter: P, animationProvider: ParametrizedAnimationProvider<P, V>) {
         this.parameterState = GlobalStateManager.instance.mutableState<P>(parameter)
-        this.animatedState = new AnimatedStateImpl<V>(animationProvider(parameter, undefined), true, undefined)
+        this.animatedState = new AnimatedStateImpl<V>(animationProvider(parameter, undefined), true)
         this.animationProvider = animationProvider
     }
 
@@ -266,9 +278,11 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     set parameter(parameter: P) {
-        if (refEqual(this.parameterState.value, parameter)) return // nothing to change
+        if (refEqual(this.parameterState.value, parameter)) {
+            return // nothing to change
+        }
         this.parameterState.value = parameter
-        this.animatedState.setAnimation(this.animationProvider(parameter, this.animatedState.value))
+        this.animatedState.animation = this.animationProvider(parameter, this.animatedState.value)
     }
 
     get value(): V {
@@ -276,7 +290,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     onValueChange(action: (newValue: V) => void): void {
-        // Improve: rethink how we'd better subscribe appropriate scope on value change.
+        // TODO: rethink how we'd better subscribe appropriate scope on value change.
         this.value
         this.animatedState.onValueChange(action)
     }

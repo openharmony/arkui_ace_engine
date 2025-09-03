@@ -13,30 +13,27 @@
  * limitations under the License.
  */
 
-import { CoroutineLocalValue, KoalaCallsiteKey } from "@koalaui/common"
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager, StateManagerImpl } from "./State"
+import { int32 } from "@koalaui/common"
 
 /**
  * This class provides an access to the global state manager of the application.
  * @internal
  */
 export class GlobalStateManager {
-    private static localManager = new CoroutineLocalValue<StateManager>()
-    private static sharedManager: StateManager | undefined = undefined
-
-    private static get current(): StateManager | undefined {
-        return GlobalStateManager.GetLocalManager() ?? GlobalStateManager.sharedManager
-    }
+    // @ts-ignore
+    private static localManagerMap = new Map<int32, StateManager>()
 
     /**
-     * The current instance of a global state manager.
+     * The current instance of a coroutine local state manager.
      * Note that it will be recreated after reset.
      */
     static get instance(): StateManager {
-        let current = GlobalStateManager.current
+        let current = GlobalStateManager.GetLocalManager()
         if (current === undefined) {
-            current = createStateManager()
-            GlobalStateManager.sharedManager = current
+            const manager = createStateManager()
+            GlobalStateManager.SetLocalManager(manager)
+            return manager
         }
         return current
     }
@@ -46,7 +43,7 @@ export class GlobalStateManager {
      * @internal
      */
     static reset() {
-        GlobalStateManager.current?.reset()
+        GlobalStateManager.GetLocalManager()?.reset()
     }
 
     /**
@@ -54,7 +51,9 @@ export class GlobalStateManager {
      * @internal
      */
     static GetLocalManager(): StateManager | undefined {
-        return GlobalStateManager.localManager.get()
+        // @ts-ignore
+        const coroutineId = CoroutineExtras.getWorkerId()
+        return GlobalStateManager.localManagerMap.get(coroutineId)
     }
 
     /**
@@ -62,15 +61,17 @@ export class GlobalStateManager {
      * @internal
      */
     static SetLocalManager(manager: StateManager | undefined): void {
-        GlobalStateManager.localManager.set(manager)
+        // @ts-ignore
+        const coroutineId = CoroutineExtras.getWorkerId()
+        if (manager === undefined) {
+            GlobalStateManager.localManagerMap.delete(coroutineId)
+            return
+        }
+        GlobalStateManager.localManagerMap.set(coroutineId, manager)
     }
 
-    /**
-     * @return callsite key for a current context or `undefined` for global context
-     * @internal
-     */
-    public static getCurrentScopeId(): KoalaCallsiteKey | undefined {
-        return GlobalStateManager.instance.currentScopeId
+    public static getCurrentScopeId(): int32 | undefined {
+        return (GlobalStateManager.instance as StateManagerImpl).current ? (GlobalStateManager.instance as StateManagerImpl).current!.id : undefined;
     }
 }
 
@@ -102,7 +103,9 @@ export function callScheduledCallbacks(manager: StateManager = GlobalStateManage
  * @param callback - a function to perform between recompositions
  */
 export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance) {
-    if (callback) manager.scheduleCallback(callback)
+    if (callback) {
+        manager.scheduleCallback(callback)
+    }
 }
 
 /**

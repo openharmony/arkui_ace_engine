@@ -23,7 +23,7 @@ void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_TapGestureEvent ConstructImpl()
+Ark_TapGestureEvent CtorImpl()
 {
     return PeerUtils::CreatePeer<TapGestureEventPeer>();
 }
@@ -36,7 +36,7 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
 {
     static const GENERATED_ArkUITapGestureEventAccessor TapGestureEventAccessorImpl {
         TapGestureEventAccessor::DestroyPeerImpl,
-        TapGestureEventAccessor::ConstructImpl,
+        TapGestureEventAccessor::CtorImpl,
         TapGestureEventAccessor::GetFinalizerImpl,
     };
     return &TapGestureEventAccessorImpl;

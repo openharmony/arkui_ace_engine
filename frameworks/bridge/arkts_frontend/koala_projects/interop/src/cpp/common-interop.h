@@ -40,19 +40,16 @@
 #define KOALA_MAYBE_LOG(name)
 #endif
 
-#ifdef KOALA_WINDOWS
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __attribute__ ((visibility ("default")))
-#endif
-
 typedef void (*Callback_Caller_t)(KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
 typedef void (*Callback_Caller_Sync_t)(KVMContext vmContext, KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
-extern "C" DLL_EXPORT void setCallbackCaller(int apiKind, Callback_Caller_t caller);
-extern "C" DLL_EXPORT void setCallbackCallerSync(int apiKind, Callback_Caller_Sync_t callerSync);
+void setCallbackCaller(Callback_Caller_t caller);
+void setCallbackCallerSync(Callback_Caller_Sync_t callerSync);
 
-extern "C" DLL_EXPORT KVMDeferred* CreateDeferred(KVMContext context, KVMObjectHandle* promise);
-extern "C" DLL_EXPORT const InteropAsyncWorker* GetAsyncWorker();
+KVMDeferred* CreateDeferred(KVMContext context, KVMObjectHandle* promise);
+const InteropAsyncWorker* GetAsyncWorker();
+
+std::vector<KStringPtr> makeStringVector(KStringArray strArray);
+std::vector<KStringPtr> makeStringVector(KNativePointerArray arr, KInt size);
 
 #if KOALA_USE_NODE_VM || KOALA_USE_HZ_VM
 #include "convertors-napi.h"
@@ -68,8 +65,6 @@ extern "C" DLL_EXPORT const InteropAsyncWorker* GetAsyncWorker();
 #include "convertors-cj.h"
 #elif KOALA_ANI
 #include "convertors-ani.h"
-#elif KOALA_KOTLIN
-#include "convertors-kotlin.h"
 #else
 #error "One of above branches must be taken"
 #endif

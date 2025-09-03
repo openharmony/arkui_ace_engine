@@ -49,8 +49,11 @@ inline void AssignCast(std::optional<ScrollEdgeType>& dst, const Ark_Edge& src)
 {
     switch (src) {
         case ARK_EDGE_TOP: dst = ScrollEdgeType::SCROLL_TOP; break;
+        case ARK_EDGE_CENTER: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_BOTTOM: dst = ScrollEdgeType::SCROLL_BOTTOM; break;
+        case ARK_EDGE_BASELINE: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_START: dst = ScrollEdgeType::SCROLL_TOP; break;
+        case ARK_EDGE_MIDDLE: dst = ScrollEdgeType::SCROLL_NONE; break;
         case ARK_EDGE_END: dst = ScrollEdgeType::SCROLL_BOTTOM; break;
         default: LOGE("Unexpected enum value in Ark_Edge: %{public}d", src);
     }
@@ -163,13 +166,15 @@ void ScrollerPeerImpl::TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOpt
         return;
     }
     ContainerScope scope(instanceId_);
-    auto edgeOptions = Converter::OptConvertPtr<ScrollEdgeOptions>(options);
-    if (edgeOptions && edgeOptions.value().velocity) {
-        float velocity = edgeOptions.value().velocity.value();
-        if (velocity > 0) {
-            velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
-            scrollController->ScrollToEdge(edgeType.value(), velocity);
-            return;
+    if (options) {
+        std::optional<ScrollEdgeOptions> edgeOptions = Converter::OptConvert<ScrollEdgeOptions>(*options);
+        if (edgeOptions && edgeOptions.value().velocity) {
+            float velocity = edgeOptions.value().velocity.value();
+            if (velocity > 0) {
+                velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
+                scrollController->ScrollToEdge(edgeType.value(), velocity);
+                return;
+            }
         }
     }
     scrollController->ScrollToEdge(edgeType.value(), true);
@@ -247,17 +252,36 @@ void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_B
         return;
     }
 
-    auto smooth = Converter::OptConvertPtr<bool>(smoothValue).value_or(false);
-    auto align = Converter::OptConvertPtr<ScrollAlign>(alignValue).value_or(ScrollAlign::NONE);
-    auto scrollToIndexOptions = Converter::OptConvertPtr<ScrollToIndexOptions>(options);
-    auto extraOffset = scrollToIndexOptions ? scrollToIndexOptions->extraOffset : std::nullopt;
+    bool smooth = false;
+    if (smoothValue) {
+        smooth = Converter::OptConvert<bool>(*smoothValue).value_or(smooth);
+    }
+
+    ScrollAlign align = ScrollAlign::NONE;
+    if (alignValue) {
+        align = Converter::OptConvert<ScrollAlign>(*alignValue).value_or(align);
+    }
+
+    std::optional<float> extraOffset = std::nullopt;
+    if (options) {
+        std::optional<ScrollToIndexOptions> scrollToIndexOptions =
+            Converter::OptConvert<ScrollToIndexOptions>(*options);
+        if (scrollToIndexOptions) {
+            extraOffset = scrollToIndexOptions.value().extraOffset;
+        }
+    }
 
     ContainerScope scope(instanceId_);
     scrollController->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
-void ScrollerPeerImpl::TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset)
+void ScrollerPeerImpl::TriggerScrollBy(const Opt_Length* dx, const Opt_Length* dy)
 {
+    CHECK_NULL_VOID(dx);
+    CHECK_NULL_VOID(dy);
+    Dimension xOffset = Converter::OptConvert<Dimension>(*dx).value_or(Dimension());
+    Dimension yOffset = Converter::OptConvert<Dimension>(*dy).value_or(Dimension());
+
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollBy Controller not bound to component.");

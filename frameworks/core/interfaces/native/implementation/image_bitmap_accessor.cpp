@@ -24,22 +24,20 @@ namespace ImageBitmapAccessor {
 const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    if (peer) {
+        peer->DecRefCount();
+    }
 }
-Ark_ImageBitmap ConstructImpl(const Ark_Union_PixelMap_String* src,
-                              const Opt_LengthMetricsUnit* unit)
+Ark_ImageBitmap CtorImpl(const Ark_String* src)
 {
-    auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
-    Converter::VisitUnionPtr(src,
-        [peer](const Ark_String& src) {
-            auto stringSrc = Converter::Convert<std::string>(src);
-            peer->SetOptions(stringSrc);
-        },
-        [peer](const Ark_image_PixelMap& src) {
-            peer->SetOptions("", src->pixelMap);
-        },
-        []() {});
-    return peer;
+    auto peer = Referenced::MakeRefPtr<ImageBitmapPeer>();
+    peer->IncRefCount();
+    std::string stringSrc;
+    if (src) {
+        stringSrc = Converter::Convert<std::string>(*src);
+    }
+    peer->SetOptions(stringSrc);
+    return reinterpret_cast<ImageBitmapPeer*>(Referenced::RawPtr(peer));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -56,32 +54,22 @@ Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
     auto height = peer->OnGetHeight();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
 }
-void SetHeightImpl(Ark_ImageBitmap peer,
-                   const Ark_Number* height)
-{
-}
 Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     double width = peer->OnGetWidth();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
 }
-void SetWidthImpl(Ark_ImageBitmap peer,
-                  const Ark_Number* width)
-{
-}
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
 {
     static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
         ImageBitmapAccessor::DestroyPeerImpl,
-        ImageBitmapAccessor::ConstructImpl,
+        ImageBitmapAccessor::CtorImpl,
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,
         ImageBitmapAccessor::GetHeightImpl,
-        ImageBitmapAccessor::SetHeightImpl,
         ImageBitmapAccessor::GetWidthImpl,
-        ImageBitmapAccessor::SetWidthImpl,
     };
     return &ImageBitmapAccessorImpl;
 }

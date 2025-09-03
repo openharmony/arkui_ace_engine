@@ -16,19 +16,15 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCREEN_CANVAS_PEER_H
 
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-
-#include "arkoala_api_generated.h"
 #include "offscreen_canvas_rendering_context2d_peer_impl.h"
+#include "arkoala_api_generated.h"
 
-struct OffscreenCanvasPeer final {
-protected:
+struct OffscreenCanvasPeer {
     OffscreenCanvasPeer() = default;
-    ~OffscreenCanvasPeer() = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    virtual ~OffscreenCanvasPeer() = default;
 
-public:
     void SetOptions(const double cw, const double ch);
+    void RemoveOptions();
     ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
     OffscreenCanvasRenderingContext2DPeer* GetContext2D(OffscreenCanvasRenderingContext2DPeer* offscreenCanvasContext,
         RenderingContextSettingsPeer* offscreenCanvasSettings);

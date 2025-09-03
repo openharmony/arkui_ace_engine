@@ -15,13 +15,12 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H
 
-#include "base/image/pixel_map.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
+// #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-
 #include "arkoala_api_generated.h"
+#include "base/image/pixel_map.h"
 
 class DrawingCanvasPeerImpl {
 public:
@@ -43,7 +42,7 @@ public:
         image.dirtyHeight = pixelmap->GetHeight();
         pattern_->PutImageData(image);
     }
-    virtual ~DrawingCanvasPeerImpl() = default;
+    virtual ~DrawingCanvasPeerImpl() {}
 
     void FillRect(const OHOS::Ace::Rect& rect)
     {
@@ -73,11 +72,9 @@ private:
     static constexpr int defaultSize = 1; // The canvas size should be at least 1x1
 };
 
-struct drawing_CanvasPeer : public DrawingCanvasPeerImpl {
-protected:
-    explicit drawing_CanvasPeer(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
+struct DrawingCanvasPeer : public DrawingCanvasPeerImpl {
+    explicit DrawingCanvasPeer(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelmap)
         : DrawingCanvasPeerImpl(pixelmap) {}
-    ~drawing_CanvasPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    ~DrawingCanvasPeer() override {}
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_CANVAS_PEER_IMPL_H

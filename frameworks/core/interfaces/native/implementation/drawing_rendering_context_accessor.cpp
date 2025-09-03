@@ -22,6 +22,9 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
+
 namespace DrawingRenderingContextAccessor {
 void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
 {
@@ -30,7 +33,7 @@ void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_DrawingRenderingContext ConstructImpl(const Opt_LengthMetricsUnit* unit)
+Ark_DrawingRenderingContext CtorImpl(const Opt_LengthMetricsUnit* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
     peerImpl->IncRefCount();
@@ -56,20 +59,29 @@ Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_RETURN(peerImpl, {});
     return Converter::ArkValue<Ark_Size>(peerImpl->GetSize());
 }
-void SetSizeImpl(Ark_DrawingRenderingContext peer,
-                 const Ark_Size* size)
+Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
+    CHECK_NULL_RETURN(peer, {});
+    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
+    auto pixelMap = GetPixelMapAccessor()->ctor();
+    CHECK_NULL_RETURN(pixelMap, {});
+    auto drawingCanvas = GetDrawingCanvasAccessor()->ctor(pixelMap);
+    CHECK_NULL_RETURN(drawingCanvas, {});
+    auto canvas = peerImpl->GetCanvas();
+    drawingCanvas->SetCanvas(canvas);
+    return drawingCanvas;
 }
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
 {
     static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
         DrawingRenderingContextAccessor::DestroyPeerImpl,
-        DrawingRenderingContextAccessor::ConstructImpl,
+        DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
         DrawingRenderingContextAccessor::GetSizeImpl,
-        DrawingRenderingContextAccessor::SetSizeImpl,
+        DrawingRenderingContextAccessor::GetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

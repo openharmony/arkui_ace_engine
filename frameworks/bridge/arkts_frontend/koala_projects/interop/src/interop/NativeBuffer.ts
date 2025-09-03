@@ -16,41 +16,34 @@
 import { pointer } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
 import { InteropNativeModule } from "./InteropNativeModule"
-import { Finalizable } from './Finalizable'
 
 // stub wrapper for KInteropBuffer
 // export type NativeBuffer = ArrayBuffer
 
 export class NativeBuffer {
-    public data: pointer
-    public length: int64
-    protected finalizable: Finalizable
+    public data: pointer = 0
+    public length: int64 = 0
+    public resourceId: int32 = 0
+    public hold: pointer = 0
+    public release: pointer = 0
 
-    constructor(length: int64)
-    constructor(data: pointer, length: int64, destroy: pointer)
-    constructor(dataOrLength: pointer | int64, length_?: int64, destroy_?: pointer) {
-        let data: pointer
-        let length: int64
-        let destroy: pointer
-        if (length_ === undefined) {
-            length = dataOrLength as int64
-            data = InteropNativeModule._Malloc(length)
-            destroy = InteropNativeModule._GetMallocFinalizer()
-        } else {
-            data = dataOrLength as pointer
-            length = length_ as int64
-            destroy = destroy_ as pointer
-        }
+    constructor(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer) {
         this.data = data
         this.length = length
-        this.finalizable = new Finalizable(data, destroy)
+        this.resourceId = resourceId
+        this.hold = hold
+        this.release = release
     }
 
-    public readByte(index: int64): int32 {
+    public readByte(index: int32): int32 {
         return InteropNativeModule._ReadByte(this.data, index, BigInt(this.length))
     }
 
-    public writeByte(index: int64, value: int32): void {
+    public writeByte(index: int32, value: int32): void {
         InteropNativeModule._WriteByte(this.data, index, BigInt(this.length), value)
+    }
+
+    static wrap(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer): NativeBuffer {
+        return new NativeBuffer(data, length, resourceId, hold, release)
     }
 }

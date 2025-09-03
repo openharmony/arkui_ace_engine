@@ -39,25 +39,25 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
         auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
     if (onAppear) {
         callbacks.onAppear = [arkCallback = CallbackHelper(onAppear.value())]() {
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onDisappear);
     if (onDisappear) {
         callbacks.onDisappear = [arkCallback = CallbackHelper(onDisappear.value())]() {
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onWillAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillAppear);
     if (onWillAppear) {
         callbacks.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() {
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onWillDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillDisappear);
     if (onWillDisappear) {
         callbacks.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto shouldDismiss = Converter::OptConvert<Callback_SheetDismiss_Void>(sheetOptions.shouldDismiss);
@@ -66,13 +66,13 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
             Ark_SheetDismiss parameter;
             const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissSheetStatic));
             parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            arkCallback.InvokeSync(parameter);
         };
     }
     auto onTypeDidChange = Converter::OptConvert<Callback_SheetType_Void>(sheetOptions.onTypeDidChange);
     if (onTypeDidChange) {
         callbacks.onTypeDidChange = [arkCallback = CallbackHelper(onTypeDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_SheetType>(static_cast<SheetType>(value)));
+            arkCallback.InvokeSync(Converter::ArkValue<Ark_SheetType>(static_cast<SheetType>(value)));
         };
     }
 }
@@ -86,7 +86,7 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
             parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
             const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissSheetStatic));
             parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            arkCallback.InvokeSync(parameter);
         };
     }
     auto onWillSpringBackWhenDismiss = Converter::OptConvert<Callback_SpringBackAction_Void>(
@@ -96,26 +96,26 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
             Ark_SpringBackAction parameter;
             const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::SheetSpringBackStatic));
             parameter.springBack = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            arkCallback.InvokeSync(parameter);
         };
     }
     auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
     if (onHeightDidChange) {
         callbacks.onHeightDidChange = [arkCallback = CallbackHelper(onHeightDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(value));
         };
     }
     auto onWidthDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onWidthDidChange);
     if (onWidthDidChange) {
         callbacks.onWidthDidChange = [arkCallback = CallbackHelper(onWidthDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(value));
         };
     }
     auto onDetentsDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onDetentsDidChange);
     if (onDetentsDidChange) {
         callbacks.onDetentsDidChange = [arkCallback = CallbackHelper(onDetentsDidChange.value())](
             int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(value));
         };
     }
 }
@@ -124,19 +124,43 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
 {
     sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::OVERLAY);
     std::vector<SheetHeight> detents;
-    auto detentsOpt = GetOpt(sheetOptions.detents);
-    if (detentsOpt) {
-        auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
-        if (value0) {
-            detents.emplace_back(value0.value());
-        }
-        auto value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
-        if (value1) {
-            detents.emplace_back(value1.value());
-        }
-        auto value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
-        if (value2) {
-            detents.emplace_back(value2.value());
+    auto detentsOpt =
+        OptConvert<Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents>(sheetOptions.detents);
+    std::optional<SheetHeight> value0;
+    std::optional<SheetHeight> value1;
+    std::optional<SheetHeight> value2;
+    if (detentsOpt.has_value()) {
+        switch (detentsOpt.value().selector) {
+            case DETENTS_SELECT_ZERO:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                break;
+            case DETENTS_SELECT_ONE:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value1);
+                if (value1) {
+                    detents.emplace_back(value1.value());
+                }
+                break;
+            case DETENTS_SELECT_TWO:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value1);
+                if (value1) {
+                    detents.emplace_back(value1.value());
+                }
+                value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value2);
+                if (value2) {
+                    detents.emplace_back(value2.value());
+                }
+                break;
         }
         sheetStyle.detents = detents;
     }
@@ -172,7 +196,11 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
             break;
     }
     sheetStyle.radius = OptConvert<NG::BorderRadiusProperty>(sheetOptions.radius);
-    sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
+    if (LessNotEqual(sheetOptions.detentSelection.value.value1.value, DETENT_SELECTION_EDGE)) {
+        sheetStyle.detentSelection.reset();
+    } else {
+        sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
+    }
     sheetStyle.showInSubWindow = OptConvert<bool>(sheetOptions.showInSubWindow).value_or(false);
     sheetStyle.placement = OptConvert<Placement>(sheetOptions.placement);
     sheetStyle.placementOnTarget = OptConvert<bool>(sheetOptions.placementOnTarget).value_or(true);
@@ -227,28 +255,28 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
     if (onAppearValue) {
         onShowCallback = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onDisappearValue = OptConvert<Callback_Void>(options.onDisappear);
     if (onDisappearValue) {
         onDismissCallback = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onWillAppearValue = OptConvert<Callback_Void>(options.onWillAppear);
     if (onWillAppearValue) {
         onWillShowCallback = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onWillDisappearValue = OptConvert<Callback_Void>(options.onWillDisappear);
     if (onWillDisappearValue) {
         onWillDismissCallback = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto onWillDismissValue = OptConvert<Callback_DismissContentCoverAction_Void>(options.onWillDismiss);
@@ -262,7 +290,7 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
                 .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
             const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissContentCoverStatic));
             parameter.dismiss = keeper.ArkValue();
-            arkCallback.Invoke(parameter);
+            arkCallback.InvokeSync(parameter);
         };
     }
 }

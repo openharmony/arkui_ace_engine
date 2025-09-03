@@ -21,7 +21,7 @@ import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
 import { ObserveWrappedBase } from './observeWrappedBase';
 import { Binding, MutableBinding } from '../utils';
-import { getRawObject, isDynamicObject } from '#generated';
+import { getRawObject, isDynamicObject } from '@component_handwritten/interop';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();

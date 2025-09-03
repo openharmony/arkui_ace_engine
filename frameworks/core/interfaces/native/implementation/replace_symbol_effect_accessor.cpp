@@ -25,9 +25,12 @@ void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
+Ark_ReplaceSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
     return PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -41,17 +44,17 @@ Opt_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
     return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
-                  const Opt_EffectScope* scope)
+                  Ark_EffectScope scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // ReplaceSymbolEffectAccessor
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIReplaceSymbolEffectAccessor ReplaceSymbolEffectAccessorImpl {
         ReplaceSymbolEffectAccessor::DestroyPeerImpl,
-        ReplaceSymbolEffectAccessor::ConstructImpl,
+        ReplaceSymbolEffectAccessor::CtorImpl,
         ReplaceSymbolEffectAccessor::GetFinalizerImpl,
         ReplaceSymbolEffectAccessor::GetScopeImpl,
         ReplaceSymbolEffectAccessor::SetScopeImpl,

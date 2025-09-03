@@ -28,7 +28,7 @@ void DestroyPeerImpl(Ark_CanvasGradient peer)
         delete peer;
     }
 }
-Ark_CanvasGradient ConstructImpl()
+Ark_CanvasGradient CtorImpl()
 {
     return new CanvasGradientPeer();
 }
@@ -41,7 +41,7 @@ void AddColorStopImpl(Ark_CanvasGradient peer,
                       const Ark_String* color)
 {
     CHECK_NULL_VOID(peer);
-    auto opt = Converter::OptConvertPtr<Color>(color);
+    auto opt = color ? Converter::OptConvert<Color>(*color) : std::nullopt;
     if (!offset || !opt) {
         peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
         return;
@@ -54,7 +54,7 @@ const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
 {
     static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
         CanvasGradientAccessor::DestroyPeerImpl,
-        CanvasGradientAccessor::ConstructImpl,
+        CanvasGradientAccessor::CtorImpl,
         CanvasGradientAccessor::GetFinalizerImpl,
         CanvasGradientAccessor::AddColorStopImpl,
     };

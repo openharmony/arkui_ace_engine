@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -33,9 +34,11 @@ namespace OHOS::Ace::NG {
     };
 }
 namespace OHOS::Ace::NG::Converter {
-    static GridRowSizeOption GridRowSizeOptionFromDimension(const std::optional<Dimension>& optValue)
+    template<>
+    GridRowSizeOption Convert(const Ark_Length& value)
     {
         GridRowSizeOption toValue;
+        auto optValue = std::optional<Dimension>(Converter::Convert<Dimension>(value));
         toValue.xs = optValue;
         toValue.sm = optValue;
         toValue.md = optValue;
@@ -43,21 +46,6 @@ namespace OHOS::Ace::NG::Converter {
         toValue.xl = optValue;
         toValue.xxl = optValue;
         return toValue;
-    }
-    template<>
-    GridRowSizeOption Convert(const Ark_Number& value)
-    {
-        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
-    }
-    template<>
-    GridRowSizeOption Convert(const Ark_String& value)
-    {
-        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
-    }
-    template<>
-    GridRowSizeOption Convert(const Ark_Resource& value)
-    {
-        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
     }
     template<>
     GridRowSizeOption Convert(const Ark_GridRowSizeOption& value)
@@ -72,25 +60,9 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    V2::Gutter Convert(const Ark_Number& value)
+    V2::Gutter Convert(const Ark_Length& value)
     {
         return V2::Gutter(Converter::Convert<Dimension>(value));
-    }
-    template<>
-    void AssignCast(std::optional<V2::Gutter>& dst, const Ark_Resource& value)
-    {
-        auto dim = Converter::OptConvert<Dimension>(value);
-        if (dim) {
-            dst = V2::Gutter(*dim);
-        }
-    }
-    template<>
-    void AssignCast(std::optional<V2::Gutter>& dst, const Ark_String& value)
-    {
-        auto dim = Converter::OptConvert<Dimension>(value);
-        if (dim) {
-            dst = V2::Gutter(*dim);
-        }
     }
     template<>
     V2::Gutter Convert(const Ark_GutterOption& value)
@@ -213,7 +185,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Ark_GridRowOptions>(option);
+    auto convValue = option ? Converter::OptConvert<Ark_GridRowOptions>(*option) : std::nullopt;
     auto nullGutter = Referenced::MakeRefPtr<V2::Gutter>();
     auto nullBreakPoints = Referenced::MakeRefPtr<V2::BreakPoints>();
     auto nullGridContainerSize = Referenced::MakeRefPtr<V2::GridContainerSize>();
@@ -225,7 +197,8 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
         auto gutter = optGutter.has_value() ? AceType::MakeRefPtr<V2::Gutter>(optGutter.value()) : nullGutter;
         GridRowModelNG::SetGutter(frameNode, gutter);
 
-        auto direction = Converter::OptConvert<V2::GridRowDirection>(arkOptions.direction);
+        auto optDirection = Converter::OptConvert<V2::GridRowDirection>(arkOptions.direction);
+        auto direction = optDirection.has_value() ? optDirection : std::nullopt;
         GridRowModelNGStatic::SetDirection(frameNode, direction);
 
         auto optBreakPoints = Converter::OptConvert<V2::BreakPoints>(arkOptions.breakpoints);
@@ -247,14 +220,14 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 }
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
-void SetOnBreakpointChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_String_Void* value)
+void OnBreakpointChangeImpl(Ark_NativePointer node,
+                            const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        // TODO: Reset value
         return;
     }
     auto onBreakpointChange = [arkCallback = CallbackHelper(*optValue)](const std::string& breakpoint) {
@@ -262,12 +235,12 @@ void SetOnBreakpointChangeImpl(Ark_NativePointer node,
     };
     GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(onBreakpointChange));
 }
-void SetAlignItemsImpl(Ark_NativePointer node,
-                       const Opt_ItemAlign* value)
+void AlignItemsImpl(Ark_NativePointer node,
+                    const Opt_ItemAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<FlexAlign>(value);
+    auto convValue = Converter::OptConvert<FlexAlign>(*value);
     GridRowModelNGStatic::SetAlignItems(frameNode, convValue);
 }
 } // GridRowAttributeModifier
@@ -276,8 +249,8 @@ const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()
     static const GENERATED_ArkUIGridRowModifier ArkUIGridRowModifierImpl {
         GridRowModifier::ConstructImpl,
         GridRowInterfaceModifier::SetGridRowOptionsImpl,
-        GridRowAttributeModifier::SetOnBreakpointChangeImpl,
-        GridRowAttributeModifier::SetAlignItemsImpl,
+        GridRowAttributeModifier::OnBreakpointChangeImpl,
+        GridRowAttributeModifier::AlignItemsImpl,
     };
     return &ArkUIGridRowModifierImpl;
 }

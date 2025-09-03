@@ -48,11 +48,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // CircleModifier
 namespace CircleInterfaceModifier {
 void SetCircleOptionsImpl(Ark_NativePointer node,
-                          const Opt_CircleOptions* options)
+                          const Opt_CircleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto circleOptions = Converter::OptConvertPtr<Converter::CircleOptions>(options);
+    CHECK_NULL_VOID(value);
+    auto circleOptions = Converter::OptConvert<Converter::CircleOptions>(*value);
     if (circleOptions && circleOptions.value().width) {
         ShapeAbstractModelNG::SetWidth(frameNode, circleOptions.value().width.value());
     }

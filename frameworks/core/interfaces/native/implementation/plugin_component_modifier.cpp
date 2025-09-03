@@ -36,17 +36,15 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
-#ifdef WRONG_SDK
         opt.data = Convert<std::string>(options.data);
-#endif
         return opt;
     }
     template<>
     RequestPluginInfo Convert(const Ark_PluginComponentTemplate& temp)
     {
         RequestPluginInfo info;
-        info.source = OptConvert<std::string>(temp.source).value_or("");
-        info.bundleName = OptConvert<std::string>(temp.bundleName).value_or("");
+        info.source = Convert<std::string>(temp.source);
+        info.bundleName = Convert<std::string>(temp.bundleName);
         return info;
     }
 } // Converter
@@ -83,8 +81,8 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
-void SetOnCompleteImpl(Ark_NativePointer node,
-                       const Opt_VoidCallback* value)
+void OnCompleteImpl(Ark_NativePointer node,
+                    const Opt_VoidCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -100,8 +98,8 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
-void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_PluginErrorCallback* value)
+void OnErrorImpl(Ark_NativePointer node,
+                 const Opt_PluginErrorCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -114,7 +112,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
-        errorData.errcode = Converter::ArkValue<Ark_Int32>(StringUtils::StringToInt(json->GetString("errcode")));
+        errorData.errcode = Converter::ArkValue<Ark_Number>(StringUtils::StringToInt(json->GetString("errcode")));
         auto msg = json->GetString("msg");
         errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);
@@ -128,8 +126,8 @@ const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
     static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
         PluginComponentModifier::ConstructImpl,
         PluginComponentInterfaceModifier::SetPluginComponentOptionsImpl,
-        PluginComponentAttributeModifier::SetOnCompleteImpl,
-        PluginComponentAttributeModifier::SetOnErrorImpl,
+        PluginComponentAttributeModifier::OnCompleteImpl,
+        PluginComponentAttributeModifier::OnErrorImpl,
     };
     return &ArkUIPluginComponentModifierImpl;
 }

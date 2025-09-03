@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SearchController peer)
     CHECK_NULL_VOID(peer);
     delete peer;
 }
-Ark_SearchController ConstructImpl()
+Ark_SearchController CtorImpl()
 {
     return new SearchControllerPeer();
 }
@@ -49,7 +49,7 @@ void SetTextSelectionImpl(Ark_SearchController peer,
                           const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
+    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
     peer->controller_->SetTextSelection(
         Converter::Convert<int32_t>(*selectionStart),
         Converter::Convert<int32_t>(*selectionEnd),
@@ -60,7 +60,7 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
 {
     static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
         SearchControllerAccessor::DestroyPeerImpl,
-        SearchControllerAccessor::ConstructImpl,
+        SearchControllerAccessor::CtorImpl,
         SearchControllerAccessor::GetFinalizerImpl,
         SearchControllerAccessor::CaretPositionImpl,
         SearchControllerAccessor::StopEditingImpl,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,20 +45,20 @@ export class TestNode extends IncrementalNode {
         /** @memo */
         content: (node: TestNode) => void
     ) {
-        NodeAttach(():TestNode => new TestNode(), content)
+        NodeAttach(() => new TestNode(), content)
     }
 
 }
 
 /* parent node that has a Reusable pool */
 export class ReusableTestNode extends TestNode {
-    constructor() {
-        super()
-    }
-
     reusePool = new Map<string, Array<Disposable>>()
 
-    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+        if (reuseKey === undefined) {
+            return undefined;
+        }
+
         if (this.reusePool!.has(reuseKey)) {
             const scopes = this.reusePool!.get(reuseKey)!;
             return scopes.pop();
@@ -66,7 +66,11 @@ export class ReusableTestNode extends TestNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (reuseKey === undefined) {
+            return false;
+        }
+
         if (!this.reusePool!.has(reuseKey)) {
             this.reusePool!.set(reuseKey, new Array<Disposable>());
         }
@@ -97,7 +101,9 @@ export function testRoot(
 
 /** @internal */
 export function testUpdate(withCallbacks: boolean = true, manager: StateManager = GlobalStateManager.instance): uint32 {
-    if (withCallbacks) manager.callCallbacks()
+    if (withCallbacks) {
+        manager.callCallbacks()
+    }
     manager.syncChanges()
     return manager.updateSnapshot()
 }

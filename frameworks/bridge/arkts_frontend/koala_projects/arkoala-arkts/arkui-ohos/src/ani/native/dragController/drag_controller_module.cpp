@@ -19,6 +19,8 @@
 #include "pixel_map_taihe_ani.h"
 #include "udmf_ani_converter_utils.h"
 #include "utils/ani_utils.h"
+#include "drag_preview.h"
+#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h"
 
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -28,7 +30,6 @@ namespace {
 constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t TWO_ARGS = 2;
 constexpr int32_t MAX_ESCAPE_NUM = 1;
-constexpr int32_t SPECIFIED_CAPACITY = 16;
 }
 
 class DragAction {
@@ -294,11 +295,11 @@ ani_object CreateDragEventObject(ani_env* env, const ArkUIDragNotifyMessage& dra
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return dragEventObj;
     }
-    ani_long dragEventPeer;
-    modifier->getDragControllerAniModifier()->createDragEventPeer(dragNotifyMsg, dragEventPeer);
+    auto dragEventPeer = modifier->getDragControllerAniModifier()->createDragEventPeer(dragNotifyMsg);
 
     ani_ref commonDragEvent;
-    if ((status = env->Class_CallStaticMethod_Ref(cls, getEventFromPeer, &commonDragEvent, dragEventPeer)) != ANI_OK) {
+    if ((status = env->Class_CallStaticMethod_Ref(
+        cls, getEventFromPeer, &commonDragEvent, reinterpret_cast<ani_long>(dragEventPeer))) != ANI_OK) {
         HILOGE("AceDrag, call fromPtr method failed. status = %{public}d", status);
         DragEventPeer* arkDragInfo = reinterpret_cast<DragEventPeer*>(dragEventPeer);
         delete arkDragInfo;
@@ -485,7 +486,7 @@ bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, an
 }
 
 bool ParseDragMixParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object dragItemInfo,
-    ani_object builderObj, ani_double builderArrayLength, ani_double dragItemInfoArrayLength)
+    ani_object builderObj, ani_int builderArrayLength, ani_int dragItemInfoArrayLength)
 {
     bool isParseSucess = true;
     ani_status status = ANI_OK;
@@ -857,31 +858,30 @@ void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
 
 ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getDragControllerAniModifier()) {
+    CHECK_NULL_RETURN(env, nullptr);
+    if (ANI_OK != env->CreateEscapeLocalScope(MAX_ESCAPE_NUM)) {
         return nullptr;
     }
-    return modifier->getDragControllerAniModifier()->aniGetDragPreview(env, aniClass);
+    ani_ref escapedObj;
+    DragPreview* dragPreview = new DragPreview();
+    CHECK_NULL_RETURN(dragPreview, nullptr);
+    ani_object dragPreviewObj = {};
+    dragPreview->AniSerializer(env, dragPreviewObj);
+    env->DestroyEscapeLocalScope(dragPreviewObj, &escapedObj);
+    return dragPreviewObj;
 }
 
 void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_object color, ani_long dragPreviewPtr)
+    ani_long thisArray, ani_double thisLength, ani_long dragPreviewPtr)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getDragControllerAniModifier()) {
-        return;
-    }
-    modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(env, aniClass, color, dragPreviewPtr);
+    Ark_ResourceColor resourceColor = GetResourceColor(thisArray, thisLength);
+    DragPreview::SetForegroundColor(env, aniClass, resourceColor, dragPreviewPtr);
 }
 
 void ANIDragPreviewAnimate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options,
     ani_object handler, ani_long dragPreviewPtr)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getDragControllerAniModifier()) {
-        return;
-    }
-    modifier->getDragControllerAniModifier()->aniDragPreviewAnimate(env, aniClass, options, handler, dragPreviewPtr);
+    DragPreview::Animate(env, aniClass, options, handler, dragPreviewPtr);
 }
 
 void ANIDragActionSetDragEventStrictReportingEnabled(
@@ -891,7 +891,7 @@ void ANIDragActionSetDragEventStrictReportingEnabled(
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
-    modifier->getDragControllerAniModifier()->aniDragActionSetDragEventStrictReportingEnabled(env, aniClass, enable);
+    modifier->getDragControllerAniModifier()->aniDragActionSetDragEventStrictReportingEnabled(enable);
 }
 
 void ANIDragActionCancelDataLoading(
@@ -901,33 +901,41 @@ void ANIDragActionCancelDataLoading(
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
-    modifier->getDragControllerAniModifier()->aniDragActionCancelDataLoading(env, aniClass, key);
+    auto keyStr = AniUtils::ANIStringToStdString(env, key);
+    modifier->getDragControllerAniModifier()->aniDragActionCancelDataLoading(keyStr.c_str());
 }
 
 void ANIDragActionNotifyDragStartReques(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus)
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatusObj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
-    modifier->getDragControllerAniModifier()->aniDragActionNotifyDragStartReques(env, aniClass, requestStatus);
+    ani_int requestStatus;
+    if (ANI_OK != env->EnumItem_GetValue_Int(requestStatusObj, &requestStatus)) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniDragActionNotifyDragStartReques(static_cast<int>(requestStatus));
 }
 
 void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr)
 {
+    if (dragActionPtr == 0) {
+        return;
+    }
     DragAction* ptr = reinterpret_cast<DragAction *>(dragActionPtr);
     delete ptr;
     ptr = nullptr;
-    dragActionPtr = 0;
 }
 
 void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getDragControllerAniModifier()) {
+    if (dragPreviewPtr == 0) {
         return;
     }
-    modifier->getDragControllerAniModifier()->aniCleanDragPreview(env, aniClass, dragPreviewPtr);
+    DragPreview* ptr = reinterpret_cast<DragPreview *>(dragPreviewPtr);
+    delete ptr;
+    ptr = nullptr;
 }
 } // namespace OHOS::Ace::Ani

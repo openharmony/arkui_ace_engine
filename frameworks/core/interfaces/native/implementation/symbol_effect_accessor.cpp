@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_SymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_SymbolEffect ConstructImpl()
+Ark_SymbolEffect CtorImpl()
 {
     return PeerUtils::CreatePeer<SymbolEffectPeer>();
 }
@@ -32,13 +32,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void DummyForAccessorGenerateImpl(Ark_SymbolEffect peer)
+{
+    // Nothing to do.
+}
 } // SymbolEffectAccessor
 const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor()
 {
     static const GENERATED_ArkUISymbolEffectAccessor SymbolEffectAccessorImpl {
         SymbolEffectAccessor::DestroyPeerImpl,
-        SymbolEffectAccessor::ConstructImpl,
+        SymbolEffectAccessor::CtorImpl,
         SymbolEffectAccessor::GetFinalizerImpl,
+        SymbolEffectAccessor::DummyForAccessorGenerateImpl,
     };
     return &SymbolEffectAccessorImpl;
 }

@@ -49,7 +49,7 @@ void* GetPixelMap(ArkUIStyledString peer)
     if (spanParagraphStyle.leadingMargin.has_value()) {
         auto pixelMap = spanParagraphStyle.leadingMargin.value().pixmap;
         CHECK_NULL_RETURN(pixelMap, nullptr);
-        image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
+        PixelMapPeer* pixelMapPeer = new PixelMapPeer();
         pixelMapPeer->pixelMap = pixelMap;
         return reinterpret_cast<void*>(pixelMapPeer);
     }

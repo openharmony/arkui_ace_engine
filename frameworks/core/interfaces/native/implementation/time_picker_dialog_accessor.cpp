@@ -24,7 +24,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-#ifdef WRONG_GEN
 PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& options)
 {
     PickerDialogInfo dialogInfo;
@@ -227,27 +226,13 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
         std::move(acceptEvent), std::move(changeEvent), std::move(enterSelectedAreaEvent),
         timePickerDialogEvent, buttonInfos);
 }
-#endif
-void DestroyPeerImpl(Ark_TimePickerDialog peer)
-{
-}
-Ark_TimePickerDialog ConstructImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 } // TimePickerDialogAccessor
+
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::DestroyPeerImpl,
-        TimePickerDialogAccessor::ConstructImpl,
-        TimePickerDialogAccessor::GetFinalizerImpl,
+        TimePickerDialogAccessor::ShowImpl,
     };
     return &TimePickerDialogAccessorImpl;
 }
-
 }

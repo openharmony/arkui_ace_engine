@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_WebKeyboardController peer)
 {
     delete peer;
 }
-Ark_WebKeyboardController ConstructImpl()
+Ark_WebKeyboardController CtorImpl()
 {
     return new WebKeyboardControllerPeer();
 }
@@ -43,34 +43,34 @@ void InsertTextImpl(Ark_WebKeyboardController peer,
     );
 }
 void DeleteForwardImpl(Ark_WebKeyboardController peer,
-                       Ark_Int32 length)
+                       const Ark_Int32* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(length);
-    auto lengthOpt = Converter::OptConvert<int32_t>(length);
+    auto lengthOpt = Converter::OptConvert<int32_t>(*length);
     Validator::ValidatePositive(lengthOpt);
     if (lengthOpt) {
         peer->handler->DeleteForward(lengthOpt.value());
     }
 }
 void DeleteBackwardImpl(Ark_WebKeyboardController peer,
-                        Ark_Int32 length)
+                        const Ark_Int32* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(length);
-    auto lengthOpt = Converter::OptConvert<int32_t>(length);
+    auto lengthOpt = Converter::OptConvert<int32_t>(*length);
     Validator::ValidatePositive(lengthOpt);
     if (lengthOpt) {
         peer->handler->DeleteBackward(lengthOpt.value());
     }
 }
 void SendFunctionKeyImpl(Ark_WebKeyboardController peer,
-                         Ark_Int32 key)
+                         const Ark_Int32* key)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(key);
     peer->handler->SendFunctionKey(
-        Converter::Convert<int32_t>(key)
+        Converter::Convert<int32_t>(*key)
     );
 }
 void CloseImpl(Ark_WebKeyboardController peer)
@@ -83,7 +83,7 @@ const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAcce
 {
     static const GENERATED_ArkUIWebKeyboardControllerAccessor WebKeyboardControllerAccessorImpl {
         WebKeyboardControllerAccessor::DestroyPeerImpl,
-        WebKeyboardControllerAccessor::ConstructImpl,
+        WebKeyboardControllerAccessor::CtorImpl,
         WebKeyboardControllerAccessor::GetFinalizerImpl,
         WebKeyboardControllerAccessor::InsertTextImpl,
         WebKeyboardControllerAccessor::DeleteForwardImpl,
