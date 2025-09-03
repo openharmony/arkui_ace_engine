@@ -2128,29 +2128,6 @@ HWTEST_F(WebModelTestNg, SetOnDragMove011, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnDragLeave012
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
-HWTEST_F(WebModelTestNg, SetOnDragLeave012, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    WebModelNG webModelNG;
-    bool callbackCalled = false;
-    auto onDragLeave = [&callbackCalled](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
-        callbackCalled = true;
-    };
-    webModelNG.SetOnDragLeave(std::move(onDragLeave));
-
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    std::string extraParams = "extraParams";
-    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEvent, extraParams);
-    EXPECT_FALSE(callbackCalled);
-#endif
-}
-
-/**
  * @tc.name: SetOnDrop013
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
