@@ -440,7 +440,20 @@ void VideoPattern::ResetMediaPlayerOnBg()
                 }, "ArkUIVideoFireError");
             return;
         }
+#ifndef OHOS_PLATFORM
+        uiTaskExecutor.PostSyncTask([weak, id] {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            ContainerScope scope(id);
+            videoPattern->PrepareSurface();
+            }, "ArkUIVideoPrepareSurface");
+#endif
         mediaPlayer->SetRenderFirstFrame(showFirstFrame);
+#ifndef OHOS_PLATFORM
+        if (mediaPlayer->PrepareAsync() != 0) {
+            TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
+        }
+#endif
         }, "ArkUIVideoMediaPlayerReset");
 }
 
@@ -469,6 +482,12 @@ void VideoPattern::ResetMediaPlayer()
 
     mediaPlayer_->SetRenderFirstFrame(showFirstFrame_);
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
+#ifndef OHOS_PLATFORM
+    PrepareSurface();
+    if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
+        TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
+    }
+#endif
 }
 
 void VideoPattern::UpdateMediaPlayerOnBg()
@@ -607,12 +626,14 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
 {
     auto eventHub = GetEventHub<VideoEventHub>();
     switch (status) {
+#ifdef OHOS_PLATFORM
         case PlaybackStatus::INITIALIZED:
             PrepareSurface();
             if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
                 TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
             }
             break;
+#endif
         case PlaybackStatus::STARTED:
             CHECK_NULL_VOID(eventHub);
             eventHub->FireStartEvent();
