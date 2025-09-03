@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -547,5 +548,61 @@ HWTEST_F(ScrollableTestNg, HandleExtScroll008, TestSize.Level1)
     };
     scrollablePattern->HandleExtScroll();
     EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
+}
+
+/**
+ * @tc.name: HandleScrollVelocity
+ * @tc.desc: Test Scrollable HandleScrollVelocity with condition of canOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleScrollVelocity, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollablePattern);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. scroll is not out of boundary, needFlingAtEdge is true, and canOverScroll is true
+     * @tc.expected: start friction animation
+     */
+    scrollablePattern->SetCanOverScroll(true);
+    scrollablePattern->scrollableDistance_ = 10.0f;
+    scrollablePattern->currentOffset_ = -5.0f;
+    EXPECT_FALSE(scrollablePattern->IsOutOfBoundary());
+    EXPECT_TRUE(scrollablePattern->HandleScrollVelocity(-10.0f));
+
+    /**
+     * @tc.steps: step3. scroll is not out of boundary, needFlingAtEdge is false, and canOverScroll is false
+     * @tc.expected: start friction animation
+     */
+    scrollablePattern->SetCanOverScroll(false);
+    scrollablePattern->scrollableDistance_ = 10.0f;
+    scrollablePattern->currentOffset_ = -10.0f;
+    EXPECT_FALSE(scrollablePattern->IsOutOfBoundary());
+    EXPECT_TRUE(scrollablePattern->HandleScrollVelocity(-10.0f));
+
+    /**
+     * @tc.steps: step3. scroll is not out of boundary, needFlingAtEdge is false, and canOverScroll is true
+     * @tc.expected: don't start friction animation
+     */
+    scrollablePattern->SetCanOverScroll(true);
+    scrollablePattern->scrollableDistance_ = 10.0f;
+    scrollablePattern->currentOffset_ = -10.0f;
+    EXPECT_FALSE(scrollablePattern->IsOutOfBoundary());
+    EXPECT_FALSE(scrollablePattern->HandleScrollVelocity(-10.0f));
+
+    /**
+     * @tc.steps: step3. scroll is out of boundary, needFlingAtEdge is false, and canOverScroll is true
+     * @tc.expected: don't start friction animation
+     */
+    scrollablePattern->SetCanOverScroll(true);
+    scrollablePattern->scrollableDistance_ = 10.0f;
+    scrollablePattern->currentOffset_ = -15.0f;
+    EXPECT_TRUE(scrollablePattern->IsOutOfBoundary());
+    EXPECT_FALSE(scrollablePattern->HandleScrollVelocity(-10.0f));
 }
 } // namespace OHOS::Ace::NG
