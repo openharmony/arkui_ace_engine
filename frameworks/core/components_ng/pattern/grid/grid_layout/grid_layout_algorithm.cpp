@@ -200,15 +200,16 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     }
     colLen += (colSpan - 1) * columnsGap_;
 
+    // If RTL, place the item from right.
+    if (rightToLeft_) {
+        positionX = frameSize.Width() - positionX - colLen;
+    }
+
     if (childLayoutWrapper) {
         auto childSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
         OffsetByAlign(childSize, rowLen, colLen, positionX, positionY);
     }
 
-    // If RTL, place the item from right.
-    if (rightToLeft_) {
-        positionX = frameSize.Width() - positionX - colLen;
-    }
     return OffsetF(positionX, positionY);
 }
 
