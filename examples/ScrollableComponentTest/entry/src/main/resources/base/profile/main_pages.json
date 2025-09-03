@@ -27,6 +27,8 @@
     "pages/waterflow/demo01/WaterFlowWithFading",
     "pages/waterflow/demo01/WaterFlowNodeFooter",
     "pages/waterflow/demo01/WaterFlowNodeFooterContent",
+    "pages/waterflow/lazyVGrid/lazyVGrid-ori",
+    "pages/waterflow/lazyVGrid/lazyVGrid-seg",
     "pages/Swiper/SwiperMainPage",
     "pages/Swiper/OnContentWillScrollNormal",
     "pages/Swiper/OnContentWillScrollNestList",
