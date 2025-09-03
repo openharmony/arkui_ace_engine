@@ -1356,6 +1356,9 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
+    bool isSelfReachEdge_ = false;
+    bool isParentReverseReachEdge_ = false;
+    WeakPtr<NestableScrollContainer> dragEndRecursiveParent_;
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::queue<MouseInfo> mouseInfoQueue_;

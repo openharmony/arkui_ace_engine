@@ -1416,6 +1416,11 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
                                                event.GetVelocity().GetVelocityY(),
                                                pressedCodes);
     }
+    auto parent = dragEndRecursiveParent_.Upgrade();
+    if (parent) {
+        OnParentScrollDragEndRecursive(parent);
+        dragEndRecursiveParent_.Reset();
+    }
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
@@ -6698,6 +6703,7 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
     auto remain = 0.f;
     if (!isFling) {
         if (scrollState_) {
+            isSelfReachEdge_ = true;
             if (CheckOverParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
                 result = HandleScroll(parent.Upgrade(), -directVelocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
                 remain = result.remain;
@@ -6950,6 +6956,7 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
     if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
         directOffset = -offset;
     }
+    isSelfReachEdge_ = false;
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
@@ -6957,8 +6964,10 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
         auto res =
             HandleScroll(parent.Upgrade(), directOffset, SCROLL_FROM_UPDATE, NestedState::CHILD_CHECK_OVER_SCROLL);
         if (NearZero(res.remain)) {
+            isParentReverseReachEdge_ = true;
             return true;
         }
+        isParentReverseReachEdge_ = false;
         directOffset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
@@ -7011,7 +7020,11 @@ bool WebPattern::FilterScrollEventHandleVelocity(const float velocity)
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
     if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
-        return HandleScrollVelocity(parent.Upgrade(), directVelocity);
+        if (isSelfReachEdge_ || isParentReverseReachEdge_) {
+            return HandleScrollVelocity(parent.Upgrade(), directVelocity);
+        }
+        dragEndRecursiveParent_ = parent;
+        return false;
     }
     if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
         if (isParentReachEdge_) {
