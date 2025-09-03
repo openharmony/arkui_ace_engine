@@ -24,19 +24,19 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#undef protected
-#undef private
-
-#define protected public
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#undef protected
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -73,6 +73,7 @@ void SelectOverlayPatternTestNg::SetUpTestCase()
 void SelectOverlayPatternTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void ResetCallback()
@@ -569,7 +570,6 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
     EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
 }
 
-
 /**
  * @tc.name: TextMenuController.disableSystemServiceMenuItems
  * @tc.desc: test disableSystemServiceMenuItems of askCelia
@@ -630,5 +630,239 @@ HWTEST_F(SelectOverlayPatternTestNg, ProcessFrameNodeChangeFlag, TestSize.Level1
     mockNode->ProcessFrameNodeChangeFlag();
     EXPECT_EQ(pattern->changeFlag_,
         FRAME_NODE_CHANGE_END_SCROLL | FRAME_NODE_CHANGE_GEOMETRY_CHANGE | FRAME_NODE_CHANGE_START_ANIMATION);
+}
+
+/**
+ * @tc.name: SelectMenuAndInnerInitProperty_ColorMode_EdgeCases
+ * @tc.desc: Test SelectMenuAndInnerInitProperty color mode edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectMenuAndInnerInitProperty_ColorMode_EdgeCases, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test with invalid color mode values
+     * @tc.expected: Should handle gracefully and use default conversion
+     */
+
+    // Test with out-of-range color mode (simulate potential invalid value)
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    auto text = FrameNode::GetOrCreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto theme = AceType::MakeRefPtr<TokenTheme>(1);
+    theme->SetColorMode(ColorMode::LIGHT);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(100, 1);
+    text->themeScopeId_ = 100;
+
+    selectOverlayNode->SelectMenuAndInnerInitProperty(text);
+
+    auto selectMenu = selectOverlayNode->selectMenu_;
+    ASSERT_NE(selectMenu, nullptr);
+    auto renderContext = selectMenu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    const auto& groupProperty = renderContext->GetBackground();
+    ASSERT_NE(groupProperty, nullptr);
+    BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
+    // Should default to some valid SystemColorMode
+    EXPECT_TRUE(actualStyleOption.colorMode == ThemeColorMode::LIGHT);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg001
+ * @tc.desc: Test UpdateSelectMenuBg with normal process
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    // Create a mock caller with specific color mode
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    auto text = FrameNode::GetOrCreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto theme = AceType::MakeRefPtr<TokenTheme>(1);
+    theme->SetColorMode(ColorMode::DARK);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(100, 1);
+    text->themeScopeId_ = 100;
+
+    /**
+     * @tc.steps: step2. Call UpdateSelectMenuBg with valid caller
+     * @tc.expected: Should update render context with correct properties
+     */
+    selectOverlayNode->UpdateSelectMenuBg(text);
+
+    /**
+     * @tc.steps: step3. Verify the render context properties
+     */
+    auto selectMenu = selectOverlayNode->selectMenu_;
+    ASSERT_NE(selectMenu, nullptr);
+    auto renderContext = selectMenu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Verify background color
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::TRANSPARENT);
+
+    // Verify blur style option
+    const auto& groupProperty = renderContext->GetBackground();
+    ASSERT_NE(groupProperty, nullptr);
+    BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
+    EXPECT_EQ(actualStyleOption.blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK
+}
+
+/**
+ * @tc.name: SelectOverlayNodeBuildMoreOrBackSymbol001
+ * @tc.desc: Test BuildMoreOrBackSymbol symbol effect options configuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeBuildMoreOrBackSymbol001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
+
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BuildMoreOrBackSymbol
+     */
+    auto symbol = selectOverlayNode->BuildMoreOrBackSymbol();
+    ASSERT_NE(symbol, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify SymbolEffectOptions are correctly configured
+     */
+    auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptions();
+    ASSERT_TRUE(symbolEffectOptions.has_value());
+
+    // Verify specific effect options
+    EXPECT_EQ(symbolEffectOptions.value().GetEffectType(), SymbolEffectType::REPLACE);
+    EXPECT_EQ(symbolEffectOptions.value().GetScopeType(), Ace::ScopeType::WHOLE);
+    EXPECT_FALSE(symbolEffectOptions.value().GetIsTxtActive());
+
+    EXPECT_EQ(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeCreatExtensionMenuColor001
+ * @tc.desc: Test CreatExtensionMenu color mode conversion and SetMenuOptionColor call with LIGHT mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment with LIGHT color mode
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
+
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+
+    // @tc.steps: step2. Create caller with DARK color mode
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    auto theme = AceType::MakeRefPtr<TokenTheme>(1);
+    theme->SetColorMode(ColorMode::DARK);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(100, 1);
+    caller->themeScopeId_ = 100;
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuItem1;
+    menuItem1.content = "item1";
+    menuItem1.id = "item1";
+    menuOptionItems.emplace_back(menuItem1);
+    MenuOptionsParam menuItem2;
+    menuItem2.content = "item2";
+    menuItem2.id = "item2";
+    menuOptionItems.emplace_back(menuItem2);
+    infoPtr->callerFrameNode = caller;
+
+    /**
+     * @tc.steps: step3. Call CreatExtensionMenu
+     */
+    std::vector<OptionParam> params;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params);
+    EXPECT_EQ(params.size(), 2);
+    auto call = infoPtr->callerFrameNode.Upgrade();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    selectOverlayNode->CreatExtensionMenu(std::move(params), call);
+
+    /**
+     * @tc.steps: step4. Verify styleOption color mode conversion
+     */
+    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
+    auto extensionMenu = selectOverlayNode->extensionMenu_;
+
+    auto menuPattern = extensionMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    EXPECT_EQ(options.size(), 2);
+    for (size_t i = 0; i < options.size(); ++i) {
+        auto pattern = options[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        EXPECT_TRUE(pattern->fontColor_.has_value());
+    }
 }
 } // namespace OHOS::Ace::NG

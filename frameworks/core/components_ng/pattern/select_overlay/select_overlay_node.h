@@ -102,7 +102,7 @@ public:
     void HideOrShowCirclesAndBackArrow(FrameNodeType type, float value);
 
     void SwitchToOverlayMode();
-    void UpdateSelectMenuBg();
+    void UpdateSelectMenuBg(const RefPtr<FrameNode>& caller);
     void AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info);
     void OnCustomSelectMenuAppear();
     void FireCustomMenuChangeEvent(bool isMenuShow);
@@ -111,7 +111,9 @@ public:
 
 private:
     void CreateToolBar();
-    void SelectMenuAndInnerInitProperty();
+    void SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& caller);
+    void SetMenuOptionColor(const std::vector<RefPtr<FrameNode>>& options, const RefPtr<FrameNode>& caller);
+    RefPtr<FrameNode> BuildMoreOrBackSymbol();
     void AddMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info, float maxWidth);
     static const std::vector<MenuItemParam> GetSystemMenuItemParams(const std::shared_ptr<SelectOverlayInfo>& info);
     static void AddMenuItemParamIf(
@@ -157,7 +159,7 @@ private:
         const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params);
     std::function<void()> CreateExtensionMenuOptionCallback(int32_t id, const OnMenuItemCallback& onCreateCallback,
         const std::function<void()>& systemEvent, const MenuOptionsParam& item);
-    void CreatExtensionMenu(std::vector<OptionParam>&& params);
+    void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
 
     void MoreAnimation(bool noAnimation);

@@ -60,6 +60,7 @@ public:
     {
         if (auto themeColors = theme.Colors(); themeColors) {
             menuButtonTextStyle_.SetTextColor(themeColors->FontPrimary());
+            symbolColor_ = themeColors->FontPrimary();
             buttonClickedColor_ = themeColors->InteractivePressed();
             buttonHoverColor_ = themeColors->InteractiveHover();
         }
