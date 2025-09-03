@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,7 @@ public:
     virtual void SetDirection(Axis value) = 0;
     virtual void SetReverse(bool value) = 0;
     virtual void SetBlockColor(const Color& value) = 0;
+    virtual void SetBlockColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;

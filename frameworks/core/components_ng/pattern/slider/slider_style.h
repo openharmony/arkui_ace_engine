@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Reverse, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockColorSetByUser, bool)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockGradientColor, Gradient)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockIsResourceColor, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundColor, Gradient)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundColorSetByUser, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundIsResourceColor, bool)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,8 @@ SliderContentModifier::SliderContentModifier(
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
     selectGradientColor_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.selectGradientColor));
+    blockGradientColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.blockGradientColor));
     blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
     selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
@@ -78,6 +80,7 @@ SliderContentModifier::SliderContentModifier(
     AttachProperty(trackThickness_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(selectGradientColor_);
+    AttachProperty(blockGradientColor_);
     AttachProperty(blockColor_);
     AttachProperty(boardColor_);
     AttachProperty(trackBorderRadius_);
@@ -378,6 +381,50 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
     canvas.Restore();
 }
 
+std::vector<GradientColor> SliderContentModifier::GetBlockColor() const
+{
+    Gradient gradient = SortGradientColorsByOffset(blockGradientColor_->Get().GetGradient());
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    return gradientColors;
+}
+
+void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radius)
+{
+    auto blockSize = blockSize_->Get();
+    auto borderWidth = blockBorderWidth_->Get();
+    if (GreatOrEqual(borderWidth * HALF, radius)) {
+        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
+        return;
+    }
+    std::vector<GradientColor> gradientColors = GetBlockColor();
+    if (gradientColors.empty()) {
+        radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+        return;
+    }
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    brush.SetAntiAlias(true);
+    radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+    float drawRadius = isEnlarge_ ? radius * scaleValue_ : radius;
+    RSRect blockRect = GetBlockRect(drawRadius);
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    RSPoint startPoint;
+    RSPoint endPoint;
+    SetStartEndPointLocation(direction, blockRect, startPoint, endPoint);
+    if (reverse_) {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+    }
+}
+
 void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -387,13 +434,7 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
     float blockRadius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
     float radius = blockRadius;
     RSBrush brush;
-    brush.SetAntiAlias(true);
-    if (GreatOrEqual(borderWidth * HALF, radius)) {
-        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
-    } else {
-        radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-    }
+    CreateDefaultBlockBrush(brush, radius);
     canvas.AttachBrush(brush);
     RSPen pen;
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
@@ -637,6 +678,50 @@ RSRect SliderContentModifier::GetTrackRect()
     return rect;
 }
 
+RSRect SliderContentModifier::GetShapEllipseBlockRect(const RectF& drawRect)
+{
+    RSRect rect;
+    rect.SetLeft(drawRect.GetX());
+    rect.SetRight(drawRect.GetX() + drawRect.Width());
+    rect.SetTop(drawRect.GetY());
+    rect.SetBottom(drawRect.GetY() + drawRect.Height());
+    return rect;
+}
+
+RSRect SliderContentModifier::GetShapPathBlockRect(const SizeF& shapeSize, const PointF& centerPoint)
+{
+    RSRect rect;
+    rect.SetLeft(centerPoint.GetX() - shapeSize.Width() * HALF);
+    rect.SetRight(centerPoint.GetX() + shapeSize.Width() * HALF);
+    rect.SetTop(centerPoint.GetY() - shapeSize.Height() * HALF);
+    rect.SetBottom(centerPoint.GetY() + shapeSize.Height() * HALF);
+    return rect;
+}
+
+RSRect SliderContentModifier::GetShapCircleBlockRect(const PointF& centerPoint, float drawRadius)
+{
+    auto blockCenterX = centerPoint.GetX();
+    auto blockCenterY = centerPoint.GetY();
+    RSRect rect;
+    rect.SetLeft(blockCenterX - drawRadius);
+    rect.SetRight(blockCenterX + drawRadius);
+    rect.SetTop(blockCenterY - drawRadius);
+    rect.SetBottom(blockCenterY + drawRadius);
+    return rect;
+}
+
+RSRect SliderContentModifier::GetBlockRect(float drawRadius)
+{
+    auto blockCenterX = blockCenterX_->Get();
+    auto blockCenterY = blockCenterY_->Get();
+    RSRect rect;
+    rect.SetLeft(blockCenterX - drawRadius);
+    rect.SetRight(blockCenterX + drawRadius);
+    rect.SetTop(blockCenterY - drawRadius);
+    rect.SetBottom(blockCenterY + drawRadius);
+    return rect;
+}
+
 void SliderContentModifier::DrawBlock(DrawingContext& context)
 {
     auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
@@ -691,6 +776,34 @@ void SliderContentModifier::DrawBlockShape(DrawingContext& context)
     }
 }
 
+void SliderContentModifier::CreateShapeCircelBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter)
+{
+    std::vector<GradientColor> gradientColors = GetBlockColor();
+    if (gradientColors.empty()) {
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+        return;
+    }
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    brush.SetAntiAlias(true);
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    RSRect blockRect = GetShapCircleBlockRect(drawCenter, drawRadius);
+    RSPoint startPoint;
+    RSPoint endPoint;
+    SetStartEndPointLocation(direction, blockRect, startPoint, endPoint);
+    if (reverse_) {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+    }
+}
+
 void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr<Circle>& circle)
 {
     auto blockSize = blockSize_->Get();
@@ -720,20 +833,45 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
     pen.SetWidth(blockBorderWidthUnscale);
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
-    canvas.AttachBrush(brush);
-
     float radius = std::min(shapeWidth, shapeHeight) * HALF;
     float drawRadius = radius - blockBorderWidthUnscale * HALF;
     PointF drawCenter(
         blockCenter.GetX() - shapeWidth * HALF + radius, blockCenter.GetY() - shapeHeight * HALF + radius);
+    RSBrush brush;
+    CreateShapeCircelBlockBrush(brush, drawRadius, drawCenter);
+    canvas.AttachBrush(brush);
     canvas.DrawCircle(ToRSPoint(drawCenter), drawRadius);
-
     canvas.DetachBrush();
     canvas.DetachPen();
     canvas.Restore();
+}
+
+void SliderContentModifier::CreateShapeEllipseBlockBrush(RSBrush& brush, const RectF& drawRect)
+{
+    std::vector<GradientColor> gradientColors = GetBlockColor();
+    if (gradientColors.empty()) {
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+        return;
+    }
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    brush.SetAntiAlias(true);
+    RSRect blockRect = GetShapEllipseBlockRect(drawRect);
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    RSPoint startPoint;
+    RSPoint endPoint;
+    SetStartEndPointLocation(direction, blockRect, startPoint, endPoint);
+    if (reverse_) {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+    }
 }
 
 void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse)
@@ -766,18 +904,44 @@ void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPt
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
     RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
-    canvas.AttachBrush(brush);
-
     RectF drawRect(blockCenter.GetX() - shapeWidth * HALF + blockBorderWidthUnscale * HALF,
         blockCenter.GetY() - shapeHeight * HALF + blockBorderWidthUnscale * HALF, shapeWidth - blockBorderWidthUnscale,
         shapeHeight - blockBorderWidthUnscale);
+    CreateShapeEllipseBlockBrush(brush, drawRect);
+    canvas.AttachBrush(brush);
     canvas.DrawOval(ToRSRect(drawRect));
 
     canvas.DetachBrush();
     canvas.DetachPen();
     canvas.Restore();
+}
+
+void SliderContentModifier::CreateShapePathBlockBrush(RSBrush& brush, const SizeF& shapeSize, const PointF& blockCenter)
+{
+    std::vector<GradientColor> gradientColors = GetBlockColor();
+    if (gradientColors.empty()) {
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+        return;
+    }
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    brush.SetAntiAlias(true);
+    RSRect blockRect = GetShapPathBlockRect(shapeSize, blockCenter);
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    RSPoint startPoint;
+    RSPoint endPoint;
+    SetStartEndPointLocation(direction, blockRect, startPoint, endPoint);
+    if (reverse_) {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+    }
 }
 
 void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path)
@@ -809,10 +973,8 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
     RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
+    CreateShapePathBlockBrush(brush, shapeSize, blockCenter);
     canvas.AttachBrush(brush);
-
     OffsetF offset(blockCenter.GetX() - shapeSize.Width() * HALF, blockCenter.GetY() - shapeSize.Height() * HALF);
     PathPainter::DrawPath(canvas, path->GetValue(), offset);
     canvas.DetachBrush();
@@ -837,6 +999,33 @@ void SliderContentModifier::SetShapeRectRadius(RSRoundRect& roundRect, float bor
     radiusX = rectBottomRightRadiusX_->Get() - borderWidth * HALF;
     radiusY = rectBottomRightRadiusY_->Get() - borderWidth * HALF;
     roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, radiusX, radiusY);
+}
+
+void SliderContentModifier::CreateShapeRectBlockBrush(RSBrush& brush, RSRect& rsRect)
+{
+    std::vector<GradientColor> gradientColors = GetBlockColor();
+    if (gradientColors.empty()) {
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+        return;
+    }
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    brush.SetAntiAlias(true);
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    RSPoint startPoint;
+    RSPoint endPoint;
+    SetStartEndPointLocation(direction, rsRect, startPoint, endPoint);
+    if (reverse_) {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+    }
 }
 
 void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect)
@@ -867,11 +1056,6 @@ void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<S
     pen.SetWidth(blockBorderWidth_->Get());
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
-    canvas.AttachBrush(brush);
-
     RSRoundRect roundRect;
     RSRect rsRect;
     rsRect.SetLeft(blockCenter.GetX() - shapeWidth * HALF + blockBorderWidthUnscale * HALF);
@@ -880,7 +1064,9 @@ void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<S
     rsRect.SetBottom(blockCenter.GetY() + shapeHeight * HALF - blockBorderWidthUnscale);
     roundRect.SetRect(rsRect);
     SetShapeRectRadius(roundRect, blockBorderWidthUnscale);
-
+    RSBrush brush;
+    CreateShapeRectBlockBrush(brush, rsRect);
+    canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.DetachPen();
@@ -1004,7 +1190,6 @@ void SliderContentModifier::DrawSelectColor(RSBrush& brush, RSRect& rect)
 {
     Gradient gradient = SortGradientColorsByOffset(selectGradientColor_->Get().GetGradient());
     std::vector<GradientColor> gradientColors = gradient.GetColors();
-
     if (gradientColors.empty()) {
         auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
