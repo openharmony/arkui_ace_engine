@@ -2695,7 +2695,7 @@ export class SegmentButton extends ViewPU {
       });
       Stack.accessibilityLevel('no');
       Gesture.create(GesturePriority.High);
-      GestureGroup.create(GestureMode.Parallel);
+      GestureGroup.create(GestureMode.Exclusive);
       TapGesture.create();
       TapGesture.onAction(event => {
         if (this.isGestureInProgress) {
