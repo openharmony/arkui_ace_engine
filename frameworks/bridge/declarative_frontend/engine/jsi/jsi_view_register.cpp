@@ -1547,12 +1547,8 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
 
 panda::Local<panda::JSValueRef> JSHandleUncaughtException(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto engine = EngineHelper::GetCurrentEngineSafely();
-    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
-    auto nativeEngine = engine->GetNativeEngine();
-    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    ArkNativeEngine* arkNativeEngine = reinterpret_cast<ArkNativeEngine*>(JSNApi::GetEnv(vm));
     CHECK_NULL_RETURN(arkNativeEngine, panda::JSValueRef::Undefined(vm));
     NapiUncaughtExceptionCallback callback = arkNativeEngine->GetNapiUncaughtExceptionCallback();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
