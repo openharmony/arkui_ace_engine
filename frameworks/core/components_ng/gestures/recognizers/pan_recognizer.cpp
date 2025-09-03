@@ -351,7 +351,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
-    extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
+    extraInfo_ = "Fingers: " + std::to_string(currentFingers_) + "(cur) - " + std::to_string(fingers_);
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
     fingersId_.erase(event.id);

@@ -41,6 +41,8 @@ struct FrameNodeSnapshot {
     int32_t hitTestMode = 0;
     std::vector<RectF> responseRegionList;
     bool active = false;
+    TouchTestStrategy strategy;
+    std::string id;
 };
 
 struct TouchPointSnapshot {
@@ -92,6 +94,8 @@ struct EventTreeRecord {
     void AddTouchPoint(const TouchEvent& event);
 
     void AddFrameNodeSnapshot(FrameNodeSnapshot&& node);
+
+    void UpdateFrameNodeSnapshot(int32_t nodeId, const TouchTestStrategy& strategy, const std::string& id);
 
     void AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>&& gesture);
 

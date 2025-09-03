@@ -80,6 +80,8 @@ std::shared_ptr<FrameNodeSnapshot> EventDumpTestNg::CreateFrameNodeSnapshotWithI
     frameNodeSnapshotInstance->isHit = true;
     frameNodeSnapshotInstance->hitTestMode = DEFAULT_HITTEST_MODE;
     frameNodeSnapshotInstance->responseRegionList = { RectF(0, 0, 20, 10), RectF(25, 0, 20, 10) };
+    frameNodeSnapshotInstance->strategy = TouchTestStrategy::DEFAULT;
+    frameNodeSnapshotInstance->id = "id_01";
     return frameNodeSnapshotInstance;
 }
 
@@ -437,6 +439,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg010, TestSize.Level1)
     auto frameNodeSnapshotInstance = CreateFrameNodeSnapshotWithInitValue();
     ASSERT_NE(frameNodeSnapshotInstance, nullptr);
     eventTreeRecord->AddFrameNodeSnapshot(std::move(*frameNodeSnapshotInstance));
+    eventTreeRecord->UpdateFrameNodeSnapshot(NODEID, TouchTestStrategy::DEFAULT, "id_01");
     auto gestureSnapshot = AceType::MakeRefPtr<GestureSnapshot>();
     int32_t finger = 0;
     eventTreeRecord->AddGestureSnapshot(finger, std::move(gestureSnapshot));

@@ -3135,6 +3135,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             if (hitResult == HitTestResult::BUBBLING) {
                 consumed = true;
             }
+            UpdateFrameNodeSnapshot(touchRes, touchRestrict.touchTestType);
         }
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
@@ -5762,8 +5763,19 @@ void FrameNode::AddFrameNodeSnapshot(
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
         .responseRegionList = responseRegionList,
-        .active = isActive_ };
+        .active = isActive_,
+        .strategy = TouchTestStrategy::DEFAULT,
+        .id = "" };
     eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
+}
+
+void FrameNode::UpdateFrameNodeSnapshot(const TouchResult& touchResult, EventTreeType type)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord(type).UpdateFrameNodeSnapshot(nodeId_, touchResult.strategy, touchResult.id);
 }
 
 int32_t FrameNode::GetUiExtensionId()
