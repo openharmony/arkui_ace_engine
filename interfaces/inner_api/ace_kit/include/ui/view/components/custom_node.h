@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_CUSTOM_NODE_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_CUSTOM_NODE_H
 
-#include "core/common/window_animation_config.h"
+#include "ui/common/window_animation_config.h"
 #include "ui/base/macros.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/view.h"
