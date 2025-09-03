@@ -2326,4 +2326,42 @@ HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate004, TestSize.Level
         menuItemPattern->content_ ? menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>() : nullptr;
     EXPECT_EQ(textProperty, nullptr);
 }
+
+/**
+ * @tc.name: UpdateTextOverflow001
+ * @tc.desc: Verify UpdateTextOverflow().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, UpdateTextOverflow001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+
+    auto theme =
+        PipelineBase::GetCurrentContext() ? PipelineBase::GetCurrentContext()->GetTheme<SelectTheme>() : nullptr;
+    ASSERT_NE(theme, nullptr);
+    theme = nullptr;
+    MockContainer::Current()->SetApiTargetVersion(99);
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+
+    MockContainer::Current()->SetApiTargetVersion(10);
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+
+    theme =
+        PipelineBase::GetCurrentContext() ? PipelineBase::GetCurrentContext()->GetTheme<SelectTheme>() : nullptr;
+    ASSERT_NE(theme, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(99);
+    theme->expandDisplay_ = true;
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+    EXPECT_EQ(textProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+}
 } // namespace OHOS::Ace::NG

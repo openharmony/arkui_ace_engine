@@ -2347,7 +2347,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
 void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
     RefPtr<SelectTheme>& theme)
 {
-    if (theme && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (theme && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         if (theme->GetExpandDisplay()) {
             textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
             textProperty->UpdateMaxLines(1);
@@ -2366,6 +2366,7 @@ void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textPropert
         textProperty->UpdateTextMarqueeFadeout(true);
         textProperty->UpdateTextMarqueeStart(false);
     }
+    CHECK_NULL_VOID(theme);
     textProperty->UpdateWordBreak(theme->GetWordBreak());
 }
 
