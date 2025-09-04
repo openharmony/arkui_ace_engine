@@ -212,6 +212,20 @@ public:
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode);
 
+    int32_t ShowBindSheetByUIContext(
+        const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack,
+        int32_t currentInstanceId, int32_t targetId);
+    int32_t UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode, const NG::SheetStyle &sheetStyle,
+        bool isPartialUpdate, int32_t currentInstanceId);
+    int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode, int32_t currentInstanceId);
     int32_t ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode);
     void HideSelectOverlay(const int32_t instanceId);
     const RefPtr<Subwindow> GetSelectOverlaySubwindow(int32_t instanceId);

@@ -688,6 +688,59 @@ void SubwindowManager::ShowBindSheetNG(bool isShow, std::function<void(const std
         std::move(sheetSpringBack), targetNode);
 }
 
+int32_t SubwindowManager::ShowBindSheetByUIContext(
+    const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack,
+    int32_t currentInstanceId, int32_t targetId)
+{
+    auto containerId = currentInstanceId;
+    auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_SHEET);
+    if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+        CHECK_NULL_RETURN(subwindow->CheckHostWindowStatus(), ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+        subwindow->InitContainer();
+        CHECK_NULL_RETURN(subwindow->GetIsRosenWindowCreate(), ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+        AddSubwindow(containerId, SubwindowType::TYPE_SHEET, subwindow);
+    }
+    return subwindow->ShowBindSheetByUIContext(sheetContentNode, std::move(buildtitleNodeFunc),
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetId);
+}
+
+int32_t SubwindowManager::UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode,
+    const NG::SheetStyle &sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+{
+    auto containerId = currentInstanceId;
+    auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_SHEET);
+    if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "updateBindSheet error");
+        return ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND;
+    }
+    return subwindow->UpdateBindSheetByUIContext(sheetContentNode, sheetStyle, isPartialUpdate);
+}
+
+int32_t SubwindowManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode,
+    int32_t currentInstanceId)
+{
+    auto containerId = currentInstanceId;
+    auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_SHEET);
+    if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "closeBindSheet error");
+        return ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND;
+    }
+    return subwindow->CloseBindSheetByUIContext(sheetContentNode);
+}
+
 void SubwindowManager::OnWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason)
 {
     OnUIExtensionWindowSizeChange(containerId, windowRect, reason);

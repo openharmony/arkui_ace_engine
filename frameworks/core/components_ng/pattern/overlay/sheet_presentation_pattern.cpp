@@ -1887,7 +1887,8 @@ SheetType SheetPresentationPattern::ComputeSheetTypeInSubWindow() const
     if (sheetStyle.sheetType.has_value()) {
         sheetType = sheetStyle.sheetType.value();
     }
-    if (sheetStyle.sheetType.value() == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
+    if (sheetStyle.sheetType.value_or(SheetType::SHEET_BOTTOM) == SheetType::SHEET_POPUP &&
+        !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
     }
     return sheetType;

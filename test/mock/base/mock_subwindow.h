@@ -25,6 +25,14 @@ class ACE_EXPORT MockSubwindow : public Subwindow {
     DECLARE_ACE_TYPE(MockSubwindow, Subwindow);
 
 public:
+    static RefPtr<MockSubwindow> subwindow_;
+    static RefPtr<MockSubwindow> GetSubwindow()
+    {
+        return subwindow_;
+    }
+    static void SetUp();
+    static void TearDown();
+
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(ResizeWindowForMenu, void());
@@ -122,6 +130,23 @@ public:
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) {
             return;
+        }
+    int32_t ShowBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
+        std::function<void()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        int32_t targetId) {
+            return 0;
+        }
+    int32_t UpdateBindSheetByUIContext(
+        const RefPtr<NG::FrameNode> &sheetContentNode, const NG::SheetStyle &sheetStyle, bool isPartialUpdate) {
+            return 0;
+        }
+    int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode) {
+            return 0;
         }
     MOCK_METHOD1(HideSheetSubWindow, void(int32_t containerId));
     MOCK_METHOD0(GetAttachState, MenuWindowState());
