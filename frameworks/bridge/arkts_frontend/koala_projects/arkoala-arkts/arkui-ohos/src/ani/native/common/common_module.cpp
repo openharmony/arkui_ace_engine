@@ -270,6 +270,25 @@ void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object f
     modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnDrawCallbackFun);
 }
 
+void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    void* fnDrawCallbackFun = nullptr;
+    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawCallbackFun = nullptr;
+    ani_ref fnObjGlobalRef = static_cast<ani_ref>(fnObj);
+    auto fndDrawCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjGlobalRef);
+    drawCallbackFun = ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
+    if (drawCallbackFun != nullptr) {
+        fnDrawCallbackFun = static_cast<void*>(drawCallbackFun.get());
+    }
+    modifier->getCommonAniModifier()->setFrameNodeDrawCallback(env, ptr, fnDrawCallbackFun);
+}
+
 std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawBehindFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {

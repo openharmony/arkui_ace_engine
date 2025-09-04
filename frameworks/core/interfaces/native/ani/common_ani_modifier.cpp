@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
@@ -132,11 +133,29 @@ void SetDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
     }
     auto* drawCallbackFuncPtr =
         static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawCallbackFun);
-
     auto* renderNodePeer = reinterpret_cast<RenderNodePeer*>(ptr);
     CHECK_NULL_VOID(renderNodePeer);
     auto renderNode = renderNodePeer->GetFrameNode();
     auto pattern = renderNode->GetPattern<NG::RenderNodePattern>();
+    if (pattern) {
+        pattern->SetDrawCallback(std::move(*drawCallbackFuncPtr));
+    }
+}
+
+void SetFrameNodeDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
+{
+    if (fnDrawCallbackFun == nullptr) {
+        LOGE("Draw callback is undefined.");
+        return;
+    }
+    auto* drawCallbackFuncPtr =
+        static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawCallbackFun);
+
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
+    CHECK_NULL_VOID(frameNodePeer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::CustomFrameNodePattern>();
     if (pattern) {
         pattern->SetDrawCallback(std::move(*drawCallbackFuncPtr));
     }
@@ -837,6 +856,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
+        .setFrameNodeDrawCallback = OHOS::Ace::NG::SetFrameNodeDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
         .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,

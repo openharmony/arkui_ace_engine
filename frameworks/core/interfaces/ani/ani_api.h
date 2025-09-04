@@ -451,6 +451,7 @@ struct ArkUIAniCommonModifier {
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);
+    void (*setFrameNodeDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);
     ArkUI_Int32 (*getCurrentInstanceId)();
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
