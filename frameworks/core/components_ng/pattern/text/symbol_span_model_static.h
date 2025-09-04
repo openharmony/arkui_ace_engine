@@ -29,6 +29,9 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetSymbolRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
+    static void SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue);
+    static void SetFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
 };
 } // namespace OHOS::Ace::NG
 
