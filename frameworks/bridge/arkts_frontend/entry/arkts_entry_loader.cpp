@@ -19,17 +19,37 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/container.h"
 
+#include <regex>
+
 namespace OHOS::Ace {
 
 static const std::string ENTRY_PREFIX = "/src/main/ets/";
 static const std::string ENTRY_SUFFIX = "/__EntryWrapper";
+static const std::string ENTRY_PREFIX_REGEX = R"(\w+/src/\w+/\w+/)";
 
 ani_object EntryLoader::GetPageEntryObj()
 {
-    const std::string moduleName = Container::Current()->GetModuleName();
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("EntryLoader get container failed");
+        return nullptr;
+    }
     std::string entryPointName;
-    entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
-    entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    auto srcEntrance = container->GetSrcEntrance();
+    if (srcEntrance.empty()) {
+        const auto moduleName = container->GetModuleName();
+        entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
+        entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    } else {
+        std::regex regex(ENTRY_PREFIX_REGEX);
+        std::smatch prefixMatch;
+        if (std::regex_search(srcEntrance, prefixMatch, regex)) {
+            auto prefix = prefixMatch[0].str();
+            entryPointName.reserve(prefix.size() + url_.size() + ENTRY_SUFFIX.size());
+            entryPointName.append(prefix).append(url_).append(ENTRY_SUFFIX);
+        }
+    }
+
     ani_string entryStr;
     env_->String_NewUTF8(entryPointName.c_str(), entryPointName.length(), &entryStr);
     ani_class entryClass = nullptr;
