@@ -2330,6 +2330,14 @@ private:
             // need not adjust when there has no items in viewport.
             return 0;
         }
+        if (info_.hasMultiLineItem_) {
+            auto startLineIter = info_.gridMatrix_.find(subStartLine_);
+            if (startLineIter != info_.gridMatrix_.end() && !startLineIter->second.empty()) {
+                if (startLineIter->second.begin()->first == subStart_) {
+                    return 0;
+                }
+            }
+        }
         auto newStartMainLineIdx = subStartLine_;
         info_.GetLineIndexByIndex(subStart_, newStartMainLineIdx);
         return subStartLine_ - newStartMainLineIdx;
