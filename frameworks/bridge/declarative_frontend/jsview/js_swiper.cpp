@@ -1010,6 +1010,7 @@ void JSSwiper::ResetSwiperNode(const JSCallbackInfo& info)
     }
     if (jsIndicatorController && jsIndicatorController != controller) {
         jsIndicatorController->ResetSwiperNode();
+        SwiperModel::GetInstance()->ResetJSIndicatorController();
     }
 }
 

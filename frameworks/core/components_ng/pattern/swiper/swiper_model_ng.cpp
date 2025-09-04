@@ -365,6 +365,15 @@ void SwiperModelNG::SetJSIndicatorController(std::function<void()> resetFunc)
     pattern->SetJSIndicatorController(resetFunc);
 }
 
+void SwiperModelNG::ResetJSIndicatorController()
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetJSIndicatorController();
+}
+
 void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

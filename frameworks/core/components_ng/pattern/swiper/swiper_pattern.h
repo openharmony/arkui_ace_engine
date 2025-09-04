@@ -795,10 +795,16 @@ public:
 
     void SetJSIndicatorController(std::function<void()> resetFunc)
     {
+        resetFunc_ = resetFunc;
+    }
+
+    void ResetJSIndicatorController()
+    {
         if (resetFunc_) {
             resetFunc_();
+            resetFunc_ = nullptr;
         }
-        resetFunc_ = resetFunc;
+        indicatorController_ = nullptr;
     }
 
     void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
