@@ -448,6 +448,7 @@ struct ArkUIAniDragModifier {
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)(ArkUI_Int32 key);
+    void (*setFrameRateRange)(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type);
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);

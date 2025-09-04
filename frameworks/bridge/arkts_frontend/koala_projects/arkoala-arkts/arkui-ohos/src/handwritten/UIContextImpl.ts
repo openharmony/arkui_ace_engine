@@ -25,13 +25,13 @@ import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } 
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
-    from "@ohos/arkui/UIContext"
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions, SheetOptions } from "arkui/component/common"
+import { KeyEvent, PopupCommonOptions, MenuOptions, SheetOptions, ExpectedFrameRateRange } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -1876,5 +1876,25 @@ export class UIContextImpl extends UIContext {
  
     public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
         return inspector.getFilteredInspectorTreeById(id, depth, filters);
+    }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let nodePtr = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id);
+        if (nodePtr === undefined) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return [];
+        }
+        let tag = ArkUIGeneratedNativeModule._FrameNode_getNodeType(nodePtr);
+        if (tag === 'Swiper') {
+            let ret: Array<SwiperDynamicSyncScene> =
+                [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
+                new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
+            let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return result;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return [];
     }
 }

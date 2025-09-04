@@ -109,6 +109,32 @@ ani_ref* GetHostContext(ArkUI_Int32 key)
     return frontend->GetHostContext(key);
 }
 
+void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)
+{
+    NG::FrameNode* peer = reinterpret_cast<NG::FrameNode*>(peerPtr);
+    CHECK_NULL_VOID(peer);
+    auto swiperPattern = peer->GetPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    ani_double min;
+    ani_double max;
+    ani_double expect;
+    if (ANI_OK != env->Object_GetPropertyByName_Double(value, "min", &min)) {
+        TAG_LOGE(AceLogTag::ACE_SWIPER, "get expectedFrameRateRange min value failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_GetPropertyByName_Double(value, "max", &max)) {
+        TAG_LOGE(AceLogTag::ACE_SWIPER, "get expectedFrameRateRange max value failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_GetPropertyByName_Double(value, "expected", &expect)) {
+        TAG_LOGE(AceLogTag::ACE_SWIPER, "get expectedFrameRateRange expect value failed.");
+        return;
+    }
+    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(min, max, expect);
+    auto sceneType = static_cast<SwiperDynamicSyncSceneType>(type);
+    swiperPattern->SetFrameRateRange(frameRateRange, sceneType);
+}
+
 void SyncInstanceId(ArkUI_Int32 instanceId)
 {
     restoreInstanceIds_.emplace_back(ContainerScope::CurrentId());
@@ -853,6 +879,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
         .getHostContext = OHOS::Ace::NG::GetHostContext,
+        .setFrameRateRange = OHOS::Ace::NG::SetFrameRateRange,
         .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
