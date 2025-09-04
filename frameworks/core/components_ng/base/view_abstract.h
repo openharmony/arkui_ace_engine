@@ -32,6 +32,7 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
@@ -81,6 +82,7 @@ struct OptionParam {
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
     bool disableSystemClick = false;
     uint32_t symbolId = 0;
+    std::optional<Color> symbolColor;
 
     // Used for security controls.
     bool isPasteOption = false;

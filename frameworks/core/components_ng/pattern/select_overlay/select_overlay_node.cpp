@@ -895,6 +895,7 @@ void GetOptionsParamsHasSymbol(
         params.emplace_back(theme->GetAskCelia(),
             GetMenuCallbackWithContainerId(info->menuCallback.onAskCelia), "", true);
         params.back().symbolId = theme->GetAskCeliaSymbolId();
+        params.back().symbolColor = theme->GetAIMenuSymbolColor();
         params.back().isAskCeliaOption = true;
     }
 }
@@ -1246,7 +1247,11 @@ void SetMenuItemSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionParam&
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
-    layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+    if (param.symbolColor.has_value()) {
+        layoutProperty->UpdateSymbolColorList({ param.symbolColor.value() });
+    } else {
+        layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+    }
     layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     if (param.symbolId != 0) {
