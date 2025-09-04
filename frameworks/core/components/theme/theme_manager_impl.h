@@ -135,9 +135,11 @@ public:
 
     RefPtr<Theme> GetThemeKit(ThemeType type, int32_t themeScopeId);
 
+    std::string GetThemesMapKey(ThemeType type) const;
+
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
-    std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
+    std::unordered_map<std::string, RefPtr<Theme>> themes_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;
 

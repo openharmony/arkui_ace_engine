@@ -61,4 +61,20 @@ HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg001, TestSize.Level1)
     auto theme = themeManager->GetThemeOrigin(ButtonTheme::TypeId());
     EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
 }
+
+/**
+ * @tc.name: GetThemesMapKey001
+ * @tc.desc: GetThemesMapKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, GetThemesMapKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create themeManager
+     */
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    auto theme = themeManager->GetThemeOrigin(ButtonTheme::TypeId());
+    themeManager->GetThemesMapKey(ButtonTheme::TypeId());
+    EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
+}
 }
