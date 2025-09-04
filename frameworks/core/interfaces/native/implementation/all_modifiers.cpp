@@ -280,6 +280,7 @@ const GENERATED_ArkUIToggleOpsAccessor* GetToggleOpsAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUISideBarContainerOpsAccessor* GetSideBarContainerOpsAccessor();
+const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor();
 const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor();
@@ -652,6 +653,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetNavExtenderAccessor,
         GetSearchOpsAccessor,
         GetSideBarContainerOpsAccessor,
+        GetSpringBackActionAccessor,
         GetStepperOpsAccessor,
         GetEventEmulatorAccessor,
         GetTextFieldOpsAccessor,

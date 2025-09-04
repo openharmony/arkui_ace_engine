@@ -6673,8 +6673,7 @@ export class Serializer extends SerializerBase {
     }
     writeSpringBackAction(value: SpringBackAction): void {
         let valueSerializer : Serializer = this
-        const value_springBack  = value.springBack
-        valueSerializer.holdAndWriteCallback(value_springBack)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSslErrorEvent(value: SslErrorEvent): void {
         let valueSerializer : Serializer = this
