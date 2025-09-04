@@ -893,7 +893,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreColorMode = OHOS::Ace::NG::RestoreColorMode,
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
-        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId
+        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
+        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity
     };
     return &impl;
 }
