@@ -83,6 +83,8 @@ void JSRadio::Create(const JSCallbackInfo& info)
         }
         if (indicatorTemp->IsNumber()) {
             indicator = indicatorTemp->ToNumber<int32_t>();
+        } else {
+            indicator = static_cast<int32_t>(RadioIndicatorType::TICK);
         }
         ParseIndicator(info, indicator, customBuilderFunc, builderObject);
     }
