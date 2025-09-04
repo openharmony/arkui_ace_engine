@@ -44,4 +44,32 @@ class InteropExtractorModule {
         options?: Object,
         content?: () => void
     ) => number;
+    static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
+}
+
+class StaticInteropHook {
+    state?: Object;
+    addRef?: () => void;
+}
+
+function registerCallbackForCreateWatchID(callback: () => any): void {
+    InteropExtractorModule.createWatchFunc = callback;
+}
+
+function registerCallbackForMakeObserved(callback: (value: Object) => Object): void {
+    InteropExtractorModule.makeObserved = callback;
+}
+
+function registerCompatibleStaticComponentCallback(
+    callback: (
+        factory: () => Object,
+        options?: Object,
+        content?: () => void
+    ) => number
+): void {
+    InteropExtractorModule.compatibleStaticComponent = callback;
+}
+
+function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
+    InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
 }
