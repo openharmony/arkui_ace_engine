@@ -18,7 +18,7 @@ import { Length } from "arkui/component/units";
 import {ArkCommonMethodPeer, LayoutPolicy, ClickEvent, CommonMethod, KeyEvent, Rectangle, SafeAreaType, SafeAreaEdge,
   FocusMovement, SizeChangeCallback, ShouldBuiltInRecognizerParallelWithCallback, AlignRuleOption, ChainStyle,
   GestureRecognizerJudgeBeginCallback, FocusAxisEvent, AxisEvent, HoverEvent, LocalizedAlignRuleOptions,
-  TouchEvent, MouseEvent, CustomProperty, ArkCommonMethodComponent } from './component/common';
+  TouchEvent, MouseEvent, CustomProperty, ArkCommonMethodComponent, Matrix4Transit } from './component/common';
 import { 
   AnimateParam, BackgroundEffectOptions, ForegroundEffectOptions, OutlineStyle, TransitionEffect, MotionBlurOptions,
    InvertOptions, TranslateOptions, sharedTransitionOptions,  BlendMode, BlendApplyType, EffectType, 
@@ -166,7 +166,7 @@ export class CommonMethodModifier implements CommonMethod {
   _rotate_0_0value?: RotateOptions | undefined
 
   _transform_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-  _transform_0_0value?: Object | undefined
+  _transform_0_0value?: Matrix4Transit | undefined
 
   _clickEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _clickEffect_0_0value?: ClickEffect | undefined
@@ -801,7 +801,7 @@ export class CommonMethodModifier implements CommonMethod {
     }
     return this
   }
-  transform(value: Object | undefined): this {
+  transform(value: Matrix4Transit | undefined): this {
     if (((this._transform_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._transform_0_0value) !== (value))) {
       this._transform_0_flag = AttributeUpdaterFlag.UPDATE
       this._transform_0_0value = value
@@ -2254,7 +2254,7 @@ export class CommonMethodModifier implements CommonMethod {
     if (this._transform_0_flag != AttributeUpdaterFlag.INITIAL) {
       switch (this._transform_0_flag) {
         case AttributeUpdaterFlag.UPDATE: {
-          peerNode.transform0Attribute((this._transform_0_0value as Object | undefined));
+          peerNode.transform0Attribute((this._transform_0_0value as Matrix4Transit | undefined));
           this._transform_0_flag = AttributeUpdaterFlag.RESET;
           break;
         }
@@ -2264,7 +2264,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         default: {
           this._transform_0_flag = AttributeUpdaterFlag.INITIAL;
-          peerNode.transform0Attribute((undefined as Object | undefined));
+          peerNode.transform0Attribute((undefined as Matrix4Transit | undefined));
         }
       }
     }
@@ -4348,7 +4348,7 @@ export class CommonMethodModifier implements CommonMethod {
           break;
         }
         default: {
-          this.transform((undefined as Object | undefined));
+          this.transform((undefined as Matrix4Transit | undefined));
         }
       }
     }

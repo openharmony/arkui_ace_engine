@@ -49,7 +49,7 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
-import { Matrix4Transit } from "#external"
+import matrix4 from "@ohos.matrix4"
 import { ScrollState } from "./list"
 import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
@@ -72,8 +72,9 @@ import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookC
 } from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier, AttributeUpdaterFlag } from "../CommonMethodModifier"
 import { ScrollableCommonMethodModifier } from '../ScrollableCommonMethodModifier'
-import { ICurve as ICurve_} from "#external"
-export type ICurve = ICurve_
+import curves from "@ohos.curves"
+export type ICurve = curves.ICurve
+export type Matrix4Transit = matrix4.Matrix4Transit
 export class ICurveInternal implements MaterializedBase,ICurve {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -3797,7 +3798,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_rotate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    transform0Attribute(value: object | undefined): void {
+    transform0Attribute(value: Matrix4Transit | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -7351,7 +7352,36 @@ export interface DismissSheetAction {
     reason: DismissReason;
 }
 export interface SpringBackAction {
-    springBack: (() => void);
+    springBack(): void
+}
+export class SpringBackActionInternal implements MaterializedBase,SpringBackAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SpringBackActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(SpringBackActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SpringBackAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SpringBackAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SpringBackActionInternal {
+        return new SpringBackActionInternal(ptr)
+    }
+    public springBack(): void {
+        this.springBack_serialize()
+        return
+    }
+    private springBack_serialize(): void {
+        ArkUIGeneratedNativeModule._SpringBackAction_springBack(this.peer!.ptr)
+    }
 }
 export type Type_SheetOptions_detents = [
     SheetSize | Length,
@@ -7889,7 +7919,7 @@ export interface CommonMethod {
     gridSpan(value: number | undefined): this {return this;}
     gridOffset(value: number | undefined): this {return this;}
     rotate(value: RotateOptions | undefined): this {return this;}
-    transform(value: object | undefined): this {return this;}
+    transform(value: Matrix4Transit | undefined): this { return this; }
     onAppear(value: (() => void) | undefined): this {return this;}
     onDisAppear(value: (() => void) | undefined): this {return this;}
     onAttach(value: (() => void) | undefined): this {return this;}
@@ -8450,7 +8480,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public rotate(value: RotateOptions | undefined): this {
         return this
     }
-    public transform(value: object | undefined ): this {
+    public transform(value: Matrix4Transit | undefined ): this {
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
@@ -10007,11 +10037,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transform(value: object | undefined): this {
+    public transform(value: Matrix4Transit | undefined): this {
         if (this.checkPriority("transform")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (object | undefined)
+                const value_casted = value as (Matrix4Transit | undefined)
                 this.getPeer()?.transform0Attribute(value_casted)
                 return this
             }
@@ -11113,11 +11143,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             if (typeof isShow === "boolean" || typeof isShow === undefined) {
                 const isShow_casted = isShow as (boolean | undefined)
                 const builder_casted = builder as (CustomBuilder | undefined)
-                const options_casted = options as (SheetOptions)
+                const options_casted = options as (SheetOptions | undefined)
                 this.getPeer()?.bindSheetAttribute(isShow_casted, builder_casted, options_casted)
             } else {
                 BindSheetHandWritten.hookSheetShowImpl(this.getPeer().peer.ptr,
-                    (isShow as Bindable<boolean>), (builder as (CustomBuilder | undefined)), (options as (SheetOptions)));
+                    (isShow as Bindable<boolean>), (builder as (CustomBuilder | undefined)), (options as (SheetOptions | undefined)));
             }
         }
         return this
