@@ -126,7 +126,7 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFpNG(size, fontSize, resObj)) {
-        if (LessOrEqual(fontSize.Value(), 0.0) || (size->IsNumber() && LessOrEqual(size->ToNumber<double>(), 0.0)) ||
+        if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0) ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
         }

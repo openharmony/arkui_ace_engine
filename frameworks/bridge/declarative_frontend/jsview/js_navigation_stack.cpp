@@ -560,12 +560,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
 int32_t JSNavigationStack::GetReplaceValue() const
 {
     if (dataSourceObj_->IsEmpty()) {
-        return 0;
+        return false;
     }
     auto replace = dataSourceObj_->GetProperty("isReplace");
-    if (!replace->IsNumber()) {
-        return 0;
-    }
     return replace->ToNumber<int32_t>();
 }
 
@@ -947,8 +944,7 @@ bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const 
         return false;
     }
     auto builderObj = JSRef<JSObject>::Cast(navDestBuilderFunc_);
-    auto lengthObj = builderObj->GetProperty("length");
-    const int32_t number = lengthObj->IsNumber() ? lengthObj->ToNumber<int32_t>() : 0;
+    const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
     if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
@@ -1016,8 +1012,7 @@ int32_t JSNavigationStack::ExecuteBuilderByConfig(const std::string& name,
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
-    auto lengthObj = builderObj->GetProperty("length");
-    const int32_t number = lengthObj->IsNumber() ? lengthObj->ToNumber<int32_t>() : 0;
+    const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
     if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));

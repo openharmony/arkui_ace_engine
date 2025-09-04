@@ -123,9 +123,6 @@ void JSNavigator::SetActive(bool active)
 void JSNavigator::SetParams(const JSCallbackInfo& args)
 {
     JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
-    if (!val->IsString()) {
-        return;
-    }
     NavigatorModel::GetInstance()->SetParams(val->ToString());
 }
 
