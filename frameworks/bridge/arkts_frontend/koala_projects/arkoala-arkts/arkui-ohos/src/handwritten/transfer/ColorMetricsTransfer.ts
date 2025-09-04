@@ -13,47 +13,47 @@
  * limitations under the License.
  */
 
-import { ColorMetrics } from "../../Graphics"
+import { ColorMetrics } from '../../Graphics'
 
 const MAX_CHANNEL_VALUE = 0xFF;
 
 export class ColorMetricsTransfer {
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error("The ColorMetrics is not object convert fail.");
+            throw Error('The ColorMetrics is not object convert fail.');
         }
         let resourceId: number = -1;
-        const red = ESValue.wrap(input).getProperty("red_").toNumber();
-        const green = ESValue.wrap(input).getProperty("green_").toNumber();
-        const blue = ESValue.wrap(input).getProperty("blue_").toNumber();
-        const alpha = ESValue.wrap(input).getProperty("alpha_").toNumber()/MAX_CHANNEL_VALUE;
-        if (ESValue.wrap(input).hasProperty("resourceId_")) {
-            resourceId = ESValue.wrap(input).getProperty("resourceId_").toNumber();
+        const red = ESValue.wrap(input).getProperty('red_').toNumber();
+        const green = ESValue.wrap(input).getProperty('green_').toNumber();
+        const blue = ESValue.wrap(input).getProperty('blue_').toNumber();
+        const alpha = ESValue.wrap(input).getProperty('alpha_').toNumber()/MAX_CHANNEL_VALUE;
+        if (ESValue.wrap(input).hasProperty('resourceId_')) {
+            resourceId = ESValue.wrap(input).getProperty('resourceId_').toNumber();
         }
         let colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
         colorMetrics.setResourceId(resourceId);
         return colorMetrics;
     }
     static transferDynamic(input: Object): Any {
-        if (input == null) {
-            throw Error("The ColorMetrics is null, convert fail.");
+        if (input === null) {
+            throw Error('The ColorMetrics is null, convert fail.');
         }
-        if (input == undefined) {
-            throw Error("The ColorMetrics is undefined, convert fail.");
+        if (input === undefined) {
+            throw Error('The ColorMetrics is undefined, convert fail.');
         }
         let staticValue = input as ColorMetrics
-        if (staticValue == null) {
-            throw Error("Not a ColorMetrics object, convert fail.");
+        if (staticValue === null) {
+            throw Error('Not a ColorMetrics object, convert fail.');
         }
-        if (staticValue == undefined) {
-            throw Error("Not a ColorMetrics object, convert fail.");
+        if (staticValue === undefined) {
+            throw Error('Not a ColorMetrics object, convert fail.');
         }
-        let nodeModule = ESValue.load("@ohos.arkui.node");
-        let ColorMetricsModule = nodeModule.getProperty("ColorMetrics")
+        let nodeModule = ESValue.load('@ohos.arkui.node');
+        let ColorMetricsModule = nodeModule.getProperty('ColorMetrics')
         let ret = ColorMetricsModule.invokeMethod('rgba', staticValue.red, staticValue.green ,staticValue.blue, staticValue.alpha/MAX_CHANNEL_VALUE);
         let resId = staticValue.getResourceId();
-        if (resId != undefined) {
-            ret.setProperty("resourceId_", ESValue.wrap(resId));
+        if (resId !== undefined) {
+            ret.setProperty('resourceId_', ESValue.wrap(resId));
         }
         return ret.unwrap();
     }
