@@ -508,6 +508,9 @@ void SelectPattern::CreateSelectedCallback()
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
+        if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
+            return;
+        }
         auto selectChangeEvent = hub->GetSelectChangeEvent();
         if (selectChangeEvent) {
             selectChangeEvent(index);

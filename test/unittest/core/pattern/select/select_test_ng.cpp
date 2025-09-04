@@ -87,6 +87,8 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+constexpr int32_t ERROR_INDEX_MIN = -1;
+constexpr int32_t ERRPR_INDEX_MAX = 999;
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -2714,5 +2716,44 @@ HWTEST_F(SelectTestNg, SetColorStatus001, TestSize.Level1)
 
     selectModelNG.SetColorStatus(frameNode, SelectColorType::MENU_BACKGROUND_COLOR);
     EXPECT_TRUE(menuPattern->isDisableMenuBgColorByUser_);
+}
+
+/**
+ * @tc.name: SelectChangeEventTest001
+ * @tc.desc: Test SelectChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectChangeEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto selectEventHub = frameNode->GetEventHub<SelectEventHub>();
+    ASSERT_NE(selectEventHub, nullptr);
+    int32_t currentIndex = 0;
+    selectEventHub->SetSelectChangeEvent([&currentIndex](int32_t index) {
+        currentIndex = index;
+    });
+    selectPattern->OnModifyDone();
+    ASSERT_NE(selectPattern->options_.size(), 0);
+    auto eventHub = selectPattern->options_[0]->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onSelect = eventHub->GetOnSelect();
+    ASSERT_NE(onSelect, nullptr);
+    onSelect(ERROR_INDEX_MIN);
+    EXPECT_EQ(currentIndex, 0);
+    onSelect(ERRPR_INDEX_MAX);
+    EXPECT_EQ(currentIndex, 0);
+    onSelect(1);
+    EXPECT_EQ(currentIndex, 1);
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 } // namespace OHOS::Ace::NG
