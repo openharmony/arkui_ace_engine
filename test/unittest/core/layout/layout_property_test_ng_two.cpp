@@ -1034,6 +1034,28 @@ HWTEST_F(LayoutPropertyTestNgTwo, FromJson001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateSafeAreaPadding001
+ * @tc.desc: Test UpdateSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateSafeAreaPadding001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    PaddingProperty paddingProperty;
+    layoutProperty->ResetSafeAreaPadding();
+    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
+    EXPECT_TRUE(layoutProperty->GetSafeAreaPaddingProperty());
+
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
+    layoutProperty->ResetSafeAreaPadding();
+    EXPECT_FALSE(layoutProperty->GetSafeAreaPaddingProperty());
+}
+
+/**
  * @tc.name: PixelRoundToJsonValue001
  * @tc.desc: Test PixelRoundToJsonValue
  * @tc.type: FUNC
