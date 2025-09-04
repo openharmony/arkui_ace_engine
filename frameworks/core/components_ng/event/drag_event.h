@@ -144,6 +144,8 @@ public:
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void UpdateGatherAnimatePosition(
         std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
+    static void UpdateGatherAnimatePosition(
+        const RefPtr<FrameNode>& gatherNode, const OffsetF& GatherNodeOffset);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     static void ExecutePreDragFunc(const RefPtr<FrameNode>& node, const PreDragStatus preDragStatus,

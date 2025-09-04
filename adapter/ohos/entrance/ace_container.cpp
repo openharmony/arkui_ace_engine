@@ -3978,8 +3978,10 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
         MMI::PointerEvent::PointerItem pointerItem;
-        if (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        if (!(currentEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+                currentEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) &&
+            (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
+                pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
             for (const auto& callback : callbacksIter->second) {
                 if (callback) {
                     callback();
@@ -3990,6 +3992,28 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             ++callbacksIter;
         }
     }
+}
+
+bool CheckPointerIsValid(const std::shared_ptr<MMI::PointerEvent> &currentPointerEvent,
+    DragPointerEvent &dragPointerEvent, MMI::PointerEvent::PointerItem &pointerItem)
+{
+    CHECK_NULL_RETURN(currentPointerEvent, false);
+    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+        return false;
+    }
+    if (!pointerItem.IsPressed()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
+        return false;
+    }
+    if (static_cast<int32_t>(PointerAction::CANCEL) == currentPointerEvent->GetPointerAction()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is cancel action, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
+        return false;
+    }
+    return true;
 }
 
 bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
@@ -4003,17 +4027,10 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     }
 
     auto currentPointerEvent = iter->second;
-    CHECK_NULL_RETURN(currentPointerEvent, false);
-    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+    if (!CheckPointerIsValid(currentPointerEvent, dragPointerEvent, pointerItem)) {
         return false;
     }
-    if (!pointerItem.IsPressed()) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
-            dragPointerEvent.pointerId);
-        return false;
-    }
+
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
