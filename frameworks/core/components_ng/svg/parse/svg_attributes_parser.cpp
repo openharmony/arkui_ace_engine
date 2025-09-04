@@ -268,6 +268,10 @@ bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& c
 
 bool SvgAttributesParser::ParseColor(std::string value, Color& color, bool featureEnable)
 {
+    if (value == "currentColor") {
+        color = Color::BLACK;
+        return true;
+    }
     auto colorOpt = GetSpecialColor(value);
     if (colorOpt.has_value()) {
         color = colorOpt.value();

@@ -476,6 +476,19 @@ HWTEST_F(ParseTestThreeNg, ParseDimensionTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParseColor001
+ * @tc.desc: ParseColor test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestThreeNg, ParseColor001, TestSize.Level1)
+{
+    Color color;
+    auto res = SvgAttributesParser::ParseColor("currentColor", color, false);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(color, Color::BLACK);
+}
+
+/**
  * @tc.name: TransformForCurrentOBBTest001
  * @tc.desc: TransformForCurrentOBB test
  * @tc.type: FUNC
