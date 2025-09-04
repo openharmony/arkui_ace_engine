@@ -28,5 +28,6 @@ ace_unittest("time_picker_test_ng") {
     "time_picker_column_layout_algorithm_test_ng.cpp",
     "time_picker_test_tojson.cpp",
     "time_picker_resource_test.cpp",
+    "time_picker_row_pattern_test.cpp",
   ]
 }
