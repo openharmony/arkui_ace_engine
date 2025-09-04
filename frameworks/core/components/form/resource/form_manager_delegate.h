@@ -29,6 +29,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_info.h"
 #include "form_js_info.h"
+#include "form_surface_info.h"
 #include "ui/rs_surface_node.h"
 #include "want.h"
 #include "want_params_wrapper.h"
@@ -92,6 +93,8 @@ public:
         float expectedWidth = 0.0f;
         float expectedHeight = 0.0f;
         float expectedBorderWidth = 0.0f;
+        float expectedLayoutWidth = 0.0f;
+        float expectedLayoutHeight = 0.0f;
     };
 
     FormManagerDelegate() = delete;
@@ -158,7 +161,7 @@ public:
     void OnFormSurfaceDetach();
     void ResetForm();
     void ReleaseForm();
-    void NotifySurfaceChange(float width, float height, float borderWidth = 0.0);
+    void NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo);
     static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();
@@ -189,6 +192,7 @@ private:
     void HandleLockFormCallback(bool lock);
     void SetGestureInnerFlag();
     void CheckWhetherSurfaceChangeFailed();
+    void UpdateFormSizeWantCache(float width, float height, float layoutWidth, float layoutHeight, float borderWidth);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;

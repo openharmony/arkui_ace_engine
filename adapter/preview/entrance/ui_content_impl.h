@@ -132,6 +132,8 @@ public:
     {
         return 0.0;
     }
+
+    void SetFormViewScale(float width, float height, float layoutWidth, float layoutHeight) override {}
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override
     {
         return nullptr;

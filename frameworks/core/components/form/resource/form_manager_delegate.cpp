@@ -224,9 +224,7 @@ int32_t FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formI
 
 void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
 {
-    float width = 0.0f;
-    float height = 0.0f;
-    float borderWidth = 0.0f;
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
     bool needRedispatch = false;
     {
         std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
@@ -234,14 +232,16 @@ void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
             TAG_LOGI(AceLogTag::ACE_FORM, "redispatch surface change event");
             needRedispatch = true;
             notifySurfaceChangeFailedRecord_.isfailed = false;
-            width = notifySurfaceChangeFailedRecord_.expectedWidth;
-            height = notifySurfaceChangeFailedRecord_.expectedHeight;
-            borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+            formSurfaceInfo.width = notifySurfaceChangeFailedRecord_.expectedWidth;
+            formSurfaceInfo.height = notifySurfaceChangeFailedRecord_.expectedHeight;
+            formSurfaceInfo.borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+            formSurfaceInfo.layoutWidth = notifySurfaceChangeFailedRecord_.expectedLayoutWidth;
+            formSurfaceInfo.layoutHeight = notifySurfaceChangeFailedRecord_.expectedLayoutHeight;
         }
     }
     if (needRedispatch) {
         uint32_t reason = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
-        formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, reason, nullptr, borderWidth);
+        formRendererDispatcher_->DispatchSurfaceChangeEvent(formSurfaceInfo, reason, nullptr);
     }
 }
 
@@ -773,23 +773,22 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
     formRendererDispatcher_->SetAllowUpdate(allowUpdate);
 }
 
-void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
+void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo)
 {
-    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
-    {
-        std::lock_guard<std::mutex> lock(wantCacheMutex_);
-        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
-        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
-        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
-    }
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, formSurfaceInfo.width,
+        formSurfaceInfo.height, formSurfaceInfo.borderWidth);
+    UpdateFormSizeWantCache(formSurfaceInfo.width, formSurfaceInfo.height, formSurfaceInfo.layoutWidth,
+        formSurfaceInfo.layoutHeight, formSurfaceInfo.borderWidth);
     {
         std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
         if (formRendererDispatcher_ == nullptr) {
             TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
             notifySurfaceChangeFailedRecord_.isfailed = true;
-            notifySurfaceChangeFailedRecord_.expectedWidth = width;
-            notifySurfaceChangeFailedRecord_.expectedHeight = height;
-            notifySurfaceChangeFailedRecord_.expectedBorderWidth = borderWidth;
+            notifySurfaceChangeFailedRecord_.expectedWidth = formSurfaceInfo.width;
+            notifySurfaceChangeFailedRecord_.expectedHeight = formSurfaceInfo.height;
+            notifySurfaceChangeFailedRecord_.expectedBorderWidth = formSurfaceInfo.borderWidth;
+            notifySurfaceChangeFailedRecord_.expectedLayoutWidth = formSurfaceInfo.layoutWidth;
+            notifySurfaceChangeFailedRecord_.expectedLayoutHeight = formSurfaceInfo.layoutHeight;
             return;
         }
     }
@@ -818,8 +817,19 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     } else if (transactionControllerHandler != nullptr) {
         transaction = transactionControllerHandler->GetRSTransaction();
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
-        static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(formSurfaceInfo, static_cast<uint32_t>(sizeChangeReason),
+        transaction);
+}
+
+void FormManagerDelegate::UpdateFormSizeWantCache(float width, float height, float layoutWidth, float layoutHeight,
+    float borderWidth)
+{
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, static_cast<double>(layoutWidth));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY, static_cast<double>(layoutHeight));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
@@ -1174,6 +1184,8 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
         OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, static_cast<double>(info.layoutWidth));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY, static_cast<double>(info.layoutHeight));
     if (runningCompId_.empty()) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
     } else {

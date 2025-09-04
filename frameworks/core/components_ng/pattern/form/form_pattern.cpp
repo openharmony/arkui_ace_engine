@@ -17,6 +17,7 @@
 
 #include "form_constants.h"
 #include "form_info_base.h"
+#include "form_surface_info.h"
 #include "locale_config.h"
 #include "locale_info.h"
 #include "pointer_event.h"
@@ -697,6 +698,7 @@ void FormPattern::OnModifyDone()
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
         TAG_LOGD(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY %{public}d", isEnable);
     }
+    GetWantParam(info);
     HandleFormComponent(info);
 
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
@@ -734,6 +736,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= formSpecialStyle_.IsForbidden() || formSpecialStyle_.IsLocked();
     UpdateBackgroundColorWhenUnTrustForm();
+    GetWantParam(info);
     HandleFormComponent(info);
     return true;
 }
@@ -752,6 +755,29 @@ void FormPattern::HandleFormComponent(RequestFormInfo& info)
     }
 }
 
+void FormPattern::GetWantParam(RequestFormInfo& info)
+{
+    auto wantWrap = info.wantWrap;
+    if (!wantWrap) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "wantWrap not exit");
+        return;
+    }
+    auto want = wantWrap->GetWant();
+    bool isEnable = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY)) {
+        int width = want.GetIntParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, 0);
+        info.layoutWidth = width ? static_cast<float>(Dimension(width, DimensionUnit::VP).ConvertToPx()) :
+            static_cast<float>(info.width.Value());
+    }
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY)) {
+        int height = want.GetIntParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY, 0);
+        info.layoutHeight = height ? static_cast<float>(Dimension(height, DimensionUnit::VP).ConvertToPx()) :
+            static_cast<float>(info.height.Value());
+    }
+    TAG_LOGD(AceLogTag::ACE_FORM, "FormPattern::GetWantParam FORM_ENABLE_SKELETON_KEY %{public}d,"
+        " layoutWidth %{public}f, layoutHeight %{public}f", isEnable, info.layoutWidth, info.layoutHeight);
+}
+
 void FormPattern::AddFormComponent(const RequestFormInfo& info)
 {
     ACE_FUNCTION_TRACE();
@@ -763,8 +789,9 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         TAG_LOGW(AceLogTag::ACE_FORM, "Invalid form size.");
         return;
     }
-    TAG_LOGW(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f",
-        info.width.Value(), info.height.Value(), info.borderWidth);
+    TAG_LOGW(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f"
+        "  layoutWidth: %{public}f layoutHeight: %{public}f", info.width.Value(), info.height.Value(),
+        info.borderWidth, info.layoutWidth, info.layoutHeight);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
         || info.shape == FORM_SHAPE_CIRCLE) {
@@ -878,7 +905,9 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             formManagerBridge_->SetAllowUpdate(cardInfo_.allowUpdate);
         }
     }
-    if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height ||
+        cardInfo_.borderWidth != info.borderWidth || !NearEqual(cardInfo_.layoutWidth, info.layoutWidth) ||
+        !NearEqual(cardInfo_.layoutHeight, info.layoutHeight)) {
         UpdateFormComponentSize(info);
     }
     if (cardInfo_.obscuredMode != info.obscuredMode) {
@@ -910,24 +939,10 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_FORM,
-        "update size, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
-        info.id, info.width.Value(), info.height.Value(), info.borderWidth);
-    cardInfo_.width = info.width;
-    cardInfo_.height = info.height;
-    cardInfo_.borderWidth = info.borderWidth;
-    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-    CHECK_NULL_VOID(externalRenderContext);
-
-    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
-        round(cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE),
-        round(cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE));
-
-    if (formManagerBridge_) {
-        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_FORM, "form manager delagate is nullptr, card id is %{public}" PRId64 ".",
-            cardInfo_.id);
-    }
+        "update size, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f"
+        "  layoutWidth: %{public}f layoutHeight: %{public}f", info.id, info.width.Value(), info.height.Value(),
+        info.borderWidth, info.layoutWidth, info.layoutHeight);
+    UpdateFormSurface(info);
 
     auto imageNode = GetFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     auto disableStyleRootNode = GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
@@ -961,6 +976,34 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
         subContainer_->SetFormPattern(WeakClaim(this));
         subContainer_->UpdateRootElementSize();
         subContainer_->UpdateSurfaceSizeWithAnimathion();
+    }
+}
+
+void FormPattern::UpdateFormSurface(const RequestFormInfo& info)
+{
+    cardInfo_.width = info.width;
+    cardInfo_.height = info.height;
+    cardInfo_.layoutWidth = info.layoutWidth;
+    cardInfo_.layoutHeight = info.layoutHeight;
+    cardInfo_.borderWidth = info.borderWidth;
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+
+    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
+        round(cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE),
+        round(cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE));
+    
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = info.width.Value();
+    formSurfaceInfo.height = info.height.Value();
+    formSurfaceInfo.layoutWidth = info.layoutWidth;
+    formSurfaceInfo.layoutHeight = info.layoutHeight;
+    formSurfaceInfo.borderWidth = info.borderWidth;
+    if (formManagerBridge_) {
+        formManagerBridge_->NotifySurfaceChange(formSurfaceInfo);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "form manager delagate is nullptr, card id is %{public}" PRId64 ".",
+            cardInfo_.id);
     }
 }
 

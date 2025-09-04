@@ -58,8 +58,8 @@ public:
     bool IsVisible();
     void SetMultiInstanceEnabled(bool isMultiInstanceEnabled) override;
 
-    void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
+    void DispatchSurfaceChangeEvent(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void SetObscured(bool isObscured) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
     void OnAccessibilityChildTreeDeregister() override;
@@ -75,9 +75,13 @@ private:
     bool isVisible_ = true;
     bool isMultiInstanceEnabled_ = false;
     static std::recursive_mutex globalLock_;
-    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
-        uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
+    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent,
+        const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const std::shared_ptr<UIContent>& uiContent);
+    void UpdateFormSurface(const std::shared_ptr<UIContent>& uiContent,
+        const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 };
 } // namespace Ace
 } // namespace OHOS

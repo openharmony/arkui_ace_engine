@@ -74,7 +74,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     SerializedGesture& serializedGesture) {}
 
-void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth) {}
+void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo) {}
 
 void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback) {}
 

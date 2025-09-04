@@ -893,6 +893,11 @@ public:
         return viewScale_;
     }
 
+    void SetViewScale(float viewScale)
+    {
+        viewScale_ = viewScale;
+    }
+
     void SetIsCurrentInForceSplitMode(bool split)
     {
         isCurrentInForceSplitMode_ = split;
