@@ -827,11 +827,11 @@ export class ConsoleMessage implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static ctor_consolemessage(message: string, sourceId: string, lineNumber: number, messageLevel: MessageLevel): KPointer {
+    static ctor_consolemessage(message: string, sourceId: string, lineNumber: int32, messageLevel: MessageLevel): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, TypeChecker.MessageLevel_ToNumeric(messageLevel))
         return retval
     }
-    constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
+    constructor(message?: string, sourceId?: string, lineNumber?: int32, messageLevel?: MessageLevel) {
         if (((message) !== (undefined)) || ((sourceId) !== (undefined)) || ((lineNumber) !== (undefined)) || ((messageLevel) !== (undefined)))
         {
             const ctorPtr : KPointer = ConsoleMessage.ctor_consolemessage((message)!, (sourceId)!, (lineNumber)!, (messageLevel)!)
@@ -847,7 +847,7 @@ export class ConsoleMessage implements MaterializedBase {
     public getSourceId(): string {
         return this.getSourceId_serialize()
     }
-    public getLineNumber(): number {
+    public getLineNumber(): int32 {
         return this.getLineNumber_serialize()
     }
     public getMessageLevel(): MessageLevel {
@@ -861,7 +861,7 @@ export class ConsoleMessage implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
         return retval
     }
-    private getLineNumber_serialize(): number {
+    private getLineNumber_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getLineNumber(this.peer!.ptr)
         return retval
     }
@@ -912,14 +912,18 @@ export class WebResourceRequest implements MaterializedBase {
         return this.getRequestMethod_serialize()
     }
     private getRequestHeader_serialize(): Array<Header> {
-        const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<Header> = new Array<Header>(buffer_length)
+        const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>()
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
             buffer[buffer_i] = retvalDeserializer.readHeader()
         }
-        const returnResult : Array<Header> = buffer
+        const returnResult: Array<Header> = buffer
         return returnResult
     }
     private getRequestUrl_serialize(): string {
@@ -969,7 +973,7 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseData(): string {
         return this.getResponseData_serialize()
     }
-    public getResponseDataEx(): string | number | NativeBuffer | Resource | undefined {
+    public getResponseDataEx(): string | int32 | NativeBuffer | Resource | undefined {
         return this.getResponseDataEx_serialize()
     }
     public getResponseEncoding(): string {
@@ -984,11 +988,11 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseHeader(): Array<Header> {
         return this.getResponseHeader_serialize()
     }
-    public getResponseCode(): number {
+    public getResponseCode(): int32 {
         return this.getResponseCode_serialize()
     }
-    public setResponseData(data: string | number | Resource | NativeBuffer): void {
-        const data_casted = data as (string | number | Resource | NativeBuffer)
+    public setResponseData(data: string | int32 | Resource | NativeBuffer): void {
+        const data_casted = data as (string | int32 | Resource | NativeBuffer)
         this.setResponseData_serialize(data_casted)
         return
     }
@@ -1012,8 +1016,8 @@ export class WebResourceResponse implements MaterializedBase {
         this.setResponseHeader_serialize(header_casted)
         return
     }
-    public setResponseCode(code: number): void {
-        const code_casted = code as (number)
+    public setResponseCode(code: int32): void {
+        const code_casted = code as (int32)
         this.setResponseCode_serialize(code_casted)
         return
     }
@@ -1029,7 +1033,7 @@ export class WebResourceResponse implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
         return retval
     }
-    private getResponseDataEx_serialize(): string | number | NativeBuffer | Resource | undefined {
+    private getResponseDataEx_serialize(): string | int32 | NativeBuffer | Resource | undefined {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseDataEx(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
@@ -1046,8 +1050,12 @@ export class WebResourceResponse implements MaterializedBase {
         return retval
     }
     private getResponseHeader_serialize(): Array<Header> {
-        const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>()
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1056,11 +1064,11 @@ export class WebResourceResponse implements MaterializedBase {
         const returnResult : Array<Header> = buffer
         return returnResult
     }
-    private getResponseCode_serialize(): number {
+    private getResponseCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseCode(this.peer!.ptr)
         return retval
     }
-    private setResponseData_serialize(data: string | number | Resource | NativeBuffer): void {
+    private setResponseData_serialize(data: string | int32 | Resource | NativeBuffer): void {
         const thisSerializer : Serializer = Serializer.hold()
         let data_type : int32 = RuntimeType.UNDEFINED
         data_type = runtimeType(data)
@@ -1071,8 +1079,8 @@ export class WebResourceResponse implements MaterializedBase {
         }
         else if (RuntimeType.NUMBER == data_type) {
             thisSerializer.writeInt8(1 as int32)
-            const data_1  = data as number
-            thisSerializer.writeNumber(data_1)
+            const data_1  = data as int32
+            thisSerializer.writeInt32(data_1)
         }
         else if (TypeChecker.isResource(data, false, false, false, false, false)) {
             thisSerializer.writeInt8(2 as int32)
@@ -1106,7 +1114,7 @@ export class WebResourceResponse implements MaterializedBase {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setResponseCode_serialize(code: number): void {
+    private setResponseCode_serialize(code: int32): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseCode(this.peer!.ptr, code)
     }
     private setResponseIsReady_serialize(IsReady: boolean): void {
@@ -1143,14 +1151,14 @@ export class WebResourceError implements MaterializedBase {
     public getErrorInfo(): string {
         return this.getErrorInfo_serialize()
     }
-    public getErrorCode(): number {
+    public getErrorCode(): int32 {
         return this.getErrorCode_serialize()
     }
     private getErrorInfo_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         return retval
     }
-    private getErrorCode_serialize(): number {
+    private getErrorCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
         return retval
     }
@@ -3495,7 +3503,7 @@ export interface OnDownloadStartEvent {
     userAgent: string;
     contentDisposition: string;
     mimetype: string;
-    contentLength: number;
+    contentLength: long;
 }
 export interface OnRefreshAccessedHistoryEvent {
     url: string;
@@ -3534,8 +3542,8 @@ export interface OnContextMenuShowEvent {
     result: WebContextMenuResult;
 }
 export interface OnSearchResultReceiveEvent {
-    activeMatchOrdinal: number;
-    numberOfMatches: number;
+    activeMatchOrdinal: int32;
+    numberOfMatches: int32;
     isDoneCounting: boolean;
 }
 export interface OnScrollEvent {
@@ -3550,7 +3558,7 @@ export interface OnSslErrorEventReceiveEvent {
 export interface OnClientAuthenticationEvent {
     handler: ClientAuthenticationHandler;
     host: string;
-    port: number;
+    port: int32;
     keyTypes: Array<string>;
     issuers: Array<string>;
 }

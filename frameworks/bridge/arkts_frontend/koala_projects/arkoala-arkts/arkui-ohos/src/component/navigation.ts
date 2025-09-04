@@ -42,7 +42,7 @@ import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ArkStackComponent, ArkStackPeer } from "./stack"
-import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationHideTitleBarImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl, hookNavigationAttributeModifier} from "./../handwritten"
+import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl, hookNavigationAttributeModifier} from "./../handwritten"
 import { NavigationModifier } from "../NavigationModifier"
 
 export class NavPathInfoInternal {
@@ -262,7 +262,7 @@ export class NavPathStack implements MaterializedBase {
     public getAllPathName(): Array<string> {
         return this.getAllPathName_serialize()
     }
-    public getParamByIndex(index: number): Object | undefined {
+    public getParamByIndex(index: number): Object | null | undefined {
         return PathStackUtils.getParamByIndex(this, index)
     }
     public getParamByName(name: string): Array<Object | undefined> {
@@ -1407,6 +1407,7 @@ export interface NavigationAttribute extends CommonMethod {
     backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
     hideNavBar(value: boolean | undefined): this
     subTitle(value: string | undefined): this
+    hideTitleBar(hide: boolean | undefined): this
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this
     hideBackButton(value: boolean | undefined): this
     titleMode(value: NavigationTitleMode | undefined): this
@@ -1481,6 +1482,9 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
         return this
     }
     public subTitle(value: string | undefined): this {
+        return this
+    }
+    public hideTitleBar(hide: boolean | undefined): this {
         return this
     }
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
@@ -1582,8 +1586,8 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             hookNavigationSetNavigationOptionsImpl(this.getPeer().peer.ptr, info)
 
             if (pathInfos != undefined) {
-                    const updater: (name: string, param: object|undefined)=>PeerNode =
-                    (name: string, param: object|undefined) => {
+                    const updater: (name: string, param: object|null|undefined)=>PeerNode =
+                    (name: string, param: object|null|undefined) => {
                         let node = ArkStackPeer.create(new ArkStackComponent())
                         return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
                             setNeedCreate(true)
@@ -1591,7 +1595,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
                             setNeedCreate(false)
                         })
                     }
-                    const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                    const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
                     NavExtender.setUpdateStackCallback(pathInfos!, () => {
                         addPartialUpdate(() => {
                             if (!this.isNeedSync()) {
@@ -1710,19 +1714,20 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public hideTitleBar(hide: boolean | undefined): this {
+        if (this.checkPriority("hideTitleBar")) {
+            const value_casted = hide as (boolean | undefined)
+            this.getPeer()?.hideTitleBar0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
         if (this.checkPriority("hideTitleBar")) {
-            const hide_type = runtimeType(hide)
-            const animated_type = runtimeType(animated)
-            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && 
-                ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type) ||
-                (RuntimeType.UNDEFINED == animated_type))) {
-                const value_casted = hide as (boolean | undefined)
-                const animated_casted = animated as (boolean | undefined)
-                hookNavigationHideTitleBarImpl(this.getPeer().peer.ptr, value_casted, animated_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = hide as (boolean | undefined)
+            const animated_casted = animated as (boolean | undefined)
+            this.getPeer()?.hideTitleBar1Attribute(value_casted, animated_casted)
+            return this
         }
         return this
     }

@@ -23,7 +23,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-class MockContainer final : public Container {
+class MockContainer : public Container {
     DECLARE_ACE_TYPE(MockContainer, Container);
 
 public:

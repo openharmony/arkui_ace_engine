@@ -17,7 +17,7 @@
 #include "node_content_peer.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -33,7 +33,7 @@ Ark_NodeContent CtorImpl()
 {
     auto NodeContent = AceType::MakeRefPtr<NG::NodeContent>();
     auto peer = NodeContentPeer::Create(NodeContent);
-    return peer;
+    return static_cast<Ark_NodeContent>(peer);
 }
 
 Ark_NativePointer GetFinalizerImpl()

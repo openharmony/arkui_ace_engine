@@ -20,7 +20,7 @@
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
-#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED
@@ -53,7 +53,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Uiextension_Set_Option",
             nullptr,
@@ -84,9 +84,9 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
             reinterpret_cast<void *>(SetOnRelease)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtensionComponent Class_BindNativeMethods failed,"
+            "BindNativeUiExtensionComponent Class_BindStaticNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
     };

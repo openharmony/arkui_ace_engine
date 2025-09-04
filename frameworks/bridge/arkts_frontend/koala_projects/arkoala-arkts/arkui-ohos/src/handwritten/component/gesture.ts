@@ -370,18 +370,20 @@ export class GestureGroupHandler extends GestureHandler {
     }
     createGestureGroup(): KPointer {
         this.pointer = GestureOps.createGestureGroup(this.mode);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
         return this.pointer;
     }
     addGestureToGroup(group: KPointer): void {
         this.createGestureGroup();
         for (let gesture of this.gestures) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.addGestureToGroup(this.pointer);
-            }
-            if (gesture instanceof GestureGroup) {
-                let gestureGroup = gesture as GestureGroup;
+            if (gesture instanceof GestureGroupHandler) {
+                let gestureGroup = gesture as GestureGroupHandler;
                 gestureGroup.addGestureToGroup(this.pointer);
+            } else if (gesture instanceof GestureHandler) {
+                let singleGesture = gesture as GestureHandler;
+                singleGesture.addGestureToGroup(this.pointer);
             }
         }
         GestureOps.addGestureToGroup(group, this.pointer);
@@ -907,11 +909,11 @@ export class ScrollableTargetInfoTransfer {
         let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
         let esValue: ESValue = ESValue.wrap(input);
         let id = esValue.invokeMethod("getId");
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
         if (id.isString()) {
             ArkUIAniModule._ScrollableTargetInfoAccessorWithId(peer, id.toString())
         }
-        const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
             return new Object();
         }
@@ -926,7 +928,7 @@ export class ScrollableTargetInfoTransfer {
         if (input == null) {
            return new Object();
         }
-        let objectInternal: EventTargetInfo = input as EventTargetInfo;
+        let objectInternal: ScrollableTargetInfo = input as ScrollableTargetInfo;
         const nativePointer: KPointer = ArkUIAniModule._TransferScrollableTargetInfoPointer(objectInternal.peer!.ptr as long);
         const global = ESValue.getGlobal();
         const wrapFunc = global.getProperty('wrapScrollableTargetInfoPointer');
@@ -963,7 +965,7 @@ export class EventTargetInfoTransfer {
         
         let objectInternal: EventTargetInfo = input as EventTargetInfo;
         const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapEventTargetInfoPointer');
+        const wrapFunc = global.getProperty('wrapEventTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
             return new Object();
         }

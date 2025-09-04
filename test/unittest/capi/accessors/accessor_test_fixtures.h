@@ -140,7 +140,7 @@ extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtur
 extern const std::vector<float> testFixtureFloatValues;
 extern const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
     testFixtureEnumArkDragBehaviorValues;
-extern const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable;
+extern const std::vector<std::tuple<int64_t, std::string, ResRawValue>> resourceInitTable;
 
 extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
     testFixtureVerticalAlignValidValues;

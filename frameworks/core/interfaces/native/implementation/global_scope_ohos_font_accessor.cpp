@@ -20,12 +20,12 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src)
+void AssignCast(std::optional<SimpleResource>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
     auto resourceString = converter.ToString();
     if (resourceString) {
-        Ark_Resource_Simple temp;
+        SimpleResource temp;
         temp.content = resourceString.value();
         temp.bundleName = converter.BundleName();
         temp.moduleName = converter.ModuleName();
@@ -36,11 +36,11 @@ void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src
     }
 }
 template<>
-void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src)
+void AssignCast(std::optional<SimpleResource>& dst, const Ark_String& src)
 {
     std::string str = Converter::Convert<std::string>(src);
     if (!str.empty()) {
-        Ark_Resource_Simple temp;
+        SimpleResource temp;
         temp.content = str;
         dst = temp;
     }
@@ -59,7 +59,7 @@ void RegisterFontImpl(const Ark_FontOptions* options)
     if (auto familyNameOpt = Converter::OptConvert<Converter::FontFamilies>(options->familyName); familyNameOpt) {
         familyName = !familyNameOpt->families.empty() ? familyNameOpt->families.front() : "";
     }
-    if (auto familySrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(options->familySrc);
+    if (auto familySrcOpt = Converter::OptConvert<Converter::SimpleResource>(options->familySrc);
         familySrcOpt) {
         familySrc = familySrcOpt->content;
         bundleName = familySrcOpt->bundleName;

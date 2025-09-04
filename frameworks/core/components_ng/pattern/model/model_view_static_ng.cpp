@@ -42,6 +42,11 @@ RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void ModelViewNG::SetModelSource(FrameNode* frameNode, const std::string& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelSource, value, frameNode);
+}
+
 void ModelViewNG::SetBackground(FrameNode* frameNode, const std::string& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelBackground, value, frameNode);

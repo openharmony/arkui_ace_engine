@@ -84,7 +84,7 @@ namespace TextInputModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(id, u"", u"", false);
+    auto frameNode = TextFieldModelStatic::CreateTextInputNode(id, u"", u"");
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -595,9 +595,9 @@ void CancelButton0Impl(Ark_NativePointer node,
     Validator::ValidateNonPercent(iconSize);
     TextFieldModelStatic::SetCancelIconSize(frameNode, iconSize);
     // set icon src
-    auto iconSrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(optIconOptions->src);
+    auto iconSrcOpt = Converter::OptConvert<Converter::SimpleResource>(optIconOptions->src);
     if (!iconSrcOpt) {
-        iconSrcOpt = Converter::Ark_Resource_Simple();
+        iconSrcOpt = Converter::SimpleResource();
     }
     TextFieldModelStatic::SetCanacelIconSrc(frameNode, iconSrcOpt->content, iconSrcOpt->bundleName,
         iconSrcOpt->moduleName);
@@ -909,8 +909,8 @@ void AutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextInputModelNG::SetAutoCapitalizationMode(frameNode, convValue);
+    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
+    TextFieldModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void HalfLeadingImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)

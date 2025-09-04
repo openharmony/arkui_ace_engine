@@ -22,17 +22,19 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT, AttributeModifier } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor } from "./units"
-import { RadioOpsHandWritten, hookRadioContentModifier } from "./../handwritten"
+import { hookRadioAttributeModifier, RadioOpsHandWritten, hookRadioContentModifier } from "./../handwritten"
+import { RadioModifier } from '../RadioModifier'
 
 export class ArkRadioPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    _attributeSet?: RadioModifier;
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkRadioPeer {
@@ -158,14 +160,15 @@ export interface RadioStyle {
 export type RadioInterface = (options: RadioOptions) => RadioAttribute;
 export type OnRadioChangeCallback = (isChecked: boolean) => void;
 export interface RadioAttribute extends CommonMethod {
-    setRadioOptions(options: RadioOptions): this {
-        return this
-    }
-    checked(value: boolean | Bindable<boolean> | undefined): this
-    onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this
-    radioStyle(value: RadioStyle | undefined): this
-    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this
-    _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
+    setRadioOptions(options: RadioOptions): this { return this; }
+    checked(value: boolean | Bindable<boolean> | undefined): this { return this; }
+    onChange(value: ((isVisible: boolean) => void) | undefined |
+        OnRadioChangeCallback | undefined): this { return this; }
+    radioStyle(value: RadioStyle | undefined): this { return this; }
+    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this { return this; }
+    _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<RadioAttribute> |
+        AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
     checked_value?: boolean | undefined
@@ -264,6 +267,12 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<RadioAttribute> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        hookRadioAttributeModifier(this, modifier);
+        return this
     }
     
     public applyAttributesFinish(): void {

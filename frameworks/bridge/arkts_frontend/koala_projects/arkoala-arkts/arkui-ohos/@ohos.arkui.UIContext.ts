@@ -23,6 +23,8 @@ import { SizeOptions } from "arkui/component/units"
 import { AnimateParam } from "arkui/component"
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
@@ -229,16 +231,16 @@ export class ComponentSnapshot {
 
 export class DragController {
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         throw Error("executeDrag with callback not implemented in DragController!")
     }
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
@@ -381,11 +383,11 @@ export class PromptAction {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         throw Error("getTopOrder not implemented in PromptAction!")
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
@@ -626,6 +628,13 @@ export class UIContext {
 
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
+    }
+
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        return UIContextImpl.createUIContextWithoutWindow(context)
+    }
+    static destroyUIContextWithoutWindow() {
+        UIContextImpl.destroyUIContextWithoutWindow()
     }
 
     public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {

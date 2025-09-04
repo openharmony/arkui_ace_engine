@@ -22,16 +22,19 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT, AttributeModifier } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { RatingOpsHandWritten, hookRatingContentModifier } from "./../handwritten"
+import { hookRatingAttributeModifier, RatingOpsHandWritten, hookRatingContentModifier } from "./../handwritten"
 import { ResourceStr } from "./units"
+import { RatingModifier } from '../RatingModifier'
+
 
 export class ArkRatingPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    _attributeSet?: RatingModifier;
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkRatingPeer {
@@ -199,15 +202,15 @@ export interface RatingConfiguration extends CommonConfiguration<RatingConfigura
 }
 export type OnRatingChangeCallback = (rating: number) => void;
 export interface RatingAttribute extends CommonMethod {
-    setRatingOptions(options?: RatingOptions): this {
-        return this
-    }
-    stars(value: number | undefined): this
-    stepSize(value: number | undefined): this
-    starStyle(value: StarStyleOptions | undefined): this
-    onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this
-    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this
-    _onChangeEvent_rating(callback: ((index: number) => void)): void
+    setRatingOptions(options?: RatingOptions): this { return this; }
+    stars(value: number | undefined): this { return this; }
+    stepSize(value: number | undefined): this { return this; }
+    starStyle(value: StarStyleOptions | undefined): this { return this; }
+    onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this { return this; }
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this { return this; }
+    _onChangeEvent_rating(callback: ((index: number) => void)): void {}
+    attributeModifier(modifier: AttributeModifier<RatingAttribute> |
+        AttributeModifier<CommonMethod> | undefined ): this { return this; }
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
     stars_value?: number | undefined
@@ -343,6 +346,12 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
             return
         }
         return
+    }
+
+    public attributeModifier(modifier: AttributeModifier<RatingAttribute> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        hookRatingAttributeModifier(this, modifier);
+        return this
     }
     
     public applyAttributesFinish(): void {

@@ -19,8 +19,7 @@
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/level_order_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/referenced.h"
 
@@ -169,41 +168,47 @@ static ani_object GetOverlayManagerOptions(ani_env* env)
     CHECK_NULL_RETURN(overlayManager, options);
 
     auto overlayInfo = overlayManager->GetOverlayManagerOptions();
-    if (overlayInfo.has_value()) {
-        ani_class cls;
-        if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptionsInner", &cls)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass OverlayManagerOptionsInner failed");
-            return options;
-        }
-        ani_method ctor;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find OverlayManagerOptionsInner ctor");
-            return options;
-        }
-        if (ANI_OK != env->Object_New(cls, ctor, &options)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Create OverlayManagerOptionsInner object failed");
-            return options;
-        }
-
-        ani_object renderRootOverlayObj;
-        CreateAniBoolean(env, overlayInfo->renderRootOverlay, renderRootOverlayObj);
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "renderRootOverlay", renderRootOverlayObj)) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property renderRootOverlay failed");
-        }
-
-        ani_object enableBackPressedEventObj;
-        CreateAniBoolean(env, overlayInfo->enableBackPressedEvent, enableBackPressedEventObj);
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "enableBackPressedEvent", enableBackPressedEventObj)) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property enableBackPressedEvent failed");
-        }
+    if (!overlayInfo.has_value()) {
+        overlayInfo = NG::OverlayManagerInfo {
+            .renderRootOverlay = true,
+            .enableBackPressedEvent = false,
+        };
     }
+
+    ani_class cls;
+    if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptionsInner", &cls)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass OverlayManagerOptionsInner failed");
+        return options;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find OverlayManagerOptionsInner ctor");
+        return options;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &options)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Create OverlayManagerOptionsInner object failed");
+        return options;
+    }
+
+    ani_object renderRootOverlayObj;
+    CreateAniBoolean(env, overlayInfo->renderRootOverlay, renderRootOverlayObj);
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "renderRootOverlay", renderRootOverlayObj)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property renderRootOverlay failed");
+    }
+
+    ani_object enableBackPressedEventObj;
+    CreateAniBoolean(env, overlayInfo->enableBackPressedEvent, enableBackPressedEventObj);
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "enableBackPressedEvent", enableBackPressedEventObj)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property enableBackPressedEvent failed");
+    }
+
     return options;
 }
 
 static void AddComponentContent(ani_env* env, ani_long aniNode, ani_int aniIndex)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani AddComponentContent enter: index: %{public}d", (int32_t)aniIndex);
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto index = static_cast<int>(aniIndex);
@@ -247,7 +252,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
         orderNumber = std::make_optional(orderValue);
     }
 
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -260,7 +265,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
 static void RemoveComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani RemoveComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -278,7 +283,7 @@ static void RemoveComponentContent(ani_env* env, ani_long aniNode)
 static void ShowComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani ShowComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
@@ -296,7 +301,7 @@ static void ShowComponentContent(ani_env* env, ani_long aniNode)
 static void HideComponentContent(ani_env* env, ani_long aniNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani HideComponentContent enter");
-    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();

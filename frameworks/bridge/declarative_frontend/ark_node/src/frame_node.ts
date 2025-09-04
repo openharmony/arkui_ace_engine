@@ -42,6 +42,10 @@ enum EventQueryType {
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
+function getFrameNodeRawPtr(frameNode) {
+    return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+}
+
 class FrameNode extends Disposable {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -59,7 +63,6 @@ class FrameNode extends Disposable {
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
   public type_: string | undefined;
-  public rawPtr_: number | undefined;
   constructor(uiContext: UIContext, type: string, options?: object, point?: number) {
     super();
     if (uiContext === undefined) {
@@ -107,7 +110,6 @@ class FrameNode extends Disposable {
     this.renderNode_?.setNodePtr(result?.nativeStrongRef);
     this.renderNode_?.setFrameNode(new WeakRef(this));
     this.type_ = type;
-    this.rawPtr_ = result?.rawPtr_;
     if (result === undefined || this._nodeId === -1) {
       return;
     }

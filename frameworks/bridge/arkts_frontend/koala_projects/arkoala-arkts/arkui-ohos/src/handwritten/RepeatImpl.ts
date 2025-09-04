@@ -18,10 +18,12 @@
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
 import { KPointer } from '@koalaui/interop';
-import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
+import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback, Repeat } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from "../component"
 import { LazyForEachImplForOptions } from './LazyForEachImpl';
+import { NodeHolder } from "./LazyForEachImpl"
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
@@ -40,7 +42,8 @@ export function RepeatImplForOptions<T>(
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
     if (repeat.disableVirtualScroll_) {
-        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_,
+            repeat.onMove_, repeat.itemDragEvent_);
     } else {
         const repeatId = __id();
         const node = contextNode<PeerNode>();
@@ -159,10 +162,24 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     userDefinedTotal_?: number; // if totalCount is specified
     onLazyLoading_?: (index: number) => void;
+    onMove_?: OnMoveHandler;
+    itemDragEvent_?: ItemDragEventHandler;
 
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
     setRepeatOptions(arr: RepeatArray<T>): this {
+        return this;
+    }
+
+    onMove(handler: OnMoveHandler | undefined): this {
+        this.onMove_ = handler;
+        return this;
+    }
+
+    onMove(handler: OnMoveHandler | undefined,
+        eventHandler: ItemDragEventHandler | undefined): this {
+        this.onMove_ = handler;
+        this.itemDragEvent_ = eventHandler;
         return this;
     }
 
@@ -211,14 +228,29 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
-export class SyntaxNodePeer extends PeerNode {
-    public static create(): SyntaxNodePeer {
+export class SyntaxItemPeer extends PeerNode {
+    public static create(): SyntaxItemPeer {
         const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._SyntaxNode_Construct(peerId);
+        const _peerPtr = ArkUIAniModule._SyntaxItem_Construct(peerId);
         if (!_peerPtr) {
-            throw new Error(`Failed to create SyntaxNodePeer with id: ${peerId}`);
+            throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`);
         }
-        return new SyntaxNodePeer(_peerPtr, peerId, 'SyntaxNode');
+        return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
+export class ForEachNodePeer extends PeerNode {
+    public static create(isRepeat: boolean = false): ForEachNodePeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
+        }
+        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach');
     }
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -254,31 +286,48 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
+            NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 itemBuilder(ri);
             }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
     };
-    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true,
+        attributes.onMove_, attributes.itemDragEvent_);
 }
+
+function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
 function nonVirtualRender<T>(arr: RepeatArray<T>,
     /** @memo */
     itemGenerator: RepeatItemBuilder<T>,
-    keyGenerator?: (element: T, index: number) => string
+    keyGenerator?: (element: T, index: number) => string,
+    onMove?: OnMoveHandler,
+    itemDragEvent?: ItemDragEventHandler,
 ): void {
     if (keyGenerator && typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }
+    let nodeHolder = remember(() => new NodeHolder())
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
-    NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
-        RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
-            const ri = new RepeatItemImpl<T>(ele, (i as number));
+    /** @memo */
+    const action = (ele: T, i: int32) => {
+        const ri = new RepeatItemImpl<T>(ele, (i as number));
+        NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);
         });
+    };
+    NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
+        RepeatByArray<T>(arr, keyGen, action);
+            nodeHolder.node = node;
     });
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(),
+        onMoveFromTo, onMove, itemDragEvent);
 }

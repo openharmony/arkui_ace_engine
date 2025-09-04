@@ -38,6 +38,20 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
     }
 }
 
+void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src)
+{
+    switch (src) {
+        case AutoCapitalizationMode::NONE: dst = ARK_AUTO_CAPITALIZATION_MODE_NONE; break;
+        case AutoCapitalizationMode::WORDS: dst = ARK_AUTO_CAPITALIZATION_MODE_WORDS; break;
+        case AutoCapitalizationMode::SENTENCES: dst = ARK_AUTO_CAPITALIZATION_MODE_SENTENCES; break;
+        case AutoCapitalizationMode::ALL_CHARACTERS: dst = ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>;
+            LOGE("Unexpected enum value in AutoCapitalizationMode: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
 {
     switch (src) {
@@ -420,6 +434,8 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
+        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);

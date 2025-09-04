@@ -30,20 +30,20 @@ type TaskType<T> = () => T;
 enum NotifyMutableStateMode {
     normal = 0,
     delayMutation = 1,
-    noMutation = 2
+    noMutation = 2,
 }
 
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
-    public static readonly RenderingComponent: number = 0;
-    public static readonly RenderingComponentV1: number = 1;
-    public static readonly RenderingComponentV2: number = 2;
-    public static readonly RenderingMonitor: number = 3;
-    public static readonly RenderingComputed: number = 4;
-    public static readonly RenderingPersistentStorage: number = 5;
+    public static readonly RenderingComponent: int = 0;
+    public static readonly RenderingComponentV1: int = 1;
+    public static readonly RenderingComponentV2: int = 2;
+    public static readonly RenderingMonitor: int = 3;
+    public static readonly RenderingComputed: int = 4;
+    public static readonly RenderingPersistentStorage: int = 5;
 
-    public _renderingComponent: number = ObserveSingleton.RenderingComponent;
+    public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
     public renderingComponentRef?: ITrackedDecoratorRef;
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
@@ -55,10 +55,10 @@ export class ObserveSingleton implements IObserve {
     );
     private reverseBindingRefsToSet_ = new Map<WeakRef<ITrackedDecoratorRef>, Set<WeakRef<IBindingSource>>>();
 
-    get renderingComponent(): number {
+    get renderingComponent(): int {
         return this._renderingComponent;
     }
-    set renderingComponent(value: number) {
+    set renderingComponent(value: int) {
         this._renderingComponent = value;
     }
 
@@ -166,8 +166,12 @@ export class ObserveSingleton implements IObserve {
                     });
                 }
             }
-        } while (this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size
-            + this.persistencePropRefsChanged_.size > 0);
+        } while (
+            this.monitorPathRefsChanged_.size +
+                this.computedPropRefsChanged_.size +
+                this.persistencePropRefsChanged_.size >
+            0
+        );
     }
 
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
@@ -196,10 +200,10 @@ export class ObserveSingleton implements IObserve {
 
     /* Execute given task
      * apply state changes to incremental engine immediately that occur while executing the task
-     * this is the regular operation mode, therefore the function is rather redundant and given 
+     * this is the regular operation mode, therefore the function is rather redundant and given
      * just for the case where normal mode needs to be nested inside delayed mode
-     * @param task 
-     * @returns 
+     * @param task
+     * @returns
      */
     public applyTaskImmediateMutableStateChange<T>(task: TaskType<T>): T {
         const temp = this.mutateMutableStateMode_;
@@ -212,11 +216,11 @@ export class ObserveSingleton implements IObserve {
     /**
      * Execute given task
      * while executing do not notify any state changes to incremental engine
-     * state changes still trigger dependent @Computed to update and @Monitor 
+     * state changes still trigger dependent @Computed to update and @Monitor
      * function to execute
-     * 
-     * @param task 
-     * @returns 
+     *
+     * @param task
+     * @returns
      */
     public applyTaskNoMutableStateChange<T>(task: TaskType<T>): T {
         const temp = this.mutateMutableStateMode_;
@@ -229,13 +233,13 @@ export class ObserveSingleton implements IObserve {
     /**
      * Execute given task
      * queue any state changes to incremental engine that occur while executing the task
-     * state changes still trigger normally dependent @Computed to update and @Monitor 
+     * state changes still trigger normally dependent @Computed to update and @Monitor
      * function to execute
      * queued state changes get notified to incremental engine when instructed to do so
      * by calling @see delayedNotify
-     * 
-     * @param task 
-     * @returns 
+     *
+     * @param task
+     * @returns
      */
     public applyTaskDelayMutableStateChange<T>(task: TaskType<T>): T {
         const temp = this.mutateMutableStateMode_;
@@ -246,22 +250,22 @@ export class ObserveSingleton implements IObserve {
     }
 
     /**
-     * Notify any state changes to incremental engine that have been queued up by 
+     * Notify any state changes to incremental engine that have been queued up by
      * executing tasks with @see applyDelayNotify
      * The function mutates each MutableState just once even if executing tasks
-     * added it to the queue several times. 
+     * added it to the queue several times.
      * The order of mutation is non deterministic.
      * @returns number of distinct MutableState objects that have been touched
      */
     public makeDelayedMutableStateChanges(): number {
         const count = this.queuedMutableStateChanges_.size;
         if (count > 0) {
-            this.queuedMutableStateChanges_.forEach(mutableStateMetaWeak => {
+            this.queuedMutableStateChanges_.forEach((mutableStateMetaWeak) => {
                 const mutableStateMeta = mutableStateMetaWeak.deref();
                 if (mutableStateMeta) {
                     mutableStateMeta!.changeMutableState();
                 }
-            })
+            });
             this.queuedMutableStateChanges_.clear();
         }
         return count;

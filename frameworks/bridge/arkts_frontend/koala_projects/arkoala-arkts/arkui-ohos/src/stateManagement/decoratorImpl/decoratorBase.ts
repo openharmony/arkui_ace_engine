@@ -171,7 +171,6 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
                 watchFunc.execute(this.varName);
             });
         }
-
     }
 
     public registerWatchToSource(watchOwner: IDecoratedV1Variable<T>): WatchIdType {

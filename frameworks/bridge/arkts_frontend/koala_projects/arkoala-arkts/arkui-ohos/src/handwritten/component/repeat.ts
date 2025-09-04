@@ -18,6 +18,7 @@
 
 import { __context, __id, remember } from '@koalaui/runtime';
 import { RepeatImplForOptions } from '../handwritten/RepeatImpl';
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from './common';
 import { InteropNativeModule } from "@koalaui/interop";
 
 export interface RepeatItem<T> {
@@ -43,13 +44,15 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface RepeatAttribute<T> {
+export interface RepeatAttribute<T> extends DynamicNode {
     arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
     key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
     virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
     template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
     templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
+    onMove(handler?: OnMoveHandler): this;
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
@@ -77,6 +80,12 @@ export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
     public templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T> {
         return this;
     };
+    public onMove(handler?: OnMoveHandler): this {
+        return this;
+    }
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        return this;
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
     }

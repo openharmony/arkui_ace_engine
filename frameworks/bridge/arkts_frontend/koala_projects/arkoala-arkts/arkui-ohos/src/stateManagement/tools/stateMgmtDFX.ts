@@ -46,11 +46,11 @@ export class DumpInfo {
 
 export class StateMgmtDFX {
     static getDecoratedVariableInfo(view: NullishType, dumpInfo: DumpInfo, isV2: boolean): void {
-       if (isV2) {
+        if (isV2) {
             StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
-       } else {
+        } else {
             StateMgmtDFX.dumpV1VariableInfo(view, dumpInfo);
-       }
+        }
     }
 
     static dumpV1VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
@@ -72,11 +72,15 @@ export class StateMgmtDFX {
         }
     }
 
-        static dumpV2VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+    static dumpV2VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
         if (view instanceof Object) {
             Object.getOwnPropertyNames(view)
                 .filter((varName) => {
-                    return varName.startsWith('__backing') || varName.startsWith('__computed') || varName.startsWith('__monitor');
+                    return (
+                        varName.startsWith('__backing') ||
+                        varName.startsWith('__computed') ||
+                        varName.startsWith('__monitor')
+                    );
                 })
                 .forEach((varName) => {
                     const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData();
@@ -87,14 +91,14 @@ export class StateMgmtDFX {
                             value: value.get(),
                         });
                     } else if (value && value instanceof ComputedDecoratedVariable) {
-                            dumpInfo.observedPropertiesInfo.push({
+                        dumpInfo.observedPropertiesInfo.push({
                             decorator: value.decorator,
                             propertyName: value.varName,
                             value: value.get(),
                         });
                     } else if (value && value instanceof MonitorFunctionDecorator) {
-                            const propertyName = varName.replace('__monitor_', '');
-                            dumpInfo.observedPropertiesInfo.push({
+                        const propertyName = varName.replace('__monitor_', '');
+                        dumpInfo.observedPropertiesInfo.push({
                             decorator: value.decorator,
                             propertyName: propertyName,
                         });

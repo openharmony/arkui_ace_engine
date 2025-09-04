@@ -682,8 +682,8 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
-    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
@@ -1609,8 +1609,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientResourcesColorStops
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
     Opt_RadialGradientOptions optInputValue;
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
-    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 
@@ -1664,7 +1664,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestValidValues, 
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 
-    auto resName = NamedResourceId("bi_public_ok", Converter::ResourceType::STRING);
+    auto resName = NamedResourceId("bi_public_ok", ResourceType::STRING);
     resStr = CreateResourceUnion<Ark_ResourceStr>(resName);
     src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
 

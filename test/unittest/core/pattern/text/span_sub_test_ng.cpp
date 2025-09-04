@@ -55,7 +55,7 @@ public:
 
 /**
  * @tc.name: SpanSetBaselineOffsetTest002
- * @tc.desc: Test baseline offset of span.
+ * @tc.desc: Test baseline offset of span
  * @tc.type: FUNC
  */
 HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest002, TestSize.Level1)

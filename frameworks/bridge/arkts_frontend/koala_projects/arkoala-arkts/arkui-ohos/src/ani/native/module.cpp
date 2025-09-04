@@ -19,11 +19,13 @@
 #include "animation/animation_ani_impl.h"
 #include "canvas/canvas_module.h"
 #include "common/common_module.h"
+#include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
+#include "syntax/for_each_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -44,6 +46,7 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
+#include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -59,7 +62,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Image_ResizableOptions",
             nullptr,
@@ -369,11 +372,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_LazyForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
-        },
-        ani_native_function {
-            "_SyntaxNode_Construct",
-            "I:J",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",
@@ -765,6 +763,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JJ:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::AddComponentToFrameNode)
         },
+
+        ani_native_function {
+            "_CreateWindowFreeContainer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateWindowFreeContainer)
+        },
+
+        ani_native_function {
+            "_DestroyWindowFreeContainer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DestroyWindowFreeContainer)
+        },
+
         ani_native_function {
             "_CheckIsUIThread",
             "I:I",
@@ -1030,12 +1041,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetStringColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetNumberColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
@@ -1079,6 +1090,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ApplyParentThemeScopeId",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
+        },
+        ani_native_function {
+            "_UINode_OnUpdateDone",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnUpdateDone)
+        },
+        ani_native_function {
+            "_UINode_SetStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetUINodeIsStatic)
         },
         ani_native_function {
             "_NodeAdapter_Construct",
@@ -1134,11 +1155,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterGetAllItems)
         },
+        ani_native_function {
+            "_SyntaxItem_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxItem)
+        },
+        ani_native_function {
+            "_ForEachNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_Component3D_SetScene",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetScene)
+        },
+        ani_native_function {
+            "_Component3D_SetWidget",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
+        },
     };
 
-    auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
     if (bindRst != ANI_OK) {
-        HILOGE("Bind native methonds failed, bindRst:%{public}d", bindRst);
+        HILOGE("Bind static native methods failed, bindRst:%{public}d", bindRst);
         return bindRst;
     }
     *result = ANI_VERSION_1;

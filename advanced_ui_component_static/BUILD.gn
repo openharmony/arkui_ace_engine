@@ -15,13 +15,18 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("advanced_ui_component_static") {
-  deps = []
+   deps = [
+    "dialog:dialog",
+    "dialogv2:dialogV2",
+  ]
   if (!ace_engine_feature_wearable) {
     deps += [
       "selecttitlebar:selectTitleBar",
       "fullscreenlaunchcomponent:fullScreenLaunch",
+      "filter:Filter",
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
+      "selectionmenu:selectionMenu",
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
       "composeListItem:composeListItem",

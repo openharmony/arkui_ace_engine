@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
@@ -22,13 +22,12 @@ export class AppStorageV2 {
     public static connect<T extends object>(
         ttype: Type,
         key: string,
-        defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return AppStorageV2Impl.instance().connect(ttype, key, defaultCreator)
+        defaultCreator?: StorageDefaultCreator<T>
+    ): T | undefined {
+        return AppStorageV2Impl.instance().connect(ttype, key, defaultCreator);
     }
 
-    public static connect<T extends object>(
-        ttype: Type,
-        defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+    public static connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
         return AppStorageV2Impl.instance().connect(ttype, defaultCreator);
     }
 
@@ -43,7 +42,7 @@ export class AppStorageV2 {
 
 export class AppStorageV2Impl {
     private static instance_: AppStorageV2Impl | undefined = undefined;
-    private memorizedValues_: Map<string, Object>;  // IObservedObject?
+    private memorizedValues_: Map<string, Object>; // IObservedObject?
 
     constructor() {
         super();
@@ -61,8 +60,8 @@ export class AppStorageV2Impl {
     public connect<T extends object>(
         ttype: Type,
         key: string,
-        defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-
+        defaultCreator?: StorageDefaultCreator<T>
+    ): T | undefined {
         if (ttype.isPrimitive()) {
             throw new Error(StorageHelper.INVALID_DEFAULT_VALUE_PRIMITIVE);
         }
@@ -76,7 +75,7 @@ export class AppStorageV2Impl {
             }
             let defaultValue = defaultCreator!();
             StorageHelper.checkTypeByInstanceOf(key!, ttype, defaultValue);
-            let observedValue = UIUtils.makeObserved(defaultValue);
+            let observedValue = uiUtils.makeObserved(defaultValue, true);
 
             this.memorizedValues_.set(key!, observedValue);
             return observedValue;
@@ -87,9 +86,7 @@ export class AppStorageV2Impl {
         return obj as T;
     }
 
-    public connect<T extends object>(
-        ttype: Type,
-        defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+    public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
         return this.connect(ttype, ttype.getName(), defaultCreator);
     }
 

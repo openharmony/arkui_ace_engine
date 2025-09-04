@@ -41,35 +41,42 @@ void SetRectShapeImpl(Ark_ShapeMask peer,
                       const Ark_Rect* rect)
 {
     if (peer && rect) {
-        peer->SetRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect));
+        peer->shape = Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect);
+        peer->SetBasicProperties();
     }
 }
 void SetRoundRectShapeImpl(Ark_ShapeMask peer,
                            const Ark_RoundRect* roundRect)
 {
     if (peer && roundRect) {
-        peer->SetRoundRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*roundRect));
+        peer->shape = Converter::Convert<RefPtr<Ace::ShapeRect>>(*roundRect);
+        peer->SetBasicProperties();
     }
 }
 void SetCircleShapeImpl(Ark_ShapeMask peer,
                         const Ark_Circle* circle)
 {
     if (peer && circle) {
-        peer->SetCircleShape(Converter::Convert<RefPtr<Ace::Circle>>(*circle));
+        peer->shape = Converter::Convert<RefPtr<Ace::Circle>>(*circle);
+        peer->SetBasicProperties();
     }
 }
 void SetOvalShapeImpl(Ark_ShapeMask peer,
                       const Ark_Rect* oval)
 {
     if (peer && oval) {
-        peer->SetOvalShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*oval));
+        peer->shape = Converter::Convert<RefPtr<Ace::Ellipse>>(*oval);
+        peer->SetBasicProperties();
     }
 }
 void SetCommandPathImpl(Ark_ShapeMask peer,
                         const Ark_CommandPath* path)
 {
     if (peer && path) {
-        peer->SetCommandPath(Converter::Convert<std::string>(*path));
+        auto pathShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::Path>();
+        pathShape->SetValue(Converter::Convert<std::string>(*path));
+        peer->shape = pathShape;
+        peer->SetBasicProperties();
     }
 }
 Ark_Number GetFillColorImpl(Ark_ShapeMask peer)
@@ -82,6 +89,9 @@ void SetFillColorImpl(Ark_ShapeMask peer,
 {
     CHECK_NULL_VOID(peer && fillColor);
     peer->fillColor = Converter::Convert<int32_t>(*fillColor);
+    if (peer->shape) {
+        peer->shape->SetColor(OHOS::Ace::Color(peer->fillColor));
+    }
 }
 Ark_Number GetStrokeColorImpl(Ark_ShapeMask peer)
 {
@@ -93,6 +103,9 @@ void SetStrokeColorImpl(Ark_ShapeMask peer,
 {
     CHECK_NULL_VOID(peer && strokeColor);
     peer->strokeColor = Converter::Convert<int32_t>(*strokeColor);
+    if (peer->shape) {
+        peer->shape->SetStrokeColor(peer->strokeColor);
+    }
 }
 Ark_Number GetStrokeWidthImpl(Ark_ShapeMask peer)
 {
@@ -104,6 +117,9 @@ void SetStrokeWidthImpl(Ark_ShapeMask peer,
 {
     CHECK_NULL_VOID(peer && strokeWidth);
     peer->strokeWidth = Converter::Convert<float>(*strokeWidth);
+    if (peer->shape) {
+        peer->shape->SetStrokeWidth(peer->strokeWidth);
+    }
 }
 } // ShapeMaskAccessor
 const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor()

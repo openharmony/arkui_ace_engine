@@ -2,6 +2,7 @@ import { int32, float32 } from "@koalaui/common"
 export enum CallbackKind {
     Kind_AccessibilityCallback = 589030517,
     Kind_AccessibilityFocusCallback = 1715445305,
+    Kind_AccessibilityTransparentCallback = -1651707213,
     Kind_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem = 300202685,
     Kind_AsyncCallback_image_PixelMap_Void = 1289587365,
     Kind_AsyncCallback_TextMenuItem_TextRange_Boolean = -1581515233,
@@ -105,6 +106,7 @@ export enum CallbackKind {
     Kind_Callback_OnHttpErrorReceiveEvent_Void = -2066745559,
     Kind_Callback_OnInterceptRequestEvent_WebResourceResponse = 1442698200,
     Kind_Callback_OnLoadInterceptEvent_Boolean = 1231444306,
+    Kind_Callback_OnMoveFromTo = -1477855655,
     Kind_Callback_OnOverScrollEvent_Void = -860386431,
     Kind_Callback_OnPageBeginEvent_Void = -2040193994,
     Kind_Callback_OnPageEndEvent_Void = -130135362,

@@ -18,6 +18,7 @@
 namespace OHOS::Ace {
 namespace {
 const char* CREATE_ARKTS_FRONTEND = "OHOS_ACE_CreateArktsFrontend";
+const char* CREATE_ARKTS_DYNAMIC_FRONTEND = "OHOS_ACE_CreatArkTsDynamicFrontend";
 const char* CREATE_ARKTS_PLUGIN_FRONTEND = "OHOS_ACE_CreateArktsPluginFrontend";
 const char* CREATE_ANI_REFERENCE = "OHOS_ACE_CreateAniReference";
 const char* DELETE_ANI_REFERENCE = "OHOS_ACE_DeleteAniReference";
@@ -36,6 +37,20 @@ Frontend* ArktsFrontendLoader::CreatArkTsFrontend(const void* sharedRuntime)
     CHECK_NULL_RETURN(createArktsFrontendFunc_, nullptr);
 
     return createArktsFrontendFunc_(sharedRuntime);
+}
+
+Frontend* ArktsFrontendLoader::CreatArkTsDynamicFrontend(const void* sharedRuntime)
+{
+    if (!sharedRuntime) {
+        return nullptr;
+    }
+    if (!createArktsDynamicFrontendFunc_) {
+        createArktsDynamicFrontendFunc_ =
+            reinterpret_cast<CreateArktsDynamicFrontendFunc>(LoadSymbol(CREATE_ARKTS_DYNAMIC_FRONTEND));
+    }
+    CHECK_NULL_RETURN(createArktsDynamicFrontendFunc_, nullptr);
+
+    return createArktsDynamicFrontendFunc_(sharedRuntime);
 }
 
 void* ArktsFrontendLoader::CreateAniReference(const void* runtime, const void* storage)

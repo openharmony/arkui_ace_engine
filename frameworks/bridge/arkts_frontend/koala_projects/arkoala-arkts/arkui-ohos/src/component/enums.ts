@@ -123,6 +123,8 @@ export enum MouseAction {
     Move = 3,
     HOVER = 4,
     Hover = 4,
+    WINDOW_ENTER = 5,
+    WINDOW_LEAVE = 6,
     CANCEL = 13
 }
 export enum AnimationStatus {

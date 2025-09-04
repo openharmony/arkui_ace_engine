@@ -75,7 +75,10 @@
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "base/log/log_wrapper.h"
+
+#include "circle_shape_peer.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -1286,6 +1289,16 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
 }
 
 template<>
+void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& src)
+{
+    switch (src) {
+        case ARK_FOCUS_DRAW_LEVEL_SELF: dst = FocusDrawLevel::SELF; break;
+        case ARK_FOCUS_DRAW_LEVEL_TOP: dst = FocusDrawLevel::TOP; break;
+        default: LOGE("Unexpected enum value in Ark_FocusDrawLevel: %{public}d", src);
+    }
+}
+
+template<>
 ScaleOptions Convert(const Ark_ScaleOptions& src)
 {
     ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
@@ -1938,7 +1951,7 @@ void ResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetResponseRegion(frameNode, {});
     }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
@@ -2011,7 +2024,7 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<NG::HitTestMode>(value);
     if (!convValue) {
-        // TODO: Reset value
+        ViewAbstract::SetHitTestMode(frameNode, NG::HitTestMode::HTMDEFAULT);
         return;
     }
     ViewAbstract::SetHitTestMode(frameNode, *convValue);
@@ -2339,6 +2352,8 @@ void BorderColorImpl(Ark_NativePointer node,
     if (color) {
         // TODO: Reset value
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    } else {
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     }
 }
 void BorderRadiusImpl(Ark_NativePointer node,
@@ -2373,7 +2388,7 @@ void BorderImageImpl(Ark_NativePointer node,
     }
     uint8_t bitSet = 0;
     Converter::VisitUnion(optValue->source,
-        [frameNode, &bitSet](const Ark_LinearGradient_common& src) {
+        [frameNode, &bitSet](const Ark_LinearGradientOptions& src) {
             Gradient gradient = Converter::Convert<Gradient>(src);
             ViewAbstract::SetBorderImageGradient(frameNode, gradient);
             bitSet |= BorderImage::GRADIENT_BIT;
@@ -2716,8 +2731,18 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOnHoverMove(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::DisableOnHoverMove(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](HoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, std::move(onHover));
 }
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const Opt_AccessibilityCallback* value)
@@ -2738,6 +2763,25 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
+}
+void OnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                         const Opt_AccessibilityTransparentCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+        TouchEventInfo& info) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkTouchEventSync(info);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      const Opt_HoverEffect* value)
@@ -2976,11 +3020,7 @@ void TabStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    ViewAbstract::SetTabStop(frameNode, *convValue);
+    ViewAbstractModelStatic::SetTabStop(frameNode, convValue);
 }
 void OnFocusImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -3352,23 +3392,6 @@ void UseEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     ViewAbstractModelStatic::SetUseEffect(frameNode, convValue, std::nullopt);
-}
-void UseEffect1Impl(Ark_NativePointer node,
-                    const Opt_Boolean* useEffect,
-                    const Opt_EffectType* effectType)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvertPtr<bool>(useEffect);
-    auto effectTypeOpt = Converter::OptConvertPtr<EffectType>(effectType);
-    ViewAbstractModelStatic::SetUseEffect(frameNode, valueOpt, effectTypeOpt);
-}
-void UseEffect2Impl(Ark_NativePointer node,
-                    const Opt_Boolean* useEffect,
-                    const Opt_EffectType* effectType)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
 }
 void RenderGroup0Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -4304,37 +4327,20 @@ void ClipShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
+    ViewAbstractModelStatic::SetClipShape(frameNode, convValue.value_or(nullptr));
 }
 void ClipShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    ClipShape0Impl(node, value);
 }
 void Mask0Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mask = Converter::OptConvertPtr<Ark_ProgressMask>(value);
+    auto mask = Converter::GetOptPtr(value);
     if (!mask) return;
     const auto& progressMask = mask.value()->GetProperty();
     ViewAbstract::SetProgressMask(frameNode, progressMask);
@@ -4342,44 +4348,26 @@ void Mask0Impl(Ark_NativePointer node,
 void Mask1Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Mask0Impl(node, value);
 }
 void Mask2Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    LOGE("setMask2 is DEPRECATED. Use a setMaskShape0 instead");
+    Mask0Impl(node, value);
 }
 void MaskShape0Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
+    ViewAbstractModelStatic::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    MaskShape0Impl(node, value);
 }
 void KeyImpl(Ark_NativePointer node,
              const Opt_String* value)
@@ -4990,16 +4978,9 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    int32_t drawLevel = 0;
-    auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
-    if (convValue.has_value()) {
-        drawLevel = AccessibilityStaticUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
-        if (drawLevel == -1) {
-            drawLevel = 0;
-        }
-    }
-    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+    auto convValue = Converter::OptConvertPtr<FocusDrawLevel>(value);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode,
+        static_cast<int32_t>(convValue.value_or(FocusDrawLevel::SELF)));
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,
@@ -5262,6 +5243,24 @@ void SystemBarEffectImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemBarEffect(frameNode, true);
 }
+void UseEffect1Impl(Ark_NativePointer node,
+                    const Opt_Boolean* useEffect,
+                    const Opt_EffectType* effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<bool>(useEffect);
+    auto effectTypeOpt = Converter::OptConvertPtr<EffectType>(effectType);
+    ViewAbstractModelStatic::SetUseEffect(frameNode, valueOpt, effectTypeOpt);
+}
+void UseEffect2Impl(Ark_NativePointer node,
+                    const Opt_Boolean* useEffect,
+                    const Opt_EffectType* effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UseEffect1Impl(node, useEffect, effectType);
+}
 void BackdropBlur0Impl(Ark_NativePointer node,
                        const Opt_Number* value,
                        const Opt_BlurOptions* options)
@@ -5452,8 +5451,14 @@ void BindTipsImpl(Ark_NativePointer node,
             }
             ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
         },
-        [] (const Ark_StyledString& value) {
-            return;
+        [frameNode, popupParam] (const Ark_StyledString& value) {
+            if (!value->spanString) {
+                LOGE("BindTipsImpl can not get the spanString.");
+                return;
+            }
+            auto message = value->spanString->GetString();
+            popupParam->SetMessage(message);
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, value->spanString);
         },
         [] () {
             return;
@@ -5880,19 +5885,18 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (expectedUpdateInterval < 0) {
         expectedUpdateInterval = DEFAULT_DURATION;
     }
+    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
     auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        // TODO: Reset value
-        return;
+    if (optEvent) {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        onVisibleAreaChange =
+            [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+                Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+                Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+                PipelineContext::SetCallBackNode(node);
+                arkCallback.Invoke(isExpanding, currentRatio);
+            };
     }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange = [arkCallback = CallbackHelper(*optEvent), node = weakNode](
-                                   bool visible, double ratio) {
-        Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-        Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
-        PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke(isExpanding, currentRatio);
-    };
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
 }
@@ -5996,6 +6000,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnHoverMoveImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
+        CommonMethodModifier::OnAccessibilityHoverTransparentImpl,
         CommonMethodModifier::HoverEffectImpl,
         CommonMethodModifier::OnMouseImpl,
         CommonMethodModifier::OnTouchImpl,

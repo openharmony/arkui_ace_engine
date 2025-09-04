@@ -22,14 +22,6 @@
 #include "parameters.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
-
-bool IsDebugDCEnabled()
-{
-    return OHOS::system::GetParameter(ENABLE_DEBUG_DC_KEY, "false") == "true";
-}
-}
 
 ArktsDynamicPattern::ArktsDynamicPattern()
     : DynamicPattern()
@@ -39,13 +31,12 @@ ArktsDynamicPattern::ArktsDynamicPattern()
 
 ArktsDynamicPattern::~ArktsDynamicPattern()
 {
-    DynamicPattern::~DynamicPattern();
+    UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     PLATFORM_LOGI("The ArktsDynamicPattern is destroyed.");
 }
 
 void ArktsDynamicPattern::InitializeDynamicComponent()
 {
-    IsDebugDCEnabled();
     if (dynamicComponentRenderer_ != nullptr) {
         PLATFORM_LOGI("dynamicComponentRenderer has create.");
         return;
@@ -67,8 +58,13 @@ void ArktsDynamicPattern::InitializeDynamicComponent()
 bool ArktsDynamicPattern::CheckDynamicRendererConstraint(int32_t workerId)
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    if (dynamicComponentRenderer_->HasWorkerUsingByWorkerId(workerId)) {
-        HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    if (!dynamicComponentRenderer_->CheckDCMaxConstraintInWorker(workerId)) {
+        HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
+        return false;
+    }
+
+    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint(workerId)) {
+        HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
         return false;
     }
 
@@ -124,6 +120,37 @@ void ArktsDynamicPattern::OnAttachContext(PipelineContext *context)
 void ArktsDynamicPattern::OnDetachContext(PipelineContext *context)
 {
     DynamicPattern::OnDetachContext(context);
+}
+
+void ArktsDynamicPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("dynamicId: ").append(std::to_string(platformId_)));
+    DumpLog::GetInstance().AddDesc(std::string("workerId: ")
+        .append(std::to_string(param_.workerId)));
+    DumpLog::GetInstance().AddDesc(std::string("entryPoint: ").append(param_.entryPoint));
+    DumpLog::GetInstance().AddDesc(std::string("backgroundTransparent: ")
+        .append(std::to_string(param_.backgroundTransparent)));
+
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    RendererDumpInfo rendererDumpInfo;
+    dynamicComponentRenderer_->Dump(rendererDumpInfo);
+    std::string isReportFrameEvent = hostConfig_.isReportFrameEvent ? "true" : "false";
+    DumpLog::GetInstance().AddDesc(std::string("isReportFrameEvent: ")
+        .append(isReportFrameEvent));
+}
+
+void ArktsDynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("dynamicId", platformId_);
+    json->Put("workerId", std::to_string(param_.workerId).c_str());
+    json->Put("entryPoint", param_.entryPoint.c_str());
+    json->Put("backgroundTransparent", std::to_string(param_.backgroundTransparent).c_str());
+
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    RendererDumpInfo rendererDumpInfo;
+    dynamicComponentRenderer_->Dump(rendererDumpInfo);
+    std::string isReportFrameEvent = hostConfig_.isReportFrameEvent ? "true" : "false";
+    json->Put("isReportFrameEvent", isReportFrameEvent.c_str());
 }
 
 void ArktsDynamicPattern::SetDynamicParam(const DynamicParam& param)

@@ -1369,12 +1369,7 @@ void ViewAbstractModelStatic::SetForegroundEffect(FrameNode* frameNode, const st
 
 void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
 {
-    if (blendMode.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
-    }
+    ViewAbstract::SetBlendMode(frameNode, blendMode.value_or(BlendMode::NONE));
 }
 
 void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)
@@ -1442,9 +1437,19 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
 void ViewAbstractModelStatic::SetUseEffect(
     FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    auto useEffect = useEffectOpt.value_or(false);
-    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
-    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (useEffectOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, *useEffectOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+    if (effectTypeOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffectType, *effectTypeOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffectType, frameNode);
+    }
 }
 
 void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
@@ -1542,12 +1547,7 @@ void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
-    if (blendApplyType) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
-    } else {
-        const auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
-    }
+    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType.value_or(BlendApplyType::FAST));
 }
 
 void ViewAbstractModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
@@ -1659,5 +1659,82 @@ int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const Re
     auto menuProperties = wrapperPattern->GetMenuParam();
     menuParam = menuProperties;
     return ERROR_CODE_NO_ERROR;
+}
+
+void ViewAbstractModelStatic::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            CHECK_NULL_VOID(frameNode);
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->GetClipEdge().has_value()) {
+                target->UpdateClipEdge(false);
+            }
+            target->UpdateClipShape(basicShapeValue);
+            target->OnClipShapeUpdate(basicShapeValue);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("clipShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+        }
+        if (basicShape) {
+            target->UpdateClipShape(basicShape);
+        } else {
+            target->ResetClipShape();
+        }
+    }
+}
+
+void ViewAbstractModelStatic::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [basicShape, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
+            basicShapeValue->ReloadResources();
+            auto target = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(target);
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShapeValue);
+            target->OnClipMaskUpdate(basicShapeValue);
+        };
+        pattern->AddResObj("maskShape", resObj, std::move(updateFunc));
+    }
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
+        }
+        if (basicShape) {
+            target->UpdateClipMask(basicShape);
+        } else {
+            target->ResetClipMask();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

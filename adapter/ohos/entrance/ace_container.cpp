@@ -651,13 +651,23 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::ARK_TS) {
-        LOGI("Init ARK_TS Frontend");
-        auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);
-        if (arktsFrontend == nullptr) {
-            LOGE("Create arktsFrontend failed.");
-            return;
+        if (isDynamicRender_) {
+            LOGI("Init Dynamic Renderer ARK_TS Frontend");
+            auto arktsDynamicFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsDynamicFrontend(sharedRuntime_);
+            if (arktsDynamicFrontend == nullptr) {
+                LOGE("Create arktsDynamicFrontend failed.");
+                return;
+            }
+            frontend_ = arktsDynamicFrontend;
+        } else {
+            LOGI("Init ARK_TS Frontend");
+            auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);
+            if (arktsFrontend == nullptr) {
+                LOGE("Create arktsFrontend failed.");
+                return;
+            }
+            frontend_ = arktsFrontend;
         }
-        frontend_ = arktsFrontend;
     } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         // initialize after AttachView
         LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");

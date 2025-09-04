@@ -27,11 +27,11 @@
 
 namespace OHOS::Ace::NG {
 // Resource functions
-using NamedResourceId = std::tuple<const char *, OHOS::Ace::NG::Converter::ResourceType>;
-using IntResourceId = std::tuple<uint32_t, OHOS::Ace::NG::Converter::ResourceType>;
+using NamedResourceId = std::tuple<const char *, OHOS::Ace::ResourceType>;
+using IntResourceId = std::tuple<uint32_t, OHOS::Ace::ResourceType>;
 
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::Converter::ResourceType type);
-Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::Converter::ResourceType type);
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::ResourceType type);
+Ark_Resource CreateResource(const char *name, OHOS::Ace::ResourceType type);
 
 inline Ark_Resource CreateResource(NamedResourceId id)
 {

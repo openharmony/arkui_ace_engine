@@ -18,6 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
@@ -75,9 +76,11 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr int32_t FLAG_DC = 1000000;
+}
 namespace UIExtensionComponentModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer UecConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
@@ -86,6 +89,28 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 #else
     return {};
 #endif //WINDOW_SCENE_SUPPORTED
+}
+
+Ark_NativePointer DcConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = NG::DynamicModelStatic::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return {};
+#endif //WINDOW_SCENE_SUPPORTED
+}
+
+
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+    switch (flags) {
+        case FLAG_DC:
+            return DcConstructImpl(id, flags);
+        default:
+            return UecConstructImpl(id, flags);
+    }
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {

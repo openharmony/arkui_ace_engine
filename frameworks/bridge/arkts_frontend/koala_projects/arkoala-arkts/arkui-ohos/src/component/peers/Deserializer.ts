@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonConfiguration } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, RestrictedWorker, RestrictedWorkerInternal, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
@@ -64,7 +64,8 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
-import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { TextModifier } from '../../TextModifier'
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { ImageModifier } from "../../ImageModifier"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
@@ -196,6 +197,7 @@ import { LevelOrderInternal, LevelMode, ImmersiveMode, LevelOrder } from "@ohos/
 import { PointerStyle, DataSyncOptions } from '#external'
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 import { uiObserver } from "@ohos/arkui/observer"
+import { ItemDragEventHandler } from "./../common"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -629,8 +631,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnSearchResultReceiveEvent(): OnSearchResultReceiveEvent {
         let valueDeserializer : Deserializer = this
-        const activeMatchOrdinal_result : number = (valueDeserializer.readNumber() as number)
-        const numberOfMatches_result : number = (valueDeserializer.readNumber() as number)
+        const activeMatchOrdinal_result : int32 = (valueDeserializer.readInt32() as int32)
+        const numberOfMatches_result : int32 = (valueDeserializer.readInt32() as int32)
         const isDoneCounting_result : boolean = valueDeserializer.readBoolean()
         let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result, numberOfMatches: numberOfMatches_result, isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
         return value
@@ -4254,7 +4256,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: Date):void => { 
+        return (selected: Date):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6129,7 +6131,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: number | Array<number>):void => { 
+        return (selected: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6158,7 +6160,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string | Array<string>):void => { 
+        return (value: string | Array<string>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6202,7 +6204,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: Date):void => { 
+        return (selected: Date):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -8958,7 +8960,7 @@ export class Deserializer extends DeserializerBase {
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal,
         // despite some property types having default values
         let value : LeadingMarginPlaceholder = ({size: size_result, pixelMap: map!} as LeadingMarginPlaceholder)
         return value
@@ -9001,68 +9003,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return LevelOrderInternal.fromPtr(ptr)
-    }
-    readLinearGradient_common(): LinearGradient_common {
-        let valueDeserializer : Deserializer = this
-        const angle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let angle_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (angle_buf_runtimeType))
-        {
-            const angle_buf__selector : int32 = valueDeserializer.readInt8()
-            let angle_buf_ : number | string | undefined
-            if (angle_buf__selector == 0) {
-                angle_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (angle_buf__selector == 1) {
-                angle_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for angle_buf_ has to be chosen through deserialisation.")
-            }
-            angle_buf = (angle_buf_ as number | string)
-        }
-        const angle_result : number | string | undefined = angle_buf
-        const direction_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let direction_buf : GradientDirection | undefined
-        if ((RuntimeType.UNDEFINED) != (direction_buf_runtimeType))
-        {
-            direction_buf = TypeChecker.GradientDirection_FromNumeric(valueDeserializer.readInt32())
-        }
-        const direction_result : GradientDirection | undefined = direction_buf
-        const colors_buf_length : int32 = valueDeserializer.readInt32()
-        let colors_buf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colors_buf_length)
-        for (let colors_buf_i = 0; colors_buf_i < colors_buf_length; colors_buf_i++) {
-            const colors_buf_buf_value0_buf_selector : int32 = valueDeserializer.readInt8()
-            let colors_buf_buf_value0_buf : Color | number | string | Resource | undefined
-            if (colors_buf_buf_value0_buf_selector == 0) {
-                colors_buf_buf_value0_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (colors_buf_buf_value0_buf_selector == 1) {
-                colors_buf_buf_value0_buf = (valueDeserializer.readNumber() as number)
-            }
-            else if (colors_buf_buf_value0_buf_selector == 2) {
-                colors_buf_buf_value0_buf = (valueDeserializer.readString() as string)
-            }
-            else if (colors_buf_buf_value0_buf_selector == 3) {
-                colors_buf_buf_value0_buf = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for colors_buf_buf_value0_buf has to be chosen through deserialisation.")
-            }
-            const colors_buf_buf_value0 : ResourceColor = (colors_buf_buf_value0_buf as Color | number | string | Resource)
-            const colors_buf_buf_value1 : number = (valueDeserializer.readNumber() as number)
-            colors_buf[colors_buf_i] = ([colors_buf_buf_value0, colors_buf_buf_value1] as [ ResourceColor, number ])
-        }
-        const colors_result : Array<[ ResourceColor, number ]> = colors_buf
-        const repeating_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let repeating_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (repeating_buf_runtimeType))
-        {
-            repeating_buf = valueDeserializer.readBoolean()
-        }
-        const repeating_result : boolean | undefined = repeating_buf
-        let value : LinearGradient_common = ({angle: angle_result, direction: direction_result, colors: colors_result, repeating: repeating_result} as LinearGradient_common)
-        return value
     }
     readLinearGradientBlurOptions(): LinearGradientBlurOptions {
         let valueDeserializer : Deserializer = this
@@ -9816,7 +9756,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const handler_result : ClientAuthenticationHandler = (valueDeserializer.readClientAuthenticationHandler() as ClientAuthenticationHandler)
         const host_result : string = (valueDeserializer.readString() as string)
-        const port_result : number = (valueDeserializer.readNumber() as number)
+        const port_result : int32 = (valueDeserializer.readInt32() as int32)
         const keyTypes_buf_length : int32 = valueDeserializer.readInt32()
         let keyTypes_buf : Array<string> = new Array<string>(keyTypes_buf_length)
         for (let keyTypes_buf_i = 0; keyTypes_buf_i < keyTypes_buf_length; keyTypes_buf_i++) {
@@ -9853,7 +9793,7 @@ export class Deserializer extends DeserializerBase {
         const userAgent_result : string = (valueDeserializer.readString() as string)
         const contentDisposition_result : string = (valueDeserializer.readString() as string)
         const mimetype_result : string = (valueDeserializer.readString() as string)
-        const contentLength_result : number = (valueDeserializer.readNumber() as number)
+        const contentLength_result : int64 = (valueDeserializer.readInt64().toLong())
         let value : OnDownloadStartEvent = ({url: url_result, userAgent: userAgent_result, contentDisposition: contentDisposition_result, mimetype: mimetype_result, contentLength: contentLength_result} as OnDownloadStartEvent)
         return value
     }
@@ -10414,7 +10354,7 @@ export class Deserializer extends DeserializerBase {
         return value
     }
     readPolyToPolyOptions(): PolyToPolyOptions {
-        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal,
         // despite some property types having default values
         let value : PolyToPolyOptions = ({dst: [], src: []} as PolyToPolyOptions)
         return value
@@ -11807,7 +11747,7 @@ export class Deserializer extends DeserializerBase {
         const triggerChange_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChange_buf_call : KPointer = valueDeserializer.readPointer()
         const triggerChange_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const triggerChange_result : ((value0: boolean) => void) = (value0: boolean):void => { 
+        const triggerChange_result : ((value0: boolean) => void) = (value0: boolean):void => {
             const triggerChange_buf_argsSerializer : Serializer = Serializer.hold();
             triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
             triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
@@ -16732,7 +16672,7 @@ export class Deserializer extends DeserializerBase {
         const size_result : number = (valueDeserializer.readNumber() as number)
         const force_result : number = (valueDeserializer.readNumber() as number)
         const timestamp_result : int64 = (valueDeserializer.readInt64() as int64)
-        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, 
+        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result,
         timestamp: timestamp_result} as HistoricalPoint)
         return value
     }
@@ -19525,45 +19465,7 @@ export class Deserializer extends DeserializerBase {
         return RotationGestureEventInternal.fromPtr(ptr)
     }
     readSceneOptions(): SceneOptions {
-        let valueDeserializer : Deserializer = this
-        const scene_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scene_buf : ResourceStr | Scene | undefined
-        if ((RuntimeType.UNDEFINED) != (scene_buf_runtimeType))
-        {
-            const scene_buf__selector : int32 = valueDeserializer.readInt8()
-            let scene_buf_ : ResourceStr | Scene | undefined
-            if (scene_buf__selector == 0) {
-                const scene_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let scene_buf__u : string | Resource | undefined
-                if (scene_buf__u_selector == 0) {
-                    scene_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (scene_buf__u_selector == 1) {
-                    scene_buf__u = valueDeserializer.readResource()
-                }
-                else {
-                    throw new Error("One of the branches for scene_buf__u has to be chosen through deserialisation.")
-                }
-                scene_buf_ = (scene_buf__u as string | Resource)
-            }
-            else if (scene_buf__selector == 1) {
-                scene_buf_ = (valueDeserializer.readScene() as Scene)
-            }
-            else {
-                throw new Error("One of the branches for scene_buf_ has to be chosen through deserialisation.")
-            }
-            scene_buf = (scene_buf_ as ResourceStr | Scene)
-        }
-        const scene_result : ResourceStr | Scene | undefined = scene_buf
-        const modelType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let modelType_buf : ModelType | undefined
-        if ((RuntimeType.UNDEFINED) != (modelType_buf_runtimeType))
-        {
-            modelType_buf = TypeChecker.ModelType_FromNumeric(valueDeserializer.readInt32())
-        }
-        const modelType_result : ModelType | undefined = modelType_buf
-        let value : SceneOptions = ({scene: scene_result, modelType: modelType_result} as SceneOptions)
-        return value
+        return ({} as SceneOptions)
     }
     readScrollOptions(): ScrollOptions {
         let valueDeserializer : Deserializer = this
@@ -20256,6 +20158,84 @@ export class Deserializer extends DeserializerBase {
         }
         const onOffsetChange_result : ((index: number) => void) | undefined = onOffsetChange_buf
         let value : SwipeActionOptions = ({start: start_result, end: end_result, edgeEffect: edgeEffect_result, onOffsetChange: onOffsetChange_result} as SwipeActionOptions)
+        return value
+    }
+    readItemDragEventHandler(): ItemDragEventHandler {
+        let valueDeserializer: Deserializer = this
+        const onLongPressTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onLongPressTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onLongPressTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onLongPressTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onLongPressTmpBuf = (value0: number): void => {
+                const onLongPressTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
+                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onLongPressTmpResult: ((value0: number) => void) | undefined|undefined = onLongPressTmpBuf
+        const onDragStartTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onDragStartTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDragStartTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDragStartTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onDragStartTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onDragStartTmpBuf = (value0: number): void => {
+                const onDragStartTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
+                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDragStartTmpResult: ((value0: number) => void) | undefined|undefined = onDragStartTmpBuf
+        const onMoveThroughTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onMoveThroughTmpBuf: OnMoveHandler | undefined|undefined = undefined
+        if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMoveThroughTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onMoveThroughTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onMoveThroughTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onMoveThroughTmpBuf = (from: number, to: number): void => {
+                const onMoveThroughTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                InteropNativeModule._CallCallbackSync(-1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
+                onMoveThroughTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMoveThroughTmpResult: OnMoveHandler | undefined|undefined = onMoveThroughTmpBuf
+        const onDropTmpBuf_runtimeType = (valueDeserializer.readInt8() as int32)
+        let onDropTmpBuf: ((value0: number) => void) | undefined|undefined = undefined
+        if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDropTmpBuf_BufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDropTmpBuf_BufCall: KPointer = valueDeserializer.readPointer()
+            const onDropTmpBuf_BufCallSync: KPointer = valueDeserializer.readPointer()
+            onDropTmpBuf = (value0: number): void => {
+                const onDropTmpBuf_BufArgsSerializer: Serializer = Serializer.hold();
+                onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
+                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDropTmpResult: ((value0: number) => void) | undefined|undefined = onDropTmpBuf
+        let value: ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
         return value
     }
     readSwipeGestureEvent(): SwipeGestureEvent {
@@ -23447,11 +23427,11 @@ export class Deserializer extends DeserializerBase {
         }
         const repeat_result : RepeatMode | undefined = repeat_buf
         const source_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let source_buf : string | Resource | LinearGradient_common | undefined
+        let source_buf : string | Resource | LinearGradientOptions | undefined
         if ((RuntimeType.UNDEFINED) != (source_buf_runtimeType))
         {
             const source_buf__selector : int32 = valueDeserializer.readInt8()
-            let source_buf_ : string | Resource | LinearGradient_common | undefined
+            let source_buf_ : string | Resource | LinearGradientOptions | undefined
             if (source_buf__selector == 0) {
                 source_buf_ = (valueDeserializer.readString() as string)
             }
@@ -23459,14 +23439,14 @@ export class Deserializer extends DeserializerBase {
                 source_buf_ = valueDeserializer.readResource()
             }
             else if (source_buf__selector == 2) {
-                source_buf_ = valueDeserializer.readLinearGradient_common()
+                source_buf_ = valueDeserializer.readLinearGradientOptions()
             }
             else {
                 throw new Error("One of the branches for source_buf_ has to be chosen through deserialisation.")
             }
-            source_buf = (source_buf_ as string | Resource | LinearGradient_common)
+            source_buf = (source_buf_ as string | Resource | LinearGradientOptions)
         }
-        const source_result : string | Resource | LinearGradient_common | undefined = source_buf
+        const source_result : string | Resource | LinearGradientOptions | undefined = source_buf
         const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let width_buf : Length | EdgeWidths | LocalizedEdgeWidths | undefined
         if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))

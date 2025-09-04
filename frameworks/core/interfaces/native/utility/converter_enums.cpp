@@ -67,6 +67,18 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
+{
+    switch (src) {
+        case ARK_AUTO_CAPITALIZATION_MODE_NONE: dst = AutoCapitalizationMode::NONE; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_WORDS: dst = AutoCapitalizationMode::WORDS; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_SENTENCES: dst = AutoCapitalizationMode::SENTENCES; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS: dst = AutoCapitalizationMode::ALL_CHARACTERS; break;
+        default: LOGE("Unexpected enum value in Ark_AutoCapitalizationMode: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
 {
     switch (src) {
@@ -1722,6 +1734,7 @@ template<>
 void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 {
     switch (src) {
+        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
         case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
         case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
         case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;

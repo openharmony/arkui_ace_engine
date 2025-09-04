@@ -117,11 +117,12 @@ export function WithThemeImpl(
         return new ArkWithThemeComponent()
     })
     NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (_: ArkWithThemePeer): void => {
-        ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstBuild)
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstRender)
         style?.(receiver)
         ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         content_?.()
         ArkThemeScopeManager.getInstance().onScopeExit();
+        receiver.isFirstRender = false;
     })
 }
 

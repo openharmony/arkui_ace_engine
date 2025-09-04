@@ -19,13 +19,13 @@
 #include <memory>
 
 #include "accessibility_element_info.h"
+#include "arkts_dynamic_renderer_loader.h"
 #include "arkts_dynamic_uicontent_impl.h"
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
@@ -44,9 +44,12 @@ namespace {
 constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr int32_t INVALID_WORKER_ID = -1;
+constexpr size_t WORKER_MAX_NUM = 1;
+constexpr int32_t WORKER_SIZE_ONE = 1;
+constexpr int32_t DC_MAX_NUM_IN_WORKER = 4;
 }
 
-std::set<int32_t> ArktsDynamicComponentRendererImpl::usingWorkers_;
+std::map<int32_t, int32_t> ArktsDynamicComponentRendererImpl::usingWorkers_;
 std::mutex ArktsDynamicComponentRendererImpl::usingWorkerMutex_;
 
 ArktsDynamicComponentRendererImpl::ArktsDynamicComponentRendererImpl(
@@ -94,6 +97,36 @@ bool ArktsDynamicComponentRendererImpl::HasWorkerUsingByWorkerId(int32_t workerI
     return usingWorkers_.find(workerId) != usingWorkers_.end();
 }
 
+bool ArktsDynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(int32_t workerId)
+{
+    if (workerId == INVALID_WORKER_ID) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        return true;
+    }
+
+    return iter->second < DC_MAX_NUM_IN_WORKER;
+}
+
+bool ArktsDynamicComponentRendererImpl::CheckWorkerMaxConstraint(int32_t workerId)
+{
+    if (workerId == INVALID_WORKER_ID) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        return usingWorkers_.size() < WORKER_MAX_NUM;
+    }
+
+    return usingWorkers_.size() < WORKER_MAX_NUM + 1;
+}
+
 void ArktsDynamicComponentRendererImpl::AddWorkerUsing(int32_t workerId)
 {
     if (workerId == INVALID_WORKER_ID) {
@@ -101,11 +134,13 @@ void ArktsDynamicComponentRendererImpl::AddWorkerUsing(int32_t workerId)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(workerId) != usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        usingWorkers_[workerId] = WORKER_SIZE_ONE;
         return;
     }
 
-    usingWorkers_.insert(workerId);
+    iter->second++;
 }
 
 void ArktsDynamicComponentRendererImpl::DeleteWorkerUsing(int32_t workerId)
@@ -115,11 +150,17 @@ void ArktsDynamicComponentRendererImpl::DeleteWorkerUsing(int32_t workerId)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(workerId) == usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
         return;
     }
 
-    usingWorkers_.erase(workerId);
+    if (iter->second <= WORKER_SIZE_ONE) {
+        usingWorkers_.erase(iter);
+        return;
+    }
+
+    iter->second++;
 }
 
 void ArktsDynamicComponentRendererImpl::CreateContent()
@@ -138,7 +179,13 @@ void ArktsDynamicComponentRendererImpl::CreateDynamicContent()
     CHECK_NULL_VOID(container);
     auto hostAbilityContext = container->GetAbilityContext();
     hostJsContext_  = container->GetJsContext();
-    auto taskWrapper = std::make_shared<EaWorkerTaskWrapperImpl>(hostInstanceId_, dynamicParam_.workerId);
+    std::shared_ptr<TaskWrapper> taskWrapper;
+    taskWrapper.reset(ArktsDynamicRendererLoader::GetInstance().CreatEaWorkerTaskWrapper(
+        hostInstanceId_, dynamicParam_.workerId));
+    if (taskWrapper == nullptr) {
+        TAG_LOGE(aceLogTag_, "CreatEaWorkerTaskWrapper failed");
+        return;
+    }
     taskWrapper->Call([weak = WeakClaim(this), hostAbilityContext]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
@@ -196,7 +243,8 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
     param.isFormRender = true;
     param.aceLogTag = aceLogTag_;
     uiContent_ = ArktsDynamicUIContentImpl::Create(abilityContext,
-        EaWorkerTaskWrapperImpl::GetCurrentAniEnv(), VMType::ARK_NATIVE, param);
+        ArktsDynamicRendererLoader::GetInstance().GetCurrentThreadAniEnv(),
+        VMType::ARK_NATIVE, param);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->SetUIContentType(uIContentType_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();

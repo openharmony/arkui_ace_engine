@@ -357,9 +357,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onClick, nullptr);
@@ -400,9 +398,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubl
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
@@ -444,9 +440,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-
-    Converter::ConvContext ctx;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEXT_SPAN_VALUE, &ctx);
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onLongPress, nullptr);

@@ -52,6 +52,8 @@ public:
     {
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
+        } else if (width.Unit() == DimensionUnit::NONE) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -61,6 +63,8 @@ public:
     {
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
+        } else if (height.Unit() == DimensionUnit::NONE) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
@@ -229,6 +233,11 @@ public:
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 
+    static void SetTabStop(FrameNode* frameNode, const std::optional<bool>& value)
+    {
+        ViewAbstract::SetTabStop(frameNode, value.value_or(false));
+    }
+
     static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
@@ -327,6 +336,8 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };

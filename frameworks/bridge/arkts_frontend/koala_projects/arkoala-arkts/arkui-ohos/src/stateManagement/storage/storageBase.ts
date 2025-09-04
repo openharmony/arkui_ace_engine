@@ -62,7 +62,16 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         const set = (newValue: T): void => {
             this.set(newValue);
         };
-        return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, decoratorName, this, get, set, watchFunc);
+        return new StorageLinkDecoratedVariable<T>(
+            owner,
+            propertyNameInAppStorage,
+            varName,
+            decoratorName,
+            this,
+            get,
+            set,
+            watchFunc
+        );
     }
 
     public registerWatchToStorageSource(link: DecoratedV1VariableBase<T>): WatchIdType {

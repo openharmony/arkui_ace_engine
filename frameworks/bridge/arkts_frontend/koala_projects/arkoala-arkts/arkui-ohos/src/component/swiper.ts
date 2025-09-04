@@ -895,6 +895,7 @@ export interface SwiperAttribute extends CommonMethod {
     vertical(value: boolean | undefined): this
     itemSpace(value: number | string | undefined): this
     displayMode(value: SwiperDisplayMode | undefined): this
+    cachedCount(count: number | undefined): this
     cachedCount(count: number | undefined, isShown?: boolean): this
     effectMode(value: EdgeEffect | undefined): this
     disableSwipe(value: boolean | undefined): this
@@ -974,6 +975,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
         return this
     }
     public displayMode(value: SwiperDisplayMode | undefined): this {
+        return this
+    }
+    public cachedCount(count: number | undefined): this {
         return this
     }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
@@ -1158,22 +1162,20 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
+    public cachedCount(count: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const value_casted = count as (number | undefined)
+            this.getPeer()?.cachedCount0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
         if (this.checkPriority("cachedCount")) {
-            const count_type = runtimeType(count)
-            const isShown_type = runtimeType(isShown)
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == isShown_type)) {
-                const value_casted = count as (number | undefined)
-                this.getPeer()?.cachedCount0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == isShown_type) || (RuntimeType.UNDEFINED == isShown_type))) {
-                const count_casted = count as (number | undefined)
-                const isShown_casted = isShown as (boolean | undefined)
-                this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const count_casted = count as (number | undefined)
+            const isShown_casted = isShown as (boolean | undefined)
+            this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
+            return this
         }
         return this
     }
@@ -1374,7 +1376,7 @@ export function SwiperImpl(
         content_?.()
     })
 }
-export class Indicator {
+export class Indicator<T> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1389,32 +1391,32 @@ export class Indicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length): T {
         this._left = value
-        return this
+        return this as Object as T
     }
-    top(value: Length): this {
+    top(value: Length): T {
         this._top = value
-        return this
+        return this as Object as T
     }
-    right(value: Length): this {
+    right(value: Length): T {
         this._right = value
-        return this
+        return this as Object as T
     }
-    bottom(value: Length): this {
+    bottom(value: Length): T {
         this._bottom = value
-        return this
+        return this as Object as T
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics): T {
         this._start = value
-        return this
+        return this as Object as T
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics): T {
         this._end = value
-        return this
+        return this as Object as T
     }
 }
-export class DotIndicator {
+export class DotIndicator extends Indicator<DotIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1431,6 +1433,7 @@ export class DotIndicator {
     _maxDisplayCount?: number | undefined
     _space?: LengthMetrics | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()
@@ -1499,7 +1502,7 @@ export class DotIndicator {
         return this
     }
 }
-export class DigitIndicator {
+export class DigitIndicator extends Indicator<DigitIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1511,6 +1514,7 @@ export class DigitIndicator {
     _digitFont?: Font | undefined
     _selectedDigitFont?: Font | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()

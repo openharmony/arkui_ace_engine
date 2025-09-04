@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   ResourceStr, Resource, GestureModifier, CustomDialogController, UIGestureEvent, LongPressGestureHandler, $r,
   Component, SelectOption, Flex, FlexAlign, ItemAlign, Row, Column, Badge, BadgePosition, Select, Position, Margin,
@@ -20,18 +19,20 @@ import {
   KeyType, TouchType, Placement, GeometryInfo, Layoutable, ConstraintSizeOptions, Builder, focusControl, SymbolEffect,
   Image, TextAlign, BlurStyle, ShadowStyle, px2vp, ButtonOptions, BorderOptions, HoverEvent, Padding, KeyEvent,
   TouchEvent, ClickEvent, CustomPopupOptions, BadgeParamWithNumber, CommonMethod, CustomDialog,
-  CustomDialogControllerOptions, PopupStateChangeParam
+  CustomDialogControllerOptions, PopupStateChangeParam, ClassCastError
 } from '@ohos.arkui.component';
-import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
-import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import { UIContext } from '@ohos.arkui.UIContext';
+import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
+import { BusinessError } from '@ohos.base';
 
 export class SelectTitleBarMenuItem {
   value: ResourceStr = '';
+  symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
@@ -40,8 +41,6 @@ export class SelectTitleBarMenuItem {
   accessibilityDescription?: ResourceStr;
 }
 
-const PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left')
-const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2')
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const TEXT_EDITABLE_DIALOG = '18.3fp'
@@ -82,14 +81,17 @@ class ButtonGestureModifier implements GestureModifier {
 
 @Component
 export struct SelectTitleBar {
-  @PropRef selected: number = 0
+  PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
+  @PropRef selected: int = 0
   options: Array<SelectOption> = [] as Array<SelectOption>;
   menuItems: Array<SelectTitleBarMenuItem> = [] as Array<SelectTitleBarMenuItem>;
   subtitle: ResourceStr = '';
   badgeValue: number = 0;
   hidesBackButton: boolean = false;
   messageDesc: string = '';
-  onSelected: ((index: number) => void) = (index: number) => {};
+  onSelected: ((index: number) => void) = (index: number) => {
+  };
   private static readonly badgeSize: number = 16;
   private static readonly totalHeight: number = 56;
   private static readonly leftPadding: number = 24;
@@ -101,6 +103,22 @@ export struct SelectTitleBar {
   @State selectMaxWidth: number = 0;
   @State fontSize: number = 1;
 
+  getStringByNameSync(contextName: string): undefined | string {
+    let uiContext: undefined | string = '';
+    try {
+      let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext;
+        uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
+      }
+    } catch (exception) {
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
+      hilog.error(ERROR_CODE, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
+    return uiContext;
+  }
+
   build() {
     Flex({
       justifyContent: FlexAlign.SpaceBetween,
@@ -110,10 +128,10 @@ export struct SelectTitleBar {
         if (!this.hidesBackButton) {
           ImageMenuItem({
             item: {
-              value: PUBLIC_BACK,
+              value: '',
+              symbolStyle: new SymbolGlyphModifier(this.PUBLIC_BACK),
               isEnabled: true,
-              label: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-              getStringByNameSync('icon_back'),
+              label: this.getStringByNameSync('icon_back'),
               action: () => {
                 this.getUIContext()?.getRouter()?.back()
               }
@@ -149,10 +167,12 @@ export struct SelectTitleBar {
                   .constraintSize({ maxWidth: this.selectMaxWidth })
                   .offset({ x: -4 } as Position)
                   .accessibilityLevel('yes')
+                  .accessibilityDescription(this.messageDesc.replace('%d', this.badgeValue.toString()))
               }
               .justifyContent(FlexAlign.Start)
               .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') } as Margin);
             }
+            .accessibilityGroup(true)
             .accessibilityLevel('no')
           } else {
             Row() {
@@ -234,8 +254,8 @@ export struct SelectTitleBar {
         resourceManager?.getIntPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new',
           this.badgeValue as Int) as string;
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to getIntPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
   }
@@ -244,8 +264,10 @@ export struct SelectTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
   menuItems: Array<SelectTitleBarMenuItem> = [] as Array<SelectTitleBarMenuItem>;
   item: SelectTitleBarMenuItem = {
+    symbolStyle: new SymbolGlyphModifier(this.PUBLIC_MORE),
     label: $r('sys.string.ohos_toolbar_more'),
   } as SelectTitleBarMenuItem;
   index: number = 0;
@@ -300,8 +322,8 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
@@ -342,12 +364,13 @@ struct CollapsibleMenuSection {
             })
 
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
-            SymbolGlyph(PUBLIC_MORE)
+            SymbolGlyph(this.PUBLIC_MORE)
               .fontSize(ImageMenuItem.imageSize)
               .draggable(false)
               .fontColor([$r('sys.color.icon_primary')])
               .focusable(true)
           }
+          .accessibilityText($r('sys.string.ohos_toolbar_more'))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -370,13 +393,13 @@ struct CollapsibleMenuSection {
             }
           })
           .onFocus(() => {
-            this.isMoreIconOnFocus = true
+            this.isMoreIconOnFocus = true;
           })
           .onBlur(() => {
-            this.isMoreIconOnFocus = false
+            this.isMoreIconOnFocus = false;
           })
           .onHover((isOn: boolean, event?: HoverEvent) => {
-            this.isMoreIconOnHover = isOn
+            this.isMoreIconOnHover = isOn;
           })
           .onKeyEvent((event: KeyEvent) => {
             if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
@@ -404,8 +427,6 @@ struct CollapsibleMenuSection {
             this.isPopupShown = true
           })
           .gestureModifier(this.buttonGestureModifier)
-          .padding(0)
-
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -454,6 +475,8 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
+  PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
   item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
   index: number = 0;
   minFontSize: number = 1.75;
@@ -487,9 +510,9 @@ struct ImageMenuItem {
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_MORE) {
+    if (this.item.value === this.PUBLIC_MORE) {
       return $r('sys.string.ohos_toolbar_more');
-    } else if (this.item.value === PUBLIC_BACK) {
+    } else if (this.item.value === this.PUBLIC_BACK) {
       return $r('sys.string.icon_back');
     } else {
       return this.item.label ? this.item.label as ResourceStr : '' as ResourceStr;
@@ -518,8 +541,8 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.fontSize = this.decideFontScale();
@@ -543,10 +566,10 @@ struct ImageMenuItem {
       let resourceString: string = '';
       try {
         resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringByNameSync(resource as string) as string;
+        getStringSync((resource as Resource).id) as string;
       } catch (err) {
-        let code: number = (err as BusinessError)!.code;
-        let message: string = (err as BusinessError)!.message;
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
@@ -555,14 +578,26 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext
-    if (this.item.value === PUBLIC_BACK) {
-      return context?.resourceManager?.getStringByNameSync('icon_back');
-    } else if (this.item.value === PUBLIC_MORE) {
-      return context?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    if (this.item.value === this.PUBLIC_BACK) {
+      try {
+        return context?.resourceManager?.getStringByNameSync('icon_back');
+      } catch (err) {
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | string = (err as ClassCastError)?.message;
+        hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+    } else if (this.item.value === this.PUBLIC_MORE) {
+      try {
+        return context?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch (err) {
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | string = (err as ClassCastError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.toStringFormat(this.item.accessibilityText) as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.toStringFormat(this.item.label) as string;
     }
     return ' ';
   }
@@ -581,30 +616,59 @@ struct ImageMenuItem {
   build() {
     if (this.isPopup) {
       Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled } as ButtonOptions) {
-        if (Util.isSymbolResource(this.item.value)) {
-          SymbolGlyph(this.item.value as Resource)
+        if (this.item.symbolStyle) {
+          SymbolGlyph()
             .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.item.symbolStyle)
             .fontSize(ImageMenuItem.imageSize)
             .draggable(false)
             .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
+            .symbolEffect(new SymbolEffect(), false)
         } else {
-          Image(this.item.value)
-            .draggable(false)
-            .width(ImageMenuItem.imageSize)
-            .height(ImageMenuItem.imageSize)
-            .focusable(this.item.isEnabled)
-            .key(ImageMenuItem.focusablePrefix + this.index)
-            .fillColor($r('sys.color.icon_primary'))
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(ImageMenuItem.imageSize)
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item.value)
+              .draggable(false)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.icon_primary'))
+          }
         }
       }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription) as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
-      .padding(0)
       .borderRadius(ImageMenuItem.buttonBorderRadius)
       .foregroundColor(this.getFgColor())
       .backgroundColor(this.getBgColor())
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .stateStyles({
+        focused: (instance: CommonMethod) => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: (instance: CommonMethod) => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
       .onFocus(() => {
         if (!this.item.isEnabled) {
           return
@@ -654,30 +718,59 @@ struct ImageMenuItem {
       .gestureModifier(this.buttonGestureModifier)
     } else {
       Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled } as ButtonOptions) {
-        if (Util.isSymbolResource(this.item.value)) {
-          SymbolGlyph(this.item.value as Resource)
+        if (this.item.symbolStyle) {
+          SymbolGlyph()
             .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.item.symbolStyle)
             .fontSize(ImageMenuItem.imageSize)
             .draggable(false)
             .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
+            .symbolEffect(new SymbolEffect(), false)
         } else {
-          Image(this.item.value)
-            .draggable(false)
-            .width(ImageMenuItem.imageSize)
-            .height(ImageMenuItem.imageSize)
-            .focusable(this.item.isEnabled)
-            .key(ImageMenuItem.focusablePrefix + this.index)
-            .fillColor($r('sys.color.icon_primary'))
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(ImageMenuItem.imageSize)
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item.value)
+              .draggable(false)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.icon_primary'))
+          }
         }
       }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription) as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
-      .padding(0)
       .borderRadius(ImageMenuItem.buttonBorderRadius)
       .foregroundColor(this.getFgColor())
       .backgroundColor(this.getBgColor())
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .stateStyles({
+        focused: (instance: CommonMethod) => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: (instance: CommonMethod) => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
       .onFocus(() => {
         if (!this.item.isEnabled) {
           return
@@ -740,6 +833,7 @@ export struct SelectTitleBarDialog {
   screenWidth: number = 640;
   verticalScreenLines: number = 6;
   horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
   @State maxLines: number = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
@@ -751,45 +845,55 @@ export struct SelectTitleBarDialog {
   build() {
     if (this.selectTitleBarDialog) {
       Column() {
-        if (this.selectTitleDialog.value) {
-          if (this.selectTitleDialog.value) {
-            if (Util.isSymbolResource(this.selectTitleDialog.value)) {
-              SymbolGlyph(this.selectTitleDialog.value as Resource)
-                .fontColor([$r('sys.color.font_primary')])
-                .fontSize(IMAGE_SIZE)
-                .draggable(false)
-                .focusable(this.selectTitleDialog.isEnabled)
-                .margin({
-                  top: $r('sys.float.padding_level24'),
-                  bottom: $r('sys.float.padding_level8'),
-                } as Margin)
-            } else {
-              Image(this.selectTitleDialog.value)
-                .width(IMAGE_SIZE)
-                .height(IMAGE_SIZE)
-                .margin({
-                  top: $r('sys.float.padding_level24'),
-                  bottom: $r('sys.float.padding_level8'),
-                } as Margin)
-                .fillColor($r('sys.color.icon_primary'))
-            }
+        if (this.selectTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.selectTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.selectTitleDialog.isEnabled)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            } as Margin)
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.selectTitleDialog.value) {
+          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
+            SymbolGlyph(this.selectTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.selectTitleDialog.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              } as Margin)
+          } else {
+            Image(this.selectTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              } as Margin)
+              .fillColor($r('sys.color.icon_primary'))
           }
-          Column() {
-            Text(this.selectTitleBarDialog)
-              .fontSize(TEXT_EDITABLE_DIALOG)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .maxLines(this.maxLines)
-              .width('100%')
-              .textAlign(TextAlign.Center)
-              .fontColor($r('sys.color.font_primary'))
-          }
-          .width('100%')
-          .padding({
-            left: $r('sys.float.padding_level4'),
-            right: $r('sys.float.padding_level4'),
-            bottom: $r('sys.float.padding_level12'),
-          } as Padding)
         }
+        Column() {
+          Text(this.selectTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        } as Padding)
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
@@ -798,20 +902,26 @@ export struct SelectTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        if (this.selectTitleDialog.value) {
-          if (this.selectTitleDialog.value) {
-            if (Util.isSymbolResource(this.selectTitleDialog.value)) {
-              SymbolGlyph(this.selectTitleDialog.value as Resource)
-                .fontColor([$r('sys.color.font_primary')])
-                .fontSize(IMAGE_SIZE)
-                .draggable(false)
-                .focusable(this.selectTitleDialog.isEnabled)
-            } else {
-              Image(this.selectTitleDialog.value)
-                .width(IMAGE_SIZE)
-                .height(IMAGE_SIZE)
-                .fillColor($r('sys.color.icon_primary'))
-            }
+        if (this.selectTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.selectTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.selectTitleDialog.isEnabled)
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.selectTitleDialog.value) {
+          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
+            SymbolGlyph(this.selectTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.selectTitleDialog.isEnabled)
+          } else {
+            Image(this.selectTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor($r('sys.color.icon_primary'))
           }
         }
       }
@@ -825,14 +935,20 @@ export struct SelectTitleBarDialog {
   }
 
   aboutToAppear(): void {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (err) {
+      let code: undefined | number = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar getMainWindowSync,code: ${code},message:${message}`);
     }
   }
 }

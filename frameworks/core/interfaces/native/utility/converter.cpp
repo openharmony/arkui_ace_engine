@@ -15,10 +15,10 @@
 
 #include <cerrno>
 #include <cstdint>
-#include "arkoala_api_generated.h"
 
 #include "converter.h"
 
+// SORTED_SECTION
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
@@ -26,17 +26,21 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
-#include "core/interfaces/native/implementation/linear_gradient_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/level_order_peer.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -137,7 +141,7 @@ namespace {
                     return;
                 }
             }
-    
+
             std::string replaceContentStr;
             if (shortHolderType) {
                 replaceContentStr = GetReplaceContentStr(searchTime, type, params, containCount);
@@ -145,7 +149,7 @@ namespace {
                 replaceContentStr =
                     GetReplaceContentStr(OHOS::Ace::Framework::StringToInt(pos) - 1, type, params, containCount);
             }
-    
+
             originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
             start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
             end = originStr.end();
@@ -572,6 +576,16 @@ std::optional<bool> ResourceConverter::ToBoolean()
 }
 
 template<>
+PreviewText Convert(const Ark_PreviewText& src)
+{
+    PreviewText previewText = {
+        .value = Convert<std::u16string>(src.value),
+        .offset = Convert<int32_t>(src.offset)
+    };
+    return previewText;
+}
+
+template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
     ScaleOpt scaleOptions;
@@ -646,18 +660,18 @@ SheetHeight Convert(const Ark_SheetSize& src)
     return detent;
 }
 
+static SheetHeight SheetHeightFromDimension(std::optional<Dimension> src)
+{
+    SheetHeight detent;
+    Validator::ValidateNonNegative(src);
+    detent.height = src;
+    return detent;
+}
+
 template<>
 SheetHeight Convert(const Ark_Length& src)
 {
-    SheetHeight detent;
-    detent.sheetMode.reset();
-    detent.height = Convert<Dimension>(src);
-    Validator::ValidateNonNegative(detent.height);
-    if (!detent.height.has_value()) {
-        detent.sheetMode = NG::SheetMode::LARGE;
-        detent.height.reset();
-    }
-    return detent;
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
@@ -716,79 +730,48 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
-std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src)
+NG::BarItem Convert(const Ark_NavigationMenuItem& src)
 {
-    std::vector<uint32_t> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto value = Converter::Convert<uint32_t>(*(src.array + i));
-        dst.push_back(value);
+    auto menuItem = src;
+    NG::BarItem item;
+    item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
+    item.icon = Converter::OptConvert<std::string>(menuItem.icon);
+    // iconSymbol is not dealt
+    item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
+    auto optCallback = Converter::GetOpt(menuItem.action);
+    if (optCallback) {
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto actionCallback = [changeCallback = CallbackHelper(*optCallback), node = targetNode]() {
+            PipelineContext::SetCallBackNode(node);
+            changeCallback.Invoke();
+        };
+        item.action = actionCallback;
     }
-    return dst;
+    return item;
 }
 
 template<>
-std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src)
+NG::BarItem Convert(const Ark_ToolbarItem& src)
 {
-    std::vector<uint32_t> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto value = Converter::Convert<uint32_t>(*(src.array + i));
-        dst.push_back(value);
+    auto toolbarItem = src;
+    NG::BarItem item;
+    item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
+    item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
+    //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
+    auto optCallback = Converter::GetOpt(toolbarItem.action);
+    if (optCallback) {
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto actionCallback = [changeCallback = CallbackHelper(*optCallback), node = targetNode]() {
+            PipelineContext::SetCallBackNode(node);
+            changeCallback.Invoke();
+        };
+        item.action = actionCallback;
     }
-    return dst;
-}
-
-template<>
-std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
-{
-    std::vector<NG::BarItem> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto menuItem = *(src.array + i);
-        NG::BarItem item;
-        item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
-        item.icon = Converter::OptConvert<std::string>(menuItem.icon);
-        // iconSymbol is not dealed
-        item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
-        if (menuItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto actionCallback = [changeCallback = CallbackHelper(menuItem.action.value), node = targetNode]() {
-                PipelineContext::SetCallBackNode(node);
-                changeCallback.Invoke();
-            };
-            item.action = actionCallback;
-        }
-        dst.push_back(item);
-    }
-    return dst;
-}
-
-template<>
-std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
-{
-    std::vector<NG::BarItem> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto toolbarItem = *(src.array + i);
-        NG::BarItem item;
-        item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
-        item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
-        //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
-        if (toolbarItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto actionCallback = [changeCallback = CallbackHelper(toolbarItem.action.value), node = targetNode]() {
-                PipelineContext::SetCallBackNode(node);
-                changeCallback.Invoke();
-            };
-            item.action = actionCallback;
-        }
-        item.status = Converter::Convert<NavToolbarItemStatus>(toolbarItem.status);
-        item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
-        //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
-        dst.push_back(item);
-    }
-    return dst;
+    item.status = Converter::OptConvert<NavToolbarItemStatus>(toolbarItem.status)
+        .value_or(NavToolbarItemStatus::NORMAL);
+    item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
+    //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
+    return item;
 }
 
 
@@ -796,32 +779,20 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return Dimension::FromString(str);
-}
-
-template<>
-CalcDimension Convert(const Ark_Length& src)
-{
-    return Convert<Dimension>(src);
-}
-
-template<>
-CalcDimension Convert(const Ark_LengthMetrics& src)
-{
-    return Convert<Dimension>(src);
+    return StringUtils::StringToDimension(str, true);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    if (!str.empty()) {
-        char firstChar = str[0];
-        if (firstChar < '0' || firstChar > '9') {
-            return CalcDimension(str);
-        }
-    }
-    return Dimension::FromString(str);
+    return StringUtils::StringToCalcDimension(str, true);
+}
+
+template<>
+CalcDimension Convert(const Ark_Length& src)
+{
+    return Convert<Dimension>(src);
 }
 
 template<>
@@ -833,20 +804,16 @@ CalcDimension Convert(const Ark_Number& src)
 template<>
 std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
-    return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
+    return {
+        Converter::OptConvert<Dimension>(src.value0).value_or(Dimension()),
+        Converter::OptConvert<Dimension>(src.value1).value_or(Dimension()),
+    };
 }
 
 template<>
 Dimension Convert(const Ark_Number& src)
 {
     return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
-}
-
-template<>
-StringArray Convert(const Ark_CustomObject& src)
-{
-    LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
-    return StringArray();
 }
 
 template<>
@@ -865,29 +832,8 @@ Color Convert(const Ark_String& src)
 template<>
 std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
 {
-    auto str = Convert<std::string>(src);
-    auto dimension = Dimension::FromString(str);
+    auto dimension = Convert<Dimension>(src);
     return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_Undefined& src)
-{
-    return "";
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_Function& src)
-{
-    LOGE("Convert [Ark_Function/CustomBuilder] to [Ark_CharPtr] is not valid.");
-    return "";
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_CustomObject& src)
-{
-    LOGE("Convert [Ark_CustomObject] to [Ark_CharPtr] is not valid.");
-    return "";
 }
 
 template<>
@@ -986,13 +932,6 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
         property.SetBorderStyle(style.value());
     }
     return property;
-}
-
-template<>
-Dimension Convert(const Ark_CustomObject& src)
-{
-    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
-    return Dimension();
 }
 
 template<>
@@ -1136,6 +1075,30 @@ Gradient Convert(const Ark_LinearGradient& value)
 }
 
 template<>
+RefPtr<Ellipse> Convert(const Ark_Rect& src)
+{
+    const auto two = 2;
+    auto dst = AceType::MakeRefPtr<Ellipse>();
+    float left = Converter::Convert<float>(src.left);
+    float top = Converter::Convert<float>(src.top);
+    float right = Converter::Convert<float>(src.right);
+    float bottom = Converter::Convert<float>(src.bottom);
+    auto width = Dimension(right - left);
+    auto height = Dimension(bottom - top);
+    auto deltaX = Dimension(left);
+    auto deltaY = Dimension(top);
+    auto position = DimensionOffset(deltaX, deltaY);
+    dst->SetWidth(width);
+    dst->SetHeight(height);
+    dst->SetPosition(position);
+    dst->SetRadiusX(Dimension((right - left) / two));
+    dst->SetRadiusY(Dimension((bottom - top) / two));
+    dst->SetAxisX(Dimension(left + (right - left) / two));
+    dst->SetAxisY(Dimension(top + (bottom - top) / two));
+    return dst;
+}
+
+template<>
 void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src)
 {
     Gradient gradient;
@@ -1190,7 +1153,7 @@ std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient_common& value)
+Gradient Convert(const Ark_LinearGradientOptions& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -1527,6 +1490,7 @@ template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
     OverlayOptions dst;
+    dst.align = Alignment::TOP_LEFT;
     auto align = Converter::OptConvert<Alignment>(src.align);
     if (align) {
         dst.align = align.value();
@@ -1648,13 +1612,9 @@ NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src)
 }
 
 template<>
-NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src)
+NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src)
 {
-    NavToolbarItemStatus status = NavToolbarItemStatus::NORMAL;
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        status = static_cast<NavToolbarItemStatus>(src.value);
-    }
-    return status;
+    return static_cast<NavToolbarItemStatus>(src);
 }
 
 template<>
@@ -1699,20 +1659,11 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
-ShapePoint Convert(const Ark_Point& src)
-{
-    return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
-}
-
-template<>
 ShapePoint Convert(const Ark_ShapePoint& src)
 {
-    ShapePoint point = {0.0_vp, 0.0_vp};
-    auto x = Converter::OptConvert<Dimension>(src.value0);
-    auto y = Converter::OptConvert<Dimension>(src.value1);
-    point.first = x.value_or(0.0_vp);
-    point.second = y.value_or(0.0_vp);
-    return point;
+    return ShapePoint(
+        Converter::OptConvert<Dimension>(src.value0).value_or(0.0_vp),
+        Converter::OptConvert<Dimension>(src.value1).value_or(0.0_vp));
 }
 
 template<>
@@ -1785,6 +1736,16 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
     if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
         dst = val;
     }
+}
+
+template<>
+RectF Convert(const Ark_Rect& src)
+{
+    auto left = Converter::Convert<float>(src.left);
+    auto top = Converter::Convert<float>(src.top);
+    auto right = Converter::Convert<float>(src.right);
+    auto bottom = Converter::Convert<float>(src.bottom);
+    return RectF(left, top, right - left, bottom - top);
 }
 
 template<>
@@ -2493,6 +2454,12 @@ CalcLength Convert(const Ark_Length& src)
 }
 
 template<>
+CalcDimension Convert(const Ark_LengthMetrics& src)
+{
+    return CalcDimension(Convert<Dimension>(src));
+}
+
+template<>
 CalcLength Convert(const Ark_LengthMetrics& src)
 {
     return CalcLength(Convert<Dimension>(src));
@@ -2596,6 +2563,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
         info.fontFamily = fontfamiliesOpt->families;
     }
     info.fontWeight = OptConvert<FontWeight>(src.fontWeight);
+    info.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.fontStyle);
 
     info.backgroundColor = OptConvert<Color>(src.backgroundColor);
     info.borderRadius = OptConvert<BorderRadiusProperty>(src.borderRadius);
@@ -3264,54 +3232,30 @@ NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src)
 }
 
 template<>
-void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src)
+void AssignCast(std::optional<NG::NavigationTransition>& dst, const Ark_NavigationAnimatedTransition& src)
 {
-    NG::NavigationTransition transition;
+    NG::NavigationTransition transition{};
     dst = transition;
-    if (src.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->isValid = false;
-        return;
-    }
     dst->isValid = true;
-    if (src.value.isInteractive.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->interactive = Converter::Convert<bool>(src.value.isInteractive.value);
-    } else {
-        dst->interactive = false;
-    }
-    if (src.value.timeout.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->timeout = Converter::Convert<int32_t>(src.value.timeout.value);
-    }
+    dst->interactive = Converter::OptConvert<bool>(src.isInteractive).value_or(false);
+    dst->timeout = Converter::OptConvert<int32_t>(src.timeout).value_or(dst->timeout);
     if (!dst->interactive) {
         dst->timeout = dst->timeout < 0 ? 1000 : dst->timeout;
     }
-    if (src.value.onTransitionEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto onTransitionEnd = [callback = CallbackHelper(src.value.onTransitionEnd.value)](bool success) {
+    auto optCallback = Converter::GetOpt(src.onTransitionEnd);
+    if (optCallback) {
+        auto onTransitionEnd = [callback = CallbackHelper(*optCallback)](bool success) {
             auto isSuccess = Converter::ArkValue<Ark_Boolean>(success);
             callback.Invoke(isSuccess);
         };
         dst->endCallback = std::move(onTransitionEnd);
     }
-    auto transitionCallback = [callback = CallbackHelper(src.value.transition)](const RefPtr<NavigationTransitionProxy>& transitionProxy) {
+    auto transitionCallback = [callback = CallbackHelper(src.transition)](
+            const RefPtr<NavigationTransitionProxy>& transitionProxy) {
         auto transition = Converter::ArkValue<Ark_NavigationTransitionProxy>(transitionProxy);
         callback.Invoke(transition);
     };
     dst->transition = std::move(transitionCallback);
-}
-
-template<>
-void AssignCast(std::optional<std::vector<NG::NavDestinationTransition>>& dst,
-    const Opt_Array_NavDestinationTransition& src)
-{
-    std::vector<NG::NavDestinationTransition> allTransitions;
-    if (src.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        return;
-    }
-    int length = src.value.length;
-    for (int i = 0; i < length; i++) {
-        NG::NavDestinationTransition indexValue = Converter::Convert<NG::NavDestinationTransition>(src.value.array[i]);
-        allTransitions.push_back(indexValue);
-    }
-    dst = allTransitions;
 }
 
 template<>
@@ -3333,22 +3277,11 @@ NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
 }
 
 template<>
-void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src)
+void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 {
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst = Converter::Convert<ShapePoint>(src.value);
-    }
-}
-
-template<>
-void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src)
-{
-    dst = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto peer = reinterpret_cast<LevelOrderPeer*>(src.value);
-        if (peer && peer->levelOrder) {
-            dst = std::make_optional(peer->levelOrder->GetOrder());
-        }
+    auto peer = src;
+    if (peer && peer->levelOrder) {
+        dst = std::make_optional(peer->levelOrder->GetOrder());
     }
 }
 

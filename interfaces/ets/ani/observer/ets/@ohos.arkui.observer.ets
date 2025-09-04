@@ -100,6 +100,8 @@ import hilog from '@ohos.hilog'
         ON_WILL_HIDE = 5,
         ON_WILL_APPEAR = 6,
         ON_WILL_DISAPPEAR = 7,
+        ON_ACTIVE = 8,
+        ON_INACTIVE = 9,
         ON_BACKPRESS = 100
     }
 
@@ -140,6 +142,10 @@ import hilog from '@ohos.hilog'
                 return NavDestinationState.ON_WILL_APPEAR;
             } else if (value === 7) {
                 return NavDestinationState.ON_WILL_DISAPPEAR;
+            } else if (value === 8) {
+                return NavDestinationState.ON_ACTIVE;
+            } else if (value === 9) {
+                return NavDestinationState.ON_INACTIVE;
             } else if (value === 100) {
                 return NavDestinationState.ON_BACKPRESS;
             } else {

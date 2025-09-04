@@ -925,8 +925,8 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Union_ResourceColor_ColoringStrategy, std::string>;
     static const std::string PROP_NAME("foregroundColor");
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
-    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
@@ -1664,7 +1664,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
         .outset = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>(3.0_fp),
         .repeat = Converter::ArkValue<Opt_RepeatMode>(ARK_REPEAT_MODE_SPACE),
         .slice = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>(4.0_vp),
-        .source = Converter::ArkUnion<Opt_Union_String_Resource_LinearGradient_common, Ark_String>(
+        .source = Converter::ArkUnion<Opt_Union_String_Resource_LinearGradienOptions, Ark_String>(
             "some_test_image.png"),
         .width = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>("1.00%"),
     };

@@ -107,6 +107,22 @@ import { Resource } from 'global.resource';
 import { ElementIdToCustomProperties } from './handwritten/CommonHandWritten'
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
 import { TapGesture } from "@component_handwritten/gesture"
+import { ArkButtonNode } from './handwritten/modifiers/ArkButtonNode'
+import { ButtonOptions, ButtonAttribute, ArkButtonPeer} from './component/button'
+import { ArkCheckboxNode } from './handwritten/modifiers/ArkCheckboxNode'
+import { CheckboxOptions, CheckboxAttribute, ArkCheckboxPeer} from './component/checkbox'
+import { ArkCheckboxGroupNode } from './handwritten/modifiers/ArkCheckboxGroupNode'
+import { CheckboxGroupOptions, CheckboxGroupAttribute, ArkCheckboxGroupPeer} from './component/checkboxgroup'
+import { ArkRadioNode } from './handwritten/modifiers/ArkRadioNode'
+import { RadioOptions, RadioAttribute, ArkRadioPeer} from './component/radio'
+import { ArkRatingNode } from './handwritten/modifiers/ArkRatingNode'
+import { RatingOptions, RatingAttribute, ArkRatingPeer} from './component/rating'
+import { ArkSelectNode } from './handwritten/modifiers/ArkSelectNode'
+import { SelectOption, SelectAttribute, ArkSelectPeer} from './component/select'
+import { ArkSliderNode } from './handwritten/modifiers/ArkSliderNode'
+import { SliderOptions, SliderAttribute, ArkSliderPeer} from './component/slider'
+import { ArkToggleNode } from './handwritten/modifiers/ArkToggleNode'
+import { ToggleOptions, ToggleAttribute, ArkTogglePeer} from './component/toggle'
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -1427,12 +1443,103 @@ export namespace typeNode {
         }
     }
 
+
+    class ButtonFrameNode extends TypedFrameNode<ArkButtonNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkButtonNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): ButtonAttribute {
+            let arkButtonNode = this.attribute as ArkButtonNode;
+            return arkButtonNode!.initialize();
+        }
+        initialize(options: ButtonOptions): ButtonAttribute {
+            let arkButtonNode = this.attribute as ArkButtonNode;
+            return arkButtonNode!.initializeWithChild(options);
+        }
+        initialize(label: ResourceStr, options?: ButtonOptions): ButtonAttribute {
+            let arkButtonNode = this.attribute as ArkButtonNode;
+            return arkButtonNode!.initializeWithLabel(label, options);
+        }
+    }
+
+    class CheckboxFrameNode extends TypedFrameNode<ArkCheckboxNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: CheckboxOptions): CheckboxAttribute {
+            let arkCheckboxNode = this.attribute as ArkCheckboxNode;
+            return arkCheckboxNode!.initialize(options);
+        }
+    }
+
+    class CheckboxGroupFrameNode extends TypedFrameNode<ArkCheckboxGroupNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxGroupNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: CheckboxGroupOptions): CheckboxGroupAttribute {
+            let arkCheckboxGroupNode = this.attribute as ArkCheckboxGroupNode;
+            return arkCheckboxGroupNode!.initialize(options);
+        }
+    }
+
+    class RadioFrameNode extends TypedFrameNode<ArkRadioNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRadioNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: RadioOptions): RadioAttribute {
+            let arkRadioNode = this.attribute as ArkRadioNode;
+            return arkRadioNode!.initialize(options);
+        }
+    }
+
+    class RatingFrameNode extends TypedFrameNode<ArkRatingNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRatingNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: RatingOptions): RatingAttribute {
+            let arkRatingNode = this.attribute as ArkRatingNode;
+            return arkRatingNode!.initialize(options);
+        }
+    }
+
+    class SelectFrameNode extends TypedFrameNode<ArkSelectNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSelectNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: Array<SelectOption>): SelectAttribute {
+            let arkSelectNode = this.attribute as ArkSelectNode;
+            return arkSelectNode!.initialize(options);
+        }
+    }
+
+    class SliderFrameNode extends TypedFrameNode<ArkSliderNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSliderNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: SliderOptions): SliderAttribute {
+            let arkSliderNode = this.attribute as ArkSliderNode;
+            return arkSliderNode!.initialize(options);
+        }
+    }
+
+    class ToggleFrameNode extends TypedFrameNode<ArkToggleNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkToggleNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ToggleOptions): ToggleAttribute {
+            let arkToggleNode = this.attribute as ArkToggleNode;
+            return arkToggleNode!.initialize(options);
+        }
+    }
+
     overload createNode {
         createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
         createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
         createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
         createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
-        createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,createImageNode
+        createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,
+        createImageNode, createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createSelectNode,
+        createSliderNode, createToggleNode
     }
 
     // @ts-ignore
@@ -1824,6 +1931,96 @@ export namespace typeNode {
             return arknode;
         });
     }
+
+    // @ts-ignore
+    export function createButtonNode(context: UIContext, type: 'Button'): ButtonFrameNode {
+        return new ButtonFrameNode(context, 'Button', (node: FrameNode, type: ModifierType): ArkButtonNode => {
+            let arknode = new ArkButtonNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkButtonPeer(retval, node._nodeId as int32, "Button", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createCheckboxNode(context: UIContext, type: string): CheckboxFrameNode {
+        return new CheckboxFrameNode(context, 'Checkbox', (node: FrameNode, type: ModifierType): ArkCheckboxNode => {
+            let arknode = new ArkCheckboxNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkCheckboxPeer(retval, node._nodeId as int32, "Checkbox", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createCheckboxGroupNode(context: UIContext, type: string): CheckboxGroupFrameNode {
+        return new CheckboxGroupFrameNode(context, 'CheckboxGroup', (node: FrameNode, type: ModifierType): ArkCheckboxGroupNode => {
+            let arknode = new ArkCheckboxGroupNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkCheckboxGroupPeer(retval, node._nodeId as int32, "CheckboxGroup", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createRadioNode(context: UIContext, type: string): RadioFrameNode {
+        return new RadioFrameNode(context, 'Radio', (node: FrameNode, type: ModifierType): ArkRadioNode => {
+            let arknode = new ArkRadioNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkRadioPeer(retval, node._nodeId as int32, "Radio", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createRatingNode(context: UIContext, type: string): RatingFrameNode {
+        return new RatingFrameNode(context, 'Rating', (node: FrameNode, type: ModifierType): ArkRatingNode => {
+            let arknode = new ArkRatingNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkRatingPeer(retval, node._nodeId as int32, "Rating", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createSelectNode(context: UIContext, type: string): SelectFrameNode {
+        return new SelectFrameNode(context, 'Select', (node: FrameNode, type: ModifierType): ArkSelectNode => {
+            let arknode = new ArkSelectNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSelectPeer(retval, node._nodeId as int32, "Select", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createSliderNode(context: UIContext, type: string): SliderFrameNode {
+        return new SliderFrameNode(context, 'Slider', (node: FrameNode, type: ModifierType): ArkSliderNode => {
+            let arknode = new ArkSliderNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSliderPeer(retval, node._nodeId as int32, "Slider", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createToggleNode(context: UIContext, type: string, options: ToggleOptions): ToggleFrameNode {
+        let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
+            let arknode = new ArkToggleNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTogglePeer(retval, node._nodeId as int32, "Toggle", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+        toggleNode.initialize(options as ToggleOptions);
+        return toggleNode;
+    }
 }
 
 class NodeAdapterThunk extends NativeThunk {
@@ -1841,11 +2038,6 @@ class NodeAdapterThunk extends NativeThunk {
 }
 
 class NodeAdapterFinalizable extends Finalizable {
-    ptr: pointer
-    finalizer: pointer
-    cleaner: NativeThunk | undefined = undefined
-    managed: boolean
-
     constructor(ptr: pointer) {
         super(ptr, nullptr, false);
         this.init(ptr)

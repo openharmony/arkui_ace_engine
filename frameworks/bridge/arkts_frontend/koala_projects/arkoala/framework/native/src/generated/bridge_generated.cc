@@ -3074,6 +3074,20 @@ void impl_CommonMethod_onAccessibilityHover(Ark_NativePointer thisPtr, KSerializ
         GetNodeModifiers()->getCommonMethodModifier()->setOnAccessibilityHover(self, (const Opt_AccessibilityCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_onAccessibilityHover, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_onAccessibilityHoverTransparent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_AccessibilityTransparentCallback value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_AccessibilityTransparentCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_AccessibilityTransparentCallback))))};;
+        }
+        Opt_AccessibilityTransparentCallback value_value = value_value_buf;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnAccessibilityHoverTransparent(self, (const Opt_AccessibilityTransparentCallback*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_onAccessibilityHoverTransparent, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_hoverEffect(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -23730,118 +23744,46 @@ void impl_TabContentInterface_setTabContentOptions(Ark_NativePointer thisPtr) {
         GetNodeModifiers()->getTabContentModifier()->setTabContentOptions(self);
 }
 KOALA_INTEROP_DIRECT_V1(TabContentInterface_setTabContentOptions, Ark_NativePointer)
-void impl_TabContentAttribute_tabBar0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_TabContentAttribute_tabBar(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_String_Resource_CustomBuilder_TabBarOptions value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Union_String_Resource_CustomBuilder_TabBarOptions value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_ComponentContent>(thisDeserializer.readComponentContent());
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = thisDeserializer.readSubTabBarStyle();
+            } else if (valueValueTempTmpBuf_UnionSelector == 2) {
+                valueValueTempTmpBuf_.selector = 2;
+                valueValueTempTmpBuf_.value2 = thisDeserializer.readBottomTabBarStyle();
+            } else if (valueValueTempTmpBuf_UnionSelector == 3) {
+                valueValueTempTmpBuf_.selector = 3;
+                valueValueTempTmpBuf_.value3 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (valueValueTempTmpBuf_UnionSelector == 4) {
+                valueValueTempTmpBuf_.selector = 4;
+                valueValueTempTmpBuf_.value4 = thisDeserializer.readResource();
+            } else if (valueValueTempTmpBuf_UnionSelector == 5) {
+                valueValueTempTmpBuf_.selector = 5;
+                valueValueTempTmpBuf_.value5 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+            } else if (valueValueTempTmpBuf_UnionSelector == 6) {
+                valueValueTempTmpBuf_.selector = 6;
+                valueValueTempTmpBuf_.value6 = thisDeserializer.readTabBarOptions();
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readResource();
-            }
-            else if (value_value_buf__selector == 2) {
-                value_value_buf_.selector = 2;
-                value_value_buf_.value2 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
-            }
-            else if (value_value_buf__selector == 3) {
-                value_value_buf_.selector = 3;
-                value_value_buf_.value3 = thisDeserializer.readTabBarOptions();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Union_String_Resource_CustomBuilder_TabBarOptions>(value_value_buf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions>(valueValueTempTmpBuf_);
         }
-        Opt_Union_String_Resource_CustomBuilder_TabBarOptions value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar0(self, (const Opt_Union_String_Resource_CustomBuilder_TabBarOptions*)&value_value);
+        Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTabContentModifier()->setTabBar(self, static_cast<Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabContentAttribute_tabBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_SubTabBarStyle_BottomTabBarStyle value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Union_SubTabBarStyle_BottomTabBarStyle value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = thisDeserializer.readSubTabBarStyle();
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readBottomTabBarStyle();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Union_SubTabBarStyle_BottomTabBarStyle>(value_value_buf_);
-        }
-        Opt_Union_SubTabBarStyle_BottomTabBarStyle value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar1(self, (const Opt_Union_SubTabBarStyle_BottomTabBarStyle*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabContentAttribute_tabBar2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Type_TabContentAttribute_tabBar_content value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Type_TabContentAttribute_tabBar_content value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = static_cast<Ark_ComponentContent>(thisDeserializer.readComponentContent());
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readSubTabBarStyle();
-            }
-            else if (value_value_buf__selector == 2) {
-                value_value_buf_.selector = 2;
-                value_value_buf_.value2 = thisDeserializer.readBottomTabBarStyle();
-            }
-            else if (value_value_buf__selector == 3) {
-                value_value_buf_.selector = 3;
-                value_value_buf_.value3 = static_cast<Ark_String>(thisDeserializer.readString());
-            }
-            else if (value_value_buf__selector == 4) {
-                value_value_buf_.selector = 4;
-                value_value_buf_.value4 = thisDeserializer.readResource();
-            }
-            else if (value_value_buf__selector == 5) {
-                value_value_buf_.selector = 5;
-                value_value_buf_.value5 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
-            }
-            else if (value_value_buf__selector == 6) {
-                value_value_buf_.selector = 6;
-                value_value_buf_.value6 = thisDeserializer.readTabBarOptions();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Type_TabContentAttribute_tabBar_content>(value_value_buf_);
-        }
-        Opt_Type_TabContentAttribute_tabBar_content value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar2(self, (const Opt_Type_TabContentAttribute_tabBar_content*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar2, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabContentAttribute_onWillShow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -32076,6 +32018,26 @@ void impl_LazyForEachOps_Sync(Ark_NativePointer node, Ark_Int32 totalCount, KSer
         GetAccessors()->getLazyForEachOpsAccessor()->Sync(node, totalCount, (const Callback_CreateItem*)&creator_value, (const Callback_RangeUpdate*)&updater_value);
 }
 KOALA_INTEROP_DIRECT_V4(LazyForEachOps_Sync, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_LazyForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_OnMoveFromTo onMoveFromToOpsValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnMoveFromTo)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnMoveFromTo))))};;
+        const auto onMoveOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnMoveHandler onMoveOpsValueTempTmpBuf = {};
+        onMoveOpsValueTempTmpBuf.tag = onMoveOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveOpsValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnMoveHandler)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnMoveHandler))))};
+        }
+        Opt_OnMoveHandler onMoveOpsValueTemp = onMoveOpsValueTempTmpBuf;;
+        const auto onMoveDragEventOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTempTmpBuf = {};
+        onMoveDragEventOpsValueTempTmpBuf.tag = onMoveDragEventOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveDragEventOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveDragEventOpsValueTempTmpBuf.value = thisDeserializer.readItemDragEventHandler();
+        }
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTemp = onMoveDragEventOpsValueTempTmpBuf;;
+        GetAccessors()->getLazyForEachOpsAccessor()->SyncOnMoveOps(node, (const Callback_OnMoveFromTo*)&onMoveFromToOpsValueTemp, static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(LazyForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_SystemOps_StartFrame() {
         return GetAccessors()->getSystemOpsAccessor()->StartFrame();
 }
@@ -44125,10 +44087,10 @@ void impl_WebContextMenuResult_selectAll(Ark_NativePointer thisPtr) {
         GetAccessors()->getWebContextMenuResultAccessor()->selectAll(self);
 }
 KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_selectAll, Ark_NativePointer)
-Ark_NativePointer impl_ConsoleMessage_ctor(const KStringPtr& message, const KStringPtr& sourceId, KInteropNumber lineNumber, Ark_Int32 messageLevel) {
-        return GetAccessors()->getConsoleMessageAccessor()->ctor((const Ark_String*) (&message), (const Ark_String*) (&sourceId), (const Ark_Number*) (&lineNumber), static_cast<Ark_MessageLevel>(messageLevel));
+Ark_NativePointer impl_ConsoleMessage_ctor(const KStringPtr& message, const KStringPtr& sourceId, Ark_Int32 lineNumber, Ark_Int32 messageLevel) {
+        return GetAccessors()->getConsoleMessageAccessor()->ctor((const Ark_String*) (&message), (const Ark_String*) (&sourceId), (const Ark_Int32*) (&lineNumber), static_cast<Ark_MessageLevel>(messageLevel));
 }
-KOALA_INTEROP_4(ConsoleMessage_ctor, Ark_NativePointer, KStringPtr, KStringPtr, KInteropNumber, Ark_Int32)
+KOALA_INTEROP_4(ConsoleMessage_ctor, Ark_NativePointer, KStringPtr, KStringPtr, Ark_Int32, Ark_Int32)
 Ark_NativePointer impl_ConsoleMessage_getFinalizer() {
         return GetAccessors()->getConsoleMessageAccessor()->getFinalizer();
 }
@@ -44143,11 +44105,11 @@ Ark_String impl_ConsoleMessage_getSourceId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getConsoleMessageAccessor()->getSourceId(self);
 }
 KOALA_INTEROP_1(ConsoleMessage_getSourceId, KStringPtr, Ark_NativePointer)
-Ark_Number impl_ConsoleMessage_getLineNumber(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_ConsoleMessage_getLineNumber(Ark_NativePointer thisPtr) {
         Ark_ConsoleMessage self = reinterpret_cast<Ark_ConsoleMessage>(thisPtr);
         return GetAccessors()->getConsoleMessageAccessor()->getLineNumber(self);
 }
-KOALA_INTEROP_DIRECT_1(ConsoleMessage_getLineNumber, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(ConsoleMessage_getLineNumber, Ark_Int32, Ark_NativePointer)
 Ark_Int32 impl_ConsoleMessage_getMessageLevel(Ark_NativePointer thisPtr) {
         Ark_ConsoleMessage self = reinterpret_cast<Ark_ConsoleMessage>(thisPtr);
         return GetAccessors()->getConsoleMessageAccessor()->getMessageLevel(self);
@@ -44230,7 +44192,7 @@ KInteropReturnBuffer impl_WebResourceResponse_getResponseDataEx(Ark_NativePointe
             else if (retValue_value_type == 1) {
                 _retSerializer.writeInt8(1);
                 const auto retValue_value_1 = retValue_value.value1;
-                _retSerializer.writeNumber(retValue_value_1);
+                _retSerializer.writeInt32(retValue_value_1);
             }
             else if (retValue_value_type == 2) {
                 _retSerializer.writeInt8(2);
@@ -44273,16 +44235,16 @@ KInteropReturnBuffer impl_WebResourceResponse_getResponseHeader(Ark_NativePointe
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(WebResourceResponse_getResponseHeader, KInteropReturnBuffer, Ark_NativePointer)
-Ark_Number impl_WebResourceResponse_getResponseCode(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebResourceResponse_getResponseCode(Ark_NativePointer thisPtr) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         return GetAccessors()->getWebResourceResponseAccessor()->getResponseCode(self);
 }
-KOALA_INTEROP_DIRECT_1(WebResourceResponse_getResponseCode, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebResourceResponse_getResponseCode, Ark_Int32, Ark_NativePointer)
 void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 data_value_buf_selector = thisDeserializer.readInt8();
-        Ark_Union_String_Number_Resource_Buffer data_value_buf = {};
+        Ark_Union_String_Int32_Resource_Buffer data_value_buf = {};
         data_value_buf.selector = data_value_buf_selector;
         if (data_value_buf_selector == 0) {
             data_value_buf.selector = 0;
@@ -44290,7 +44252,7 @@ void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerial
         }
         else if (data_value_buf_selector == 1) {
             data_value_buf.selector = 1;
-            data_value_buf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            data_value_buf.value1 = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
         else if (data_value_buf_selector == 2) {
             data_value_buf.selector = 2;
@@ -44303,8 +44265,8 @@ void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerial
         else {
             INTEROP_FATAL("One of the branches for data_value_buf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_Number_Resource_Buffer data_value = static_cast<Ark_Union_String_Number_Resource_Buffer>(data_value_buf);;
-        GetAccessors()->getWebResourceResponseAccessor()->setResponseData(self, (const Ark_Union_String_Number_Resource_Buffer*)&data_value);
+        Ark_Union_String_Int32_Resource_Buffer data_value = static_cast<Ark_Union_String_Int32_Resource_Buffer>(data_value_buf);;
+        GetAccessors()->getWebResourceResponseAccessor()->setResponseData(self, (const Ark_Union_String_Int32_Resource_Buffer*)&data_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebResourceResponse_setResponseData, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebResourceResponse_setResponseEncoding(Ark_NativePointer thisPtr, const KStringPtr& encoding) {
@@ -44336,11 +44298,11 @@ void impl_WebResourceResponse_setResponseHeader(Ark_NativePointer thisPtr, KSeri
         GetAccessors()->getWebResourceResponseAccessor()->setResponseHeader(self, (const Array_Header*)&header_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebResourceResponse_setResponseHeader, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_WebResourceResponse_setResponseCode(Ark_NativePointer thisPtr, KInteropNumber code) {
+void impl_WebResourceResponse_setResponseCode(Ark_NativePointer thisPtr, Ark_Int32 code) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
-        GetAccessors()->getWebResourceResponseAccessor()->setResponseCode(self, (const Ark_Number*) (&code));
+        GetAccessors()->getWebResourceResponseAccessor()->setResponseCode(self, (const Ark_Int32*) (&code));
 }
-KOALA_INTEROP_DIRECT_V2(WebResourceResponse_setResponseCode, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(WebResourceResponse_setResponseCode, Ark_NativePointer, Ark_Int32)
 void impl_WebResourceResponse_setResponseIsReady(Ark_NativePointer thisPtr, Ark_Boolean IsReady) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         GetAccessors()->getWebResourceResponseAccessor()->setResponseIsReady(self, IsReady);
@@ -44364,11 +44326,11 @@ Ark_String impl_WebResourceError_getErrorInfo(Ark_NativePointer thisPtr) {
         return GetAccessors()->getWebResourceErrorAccessor()->getErrorInfo(self);
 }
 KOALA_INTEROP_1(WebResourceError_getErrorInfo, KStringPtr, Ark_NativePointer)
-Ark_Number impl_WebResourceError_getErrorCode(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebResourceError_getErrorCode(Ark_NativePointer thisPtr) {
         Ark_WebResourceError self = reinterpret_cast<Ark_WebResourceError>(thisPtr);
         return GetAccessors()->getWebResourceErrorAccessor()->getErrorCode(self);
 }
-KOALA_INTEROP_DIRECT_1(WebResourceError_getErrorCode, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebResourceError_getErrorCode, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_ctor() {
         return GetAccessors()->getJsGeolocationAccessor()->ctor();
 }
@@ -45962,7 +45924,7 @@ Ark_NativePointer impl_RouterExtender_RouterPush1attribute(KSerializerBuffer thi
     }
     return GetAccessors()->getRouterExtenderAccessor()->push((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterPush1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterPush1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     const auto url = static_cast<Ark_String>(thisDeserializer.readString());
@@ -45983,7 +45945,7 @@ Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer 
     }
     return GetAccessors()->getRouterExtenderAccessor()->replace((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode) {
         return GetAccessors()->getRouterExtenderAccessor()->moveCommonUnderPageNode(commonNode, pageNode);
 }
@@ -46027,7 +45989,7 @@ Ark_NativePointer impl_RouterExtender_RouterRunPage(KSerializerBuffer thisArray,
     }
     return GetAccessors()->getRouterExtenderAccessor()->runPage((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterRunPage, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterRunPage, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_RouterClear() {
         GetAccessors()->getRouterExtenderAccessor()->clear();
 }

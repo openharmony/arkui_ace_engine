@@ -39,8 +39,8 @@ function finalizerUnregister(target: Object) {
 }
 
 export class DrawableDescriptor {
-  protected pixelMap?: image.PixelMap = undefined
-  protected nativeObj: long = 0
+  @JSONStringifyIgnore protected pixelMap?: image.PixelMap = undefined
+  @JSONStringifyIgnore protected nativeObj: long = 0
 
   constructor() { }
 
@@ -74,7 +74,7 @@ export class DrawableDescriptor {
 }
 
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {
-  private finalization: NativeDestructor
+  @JSONStringifyIgnore private finalization: NativeDestructor
 
   constructor(src?: image.PixelMap) {
     super()
@@ -94,10 +94,10 @@ export class PixelMapDrawableDescriptor extends DrawableDescriptor {
 }
 
 export class LayeredDrawableDescriptor extends DrawableDescriptor {
-  private foreground?: DrawableDescriptor = undefined
-  private background?: DrawableDescriptor = undefined
-  private mask?: DrawableDescriptor = undefined
-  private finalization: NativeDestructor
+  @JSONStringifyIgnore private foreground?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private background?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private mask?: DrawableDescriptor = undefined
+  @JSONStringifyIgnore private finalization: NativeDestructor
 
   constructor(foreground?: DrawableDescriptor, background?: DrawableDescriptor, mask?: DrawableDescriptor) {
     super();
@@ -159,9 +159,9 @@ class AnimationOptionsImpl implements AnimationOptions {
 }
 
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
-  private pixelMaps: Array<image.PixelMap>
-  private options: AnimationOptions | undefined = undefined
-  private finalization: NativeDestructor
+  @JSONStringifyIgnore private pixelMaps: Array<image.PixelMap>
+  @JSONStringifyIgnore private options: AnimationOptions | undefined = undefined
+  @JSONStringifyIgnore private finalization: NativeDestructor
   constructor(pixelMaps: Array<image.PixelMap>, options?: AnimationOptions) {
     super()
     if (pixelMaps.length > 0) {

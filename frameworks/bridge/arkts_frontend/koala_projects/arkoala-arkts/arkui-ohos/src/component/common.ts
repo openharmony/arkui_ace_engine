@@ -1871,7 +1871,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
-export type CustomProperty = Object | undefined | Record<string, CustomProperty>;
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
     _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -2269,7 +2269,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    
+
     backgroundColor0Attribute(value: ResourceColor | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3065,6 +3065,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.holdAndWriteCallback(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hoverEffectAttribute(value: HoverEffect | undefined): void {
@@ -5804,7 +5816,12 @@ export class ArkCommonMethodPeer extends PeerNode {
             const message_value  = message!
             let message_value_type : int32 = RuntimeType.UNDEFINED
             message_value_type = runtimeType(message_value)
-            if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
+            if (TypeChecker.isStyledString(message_value, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const message_value_1  = message_value as StyledString
+                thisSerializer.writeStyledString(message_value_1)
+            }
+            else if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
                 thisSerializer.writeInt8(0 as int32)
                 const message_value_0  = message_value as ResourceStr
                 let message_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -5819,11 +5836,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                     const message_value_0_1  = message_value_0 as Resource
                     thisSerializer.writeResource(message_value_0_1)
                 }
-            }
-            else if (TypeChecker.isStyledString(message_value, false)) {
-                thisSerializer.writeInt8(1 as int32)
-                const message_value_1  = message_value as StyledString
-                thisSerializer.writeStyledString(message_value_1)
             }
         }
         let options_type : int32 = RuntimeType.UNDEFINED
@@ -7229,7 +7241,7 @@ export enum SheetSize {
 export interface BorderImageOption {
     slice?: Length | EdgeWidths | LocalizedEdgeWidths;
     repeat?: RepeatMode;
-    source?: string | Resource | LinearGradient_common;
+    source?: string | Resource | LinearGradientOptions;
     width?: Length | EdgeWidths | LocalizedEdgeWidths;
     outset?: Length | EdgeWidths | LocalizedEdgeWidths;
     fill?: boolean;
@@ -7518,35 +7530,36 @@ export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
 export enum BlendMode {
-    CLEAR = 0,
-    SRC = 1,
-    DST = 2,
-    SRC_OVER = 3,
-    DST_OVER = 4,
-    SRC_IN = 5,
-    DST_IN = 6,
-    SRC_OUT = 7,
-    DST_OUT = 8,
-    SRC_ATOP = 9,
-    DST_ATOP = 10,
-    XOR = 11,
-    PLUS = 12,
-    MODULATE = 13,
-    SCREEN = 14,
-    OVERLAY = 15,
-    DARKEN = 16,
-    LIGHTEN = 17,
-    COLOR_DODGE = 18,
-    COLOR_BURN = 19,
-    HARD_LIGHT = 20,
-    SOFT_LIGHT = 21,
-    DIFFERENCE = 22,
-    EXCLUSION = 23,
-    MULTIPLY = 24,
-    HUE = 25,
-    SATURATION = 26,
-    COLOR = 27,
-    LUMINOSITY = 28
+    NONE,
+    CLEAR = 1,
+    SRC = 2,
+    DST = 3,
+    SRC_OVER = 4,
+    DST_OVER = 5,
+    SRC_IN = 6,
+    DST_IN = 7,
+    SRC_OUT = 8,
+    DST_OUT = 9,
+    SRC_ATOP = 10,
+    DST_ATOP = 11,
+    XOR = 12,
+    PLUS = 13,
+    MODULATE = 14,
+    SCREEN = 15,
+    OVERLAY = 16,
+    DARKEN = 17,
+    LIGHTEN = 18,
+    COLOR_DODGE = 19,
+    COLOR_BURN = 20,
+    HARD_LIGHT = 21,
+    SOFT_LIGHT = 22,
+    DIFFERENCE = 23,
+    EXCLUSION = 24,
+    MULTIPLY = 25,
+    HUE = 26,
+    SATURATION = 27,
+    COLOR = 28,
+    LUMINOSITY = 29
 }
 export interface PopupOptions {
     message: string;
@@ -7832,6 +7845,7 @@ export interface CommonMethod {
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {return this;}
     onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {return this;}
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {return this;}
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {return this;}
     hoverEffect(value: HoverEffect | undefined): this {return this;}
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
@@ -8062,6 +8076,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((parameter: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
@@ -8305,6 +8320,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
         return this
     }
     public hoverEffect(value: HoverEffect | undefined): this {
@@ -8761,7 +8779,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     }
 }
 export type CommonAttribute = CommonMethod
-export type CustomBuilder = 
+export type CustomBuilder =
 /** @memo */
 () => void;
 export interface OverlayOptions {
@@ -8834,12 +8852,6 @@ export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements C
     public strokeDashArray(value: Array<Length> | undefined): this {
         return this
     }
-}
-export interface LinearGradient_common {
-    angle?: number | string;
-    direction?: GradientDirection;
-    colors: Array<[ ResourceColor, number ]>;
-    repeating?: boolean;
 }
 export interface PixelRoundPolicy {
     start?: PixelRoundCalcPolicy;
@@ -9010,8 +9022,6 @@ export interface ItemDragEventHandler {
     onMoveThrough?: OnMoveHandler;
     onDrop?: ((index: number) => void);
 }
-export interface DynamicNode<T> {
-}
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
     effectEdge?: number;
@@ -9050,6 +9060,7 @@ export interface KeyframeState {
 export type Callback<T,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<number>;
     expectedUpdateInterval?: number;
@@ -9545,6 +9556,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("hoverEffect")) {
             const value_casted = value as (HoverEffect | undefined)
             this.getPeer()?.hoverEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {       
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.onAccessibilityHoverTransparentAttribute(value_casted)
             return this
         }
         return this
@@ -10947,7 +10966,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         if (this.checkPriority("sharedTransition")) {
             const id_casted = id as (string | undefined)
-            const options_casted = options as (sharedTransitionOptions)
+            const options_casted = options as (sharedTransitionOptions | undefined)
             this.getPeer()?.sharedTransitionAttribute(id_casted, options_casted)
             return this
         }
@@ -10978,7 +10997,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
             const value_casted = value as (BlendMode | undefined)
-            const type_casted = type as (BlendApplyType)
+            const type_casted = type as (BlendApplyType | undefined)
             this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
             return this
         }
@@ -11133,7 +11152,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
-        this._attributeOptimizer.applyModifierPatch(this.getPeer()); 
+        this._attributeOptimizer.applyModifierPatch(this.getPeer());
         super.applyAttributesFinish()
     }
 }
@@ -12988,7 +13007,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             exactRetValue.push(new Byte(retval[i]))
         }
         let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
+
         let returnResult = retvalDeserializer.readCallback_Void(true);
         return returnResult;
     }

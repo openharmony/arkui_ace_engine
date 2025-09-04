@@ -16,6 +16,7 @@
 #include "animation_ani_modifier.h"
 #include "canvas_ani_modifier.h"
 #include "common_ani_modifier.h"
+#include "component3d_ani_modifier.h"
 #include "component_content_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "condition_scope_ani_modifier.h"
@@ -39,7 +40,9 @@
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
-#include "syntax_node_ani_modifier.h"
+#include "syntax_item_ani_modifier.h"
+#include "for_each_node_ani_modifier.h"
+#include "uinode_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -72,8 +75,11 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
         .getCanvasAniModifier = OHOS::Ace::NG::GetCanvasAniModifier,
         .getTraceAniModifier = OHOS::Ace::NG::GetTraceAniModifier,
-        .getSyntaxNodeAniModifier = OHOS::Ace::NG::GetSyntaxNodeAniModifier,
+        .getUINodeOnUpdateDoneAniModifier = OHOS::Ace::NG::GetUINodeOnUpdateDoneAniModifier,
         .getNodeAdapterAniModifier = OHOS::Ace::NG::GetNodeAdapterAniModifier,
+        .getSyntaxItemAniModifier = OHOS::Ace::NG::GetSyntaxItemAniModifier,
+        .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
+        .getComponent3DModifier = OHOS::Ace::NG::GetComponent3DModifier,
     };
     return &impl;
 }

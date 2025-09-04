@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
@@ -69,6 +70,9 @@ namespace SaveButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components SaveButton used in ParallelizeUI");
+    }
     auto frameNode = SaveButtonModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();

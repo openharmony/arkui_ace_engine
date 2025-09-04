@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
@@ -25,6 +26,9 @@ namespace SpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components Span used in ParallelizeUI");
+    }
     auto spanNode = SpanModelNG::CreateSpanNode(id, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();

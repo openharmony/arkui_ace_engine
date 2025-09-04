@@ -120,11 +120,11 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSiz
     EXPECT_EQ(headerValue, "");
     EXPECT_EQ(footerValue, "");
 
-    const auto RES_NAME_HEADER = NamedResourceId{"header", Converter::ResourceType::STRING};
+    const auto RES_NAME_HEADER = NamedResourceId{"header", ResourceType::STRING};
     Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
     auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(headerResStr);
 
-    const auto RES_NAME_FOOTER = NamedResourceId{"footer", Converter::ResourceType::STRING};
+    const auto RES_NAME_FOOTER = NamedResourceId{"footer", ResourceType::STRING};
     Ark_ResourceStr footerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_FOOTER);
     auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(footerResStr);
 

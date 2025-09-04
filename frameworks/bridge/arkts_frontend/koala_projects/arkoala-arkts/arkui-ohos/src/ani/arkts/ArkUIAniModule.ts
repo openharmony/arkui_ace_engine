@@ -33,6 +33,7 @@ import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { NodeAdapter } from '../../FrameNode'
+import { Scene } from "@ohos.graphics.scene"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -73,7 +74,6 @@ export class ArkUIAniModule {
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
-    native static _SyntaxNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -167,11 +167,9 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
-
     native static _DragController_getDragPreview(): dragController.DragPreview
-
-    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
-
+    native static _DragController_setForegroundColor(
+        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void
@@ -242,6 +240,10 @@ export class ArkUIAniModule {
     native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
     native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
+    // for UIContext without window
+    native static _CreateWindowFreeContainer(context: common.Context): KInt
+    native static _DestroyWindowFreeContainer(instanceId: KInt): void
+
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
@@ -309,6 +311,8 @@ export class ArkUIAniModule {
         onThemeScopeDestroy: () => void
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    native static _UINode_OnUpdateDone(peer: KPointer): void;
+    native static _UINode_SetStatic(peer: KPointer): void;
     
     //NodeAdapter 
     native static _NodeAdapter_Construct( nodeAdapter : NodeAdapter): KPointer
@@ -323,4 +327,9 @@ export class ArkUIAniModule {
     native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
     native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
 
+    native static _SyntaxItem_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt): KPointer
+    // for Component3D
+    native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
+    native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
 }

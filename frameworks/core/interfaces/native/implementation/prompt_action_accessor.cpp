@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model_static.h"

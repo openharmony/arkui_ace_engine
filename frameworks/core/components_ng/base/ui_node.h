@@ -131,6 +131,16 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
 
+    virtual void OnChildUpdateDone() {};
+
+    void SetIsStatic(bool isstatic) {
+        isStaticNode_ = isstatic;
+    }
+
+    bool GetIsStatic() {
+        return isStaticNode_;
+    }
+
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
@@ -1265,6 +1275,7 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+    bool isStaticNode_ = false;
 };
 
 } // namespace OHOS::Ace::NG

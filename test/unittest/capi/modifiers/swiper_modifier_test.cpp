@@ -69,8 +69,8 @@ static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
 static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
 static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
-const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
-const auto RES_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
+const auto RES_NAME = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
+const auto RES_ID = IntResourceId(1234, ResourceType::COLOR);
 const auto CONTEXT_ID = 123;
 } // namespace
 

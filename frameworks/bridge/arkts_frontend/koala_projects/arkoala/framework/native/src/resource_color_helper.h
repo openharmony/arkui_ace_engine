@@ -24,6 +24,7 @@
 class Deserializer;
 
 namespace OHOS::Ace {
+Ark_ResourceColor ACE_FORCE_EXPORT GetResourceColor(int64_t arrayBuff, int32_t length);
 std::vector<Ark_ResourceColor> ACE_FORCE_EXPORT GetResourceColorArray(int64_t thisArray, int32_t thisLength);
 Ark_ResourceColor ACE_FORCE_EXPORT DeserializerResourceColor(Deserializer& deserializer);
 } // namespace OHOS::Ace

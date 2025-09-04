@@ -24,15 +24,15 @@ export const enum AreaMode {
     EL2 = 1,
     EL3 = 2,
     EL4 = 3,
-    EL5 = 4
+    EL5 = 4,
 }
 
 export interface IAniStorage {
-    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined;
-    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void;
-    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean;
+    get(key: string, areaMode?: AreaMode): string | undefined;
+    set(key: string, val: string, areaMode?: AreaMode): void;
+    has(key: string, areaMode?: AreaMode): boolean;
     clear(): void;
-    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void;
+    delete(key: string, areaMode?: AreaMode): void;
 }
 
 // class JsonElement{}
@@ -57,6 +57,13 @@ export type ToJSONType<T> = (value: T) => jsonx.JsonElement;
  * @since 20
  */
 export type FromJSONType<T> = (element: jsonx.JsonElement) => T;
+
+interface PersistPropsOptions<T> {
+    key: string;
+    defaultValue: T;
+    toJson?: ToJSONType<T>;
+    fromJson?: FromJSONType<T>;
+}
 
 class TypedMap {
     private key2Type_ = new Map<string, Type>();
@@ -99,20 +106,41 @@ class TypedMap {
 }
 
 export class AniStorage implements IAniStorage {
-    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined {
-        return ArkUIAniModule._PersistentStorage_Get(key, areaMode);
-    }
-    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Set(key, val, areaMode);
-    }
-    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean {
-        return ArkUIAniModule._PersistentStorage_Has(key, areaMode);
-    }
-    clear(): void {
+    clear(): void { // No AreaMode parameter
         ArkUIAniModule._PersistentStorage_Clear();
     }
-    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Delete(key, areaMode);
+    delete(key: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Delete(key, areaModeToInt(areaMode));
+    }
+    get(key: string, areaMode?: AreaMode): string | undefined {
+        return ArkUIAniModule._PersistentStorage_Get(key, areaModeToInt(areaMode));
+    }
+    has(key: string, areaMode?: AreaMode): boolean {
+        return ArkUIAniModule._PersistentStorage_Has(key, areaModeToInt(areaMode));
+    }
+    set(key: string, val: string, areaMode?: AreaMode): void {
+        ArkUIAniModule._PersistentStorage_Set(key, val, areaModeToInt(areaMode));
+    }
+}
+
+function areaModeToInt(areaMode?: AreaMode): Int {
+    if (areaMode === undefined) {
+        return -1;
+    }
+    switch(areaMode) {
+        case AreaMode.EL1:
+            return 0;
+        case AreaMode.EL2:
+            return 1;
+        case AreaMode.EL3:
+            return 2;
+        case AreaMode.EL4:
+            return 3;
+        case AreaMode.EL5:
+            return 4;
+        default:
+            // never getting here
+            return -1;
     }
 }
 
@@ -170,6 +198,23 @@ class PersistentStorage {
         return PersistentStorage.getOrCreate().persistPropInternal(key, defaultValue, toJson, fromJson);
     }
 
+    /**
+     * Add property 'key' to AppStorage properties whose current value will be
+     * persistent for a loop.
+     * If AppStorage does not include this property it will be added and initializes
+     * with given value
+     *
+     * @param { PersistPropsOptions } properties - see PersistPropsOptions
+     * @static
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    public static persistProps(properties: PersistPropsOptions<Any>[]): void {
+        properties.forEach((prop) => {
+            PersistentStorage.persistProp(prop.key, prop.defaultValue, prop.toJson, prop.fromJson);
+        });
+    }
+
     private persistPropInternal<T>(
         key: string,
         defaultValue: T,
@@ -218,7 +263,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
-                isSimpleType ? undefined : toJson,
+                isSimpleType ? undefined : toJson
             );
             if (!success) {
                 StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
@@ -272,12 +317,7 @@ class PersistentStorage {
 
     // case 1: neither on disk nor in storage
     // create with default value and start to persist
-    private __createNewAndPersist<T>(
-        key: string,
-        ttype: Type,
-        defaultValue: T,
-        toJson?: ToJSONType<T>,
-    ): boolean {
+    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>): boolean {
         if (!AppStorage.setOrCreate<T>(key, defaultValue)) {
             StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
@@ -302,7 +342,7 @@ class PersistentStorage {
 
         try {
             if (this.simpleTypeSet.has(ttype) && fromJson === undefined) {
-                // Step 2: simple type just parse from disk    
+                // Step 2: simple type just parse from disk
                 const value = JSON.parse<T>(jsonString, ttype);
 
                 // Step 3: Store the value in AppStorage

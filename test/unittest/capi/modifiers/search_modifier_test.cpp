@@ -112,7 +112,7 @@ const Opt_ResourceColor OPT_COLOR_INT = Converter::ArkValue<Opt_ResourceColor>(C
 const Opt_ResourceColor OPT_COLOR_FLOAT = Converter::ArkValue<Opt_ResourceColor>(COLOR_FLOAT);
 const Opt_ResourceColor OPT_COLOR_STRING = Converter::ArkValue<Opt_ResourceColor>(COLOR_STRING);
 
-const auto RES_NAME = NamedResourceId(TEST_STRING, Converter::ResourceType::MEDIA);
+const auto RES_NAME = NamedResourceId(TEST_STRING, ResourceType::MEDIA);
 
 //  default colors
 const auto OPT_RESOURCE_RESOURCE = CreateResourceUnion<Opt_ResourceStr>(RES_NAME);
@@ -163,9 +163,9 @@ const std::string BUTTON_STYLE_INPUT("CancelButtonStyle.INPUT");
 const uint32_t FLOAT_RES_0_ID = 1001;
 const uint32_t FLOAT_RES_1_ID = 1002;
 const double FLOAT_RES_0_VALUE = 0.705f;
-const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
+const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, ResourceType::FLOAT);
 const double FLOAT_RES_1_VALUE = 1.2f;
-const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);
+const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, ResourceType::FLOAT);
 
 // test types
 typedef std::pair<Ark_Length, std::string> LengthTest;

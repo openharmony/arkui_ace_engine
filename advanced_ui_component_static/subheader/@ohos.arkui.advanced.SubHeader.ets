@@ -648,20 +648,20 @@ export struct SubHeader {
       (this.titleBuilder as () => void)();
     } else if (this.secondaryTitle && this.icon) {
       this.IconSecondaryTitleStyle({
-        content: this.secondaryTitle as string,
+        content: this.secondaryTitle as ResourceStr,
         iconOptions: {
           icon: this.icon as ResourceStr,
           symbolicIconOption: this.iconSymbolOptions,
         },
       });
     } else if (this.secondaryTitle && this.primaryTitle) {
-      this.SubTitleStyle({ content: this.primaryTitle as string, subContent: this.secondaryTitle as string });
+      this.SubTitleStyle({ content: this.primaryTitle as ResourceStr, subContent: this.secondaryTitle as ResourceStr });
     } else if (this.secondaryTitle) {
-      this.SecondTitleStyle({ content: this.secondaryTitle as string });
+      this.SecondTitleStyle({ content: this.secondaryTitle as ResourceStr });
     } else if (this.select) {
       this.SelectStyle(this.select as SelectOptions);
     } else if (this.primaryTitle) {
-      this.PrimaryTitleStyle({ content: this.primaryTitle as string });
+      this.PrimaryTitleStyle({ content: this.primaryTitle as ResourceStr });
     } else {
       // 其他不支持场景
       this.dummyFunction();
@@ -1274,15 +1274,7 @@ class Util {
 
 function getResourceValue(resourceName: string): number {
   if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {
-    let resourceValue: number | undefined = (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue;
-    if (typeof resourceValue === 'number') {
-      return resourceValue as number;
-    } else {
-      resourceValue = Util.getNumberByResource((RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceId,
-        (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue);
-      (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue = resourceValue;
-      return resourceValue as number;
-    }
+    return (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue;
   }
   return 0;
 }

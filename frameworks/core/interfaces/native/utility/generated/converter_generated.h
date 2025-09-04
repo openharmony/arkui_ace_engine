@@ -1912,7 +1912,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Number_Buffer_Resource& src)
+                   const Ark_Union_String_Int32_Buffer_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1946,6 +1946,23 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_String_Number_Resource_Buffer& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_String_Int32_Resource_Buffer& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2026,7 +2043,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Resource_LinearGradient_common& src)
+                   const Ark_Union_String_Resource_LinearGradientOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3228,6 +3245,7 @@ void WithOptional(const name& src, T call) { \
 ASSIGN_OPT(Opt_Int32)
 ASSIGN_OPT(Opt_AccessibilityCallback)
 ASSIGN_OPT(Opt_AccessibilityFocusCallback)
+ASSIGN_OPT(Opt_AccessibilityTransparentCallback)
 ASSIGN_OPT(Opt_AccessibilityHoverType)
 ASSIGN_OPT(Opt_AccessibilityRoleType)
 ASSIGN_OPT(Opt_AccessibilitySamePageMode)
@@ -4318,6 +4336,7 @@ ASSIGN_OPT(Opt_InputCounterOptions)
 ASSIGN_OPT(Opt_InsertValue)
 ASSIGN_OPT(Opt_IntelligentTrackingPreventionDetails)
 ASSIGN_OPT(Opt_InvertOptions)
+ASSIGN_OPT(Opt_ItemDragEventHandler)
 ASSIGN_OPT(Opt_ItemDragInfo)
 ASSIGN_OPT(Opt_KeyboardOptions)
 ASSIGN_OPT(Opt_KeyEvent)
@@ -4326,7 +4345,6 @@ ASSIGN_OPT(Opt_LeadingMarginPlaceholder)
 ASSIGN_OPT(Opt_LengthMetrics)
 ASSIGN_OPT(Opt_LetterSpacingStyle)
 ASSIGN_OPT(Opt_LevelMode)
-ASSIGN_OPT(Opt_LinearGradient_common)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_LinearGradientOptions)
 ASSIGN_OPT(Opt_LinearIndicatorStartOptions)
@@ -4615,14 +4633,14 @@ ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
 ASSIGN_OPT(Opt_Union_SizeOptions_ImageSize)
 ASSIGN_OPT(Opt_Union_String_Array_String)
 ASSIGN_OPT(Opt_Union_String_CustomBuilder_ComponentContent)
-ASSIGN_OPT(Opt_Union_String_Number_Buffer_Resource)
+ASSIGN_OPT(Opt_Union_String_Int32_Buffer_Resource)
 ASSIGN_OPT(Opt_Union_String_Number_Resource)
 ASSIGN_OPT(Opt_Union_String_Number_Resource_Buffer)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_String_Resource_ComponentContent)
-ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient_common)
+ASSIGN_OPT(Opt_Union_String_Resource_LinearGradientOptions)
 ASSIGN_OPT(Opt_Union_String_Resource_PixelMap)
 ASSIGN_OPT(Opt_Union_String_WebResourceRequest)
 ASSIGN_OPT(Opt_Union_WebController_WebviewController)
@@ -4929,6 +4947,8 @@ ASSIGN_OPT(Opt_CheckBoxModifierBuilder)
 ASSIGN_OPT(Opt_RatingModifierBuilder)
 ASSIGN_OPT(Opt_ToggleModifierBuilder)
 ASSIGN_OPT(Opt_SliderModifierBuilder)
+ASSIGN_OPT(Opt_LevelOrder)
+ASSIGN_OPT(Opt_NavigationAnimatedTransition)
 #undef ASSIGN_OPT
 }
 

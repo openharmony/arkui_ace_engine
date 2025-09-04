@@ -64,12 +64,18 @@ const int32_t FORM_ON_ERROR_CODE_INVALID = -1;
 const std::string FORM_EMPTY_STRING = "";
 const int32_t MIN_SIGNED_NUMBER_OF_ARK = INT_MIN;
 const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
+const int32_t TYPE_INT = 0;
 } // namespace
 namespace Converter {
 template<>
 OptRequestFormInfo Convert(const Ark_FormInfo& src)
 {
     OptRequestFormInfo dst;
+    if (src.id.selector == TYPE_INT) {
+        dst.id = Converter::OptConvert<int64_t>(src.id.value0);
+    } else {
+        dst.id = StringUtils::StringToLongInt(Converter::OptConvert<std::string>(src.id.value1).value(), -1);
+    }
     dst.name = Converter::Convert<std::string>(src.name);
     dst.bundle = Converter::Convert<std::string>(src.bundle);
     dst.ability = Converter::Convert<std::string>(src.ability);
@@ -146,13 +152,28 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto formInfo = Converter::Convert<OptRequestFormInfo>(*value);
-    FormModelNG::SetModuleName(frameNode, formInfo.module);
-    if (formInfo.dimension) {
-        FormModelNG::SetDimension(frameNode, *formInfo.dimension);
+    auto optRequestFormInfo = Converter::Convert<OptRequestFormInfo>(*value);
+    RequestFormInfo formInfo;
+    formInfo.id = optRequestFormInfo.id.value();
+    formInfo.cardName = optRequestFormInfo.name;
+    formInfo.bundleName = optRequestFormInfo.bundle;
+    formInfo.abilityName = optRequestFormInfo.ability;
+    formInfo.moduleName = optRequestFormInfo.module;
+    formInfo.wantWrap = WantWrap::CreateWantWrap(formInfo.bundleName, formInfo.abilityName);
+    if (optRequestFormInfo.dimension) {
+        formInfo.dimension = optRequestFormInfo.dimension.value();
     }
-    LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
-         "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
+    if (optRequestFormInfo.temporary) {
+        formInfo.temporary = optRequestFormInfo.temporary.value();
+    }
+    if (optRequestFormInfo.renderingMode) {
+        formInfo.renderingMode = optRequestFormInfo.renderingMode.value();
+    }
+    if (optRequestFormInfo.shape) {
+        formInfo.shape = optRequestFormInfo.shape.value();
+    }
+    FormModelNG::UpdateProperty(formInfo);
+    FormModelNG::SetModuleName(frameNode, formInfo.moduleName);
 #endif // FORM_SUPPORTED
 }
 } // FormComponentInterfaceModifier
@@ -165,7 +186,7 @@ void SizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto dimension = Converter::OptConvert<LiteralDimension>(*value);
     if (!dimension) {
-        // TODO: Reset value
+        LOGE("dimension is null");
         return;
     }
     FormModelNG::SetSize(frameNode, dimension->width, dimension->height);
@@ -177,12 +198,12 @@ void ModuleNameImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    auto moduleName = Converter::OptConvert<std::string>(*value);
+    if (!moduleName) {
+        LOGE("moduleName is null");
         return;
     }
-    FormModelNG::SetModuleName(frameNode, *convValue);
+    FormModelNG::SetModuleName(frameNode, *moduleName);
 #endif // FORM_SUPPORTED
 }
 void DimensionImpl(Ark_NativePointer node,
@@ -191,10 +212,10 @@ void DimensionImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<int32_t>(*value);
+    auto dimension = Converter::OptConvert<int32_t>(*value);
     // TODO: Reset value
-    CHECK_NULL_VOID(opt);
-    FormModelNG::SetDimension(frameNode, *opt);
+    CHECK_NULL_VOID(dimension);
+    FormModelNG::SetDimension(frameNode, *dimension);
 #endif // FORM_SUPPORTED
 }
 void AllowUpdateImpl(Ark_NativePointer node,
@@ -203,12 +224,12 @@ void AllowUpdateImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    auto allowUpdate = Converter::OptConvert<bool>(*value);
+    if (!allowUpdate) {
+        LOGE("allowUpdate is null");
         return;
     }
-    FormModelNG::AllowUpdate(frameNode, *convValue);
+    FormModelNG::AllowUpdate(frameNode, *allowUpdate);
 #endif // FORM_SUPPORTED
 }
 void VisibilityImpl(Ark_NativePointer node,
@@ -217,9 +238,9 @@ void VisibilityImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<VisibleType>(*value);
-    CHECK_NULL_VOID(opt);
-    FormModelNG::SetVisibility(frameNode, *opt);
+    auto visible = Converter::OptConvert<VisibleType>(*value);
+    CHECK_NULL_VOID(visible);
+    FormModelNG::SetVisibility(frameNode, *visible);
 #endif // FORM_SUPPORTED
 }
 void OnAcquiredImpl(Ark_NativePointer node,
@@ -230,7 +251,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("acquired is null");
         return;
     }
     auto onAcquired = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -249,7 +270,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
         Ark_FormCallbackInfo parameter = {
             .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString) };
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
     FormModelNG::SetOnAcquired(frameNode, onAcquired);
 #endif // FORM_SUPPORTED
@@ -262,7 +283,7 @@ void OnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("error is null");
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -282,7 +303,7 @@ void OnErrorImpl(Ark_NativePointer node,
             .errcode = Converter::ArkValue<Ark_Number>(code),
             .msg = Converter::ArkValue<Ark_String>(msg)
         };
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
     FormModelNG::SetOnError(frameNode, onError);
 #endif // FORM_SUPPORTED
@@ -305,7 +326,7 @@ void OnUninstallImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("uninstall is null");
         return;
     }
     auto onUninstall = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
@@ -325,7 +346,7 @@ void OnUninstallImpl(Ark_NativePointer node,
             .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString)
         };
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
     FormModelNG::SetOnUninstall(frameNode, onUninstall);
 #endif // FORM_SUPPORTED
@@ -338,11 +359,11 @@ void OnLoadImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        LOGE("load is null");
         return;
     }
     auto onLoad = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
 #endif // FORM_SUPPORTED

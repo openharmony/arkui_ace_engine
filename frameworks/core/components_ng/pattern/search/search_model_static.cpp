@@ -132,6 +132,20 @@ void SearchModelStatic::SetSearchDefaultIcon(FrameNode *frameNode)
     pattern->CreateSearchIcon("");
 }
 
+void SearchModelStatic::SetAutoCapitalizationMode(
+    FrameNode* frameNode, const std::optional<AutoCapitalizationMode>& value)
+{
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (value) {
+        pattern->UpdateAutoCapitalizationMode(*value);
+    } else {
+        pattern->ResetAutoCapitalizationMode();
+    }
+}
+
 void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<IconOptions>& iconOptions)
 {
     auto theme = SearchModelStatic::GetTheme(frameNode);
