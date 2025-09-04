@@ -28,7 +28,7 @@ export function updateObjectExpression(
         ObjectExpression.createObjectExpression(
             nodeType(original),
             properties,
-            false), // TODO: provide trailingComma value from native module through ObjectExpression?
+            false), // Improve: provide trailingComma value from native module through ObjectExpression?
         original
     )
 }

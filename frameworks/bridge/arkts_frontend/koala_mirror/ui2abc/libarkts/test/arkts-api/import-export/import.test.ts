@@ -26,7 +26,7 @@ suite(util.basename(__filename), () => {
 
         let script = arkts.createETSModuleFromSource(sample_in)
 
-        arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 arkts.factory.createETSImportDeclaration(
@@ -45,7 +45,10 @@ suite(util.basename(__filename), () => {
                     ],
                     arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
                 )
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(
@@ -66,7 +69,7 @@ suite(util.basename(__filename), () => {
         let script = arkts.createETSModuleFromSource(sample_in)
         const importDeclaration = script.statements[0] as arkts.ETSImportDeclaration
 
-        arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 arkts.factory.createETSImportDeclaration(
@@ -86,7 +89,10 @@ suite(util.basename(__filename), () => {
                     arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
                 ),
                 ...script.statements,
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(
@@ -112,7 +118,7 @@ suite(util.basename(__filename), () => {
         let script = arkts.createETSModuleFromSource(sample_in)
         const importDeclaration = script.statements[0] as arkts.ETSImportDeclaration
 
-        arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 arkts.factory.createETSImportDeclaration(
@@ -132,7 +138,10 @@ suite(util.basename(__filename), () => {
                     arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
                 ),
                 ...script.statements,
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(
@@ -200,12 +209,15 @@ suite(util.basename(__filename), () => {
             )
         newFuncDecl.updateModifiers(newScriptFunc.modifierFlags)
 
-        script = arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 script.statements[0],
                 newFuncDecl
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(

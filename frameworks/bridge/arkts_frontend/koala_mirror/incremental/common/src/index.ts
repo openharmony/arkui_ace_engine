@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,10 @@ export {
     float32, float64,
     asArray,
     asFloat64,
+    charToInt,
     float32FromBits,
+    float64ToInt,
+    float64ToLong,
     int32BitsFromFloat,
     Array_from_set,
     AtomicRef,
@@ -37,23 +40,16 @@ export {
     propDeepCopy,
     refEqual,
     int8Array,
+    errorAsString,
     unsafeCast,
+    CoroutineLocalValue,
     scheduleCoroutine,
     memoryStats,
     launchJob
 } from "@koalaui/compat"
 export { clamp, lerp, modulo, parseNumber, isFiniteNumber, getDistancePx } from "./math"
 export { hashCodeFromString } from "./stringUtils"
-export { KoalaProfiler } from "./KoalaProfiler"
-export * from "./PerfProbe"
-export * from "./Errors"
-export * from "./LifecycleEvent"
 export * from "./Finalization"
-export * from "./MarkableQueue"
-export * from "./Matrix33"
-export * from "./Matrix44"
-export * from "./Point3"
-export * from "./Point"
 export { SHA1Hash, createSha1 } from "./sha1"
 export { UniqueId } from "./uniqueId"
 export * from "./koalaKey"

@@ -178,6 +178,38 @@ class TestReturnMethod extends Log {
     }
 }
 
+class TestReturnLambda extends Log {
+    /** @memo */
+    test() {
+        const memoReturnLambda =
+            ():
+                /** @memo */
+                (log: Array<string>, value: string) => void => {
+                    return (
+                        /** @memo */
+                        (log: Array<string>, value: string) => {
+                            log.push("lambdaReturnMemo", value)
+                        }
+                    )
+                }
+
+        this.runReturnMemo(
+            memoReturnLambda()
+        )
+    }
+
+    /** @memo */
+    runReturnMemo(
+        /** @memo */
+        parameter: (log: Array<string>, value: string)=>void
+    ) {
+        GlobalStateHolder.globalState.value
+        this.log.push("lambdaReturnMemo call")
+        parameter(this.log, "arg")
+    }
+}
+
+
 function returnListMemoFunctions(): [
     /** @memo */
     () => void,
@@ -487,8 +519,8 @@ class TestTrackingParameters {
         GlobalStateHolder.globalState.value
         TestTrackingParameters.log.push(`testContentParam call`)
         this.methodWithContentParam(
+            TestTrackingParameters.varValue,
             TestTrackingParameters.updateFlag ? this.methodWithParamCopy : this.methodWithParam,
-            TestTrackingParameters.varValue
         )
         if (TestTrackingParameters.updateFlag) TestTrackingParameters.updateFlag = false
     }
@@ -523,9 +555,9 @@ class TestTrackingParameters {
 
     /** @memo */
     methodWithContentParam(
+        value: number,
         /** @memo */
         content: (value: number) => void,
-        value: number
     ) {
         TestTrackingParameters.log.push(`methodWithContentParam`)
         content(value)
@@ -892,8 +924,34 @@ suite("Basic memo semantic", () => {
         )
     })
 
-    test.expectFailure("Description of the problem", "Return type of functional type in lambda", () => {
-        Assert.fail('implement me')
+    test("Return type of functional type in lambda", () => {
+        const instance = new TestReturnLambda()
+        const root = testRoot(
+            /** @memo */
+            () => { instance.test() }
+        )
+        assertResultArray(instance.log,
+            "lambdaReturnMemo call",
+            "lambdaReturnMemo",
+            "arg"
+        )
+        GlobalStateHolder.globalState.value++
+        testTick(root)
+        assertResultArray(instance.log,
+            "lambdaReturnMemo call",
+            "lambdaReturnMemo",
+            "arg",
+            "lambdaReturnMemo call",
+        )
+        GlobalStateHolder.globalState.value++
+        testTick(root)
+        assertResultArray(instance.log,
+            "lambdaReturnMemo call",
+            "lambdaReturnMemo",
+            "arg",
+            "lambdaReturnMemo call",
+            "lambdaReturnMemo call",
+        )
     })
 
     test("Parameter of function type", () => {
@@ -1015,7 +1073,7 @@ suite("Auto-deducing memo annotation", () => {
             "deduced variable call"
         )
     })
-    test.expectFailure("Description of the problem", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
+    test.expectFailure("Test not implemented", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
         Assert.fail("implement me")
     })
 })
@@ -1241,10 +1299,7 @@ suite("Tracking parameters", () => {
             "testFunction call",
         )
     })
-    test.expectFailure("Description of the problem", "By convention a lambda parameter with name `content` is not tracked", () => {
-        // This is to be addressed later when the compiler provides ability to compare
-        // lambdas by code, not by closure object equality.
-
+    test("By convention a lambda parameter with name `content` is not tracked", () => {
         TestTrackingParameters.log.length = 0
         TestTrackingParameters.varValue = 10
         TestTrackingParameters.updateFlag = false
@@ -1266,7 +1321,6 @@ suite("Tracking parameters", () => {
             `methodWithContentParam`,
             `methodWithParam: 10`,
             `testContentParam call`,
-            `methodWithContentParam`,
         )
         GlobalStateHolder.globalState.value ++
         TestTrackingParameters.varValue = 50
@@ -1276,7 +1330,6 @@ suite("Tracking parameters", () => {
             `methodWithContentParam`,
             `methodWithParam: 10`,
             `testContentParam call`,
-            `methodWithContentParam`,
             `testContentParam call`,
             `methodWithContentParam`,
             `methodWithParam: 50`
@@ -1447,7 +1500,7 @@ suite("Method receivers", () => {
         )
     })
 
-    test.expectFailure("Description of the problem", "lambda with receiver (ArkTS)", () => {
+    test.expectFailure("Test not implemented", "lambda with receiver (ArkTS)", () => {
         Assert.fail('implement me')
     })
 })
@@ -1549,29 +1602,34 @@ suite("Functions marked with @memo:intrinsic", () => {
 })
 
 suite("Memo functions with all kinds of import and export statements", () => {
-    test("Named import and qualified import with `*` of memo function", () => {
-        SharedLog.log.length = 0
-        const root = testRoot(TestImportedMemo.testImportedFunction)
-        assertResultArray(SharedLog.log,
-            "testImportedFunction call",
-            "sharedMemoFunction", "sharedMemoFunction",
-        )
-        GlobalStateHolder.globalState.value++
-        testTick(root)
-        assertResultArray(SharedLog.log,
-            "testImportedFunction call",
-            "sharedMemoFunction", "sharedMemoFunction",
-            "testImportedFunction call",
-        )
-        GlobalStateHolder.globalState.value++
-        testTick(root)
-        assertResultArray(SharedLog.log,
-            "testImportedFunction call",
-            "sharedMemoFunction", "sharedMemoFunction",
-            "testImportedFunction call",
-            "testImportedFunction call",
-        )
-    })
+    test("Named import and qualified import with `*` of memo function",
+        () => {
+            SharedLog.log.length = 0
+            const root = testRoot(TestImportedMemo.testImportedFunction)
+            assertResultArray(SharedLog.log,
+                "testImportedFunction call",
+                "sharedMemoFunction",
+                "sharedMemoFunction",
+            )
+            GlobalStateHolder.globalState.value++
+            testTick(root)
+            assertResultArray(SharedLog.log,
+                "testImportedFunction call",
+                "sharedMemoFunction",
+                "sharedMemoFunction",
+                "testImportedFunction call",
+            )
+            GlobalStateHolder.globalState.value++
+            testTick(root)
+            assertResultArray(SharedLog.log,
+                "testImportedFunction call",
+                "sharedMemoFunction",
+                "sharedMemoFunction",
+                "testImportedFunction call",
+                "testImportedFunction call",
+            )
+        }
+    )
 })
 
 // suite("@memo_stable annotation", () => {

@@ -15,7 +15,7 @@
 
 // TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
 import { Assert, suite, test } from "@koalaui/harness"
-import { asArray, int32, KoalaCallsiteKey } from "@koalaui/common"
+import { asArray, int32, KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
 import {
     GlobalStateManager,
     Repeat,
@@ -28,15 +28,6 @@ import {
     mutableState,
     testTick,
 } from "../../src"
-
-// For tests we compute positional ids from strings.
-export function key(name: string): KoalaCallsiteKey {
-    let key: KoalaCallsiteKey = 0
-    for (let i = 0; i < name.length; i++) {
-        key = (key << 3) | (key >> 29) ^ (name[i] as int32)
-    }
-    return key
-}
 
 const collector = new Array<string>()
 

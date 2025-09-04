@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo, memo_stable, memo_intrinsic, memo_entry } from "@koalaui/runtime/annotations"
+import { memo, memo_stable, memo_intrinsic, memo_entry, memo_wrap } from "@koalaui/runtime/annotations"
 import { __context, __id, __key } from "@koalaui/runtime"
 
 type MemoType = @memo () => void
@@ -45,22 +45,19 @@ type MemoType = @memo () => void
 	arg5?.(arg1)
 }
 
-// Disabled for now it breaks recheck
+@memo function call_with_receiver(obj: A, @memo v: (this: A) => int): int {
+	const x = obj.v()
+	const y = v(obj)
+	return x + y
+}
 
-// @memo function call_with_receiver(obj: A, @memo v: (this: A) => int): int {
-// 	const x = obj.v()
-// 	const y = v(obj)
-// 	return x + y
-// }
-
-// @memo function test_call_with_receiver() {
-// 	const a = new A()
-// 	const f = @memo (this: A): int => {
-// 		return 11
-// 	}
-// 	call_with_receiver(a, f)
-// }
-
+@memo function test_call_with_receiver() {
+	const a = new A()
+	const f = @memo (this: A): int => {
+		return 11
+	}
+	call_with_receiver(a, f)
+}
 class A {
 	x: int
 	y: int
@@ -200,6 +197,11 @@ class Test {
     static intrinsicKeyAccessor(): void {
         let key = __key()
     }
+
+	@memo wrap_param_test(
+        @memo_wrap obj: A
+    ): void {
+    }
 }
 
 declare class AbstractTest {
@@ -256,6 +258,9 @@ class Use {
 		const MemoStableClass_instance = new MemoStableClass()
 		MemoStableClass_instance.test1("a")
 		MemoStableClass_instance.test2(5)
+
+        const obj: A = new A()
+        test.wrap_param_test(obj)
 	}
 }
 

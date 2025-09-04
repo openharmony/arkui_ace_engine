@@ -12,26 +12,52 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
+
+koala_root = ".."
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 libarkts_root = "./libarkts"
 
-action("install") {
-    script = "gn/command/install.py"
+build_root = "//build"
+toolchain_linux = "$build_root/toolchain/linux:clang_x64"
 
+npm_cmd("fast_arktsc_build") {
     outputs = [
-        "$target_out_dir/install"
+        "$target_out_dir/fast_arktsc_build"
     ]
-
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
+    deps = [
+        ":ui2abc_install_all"
     ]
+    project_path = rebase_path("./fast-arktsc")
+    run_tasks = [ "compile" ]
 }
 
-action("panda_sdk") {
+npm_cmd("ui2abc_install") {
+    outputs = [
+        "$target_out_dir/ui2abc_install"
+    ]
+    project_path = rebase_path(".")
+    install = true
+}
+
+npm_cmd("ui2abc_build") {
+    outputs = [
+        "$target_out_dir/MemoTransformer.js"
+    ]
+
+    deps = [
+        ":fast_arktsc_build",
+        "$libarkts_root:es2panda"
+    ]
+
+    project_path = rebase_path(".")
+    run_tasks = [ "build:plugins" ]
+}
+
+action("ui2abc_panda_sdk") {
     script = "gn/command/gen_sdk.py"
 
     outputs = [
@@ -39,7 +65,7 @@ action("panda_sdk") {
     ]
 
     external_deps = [
-        "ets_frontend:libes2panda_public",
+        "ets_frontend:libes2panda_public(${toolchain_linux})",
     ]
 
     args = [
@@ -50,8 +76,16 @@ action("panda_sdk") {
     ]
 }
 
+group("ui2abc_install_all") {
+    deps = [
+        "$koala_root/ui2abc:ui2abc_install",
+        "$koala_root/incremental:incremental_install",
+        "$koala_root/interop:interop_install"
+    ]
+}
+
 group("ui2abc") {
     deps = [
-        "$libarkts_root:es2panda"
+        ":ui2abc_build"
     ]
 }

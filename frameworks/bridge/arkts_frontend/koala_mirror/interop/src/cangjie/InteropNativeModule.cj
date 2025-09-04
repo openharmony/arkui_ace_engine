@@ -33,10 +33,10 @@ foreign {
         func InvokeFinalizer(ptr1: UInt64, ptr2: UInt64): Unit
         func GetPtrVectorElement(ptr1: UInt64, arg: Int32): UInt64
         func StringLength(ptr1: UInt64): Int32
-        func StringData(ptr1: UInt64, arr: CPointer<UInt8>, i: Int32): Unit
+        func StringData(ptr1: UInt64, array: CPointer<UInt8>, arrayLength: Int32): Unit
         func StringMake(str1: CString): UInt64
         func GetPtrVectorSize(ptr1: UInt64): Int32
-        func ManagedStringWrite(str1: CString, arr: pointer, arg: Int32): Int32
+        func ManagedStringWrite(str1: CString, array: pointer, arrayLength: Int32, arg: Int32): Int32
         func NativeLog(str1: CString): Unit
         func Utf8ToString(data: pointer, offset: Int32, length: Int32): CString
         func CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: Int32): Int32
@@ -131,7 +131,7 @@ public open class InteropNativeModule {
             return result
         }
     }
-    public static func _StringData(ptr1: UInt64, arr: Array<UInt8>, i: Int32): Unit {
+    public static func _StringData(ptr1: UInt64, array: Array<UInt8>, arrayLength: Int32): Unit {
         unsafe {
             let handle_1 = acquireArrayRawData(arr)
             StringData(ptr1, handle_1.pointer, i)
@@ -152,10 +152,10 @@ public open class InteropNativeModule {
             return result
         }
     }
-    public static func _ManagedStringWrite(str1: String, arr: pointer, arg: Int32): Int32 {
+    public static func _ManagedStringWrite(str1: String, array: pointer, arrayLength: Int32, arg: Int32): Int32 {
         unsafe {
             let str1 =  LibC.mallocCString(str1)
-            let result = ManagedStringWrite(str1, arr, arg)
+            let result = ManagedStringWrite(str1, arr, arrLength, arg)
             LibC.free(str1)
             return result
         }

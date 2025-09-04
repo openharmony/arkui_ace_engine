@@ -20,26 +20,65 @@
 #include "callback-resource.h"
 #include <deque>
 #include <unordered_map>
-
+#include <atomic>
+#include "interop-utils.h"
 
 static bool needReleaseFront = false;
 static std::deque<CallbackEventKind> callbackEventsQueue;
 static std::deque<CallbackBuffer> callbackCallSubqueue;
 static std::deque<InteropInt32> callbackResourceSubqueue;
 
+static std::atomic<KVMDeferred*> currentDeferred(nullptr);
+
+static KVMDeferred* takeCurrent(KNativePointer waitContext) {
+    KVMDeferred* current;
+    do {
+        current = currentDeferred.load();
+    } while (!currentDeferred.compare_exchange_strong(current, nullptr));
+    return current;
+}
+
+void notifyWaiter() {
+    auto current = takeCurrent(nullptr);
+    if (current)
+        current->resolve(current, nullptr, 0);
+}
+
+KVMObjectHandle impl_CallbackAwait(KVMContext vmContext, KNativePointer waitContext) {
+    KVMObjectHandle result = nullptr;
+    auto* current = takeCurrent(waitContext);
+    if (current) {
+        current->reject(current, "Wrong");
+    }
+    auto next = CreateDeferred(vmContext, &result);
+    KVMDeferred* null = nullptr;
+    while (!currentDeferred.compare_exchange_strong(null, next)) {}
+    return result;
+}
+KOALA_INTEROP_CTX_1(CallbackAwait, KVMObjectHandle, KNativePointer)
+
+void impl_UnblockCallbackWait(KNativePointer waitContext) {
+    auto current = takeCurrent(waitContext);
+    if (current) current->resolve(current, nullptr, 0);
+}
+KOALA_INTEROP_V1(UnblockCallbackWait, KNativePointer)
+
 void enqueueCallback(const CallbackBuffer* event) {
     callbackEventsQueue.push_back(Event_CallCallback);
     callbackCallSubqueue.push_back(*event);
+    notifyWaiter();
 }
 
 void holdManagedCallbackResource(InteropInt32 resourceId) {
     callbackEventsQueue.push_back(Event_HoldManagedResource);
     callbackResourceSubqueue.push_back(resourceId);
+    notifyWaiter();
 }
 
 void releaseManagedCallbackResource(InteropInt32 resourceId) {
     callbackEventsQueue.push_back(Event_ReleaseManagedResource);
     callbackResourceSubqueue.push_back(resourceId);
+    notifyWaiter();
 }
 
 KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
@@ -66,16 +105,18 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         return 0;
     }
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
-    memcpy(result, &frontEventKind, 4);
+    interop_memcpy(result, size, &frontEventKind, sizeof(int32_t));
+
     switch (frontEventKind)
     {
-        case Event_CallCallback:
-            memcpy(result + 4, callbackCallSubqueue.front().buffer, sizeof(CallbackBuffer::buffer));
+        case Event_CallCallback: {
+            interop_memcpy(result + 4, size, callbackCallSubqueue.front().buffer, sizeof(CallbackBuffer::buffer));
             break;
+        }
         case Event_HoldManagedResource:
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
-            memcpy(result + 4, &resourceId, 4);
+            interop_memcpy(result + 4, size, &resourceId, sizeof(InteropInt32));
             break;
         }
         default:

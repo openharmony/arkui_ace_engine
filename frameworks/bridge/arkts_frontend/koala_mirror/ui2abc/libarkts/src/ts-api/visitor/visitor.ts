@@ -21,7 +21,7 @@ import { SyntaxKind } from "../static/enums"
 
 type Visitor = (node: ts.Node) => ts.Node
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodeVisitor<T extends ts.Node | undefined>(node: T, visitor: Visitor): T {
     if (node === undefined) {
         return node
@@ -29,7 +29,7 @@ function nodeVisitor<T extends ts.Node | undefined>(node: T, visitor: Visitor): 
     return visitor(node) as T
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodesVisitor<T extends ts.Node, TIn extends ts.NodeArray<T> | undefined>(nodes: TIn, visitor: Visitor): T[] | TIn {
     if (nodes === undefined) {
         return nodes
@@ -39,7 +39,7 @@ function nodesVisitor<T extends ts.Node, TIn extends ts.NodeArray<T> | undefined
 
 type VisitEachChildFunction<T extends ts.Node> = (node: T, visitor: Visitor) => T
 
-// TODO: add more nodes
+// Improve: add more nodes
 type HasChildren =
     | ts.SourceFile
     | ts.FunctionDeclaration
@@ -54,7 +54,7 @@ type HasChildren =
 
 type VisitEachChildTable = { [TNode in HasChildren as TNode["kind"]]: VisitEachChildFunction<TNode> }
 
-// TODO: add more nodes
+// Improve: add more nodes
 const visitEachChildTable: VisitEachChildTable = {
     [SyntaxKind.SourceFile]: function (node: ts.SourceFile, visitor: Visitor) {
         return factory.updateSourceFile(

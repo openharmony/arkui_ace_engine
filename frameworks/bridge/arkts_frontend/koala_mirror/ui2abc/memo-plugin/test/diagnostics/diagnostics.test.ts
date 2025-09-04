@@ -17,17 +17,17 @@ import { assert } from "chai"
 import * as child from "child_process"
 import * as path from "path"
 
-function runTsc(file: string) {
+function runCompiler(file: string) {
     return child.spawnSync("../../incremental/tools/panda/arkts/ui2abc", [
-        "--arktsconfig", path.join("test", "arktsconfig-golden.json"),
-        "--output", file,
-        path.join('test', 'diagnostics', 'input', file),
+        "--arktsconfig", path.resolve(path.join("test", "arktsconfig-golden.json")),
+        "--output", path.resolve(path.join("test/build/abc", file.replace(/\.ets$/, ".abc"))),
+        path.join("test", "diagnostics", "input", file),
    ])
 }
 
 function diagnostics(name: string, file: string, message: string) {
     test(name, () => {
-        const result = runTsc(file)
+        const result = runCompiler(file)
         const out = result.stdout.toString() + "\n" + result.stderr.toString()
         if (!out.includes(message))
             console.error(out)
@@ -37,7 +37,7 @@ function diagnostics(name: string, file: string, message: string) {
 
 function noDiagnostics(name: string, file: string, message: string) {
     test(name, () => {
-        const result = runTsc(file)
+        const result = runCompiler(file)
         const out = result.stdout.toString() + "\n" + result.stderr.toString()
         if (out.includes(message))
             console.error(out)
@@ -45,43 +45,105 @@ function noDiagnostics(name: string, file: string, message: string) {
     }).timeout(30000);
 }
 
-suite("Smoke", () => {
-    diagnostics("smoke",
-        "smoke.input.ts",
-        "SyntaxError: Unexpected token 'syntax'."
+const isPandaIssue26911Fixed = false
+if (isPandaIssue26911Fixed) {
+    suite("Smoke", () => {
+        diagnostics(
+            "smoke",
+            "smoke.ets",
+            `SyntaxError: Unexpected token 'syntax'.`
+        )
+    })
+}
+
+suite("@memo function out of memo context", () => {
+    diagnostics(
+        "Global memo call",
+        "global-memo-call.ets",
+        `Calling @memo function foo from non-@memo context _$init$_`
+    )
+    diagnostics(
+        "Memo in handler",
+        "memo-in-handler.ets",
+        `Calling @memo function foo from non-@memo anonymous context`
+    )
+    diagnostics(
+        "Memo in inner function",
+        "memo-in-inner-function.ets",
+        `Calling @memo function foo from non-@memo anonymous context`
+    )
+    noDiagnostics(
+        "Memo with @memo:entry",
+        "memo-entry.ets",
+        `Calling @memo function`
+    )
+    diagnostics(
+        "Memo in non-memo stack",
+        "no-memo-entry.ets",
+        `Calling @memo function foo from non-@memo context bar`
     )
 })
 
-suite("Memo in non-memo context", () => {
-    diagnostics("global memo",
-        "global_memo.input.ts",
-        'Attempt to call @memo-method foo from non-@memo-method _$init$_'
+suite("Parameter with @memo initializer", () => {
+    noDiagnostics(
+        "Default non-memo argument",
+        "default-non-memo-argument.ets",
+        "Can not call @memo function at parameter default value expression. Parameter: x"
     )
-    diagnostics("memo in handler",
-        "memo_in_handler.input.ts",
-        'Attempt to call @memo-method foo from anonymous non-@memo-method'
+    diagnostics(
+        "Default memo argument",
+        "default-memo-argument.ets",
+        `Can not call @memo function at parameter default value expression. Parameter: x`
     )
-    diagnostics("memo in inner function",
-        "memo_in_inner_function.input.ts",
-        'Attempt to call @memo-method foo from anonymous non-@memo-method'
+    diagnostics(
+        "Default complex memo argument",
+        "default-complex-memo-argument.ets",
+        "Can not call @memo function at parameter default value expression. Parameter: x"
     )
-    noDiagnostics("memo with @memo:entry",
-        "memo_entry.input.ts",
-        'Attempt to call @memo-method foo from'
+    diagnostics(
+        "Default memo argument at arrow function definition",
+        "arrow-default-memo-argument.ets",
+        "Can not call @memo function at parameter default value expression. Parameter: x"
     )
-    diagnostics("memo in non-memo stack",
-        "no_memo_entry.input.ts",
-        'Attempt to call @memo-method foo from non-@memo-method bar'
+    noDiagnostics(
+        "Default non-memo argument at arrow function definition",
+        "arrow-default-non-memo-argument.ets",
+        "Can not call @memo function at parameter default value expression. Parameter: x"
     )
 })
 
-// suite("Shorthand @memo property assignment", () => {
-//     diagnostics("shorthand assignment to @memo property",
-//         "PropertyShorthandAssignment.ts",
-//         "Can not shorthand assign to memo property: x"
-//     )
-//     noDiagnostics("shorthand assignment to non-memo property",
-//         "NonmemoPropertyShorthandAssignment.ts",
-//         "Can not shorthand assign to memo property: x"
-//     )
-// })
+suite("@memo function missing return type", () => {
+    diagnostics(
+        "Function",
+        "missing-type-function.ets",
+        "@memo foo must have it's return type explicitly specified"
+    )
+    diagnostics(
+        "Arrow function",
+        "missing-type-arrow-function.ets",
+        "@memo anonymous function must have it's return type explicitly specified"
+    )
+    diagnostics(
+        "Method",
+        "missing-type-method.ets",
+        "@memo foo must have it's return type explicitly specified"
+    )
+    noDiagnostics(
+        "Correct functions",
+        "correctly-typed-functions.ets",
+        "must have it's return type explicitly specified"
+    )
+})
+
+suite("@memo function parameter reassignment", () => {
+    diagnostics(
+        "@memo function parameter reassignment",
+        "memo-parameter-reassignment.ets",
+        "@memo function parameter reassignment is forbidden: parameter yyy at function foo"
+    )
+    noDiagnostics(
+        "non-@memo function parameter reassignment",
+        "non-memo-parameter-reassignment.ets",
+        "reassignment is forbidden"
+    )
+})

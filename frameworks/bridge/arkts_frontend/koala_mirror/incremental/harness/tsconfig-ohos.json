@@ -1,0 +1,23 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "rootDir": ".",
+        "outDir": "build",
+        "module": "CommonJS",
+        "paths": {
+            "@koalaui/compat": ["../compat/src/ohos"],
+            "@koalaui/common": ["../common/src"],
+            "#harness": ["./src/ohos"]
+        }
+    },
+    "include": [
+        "./src/index.ts",
+        "./src/arkts/shared.ts",
+        "./src/ohos/**/*"
+    ],
+    "references": [
+        { "path": "../common" },
+        { "path": "../compat/tsconfig-ohos.json" }
+    ]
+}

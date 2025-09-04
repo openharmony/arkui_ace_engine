@@ -13,7 +13,7 @@
         "skipLibCheck": true,
         "removeComments": false,
         "outDir": "build/lib",
-        "module": "CommonJS", // TODO maybe migrate to ESM?
+        "module": "CommonJS", // Improve: maybe migrate to ESM?
         "rootDirs": ["src"],
         "baseUrl": ".",
         "types": ["node"],

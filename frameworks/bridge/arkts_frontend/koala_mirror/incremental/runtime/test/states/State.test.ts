@@ -14,15 +14,9 @@
  */
 
 import { Assert as assert, suite, test } from "@koalaui/harness"
-import { UniqueId, KoalaCallsiteKey } from "@koalaui/common"
+import { hashCodeFromString as key } from "@koalaui/common"
 import { IncrementalNode, MutableState, State, TestNode, testUpdate, ValueTracker } from "../../src"
 import { createStateManager } from "../../src/states/State"
-
-// For tests we compute positional ids from strings.
-export function key(value: string): KoalaCallsiteKey {
-    let hash = (new UniqueId()).addString(value).compute().slice(0, 10)
-    return parseInt(hash, 16)
-}
 
 export function assertNode(state: State<TestNode>, presentation: string) {
     assert.isFalse(state.modified) // the same node
@@ -143,7 +137,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState(context => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) return scope.cached
             const state = manager.stateBy<number>(name)!
             assert.isDefined(state)
@@ -157,7 +151,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState(context => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) return scope.cached
             const state = manager.stateBy<number>(name)!
             assert.isDefined(state)
@@ -937,6 +931,49 @@ suite("State", () => {
         assertState(state, false)
         assert.equal(computableCounter, 2) // computable is not recomputed
         assert.equal(stateCounter, 2) // state is recomputed by request but it is not modified
+    })
+    test("do not recompute by state if it was not used during last computation", () => {
+        const manager = createStateManager()
+        const stateB = manager.mutableState(true)
+        const stateT = manager.mutableState(1)
+        const stateF = manager.mutableState(2)
+        const computing = new Array<string>()
+        const computable = manager.computableState(() => {
+            computing.push("recomputed")
+            return stateB.value ? stateT.value : stateF.value
+        })
+        // initial computation
+        assertState(computable, 1)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if nothing changed
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computable.value, 1)
+        assert.isEmpty(computing)
+        // recompute if used stateT changed
+        stateT.value = -1
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -1)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if stateF changed
+        stateF.value = -2
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -1)
+        assert.isEmpty(computing)
+        // switch flag and recompute
+        stateB.value = false
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -2)
+        assertStringsAndCleanup(computing, "recomputed")
+        // recompute if used stateF changed
+        stateF.value = 2
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, 2)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if stateT changed
+        stateT.value = 1
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, 2)
+        assert.isEmpty(computing)
     })
     test("build and update simple tree", () => {
         let manager = createStateManager()

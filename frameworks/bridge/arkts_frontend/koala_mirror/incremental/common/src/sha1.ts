@@ -76,7 +76,7 @@ export class SHA1Hash {
         let length: int32 = 0
         let buffer: ArrayBufferLike | undefined = undefined
 
-        // TODO: an attempt to wrie this in a generic form causes
+        // Improve: an attempt to wrie this in a generic form causes
         // es2panda to segfault.
         let BYTES_PER_ELEMENT = 4
         if (data instanceof Int32Array) {
@@ -206,7 +206,7 @@ export class SHA1Hash {
         offset = ((offset ??  0) | 0) as int32
 
         while (i < inputWords) {
-            W[i++] = swap32(data[offset++] as int32)
+            W[i++] = swap32(data[offset!++] as int32)
         }
 
         for (i = inputWords; i < workWords; i++) {

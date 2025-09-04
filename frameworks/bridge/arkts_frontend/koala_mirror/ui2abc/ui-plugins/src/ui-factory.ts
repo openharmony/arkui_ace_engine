@@ -83,11 +83,11 @@ export class factory {
     /**
      * create `initializers: <optionsName> | undefined` as identifier
      */
-    static createInitializerOptionsIdentifier(optionsName: string): arkts.Identifier {
+    static createInitializerOptionsIdentifier(optionsName: string, inBuild: boolean): arkts.Identifier {
         return arkts.factory.createIdentifier(
-            CustomComponentNames.COMPONENT_INITIALIZERS_NAME,
+            inBuild ? CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0 : CustomComponentNames.COMPONENT_INITIALIZERS_NAME,
             arkts.factory.createETSUnionType([
-                factory.createTypeReferenceFromString(optionsName),
+                factory.createTypeReferenceFromString(inBuild ? 'Object' : optionsName),
                 arkts.factory.createETSUndefinedType()
             ])
         )
@@ -96,36 +96,37 @@ export class factory {
     /**
      * create `initializers: <optionsName> | undefined` as parameter
      */
-    static createInitializersOptionsParameter(optionsName: string): arkts.ETSParameterExpression {
+    static createInitializersOptionsParameter(optionsName: string, inBuild: boolean, isOptional: boolean = false): arkts.ETSParameterExpression {
         return arkts.factory.createETSParameterExpression(
             factory.createInitializerOptionsIdentifier(
-                optionsName
+                optionsName, inBuild
             ),
-            false
+            isOptional
         )
     }
 
     /**
      * create `content: (() => void) | undefined` as identifier
      */
-    static createContentIdentifier(): arkts.Identifier {
+    static createContentIdentifier(isOptional: boolean): arkts.Identifier {
         return arkts.factory.createIdentifier(
-            BuilderLambdaNames.CONTENT_PARAM_NAME,
-            arkts.factory.createETSUnionType([
-                factory.createLambdaFunctionType(),
-                arkts.factory.createETSUndefinedType()
-            ])
-        );
+                BuilderLambdaNames.CONTENT_PARAM_NAME,
+                isOptional ? factory.createLambdaFunctionType() :
+                arkts.factory.createETSUnionType([
+                    factory.createLambdaFunctionType(),
+                    arkts.factory.createETSUndefinedType()
+                ])
+            )
     }
 
     /**
      * create `@memo() content: (() => void) | undefined` as parameter
      */
-    static createContentParameter(): arkts.ETSParameterExpression {
-        const contentParam: arkts.Identifier = factory.createContentIdentifier();
-        const param = arkts.factory.createETSParameterExpression(contentParam, false);
-        param.setAnnotations([annotation(InternalAnnotations.MEMO)]);
-        return param;
+    static createContentParameter(isOptional: boolean = false): arkts.ETSParameterExpression {
+        const contentParam: arkts.Identifier = factory.createContentIdentifier(isOptional)
+        const param = arkts.factory.createETSParameterExpression(contentParam, isOptional)
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)])
+        return param
     }
 
     /**

@@ -18,7 +18,8 @@ import { StyleTransformer } from "./style-transformer"
 import { EtsFirstArgTransformer } from "./ets-first-arg-transformer"
 import { BuilderLambdaTransformer } from "./builder-lambda-transformer"
 import { InstantiateFactoryHelper } from "./instantiate-factory-helper"
-
+import { Importer } from "./utils"
+import { StructsResolver, StructTable } from "./struct-recorder"
 export interface TransformerOptions {
     trace?: boolean,
 }
@@ -26,14 +27,15 @@ export interface TransformerOptions {
 export default function checkedTransformer(
     userPluginOptions?: TransformerOptions
 ): arkts.ProgramTransformer {
-    console.log("CHECKED: ", userPluginOptions)
     return (program: arkts.Program, _compilationOptions: arkts.CompilationOptions, context: arkts.PluginContext) => {
-        [
+        const structsResolver = context.parameter<StructsResolver>("structsTable")!;
+        const result = [
             new InstantiateFactoryHelper(),
             new EtsFirstArgTransformer(),
             new StyleTransformer(),
-            new BuilderLambdaTransformer()
+            new BuilderLambdaTransformer(structsResolver)
         ]
-        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.astNode)
+        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.ast)
+        program.setAst(result as arkts.ETSModule)
     }
 }

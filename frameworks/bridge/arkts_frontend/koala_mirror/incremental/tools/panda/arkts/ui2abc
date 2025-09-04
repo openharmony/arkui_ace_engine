@@ -14,5 +14,5 @@
 # limitations under the License.
 
 SCRIPT_DIR=`dirname "${BASH_SOURCE[0]}"`
-PANDA_SDK_PATH=${PANDA_SDK_PATH:=$SCRIPT_DIR/../node_modules/@panda/sdk} node $SCRIPT_DIR/../../../../ui2abc/libarkts/lib/es2panda.js "$@"
+KOALA_WORKSPACE=1 PANDA_SDK_PATH=${PANDA_SDK_PATH:=$SCRIPT_DIR/../node_modules/@panda/sdk} node $SCRIPT_DIR/../../../../ui2abc/libarkts/lib/es2panda.js "$@"
 

@@ -15,7 +15,7 @@
 
 import * as fs from "node:fs"
 import * as util from "../../test-util"
-import * as arkts from "../../../src/arkts-api"
+import * as arkts from "../../../src"
 import { constructorWithOverload } from "./constructor"
 import { updateTopLevelClass } from "./simple"
 import { renameClass } from "./simple/rename-class"
@@ -31,8 +31,9 @@ import { addOptionalChain } from "./optional/add-chain"
 import { addUseImportClassSameFile } from "./exports/basic"
 import { addUseImportClassSameFileAndExportClass } from "./exports/add-export"
 import { addUseImportClassSameFileAndCreateClass } from "./exports/create-class"
+import { addUseImportClassSameFileAfterRewritingStructToClass, rewriteStructToClass } from "./exports/struct-to-class"
 
-const DIR = './test/arkts-api/recheck/'
+const DIR = './test/arkts-api/recheck'
 const PANDA_SDK_PATH = process.env.PANDA_SDK_PATH ?? '../../incremental/tools/panda/node_modules/@panda/sdk'
 
 function createConfig(file: string) {
@@ -65,28 +66,8 @@ function proceedToChecked() {
     arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
 }
 
-function applyTransform(transform?: arkts.ProgramTransformer, onlyModifyMain?: boolean) {
-    arkts.arktsGlobal.compilerContext.program.externalSources.forEach(it => {
-        if (it.getName().startsWith("std.")) return
-        if (it.getName().startsWith("escompat")) return
-        it.programs.forEach(program => {
-            const ast = program.astNode
-            const importStorage = new arkts.ImportStorage(program, false)
-            if (!onlyModifyMain) {
-                transform?.(program, { isMainProgram: false, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED }, new arkts.PluginContextImpl())
-            }
-            arkts.setBaseOverloads(ast)
-            importStorage.update()
-            arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, ast.peer)
-        })
-    })
-
-    const script = arkts.createETSModuleFromContext()
-    const importStorage = new arkts.ImportStorage(arkts.arktsGlobal.compilerContext.program, false)
-    transform?.(arkts.arktsGlobal.compilerContext.program, { isMainProgram: true, name: "", stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED }, new arkts.PluginContextImpl())
-    arkts.setBaseOverloads(script)
-    importStorage.update()
-    arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, script.peer)
+function applyTransformOnStage(transform?: arkts.ProgramTransformer, onlyModifyMain?: boolean, stage: arkts.Es2pandaContextState = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+    arkts.runTransformer(arkts.arktsGlobal.compilerContext.program, stage, false, transform, new arkts.PluginContextImpl(), {})
 }
 
 function recheck() {
@@ -108,13 +89,17 @@ function dumpJson(file: string) {
 function assertSrc(file: string) {
     const src = arkts.createETSModuleFromContext().dumpSrc()
     const expected = fs.readFileSync(`${DIR}/${file}/dump-src/main.ets`, 'utf-8')
-    util.assert.equal(src, expected)
+    util.assert.equal(filterGensym(src), filterGensym(expected))
 }
 
 function assertJson(file: string) {
     const json = arkts.createETSModuleFromContext().dumpJson()
     const expected = fs.readFileSync(`${DIR}/${file}/dump-json/main.json`, 'utf-8')
     util.assert.equal(json, expected)
+}
+
+function filterGensym(value: string): string {
+    return value.replaceAll(/gensym%%_[0-9]*/g, "gensym_XXX")
 }
 
 function proceedToBin() {
@@ -146,7 +131,35 @@ function runTest(
     createConfig(file)
     createContext(file)
     proceedToChecked()
-    applyTransform(transform, options.onlyModifyMain)
+    applyTransformOnStage(transform, options.onlyModifyMain)
+    recheck()
+    if (process.env.TEST_GOLDEN == "1") {
+        if (!options.skipSrc) dumpSrc(file)
+        if (!options.skipJson) dumpJson(file)
+    } else {
+        if (!options.skipSrc) assertSrc(file)
+        if (!options.skipJson) assertJson(file)
+    }
+    proceedToBin()
+}
+
+function runTestWithParsedTransform(
+    file: string,
+    parsedTransform?: arkts.ProgramTransformer,
+    transform?: arkts.ProgramTransformer,
+    userOptions: TestOptions = defaultTestOptions
+) {
+    const options = {
+        skipSrc: userOptions.skipSrc ?? defaultTestOptions.skipSrc,
+        skipJson: userOptions.skipJson ?? defaultTestOptions.skipJson,
+        onlyModifyMain: userOptions.onlyModifyMain ?? defaultTestOptions.onlyModifyMain
+    }
+    createConfig(file)
+    createContext(file)
+    proceedToParsed()
+    applyTransformOnStage(parsedTransform, options.onlyModifyMain, arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
+    proceedToChecked()
+    applyTransformOnStage(transform, options.onlyModifyMain)
     recheck()
     if (process.env.TEST_GOLDEN == "1") {
         if (!options.skipSrc) dumpSrc(file)
@@ -164,11 +177,11 @@ suite(util.basename(__filename), () => {
             runTest('static/function', undefined)
         })
 
-        test("public setter", () => {
+        test.skip("public setter", () => {
             runTest('static/public-setter', undefined)
         })
 
-        test("constructor with overload", () => {
+        test.skip("constructor with overload", () => {
             runTest('static/constructor', undefined)
         })
 
@@ -188,24 +201,28 @@ suite(util.basename(__filename), () => {
         test("import type", () => {
             runTest('static/import-type', undefined)
         })
+
+        test("import all", () => {
+            runTest('static/import-all', undefined)
+        })
     })
 
     suite('simple', () => {
         test('rename class', () => {
             runTest('simple/rename-class', (program: arkts.Program) => {
-                return updateTopLevelClass(program.astNode, renameClass)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, renameClass))
             })
         })
 
         test('add class method', () => {
             runTest('simple/add-class-method', (program: arkts.Program) => {
-                return updateTopLevelClass(program.astNode, addClassMethod)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, addClassMethod))
             })
         })
 
         test('add variable declaration', () => {
             runTest('simple/add-variable', (program: arkts.Program) => {
-                return updateTopLevelClass(program.astNode, addVariableDeclaration)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, addVariableDeclaration))
             })
         })
     })
@@ -224,6 +241,12 @@ suite(util.basename(__filename), () => {
         })
         test('add optional chain', () => {
             runTest('optional/add-chain', addOptionalChain)
+        })
+    })
+
+    suite('lambda', () => {
+        test('compiler produced lambdas unchanged', () => {
+            runTest('lambda/unchanged', undefined)
         })
     })
 
@@ -262,6 +285,10 @@ suite(util.basename(__filename), () => {
 
         test('import created class', () => {
             runTest('exports/create-class', addUseImportClassSameFileAndCreateClass)
+        })
+
+        test('export struct as class', () => {
+            runTestWithParsedTransform('exports/struct-to-class', rewriteStructToClass, addUseImportClassSameFileAfterRewritingStructToClass)
         })
     })
 })

@@ -1,0 +1,20 @@
+{
+    "outputDir": "build-m3-impl",
+    "outputInclude": [ "arkui-m3.abc" ],
+    "cachePrefix": "arkui",
+    "buildCommand": [ "npm", "run", "build:m3" ],
+    "files": [
+        "sdk/annotations/index.ets"
+    ],
+    "configs": [
+        "ui2abcconfig-m3.json",
+        "../../interop/arktsconfig.json",
+        "../../incremental/common/arktsconfig.json",
+        "../../incremental/compat/arktsconfig.json",
+        "../../incremental/runtime/ui2abcconfig.json",
+        "../../ui2abc/memo-plugin/tsconfig.json",
+        "../../ui2abc/ui-plugins/tsconfig.json"
+    ],
+    "compiler": "../../incremental/tools/panda/node_modules/@panda/sdk/package.json",
+    "hashAlgorithm": "sha256"
+}

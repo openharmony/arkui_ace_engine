@@ -16,35 +16,41 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import commonjs from '@rollup/plugin-commonjs'
 
+const ENABLE_SOURCE_MAPS = false // Enable for debugging
+
 /** @type {import("rollup").RollupOptions} */
-export default {
-    input: "./src/index.ts",
-    output: {
-        file: "./lib/libarkts.js",
-        format: "commonjs",
+export default [
+    makeConfig("./src/index.ts", "libarkts.js"),
+    makeConfig("./src/wrapper-compat/index.ts", "libarkts-compat.js"),
+]
+
+function makeConfig(input, output) {
+    return {
+        input: input,
+        output: {
+            file: "./lib/" + output,
+            format: "commonjs",
+            plugins: [
+                // terser()
+            ],
+            banner: APACHE_LICENSE_HEADER(),
+            sourcemap: ENABLE_SOURCE_MAPS
+        },
         plugins: [
-            // terser()
+        commonjs(),
+            typescript({
+                outputToFilesystem: false,
+                module: "esnext",
+                sourceMap: ENABLE_SOURCE_MAPS,
+                declarationMap: false,
+                declaration: true,
+                composite: false,
+            }),
+            nodeResolve({
+                extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
+            })
         ],
-        banner: [
-            "#!/usr/bin/env node",
-            APACHE_LICENSE_HEADER()
-        ].join("\n"),
-    },
-    external: ["commander", "typescript", "@koalaui/libarkts"],
-    plugins: [
-	commonjs(),
-        typescript({
-            outputToFilesystem: false,
-            module: "esnext",
-            sourceMap: false,
-            declarationMap: false,
-            declaration: false,
-            composite: false,
-        }),
-        nodeResolve({
-            extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
-        })
-    ],
+    }
 }
 
 function APACHE_LICENSE_HEADER() {

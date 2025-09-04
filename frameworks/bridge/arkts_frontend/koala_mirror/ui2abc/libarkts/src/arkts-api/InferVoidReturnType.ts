@@ -14,7 +14,7 @@
  */
 
 import { factory } from "./factory/nodeFactory"
-import { isReturnStatement, isScriptFunction, ScriptFunction } from "../generated"
+import { BlockStatement, isReturnStatement, isScriptFunction, Program, ScriptFunction } from "../generated"
 import { AbstractVisitor } from "./AbstractVisitor"
 import { AstNode } from "./peers/AstNode"
 import { Es2pandaPrimitiveType, Es2pandaScriptFunctionFlags } from "src/generated/Es2pandaEnums"
@@ -23,7 +23,7 @@ interface IsScriptFunctionRoot {
     isScriptFunctionRoot: boolean
 }
 
-// TODO: this is to workaround compiler not beeing able to infer return type on recheck
+// Improve: this is to workaround compiler not beeing able to infer return type on recheck
 class CheckReturns extends AbstractVisitor {
     visitor(node: AstNode, options?: IsScriptFunctionRoot): AstNode {
         if (isReturnStatement(node) && node.argument !== undefined) {
@@ -50,6 +50,7 @@ function checkReturns(node: AstNode): boolean {
 }
 
 class InferVoidReturnType extends AbstractVisitor {
+    visitor(node: BlockStatement): BlockStatement
     visitor(node: AstNode): AstNode {
         const result = this.visitEachChild(node)
         if (isScriptFunction(result) &&
@@ -77,13 +78,8 @@ class InferVoidReturnType extends AbstractVisitor {
         }
         return result
     }
-
-    static instance?: InferVoidReturnType
 }
 
-export function inferVoidReturnType(node: AstNode) {
-    if (!InferVoidReturnType.instance) {
-        InferVoidReturnType.instance = new InferVoidReturnType()
-    }
-    InferVoidReturnType.instance.visitor(node)
+export function inferVoidReturnType(program: Program) {
+    program.setAst(new InferVoidReturnType().visitor(program.ast))
 }

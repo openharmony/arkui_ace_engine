@@ -14,43 +14,44 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
-incremental_root = ""
 koala_root = ".."
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-action("incremental.abc") {
-    script = "gn/command/npm.py"
+npm_cmd("incremental_install") {
+    outputs = [
+        "$target_out_dir/incremental_install"
+    ]
+    project_path = rebase_path(".")
+    install = true
+}
+
+npm_cmd("incremental_build") {
     outputs = [
         "$target_out_dir/incremental.abc"
     ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--arklink-path", rebase_path("${static_linker_build_path}"),
-        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
-        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-        "--npm-args", "run", "build:incremental:gn"
-    ]
+    project_path = rebase_path("./runtime")
+    run_tasks = [ "build:incremental:inc:ui2abc" ]
 
     deps = [
-      "${ohos_ets_api_deps}",
-      "${ohos_ets_arkts_deps}",
       "$koala_root/ui2abc:ui2abc"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
-
-    external_deps += [
-        "ets_frontend:libes2panda_public(${host_toolchain})",
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps,
+        "ets_frontend:libes2panda_public(${host_toolchain})"
     ]
+    built_file_path = rebase_path("./runtime/build/incremental.abc")
+    target_out_path = rebase_path("$target_out_dir/incremental.abc")
 }
 
-group("incremental") {
+group("incremental_abc") {
     deps = [
-      "$incremental_root:incremental.abc"
+      "../ui2abc:fast_arktsc_build",
+      ":incremental_build"
     ]
 }

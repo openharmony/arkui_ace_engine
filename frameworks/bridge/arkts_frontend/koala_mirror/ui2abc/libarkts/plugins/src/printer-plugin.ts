@@ -25,6 +25,6 @@ export default function printerTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     return (program: arkts.Program) => {
-        return new PrintVisitor().visitor(program.astNode)
+        return new PrintVisitor().visitor(program.ast)
     }
 }

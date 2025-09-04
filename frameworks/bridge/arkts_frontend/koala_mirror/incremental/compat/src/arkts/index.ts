@@ -15,7 +15,7 @@
 
 export * from "./array"
 export * from "./atomic"
-export * from "./double"
+export * from "./primitive"
 export * from "./finalization"
 export * from "./performance"
 export * from "./prop-deep-copy"

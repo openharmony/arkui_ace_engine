@@ -80,7 +80,7 @@ suite(util.basename(__filename), () => {
             )
         funcDecl.updateModifiers(scriptFunc.modifierFlags)
 
-        script = arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 script.statements[0],
@@ -94,7 +94,10 @@ suite(util.basename(__filename), () => {
                         undefined,
                     )
                 )
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(
@@ -215,7 +218,7 @@ suite(util.basename(__filename), () => {
             )
         funcDecl.updateModifiers(scriptFunc.modifierFlags)
 
-        script = arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 script.statements[0],
@@ -233,7 +236,10 @@ suite(util.basename(__filename), () => {
                         undefined,
                     )
                 )
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(
