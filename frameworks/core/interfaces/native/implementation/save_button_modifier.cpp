@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -98,11 +97,7 @@ void OnClickImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
+    CHECK_NULL_VOID(value);
     auto onEvent = [arkCallback = CallbackHelper(value->value)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
         std::string message;
@@ -121,15 +116,12 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        auto error = Opt_BusinessError{
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, Opt_BusinessError{
             .value = Ark_BusinessError{
-                .name = Converter::ArkValue<Ark_String>("", Converter::FC),
                 .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-                .stack = Converter::ArkValue<Opt_String>("", Converter::FC),
                 .code = Converter::ArkValue<Ark_Number>(code)
             }
-        };
-        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
+        });
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));

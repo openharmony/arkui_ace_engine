@@ -134,8 +134,6 @@ export function SaveButton(
     /** @memo */
     style: ((attributes: SaveButtonAttribute) => void) | undefined,
     options?: SaveButtonOptions,
-    /** @memo */
-    content_?: (() => void) | undefined,
 ): void {
     const receiver = remember(() => {
         return new ArkSaveButtonComponent()
@@ -143,7 +141,6 @@ export function SaveButton(
     NodeAttach<ArkSaveButtonPeer>((): ArkSaveButtonPeer => ArkSaveButtonPeer.create(receiver), (_: ArkSaveButtonPeer) => {
         receiver.setSaveButtonOptions(options)
         style?.(receiver)
-        content_?.()
         receiver.applyAttributesFinish()
     })
 }
