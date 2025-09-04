@@ -104,6 +104,8 @@ public:
             theme->fontScale_ = pattern->GetAttr<double>("progress_aging_font_scale", 1.75);
             theme->textColor_ = pattern->GetAttr<Color>("progress_text_color", defaultColor);
             theme->textSize_ = pattern->GetAttr<Dimension>("progress_text_size", 12.0_fp);
+            theme->fontWeight_ = pattern->GetAttr<int>(
+                "progress_text_font_weight", static_cast<int>(FontWeight::NORMAL));
             theme->capsuleSelectColor_ = pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED);
             theme->selectColorAlpha_ = pattern->GetAttr<double>("capsule_progress_default_alpha", 1.0);
             theme->capsuleSelectColor_ = theme->capsuleSelectColor_.BlendOpacity(theme->selectColorAlpha_);
@@ -313,6 +315,11 @@ public:
         return textSize_;
     }
 
+    int GetFontWeight() const
+    {
+        return fontWeight_;
+    }
+
     const Dimension& GetProgressHeight() const
     {
         return progressHeight_;
@@ -513,6 +520,7 @@ protected:
     // For capsule progress.
     Color textColor_;
     Dimension textSize_;
+    int fontWeight_ = static_cast<int>(FontWeight::NORMAL);
     Dimension progressHeight_;
     Color capsuleSelectColor_;
     float progressDisable_ = 0.4;

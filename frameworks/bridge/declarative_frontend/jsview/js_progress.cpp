@@ -435,7 +435,7 @@ void JSProgress::JsSetFontDefault()
     RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
     ProgressModel::GetInstance()->SetFontSize(progressTheme->GetTextSize());
     ProgressModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-    ProgressModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    ProgressModel::GetInstance()->SetFontWeight(static_cast<FontWeight>(progressTheme->GetFontWeight()));
     ProgressModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
 }
 
