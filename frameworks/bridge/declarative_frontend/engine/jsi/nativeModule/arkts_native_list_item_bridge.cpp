@@ -29,10 +29,10 @@ std::string GetErrorMessage(int32_t errorCode)
             errorMessage = "Parameter error.";
             break;
         case ERROR_CODE_PARAM_ERROR:
-            errorMessage = "Parameter error.";
+            errorMessage = "The component type of the node is incorrect.";
             break;
         case ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE:
-            errorMessage = "Node is not on main tree.";
+            errorMessage = "The node not mounted to component tree.";
             break;
     }
     return errorMessage;
