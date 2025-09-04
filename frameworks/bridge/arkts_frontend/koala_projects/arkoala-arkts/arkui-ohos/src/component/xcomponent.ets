@@ -41,3 +41,11 @@ export class TypedXComponentPeerInternal extends ArkXComponentPeer {
         super(peerPtr, id, name, flags)
     }
 }
+
+export interface XComponentOptionsInternal {
+
+}
+
+export interface XComponentParametersInternal {
+    
+}

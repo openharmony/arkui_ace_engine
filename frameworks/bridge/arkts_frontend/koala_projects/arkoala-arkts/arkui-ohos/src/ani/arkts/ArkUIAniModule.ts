@@ -14,31 +14,32 @@
  */
 
 import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
-import { drawing } from "@ohos/graphics/drawing"
+import { default as drawing } from "@ohos.graphics.drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "arkui/component"
+import { DrawContext } from "arkui.Graphics"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "#generated"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
-import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
-import { XComponentOptionsInternal, XComponentParametersInternal } from "arkui/component"
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
+import { XComponentOptionsInternal, XComponentParametersInternal } from "#generated"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { uiObserver }  from "@ohos/arkui/observer"
-import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
-import { NodeAdapter } from '../../FrameNode'
+import { default as uiObserver }  from "@ohos/arkui/observer"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from "@ohos.graphics.scene"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
-
+    native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
+    native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
@@ -48,7 +49,6 @@ export class ArkUIAniModule {
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
-    native static _Common_SetFrameRateRange(ptr: KPointer, value: ExpectedFrameRateRange, type: KInt): void
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
@@ -65,21 +65,14 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
     native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
-    native static _CustomNode_QueryNavDestinationInfo1(uniqueId: KInt): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
-    native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
-    native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
-    native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
-    native static _SetWaterFlowFooter(ptr: KPointer, footer: KPointer): void
-    native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
-    native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
@@ -176,8 +169,7 @@ export class ArkUIAniModule {
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
     native static _DragController_getDragPreview(): dragController.DragPreview
-    native static _DragController_setForegroundColor(
-        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
+    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void
