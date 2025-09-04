@@ -38,7 +38,7 @@ void DragEventSetCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
 void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer);
 void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array_ref array, [[maybe_unused]] ani_int length);
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array, [[maybe_unused]] ani_int length);
 void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dragInfo);
 void DragSetDragPreviewOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

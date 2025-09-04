@@ -162,23 +162,44 @@ void NodeAdapterNotifyItemMoved(
     modifier->getNodeAdapterAniModifier()->nodeAdapterNotifyItemMoved(ptr, from, to);
 }
 
-ani_array_double NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+ani_array NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return nullptr;
     }
     AniDoubleArray items = modifier->getNodeAdapterAniModifier()->nodeAdapterGetAllItems(ptr);
-    ani_array_double result;
+    ani_array result;
     auto size = items.size;
     if (size == 0 || items.data == nullptr) {
         return nullptr;
     }
-    if (env->Array_New_Double(size, &result) != ANI_OK) {
+
+    ani_ref undef {};
+    if (env->GetUndefined(&undef) != ANI_OK) {
         return nullptr;
     }
-    if (ANI_OK != env->Array_SetRegion_Double(result, 0, size, items.data.get())) {
+    if (env->Array_New(size, undef, &result) != ANI_OK) {
         return nullptr;
+    }
+
+    ani_class doubleClass {};
+    if (env->FindClass("std.core.Double", &doubleClass) != ANI_OK) {
+        return nullptr;
+    }
+    ani_method doubleCtor {};
+    if (env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleCtor) != ANI_OK) {
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        ani_object boxedDouble {};
+        if (env->Object_New(doubleClass, doubleCtor, &boxedDouble, items.data[i]) != ANI_OK) {
+            return nullptr;
+        }
+        if (ANI_OK != env->Array_Set(result, i, boxedDouble)) {
+            return nullptr;
+        }
     }
     return result;
 }

@@ -39,7 +39,7 @@ bool ParseChange(ani_env* env, const ani_ref& change, const float defaultSize, i
     env->Object_GetPropertyByName_Ref(static_cast<ani_object>(change), "childrenSize", &childrenSize);
 
     ani_size childrenSizeCount;
-    if (env->Array_GetLength(static_cast<ani_array_ref>(childrenSize), &childrenSizeCount) != ANI_OK) {
+    if (env->Array_GetLength(static_cast<ani_array>(childrenSize), &childrenSizeCount) != ANI_OK) {
         return true;
     }
     for (size_t j = 0; j < childrenSizeCount; ++j) {
@@ -47,7 +47,7 @@ bool ParseChange(ani_env* env, const ani_ref& change, const float defaultSize, i
         ani_double childSize = -1.0;
         ani_ref itemSize;
         ani_boolean isUndefined = false;
-        if (env->Array_Get_Ref(static_cast<ani_array_ref>(childrenSize), j, &itemSize) != ANI_OK ||
+        if (env->Array_Get(static_cast<ani_array>(childrenSize), j, &itemSize) != ANI_OK ||
             env->Reference_IsUndefined(itemSize, &isUndefined) != ANI_OK || isUndefined || ANI_OK !=
             env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":d", &childSize) ||
             Negative(childSize)) {
@@ -66,7 +66,7 @@ void SyncChildrenSize(ani_env* env, const ani_object& obj, const ArkUIAniListMod
         return;
     }
     ani_size aniLength;
-    if (env->Array_GetLength(static_cast<ani_array_ref>(sizeArray), &aniLength) != ANI_OK) {
+    if (env->Array_GetLength(static_cast<ani_array>(sizeArray), &aniLength) != ANI_OK) {
         return;
     }
     modifier->resizeChildrenSize(node, 0);
@@ -75,7 +75,7 @@ void SyncChildrenSize(ani_env* env, const ani_object& obj, const ArkUIAniListMod
         ani_double childSize = -1.0;
         ani_ref itemSize;
         ani_boolean isUndefined = false;
-        if (env->Array_Get_Ref(static_cast<ani_array_ref>(sizeArray), i, &itemSize) != ANI_OK ||
+        if (env->Array_Get(static_cast<ani_array>(sizeArray), i, &itemSize) != ANI_OK ||
             env->Reference_IsUndefined(itemSize, &isUndefined) != ANI_OK || isUndefined) {
             modifier->syncChildrenSize(node, -1.0f);
             continue;
@@ -103,7 +103,7 @@ void SetChildrenMainSize(
             return;
         }
         ani_size length;
-        if (env->Array_GetLength(static_cast<ani_array_ref>(changes), &length) != ANI_OK) {
+        if (env->Array_GetLength(static_cast<ani_array>(changes), &length) != ANI_OK) {
             return;
         }
         ani_class childrenSizeInfo;
@@ -112,7 +112,7 @@ void SetChildrenMainSize(
         }
         for (ani_size i = 0; i < length; ++i) {
             ani_ref change;
-            if (env->Array_Get_Ref(static_cast<ani_array_ref>(changes), i, &change) != ANI_OK) {
+            if (env->Array_Get(static_cast<ani_array>(changes), i, &change) != ANI_OK) {
                 continue;
             }
             ani_boolean isChildrenSizeInfo;

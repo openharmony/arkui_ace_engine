@@ -217,13 +217,18 @@ struct InteropTypeConverter<KNativePointer> {
 
 template<>
 struct InteropTypeConverter<KInt*> {
-    using InteropType = ani_array_int;
+    using InteropType = ani_array;
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       ani_size length = 0;
       CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KInt* data = new KInt[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
+      for (size_t i = 0; i < length; ++i) {
+        ani_ref dataElem {};
+        CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
+        CHECK_ANI_FATAL(env->Object_CallMethodByName_Int(
+          static_cast<ani_object>(dataElem), "unboxed", ":i", (ani_int *)(&data[i])));
+      }
       return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
@@ -231,7 +236,16 @@ struct InteropTypeConverter<KInt*> {
       if (converted) {
         ani_size length = 0;
         CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        CHECK_ANI_FATAL(env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted));
+
+        ani_class intClass {};
+        CHECK_ANI_FATAL(env->FindClass("std.core.Int", &intClass));
+        ani_method intCtor {};
+        CHECK_ANI_FATAL(env->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor));
+        for (size_t i = 0; i < length; ++i) {
+          ani_object boxedInt {};
+          CHECK_ANI_FATAL(env->Object_New(intClass, intCtor, &boxedInt, (ani_int)converted[i]));
+          CHECK_ANI_FATAL(env->Array_Set(value, i, boxedInt));
+        }
       }
       delete [] converted;
     }
@@ -239,13 +253,18 @@ struct InteropTypeConverter<KInt*> {
 
 template<>
 struct InteropTypeConverter<KFloat*> {
-    using InteropType = ani_array_float;
+    using InteropType = ani_array;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       ani_size length = 0;
       CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KFloat* data = new KFloat[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
+      for (size_t i = 0; i < length; ++i) {
+        ani_ref dataElem {};
+        CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
+        CHECK_ANI_FATAL(env->Object_CallMethodByName_Float(
+          static_cast<ani_object>(dataElem), "unboxed", ":f", (ani_float*)(&data[i])));
+      }
       return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
@@ -253,7 +272,16 @@ struct InteropTypeConverter<KFloat*> {
       if (converted) {
         ani_size length = 0;
         CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        CHECK_ANI_FATAL(env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted));
+
+        ani_class floatClass {};
+        CHECK_ANI_FATAL(env->FindClass("std.core.Float", &floatClass));
+        ani_method floatCtor {};
+        CHECK_ANI_FATAL(env->Class_FindMethod(floatClass, "<ctor>", "f:", &floatCtor));
+        for (size_t i = 0; i < length; ++i) {
+          ani_object boxedFloat {};
+          CHECK_ANI_FATAL(env->Object_New(floatClass, floatCtor, &boxedFloat, (ani_float)converted[i]));
+          CHECK_ANI_FATAL(env->Array_Set(value, i, boxedFloat));
+        }
       }
       delete [] converted;
     }
@@ -261,24 +289,40 @@ struct InteropTypeConverter<KFloat*> {
 
 template<>
 struct InteropTypeConverter<KByte*> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_array;
     static KByte* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       ani_size length = 0;
       CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KByte* data = new KByte[length];
       if (length > 0) {
-          CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+        for (size_t i = 0; i < length; ++i) {
+          ani_ref dataElem {};
+          CHECK_ANI_FATAL(env->Array_Get(value, i, &dataElem));
+          CHECK_ANI_FATAL(env->Object_CallMethodByName_Byte(
+            static_cast<ani_object>(dataElem), "unboxed", ":b", (ani_byte *)(&data[i])));
+        }
       }
       return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
-      if (converted) {
-        ani_size length = 0;
-        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        if (length > 0) {
-            CHECK_ANI_FATAL(env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted));
+      if (!converted) {
+        delete[] converted;
+        return;
+      }
+      ani_size length = 0;
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+
+      ani_class byteClass {};
+      CHECK_ANI_FATAL(env->FindClass("std.core.Byte", &byteClass));
+      ani_method byteCtor {};
+      CHECK_ANI_FATAL(env->Class_FindMethod(byteClass, "<ctor>", "b:", &byteCtor));
+      if (length > 0) {
+        for (size_t i = 0; i < length; ++i) {
+          ani_object boxedByte {};
+          CHECK_ANI_FATAL(env->Object_New(byteClass, byteCtor, &boxedByte, (ani_byte)converted[i]));
+          CHECK_ANI_FATAL(env->Array_Set(value, i, boxedByte));
         }
       }
       delete[] converted;
