@@ -17,7 +17,6 @@
 
 #include <cstdint>
 
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/node/theme_modifier.h"
