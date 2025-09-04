@@ -139,30 +139,29 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition001, TestSize.Level
 }
 
 /**
- * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPosition002
- * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPosition.
+ * @tc.name: OH_ArkUI_NodeUtils_GetParentInPageTree001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetParentInPageTree.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition002, TestSize.Level1)
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetParentInPageTree001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create a node not nullptr.
-     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     * @tc.steps: step1. Create a node  nullptr.
+     * @tc.expect: result is nullptr.
      */
-    ArkUI_NodeHandle node = new ArkUI_Node();
-    ArkUI_IntOffset localOffset;
+    ArkUI_NodeHandle node = nullptr;
 
     /**
      * @tc.steps: step2. Call the function.
      * @tc.expect: the function is be called.
      */
-    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPosition(node, &localOffset);
+    ArkUI_NodeHandle result = OH_ArkUI_NodeUtils_GetParentInPageTree(node);
 
     /**
      * @tc.steps: step3. Verify the result.
-     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     * @tc.expect: result is nullptr.
      */
-    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
