@@ -1333,6 +1333,7 @@ private:
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     void CheckTargetPositon(float& correctOffset);
     void UpdateDefaultColor();
+    void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1501,6 +1502,7 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
+    bool isAutoPlayAnimationRunning_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     // Indicates whether previous frame animation is running, only used on swiper custom animation.

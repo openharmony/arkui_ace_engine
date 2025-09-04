@@ -73,6 +73,9 @@ public:
     // app swiper scroll
     static constexpr char APP_SWIPER_SCROLL[] = "APP_SWIPER_SCROLL";
 
+    // auto app swiper fling
+    static constexpr char AUTO_APP_SWIPER_FLING[] = "AUTO_APP_SWIPER_FLING";
+
     // app tab switch
     static constexpr char APP_TAB_SWITCH[] = "APP_TAB_SWITCH";
 
