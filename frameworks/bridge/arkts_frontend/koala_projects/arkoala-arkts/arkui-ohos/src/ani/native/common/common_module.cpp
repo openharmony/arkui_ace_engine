@@ -31,7 +31,6 @@
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
-#include "arkoala/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif
@@ -1110,12 +1109,12 @@ ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src)
 
 void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
-    modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    // modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 
 void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
@@ -1129,12 +1128,12 @@ void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
 
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
-    modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
+    // modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
 }
 
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode)
@@ -1186,25 +1185,25 @@ std::function<void()> ConvertOnThemeScopeDestroyFun(
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
     ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
-    void* fnOnThemeScopeDestroyFun = nullptr;
-    ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-    std::function<void()> onThemeScopeDestroyFun = nullptr;
-    if (onThemeScopeDestroy) {
-        ani_ref onThemeScopeDestroyAniRef = static_cast<ani_ref>(onThemeScopeDestroy);
-        auto onThemeScopeDestroyAni = std::make_shared<CommonModuleCallbackAni>(env, onThemeScopeDestroyAniRef);
-        onThemeScopeDestroyFun = ConvertOnThemeScopeDestroyFun(vm, onThemeScopeDestroyAni);
-    }
-    if (onThemeScopeDestroyFun != nullptr) {
-        fnOnThemeScopeDestroyFun = &onThemeScopeDestroyFun;
-    }
-    modifier->getCommonAniModifier()->createAndBindTheme(
-        env, themeScopeId, themeId, colors, colorMode, fnOnThemeScopeDestroyFun);
+    // const auto* modifier = GetNodeAniModifier();
+    // if (!modifier) {
+    //     return;
+    // }
+    // std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    // void* fnOnThemeScopeDestroyFun = nullptr;
+    // ani_vm* vm = nullptr;
+    // env->GetVM(&vm);
+    // std::shared_ptr<std::function<void()>> onThemeScopeDestroyFun = nullptr;
+    // if (onThemeScopeDestroy) {
+    //     ani_ref onThemeScopeDestroyAniRef = static_cast<ani_ref>(onThemeScopeDestroy);
+    //     auto onThemeScopeDestroyAni = std::make_shared<CommonModuleCallbackAni>(env, onThemeScopeDestroyAniRef);
+    //     onThemeScopeDestroyFun = ConvertOnThemeScopeDestroyFun(vm, onThemeScopeDestroyAni);
+    // }
+    // if (onThemeScopeDestroyFun != nullptr) {
+    //     fnOnThemeScopeDestroyFun = static_cast<void*>(onThemeScopeDestroyFun.get());
+    // }
+    // modifier->getCommonAniModifier()->createAndBindTheme(
+    //     env, themeScopeId, themeId, colors, colorMode, fnOnThemeScopeDestroyFun);
 }
 
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent)

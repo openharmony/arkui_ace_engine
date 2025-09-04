@@ -29,6 +29,7 @@
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 #include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -55,7 +56,7 @@ void* GetPixelMap(ArkUICanvasRenderer peer, ani_double sx, ani_double sy, ani_do
     CHECK_NULL_RETURN(peerImpl, nullptr);
     auto pixelMap = peerImpl->GetPixelMap(sx, sy, sw, sh);
     CHECK_NULL_RETURN(pixelMap, nullptr);
-    PixelMapPeer* pixelMapPeer = new PixelMapPeer();
+    image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
     pixelMapPeer->pixelMap = pixelMap;
     return reinterpret_cast<void*>(pixelMapPeer);
 #else
@@ -72,7 +73,7 @@ void DrawPixelMap0(ArkUICanvasRenderer peer, void* pixelMapPtr, ani_double dx, a
 #if defined(PIXEL_MAP_SUPPORTED)
     auto pixelMap = PixelMap::CreatePixelMap(pixelMapPtr);
     CHECK_NULL_VOID(pixelMap);
-    PixelMapPeer* pixelMapPeer = new PixelMapPeer();
+    image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
     pixelMapPeer->pixelMap = pixelMap;
     GeneratedModifier::CanvasRendererPeerImpl::DrawImageParam params = {
         .dx = static_cast<double>(dx),
@@ -93,7 +94,7 @@ void DrawPixelMap1(
 #if defined(PIXEL_MAP_SUPPORTED)
     auto pixelMap = PixelMap::CreatePixelMap(pixelMapPtr);
     CHECK_NULL_VOID(pixelMap);
-    PixelMapPeer* pixelMapPeer = new PixelMapPeer();
+    image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
     pixelMapPeer->pixelMap = pixelMap;
     GeneratedModifier::CanvasRendererPeerImpl::DrawImageParam params = {
         .dx = static_cast<double>(dx),
@@ -116,7 +117,7 @@ void DrawPixelMap2(ArkUICanvasRenderer peer, void* pixelMapPtr, ani_double sx, a
 #if defined(PIXEL_MAP_SUPPORTED)
     auto pixelMap = PixelMap::CreatePixelMap(pixelMapPtr);
     CHECK_NULL_VOID(pixelMap);
-    PixelMapPeer* pixelMapPeer = new PixelMapPeer();
+    image_PixelMapPeer* pixelMapPeer = new image_PixelMapPeer();
     pixelMapPeer->pixelMap = pixelMap;
     GeneratedModifier::CanvasRendererPeerImpl::DrawImageParam params = {
         .sx = static_cast<double>(sx),
@@ -135,8 +136,7 @@ void DrawPixelMap2(ArkUICanvasRenderer peer, void* pixelMapPtr, ani_double sx, a
 
 ArkUIImageBitmap ImageBitmapConstruct(const std::string& str, void* pixelMapPtr, ArkUI_Int32 unit)
 {
-    auto peer = Referenced::MakeRefPtr<ImageBitmapPeer>();
-    peer->IncRefCount();
+    auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
     if (pixelMapPtr) {
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixelMap = PixelMap::CreatePixelMap(pixelMapPtr);
@@ -146,7 +146,7 @@ ArkUIImageBitmap ImageBitmapConstruct(const std::string& str, void* pixelMapPtr,
     } else {
         peer->SetOptions(str, nullptr, unit);
     }
-    return reinterpret_cast<ArkUIImageBitmap>(Referenced::RawPtr(peer));
+    return reinterpret_cast<ArkUIImageBitmap>(peer);
 }
 
 ani_double GetCanvasDensity(ArkUICanvasRenderer peer)

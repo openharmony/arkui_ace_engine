@@ -20,7 +20,7 @@
 #include "udmf_ani_converter_utils.h"
 #include "utils/ani_utils.h"
 #include "drag_preview.h"
-#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h"
+// #include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h"
 
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -874,8 +874,8 @@ ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
 void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_long thisArray, ani_double thisLength, ani_long dragPreviewPtr)
 {
-    Ark_ResourceColor resourceColor = GetResourceColor(thisArray, thisLength);
-    DragPreview::SetForegroundColor(env, aniClass, resourceColor, dragPreviewPtr);
+    // Ark_ResourceColor resourceColor = GetResourceColor(thisArray, thisLength);
+    // DragPreview::SetForegroundColor(env, aniClass, resourceColor, dragPreviewPtr);
 }
 
 void ANIDragPreviewAnimate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options,
