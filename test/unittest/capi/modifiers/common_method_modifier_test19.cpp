@@ -201,11 +201,6 @@ void AssignArkValue(Ark_FocusMovement& dst, const SetFocusData& src, ConvContext
 
 } // namespace Converter
 
-namespace GeneratedModifier {
-    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
-    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
-}
-
 class CommonMethodModifierTest19 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
     GENERATED_ARKUI_BLANK // test common methods on frameNode for Blank component
