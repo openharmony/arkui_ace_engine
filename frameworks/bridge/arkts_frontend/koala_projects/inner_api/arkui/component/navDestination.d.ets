@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo_stable } from "@koala.runtime.annotations";
+import { memo_stable } from '@koala.runtime.annotations';
 import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
 import { ComponentBase } from 'arkui.ComponentBase';
@@ -213,7 +213,8 @@ export declare class ArkNavDestinationStyle extends ArkCommonMethodStyle impleme
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this;
 }
 
-@memo_stable() export declare class ArkNavDestinationComponent extends ArkCommonMethodComponent implements NavDestinationAttribute {
+@memo_stable() export declare class ArkNavDestinationComponent extends ArkCommonMethodComponent
+        implements NavDestinationAttribute {
     public getPeer(): ArkNavDestinationPeer;
     public setNavDestinationOptions(): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
