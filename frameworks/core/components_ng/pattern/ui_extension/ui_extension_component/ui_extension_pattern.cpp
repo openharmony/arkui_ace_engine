@@ -205,13 +205,17 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
     CHECK_NULL_VOID(context);
     auto newInstanceId = context->GetInstanceId();
     bool isMoving = IsMoving();
+    bool detachContextHappened = hasDetachContext_;
     UIEXT_LOGI("OnAttachContext newInstanceId: %{public}d, oldInstanceId: %{public}d,"
-        " isMoving: %{public}d.", newInstanceId, instanceId_, isMoving);
+        " isMoving: %{public}d, detachContextHappened: %{public}d.",
+        newInstanceId, instanceId_, isMoving, detachContextHappened);
     if (newInstanceId != instanceId_) {
         UnRegisterEvent(instanceId_);
         RegisterEvent(newInstanceId);
         instanceId_ = newInstanceId;
         UpdateSessionInstanceId(newInstanceId);
+    } else if (detachContextHappened) {
+        RegisterEvent(instanceId_);
     }
     /* only for 1.2 begin */
     if (context->GetFrontendType() == FrontendType::ARK_TS) {
