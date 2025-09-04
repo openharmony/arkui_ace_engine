@@ -3161,10 +3161,12 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Ren
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.cpp @arkuiframework
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/module.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/common/common_module.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/common/common_module.h @arkuiframework
 frameworks/core/interfaces/native/ani/common_ani_modifier.h @arkuiframework
 frameworks/core/interfaces/native/ani/common_ani_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/ani/custom_node_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
@@ -3175,6 +3177,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
 frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkuiframework
 frameworks/bridge/arkts_frontend/arkts_frontend.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/transfer/ @arkuiframework
 frameworks/bridge/arkts_frontend/entry/ @arkuiframework
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @arkuievent
