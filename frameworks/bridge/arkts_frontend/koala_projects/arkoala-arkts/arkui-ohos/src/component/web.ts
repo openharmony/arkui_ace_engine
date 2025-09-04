@@ -3158,7 +3158,7 @@ export interface WebKeyboardOptions {
 }
 export interface WebKeyboardCallbackInfo {
     controller: WebKeyboardController;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
