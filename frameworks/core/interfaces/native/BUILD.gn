@@ -196,6 +196,14 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
+    if (ace_engine_feature_wearable) {
+      sources -= [
+        "ani/ani_theme.cpp",
+        "ani/ani_theme_module.cpp",
+        "ani/common_ani_modifier.cpp",
+      ]
+    }
+
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
