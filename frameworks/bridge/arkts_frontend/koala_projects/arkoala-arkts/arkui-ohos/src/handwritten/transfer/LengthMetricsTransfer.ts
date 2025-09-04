@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-import { LengthMetrics, LengthUnit } from "../../Graphics"
-import { int32 } from "@koalaui/common"
+import { LengthMetrics, LengthUnit } from '../../Graphics'
+import { int32 } from '@koalaui/common'
 
 export class LengthMetricsTransfer {
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error("The LengthMetrics is not object convert fail.");
+            throw Error('The LengthMetrics is not object convert fail.');
         }
-        const value = ESValue.wrap(input).getProperty("value").toNumber();
-        const unit = ESValue.wrap(input).getProperty("unit").toNumber();
+        const value = ESValue.wrap(input).getProperty('value').toNumber();
+        const unit = ESValue.wrap(input).getProperty('unit').toNumber();
         let unitInt32 = unit as int32;
         let lengthUnit: LengthUnit = LengthUnit.VP;
         if (unitInt32 >= LengthUnit.PX || unitInt32 <= LengthUnit.LPX) {
@@ -32,21 +32,21 @@ export class LengthMetricsTransfer {
         return sizeInternal;
     }
     static transferDynamic(input: Object): Any {
-        if (input == null) {
-            throw Error("The LengthMetrics is null, convert fail.");
+        if (input === null) {
+            throw Error('The LengthMetrics is null, convert fail.');
         }
-        if (input == undefined) {
-            throw Error("The LengthMetrics is undefined, convert fail.");
+        if (input === undefined) {
+            throw Error('The LengthMetrics is undefined, convert fail.');
         }
         let staticValue = input as LengthMetrics;
-        if (staticValue == null) {
-            throw Error("Not a LengthMetrics object, convert fail.");
+        if (staticValue === null) {
+            throw Error('Not a LengthMetrics object, convert fail.');
         }
-        if (staticValue == undefined) {
-            throw Error("Not a LengthMetrics object, convert fail.");
+        if (staticValue === undefined) {
+            throw Error('Not a LengthMetrics object, convert fail.');
         }
-        let nodeModule = ESValue.load("@ohos.arkui.node");
-        let lengthMetricsModule = nodeModule.getProperty("LengthMetrics");
+        let nodeModule = ESValue.load('@ohos.arkui.node');
+        let lengthMetricsModule = nodeModule.getProperty('LengthMetrics');
         let dynamicValue = lengthMetricsModule.instantiate();
         dynamicValue.setProperty('unit', ESValue.wrap(staticValue.unit.valueOf()));
         dynamicValue.setProperty('value', ESValue.wrap(staticValue.value));
