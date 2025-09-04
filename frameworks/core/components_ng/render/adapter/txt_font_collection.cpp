@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void OnLoadFontFinished(const Rosen::FontCollection* collection, const std::string& name)
+void OnLoadFontFinished(const Rosen::FontCollection* collection, const Rosen::FontEventInfo& info)
 {
     auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
     if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
@@ -26,12 +26,12 @@ void OnLoadFontFinished(const Rosen::FontCollection* collection, const std::stri
     auto loadFinishCallback = FontCollection::Current()->GetLoadFontFinishCallback();
     for (const auto& callback : loadFinishCallback) {
         if (callback) {
-            callback(name);
+            callback(info.familyName);
         }
     }
 }
 
-void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const std::string& name)
+void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const Rosen::FontEventInfo& info)
 {
     auto txtFontCollection = AceType::DynamicCast<TxtFontCollection>(FontCollection::Current());
     if (!txtFontCollection || txtFontCollection->GetRawFontCollection().get() != collection) {
@@ -40,7 +40,7 @@ void OnUnLoadFontFinished(const Rosen::FontCollection* collection, const std::st
     auto unLoadFinishCallback = FontCollection::Current()->GetUnloadFontFinishCallback();
     for (const auto& callback : unLoadFinishCallback) {
         if (callback) {
-            callback(name);
+            callback(info.familyName);
         }
     }
 }
