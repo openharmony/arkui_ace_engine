@@ -21,7 +21,7 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions, WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
@@ -46,6 +46,7 @@ export class ArkUIAniModule {
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(): common.Context
+    native static _Common_SetFrameRateRange(ptr: KPointer, value: ExpectedFrameRateRange, type: KInt): void
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt

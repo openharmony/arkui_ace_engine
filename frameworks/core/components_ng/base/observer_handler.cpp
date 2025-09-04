@@ -126,6 +126,7 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
 {
+    NotifyRouterPageStateChangeForAni(pageInfo, state);
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
     auto container = Container::Current();
@@ -145,6 +146,29 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     std::string pageId = std::to_string(pageInfo->GetPageId());
     RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
     routerPageHandleFunc_(info, routerPageInfo);
+}
+
+void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
+{
+    CHECK_NULL_VOID(pageInfo);
+    CHECK_NULL_VOID(routerPageHandleFuncForAni_);
+    auto container = Container::CurrentSafelyWithCheck();
+    if (!container) {
+        LOGW("notify router event failed, current UI instance invalid");
+        return;
+    }
+    napi_value context = GetUIContextValue();
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        container->GetModuleName()
+    };
+    int32_t index = pageInfo->GetPageIndex();
+    std::string name = pageInfo->GetPageUrl();
+    std::string path = pageInfo->GetPagePath();
+    std::string pageId = std::to_string(pageInfo->GetPageId());
+    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    routerPageHandleFuncForAni_(info, routerPageInfo);
 }
 
 void UIObserverHandler::NotifyDensityChange(double density)
@@ -451,6 +475,11 @@ void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc fun
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 {
     routerPageHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func)
+{
+    routerPageHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
