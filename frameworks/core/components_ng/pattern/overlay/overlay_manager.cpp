@@ -875,6 +875,9 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
         currentId = pipeline ? pipeline->GetInstanceId() : currentId;
     }
 
+    auto topOrderNode = GetTopOrderNode();
+    auto topFocusableNode = GetTopFocusableNode();
+    PopLevelOrder(node->GetId());
     ContainerScope scope(currentId);
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
@@ -883,6 +886,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
         node->GetId(), root->GetId());
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FocusNextOrderNode(topFocusableNode);
+    SendAccessibilityEventToNextOrderNode(topOrderNode);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
         auto dialogProps = AceType::DynamicCast<DialogLayoutProperty>(node->GetLayoutProperty());
@@ -4028,9 +4033,6 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
 {
     CHECK_NULL_VOID(dialogNode);
     RemoveDialogFromMap(dialogNode);
-    auto topOrderNode = GetTopOrderNode();
-    auto topFocusableNode = GetTopFocusableNode();
-    PopLevelOrder(dialogNode->GetId());
     if (dialogNode->IsRemoving()) {
         // already in close animation
         TAG_LOGW(AceLogTag::ACE_DIALOG, "dialogNode/%{public}d is removing", dialogNode->GetId());
@@ -4075,8 +4077,6 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     FireNavigationLifecycle(dialogNode, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
         static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     CallOnHideDialogCallback();
-    FocusNextOrderNode(topFocusableNode);
-    SendAccessibilityEventToNextOrderNode(topOrderNode);
 }
 
 RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(int32_t containerId)
