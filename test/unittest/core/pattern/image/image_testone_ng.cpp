@@ -29,7 +29,7 @@ public:
  * @tc.name: ImageColorFilterTest002
  * @tc.desc: Test image ColorFilter for jpg is set correctly.
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
 {
     /**
@@ -44,7 +44,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(ALT_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -103,7 +104,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -162,7 +164,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -218,7 +221,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(ALT_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -261,7 +265,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -304,7 +309,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -345,12 +351,13 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level0)
     RefPtr<PixelMap> pixMap = nullptr;
     /**
      * set web picture
-    */
+     */
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -393,7 +400,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -403,7 +411,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set blue fillcolor
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageFill(Color::BLUE);
@@ -412,11 +420,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the color is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
     frameNode->MarkModifyDone();
     auto renderContext = frameNode->GetRenderContext();
@@ -425,9 +433,9 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set blue fillcolor
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set blue fillcolor
+     */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
@@ -446,11 +454,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the color is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
     frameNode->MarkModifyDone();
 
@@ -475,7 +483,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -485,7 +494,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set smoothedge
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetSmoothEdge(true);
@@ -494,20 +503,20 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the smoothedge is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetSmoothEdge().value_or(0.0f), true);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set smoothedge
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set smoothedge
+     */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
@@ -526,11 +535,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the smoothedge is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetSmoothEdge().value_or(0.0f), true);
     frameNode->MarkModifyDone();
 
@@ -555,7 +564,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -614,7 +624,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetSyncMode(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -672,7 +683,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -682,7 +694,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set rendermode
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageRenderMode(IMAGE_RENDERMODE_DEFAULT);
@@ -691,20 +703,20 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the rendermode is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), IMAGE_NO_RENDERMODE);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set rendermode
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set rendermode
+     */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
@@ -723,11 +735,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the rendermode is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), IMAGE_NO_RENDERMODE);
     frameNode->MarkModifyDone();
 
@@ -752,7 +764,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -771,7 +784,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set imagefit
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
@@ -780,20 +793,20 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the imagefit is set
-    */
+     */
     EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
-   /**
-    * Creating a colorfilter through a graphical interface
-    * Set imagefit
-    */
+    /**
+     * Creating a colorfilter through a graphical interface
+     * Set imagefit
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
@@ -801,12 +814,13 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the imagefit is set
-    */
-    EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);;
+     */
+    EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
+    ;
     frameNode->MarkModifyDone();
 
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
@@ -830,7 +844,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -843,7 +858,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set blue fillcolor
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageFill(Color::BLUE);
@@ -856,10 +871,10 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
-   /**
-    * Creating a colorfilter through a graphical interface
-    * Set red fillcolor
-    */
+    /**
+     * Creating a colorfilter through a graphical interface
+     * Set red fillcolor
+     */
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
     ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
@@ -899,7 +914,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -958,7 +974,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1005,7 +1022,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1024,7 +1042,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set ImageSourceSize
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageSourceSize({ Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
@@ -1036,11 +1054,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
     ASSERT_NE(imageLayoutProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the ImageSourceSize is set
-    */
+     */
     EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(),
         SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));
@@ -1049,20 +1067,20 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set ImageSourceSize
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set ImageSourceSize
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
     image.SetImageSourceSize({ Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the ImageSourceSize is set
-    */
+     */
     EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(),
         SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));
@@ -1086,7 +1104,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -1133,7 +1152,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1146,7 +1166,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set ImageInterpolation
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageInterpolation(IMAGE_NO_INTERPOLATION);
@@ -1160,9 +1180,9 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set ImageInterpolation
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set ImageInterpolation
+     */
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
     ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
@@ -1202,7 +1222,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1221,7 +1242,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set ImageRepeat
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetImageRepeat(IMAGE_NO_REPEAT);
@@ -1233,31 +1254,31 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
     ASSERT_NE(imageLayoutProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the ImageRepeat is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), IMAGE_NO_REPEAT);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set ImageRepeat
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set ImageRepeat
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
     image.SetImageRepeat(IMAGE_NO_REPEAT);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the ImageRepeat is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), IMAGE_NO_REPEAT);
     frameNode->MarkModifyDone();
 
@@ -1282,7 +1303,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1301,7 +1323,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set MatchTextDirection
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetMatchTextDirection(MATCHTEXTDIRECTION_DEFAULT);
@@ -1313,31 +1335,31 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
     ASSERT_NE(imageLayoutProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the MatchTextDirection is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().value(), MATCHTEXTDIRECTION_DEFAULT);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set MatchTextDirection
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set MatchTextDirection
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
     image.SetMatchTextDirection(MATCHTEXTDIRECTION_DEFAULT);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the MatchTextDirection is set
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().value(), MATCHTEXTDIRECTION_DEFAULT);
     frameNode->MarkModifyDone();
 
@@ -1362,7 +1384,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1381,7 +1404,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set CopyOption
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
@@ -1393,31 +1416,31 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level0)
     ASSERT_NE(imageLayoutProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the CopyOption is set
-    */
+     */
     EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->copyOption_, COPYOPTIONS_DEFAULT);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set CopyOption
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set CopyOption
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the CopyOption is set
-    */
+     */
     EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->copyOption_, COPYOPTIONS_DEFAULT);
     frameNode->MarkModifyDone();
 
@@ -1442,7 +1465,8 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1461,7 +1485,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level0)
     /**
      * Colorfilter in default array form
      * Set AutoResize
-    */
+     */
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
@@ -1473,31 +1497,31 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level0)
     ASSERT_NE(imageLayoutProperty, nullptr);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     /**
      * Check if the AutoResize is set
-    */
+     */
     EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), AUTORESIZE_DEFAULT);
     frameNode->MarkModifyDone();
     /**
      * @tc.steps: step3. set drawingcolorFilter.
      */
     /**
-    * Creating a colorfilter through a graphical interface
-    * Set AutoResize
-    */
+     * Creating a colorfilter through a graphical interface
+     * Set AutoResize
+     */
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     image.SetDrawingColorFilter(drawingColorFilter);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
     /**
      * Check if the colorfilter is set correctly
-    */
+     */
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
     /**
      * Check if the AutoResize is set
-    */
+     */
     EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), AUTORESIZE_DEFAULT);
     frameNode->MarkModifyDone();
 
@@ -1506,7 +1530,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest024, TestSize.Level0)
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
 
-void ImageModelNGTest001_SetLayoutProperty01(ImageModelNG &image)
+void ImageModelNGTest001_SetLayoutProperty01(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     auto imageTestData = string("imageTestData");
@@ -1521,7 +1545,7 @@ void ImageModelNGTest001_SetLayoutProperty01(ImageModelNG &image)
 
     auto imageSourceInfo_ = imageSourceInfo.value();
     ImageModelNG::SetAlt(frameNode, imageSourceInfo_);
-    auto &&imageSourceInfoAlt = ImageModelNG::GetAlt(frameNode);
+    auto&& imageSourceInfoAlt = ImageModelNG::GetAlt(frameNode);
     ASSERT_EQ(imageSourceInfoAlt.GetModuleName(), MODULE_NAME);
     ASSERT_EQ(imageSourceInfoAlt.GetSrc(), IMAGE_SRC_URL);
 
@@ -1542,7 +1566,7 @@ void ImageModelNGTest001_SetLayoutProperty01(ImageModelNG &image)
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));
 }
 
-void ImageModelNGTest001_SetRenderProperty01(ImageModelNG &image)
+void ImageModelNGTest001_SetRenderProperty01(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     ImageModelNG::SetAlt(frameNode, ImageSourceInfo { RESOURCE_URL });
@@ -1586,7 +1610,7 @@ void ImageModelNGTest001_SetRenderProperty01(ImageModelNG &image)
     EXPECT_EQ(imageRenderProperty->GetSmoothEdge().value(), smoothEdge);
 }
 
-void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
+void ImageModelNGTest001_MixedProperties01(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     ImageModelNG::SetImageFill(frameNode, Color::BLUE);
@@ -1637,19 +1661,19 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
     EXPECT_EQ(failEvent.GetComponentHeight(), loadImageFailEvent.GetComponentHeight());
 }
 
-void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
+void ImageModelNGTest001_MixedProperties02(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto finishEventData = RADIUS_DEFAULT;
-    auto finishEventCls = [&finishEventData]() { finishEventData = RADIUS_EXTREME;};
+    auto finishEventCls = [&finishEventData]() { finishEventData = RADIUS_EXTREME; };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(finishEventCls));
     eventHub->FireFinishEvent();
     EXPECT_EQ(finishEventData, RADIUS_EXTREME);
 
-    auto finishEventIns = [&finishEventData]() { finishEventData = RADIUS_DEFAULT;};
+    auto finishEventIns = [&finishEventData]() { finishEventData = RADIUS_DEFAULT; };
     image.SetSvgAnimatorFinishEvent(std::move(finishEventIns));
     eventHub->FireFinishEvent();
     EXPECT_EQ(finishEventData, RADIUS_DEFAULT);
@@ -1682,7 +1706,7 @@ void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
     ImageModelNG::SetBackBorder(frameNode);
 }
 
-void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
+void ImageModelNGTest001_MixedProperties03(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     ImageModelNG::SetSyncMode(frameNode, SYNCMODE_DEFAULT);
@@ -1715,7 +1739,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
     EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
 }
 
-void ImageModelNGTest001_MixedProperties04(ImageModelNG &image)
+void ImageModelNGTest001_MixedProperties04(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     ImageModelNG::SetMatchTextDirection(frameNode, true);
@@ -1739,9 +1763,9 @@ void ImageModelNGTest001_MixedProperties04(ImageModelNG &image)
     EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(frameNode), DynamicRangeMode::HIGH);
     EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(nullptr), DynamicRangeMode::STANDARD);
 
-    ImageModelNG::SetHdrBrightness(frameNode, 0.8f); // 0.8 means brightness of the picture
+    ImageModelNG::SetHdrBrightness(frameNode, 0.8f);                  // 0.8 means brightness of the picture
     EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(frameNode), 0.8f); // 0.8 means brightness of the picture
-    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(nullptr), 1.0f); // 1.0 means default brightness of the picture
+    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(nullptr), 1.0f);   // 1.0 means default brightness of the picture
 
     ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::RIGHT);
     EXPECT_EQ(ImageModelNG::GetOrientation(frameNode), ImageRotateOrientation::RIGHT);
@@ -1750,10 +1774,10 @@ void ImageModelNGTest001_MixedProperties04(ImageModelNG &image)
     auto pairSize = std::make_pair(Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT));
     ImageModelNG::SetImageSourceSize(frameNode, pairSize);
     auto resultSourceSize = ImageModelNG::GetImageSourceSize(frameNode);
-    EXPECT_FLOAT_EQ(resultSourceSize.first.ConvertToPx(),
-        static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()));
-    EXPECT_FLOAT_EQ(resultSourceSize.second.ConvertToPx(),
-        static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx()));
+    EXPECT_FLOAT_EQ(
+        resultSourceSize.first.ConvertToPx(), static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()));
+    EXPECT_FLOAT_EQ(
+        resultSourceSize.second.ConvertToPx(), static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx()));
 
     Matrix4 matrix4DefaultValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
     Matrix4 matrix4Value = Matrix4(1.0f, 1.0f, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
@@ -1775,7 +1799,8 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto [frameNode, v1, v2, v3] = GetCompoment();
     ImageModelNGTest001_SetLayoutProperty01(image);
@@ -1813,15 +1838,15 @@ HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level0)
     EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_Y), "REPEAT_Y");
 }
 
-void ImageModelNGFailedTest001_Properties01(ImageModelNG &image)
+void ImageModelNGFailedTest001_Properties01(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     /**
      * pop node
      * All of the following property settings will fail
-    */
+     */
     auto uiNodes = PopUINodes();
-    FrameNode *frameNodeNull = nullptr;
+    FrameNode* frameNodeNull = nullptr;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     EXPECT_EQ(imageLayoutProperty->GetAlt().has_value(), false);
 
@@ -1868,15 +1893,15 @@ void ImageModelNGFailedTest001_Properties01(ImageModelNG &image)
     PushUINodes(uiNodes);
 }
 
-void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
+void ImageModelNGFailedTest001_Properties02(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     /**
      * pop node
      * All of the following property settings will fail
-    */
+     */
     auto uiNodes = PopUINodes();
-    FrameNode *frameNodeNull = nullptr;
+    FrameNode* frameNodeNull = nullptr;
     auto imageName = RESOURCE_URL;
     ImageModelNG::InitImage(frameNodeNull, imageName);
     image.SetFitOriginSize(true);
@@ -1926,15 +1951,15 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     PushUINodes(uiNodes);
 }
 
-void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
+void ImageModelNGFailedTest001_Properties03(ImageModelNG& image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
     /**
      * pop node
      * All of the following property settings will fail
-    */
+     */
     auto uiNodes = PopUINodes();
-    FrameNode *frameNodeNull = nullptr;
+    FrameNode* frameNodeNull = nullptr;
 
     image.SetImageInterpolation(ImageInterpolation::HIGH);
     EXPECT_EQ(imageRenderProperty->GetImageInterpolation().has_value(), false);
@@ -1996,7 +2021,8 @@ HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto [frameNode, v1, v2, v3] = GetCompoment();
     ImageModelNGFailedTest001_Properties01(image);
@@ -2018,7 +2044,8 @@ HWTEST_F(ImageTestOneNg, ImageImageInterpolation001, TestSize.Level1)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
@@ -2066,7 +2093,8 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

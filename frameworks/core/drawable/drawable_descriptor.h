@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H
+
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
@@ -23,6 +24,11 @@ enum class DrawableType {
     LAYERED,
     ANIMATED,
     PIXELMAP,
+};
+
+struct MediaData {
+    std::unique_ptr<uint8_t[]> data;
+    size_t len = 0;
 };
 
 class ACE_FORCE_EXPORT DrawableDescriptor : public AceType {
@@ -44,4 +50,5 @@ private:
     virtual void CreatePixelMap() {}
 };
 }; // namesapce OHOS::Ace
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H

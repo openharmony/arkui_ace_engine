@@ -86,10 +86,10 @@ if (is_arkui_x) {
       "base/source_info.cpp",
       "core/pixelmap_drawable_descriptor.cpp",
       "drawable_descriptor.cpp",
+      "js_drawable_descriptor.cpp",
       "loader/file_image_loader.cpp",
       "loader/image_loader.cpp",
       "loader/resource_image_loader.cpp",
-      "new_js_drawable_descriptor.cpp",
       "utils/napi_utils.cpp",
       "utils/resource_manager.cpp",
     ]

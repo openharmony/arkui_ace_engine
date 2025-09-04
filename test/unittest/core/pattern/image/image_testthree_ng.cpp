@@ -38,7 +38,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0024, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -52,7 +53,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0024, TestSize.Level0)
      */
     EXPECT_TRUE(imagePattern->images_.size() == 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -90,7 +91,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0025, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -104,7 +106,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0025, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -142,7 +144,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -156,7 +159,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -194,7 +197,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0027, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -208,7 +212,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0027, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->durationTotal_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -246,7 +250,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0028, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -260,7 +265,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0028, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->nowImageIndex_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -298,7 +303,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0029, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -312,7 +318,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0029, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->isSrcUndefined_, false);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -350,7 +356,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -364,7 +371,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -420,13 +427,14 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0031, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
 
-    //切换Image数据源
+    // 切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -472,13 +480,14 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0032, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 
-    //切换Image数据源
+    // 切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -524,13 +533,14 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0033, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->durationTotal_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -576,13 +586,14 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0034, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->nowImageIndex_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -610,7 +621,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0035, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -624,7 +636,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0035, TestSize.Level0)
      */
     EXPECT_EQ(frameNode->GetChildren().empty(), true);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -664,7 +676,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0036, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -678,7 +691,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0036, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -716,7 +729,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0037, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -730,7 +744,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0037, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -768,7 +782,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0038, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -776,13 +791,13 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0038, TestSize.Level0)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
 
-        /**
+    /**
      * @tc.steps: step1. Test images size
      * @tc.expected: 0
      */
     EXPECT_TRUE(imagePattern->images_.size() == 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -820,7 +835,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0039, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -834,7 +850,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0039, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -872,7 +888,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -886,7 +903,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -924,7 +941,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0041, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -938,7 +956,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0041, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->durationTotal_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -976,7 +994,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0042, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -990,7 +1009,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0042, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->nowImageIndex_, 0);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -1028,7 +1047,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0043, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1042,7 +1062,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0043, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->isSrcUndefined_, false);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -1080,7 +1100,8 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1094,7 +1115,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level0)
      */
     EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 
-    //切换Image数据源
+    // 切换Image数据源
     std::vector<ImageProperties> images;
     for (int32_t index = 0; index < 10; index++) {
         ImageProperties imageProperties;
@@ -1801,9 +1822,7 @@ void ImagePatternMethods01()
 
     imagePattern->SetDuration(1);
     int testData = 0;
-    std::function onProgress = [&testData](const uint32_t&, const uint32_t&) {
-        testData = 1;
-    };
+    std::function onProgress = [&testData](const uint32_t&, const uint32_t&) { testData = 1; };
     imagePattern->SetOnProgressCallback(std::move(onProgress));
     imagePattern->onProgressCallback_(uint32_t(0), uint32_t(1));
     EXPECT_EQ(testData, 1);
@@ -1813,7 +1832,7 @@ void ImagePatternMethods01()
     eventHub->defaultOnDragStart_(dragEvent, string(""));
     EXPECT_EQ(dragEvent->GetData(), nullptr);
 
-    std::vector<float> matrix = {1.1f};
+    std::vector<float> matrix = { 1.1f };
     ImageModelNG::SetColorFilterMatrix(frameNode, matrix);
     imagePattern->SetColorFilter(frameNodePtr);
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), matrix);
@@ -2234,6 +2253,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level0)
      */
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
@@ -2243,7 +2263,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level0)
     imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = false;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     EXPECT_NE(res, imageType);
 }
 
@@ -2272,6 +2292,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level0)
      */
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
@@ -2279,7 +2300,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level0)
     auto imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = true;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     EXPECT_NE(res, imageType);
 }
 

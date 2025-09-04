@@ -32,8 +32,6 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void DrawDrawable(DrawingContext& drawingContext);
-
     void SetSensitive(bool sensitive)
     {
         CHECK_NULL_VOID(sensitive_);

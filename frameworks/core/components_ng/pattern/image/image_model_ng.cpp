@@ -76,7 +76,7 @@ void SetFrameNodeDraggable(RefPtr<FrameNode>& frameNode, bool isImageSpan)
     }
 }
 
-void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap)
+void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -93,15 +93,15 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
+    if (src.empty() && !imageInfoConfig.pixelMap && pattern->GetIsAnimation()) {
         pattern->SetSrcUndefined(true);
         return;
     }
 
     // set draggable for framenode
     SetFrameNodeDraggable(frameNode, imageInfoConfig.isImageSpan);
-    auto srcInfo =
-        CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
+    auto srcInfo = CreateSourceInfo(
+        imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
     srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
 
     if (pattern->GetImageType() != ImageType::BASE) {
@@ -1331,7 +1331,7 @@ void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const R
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CreateWithResourceObj(frameNode , resourceType, resObj);
+    CreateWithResourceObj(frameNode, resourceType, resObj);
 }
 
 void ImageModelNG::CreateWithResourceObj(

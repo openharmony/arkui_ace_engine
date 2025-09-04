@@ -60,7 +60,8 @@ RefPtr<FrameNode> ImageBases::CreateImageNode(const std::string& src, const std:
     imageInfoConfig.src = std::make_shared<std::string>(src);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { alt });
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -78,7 +79,8 @@ RefPtr<FrameNode> ImageBases::CreateImageNodeWithDefaultProp(
     imageInfoConfig.src = std::make_shared<std::string>(src);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { alt });
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
@@ -103,7 +105,8 @@ RefPtr<FrameNode> ImageBases::CreateSyncImageNode()
     imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -118,7 +121,8 @@ RefPtr<FrameNode> ImageBases::CreateSyncWebImageNode()
     imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -128,7 +132,7 @@ RefPtr<FrameNode> ImageBases::CreateSyncWebImageNode()
 std::vector<RefPtr<UINode>> PopUINodes()
 {
     std::vector<RefPtr<UINode>> vec;
-    auto *stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     for (auto uiNode = stack->Finish(); uiNode != nullptr;) {
         vec.push_back(uiNode);
         uiNode = stack->Finish();
@@ -136,7 +140,7 @@ std::vector<RefPtr<UINode>> PopUINodes()
     return vec;
 }
 
-void PushUINodes(std::vector<RefPtr<UINode>> &vec)
+void PushUINodes(std::vector<RefPtr<UINode>>& vec)
 {
     for (auto it = vec.rbegin(); it != vec.rend(); ++it) {
         ViewStackProcessor::GetInstance()->Push(*it);

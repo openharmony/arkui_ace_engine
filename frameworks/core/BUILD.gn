@@ -296,6 +296,12 @@ template("ace_core_source_set") {
 
       # force split
       "common/force_split/force_split_utils.cpp",
+
+      # drawable
+      "drawable/animated_drawable_descriptor.cpp",
+      "drawable/drawable_descriptor.cpp",
+      "drawable/layered_drawable_descriptor.cpp",
+      "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {

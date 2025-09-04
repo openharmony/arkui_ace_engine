@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_LAYERED_DRAWABLE_DESCRIPTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_LAYERED_DRAWABLE_DESCRIPTOR_H
 
-#include <vector>
+#include <memory>
 
 #include "core/drawable/drawable_descriptor.h"
 
@@ -50,19 +50,22 @@ public:
         mask_ = mask;
     }
 
-    void SetForegroundData(const std::vector<uint8_t>& data)
+    void SetForegroundData(uint8_t* data, size_t len)
     {
-        foregroundData_ = data;
+        foregroundData_.data.reset(data);
+        foregroundData_.len = len;
     }
 
-    void SetBackgroundData(const std::vector<uint8_t>& data)
+    void SetBackgroundData(uint8_t* data, size_t len)
     {
-        backgroundData_ = data;
+        backgroundData_.data.reset(data);
+        backgroundData_.len = len;
     }
 
-    void SetMaskData(const std::vector<uint8_t>& data)
+    void SetMaskData(uint8_t* data, size_t len)
     {
-        maskData_ = data;
+        maskData_.data.reset(data);
+        maskData_.len = len;
     }
 
     void SetMaskPath(const std::string& path)
@@ -92,13 +95,14 @@ private:
     bool CreateMaskByData();
 
     std::string maskPath_;
-    std::vector<uint8_t> foregroundData_;
-    std::vector<uint8_t> backgroundData_;
-    std::vector<uint8_t> maskData_;
+    MediaData foregroundData_;
+    MediaData backgroundData_;
+    MediaData maskData_;
     RefPtr<PixelMap> foreground_;
     RefPtr<PixelMap> background_;
     RefPtr<PixelMap> mask_;
     RefPtr<PixelMap> composePixelMap_;
 };
 } // namespace OHOS::Ace
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_LAYERED_DRAWABLE_DESCRIPTOR_H

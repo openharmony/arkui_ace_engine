@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PIXEL_MAP_DRAWABLE_DESCRIPTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PIXEL_MAP_DRAWABLE_DESCRIPTOR_H
 
-#include <vector>
+#include <memory>
 
 #include "core/drawable/drawable_descriptor.h"
 
@@ -25,7 +24,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PixelMapDrawableDescriptor : public DrawableDescriptor {
 public:
     PixelMapDrawableDescriptor() = default;
-    explicit PixelMapDrawableDescriptor(const RefPtr<PixelMap>& pixelmap): pixelmap_(pixelmap) {}
+    explicit PixelMapDrawableDescriptor(const RefPtr<PixelMap>& pixelmap) : pixelmap_(pixelmap) {}
     ~PixelMapDrawableDescriptor() = default;
 
     RefPtr<PixelMap> GetPixelMap() override;
@@ -40,17 +39,18 @@ public:
         return DrawableType::PIXELMAP;
     }
 
-    void SetRawData(const std::vector<uint8_t>& data)
+    void SetRawData(uint8_t* data, size_t len)
     {
-        rawData_ = data;
+        rawData_.data.reset(data);
+        rawData_.len = len;
     }
 
 private:
     void CreatePixelMap() override;
 
-    std::vector<uint8_t> rawData_;
+    MediaData rawData_;
     RefPtr<PixelMap> pixelmap_;
 };
-}; // namesapce OHOS::Ace
+}; // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PIXEL_MAP_DRAWABLE_DESCRIPTOR_H

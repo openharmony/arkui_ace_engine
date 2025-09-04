@@ -22,7 +22,6 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/dimension.h"
-#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -41,7 +40,9 @@ namespace OHOS::Ace {
 enum class ImageResourceType { SRC, ALT, FILL_COLOR, BORDER_RADIUS };
 
 struct ACE_FORCE_EXPORT ImageInfoConfig {
+    ImageType type = ImageType::BASE;
     std::shared_ptr<std::string> src;
+    RefPtr<PixelMap> pixelMap;
     std::string bundleName;
     std::string moduleName;
     bool isUriPureNumber = false;
@@ -52,9 +53,7 @@ class ACE_FORCE_EXPORT ImageModel {
 public:
     static ImageModel* GetInstance();
     virtual ~ImageModel() = default;
-    virtual void Create(const RefPtr<DrawableDescriptor>& drawable) {}
-    virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
-
+    virtual void Create(ImageInfoConfig& imageInfoConfig) = 0;
     virtual void SetAlt(const ImageSourceInfo& src) = 0;
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
