@@ -45,7 +45,7 @@ export class DeserializerBase implements Disposable {
             const newBuffer = InteropNativeModule._Malloc(length)
             this._isOwnBuffer = true
             for (let i = 0; i < length; i++) {
-                unsafeMemory.writeInt8(newBuffer + i, buffer[i] as byte)
+                unsafeMemory.writeInt8(newBuffer + i, buffer[i].toByte())
             }
             this._buffer = newBuffer
         } else {
@@ -169,24 +169,16 @@ export class DeserializerBase implements Disposable {
         return value == 1
     }
 
-    final readFunction(): int32 {
-        return this.readInt32()
-    }
-
     final readCallbackResource(): CallbackResource {
-        return ({
+        return {
             resourceId: this.readInt32(),
             hold: this.readPointer(),
             release: this.readPointer(),
-        } as CallbackResource)
+        }
     }
 
     final readString(): string {
         const encodedLength = this.readInt32();
-        if (encodedLength <= 0) {
-            throw new Error(`value size(${encodedLength}) is equal or less than zero`)
-        }
-
         const pos = this._position
         const newPos = pos + encodedLength
 
@@ -214,13 +206,13 @@ export class DeserializerBase implements Disposable {
 
     final readNumber(): number | undefined {
         const pos = this._position
-        const tag = this.readInt8() as int
+        const tag = this.readInt8().toInt()
         switch (tag) {
-            case Tags.UNDEFINED as int:
+            case Tags.UNDEFINED.valueOf():
                 return undefined;
-            case Tags.INT32  as int:
+            case Tags.INT32.valueOf():
                 return this.readInt32()
-            case Tags.FLOAT32  as int:
+            case Tags.FLOAT32.valueOf():
                 return this.readFloat32()
             default:
                 throw new Error(`Unknown number tag: ${tag}`)
@@ -232,12 +224,12 @@ export class DeserializerBase implements Disposable {
         return ResourceHolder.instance().get(resource.resourceId)
     }
 
-    final readBuffer(): NativeBuffer {
+    final readBuffer(): ArrayBuffer {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
         InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
-        return new NativeBuffer(data, length, resource.release)
+        return InteropNativeModule._MaterializeBuffer(data, length, resource.resourceId, resource.hold, resource.release)
     }
 }
 

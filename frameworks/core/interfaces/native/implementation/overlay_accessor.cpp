@@ -67,7 +67,6 @@ void SetOverlayAttributeImpl(Ark_NativePointer node, const Opt_Union_String_Cust
         [frameNode, &overlay]() {
             RefPtr<NG::UINode> node = nullptr;
             ViewAbstract::SetOverlayBuilder(frameNode, nullptr, overlay.align, overlay.x, overlay.y);
-            ViewAbstract::SetOverlay(frameNode, overlay);
         });
 }
 } // DragDropOpsAccessor

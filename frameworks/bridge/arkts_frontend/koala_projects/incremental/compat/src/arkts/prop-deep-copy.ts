@@ -20,5 +20,5 @@
  */
 
 export function propDeepCopy<T>(sourceObject: T): T {
-    return deepcopy<T>(sourceObject) as T;
+    return deepcopy<T>(sourceObject) as T
 }

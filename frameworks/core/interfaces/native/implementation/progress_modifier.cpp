@@ -72,7 +72,9 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
     // showDefaultPercentage
     ProgressModelStatic::SetShowText(frameNode, Converter::OptConvert<bool>(options.showDefaultPercentage));
     // content
+#ifdef WRONG_GEN
     ProgressModelStatic::SetText(frameNode, Converter::OptConvert<std::string>(options.content));
+#endif
     // fontColor
     ProgressModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(options.fontColor));
     // font
@@ -134,9 +136,6 @@ ProgressOptions Convert(const Ark_ProgressOptions& src)
     }
     // type
     auto type = Converter::OptConvert<ProgressType>(src.type);
-    if (!type.has_value()) {
-        type = Converter::OptConvert<ProgressType>(src.style);
-    }
     if (type) {
         options.type = type.value();
     }
@@ -215,20 +214,20 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
 }
 } // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {
-void ValueImpl(Ark_NativePointer node,
-               const Opt_Number* value)
+void SetValueImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<double>(*value);
+    auto convValue = Converter::OptConvertPtr<double>(value);
     if (!convValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     ProgressModelNG::SetValue(frameNode, *convValue);
 }
-void ColorImpl(Ark_NativePointer node,
-               const Opt_Union_ResourceColor_LinearGradient* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_Union_ResourceColor_LinearGradient* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -254,12 +253,12 @@ void ColorImpl(Ark_NativePointer node,
         [frameNode](const Ark_LinearGradient& linearGradient) {
             ProgressModelStatic::SetGradientColor(frameNode, Converter::OptConvert<Gradient>(linearGradient));
         },
-        // TODO: Reset value
+        // Implement Reset value
         []() {}
     );
 }
-void StyleImpl(Ark_NativePointer node,
-               const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
+void SetStyleImpl(Ark_NativePointer node,
+                  const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -276,27 +275,17 @@ void StyleImpl(Ark_NativePointer node,
         [frameNode](const Ark_ProgressStyleOptions& options) {
             g_setProgressStyle(frameNode, options);
         },
-        // TODO: Reset value
+        // Implement Reset value
         []() {}
     );
 }
-void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     ProgressModelStatic::SetPrivacySensitive(frameNode, convValue);
-}
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ProgressModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("ARKOALA ProgressInterfaceModifier::ContentModifierImpl -> Method is not implemented.");
 }
 } // ProgressAttributeModifier
 const GENERATED_ArkUIProgressModifier* GetProgressModifier()
@@ -304,11 +293,10 @@ const GENERATED_ArkUIProgressModifier* GetProgressModifier()
     static const GENERATED_ArkUIProgressModifier ArkUIProgressModifierImpl {
         ProgressModifier::ConstructImpl,
         ProgressInterfaceModifier::SetProgressOptionsImpl,
-        ProgressAttributeModifier::ValueImpl,
-        ProgressAttributeModifier::ColorImpl,
-        ProgressAttributeModifier::StyleImpl,
-        ProgressAttributeModifier::PrivacySensitiveImpl,
-        ProgressAttributeModifier::ContentModifierImpl,
+        ProgressAttributeModifier::SetValueImpl,
+        ProgressAttributeModifier::SetColorImpl,
+        ProgressAttributeModifier::SetStyleImpl,
+        ProgressAttributeModifier::SetPrivacySensitiveImpl,
     };
     return &ArkUIProgressModifierImpl;
 }

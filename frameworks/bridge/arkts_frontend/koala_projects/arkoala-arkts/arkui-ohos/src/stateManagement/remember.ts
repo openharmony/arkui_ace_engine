@@ -21,17 +21,17 @@ import {
     StateManagerImpl,
     StateContext,
     GlobalStateManager,
-    Dependencies,
+    StateToScopes,
 } from '@koalaui/runtime';
 import { MemoState } from './memorize/state';
 
 export class CascadeMemoState<Value> implements MemoState<Value> {
     private manager: StateManagerImpl | undefined = undefined;
     private _value: Value;
-    public dependencies: Dependencies | undefined = undefined;
+    public dependencies: StateToScopes | undefined = undefined;
 
     constructor(manager: StateContext) {
-        this.dependencies = new Dependencies();
+        this.dependencies = new StateToScopes();
         this.manager = manager as StateManagerImpl;
     }
 
@@ -46,7 +46,7 @@ export class CascadeMemoState<Value> implements MemoState<Value> {
 
     set value(value: Value) {
         this._value = value;
-        this.dependencies?.updateDependencies(true);
+        this.dependencies?.invalidate();
     }
 
     dispose(): void {

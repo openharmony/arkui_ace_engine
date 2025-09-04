@@ -20,21 +20,21 @@
 #include "interop-types.h"
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
-static const char* callCallbackFromNativeSig = "IJI:I";
+static const char* callCallbackFromNativeSig = "ili:i";
 
 const bool registerByOne = true;
 
 static bool registerNatives(ani_env *env, const ani_class clazz, const std::vector<std::tuple<std::string, std::string, void*, int>> impls) {
-    std::vector<ani_native_function> staticMethods;
-    staticMethods.reserve(impls.size());
+    std::vector<ani_native_function> methods;
+    methods.reserve(impls.size());
     bool result = true;
     for (const auto &[name, type, func, flag] : impls) {
-        ani_native_function staticMethod;
-        staticMethod.name = name.c_str();
-        staticMethod.pointer = func;
-        staticMethod.signature = nullptr;
+        ani_native_function method;
+        method.name = name.c_str();
+        method.pointer = func;
+        method.signature = nullptr;
         if (registerByOne) {
-            result &= env->Class_BindStaticNativeMethods(clazz, &staticMethod, 1) == ANI_OK;
+            result &= env->Class_BindStaticNativeMethods(clazz, &method, 1) == ANI_OK;
             ani_boolean isError = false;
             CHECK_ANI_FATAL(env->ExistUnhandledError(&isError));
             if (isError) {
@@ -43,12 +43,11 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
             }
         }
         else {
-            staticMethods.push_back(staticMethod);
+            methods.push_back(method);
         }
     }
     if (!registerByOne) {
-        result = env->Class_BindStaticNativeMethods(
-            clazz, staticMethods.data(), static_cast<ani_size>(staticMethods.size())) == ANI_OK;
+        result = env->Class_BindStaticNativeMethods(clazz, methods.data(), static_cast<ani_size>(methods.size())) == ANI_OK;
     }
     return registerByOne ? true : result;
 }
@@ -146,11 +145,11 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 }
 
 static std::map<std::string, std::string> g_defaultClasspaths = {
-    {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
-    // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "Larkui/component/arkts/TestNativeModule/TestNativeModule;"},
-    {"ArkUINativeModule", "Larkui/component/arkts/ArkUINativeModule/ArkUINativeModule;"},
-    {"ArkUIGeneratedNativeModule", "Larkui/component/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
+    {"InteropNativeModule", "@koalaui.interop.InteropNativeModule.InteropNativeModule"},
+    // Improve: leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
+    {"TestNativeModule", "arkui.framework.arkts.TestNativeModule.TestNativeModule"},
+    {"ArkUINativeModule", "arkui.framework.arkts.ArkUINativeModule.ArkUINativeModule"},
+    {"ArkUIGeneratedNativeModule", "arkui.framework.arkts.ArkUIGeneratedNativeModule.ArkUIGeneratedNativeModule"},
 };
 
 const std::string& AniExports::getClasspath(const std::string& module) {
@@ -170,12 +169,15 @@ static struct {
     ani_static_method method = nullptr;
 } g_koalaANICallbackDispatcher;
 
+static thread_local ani_env* currentContext = nullptr;
+
 bool setKoalaANICallbackDispatcher(
     ani_env* aniEnv,
     ani_class clazz,
     const char* dispatcherMethodName,
     const char* dispatcherMethodSig
 ) {
+    currentContext = aniEnv;
     g_koalaANICallbackDispatcher.clazz = clazz;
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
@@ -192,47 +194,10 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) 
     *method = g_koalaANICallbackDispatcher.method;
 }
 
-std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
-{
-    std::string propertyValue;
-    ani_status status = ANI_ERROR;
-    ani_type errorType = nullptr;
-    if ((status = aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
-        return propertyValue;
+ani_env* getKoalaANIContext(void* hint) {
+    if (currentContext) {
+        return currentContext;
+    } else {
+        return reinterpret_cast<ani_env*>(hint);
     }
-    ani_method getterMethod = nullptr;
-    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
-        return propertyValue;
-    }
-    ani_ref aniRef = nullptr;
-    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
-        return propertyValue;
-    }
-    ani_string aniString = reinterpret_cast<ani_string>(aniRef);
-    ani_size sz {};
-    if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
-        return propertyValue;
-    }
-    propertyValue.resize(sz + 1);
-    if ((status = aniEnv->String_GetUTF8SubString(
-        aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz))!= ANI_OK) {
-        return propertyValue;
-    }
-    propertyValue.resize(sz);
-    return propertyValue;
-}
-void ErrorPrint(ani_env* env)
-{
-    if (!env) {
-        return;
-    }
-    ani_error aniError;
-    env->GetUnhandledError(&aniError);
-    env->ResetError();
-    std::string errorMsg = GetErrorProperty(env, aniError, "message");
-    std::string errorName = GetErrorProperty(env, aniError, "name");
-    std::string errorStack = GetErrorProperty(env, aniError, "stack");
-    LOGI("[%{public}s] Cannot load main : \nerrorMsg: %{public}s, \nerrorName: "
-            "%{public}s, \nerrorStack: %{public}s",
-        __func__, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
 }

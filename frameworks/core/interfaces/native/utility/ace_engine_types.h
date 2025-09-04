@@ -37,11 +37,6 @@ enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
 }
 
 namespace OHOS::Ace::NG::Converter {
-struct SimpleResource {
-    std::string content;
-    std::string bundleName;
-    std::string moduleName;
-};
 
 struct RadioStyle {
     std::optional<Color> checkedBackgroundColor;
@@ -63,9 +58,6 @@ struct TextDecorationOptions {
     std::optional<TextDecoration> textDecoration;
     std::optional<Color> color;
     std::optional<TextDecorationStyle> textDecorationStyle;
-};
-struct ListItemOptions {
-    std::optional<V2::ListItemStyle> style;
 };
 
 struct AnimateParam {

@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 #include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
@@ -37,7 +36,9 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
 {
     TextTimerOptions dst;
     dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
+#ifdef WRONG_GEN
     dst.count = Converter::OptConvert<float>(src.count);
+#endif
     dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     return dst;
 }
@@ -61,8 +62,7 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opts = Converter::OptConvert<TextTimerOptions>(*options);
+    auto opts = Converter::OptConvertPtr<TextTimerOptions>(options);
     TextTimerModelStatic::SetIsCountDown(frameNode, opts->isCountDown);
     if (!opts->isCountDown.value_or(false)) {
         opts->count.reset();
@@ -78,12 +78,12 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
 }
 } // TextTimerInterfaceModifier
 namespace TextTimerAttributeModifier {
-void FormatImpl(Ark_NativePointer node,
-                const Opt_String* value)
+void SetFormatImpl(Ark_NativePointer node,
+                   const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto format = Converter::OptConvert<std::string>(*value);
+    auto format = Converter::OptConvertPtr<std::string>(value);
 
     if (format) {
         std::smatch result;
@@ -108,86 +108,80 @@ void FormatImpl(Ark_NativePointer node,
     }
     TextTimerModelStatic::SetFormat(frameNode, format);
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvert<Color>(*value);
+    auto color = Converter::OptConvertPtr<Color>(value);
     TextTimerModelStatic::SetFontColor(frameNode, color);
 }
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto size = Converter::OptConvert<Dimension>(*value);
+    auto size = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(size);
     Validator::ValidateNonPercent(size);
     TextTimerModelStatic::SetFontSize(frameNode, size);
 }
-void FontStyleImpl(Ark_NativePointer node,
-                   const Opt_FontStyle* value)
+void SetFontStyleImpl(Ark_NativePointer node,
+                      const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto style = Converter::OptConvert<Ace::FontStyle>(*value);
+    auto style = Converter::OptConvertPtr<Ace::FontStyle>(value);
     TextTimerModelStatic::SetFontStyle(frameNode, style);
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto weight = Converter::OptConvert<Ace::FontWeight>(*value);
+    auto weight = Converter::OptConvertPtr<Ace::FontWeight>(value);
     TextTimerModelStatic::SetFontWeight(frameNode, weight);
 }
-void FontFamilyImpl(Ark_NativePointer node,
-                    const Opt_ResourceStr* value)
+void SetFontFamilyImpl(Ark_NativePointer node,
+                       const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     TextTimerModelStatic::SetFontFamily(frameNode, families);
 }
-void OnTimerImpl(Ark_NativePointer node,
-                 const Opt_TextTimerAttribute_onTimer_event_type* value)
+// fix Opt_Callback_Number_Number_Void > Opt_Callback_Int64_Int64_Void this is time so int64 is required
+void SetOnTimerImpl(Ark_NativePointer node,
+                    const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
         int64_t utc, int64_t elapsedTime) {
+#ifdef WRONG_GEN
         PipelineContext::SetCallBackNode(node);
         auto utcResult = Converter::ArkValue<Ark_Int64>(utc);
         auto elapsedTimeResult = Converter::ArkValue<Ark_Int64>(elapsedTime);
         arkCallback.Invoke(utcResult, elapsedTimeResult);
+#endif
     };
     TextTimerModelNG::SetOnTimer(frameNode, std::move(onChange));
 }
-void TextShadowImpl(Ark_NativePointer node,
-                    const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
+void SetTextShadowImpl(Ark_NativePointer node,
+                       const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     TextTimerModelStatic::SetTextShadow(frameNode, shadowList);
-}
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextTimerModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("Arkoala method TextTimerAttributeModifier.setContentModifier not implemented");
 }
 } // TextTimerAttributeModifier
 const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
@@ -195,15 +189,14 @@ const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
     static const GENERATED_ArkUITextTimerModifier ArkUITextTimerModifierImpl {
         TextTimerModifier::ConstructImpl,
         TextTimerInterfaceModifier::SetTextTimerOptionsImpl,
-        TextTimerAttributeModifier::FormatImpl,
-        TextTimerAttributeModifier::FontColorImpl,
-        TextTimerAttributeModifier::FontSizeImpl,
-        TextTimerAttributeModifier::FontStyleImpl,
-        TextTimerAttributeModifier::FontWeightImpl,
-        TextTimerAttributeModifier::FontFamilyImpl,
-        TextTimerAttributeModifier::OnTimerImpl,
-        TextTimerAttributeModifier::TextShadowImpl,
-        TextTimerAttributeModifier::ContentModifierImpl,
+        TextTimerAttributeModifier::SetFormatImpl,
+        TextTimerAttributeModifier::SetFontColorImpl,
+        TextTimerAttributeModifier::SetFontSizeImpl,
+        TextTimerAttributeModifier::SetFontStyleImpl,
+        TextTimerAttributeModifier::SetFontWeightImpl,
+        TextTimerAttributeModifier::SetFontFamilyImpl,
+        TextTimerAttributeModifier::SetOnTimerImpl,
+        TextTimerAttributeModifier::SetTextShadowImpl,
     };
     return &ArkUITextTimerModifierImpl;
 }

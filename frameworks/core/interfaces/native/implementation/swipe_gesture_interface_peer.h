@@ -16,8 +16,7 @@
 #pragma once
 
 #include "core/components_ng/gestures/swipe_gesture.h"
- 
-struct SwipeGestureInterfacePeer final {
+
+struct SwipeGesturePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SwipeGesture> gesture;
 };
- 

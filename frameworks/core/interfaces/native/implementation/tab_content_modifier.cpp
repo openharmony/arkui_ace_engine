@@ -15,12 +15,11 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG {
 namespace {
     struct TabBarOptions {
@@ -34,27 +33,6 @@ namespace {
         CustomNodeBuilder,
         Ark_TabBarOptions
     >;
-
-void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBuilder)
-{
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto arkNode = reinterpret_cast<Ark_NativePointer>(frameNode);
-    CallbackHelper(arkBuilder)
-        .BuildAsync([weakNode](const RefPtr<UINode>& uiNode) {
-            auto contentNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(contentNode);
-            auto builder = [weakUINode = WeakPtr<UINode>(uiNode)]() {
-                auto uiNode = weakUINode.Upgrade();
-                CHECK_NULL_VOID(uiNode);
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            auto contentNodePtr = AceType::RawPtr(contentNode);
-            TabContentModelStatic::SetTabBarStyle(contentNodePtr, TabBarStyle::NOSTYLE);
-            TabContentModelStatic::SetTabBar(contentNodePtr, std::nullopt, std::nullopt, std::move(builder));
-            TabContentModelNG::AddTabBarItem(contentNode, DEFAULT_NODE_SLOT, true);
-        },
-        arkNode);
-}
 } // namespace
 
 namespace Validator {
@@ -149,7 +127,7 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         [&optPadding](const Ark_Padding& arkPadding) {
             optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
         },
-        [&optPadding](const Ark_Length& arkLength) {
+        [&optPadding](const Ark_Dimension& arkLength) {
             optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
         },
         [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
@@ -329,13 +307,11 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
-void TabBarImpl(Ark_NativePointer node,
-    const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions*
-        value)
+void SetTabBarImpl(Ark_NativePointer node,
+                   const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     Converter::VisitUnion(
         *value,
         [](const Ark_ComponentContent& arkContent) {
@@ -353,8 +329,14 @@ void TabBarImpl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
         },
-        [frameNode](const CustomNodeBuilder& arkBuilder) {
-            SetTabBarCustomBuilder(frameNode, arkBuilder);
+        [frameNode, node](const CustomNodeBuilder& arkBuilder) {
+            CallbackHelper(arkBuilder).BuildAsync(
+                [frameNode](const RefPtr<UINode>& uiNode) {
+                    auto builder = [frameNode, uiNode]() { ViewStackProcessor::GetInstance()->Push(uiNode); };
+                    TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+                    TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+                },
+                node);
         },
         [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
             std::optional<std::string> label;
@@ -366,13 +348,10 @@ void TabBarImpl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, label, icon, nullptr);
         },
-        [frameNode]() {
-            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, nullptr);
-        });
+        []() {});
 }
-void OnWillShowImpl(Ark_NativePointer node,
-                    const Opt_VoidCallback* value)
+void SetOnWillShowImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -386,8 +365,8 @@ void OnWillShowImpl(Ark_NativePointer node,
     };
     TabContentModelStatic::SetOnWillShow(frameNode, std::move(onWillShow));
 }
-void OnWillHideImpl(Ark_NativePointer node,
-                    const Opt_VoidCallback* value)
+void SetOnWillHideImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -407,9 +386,9 @@ const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
     static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
         TabContentModifier::ConstructImpl,
         TabContentInterfaceModifier::SetTabContentOptionsImpl,
-        TabContentAttributeModifier::TabBarImpl,
-        TabContentAttributeModifier::OnWillShowImpl,
-        TabContentAttributeModifier::OnWillHideImpl,
+        TabContentAttributeModifier::SetTabBarImpl,
+        TabContentAttributeModifier::SetOnWillShowImpl,
+        TabContentAttributeModifier::SetOnWillHideImpl,
     };
     return &ArkUITabContentModifierImpl;
 }

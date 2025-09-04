@@ -23,11 +23,7 @@ void PathInfo::InvokeOnPop(const PopInfo& popInfo)
 {
     Ark_PopInfo arkPopInfo {
         .info = ::OHOS::Ace::NG::Converter::ArkValue<Ark_NavPathInfo>(popInfo.info),
-#ifndef WRONG_GEN
         .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_Object>(popInfo.result),
-#else
-        .result = Ark_CustomObject{},
-#endif
     };
     onPop_.Invoke(arkPopInfo);
 }
@@ -369,7 +365,7 @@ void PathStack::Clear(const std::optional<bool>& animated)
     InvokeOnStateChanged();
 }
 
-int PathStack::RemoveInfoByIndexes(const std::vector<int>& indexes)
+int PathStack::RemoveByIndexes(const std::vector<int>& indexes)
 {
     if (indexes.empty()) {
         return 0;
@@ -521,11 +517,6 @@ const RefPtr<PathStack>& NavigationStack::GetDataSourceObj()
     return dataSourceObj_;
 }
 
-void NavigationStack::SetNavDestBuilderFunc(const NavDestBuildCallback& navDestBuilderFunc)
-{
-    navDestBuilderFunc_ = navDestBuilderFunc;
-}
-
 bool NavigationStack::IsEmpty()
 {
     return false; // this can't be empty due to PathStack is one of the base classes
@@ -629,33 +620,6 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         pattern->SetNavigationStack(WeakClaim(this));
     }
     return true;
-}
-
-RefPtr<NG::UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
-    const WeakPtr<NG::UINode>& customNode)
-{
-    // the inherited from RouteInfo class required here for store the external specific type parameter
-    auto extRouteInfo = AceType::DynamicCast<RouteInfo>(routeInfo);
-    if (!extRouteInfo) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "route info is invalid");
-        return AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
-    }
-    auto name = extRouteInfo->GetName();
-    auto param = ParamType(); // getting of the external specific type parameter may be here
-    RefPtr<NG::UINode> node;
-    RefPtr<NG::NavDestinationGroupNode> desNode;
-    int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
-    if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
-        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
-        if (pattern) {
-            auto pathInfo = AceType::MakeRefPtr<NavPathInfo>(name); // `param`data may be added
-            pattern->SetNavPathInfo(pathInfo);
-            pattern->SetName(name);
-            pattern->SetNavigationStack(WeakClaim(this));
-        }
-        return node;
-    }
-    return AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
 }
 
 std::string NavigationStack::GetNameByIndex(int32_t index) const
@@ -784,41 +748,6 @@ void NavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
     if (modeChange) {
         modeChange(mode);
     }
-}
-
-int32_t NavigationStack::LoadDestination(const std::string& name, const ParamType& param,
-    const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node,
-    RefPtr<NG::NavDestinationGroupNode>& desNode)
-{
-    // execute navdestination attribute builder
-    if (LoadDestinationByBuilder(name, param, node, desNode)) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load destination by buildermap");
-        return ERROR_CODE_NO_ERROR;
-    }
-    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
-        ", loading by URL not implemneted");
-    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
-        ", loading by URL not implemneted");
-    return ERROR_CODE_DESTINATION_NOT_FOUND;
-}
-
-bool NavigationStack::LoadDestinationByBuilder(const std::string& name, const ParamType& param,
-    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
-{
-    if (!navDestBuilderFunc_.IsValid()) {
-        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Builder function is empty");
-        return false;
-    }
-    auto arkName = Converter::ArkValue<Ark_String>(name);
-    auto arkParam = Converter::ArkValue<Opt_Object>(param);
-    navDestBuilderFunc_.Invoke(arkName, arkParam);
-    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
-        ", No way to obtain the FrameNode in result of the build func execution.");
-    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
-        ", No way to obtain the FrameNode in result of the build func execution.");
-    RefPtr<NG::UINode> resultNode = nullptr;
-    node = resultNode;
-    return GetNavDestinationNodeInUINode(node, desNode);
 }
 
 bool NavigationStack::GetNavDestinationNodeInUINode(

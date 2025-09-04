@@ -20,7 +20,6 @@
 struct ShapeClipPeer final : public BaseShapePeer {
 protected:
     ShapeClipPeer() = default;
-    explicit ShapeClipPeer(const RefPtr<OHOS::Ace::BasicShape>& src) : BaseShapePeer(src) {}
     ~ShapeClipPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 };

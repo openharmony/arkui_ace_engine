@@ -29,7 +29,7 @@ Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode && value && callback, nullptr);
-    auto text = Converter::OptConvert<std::string>(*value);
+    auto text = Converter::Convert<std::string>(*value);
     SearchModelNG::SetTextValue(frameNode, text);
 
     auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {

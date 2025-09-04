@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -65,9 +64,8 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(controller);
 
-    auto controllerPtr = Converter::OptConvert<Ark_PatternLockController>(*controller);
+    auto controllerPtr = Converter::OptConvertPtr<Ark_PatternLockController>(controller);
     if (controllerPtr.has_value()) {
         auto internalController = PatternLockModelNG::GetController(frameNode);
         auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
@@ -78,17 +76,16 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
 }
 } // PatternLockInterfaceModifier
 namespace PatternLockAttributeModifier {
-void SideLengthImpl(Ark_NativePointer node,
-                    const Opt_Length* value)
+void SetSideLengthImpl(Ark_NativePointer node,
+                       const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
     PatternLockModelStatic::SetSideLength(frameNode, convValue);
 }
-void CircleRadiusImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+void SetCircleRadiusImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -96,56 +93,56 @@ void CircleRadiusImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convValue);
     PatternLockModelStatic::SetCircleRadius(frameNode, convValue);
 }
-void BackgroundColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
+void SetBackgroundColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     ViewAbstractModelStatic::SetBackgroundColor(frameNode, convValue);
 }
-void RegularColorImpl(Ark_NativePointer node,
-                      const Opt_ResourceColor* value)
+void SetRegularColorImpl(Ark_NativePointer node,
+                         const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     PatternLockModelStatic::SetRegularColor(frameNode, convValue);
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+void SetSelectedColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     PatternLockModelStatic::SetSelectedColor(frameNode, convValue);
 }
-void ActiveColorImpl(Ark_NativePointer node,
-                     const Opt_ResourceColor* value)
+void SetActiveColorImpl(Ark_NativePointer node,
+                        const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     PatternLockModelStatic::SetActiveColor(frameNode, convValue);
 }
-void PathColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetPathColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     PatternLockModelStatic::SetPathColor(frameNode, convValue);
 }
-void PathStrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* value)
+void SetPathStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     PatternLockModelStatic::SetStrokeWidth(frameNode, convValue);
 }
-void OnPatternCompleteImpl(Ark_NativePointer node,
-                           const Opt_Callback_Array_Number_Void* value)
+void SetOnPatternCompleteImpl(Ark_NativePointer node,
+                              const Opt_Callback_Array_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -163,16 +160,16 @@ void OnPatternCompleteImpl(Ark_NativePointer node,
     };
     PatternLockModelNG::SetPatternComplete(frameNode, std::move(call));
 }
-void AutoResetImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+void SetAutoResetImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     PatternLockModelStatic::SetAutoReset(frameNode, convValue);
 }
-void OnDotConnectImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_Void* value)
+void SetOnDotConnectImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -188,8 +185,8 @@ void OnDotConnectImpl(Ark_NativePointer node,
     };
     PatternLockModelNG::SetDotConnect(frameNode, std::move(call));
 }
-void ActivateCircleStyleImpl(Ark_NativePointer node,
-                             const Opt_CircleStyleOptions* value)
+void SetActivateCircleStyleImpl(Ark_NativePointer node,
+                                const Opt_CircleStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -198,16 +195,22 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
         PatternLockModelStatic::SetActiveCircleColor(frameNode, convValue->color);
         PatternLockModelStatic::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);
         PatternLockModelStatic::SetActiveCircleRadius(frameNode, convValue->radius);
-        PatternLockModelStatic::SetEnableForeground(frameNode, convValue->enableForeground);
+        if (convValue->enableForeground) {
+            PatternLockModelNG::SetEnableForeground(frameNode, convValue->enableForeground.value());
+        }
     }
 }
-void SkipUnselectedPointImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
+void SetSkipUnselectedPointImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    PatternLockModelStatic::SetSkipUnselectedPoint(frameNode, convValue);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, *convValue);
 }
 } // PatternLockAttributeModifier
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
@@ -215,19 +218,19 @@ const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
     static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
         PatternLockModifier::ConstructImpl,
         PatternLockInterfaceModifier::SetPatternLockOptionsImpl,
-        PatternLockAttributeModifier::SideLengthImpl,
-        PatternLockAttributeModifier::CircleRadiusImpl,
-        PatternLockAttributeModifier::BackgroundColorImpl,
-        PatternLockAttributeModifier::RegularColorImpl,
-        PatternLockAttributeModifier::SelectedColorImpl,
-        PatternLockAttributeModifier::ActiveColorImpl,
-        PatternLockAttributeModifier::PathColorImpl,
-        PatternLockAttributeModifier::PathStrokeWidthImpl,
-        PatternLockAttributeModifier::OnPatternCompleteImpl,
-        PatternLockAttributeModifier::AutoResetImpl,
-        PatternLockAttributeModifier::OnDotConnectImpl,
-        PatternLockAttributeModifier::ActivateCircleStyleImpl,
-        PatternLockAttributeModifier::SkipUnselectedPointImpl,
+        PatternLockAttributeModifier::SetSideLengthImpl,
+        PatternLockAttributeModifier::SetCircleRadiusImpl,
+        PatternLockAttributeModifier::SetBackgroundColorImpl,
+        PatternLockAttributeModifier::SetRegularColorImpl,
+        PatternLockAttributeModifier::SetSelectedColorImpl,
+        PatternLockAttributeModifier::SetActiveColorImpl,
+        PatternLockAttributeModifier::SetPathColorImpl,
+        PatternLockAttributeModifier::SetPathStrokeWidthImpl,
+        PatternLockAttributeModifier::SetOnPatternCompleteImpl,
+        PatternLockAttributeModifier::SetAutoResetImpl,
+        PatternLockAttributeModifier::SetOnDotConnectImpl,
+        PatternLockAttributeModifier::SetActivateCircleStyleImpl,
+        PatternLockAttributeModifier::SetSkipUnselectedPointImpl,
     };
     return &ArkUIPatternLockModifierImpl;
 }

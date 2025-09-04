@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_LongPressRecognizer peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LongPressRecognizer CtorImpl()
+Ark_LongPressRecognizer ConstructImpl()
 {
     return PeerUtils::CreatePeer<LongPressRecognizerPeer>();
 }
@@ -50,7 +50,7 @@ const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor
 {
     static const GENERATED_ArkUILongPressRecognizerAccessor LongPressRecognizerAccessorImpl {
         LongPressRecognizerAccessor::DestroyPeerImpl,
-        LongPressRecognizerAccessor::CtorImpl,
+        LongPressRecognizerAccessor::ConstructImpl,
         LongPressRecognizerAccessor::GetFinalizerImpl,
         LongPressRecognizerAccessor::IsRepeatImpl,
         LongPressRecognizerAccessor::GetDurationImpl,

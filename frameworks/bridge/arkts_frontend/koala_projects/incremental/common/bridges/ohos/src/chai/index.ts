@@ -79,7 +79,7 @@ export interface Assert {
     isNotEmpty(object: any, message?: string): void
 }
 
-// todo: the 'message' arg is ignored
+// Improve: the 'message' arg is ignored
 
 export var assert: Assert = ((expression: any, message?: string): void => {
     expect(Boolean(expression)).assertTrue()
@@ -90,27 +90,27 @@ assert.equal = <T>(actual: T, expected: T, message?: string): void => {
 }
 
 assert.notEqual = <T>(actual: T, expected: T, message?: string): void => {
-    // todo: not accurate impl, because compared values are not printed
+    // Improve: not accurate impl, because compared values are not printed
     expect(actual != expected).assertTrue()
 }
 
 assert.strictEqual = <T>(actual: T, expected: T, message?: string): void => {
-    // todo: not accurate impl, because compared values are not printed
+    // Improve: not accurate impl, because compared values are not printed
     expect(actual === expected).assertTrue()
 }
 
 assert.notStrictEqual = <T>(actual: T, expected: T, message?: string): void => {
-    // todo: not accurate impl, because compared values are not printed
+    // Improve: not accurate impl, because compared values are not printed
     expect(actual !== expected).assertTrue()
 }
 
 assert.deepEqual = (actual: any, expected: any, message?: string): void => {
-    // todo: implement
+    // Improve: implement
     expect(actual).assertEqual(actual/*expected*/)
 }
 
 assert.notDeepEqual = (actual: any, expected: any, message?: string): void => {
-    // todo: implement
+    // Improve: implement
     expect(actual).assertEqual(actual/*expected*/)
 }
 
@@ -146,7 +146,7 @@ assert.isNotNull = (value: any, message?: string): void => {
 }
 
 assert.instanceOf = (value: any, constructor: Function, message?: string): void => {
-    // todo: not accurate impl
+    // Improve: not accurate impl
     // expect(value).assertInstanceOf(constructor.name)
     expect(value instanceof constructor).assertTrue()
 }
@@ -159,7 +159,7 @@ assert.isAtLeast = (valueToCheck: number, valueToBeAtLeast: number, message?: st
 }
 
 assert.exists = (value: any, message?: string): void => {
-    // todo: not accurate impl
+    // Improve: not accurate impl
     expect(value == null).assertFalse()
 }
 
@@ -187,12 +187,12 @@ assert.isBelow = (valueToCheck: number, valueToBeBelow: number, message?: string
 }
 
 assert.match = (value: string, regexp: RegExp, message?: string): void => {
-    // todo: not accurate impl
+    // Improve: not accurate impl
     expect(regexp.test(value)).assertTrue()
 }
 
 assert.isDefined = (value: any, message?: string): void => {
-    // todo: not accurate impl
+    // Improve: not accurate impl
     expect(value === undefined).assertFalse()
 }
 
@@ -201,12 +201,12 @@ assert.isUndefined = (value: any, message?: string): void => {
 }
 
 assert.isEmpty = (object: any, message?: string): void => {
-    // todo: implement
+    // Improve: implement
     expect(object !== undefined).assertTrue()
 }
 
 assert.isNotEmpty = (object: any, message?: string): void => {
-    // todo: implement
+    // Improve: implement
     expect(object !== undefined).assertTrue()
 }
 

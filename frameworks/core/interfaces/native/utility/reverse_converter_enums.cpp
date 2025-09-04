@@ -38,20 +38,6 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
     }
 }
 
-void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src)
-{
-    switch (src) {
-        case AutoCapitalizationMode::NONE: dst = ARK_AUTO_CAPITALIZATION_MODE_NONE; break;
-        case AutoCapitalizationMode::WORDS: dst = ARK_AUTO_CAPITALIZATION_MODE_WORDS; break;
-        case AutoCapitalizationMode::SENTENCES: dst = ARK_AUTO_CAPITALIZATION_MODE_SENTENCES; break;
-        case AutoCapitalizationMode::ALL_CHARACTERS: dst = ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS; break;
-        default:
-            dst = INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>;
-            LOGE("Unexpected enum value in AutoCapitalizationMode: %{public}d", src);
-            break;
-    }
-}
-
 void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
 {
     switch (src) {
@@ -396,22 +382,6 @@ void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
     }
 }
 
-void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
-{
-    switch (src) {
-        case SecurityComponentHandleResult::CLICK_SUCCESS:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_SUCCESS;
-            break;
-        case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
-            dst = ARK_LOCATION_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
-            break;
-        default:
-            dst = static_cast<Ark_LocationButtonOnClickResult>(-1);
-            LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
-            break;
-    }
-}
-
 void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
 {
     switch (src) {
@@ -434,8 +404,6 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
-        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
-        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
@@ -658,17 +626,6 @@ void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
     }
 }
 
-void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
-{
-    switch (src) {
-        case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
-        case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
-        case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
-        default: dst = static_cast<Ark_Sticky>(-1);
-            LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
-    }
-}
-
 void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
 {
     switch (src) {
@@ -869,8 +826,6 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
-        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD; break;
-        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }

@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/node_container/node_container_event_hub.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "core/interfaces/native/implementation/frame_node_peer.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

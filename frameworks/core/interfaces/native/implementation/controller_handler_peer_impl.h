@@ -23,7 +23,7 @@
 struct ControllerHandlerPeer {
     struct ChildWindowInfo {
         int32_t parentWebId = -1;
-        OHOS::Ace::RefPtr<WebviewControllerPeer> controller = nullptr;
+        OHOS::Ace::RefPtr<webview_WebviewControllerPeer> controller = nullptr;
         WebviewControllerInfo controllerInfo = {};
     };
 
