@@ -90,7 +90,6 @@ export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
         // we call this function outside of class, so need to make it public
     }
 }
-    
 /** @memo */
 export function RepeatImpl<T>(
     /** @memo */
