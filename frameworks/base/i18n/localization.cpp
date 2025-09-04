@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <shared_mutex>
 #include "base/i18n/localization.h"
 
 #include "chnsecal.h"
@@ -66,6 +67,7 @@ const char DEFAULT_LANGUAGE[] = "en-US";
 constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
 constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
 constexpr uint32_t SECONDS_IN_HOUR = 3600;
+std::shared_mutex indexJsonMutex_;
 
 const char CHINESE_LEAP[] = u8"\u95f0";
 const char CHINESE_FIRST[] = u8"\u521d";
@@ -145,6 +147,7 @@ MeasureUnit* GetMeasureUnit(TimeUnitStyle timeUnitStyle, UErrorCode& status)
 void GetLocalJsonObject(InternalResource::ResourceId id, std::string language, std::unique_ptr<JsonValue>& indexJson,
     std::unique_ptr<JsonValue>& json)
 {
+    std::unique_lock<std::shared_mutex> lock(indexJsonMutex_);
     if (indexJson == nullptr) {
         size_t size = 0;
         const uint8_t* buf = InternalResource::GetInstance().GetResource(id, size);
