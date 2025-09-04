@@ -224,11 +224,10 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
     return result;
 }
 
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawCallbackFun(ani_vm* vm,
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawCallbackFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni](const NG::DrawingContext& context) -> void {
+    return [vm, callbackAni](const NG::DrawingContext& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -247,7 +246,7 @@ std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> Convert
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj)
@@ -258,14 +257,11 @@ void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object f
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    void* fnDrawCallbackFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawCallbackFun = nullptr;
     ani_ref fnObjGlobalRef = static_cast<ani_ref>(fnObj);
     auto fndDrawCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjGlobalRef);
-    drawCallbackFun = ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
-    if (drawCallbackFun != nullptr) {
-        fnDrawCallbackFun = static_cast<void*>(drawCallbackFun.get());
-    }
+    std::function<void(NG::DrawingContext& drawingContext)> drawCallbackFun =
+        ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
+    void* fnDrawCallbackFun = &drawCallbackFun;
 
     modifier->getCommonAniModifier()->setDrawCallback(env, ptr, fnDrawCallbackFun);
 }
@@ -279,21 +275,20 @@ void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     void* fnDrawCallbackFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawCallbackFun = nullptr;
+    std::function<void(NG::DrawingContext& drawingContext)> drawCallbackFun = nullptr;
     ani_ref fnObjGlobalRef = static_cast<ani_ref>(fnObj);
     auto fndDrawCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, fnObjGlobalRef);
     drawCallbackFun = ConvertFnObjDrawCallbackFun(vm, fndDrawCallbackAni);
     if (drawCallbackFun != nullptr) {
-        fnDrawCallbackFun = static_cast<void*>(drawCallbackFun.get());
+        fnDrawCallbackFun = &drawCallbackFun;
     }
     modifier->getCommonAniModifier()->setFrameNodeDrawCallback(env, ptr, fnDrawCallbackFun);
 }
 
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawBehindFun(ani_vm* vm,
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -312,14 +307,13 @@ std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> Convert
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawContentFun(ani_vm* vm,
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -338,14 +332,13 @@ std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> Convert
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
-std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> ConvertFnObjDrawFrontFun(ani_vm* vm,
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
 {
-    return std::make_shared<std::function<void(NG::DrawingContext& drawingContext)>>(
-        [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -365,7 +358,7 @@ std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> Convert
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
 void SetDrawModifier(
@@ -387,9 +380,9 @@ void SetDrawModifier(
     void* fnDrawBehindFun = nullptr;
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawBehindFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawContentFun = nullptr;
-    std::shared_ptr<std::function<void(NG::DrawingContext& drawingContext)>> drawFrontFun = nullptr;
+    std::function<void(NG::DrawingContext& drawingContext)> drawBehindFun = nullptr;
+    std::function<void(NG::DrawingContext& drawingContext)> drawContentFun = nullptr;
+    std::function<void(NG::DrawingContext& drawingContext)> drawFrontFun = nullptr;
     if (flag & FLAG_DRAW_BEHIND) {
         auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
@@ -403,13 +396,13 @@ void SetDrawModifier(
         drawFrontFun = ConvertFnObjDrawFrontFun(vm, fnDrawFrontAni, drawModifierRef);
     }
     if (drawBehindFun != nullptr) {
-        fnDrawBehindFun = static_cast<void*>(drawBehindFun.get());
+        fnDrawBehindFun = &drawBehindFun;
     }
     if (drawContentFun != nullptr) {
-        fnDrawContentFun = static_cast<void*>(drawContentFun.get());
+        fnDrawContentFun = &drawContentFun;
     }
     if (drawFrontFun != nullptr) {
-        fnDrawFrontFun = static_cast<void*>(drawFrontFun.get());
+        fnDrawFrontFun = &drawFrontFun;
     }
     modifier->getArkUIAniDrawModifier()->setDrawModifier(ptr, flag,
         fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun);
@@ -485,11 +478,10 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
         env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
 #endif
 }
-std::shared_ptr<std::function<void(NG::LayoutConstraintF & layoutConstraint)>> ConvertFnObjMeasureFun(ani_vm* vm,
+std::function<void(NG::LayoutConstraintF & layoutConstraint)> ConvertFnObjMeasureFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
-    return std::make_shared<std::function<void(NG::LayoutConstraintF & layoutConstraint)>>(
-        [vm, callbackAni](const NG::LayoutConstraintF& context) -> void {
+    return [vm, callbackAni](const NG::LayoutConstraintF& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -514,14 +506,13 @@ std::shared_ptr<std::function<void(NG::LayoutConstraintF & layoutConstraint)>> C
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
-std::shared_ptr<std::function<void(NG::OffsetF& position)>> ConvertFnObjLayoutFun(ani_vm* vm,
+std::function<void(NG::OffsetF& position)> ConvertFnObjLayoutFun(ani_vm* vm,
     const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
-    return std::make_shared<std::function<void(NG::OffsetF& position)>>(
-        [vm, callbackAni](const NG::OffsetF& context) -> void {
+    return [vm, callbackAni](const NG::OffsetF& context) -> void {
             CHECK_NULL_VOID(vm);
             CHECK_NULL_VOID(callbackAni);
             ani_env* env = nullptr;
@@ -536,7 +527,7 @@ std::shared_ptr<std::function<void(NG::OffsetF& position)>> ConvertFnObjLayoutFu
             if (attachCurrentThreadStatus == ANI_OK) {
                 vm->DetachCurrentThread();
             }
-        });
+        };
 }
 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
@@ -551,8 +542,8 @@ void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     env->GetVM(&vm);
     void* fnMeasureFun = nullptr;
     void* fnLayoutFun = nullptr;
-    std::shared_ptr<std::function<void(NG::LayoutConstraintF & layoutConstraint)>> fnObjMeasureFun = nullptr;
-    std::shared_ptr<std::function<void(NG::OffsetF& position)>> fnObjLayoutFun = nullptr;
+    std::function<void(NG::LayoutConstraintF & layoutConstraint)> fnObjMeasureFun = nullptr;
+    std::function<void(NG::OffsetF& position)> fnObjLayoutFun = nullptr;
     if (fnObjMeasure != nullptr) {
         customFuncExisted = true;
         ani_ref fnObjMeasureAniRef = static_cast<ani_ref>(fnObjMeasure);
@@ -569,10 +560,10 @@ void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
         return;
     }
     if (fnObjMeasureFun != nullptr) {
-        fnMeasureFun = static_cast<void*>(fnObjMeasureFun.get());
+        fnMeasureFun = &fnObjMeasureFun;
     }
     if (fnObjLayoutFun != nullptr) {
-        fnLayoutFun = static_cast<void*>(fnObjLayoutFun.get());
+        fnLayoutFun = &fnObjLayoutFun;
     }
     modifier->getCommonAniModifier()->setCustomCallback(ptr, fnMeasureFun, fnLayoutFun);
 }
@@ -1164,10 +1155,10 @@ void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId)
     modifier->getCommonAniModifier()->setThemeScopeId(env, themeScopeId);
 }
 
-std::shared_ptr<std::function<void()>> ConvertOnThemeScopeDestroyFun(
+std::function<void()> ConvertOnThemeScopeDestroyFun(
     ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
-    return std::make_shared<std::function<void()>>([vm, callbackAni]() {
+    return [vm, callbackAni]() {
         CHECK_NULL_VOID(vm);
         CHECK_NULL_VOID(callbackAni);
         ani_env* env = nullptr;
@@ -1180,7 +1171,7 @@ std::shared_ptr<std::function<void()>> ConvertOnThemeScopeDestroyFun(
         if (attachCurrentThreadStatus == ANI_OK) {
             vm->DetachCurrentThread();
         }
-    });
+    };
 }
 
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
@@ -1194,14 +1185,14 @@ void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId,
     void* fnOnThemeScopeDestroyFun = nullptr;
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    std::shared_ptr<std::function<void()>> onThemeScopeDestroyFun = nullptr;
+    std::function<void()> onThemeScopeDestroyFun = nullptr;
     if (onThemeScopeDestroy) {
         ani_ref onThemeScopeDestroyAniRef = static_cast<ani_ref>(onThemeScopeDestroy);
         auto onThemeScopeDestroyAni = std::make_shared<CommonModuleCallbackAni>(env, onThemeScopeDestroyAniRef);
         onThemeScopeDestroyFun = ConvertOnThemeScopeDestroyFun(vm, onThemeScopeDestroyAni);
     }
     if (onThemeScopeDestroyFun != nullptr) {
-        fnOnThemeScopeDestroyFun = static_cast<void*>(onThemeScopeDestroyFun.get());
+        fnOnThemeScopeDestroyFun = &onThemeScopeDestroyFun;
     }
     modifier->getCommonAniModifier()->createAndBindTheme(
         env, themeScopeId, themeId, colors, colorMode, fnOnThemeScopeDestroyFun);
