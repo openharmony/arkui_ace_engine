@@ -439,6 +439,8 @@ bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerE
                 return false;
         }
         TouchEvent touchEvent = event.CreateTouchPoint();
+        touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+        touchEvent.convertInfo.second = UIInputEventType::TOUCH;
         touchEvent.SetSourceType(SourceType::TOUCH);
         CHECK_NULL_RETURN(touchEventCallback_, false);
         touchEventCallback_(touchEvent, markProcess, node);
