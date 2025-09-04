@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -49,6 +50,9 @@ void ViewContextTestNG::TearDownTestCase()
 {
     MockContainer::TearDown();
     MockPipelineContext::TearDown();
+    // Note that MockSubwindow cannot be held by SubwindowManager and needs to be released
+    SubwindowManager::GetInstance()->subwindowMap_.clear();
+    SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
     MockSubwindow::TearDown();
 }
 
