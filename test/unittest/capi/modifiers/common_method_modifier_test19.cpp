@@ -18,6 +18,10 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -486,7 +490,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, SetOnKeyEventDispatchTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEventDispatch, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -505,14 +509,12 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSiz
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
         auto peer = parameter;
         ASSERT_NE(peer, nullptr);
-        auto accessor = GeneratedModifier::GetKeyEventAccessor();
         auto info = peer->GetEventInfo();
         ASSERT_NE(info, nullptr);
         checkEvent = {
             .resourceId = resourceId,
             .code = info->GetKeyCode()
         };
-        accessor->destroyPeer(peer);
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
     };
 
