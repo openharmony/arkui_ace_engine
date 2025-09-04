@@ -108,6 +108,7 @@ struct DragControllerAsyncCtx {
     DragPointerEvent dragPointerEvent;
     float windowScale = 1.0f;
     float dipScale = 0.0;
+    float scale = 1.0f;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -850,6 +851,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     }
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("scale", asyncCtx->scale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
@@ -1022,6 +1024,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         }
         shadowInfos.push_back(shadowInfo);
     }
+    asyncCtx->scale = data.previewScale;
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
         return false;
@@ -1177,6 +1180,7 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         return false;
     }
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("scale", asyncCtx->scale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
@@ -1207,6 +1211,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (!ret) {
         return false;
     }
+    asyncCtx->scale = data.previewScale;
     Msdp::DeviceStatus::DragData dragData;
     if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "prepare drag data failed!");

@@ -235,6 +235,7 @@ HWTEST_F(DragAnimationHelperTestNg, PlayGatherAnimation001, TestSize.Level1)
     ASSERT_TRUE(pipelineContext != nullptr);
     auto overlayManager = pipelineContext->GetOverlayManager();
     ASSERT_TRUE(overlayManager != nullptr);
+
     overlayManager->MountGatherNodeToRootNode(parentNode_, gatherNodeInfos);
     DragAnimationHelper::PlayGatherAnimation(parentNode_, overlayManager);
 
