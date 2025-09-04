@@ -186,7 +186,6 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest006, TestSize.Level1)
     uint32_t density = 2;
     auto layeredDrawableDescriptor =
         Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
-
     /**
      * @tc.steps: step2. check
      */

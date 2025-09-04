@@ -272,6 +272,10 @@ public:
         RState& state, DrawableType& drawableType, uint32_t density);
     static std::unique_ptr<DrawableDescriptor> Create(DataInfo& foregroundInfo, DataInfo& backgroundInfo,
         std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr);
+    static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
+        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType);
+    static std::unique_ptr<DrawableDescriptor> Create(std::tuple<const char*, uint32_t, uint32_t>& drawableInfo,
+        const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType);
 };
 } // namespace Napi
 } // namespace Ace
