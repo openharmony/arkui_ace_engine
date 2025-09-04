@@ -381,11 +381,11 @@ export class PromptAction {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         throw Error("getTopOrder not implemented in PromptAction!")
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
