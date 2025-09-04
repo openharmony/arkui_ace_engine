@@ -1,17 +1,17 @@
 import { ArkRadioComponent, RadioConfiguration } from "../component/radio";
-import { ContentModifierHelper } from "../component/arkui-contentmodifier"
-import { ContentModifier, CustomBuilderT } from "../component/common";
-import { KPointer, nullptr, toPeerPtr } from "@koalaui/interop";
-import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
-import { BuilderNode } from "../BuilderNode"
-import { FrameNode } from '../FrameNode'
-import { int32 } from "@koalaui/common"
+import { ContentModifierHelper } from '../component/arkui-contentmodifier';
+import { ContentModifier, CustomBuilderT } from '../component/common';
+import { KPointer, nullptr, toPeerPtr } from '@koalaui/interop';
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { BuilderNode } from '../BuilderNode';
+import { FrameNode } from '../FrameNode';
+import { int32 } from '@koalaui/common';
 import { WrappedBuilder } from '../component/builder'
-import { ArkButtonComponent, ButtonConfiguration } from "../component/button";
-import { ArkCheckboxComponent, CheckBoxConfiguration } from "../component/checkbox";
-import { ArkToggleComponent, ToggleConfiguration } from "../component/toggle";
-import { ArkRatingComponent, RatingConfiguration } from "../component/rating";
-import { ArkSliderComponent, SliderConfiguration } from "../component/slider";
+import { ArkButtonComponent, ButtonConfiguration } from '../component/button';
+import { ArkCheckboxComponent, CheckBoxConfiguration } from '../component/checkbox';
+import { ArkToggleComponent, ToggleConfiguration } from '../component/toggle';
+import { ArkRatingComponent, RatingConfiguration } from '../component/rating';
+import { ArkSliderComponent, SliderConfiguration } from '../component/slider';
 
 export class HookContentModifier {
     static radioNodeMap_: Map<int32, BuilderNode<RadioConfiguration>> = new Map<int32, BuilderNode<RadioConfiguration>>();
@@ -21,7 +21,8 @@ export class HookContentModifier {
     static ratingNodeMap_: Map<int32, BuilderNode<RatingConfiguration>> = new Map<int32, BuilderNode<RatingConfiguration>>();
     static sliderNodeMap_: Map<int32, BuilderNode<SliderConfiguration>> = new Map<int32, BuilderNode<SliderConfiguration>>();
     //Radio
-    static getRadioBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<RadioConfiguration>>, config: RadioConfiguration): BuilderNode<RadioConfiguration> {
+    static getRadioBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<RadioConfiguration>>, config: RadioConfiguration): BuilderNode<RadioConfiguration> {
         if (HookContentModifier.radioNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.radioNodeMap_.get(peerId)!
             builderNode.update(config)
@@ -42,7 +43,8 @@ export class HookContentModifier {
         }
     }
     //Button
-    static getButtonBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<ButtonConfiguration>>, config: ButtonConfiguration): BuilderNode<ButtonConfiguration> {
+    static getButtonBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<ButtonConfiguration>>, config: ButtonConfiguration): BuilderNode<ButtonConfiguration> {
         if (HookContentModifier.buttonNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.buttonNodeMap_.get(peerId)!
             builderNode.update(config)
@@ -63,7 +65,8 @@ export class HookContentModifier {
         }
     }
     //Checkbox
-    static getCheckboxBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<CheckBoxConfiguration>>, config: CheckBoxConfiguration): BuilderNode<CheckBoxConfiguration> {
+    static getCheckboxBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<CheckBoxConfiguration>>, config: CheckBoxConfiguration): BuilderNode<CheckBoxConfiguration> {
         if (HookContentModifier.checkboxNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.checkboxNodeMap_.get(peerId)!
             builderNode.update(config)
@@ -84,7 +87,8 @@ export class HookContentModifier {
         }
     }
     //Toggle
-    static getToggleBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<ToggleConfiguration>>, config: ToggleConfiguration): BuilderNode<ToggleConfiguration> {
+    static getToggleBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<ToggleConfiguration>>, config: ToggleConfiguration): BuilderNode<ToggleConfiguration> {
         if (HookContentModifier.toggleNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.toggleNodeMap_.get(peerId)!
             builderNode.update(config)
@@ -105,7 +109,8 @@ export class HookContentModifier {
         }
     }
     //Rating
-    static getRatingBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<RatingConfiguration>>, config: RatingConfiguration): BuilderNode<RatingConfiguration> {
+    static getRatingBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<RatingConfiguration>>, config: RatingConfiguration): BuilderNode<RatingConfiguration> {
         if (HookContentModifier.ratingNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.ratingNodeMap_.get(peerId)!
             builderNode.update(config)
@@ -126,7 +131,8 @@ export class HookContentModifier {
         }
     }
     //Slider
-    static getSliderBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<SliderConfiguration>>, config: SliderConfiguration): BuilderNode<SliderConfiguration> {
+    static getSliderBuilderNode(
+        peerId: int32, builder: WrappedBuilder<CustomBuilderT<SliderConfiguration>>, config: SliderConfiguration): BuilderNode<SliderConfiguration> {
         if (HookContentModifier.sliderNodeMap_.has(peerId)) {
             let builderNode = HookContentModifier.sliderNodeMap_.get(peerId)!
             builderNode.update(config)
