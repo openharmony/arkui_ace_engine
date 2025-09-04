@@ -165,7 +165,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     onMove_?: OnMoveHandler;
     itemDragEvent_?: ItemDragEventHandler;
 
-    reusable_: boolean = false;
+    reusable_: boolean = true;
     disableVirtualScroll_: boolean = false;
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
@@ -199,7 +199,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
         this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
-        this.reusable_ = options?.reusable !== false;
+        this.reusable_ = options?.reusable ?? true;
         this.onLazyLoading_ = options?.onLazyLoading;
 
         this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
