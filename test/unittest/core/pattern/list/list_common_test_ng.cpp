@@ -5269,4 +5269,19 @@ HWTEST_F(ListCommonTestNg, ParseResObjDividerEndMargin002, TestSize.Level1)
     divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
     EXPECT_NE(divider.endMargin, 1000.0_vp);
 }
+
+/**
+ * @tc.name: JudgeFocusDependence001
+ * @tc.desc: Test FocusDependence in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, JudgeFocusDependence001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    pattern_->OnModifyDone();
+    ASSERT_EQ(focusHub->GetFocusDependence(), FocusDependence::CHILD);
+}
 } // namespace OHOS::Ace::NG
