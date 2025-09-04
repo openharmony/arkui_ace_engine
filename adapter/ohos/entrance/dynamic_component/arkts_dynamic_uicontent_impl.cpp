@@ -339,6 +339,7 @@ UIContentErrorCode ArktsDynamicUIContentImpl::CommonInitializeDc(const std::stri
     // after frontend initialize
     HandleCommonInitializeWindowFocus();
     HandleSurfaceChanged(aceView, deviceWidth, deviceHeight, isModelJson);
+    SetAniLocalContextFromHost();
     return errorCode;
 }
 
@@ -697,5 +698,22 @@ void ArktsDynamicUIContentImpl::HandleSurfaceChanged(
     if (context) {
         UpdateFontScale(context->GetConfiguration());
     }
+}
+
+void ArktsDynamicUIContentImpl::SetAniLocalContextFromHost()
+{
+    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
+        return;
+    }
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    if (!aceContainer->IsArkTsFrontEnd()) {
+        return;
+    }
+    auto arktsFrontend = aceContainer->GetFrontend();
+    CHECK_NULL_VOID(arktsFrontend);
+    arktsFrontend->SetHostContext(instanceId_, arktsFrontend->GetHostContext(hostInstanceId_));
 }
 } // namespace OHOS::Ace::NG
