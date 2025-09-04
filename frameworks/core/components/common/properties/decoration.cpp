@@ -323,11 +323,16 @@ BackgroundImagePosition BackgroundImagePosition::operator*(double value) const
 
 bool BackgroundImagePosition::operator==(const BackgroundImagePosition& backgroundImagePosition) const
 {
-    bool isXAxisEqual = (GetSizeX() == backgroundImagePosition.GetSizeX()) &&
-                        GetSizeTypeX() == backgroundImagePosition.GetSizeTypeX();
-    bool isYAxisEqual = (GetSizeY() == backgroundImagePosition.GetSizeY()) &&
-                        GetSizeTypeY() == backgroundImagePosition.GetSizeTypeY();
-    return isXAxisEqual && isYAxisEqual;
+    bool isXAxisEqual =
+        (GetSizeX() == backgroundImagePosition.GetSizeX()) && GetSizeTypeX() == backgroundImagePosition.GetSizeTypeX();
+    bool isYAxisEqual =
+        (GetSizeY() == backgroundImagePosition.GetSizeY()) && GetSizeTypeY() == backgroundImagePosition.GetSizeTypeY();
+    bool isOffsetBaseOnAlignmentNeededEqual =
+        (GetIsOffsetBaseOnAlignmentNeeded() == backgroundImagePosition.GetIsOffsetBaseOnAlignmentNeeded());
+    bool isPercentEqual = (GetPercentX() == backgroundImagePosition.GetPercentX()) &&
+                          (GetPercentY() == backgroundImagePosition.GetPercentY());
+    bool isDirectionEqual = (GetDirectionType() == backgroundImagePosition.GetDirectionType());
+    return isXAxisEqual && isYAxisEqual && isOffsetBaseOnAlignmentNeededEqual && isPercentEqual && isDirectionEqual;
 }
 
 bool BackgroundImagePosition::operator!=(const BackgroundImagePosition& backgroundImagePosition) const

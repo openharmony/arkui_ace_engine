@@ -1221,6 +1221,21 @@ typedef enum {
      *
      */
     NODE_MARK_ANCHOR,
+
+    /**
+     * @brief Defines the position of the background image in the component, that is, the coordinates relative to
+     * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
+     *
+     * @since 12
+     */
     /**
      * @brief Defines the position of the background image in the component, that is, the coordinates relative to
      * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
