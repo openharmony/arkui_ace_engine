@@ -126,7 +126,9 @@ int32_t SheetManager::OpenBindSheetByUIContext(
         return customNode;
     };
 
-    auto context = AceType::Claim(sheetContentNode->GetContext());
+    auto container = Container::GetContainer(currentInstanceId);
+    CHECK_NULL_RETURN(container, ERROR_CODE_INTERNAL_ERROR);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(context, ERROR_CODE_INTERNAL_ERROR);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);

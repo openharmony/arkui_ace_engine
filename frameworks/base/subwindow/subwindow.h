@@ -255,6 +255,21 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
+    virtual int32_t ShowBindSheetByUIContext(
+        const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack,
+        int32_t targetId) = 0;
+    
+    virtual int32_t UpdateBindSheetByUIContext(
+        const RefPtr<NG::FrameNode> &sheetContentNode, const NG::SheetStyle &sheetStyle, bool isPartialUpdate) = 0;
+    virtual int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode> &sheetContentNode) = 0;
     virtual void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) = 0;
     virtual bool NeedFollowParentWindowLayout() = 0;
     virtual void AddFollowParentWindowLayoutNode(int32_t nodeId) = 0;

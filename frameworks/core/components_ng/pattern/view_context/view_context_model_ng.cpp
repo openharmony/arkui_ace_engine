@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -77,6 +79,13 @@ int32_t ViewContextModelNG::OpenBindSheet(
     std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
     int32_t currentInstanceId, int32_t targetId)
 {
+    if (sheetStyle.showInSubWindow.value_or(false)) {
+        return SubwindowManager::GetInstance()->ShowBindSheetByUIContext(sheetContentNode, std::move(titleBuildFunc),
+            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+            std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+            std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+            std::move(sheetSpringBack), currentInstanceId, targetId);
+    }
     return SheetManager::GetInstance().OpenBindSheetByUIContext(sheetContentNode, std::move(titleBuildFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -87,12 +96,33 @@ int32_t ViewContextModelNG::OpenBindSheet(
 int32_t ViewContextModelNG::UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
     const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
 {
+    auto scroll = sheetContentNode->GetParent();
+    CHECK_NULL_RETURN(scroll, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto sheetPage = AceType::DynamicCast<FrameNode>(scroll->GetParent());
+    CHECK_NULL_RETURN(sheetPage, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto currentsheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (currentsheetStyle.showInSubWindow.value_or(false)) {
+        return SubwindowManager::GetInstance()->UpdateBindSheetByUIContext(
+            sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
+    }
     return SheetManager::GetInstance().UpdateBindSheetByUIContext(
         sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
 }
 
 int32_t ViewContextModelNG::CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId)
 {
+    auto scroll = sheetContentNode->GetParent();
+    CHECK_NULL_RETURN(scroll, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto sheetPage = AceType::DynamicCast<FrameNode>(scroll->GetParent());
+    CHECK_NULL_RETURN(sheetPage, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto currentsheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (currentsheetStyle.showInSubWindow.value_or(false)) {
+        return SubwindowManager::GetInstance()->CloseBindSheetByUIContext(sheetContentNode, currentInstanceId);
+    }
     return SheetManager::GetInstance().CloseBindSheetByUIContext(sheetContentNode, currentInstanceId);
 }
 } // namespace OHOS::Ace::NG
