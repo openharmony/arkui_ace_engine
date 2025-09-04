@@ -3182,11 +3182,16 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Ren
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniModule.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/module.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/common/common_module.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/common/common_module.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.cpp @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkuiframework
+
 frameworks/core/interfaces/native/ani/common_ani_modifier.h @arkuiframework
 frameworks/core/interfaces/native/ani/common_ani_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/ani/custom_node_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
@@ -3204,6 +3209,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/transfer/ @arkuiframework
 frameworks/bridge/arkts_frontend/entry/ @arkuiframework
 
 frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui_image
