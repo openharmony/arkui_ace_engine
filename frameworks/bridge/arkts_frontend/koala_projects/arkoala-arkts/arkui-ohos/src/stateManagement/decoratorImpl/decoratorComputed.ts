@@ -82,7 +82,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         let newValue: T;
         try {
             newValue = this.computedLambda_();
-        } catch (e: Exception) {
+        } catch (e) {
             StateMgmtConsole.log(`@Computed Exception caught for ${this.varName}: ${e.toString()}.`);
             throw e;
         } finally {
