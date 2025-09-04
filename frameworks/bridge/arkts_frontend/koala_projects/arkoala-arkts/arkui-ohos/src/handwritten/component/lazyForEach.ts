@@ -169,7 +169,7 @@ export function LazyForEachImpl<T>(
     })
     style?.(receiver)
     if(!receiver.dataSource) {
-            InteropNativeModule._NativeLog("LazyForEach receiver.dataSource null ")
+        InteropNativeModule._NativeLog("LazyForEach receiver.dataSource null ")
     }
     else {
         LazyForEachImplForOptions(
