@@ -41,9 +41,13 @@ public:
     void SetSwiperAction(std::shared_ptr<ArkUINode> node)
     {
         swipeContent_ = node;
-        swipeItem_ = OH_ArkUI_ListItemSwipeActionItem_Create();
-        OH_ArkUI_ListItemSwipeActionItem_SetContent(swipeItem_, node->GetHandle());
-        swipeAction_ = OH_ArkUI_ListItemSwipeActionOption_Create();
+        if (!swipeItem_) {
+            swipeItem_ = OH_ArkUI_ListItemSwipeActionItem_Create();
+        }
+        OH_ArkUI_ListItemSwipeActionItem_SetContent(swipeItem_, node ? node->GetHandle() : nullptr);
+        if (swipeAction_) {
+            swipeAction_ = OH_ArkUI_ListItemSwipeActionOption_Create();
+        }
         OH_ArkUI_ListItemSwipeActionOption_SetEnd(swipeAction_, swipeItem_);
         ArkUI_AttributeItem Item = {.object = swipeAction_};
         nativeModule_->setAttribute(handle_, NODE_LIST_ITEM_SWIPE_ACTION, &Item);

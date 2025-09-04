@@ -37,6 +37,7 @@ public:
         } else {
             nativeModule_->resetAttribute(handle_, NODE_LIST_ITEM_GROUP_SET_HEADER);
         }
+        header_ = node;
     }
 
     void SetFooter(std::shared_ptr<ArkUINode> node)
@@ -47,6 +48,7 @@ public:
         } else {
             nativeModule_->resetAttribute(handle_, NODE_LIST_ITEM_GROUP_SET_FOOTER);
         }
+        footer = node;
     }
 
     std::shared_ptr<ArkUINode> GetHeader() const

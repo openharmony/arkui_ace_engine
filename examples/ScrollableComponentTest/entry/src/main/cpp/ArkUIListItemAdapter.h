@@ -153,7 +153,9 @@ private:
             // 使用并更新回收复用的缓存。
             auto recycledItem = cachedItems_.top();
             auto textItem = std::dynamic_pointer_cast<ArkUITextNode>(recycledItem->GetChildren().back());
-            textItem->SetTextContent(data_[index]);
+            if (textItem) {
+                textItem->SetTextContent(data_[index]);
+            }
             handle = recycledItem->GetHandle();
             auto swipeContent = recycledItem->GetSwipeContent();
             swipeContent->RegisterOnClick([this, data = data_[index]](ArkUI_NodeEvent *event) {
@@ -205,8 +207,11 @@ private:
     void OnItemDetached(ArkUI_NodeAdapterEvent *event)
     {
         auto item = OH_ArkUI_NodeAdapterEvent_GetRemovedNode(event);
-        // 放置到缓存池中进行回收复用。
-        cachedItems_.emplace(items_[item]);
+        std::shared_ptr<ArkUIListItemNode>> itemNode = items_[item];
+        if (itemNode) {
+            // 放置到缓存池中进行回收复用。
+            cachedItems_.emplace(itemNode);
+        }
     }
 
     std::vector<std::string> data_;
