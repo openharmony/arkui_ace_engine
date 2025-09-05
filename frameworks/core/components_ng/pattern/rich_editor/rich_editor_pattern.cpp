@@ -5779,9 +5779,11 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
         return;
     }
     std::u16string deleteText = DeleteForwardOperation(length, false);
-    if (record && deleteText.length() != 0) {
-        record->deleteText = deleteText;
-    }
+    auto isDeleteContent = !deleteText.empty();
+    IF_TRUE(isDeleteContent && record, record->deleteText = deleteText);
+    auto isDeleteLastContent = isDeleteContent && previewTextRecord_.needReplacePreviewText &&
+        previewTextRecord_.newPreviewContent.empty() && !previewTextRecord_.previewContent.empty();
+    IF_TRUE(isDeleteLastContent, FireOnSelectionChange(caretPosition_));
 }
 
 bool RichEditorPattern::NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record)

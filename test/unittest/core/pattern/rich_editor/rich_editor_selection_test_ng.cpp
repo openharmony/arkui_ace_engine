@@ -2233,4 +2233,27 @@ HWTEST_F(RichEditorSelectionTestNg, GetSpansInfo001, TestSize.Level1)
     EXPECT_EQ(info4.selection_.selection[1], 1);
 }
 
+/**
+ * @tc.name: DeleteByRange001
+ * @tc.desc: test DeleteByRange func
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, DeleteByRange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
+    richEditorPattern->previewTextRecord_.newPreviewContent = u"";
+    richEditorPattern->previewTextRecord_.previewContent = INIT_VALUE_1;
+    richEditorPattern->lastSelectionRange_ = { -1, -1 };
+    auto value = richEditorPattern->lastSelectionRange_;
+    richEditorPattern->DeleteByRange(nullptr, 1, 2);
+    EXPECT_TRUE(value == richEditorPattern->lastSelectionRange_);
+}
 } // namespace OHOS::Ace::NG
