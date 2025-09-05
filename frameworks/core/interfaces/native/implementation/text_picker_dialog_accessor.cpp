@@ -225,8 +225,10 @@ void BuildTextPickerDialog(const Ark_TextPickerDialogOptions& options, TextPicke
     }
     pickerDialog.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
     pickerDialog.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
-    pickerDialog.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        pickerDialog.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
     pickerDialog.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
     pickerDialog.effectOption =  Converter::OptConvert<EffectOption>(options.backgroundEffect);
     pickerDialog.shadow = Converter::OptConvert<Shadow>(options.shadow);

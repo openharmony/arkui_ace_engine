@@ -59,8 +59,10 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& op
     if (offset) {
         dialogInfo.offset = offset.value();
     }
-    dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        dialogInfo.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
     dialogInfo.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
     dialogInfo.effectOption =  Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
