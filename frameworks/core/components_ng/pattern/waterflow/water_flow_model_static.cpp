@@ -100,9 +100,14 @@ void WaterFlowModelStatic::SetCachedCount(FrameNode* frameNode, const std::optio
     }
 }
 
-void WaterFlowModelStatic::SetShowCached(FrameNode* frameNode, bool show)
+void WaterFlowModelStatic::SetShowCached(FrameNode* frameNode, const std::optional<bool>& show)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (show) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, frameNode);
+    }
 }
 
 RefPtr<WaterFlowSections> WaterFlowModelStatic::GetOrCreateWaterFlowSections(FrameNode* frameNode)

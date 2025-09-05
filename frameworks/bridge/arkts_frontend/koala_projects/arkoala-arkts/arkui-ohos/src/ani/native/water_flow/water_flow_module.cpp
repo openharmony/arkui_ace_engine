@@ -190,16 +190,16 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
 
     ani_ref func;
     env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "onGetItemMainSizeByIndex", &func);
-
-    ani_class ClassGetItemMainSizeByIndex;
-    env->FindClass("std.core.Function1", &ClassGetItemMainSizeByIndex);
-    ani_boolean isGetItemMainSizeByIndex;
-    env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
-
     isUndefined = false;
+    ani_boolean isGetItemMainSizeByIndex = ANI_FALSE;
     env->Reference_IsUndefined(func, &isUndefined);
+    if (!isUndefined) {
+        ani_class ClassGetItemMainSizeByIndex;
+        env->FindClass("std.core.Function1", &ClassGetItemMainSizeByIndex);
+        env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
+    }
 
-    if (isGetItemMainSizeByIndex && !isUndefined) {
+    if (isGetItemMainSizeByIndex) {
         ani_ref fnObjGlobalRef = nullptr;
         env->GlobalReference_Create(func, &fnObjGlobalRef);
         auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
@@ -266,12 +266,12 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
             continue;
         }
 
-        ani_double start = 0.0;
-        if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(change), "start", &start) != ANI_OK) {
+        ani_int start = 0;
+        if (env->Object_GetPropertyByName_Int(static_cast<ani_object>(change), "start", &start) != ANI_OK) {
             continue;
         }
-        ani_double deleteCount = 0.0;
-        if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(change), "deleteCount", &deleteCount) !=
+        ani_int deleteCount = 0;
+        if (env->Object_GetPropertyByName_Int(static_cast<ani_object>(change), "deleteCount", &deleteCount) !=
             ANI_OK) {
             continue;
         }
@@ -316,5 +316,38 @@ void SetWaterFlowFooterContent(ani_env* env, [[maybe_unused]] ani_object aniClas
         return;
     }
     modifier->getArkUIAniWaterFlowModifier()->setWaterFlowFooterContent(arkNode, footerNode);
+}
+
+void SetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long footerPtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    auto* footerNode = reinterpret_cast<ArkUINodeHandle>(footerPtr);
+    if (!modifier || !arkNode || !footerNode) {
+        return;
+    }
+    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowFooter(arkNode, footerNode);
+}
+
+void SetWaterFlowScroller(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long scrollerPtr)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    CHECK_NULL_VOID(arkNode);
+    auto* scroller = reinterpret_cast<void*>(scrollerPtr);
+    CHECK_NULL_VOID(scroller);
+
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowScroller(arkNode, scroller);
+}
+
+void SetWaterFlowLayoutMode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int mode)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    CHECK_NULL_VOID(arkNode);
+
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowLayoutMode(arkNode, static_cast<int32_t>(mode));
 }
 } // namespace OHOS::Ace::Ani

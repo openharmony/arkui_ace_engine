@@ -547,8 +547,11 @@ struct ArkUIAniLazyForEachNodeModifier {
 };
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowSection)(
-        ArkUINodeHandle node, double start, double deleteCount, void* section, ArkUI_Int32 size);
+        ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size);
     void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setWaterFlowFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
+    void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
 };
 struct ArkUIAniListModifier {
     bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);

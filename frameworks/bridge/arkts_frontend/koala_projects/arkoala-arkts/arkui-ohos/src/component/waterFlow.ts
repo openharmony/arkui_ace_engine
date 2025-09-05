@@ -27,9 +27,9 @@ import { ConstraintSizeOptions, Length, Dimension, Padding } from "./units"
 import { FlexDirection } from "./enums"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContent } from "./arkui-custom"
+import { ComponentContentBase } from "../ComponentContent"
 import { Scroller, OnScrollFrameBeginCallback } from "./scroll"
-import { WaterFlowHandWritten } from "../handwritten/WaterFlowImpl"
+import { hookWaterFlowOptionsImpl } from "../handwritten/WaterFlowImpl"
 import { WaterFlowModifier } from "../WaterFlowModifier"
 import { hookWaterFlowAttributeModifier } from "../handwritten"
 
@@ -46,7 +46,6 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setWaterFlowOptionsAttribute(options?: WaterFlowOptions): void {
-        WaterFlowHandWritten.hookWaterFlowOptionsImpl(this, options);
         const thisSerializer : Serializer = Serializer.hold()
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -299,7 +298,7 @@ export enum WaterFlowLayoutMode {
 }
 export interface WaterFlowOptions {
     footer?: CustomBuilder;
-    footerContent?: ComponentContent;
+    footerContent?: ComponentContentBase;
     scroller?: Scroller;
     sections?: WaterFlowSections;
     layoutMode?: WaterFlowLayoutMode;
@@ -407,7 +406,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
-            this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+            hookWaterFlowOptionsImpl(this, options);
             return this
         }
         return this

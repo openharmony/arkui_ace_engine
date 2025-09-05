@@ -12900,9 +12900,9 @@ export class Deserializer extends DeserializerBase {
         let footerContent_buf : ComponentContent | undefined
         if ((RuntimeType.UNDEFINED) != (footerContent_buf_runtimeType))
         {
-            footerContent_buf = (valueDeserializer.readComponentContent() as ComponentContent)
+            footerContent_buf = undefined
         }
-        const footerContent_result : ComponentContent | undefined = footerContent_buf
+        const footerContent_result : ComponentContent | undefined = undefined
         const scroller_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let scroller_buf : Scroller | undefined
         if ((RuntimeType.UNDEFINED) != (scroller_buf_runtimeType))
