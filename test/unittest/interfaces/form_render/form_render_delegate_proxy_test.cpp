@@ -19,7 +19,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_proxy.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
-#include "test/mock/interfaces/mock_i_remote_object_form.h"
+#include "test/unittest/interfaces/form_render/mock/mock_i_remote_object_form.h"
 
 using namespace testing;
 using namespace testing::ext;

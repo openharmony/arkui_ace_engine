@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 #include "form_mgr_errors.h"
 #include "test/mock/interfaces/mock_uicontent.h"
-#include "test/mock/interfaces/mock_form_render_delegate_stub.h"
+#include "test/unittest/interfaces/form_render/mock/mock_form_render_delegate_stub.h"
 #include "ui_content.h"
 
 #define private public
@@ -498,7 +498,6 @@ HWTEST_F(FormRenderTest, FormRenderTest012, TestSize.Level1)
     ASSERT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    formRenderer->ResetRenderDelegate();
 }
 
 /**
