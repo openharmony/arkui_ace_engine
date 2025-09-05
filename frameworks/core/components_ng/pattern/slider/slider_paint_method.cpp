@@ -76,7 +76,7 @@ void SliderPaintMethod::SetAttrParameters(const RefPtr<FrameNode>& host)
     sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
     sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
     sliderContentModifier_->SetBlockColor(parameters_.blockColor);
-    sliderContentModifier_->SetLinerGradientBlockColor(parameters_.blockGradientColor);
+    sliderContentModifier_->SetLinearGradientBlockColor(parameters_.blockGradientColor);
     sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
     sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
 }

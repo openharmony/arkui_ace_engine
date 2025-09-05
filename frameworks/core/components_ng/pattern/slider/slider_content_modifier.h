@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void SetLinerGradientBlockColor(const Gradient& color)
+    void SetLinearGradientBlockColor(const Gradient& color)
     {
         if (blockGradientColor_) {
             blockGradientColor_->Set(GradientArithmetic(color));

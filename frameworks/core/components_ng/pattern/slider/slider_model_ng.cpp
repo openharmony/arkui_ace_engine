@@ -72,7 +72,7 @@ void SliderModelNG::SetReverse(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value);
 }
-void SliderModelNG::SetBlockColor(const Gradient& value, bool isResourceColor)
+void SliderModelNG::SetLinearGradientBlockColor(const Gradient& value, bool isResourceColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockGradientColor, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockIsResourceColor, isResourceColor);
@@ -461,7 +461,7 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColorSetByUser, true, frameNode);
 }
-void SliderModelNG::SetLinerGradientBlockColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
+void SliderModelNG::SetLinearGradientBlockColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockGradientColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockIsResourceColor, isResourceColor, frameNode);
@@ -693,7 +693,7 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
     return value;
 }
 
-Gradient SliderModelNG::GetLinerGradientBlockColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetLinearGradientBlockColor(FrameNode* frameNode)
 {
     Gradient value;
     CHECK_NULL_RETURN(frameNode, value);

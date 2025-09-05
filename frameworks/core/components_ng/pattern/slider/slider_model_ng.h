@@ -42,7 +42,7 @@ public:
     void SetDirection(Axis value) override;
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override {};
-    void SetBlockColor(const Gradient& value, bool isResourceColor = false) override;
+    void SetLinearGradientBlockColor(const Gradient& value, bool isResourceColor = false) override;
     void SetTrackBackgroundColor(const Color& value) override {};
     void SetTrackBackgroundColor(const Gradient& value, bool isResourceColor = false) override;
     void SetSelectColor(const Color& value) override;
@@ -116,7 +116,7 @@ public:
     static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
-    static void SetLinerGradientBlockColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
+    static void SetLinearGradientBlockColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetShowSteps(
@@ -166,7 +166,7 @@ public:
     static void SetSliderMode(FrameNode* frameNode, const SliderMode& value);
 
     static Color GetBlockColor(FrameNode* frameNode);
-    static Gradient GetLinerGradientBlockColor(FrameNode* frameNode);
+    static Gradient GetLinearGradientBlockColor(FrameNode* frameNode);
     static Gradient GetTrackBackgroundColor(FrameNode* frameNode);
     static Gradient GetSelectColor(FrameNode* frameNode);
     static bool GetShowSteps(FrameNode* frameNode);

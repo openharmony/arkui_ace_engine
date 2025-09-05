@@ -1934,8 +1934,8 @@ HWTEST_F(SliderExTestNg, SliderBlockGradientColor001, TestSize.Level1)
     defaultGradient.AddColor(gradientColor2);
     std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
     SliderModelNG::ResetBlockColor(Referenced::RawPtr(frameNode));
-    SliderModelNG::SetLinerGradientBlockColor(Referenced::RawPtr(frameNode), defaultGradient);
-    Gradient testGradient = SliderModelNG::GetLinerGradientBlockColor(Referenced::RawPtr(frameNode));
+    SliderModelNG::SetLinearGradientBlockColor(Referenced::RawPtr(frameNode), defaultGradient);
+    Gradient testGradient = SliderModelNG::GetLinearGradientBlockColor(Referenced::RawPtr(frameNode));
     std::vector<GradientColor> testGradientColors = testGradient.GetColors();
 
     EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
