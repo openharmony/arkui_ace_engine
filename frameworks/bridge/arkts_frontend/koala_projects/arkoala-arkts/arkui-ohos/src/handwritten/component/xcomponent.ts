@@ -14,13 +14,13 @@
  */
 
 
-import { TypeChecker } from "#components"
-import { ArkUIAniModule } from "arkui.ani";
+import { TypeChecker } from '#components'
+import { ArkUIAniModule } from 'arkui.ani';
 import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from './common';
-import { applyAttributeModifierBase, applyCommonModifier } from "../handwritten/modifiers/ArkCommonModifier";
+import { applyAttributeModifierBase, applyCommonModifier } from '../handwritten/modifiers/ArkCommonModifier';
 import { PeerNode } from '../PeerNode';
 import { CommonMethodModifier, AttributeUpdaterFlag } from '../CommonMethodModifier';
-import { CommonModifier } from "../CommonModifier";
+import { CommonModifier } from '../CommonModifier';
 
 export interface XComponentControllerCallbackInternal {
     onSurfaceCreated: ((surfaceId: string) => void);
@@ -42,7 +42,7 @@ export class SurfaceRectAniInternal implements SurfaceRect {
 }
 
 export class TypedXComponentPeerInternal extends ArkXComponentPeer {
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
 }
@@ -273,7 +273,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         }
     }
     onLoad(value: VoidCallback | undefined): this {
-        if (((this._onLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._onLoad_0_flag) === (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoad_0_0value = value
@@ -285,7 +285,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     onDestroy(value: VoidCallback | undefined): this {
-        if (((this._onDestroy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._onDestroy_0_flag) === (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onDestroy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDestroy_0_0value = value
@@ -297,7 +297,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     enableAnalyzer(value: boolean | undefined): this {
-        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
+        if (((this._enableAnalyzer_0_flag) === (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
@@ -309,7 +309,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     enableSecure(value: boolean | undefined): this {
-        if (((this._enableSecure_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSecure_0_0value) !== (value)))
+        if (((this._enableSecure_0_flag) === (AttributeUpdaterFlag.INITIAL)) || ((this._enableSecure_0_0value) !== (value)))
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableSecure_0_0value = value
@@ -321,7 +321,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     hdrBrightness(value: number | undefined): this {
-        if (((this._hdrBrightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hdrBrightness_0_0value) !== (value)))
+        if (((this._hdrBrightness_0_flag) === (AttributeUpdaterFlag.INITIAL)) || ((this._hdrBrightness_0_0value) !== (value)))
         {
             this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
             this._hdrBrightness_0_0value = value
@@ -333,7 +333,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     enableTransparentLayer(value: boolean | undefined): this {
-        if (((this._enableTransparentLayer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableTransparentLayer_0_0value) !== (value)))
+        if (((this._enableTransparentLayer_0_flag) === (AttributeUpdaterFlag.INITIAL)) || ((this._enableTransparentLayer_0_0value) !== (value)))
         {
             this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableTransparentLayer_0_0value = value
@@ -346,7 +346,8 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     }
 }
 
-function hookXComponentAttributeModifier(component: ArkXComponentComponent, modifier: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+function hookXComponentAttributeModifier(
+    component: ArkXComponentComponent, modifier: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
         return;
     }
@@ -372,5 +373,6 @@ function hookXComponentAttributeModifier(component: ArkXComponentComponent, modi
         componentNew.setPeer(component.getPeer());
         return componentNew;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<XComponentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    applyAttributeModifierBase(
+        modifier as Object as AttributeModifier<XComponentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
