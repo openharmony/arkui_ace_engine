@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1897,6 +1897,45 @@ HWTEST_F(SliderExTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
 
     SliderModelNG::SetTrackBackgroundColor(Referenced::RawPtr(frameNode), defaultGradient);
     Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(Referenced::RawPtr(frameNode));
+    std::vector<GradientColor> testGradientColors = testGradient.GetColors();
+
+    EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
+    EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(1).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(1).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(0).GetDimension(), testGradientColors.at(0).GetDimension());
+    EXPECT_EQ(defaultGradientColors.at(1).GetDimension(), testGradientColors.at(1).GetDimension());
+}
+
+/**
+ * @tc.name: SliderBlockGradientColor001
+ * @tc.desc: Check "SliderBlockColor" an "GetBlockColor"  API
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderExTestNg, SliderBlockGradientColor001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+
+    Gradient defaultGradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::GREEN));
+    gradientColor1.SetDimension(Dimension(0.0));
+    defaultGradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(1.0));
+    defaultGradient.AddColor(gradientColor2);
+    std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
+    SliderModelNG::ResetBlockColor(Referenced::RawPtr(frameNode));
+    SliderModelNG::SetLinerGradientBlockColor(Referenced::RawPtr(frameNode), defaultGradient);
+    Gradient testGradient = SliderModelNG::GetLinerGradientBlockColor(Referenced::RawPtr(frameNode));
     std::vector<GradientColor> testGradientColors = testGradient.GetColors();
 
     EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());

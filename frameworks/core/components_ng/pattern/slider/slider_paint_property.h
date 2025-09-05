@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,21 @@ public:
         return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
     }
 
+    std::string ToJsonBlockColor() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, "");
+        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        CHECK_NULL_RETURN(theme, "");
+        if (HasBlockGradientColor()) {
+            Gradient colors = GetBlockGradientColor().value();
+            return GradientToJson(colors);
+        }
+        return GetBlockColor().value_or(theme->GetBlockColor()).ColorToString();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
@@ -152,8 +167,7 @@ public:
         jsonConstructor->Put("direction",
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
         json->PutExtAttr("constructor", jsonConstructor, filter);
-        json->PutExtAttr("blockColor",
-            GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("blockColor", ToJsonBlockColor().c_str(), filter);
         json->PutExtAttr("trackColor", ToJsonTrackBackgroundColor().c_str(), filter);
         json->PutExtAttr("selectedColor", ToJsonSelectColor().c_str(), filter);
         json->PutExtAttr("showSteps", GetShowSteps().value_or(false) ? "true" : "false", filter);
@@ -245,6 +259,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)

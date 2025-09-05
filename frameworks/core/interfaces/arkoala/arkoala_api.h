@@ -44,6 +44,7 @@ extern "C" {
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
+#define ARKUI_NUM_TEN 10
 #define ARKUI_MAX_ANCHOR_ID_SIZE 50
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -4425,6 +4426,19 @@ struct ArkUISliderModifier {
     void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setShowStepsWithOptions)(
         ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
+    void (*setLinearBlockColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
+
+    void (*resetLinearTrackBackgroundColor)(ArkUINodeHandle node);
+    void (*resetLinearSelectColor)(ArkUINodeHandle node);
+    void (*resetLinearBlockColor)(ArkUINodeHandle node);
+
+    ArkUI_Int32 (*getLinearTrackBackgroundColor)(ArkUINodeHandle node,
+        ArkUI_Uint32 (*colors)[ARKUI_NUM_TEN], ArkUI_Float32 (*stop)[ARKUI_NUM_TEN]);
+    ArkUI_Int32 (*getLinearSelectColor)(ArkUINodeHandle node,
+        ArkUI_Uint32 (*colors)[ARKUI_NUM_TEN], ArkUI_Float32 (*stop)[ARKUI_NUM_TEN]);
+    ArkUI_Int32 (*getLinearBlockColor)(ArkUINodeHandle node,
+        ArkUI_Uint32 (*colors)[ARKUI_NUM_TEN], ArkUI_Float32 (*stop)[ARKUI_NUM_TEN]);
 };
 
 struct ArkUIProgressModifier {

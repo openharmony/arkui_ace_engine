@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -872,6 +872,31 @@ HWTEST_F(SliderTestNg, SliderTestNg013, TestSize.Level1)
     EXPECT_NE(sliderPaintProperty, nullptr);
     EXPECT_EQ(true, sliderPaintProperty->GetTrackBackgroundColor().has_value());
     EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor().value(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
+}
+
+/**
+ * @tc.name: SliderTestNg014
+ * @tc.desc: Test Slider Block Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties, and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(sliderPaintProperty, nullptr);
+    EXPECT_EQ(true, sliderPaintProperty->GetBlockGradientColor().has_value());
+    EXPECT_EQ(sliderPaintProperty->GetBlockGradientColor().value(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
 }
 
 /**

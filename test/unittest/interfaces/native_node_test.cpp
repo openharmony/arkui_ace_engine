@@ -8377,6 +8377,40 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest148
+ * @tc.desc: Test imageNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest148, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SLIDER);
+    uint32_t colors[] = {0xFFFEBB62, 0xffFFA0A4, 0xffFF0000};
+    float stops[] = {0.0, 0.5, 1};
+    ArkUI_ColorStop linerGrand[] = {{colors, stops, 3}};
+    ArkUI_AttributeItem item = {nullptr, 0, nullptr, linerGrand};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: NativeNodeTest_OutlineColor001
  * @tc.desc: Test customNode function.
  * @tc.type: FUNC

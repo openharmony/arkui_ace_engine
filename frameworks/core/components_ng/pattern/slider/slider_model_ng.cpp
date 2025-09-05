@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,10 +72,10 @@ void SliderModelNG::SetReverse(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value);
 }
-void SliderModelNG::SetBlockColor(const Color& value)
+void SliderModelNG::SetBlockColor(const Gradient& value, bool isResourceColor)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockColorSetByUser, true);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockGradientColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockIsResourceColor, isResourceColor);
 }
 void SliderModelNG::SetTrackBackgroundColor(const Gradient& value, bool isResourceColor)
 {
@@ -461,6 +461,12 @@ void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColorSetByUser, true, frameNode);
 }
+void SliderModelNG::SetLinerGradientBlockColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockGradientColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockIsResourceColor, isResourceColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColorSetByUser, true, frameNode);
+}
 void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
@@ -553,11 +559,6 @@ void SliderModelNG::ResetBlockBorderColor(FrameNode* frameNode)
 void SliderModelNG::ResetBlockBorderWidth(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockBorderWidth, PROPERTY_UPDATE_RENDER, frameNode);
-}
-
-void SliderModelNG::ResetBlockColor(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
@@ -689,6 +690,20 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
     Color value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderPaintProperty, BlockColor, value, frameNode, Color(BLOCK_COLOR));
+    return value;
+}
+
+Gradient SliderModelNG::GetLinerGradientBlockColor(FrameNode* frameNode)
+{
+    Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockGradientColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(BLOCK_COLOR)));
     return value;
 }
 
@@ -1076,6 +1091,18 @@ void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
 void SliderModelNG::ResetBlockColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockGradientColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetBlockColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        BlockColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        BlockIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        BlockGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void SliderModelNG::ResetSelectColor()

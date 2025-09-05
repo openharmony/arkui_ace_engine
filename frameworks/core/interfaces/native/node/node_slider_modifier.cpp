@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ const float DEFAULT_STEP_VALUE = 1.0;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+const int32_t NUM_TEN = 10;
 namespace SliderModifier {
 
 thread_local std::string g_strValue;
@@ -266,6 +267,22 @@ void SetBlockColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
             SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
         }
     }
+}
+
+void SetLinearBlockColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(gradient);
+    OHOS::Ace::NG::Gradient tempGradient;
+    for (int32_t j = 0; j < colorLength; j++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
+        gradientColor.SetDimension(
+            Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
+        tempGradient.AddColor(gradientColor);
+    }
+    SliderModelNG::SetLinerGradientBlockColor(frameNode, tempGradient, false);
 }
 
 void ResetBlockColor(ArkUINodeHandle node)
@@ -765,6 +782,57 @@ ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
     return gradient.GetColors().at(0).GetLinearColor().ToColor().GetValue();
 }
 
+ArkUI_Int32 GetLinearBlockColor(ArkUINodeHandle node,
+    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    NG::Gradient gradient = SliderModelNG::GetLinerGradientBlockColor(frameNode);
+    std::vector<OHOS::Ace::NG::GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        (*colors)[index] = gradientColor.GetLinearColor().GetValue();
+        (*stop)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
+ArkUI_Int32 GetLinearSelectColor(ArkUINodeHandle node,
+    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    NG::Gradient gradient = SliderModelNG::GetSelectColor(frameNode);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        (*colors)[index] = gradientColor.GetLinearColor().GetValue();
+        (*stop)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
+ArkUI_Int32 GetLinearTrackBackgroundColor(ArkUINodeHandle node,
+    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    NG::Gradient gradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        (*colors)[index] = gradientColor.GetLinearColor().GetValue();
+        (*stop)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1001,6 +1069,13 @@ const ArkUISliderModifier* GetSliderModifier()
         .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
         .setShowStepsWithOptions = SliderModifier::SetShowStepsWithOptions,
+        .setLinearBlockColor = SliderModifier::SetLinearBlockColor,
+        .resetLinearBlockColor = SliderModifier::ResetBlockColor,
+        .resetLinearTrackBackgroundColor = SliderModifier::ResetTrackBackgroundColor,
+        .resetLinearSelectColor = SliderModifier::ResetSelectColor,
+        .getLinearTrackBackgroundColor = SliderModifier::GetLinearTrackBackgroundColor,
+        .getLinearSelectColor = SliderModifier::GetLinearSelectColor,
+        .getLinearBlockColor = SliderModifier::GetLinearBlockColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

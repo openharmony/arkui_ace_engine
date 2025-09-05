@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,16 +249,26 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    RefPtr<ResourceObject> resObj;
-    if (!ParseJsColor(info[0], colorVal, resObj)) {
-        SliderModel::GetInstance()->ResetBlockColor();
-    } else {
+    NG::Gradient gradient;
+    bool isResourceColor = false;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
+            SliderModel::GetInstance()->ResetBlockColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+            }
+            return;
+        }
+        isResourceColor = true;
+        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         SliderModel::GetInstance()->SetBlockColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+        }
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
-    }
+    SliderModel::GetInstance()->SetBlockColor(gradient, isResourceColor);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)

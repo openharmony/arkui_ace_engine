@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -328,14 +328,35 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Gradient gradient;
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
-        GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
-    } else {
+    if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        auto colorLength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        if (colorLength <= 0) {
+            GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUINodeModifiers()->getSliderModifier()->setLinearBlockColor(nativeNode, &gradientObj, colorLength);
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         GetArkUINodeModifiers()->getSliderModifier()->setBlockColorPtr(nativeNode, color.GetValue(), colorRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

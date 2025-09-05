@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,6 +251,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
     sliderContentModifier.SetBlockBorderColor(TEST_COLOR);
     sliderContentModifier.SetBlockBorderWidth(SLIDER_CONTENT_MODIFIER_BLOCK_BORDER_WIDTH);
+    sliderContentModifier.SetLinerGradientBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
@@ -261,6 +262,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
     EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.blockGradientColor_->Get().GetGradient(),
         SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
@@ -2288,5 +2291,61 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest041, TestSize.Level1)
      * @tc.steps: step3. Check the param value.
      */
     ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest042
+ * @tc.desc: TEST gradient block color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor(Color::BLUE));
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    sliderContentModifier.SetLinerGradientBlockColor(gradient);
+
+
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    Gradient gradient3 = sliderContentModifier.blockGradientColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors3 = gradient3.GetColors();
+    EXPECT_EQ(gradientColors.size(), gradientColors3.size());
+    EXPECT_EQ(gradientColors[0].GetLinearColor(), gradientColors3[0].GetLinearColor());
+    EXPECT_EQ(gradientColors[1].GetLinearColor(), gradientColors3[1].GetLinearColor());
+    EXPECT_EQ(gradientColors[2].GetLinearColor(), gradientColors3[2].GetLinearColor());
+    EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors3[0].GetDimension());
+    EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors3[1].GetDimension());
+    EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors3[2].GetDimension());
 }
 } // namespace OHOS::Ace::NG
