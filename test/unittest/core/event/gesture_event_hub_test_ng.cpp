@@ -1397,8 +1397,14 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest019, TestSize.Level1)
      * @tc.expected: retFlag is false.
      */
     KeyEvent event;
+    event.deviceId = 1;
+    int receivedDeviceId = -1;
+    auto testClickEvent = AceType::MakeRefPtr<ClickEvent>(
+        [&receivedDeviceId](GestureEvent& info) { receivedDeviceId = info.GetDeviceId(); });
+    gestureEventHub->clickEventActuator_->AddClickEvent(testClickEvent);
     bool retFlag = gestureEventHub->KeyBoardShortCutClick(event, WeakPtr<NG::FrameNode>(frameNode));
     EXPECT_TRUE(retFlag);
+    EXPECT_EQ(receivedDeviceId, 1);
 }
 
 /**
