@@ -88,4 +88,48 @@ HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTes
     }
 }
 
+/**
+ * @tc.name: DragDropInitiatingStateMachineTestNG002
+ * @tc.desc: Test TransMenuShow function when isMenuShow is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTestNG002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator, get DragDropInitiatingStateMachine.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    /**
+     * @tc.steps: step2. Set currentState_ to READY and call TransMenuShow with false.
+     * @tc.expected: step2. the currentState_ is READY.
+     */
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+    machine->TransMenuShow(false);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+    /**
+     * @tc.steps: step3. Set currentState_ to LIFTING and call TransMenuShow with false.
+     * @tc.expected: step3. the currentState_ is IDLE.
+     */
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::LIFTING);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->TransMenuShow(false);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+}
+
 } // namespace OHOS::Ace::NG

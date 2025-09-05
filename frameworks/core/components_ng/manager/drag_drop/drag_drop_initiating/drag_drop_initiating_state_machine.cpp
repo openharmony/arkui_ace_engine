@@ -200,7 +200,9 @@ void DragDropInitiatingStateMachine::TransMenuShow(bool isMenuShow)
         return;
     }
     if (!isMenuShow) {
-        RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        if (currentState_ == static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)) {
+            RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        }
         return;
     }
     RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
