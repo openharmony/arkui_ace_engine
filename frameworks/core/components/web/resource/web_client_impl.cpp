@@ -1583,4 +1583,14 @@ bool WebClientImpl::IsShowHandle()
     CHECK_NULL_RETURN(delegate, false);
     return delegate->IsShowHandle();
 }
+
+void WebClientImpl::OnRefreshAccessedHistoryV2(const std::string& url, bool isReload, bool isMainFrame)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnRefreshAccessedHistory(url, isReload, isMainFrame);
+}
 } // namespace OHOS::Ace

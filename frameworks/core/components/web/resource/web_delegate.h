@@ -1104,7 +1104,7 @@ public:
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
-    void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
+    void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed, bool isMainFrame = false);
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
     void OnContextMenuDismissed();
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);

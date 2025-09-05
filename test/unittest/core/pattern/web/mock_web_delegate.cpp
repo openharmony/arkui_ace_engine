@@ -843,7 +843,7 @@ std::string WebDelegate::OnOverrideErrorPage(
 void WebDelegate::OnTooltip(const std::string& tooltip) {}
 void WebDelegate::OnRequestFocus() {}
 void WebDelegate::OnRenderExited(OHOS::NWeb::RenderExitReason reason) {}
-void WebDelegate::OnRefreshAccessedHistory(const std::string& url, bool isRefreshed) {}
+void WebDelegate::OnRefreshAccessedHistory(const std::string& url, bool isRefreshed, bool isMainFrame) {}
 void WebDelegate::OnPageError(const std::string& param) {}
 void WebDelegate::OnMessage(const std::string& param) {}
 void WebDelegate::OnRouterPush(const std::string& param) {}

@@ -5965,16 +5965,17 @@ void WebDelegate::OnRenderExited(OHOS::NWeb::RenderExitReason reason)
         TaskExecutor::TaskType::JS, "ArkUIWebRenderExited");
 }
 
-void WebDelegate::OnRefreshAccessedHistory(const std::string& url, bool isRefreshed)
+void WebDelegate::OnRefreshAccessedHistory(const std::string& url, bool isRefreshed, bool isMainFrame)
 {
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
-        [weak = WeakClaim(this), url, isRefreshed]() {
+        [weak = WeakClaim(this), url, isRefreshed, isMainFrame]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto onRefreshAccessedHistoryV2 = delegate->onRefreshAccessedHistoryV2_;
             if (onRefreshAccessedHistoryV2) {
-                onRefreshAccessedHistoryV2(std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed));
+                onRefreshAccessedHistoryV2(std::make_shared<RefreshAccessedHistoryEvent>(
+                    url, isRefreshed, isMainFrame));
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebRefreshAccessedHistory");
