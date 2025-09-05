@@ -937,4 +937,40 @@ HWTEST_F(GaugeModifierTestNg, GaugeModifierTest023, TestSize.Level1)
     // With large radius, the path should be created with large dimensions
     EXPECT_FALSE(path.IsValid());
 }
+
+/**
+ * @tc.name: GaugeModifierTest024
+ * @tc.desc: Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeModifierTestNg, GaugeModifierTest024, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create gauge.
+    */
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<Color> colors = {};
+        std::vector<float> values = { 1.0f, 2.0f };
+        model.SetColors(colors, values);
+    });
+    /**
+    * @tc.steps: step2. UpdateGauge
+    * @tc.expected: Expect functions to be call.
+    */
+    GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
+    RefPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+
+    std::vector<float> weights = { 1.0f, 1.0f };
+    paintProperty_->UpdateValues(weights);
+
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
+}
 }

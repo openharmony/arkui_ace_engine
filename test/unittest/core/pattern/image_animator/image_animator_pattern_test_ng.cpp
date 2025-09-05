@@ -393,4 +393,55 @@ HWTEST_F(ImageAnimatorPatternTestNg, OnePicFinish001, TestSize.Level1)
     // Check that playbackListener was triggered even though there's only one picture
     EXPECT_TRUE(numFlag2 == 1);
 }
+
+/**
+ * @tc.name: RunAnimatorByStatusTest001
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest001, TestSize.Level1)
+{
+    CreateImageAnimator(10);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(0);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(5);
+    EXPECT_EQ(pattern_->nowImageIndex_, 9);
+}
+
+/**
+ * @tc.name: RunAnimatorByStatusTest002
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest002, TestSize.Level1)
+{
+    CreateImageAnimator(13);
+    EXPECT_FALSE(pattern_->firstUpdateEvent_);
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(10);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(7);
+    EXPECT_EQ(pattern_->nowImageIndex_, 7);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(5);
+    EXPECT_EQ(pattern_->nowImageIndex_, 12);
+}
 } // namespace OHOS::Ace::NG
