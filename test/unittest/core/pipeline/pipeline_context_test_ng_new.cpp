@@ -3118,8 +3118,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg230, TestSize.Level1)
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
     context_->SetIsFormRender(false);
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockMockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
 
     context_->dirtyPropertyNodes_.clear();
     context_->FlushDirtyPropertyNodes();
