@@ -84,6 +84,15 @@ ani_object GetHostContext([[maybe_unused]] ani_env* env)
     return nullptr;
 }
 
+void SetFrameRateRange([[maybe_unused]] ani_env* env, ani_object obj, ani_long key, ani_object value, ani_int type)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setFrameRateRange(env, key, value, type);
+}
+
 void SyncInstanceId([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
 {
     const auto* modifier = GetNodeAniModifier();

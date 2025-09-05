@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -53,6 +53,7 @@ import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { KPointer } from "@koalaui/interop"
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -63,6 +64,41 @@ export class UIInspector {
 export interface TargetInfo {
     id: string | number;
     componentId?: number;
+}
+
+export class DynamicSyncScene {
+    private range: ExpectedFrameRateRange;
+    constructor(range: ExpectedFrameRateRange) {
+        this.range = range;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        this.range = range;
+    }
+
+    getFrameRateRange(): ExpectedFrameRateRange {
+        return this.range;
+    }
+}
+
+export const enum SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATION = 1,
+}
+
+export class SwiperDynamicSyncScene extends DynamicSyncScene {
+    readonly type: SwiperDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
 }
 
 export class Font {
@@ -631,6 +667,10 @@ export class UIContext {
  
     public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
         throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        throw Error("requireDynamicSyncScene not implemented in UIContext!");
     }
 }
 export abstract class FrameCallback {
