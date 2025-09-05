@@ -15,7 +15,7 @@
 
 import { int32 } from "@koalaui/common"
 
-// todo can be removed if passing ArrayBuffer type through interop is possible
+// Improve: can be removed if passing ArrayBuffer type through interop is possible
 export class KBuffer {
     private readonly _buffer: Uint8Array
     public get buffer(): ArrayBuffer {

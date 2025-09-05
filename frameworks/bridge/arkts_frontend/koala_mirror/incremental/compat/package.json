@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/compat",
-    "version": "1.7.3+devel",
+    "version": "1.7.6+devel",
     "description": "",
     "main": "build/src/index.js",
     "types": "build/src/index.d.ts",
@@ -24,6 +24,7 @@
     "scripts": {
         "clean": "rimraf build dist",
         "compile": "ets-tsc -b .",
+        "compile:release": "ets-tsc -b .",
         "compile:ohos": "ets-tsc -b ./tsconfig-ohos.json",
         "compile:all": "npm run compile && npm run compile:ohos",
         "build:compat": "npm run build:compat:inc",

@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "outDir": "./files/build",
+        "baseUrl": "."
+    },
+    "include": ["./**/*.ts"]
+}

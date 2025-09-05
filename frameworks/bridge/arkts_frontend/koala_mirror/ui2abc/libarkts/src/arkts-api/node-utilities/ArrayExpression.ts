@@ -16,7 +16,7 @@
 import { Es2pandaAstNodeType } from "../../generated/Es2pandaEnums"
 import { ArrayExpression, Expression } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
-import { updateNodeByNode } from "../../reexport-for-generated"
+import { updateNodeByNode } from "../utilities/private"
 
 export function createArrayExpression(
     elements: readonly Expression[]

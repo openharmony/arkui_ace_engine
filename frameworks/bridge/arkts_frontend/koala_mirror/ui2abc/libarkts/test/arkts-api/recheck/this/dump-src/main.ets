@@ -1,11 +1,11 @@
 
-function main() {}
+function main(): void {}
 
 
 
 class A {
-  public no_this() {
-    (this);
+  public no_this(): void {
+    this;
     console.log("test");
   }
   

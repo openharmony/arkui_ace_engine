@@ -24,7 +24,7 @@ suite(util.basename(__filename), () => {
 
         let script = arkts.createETSModuleFromSource(sample_in)
 
-        script = arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 arkts.factory.createExpressionStatement(
@@ -32,7 +32,10 @@ suite(util.basename(__filename), () => {
                         'abc'
                     )
                 )
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(

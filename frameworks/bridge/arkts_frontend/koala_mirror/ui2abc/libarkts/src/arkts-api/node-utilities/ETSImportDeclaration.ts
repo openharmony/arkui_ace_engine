@@ -29,7 +29,7 @@ export function updateETSImportDeclaration(
         && isSameNativeObject(specifiers, original.specifiers)
         /* no getter for importKind */
     ) {
-        /* TODO: probably should set importMetadata, but no getter provided yet */
+        /* Improve: probably should set importMetadata, but no getter provided yet */
         return original
     }
     return updateNodeByNode(

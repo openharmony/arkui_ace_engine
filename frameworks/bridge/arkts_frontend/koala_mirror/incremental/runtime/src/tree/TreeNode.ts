@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { className, float64, int32, KoalaProfiler, uint32 } from "@koalaui/common"
+import { className, float64, float64ToInt, int32, uint32 } from "@koalaui/common"
+import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { Disposable } from "../states/Disposable"
 import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
 
@@ -34,8 +35,8 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
 
     constructor(kind: uint32 = 1) {
         this.kind = kind
-        KoalaProfiler.nodeCreated(this.kind, this)
-        KoalaProfiler.counters?.node()
+        RuntimeProfiler.nodeCreated(this.kind, this)
+        RuntimeProfiler.instance?.node()
     }
 
     get disposed(): boolean {
@@ -48,7 +49,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     dispose(): void {
         this.myDisposed = true
-        KoalaProfiler.nodeDisposed(this.kind, this)
+        RuntimeProfiler.nodeDisposed(this.kind, this)
     }
 
     /**
@@ -76,7 +77,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Returns the number of children of this node.
      */
     get childrenCount(): uint32 {
-        return this.myChildren.length as uint32
+        return float64ToInt(this.myChildren.length)
     }
 
     /**
@@ -223,7 +224,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     removeChild(node: TreeNode): boolean {
         if (node.myParent !== this) return false // not in hierarchy
-        const index: int32 = this.myIndicesValid ? node.index : this.myChildren.indexOf(node) as int32
+        const index: int32 = this.myIndicesValid ? node.index : float64ToInt(this.myChildren.indexOf(node))
         return undefined !== this.removeChildAt(index)
     }
 
@@ -284,7 +285,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     }
 
     collectParentsTo(array: Array<TreeNode>): void {
-        const index = array.length as int32
+        const index = float64ToInt(array.length)
         let parent = this.myParent
         while (parent !== undefined) {
             array.splice(index, 0, parent!)

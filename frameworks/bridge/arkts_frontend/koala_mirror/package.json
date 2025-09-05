@@ -1,0 +1,8 @@
+{
+    "name": "root",
+    "private": true,
+    "//": "DO NOT ADD dependencies or devDependencies clauses to this level! Keep subfolders autonomous.",
+    "scripts": {
+        "prepare": "cd arkoala-arkts && npm i && cd .. && cd incremental && npm i && cd .. && cd interop && npm i && cd .. && cd ui2abc && npm i && cd .."
+    }
+}

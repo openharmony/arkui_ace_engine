@@ -13,4 +13,4 @@
  * limitations under the License.
  */
  
-function foo() {}
+function foo(): void {}

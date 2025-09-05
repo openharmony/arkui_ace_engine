@@ -77,7 +77,7 @@
 //         )
 //     })
 //
-//     // TODO: update nodes properly (now failing to generate bin)
+//     // Improve: update nodes properly (now failing to generate bin)
 //     test("builder-lambda-transformer-sample-3", function() {
 //         // function Foo(builder: (instance: string) => string, arg1: string): void {
 //         //     console.log(arg1 + builder("ABC"))

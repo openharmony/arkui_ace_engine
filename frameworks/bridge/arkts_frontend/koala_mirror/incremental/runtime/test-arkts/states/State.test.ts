@@ -15,18 +15,9 @@
 
 // TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
 import { Assert, suite, test } from "@koalaui/harness"
-import { KoalaCallsiteKey, float64, int32 } from "@koalaui/common"
+import { float64, int32, hashCodeFromString as key } from "@koalaui/common"
 import { IncrementalNode, State, StateContext, TestNode, testUpdate, ValueTracker } from "../../src"
 import { createStateManager } from "../../src/states/State"
-
-// For tests we compute positional ids from strings.
-export function key(name: string): KoalaCallsiteKey {
-    let key: KoalaCallsiteKey = 0
-    for (let i = 0; i < name.length; i++) {
-        key = (key << 3) | (key >> 29) ^ (name[i] as int32)
-    }
-    return key
-}
 
 function assertNode(state: State<TestNode>, presentation: string) {
     Assert.isFalse(state.modified) // the same node
@@ -147,7 +138,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState((context: StateContext) => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param<int32>(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
                 Assert.isDefined(state)
@@ -163,7 +154,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState((context: StateContext) => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param<int32>(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
                 Assert.isDefined(state)
@@ -911,6 +902,49 @@ suite("State", () => {
         assertState(state, false)
         Assert.equal(computableCounter, 2) // computable is not recomputed
         Assert.equal(stateCounter, 2) // state is recomputed by request but it is not modified
+    })
+    test("do not recompute by state if it was not used during last computation", () => {
+        const manager = createStateManager()
+        const stateB = manager.mutableState(true)
+        const stateT = manager.mutableState(1)
+        const stateF = manager.mutableState(2)
+        const computing = new Array<string>()
+        const computable = manager.computableState(() => {
+            computing.push("recomputed")
+            return stateB.value ? stateT.value : stateF.value
+        })
+        // initial computation
+        Assert.equal(computable.value, 1)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if nothing changed
+        Assert.equal(testUpdate(false, manager), 0)
+        Assert.equal(computable.value, 1)
+        Assert.isEmpty(computing)
+        // recompute if used stateT changed
+        stateT.value = -1
+        Assert.equal(testUpdate(false, manager), 1)
+        Assert.equal(computable.value, -1)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if stateF changed
+        stateF.value = -2
+        Assert.equal(testUpdate(false, manager), 1)
+        Assert.equal(computable.value, -1)
+        Assert.isEmpty(computing)
+        // switch flag and recompute
+        stateB.value = false
+        Assert.equal(testUpdate(false, manager), 1)
+        Assert.equal(computable.value, -2)
+        assertStringsAndCleanup(computing, "recomputed")
+        // recompute if used stateF changed
+        stateF.value = 2
+        Assert.equal(testUpdate(false, manager), 1)
+        Assert.equal(computable.value, 2)
+        assertStringsAndCleanup(computing, "recomputed")
+        // do not recompute if stateT changed
+        stateT.value = 1
+        Assert.equal(testUpdate(false, manager), 1)
+        Assert.equal(computable.value, 2)
+        Assert.isEmpty(computing)
     })
     test("build and update simple tree", () => {
         let manager = createStateManager()
@@ -1746,7 +1780,7 @@ suite("ArrayState", () => {
         Assert.equal(testUpdate(false, manager), 0)
         Assert.equal(result.value, "<= one three two =>")
         Assert.isEmpty(computing)
-/* TODO: [TID 00edbb] F/ets: Failed to create the collator for en (US)
+/* Improve: [TID 00edbb] F/ets: Failed to create the collator for en (US)
         // compute state only when snapshot updated
         array.sort((s1: string, s2: string) => s1.length < s2.length ? -1 : s1.length > s2.length ? 1 : s1.localeCompare(s2))
         Assert.equal(testUpdate(false, manager), 1)

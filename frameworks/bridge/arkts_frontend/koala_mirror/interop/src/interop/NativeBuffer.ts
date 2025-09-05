@@ -16,23 +16,34 @@
 import { pointer } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
 import { InteropNativeModule } from "./InteropNativeModule"
+import { Finalizable } from './Finalizable'
 
 // stub wrapper for KInteropBuffer
 // export type NativeBuffer = ArrayBuffer
 
 export class NativeBuffer {
-    public data: pointer = 0
-    public length: int64 = 0
-    public resourceId: int32 = 0
-    public hold: pointer = 0
-    public release: pointer = 0
+    public data: pointer
+    public length: int64
+    protected finalizable: Finalizable
 
-    constructor(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer) {
+    constructor(length: int64)
+    constructor(data: pointer, length: int64, destroy: pointer)
+    constructor(dataOrLength: pointer | int64, length_?: int64, destroy_?: pointer) {
+        let data: pointer
+        let length: int64
+        let destroy: pointer
+        if (length_ === undefined) {
+            length = dataOrLength as int64
+            data = InteropNativeModule._Malloc(length)
+            destroy = InteropNativeModule._GetMallocFinalizer()
+        } else {
+            data = dataOrLength as pointer
+            length = length_ as int64
+            destroy = destroy_ as pointer
+        }
         this.data = data
         this.length = length
-        this.resourceId = resourceId
-        this.hold = hold
-        this.release = release
+        this.finalizable = new Finalizable(data, destroy)
     }
 
     public readByte(index: int64): int32 {
@@ -41,9 +52,5 @@ export class NativeBuffer {
 
     public writeByte(index: int64, value: int32): void {
         InteropNativeModule._WriteByte(this.data, index, BigInt(this.length), value)
-    }
-
-    static wrap(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer): NativeBuffer {
-        return new NativeBuffer(data, length, resourceId, hold, release)
     }
 }

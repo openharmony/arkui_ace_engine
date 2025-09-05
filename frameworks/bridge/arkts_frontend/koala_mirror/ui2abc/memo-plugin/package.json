@@ -8,27 +8,30 @@
         "./lib/**/*"
     ],
     "scripts": {
-        "clean": "rimraf build",
+        "clean": "rimraf build lib .rollup.cache",
         "compile": "rollup -c",
-
         "runtime:clean": "npm run all:clean --prefix ../../incremental",
         "runtime:prepare": "npm run build:incremental:inc:ui2abc --prefix ../../incremental/runtime && npm run build:incremental:inc:ui2abc:recheck --prefix ../../incremental/runtime",
         "compile:libarkts": "npm run compile --prefix ../libarkts",
         "demo:clean": "npm run clean --prefix demo",
-        "demo:run": "npm run compile:libarkts && npm run compile && npm run compile --prefix demo && npm run run --prefix demo",
-        "test": "npm run compile:libarkts && npm run compile && npm run test --prefix test",
+        "demo:run:light": "npm run compile --prefix demo && npm run run --prefix demo",
+        "demo:run": "npm run compile:libarkts && npm run compile && npm run demo:run:light",
+        "test:light": "npm run test --prefix test",
+        "test:canonize": "npm run test:canonize --prefix test",
+        "test": "npm run compile:libarkts && npm run compile && npm run test:light",
         "demo:disasm": "npm run disasm --prefix demo",
-
         "compile:deps:harness": "cd ../../incremental/harness && npm run build:harness",
         "compile:deps": "npm run compile:libarkts && npm run compile && npm run compile:deps:harness && npm run runtime:prepare",
-
         "compile:annotate": "npm run compile --prefix ../annotate",
+        "executable:light": "npm run test:arkts:memo-plugin:light --prefix ../tests-memo",
         "executable": "npm run test:arkts:memo-plugin --prefix ../tests-memo",
         "diagnostics": "mocha --config mocharc.diagnostics.json",
         "test:diagnostics": "npm run compile && npm run diagnostics",
+        "test:all:light": "npm run test:light && npm run diagnostics && npm run executable:light",
         "test:all": "npm run test && npm run diagnostics && npm run executable"
     },
-    "devDependencies": {
-        "@koalaui/harness": "1.5.15+devel"
-    }
+    "dependencies": {
+        "@koalaui/harness": "file:../../incremental/harness"
+    },
+    "version": "1.7.6+devel"
 }

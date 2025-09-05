@@ -16,7 +16,7 @@
 import * as arkts from "../../../../src/arkts-api"
 
 class AddThisReference extends arkts.AbstractVisitor {
-    visitor(beforeChildren: arkts.ETSModule): arkts.ETSModule
+    visitor(beforeChildren: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isScriptFunction(node) && node.id?.name == "no_this") {
@@ -46,5 +46,5 @@ class AddThisReference extends arkts.AbstractVisitor {
 }
 
 export function addThisReference(program: arkts.Program) {
-    return (new AddThisReference()).visitor(program.astNode)
+    program.setAst(new AddThisReference().visitor(program.ast))
 }

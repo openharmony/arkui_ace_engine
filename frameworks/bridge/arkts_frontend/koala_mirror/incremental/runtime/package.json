@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/runtime",
-    "version": "1.7.3+devel",
+    "version": "1.7.6+devel",
     "description": "",
     "main": "./build/lib/src/index.js",
     "types": "./build/lib/src/index.d.ts",
@@ -12,6 +12,7 @@
     ],
     "scripts": {
         "compile": "npm run build:compiler-plugin && ets-tsc -p .",
+        "compile:release": "npm run build:compiler-plugin && ets-tsc -p .",
         "compile:test": "ets-tsc -b tsconfig-test.json",
         "clean": "rimraf build ets",
         "test": "mocha",
@@ -35,13 +36,15 @@
         "build:runtime:inc": "npm run unmemoize && fast-arktsc --config ./arktsconfig-run-unmemoized.json --compiler ../tools/panda/arkts/arktsc --link-name ./build/runtime.abc && ninja ${NINJA_OPTIONS} -f build/unmemoized/abc/build.ninja",
         "build:runtime:inc:ui2abc:restart": "npm run unmemoize && fast-arktsc --config ./ui2abcconfig-only-restart.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc --restart-stages && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/build.ninja",
         "annotate": "npm run compile --prefix ../../ui2abc/annotate && node ../../ui2abc/annotate",
-        "build:runtime:inc:ui2abc": "npm run annotate && fast-arktsc --config ./ui2abcconfig.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc --restart-stages && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/build.ninja",
-        "build:runtime:inc:ui2abc:recheck": "npm run annotate && fast-arktsc --config ./ui2abcconfig-recheck.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/recheck/build.ninja",
+        "fast-arktsc": "npm run compile --prefix ../../ui2abc/fast-arktsc",
+        "build:runtime:inc:ui2abc": "npm run annotate && npm run fast-arktsc && node ../../ui2abc/fast-arktsc --config ./ui2abcconfig.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc --restart-stages --group-by 5 && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/build.ninja",
+        "build:runtime:inc:ui2abc:recheck": "npm run annotate && npm run fast-arktsc && node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-recheck.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc --group-by 5 && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/recheck/build.ninja",
+        "build:runtime:full": "npm run annotate && npm run fast-arktsc && node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-recheck.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/runtime.abc --simultaneous && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/recheck/build.ninja",
         "build:runtime:with:tests": "npm run unmemoize:with:tests && fast-arktsc --config ./arktsconfig-test-unmemoized.json --compiler ../tools/panda/arkts/arktsc --link-name ./build/runtime-tests.abc && ninja ${NINJA_OPTIONS} -f build/unmemoized/abc/build.ninja",
         "build:incremental:components": "npm run build:compat && npm run build:common && npm run build:runtime",
         "build:incremental:components:inc": "npm run build:compat:inc && npm run build:common:inc && npm run build:runtime:inc",
         "build:incremental:components:inc:ui2abc": "npm run build:compat:inc:ui2abc && npm run build:common:inc:ui2abc && npm run build:runtime:inc:ui2abc",
-        "build:incremental:components:inc:ui2abc:recheck": "npm run build:compat:inc:ui2abc && npm run build:common:inc:ui2abc && npm run build:runtime:inc:ui2abc:recheck",
+        "build:incremental:components:inc:ui2abc:recheck": "npm run build:compat:inc:ui2abc && npm run build:common:inc:ui2abc && npm run build:runtime:full",
         "link:incremental": "../tools/panda/arkts/arklink --output build/incremental.abc -- ../compat/build/compat.abc ../common/build/common.abc build/runtime.abc",
         "build:incremental": "npm run build:incremental:components && npm run link:incremental",
         "build:incremental:inc": "npm run build:incremental:components:inc && npm run link:incremental",
@@ -51,9 +54,9 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.7.3+devel",
-        "@koalaui/compat": "1.7.3+devel",
-        "@koalaui/harness": "1.7.3+devel"
+        "@koalaui/common": "file:../common",
+        "@koalaui/compat": "file:../compat",
+        "@koalaui/harness": "file:../harness"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.20.0",

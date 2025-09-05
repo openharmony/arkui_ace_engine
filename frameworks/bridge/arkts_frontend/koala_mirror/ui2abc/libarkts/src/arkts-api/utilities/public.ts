@@ -14,36 +14,54 @@
  */
 
 import { global } from "../static/global"
-import { isNumber, throwError } from "../../utils"
-import { KNativePointer, nullptr } from "@koalaui/interop"
-import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode } from "./private"
+import { isNumber, throwError, withWarning } from "../../utils"
+import { KNativePointer, nullptr, KInt} from "@koalaui/interop"
+import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode, passString } from "./private"
 import { Es2pandaContextState, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import type { AstNode } from "../peers/AstNode"
+import { isSameNativeObject } from "../peers/ArktsObject"
 import {
     type AnnotationUsage,
     ClassDefinition,
     ClassProperty,
-    ETSImportDeclaration,
     ETSModule,
     isClassDefinition,
     isFunctionDeclaration,
     isMemberExpression,
     isScriptFunction,
     isIdentifier,
-    isETSModule
+    isETSModule,
+    ImportSpecifier
 } from "../../generated"
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
+import { listPrograms } from "../plugins"
 
+/**
+ * Improve: Replace or remove with better naming
+ * 
+ * @deprecated
+ */
 export function createETSModuleFromContext(): ETSModule {
     let program = global.es2panda._ContextProgram(global.context)
     if (program == nullptr) {
         throw new Error(`Program is null for context ${global.context.toString(16)}`)
     }
-    return new ETSModule(global.es2panda._ProgramAst(global.context, program))
+    const ast = global.es2panda._ProgramAst(global.context, program)
+    if (ast == nullptr) {
+        throw new Error(`AST is null for program ${program.toString(16)}`)
+
+    }
+    return new ETSModule(ast)
 }
 
+/**
+ * Now used only in tests
+ * Improve: Remove or replace with better method
+ * 
+ * @deprecated
+ */
 export function createETSModuleFromSource(
     source: string,
     state: Es2pandaContextState = Es2pandaContextState.ES2PANDA_STATE_PARSED,
@@ -59,12 +77,9 @@ export function createETSModuleFromSource(
     return new ETSModule(global.es2panda._ProgramAst(global.context, program))
 }
 
-export function updateETSModuleByStatements(
-    node: ETSModule,
-    statements: readonly AstNode[],
-): ETSModule {
-    global.generatedEs2panda._BlockStatementSetStatements(global.context, node.peer, passNodeArray(statements), statements.length)
-    return node
+export function metaDatabase(fileName: string): string {
+    if (fileName.endsWith(".meta.json")) throw new Error(`Must pass source, not database: ${fileName}`)
+    return `${fileName}.meta.json`
 }
 
 export function checkErrors() {
@@ -83,22 +98,46 @@ export function proceedToState(state: Es2pandaContextState): void {
     const before = Date.now()
     global.es2panda._ProceedToState(global.context, state)
     const after = Date.now()
-    global.profiler.proceedTime += after-before
+    global.profiler.proceededToState(after-before)
     NodeCache.clear()
     checkErrors()
 }
 
-export function startChecker(): boolean {
-    return global.es2panda._CheckerStartChecker(global.context)
+/** @deprecated Use {@link rebindContext} instead */
+export function rebindSubtree(node: AstNode): void {
+    global.es2panda._AstNodeRebind(global.context, node.peer)
+    checkErrors()
 }
 
+/** @deprecated Use {@link recheckSubtree} instead */
 export function recheckSubtree(node: AstNode): void {
     global.es2panda._AstNodeRecheck(global.context, node.peer)
     checkErrors()
 }
 
-export function rebindSubtree(node: AstNode): void {
-    global.es2panda._AstNodeRebind(global.context, node.peer)
+export function rebindContext(context: KNativePointer = global.context): void {
+    global.es2panda._AstNodeRebind(
+        context,
+        global.es2panda._ProgramAst(
+            context,
+            global.es2panda._ContextProgram(
+                context
+            )
+        )
+    )
+    checkErrors()
+}
+
+export function recheckContext(context: KNativePointer = global.context): void {
+    global.es2panda._AstNodeRecheck(
+        context,
+        global.es2panda._ProgramAst(
+            context,
+            global.es2panda._ContextProgram(
+                context,
+            )
+        )
+    )
     checkErrors()
 }
 
@@ -126,7 +165,7 @@ export function getAnnotations(node: AstNode): readonly AnnotationUsage[] {
 
 export function getOriginalNode(node: AstNode): AstNode {
     if (node === undefined) {
-        // TODO: fix this
+        // Improve: fix this
         throwError('there is no arkts pair of ts node (unable to getOriginalNode)')
     }
     if (node.originalPeer === nullptr) {
@@ -139,15 +178,7 @@ export function getFileName(): string {
     return global.filePath
 }
 
-export function getPackageName(): string {
-    return global.packageName
-}
-
-export function getFilePathFromPackageRoot(): string {
-    return global.filePathFromPackageRoot
-}
-
-// TODO: It seems like Definition overrides AstNode  modifiers
+// Improve: It seems like Definition overrides AstNode  modifiers
 // with it's own modifiers which is completely unrelated set of flags.
 // Use this function if you need
 // the language level modifiers: public, declare, export, etc.
@@ -155,7 +186,7 @@ export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFla
     return global.generatedEs2panda._AstNodeModifiers(global.context, node.peer)
 }
 
-// TODO: ClassProperty's optional flag is set by AstNode's modifiers flags.
+// Improve: ClassProperty's optional flag is set by AstNode's modifiers flags.
 export function classPropertySetOptional(node: ClassProperty, value: boolean): ClassProperty {
     if (value) {
         node.modifierFlags |= Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL;
@@ -196,4 +227,46 @@ export function nameIfETSModule(node: AstNode): string {
 
 export function asString(node: AstNode|undefined): string {
     return `${node?.constructor.name} ${node ? nameIfIdentifier(node) : undefined}`
+}
+
+const defaultPandaSdk = "../../../incremental/tools/panda/node_modules/@panda/sdk"
+
+
+export function findStdlib(): string {
+    const sdk = process.env.PANDA_SDK_PATH ?? withWarning(
+        defaultPandaSdk,
+        `PANDA_SDK_PATH not set, assuming ${defaultPandaSdk}`
+    )
+    return `${sdk}/ets/stdlib`
+}
+
+export function collectDependencies(files: string[], configPath: string): string[] {
+    const result = new Set<string>()
+    for (let file of files) {
+        const context = Context.createFromFile(file, configPath, findStdlib(), "/tmp/foo.abc")!
+        global.compilerContext = context
+        proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
+        listPrograms(context.program).forEach(it => result.add(it.absoluteName))
+        context.destroy()
+    }
+    return Array.from(result)
+}
+
+export function generateTsDeclarationsFromContext(
+  outputDeclEts: string,
+  outputEts: string,
+  exportAll: boolean,
+  isolated: boolean
+): KInt {
+  return global.es2panda._GenerateTsDeclarationsFromContext(
+    global.context,
+    passString(outputDeclEts),
+    passString(outputEts),
+    exportAll,
+    isolated
+  );
+}
+
+export function setAllParents(ast: AstNode): void {
+    global.es2panda._AstNodeUpdateAll(global.context, ast.peer);
 }

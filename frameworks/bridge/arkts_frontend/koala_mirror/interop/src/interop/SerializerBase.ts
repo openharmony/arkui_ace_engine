@@ -75,7 +75,7 @@ export function isInstanceOf(className: string, value: object | undefined): bool
 
 export function registerCallback(value: object|undefined): int32 {
     return wrapCallback((args: Uint8Array, length: int32) => {
-        // TBD: deserialize the callback arguments and call the callback
+        // Improve: deserialize the callback arguments and call the callback
         return 42
     })
 }
@@ -106,6 +106,25 @@ export class SerializerBase {
     private buffer: ArrayBuffer
     private view: DataView
 
+    private static pool: SerializerBase[] = [
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+    ]
+    private static poolTop = 0
+
+    static hold(): SerializerBase {
+        if (this.poolTop === this.pool.length) {
+            throw new Error("Pool empty! Release one of taken serializers")
+        }
+        return SerializerBase.pool[this.poolTop++]
+    }
+
     private static customSerializers: CustomSerializer | undefined = undefined
     static registerCustomSerializer(serializer: CustomSerializer) {
         if (SerializerBase.customSerializers == undefined) {
@@ -123,6 +142,10 @@ export class SerializerBase {
     public release() {
         this.releaseResources()
         this.position = 0
+        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
+            throw new Error("Serializers should be release in LIFO order")
+        }
+        SerializerBase.poolTop -= 1;
     }
     asBuffer(): KSerializerBuffer {
         return new Uint8Array(this.buffer)
@@ -147,8 +170,8 @@ export class SerializerBase {
             const minSize = this.position + value
             const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2))
             let resizedBuffer = new ArrayBuffer(resizedSize)
-            // TODO: can we grow without new?
-            // TODO: check the status of ArrayBuffer.transfer function implementation in STS
+            // Improve: can we grow without new?
+            // Improve: check the status of ArrayBuffer.transfer function implementation in STS
             new Uint8Array(resizedBuffer).set(new Uint8Array(this.buffer))
             this.buffer = resizedBuffer
             this.view = new DataView(resizedBuffer)
@@ -207,7 +230,7 @@ export class SerializerBase {
     private releaseResources() {
         for (const resourceId of this.heldResources)
             InteropNativeModule._ReleaseCallbackResource(resourceId)
-        // todo think about effective array clearing/pushing
+        // Improve: think about effective array clearing/pushing
         this.heldResources = []
     }
     writeCustomObject(kind: string, value: any) {
@@ -275,16 +298,12 @@ export class SerializerBase {
     writeString(value: string) {
         this.checkCapacity(4 + value.length * 4) // length, data
         let encodedLength =
-            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.position + 4)
+            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.view.buffer.byteLength, this.position + 4)
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
     writeBuffer(buffer: NativeBuffer) {
-        this.writeCallbackResource({
-            resourceId: buffer.resourceId,
-            hold: buffer.hold,
-            release: buffer.release,
-        })
+        this.holdAndWriteObject(buffer)
         this.writePointer(buffer.data)
         this.writeInt64(buffer.length)
     }

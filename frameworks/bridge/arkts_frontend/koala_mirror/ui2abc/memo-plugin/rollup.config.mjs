@@ -31,7 +31,7 @@ export default [
     buildPlugin({
         src: "./src/entry.ts",
         dst: "./lib/entry.js",
-        minimize: true,
+        minimize: false,
     }),
 ]
 
@@ -54,6 +54,7 @@ function buildPlugin({ src, dst, minimize = false }) {
             ],
             sourcemap: ENABLE_SOURCE_MAPS,
             banner: APACHE_LICENSE_HEADER(),
+            sourcemap: ENABLE_SOURCE_MAPS
         },
         external: ["@koalaui/libarkts"],
         plugins: [
@@ -96,14 +97,14 @@ function APACHE_LICENSE_HEADER() {
 
 /** @returns {import("rollup").OutputPlugin} */
 function replaceLibarktsImport() {
-    const REQUIRE_PATTERN = `require("@koalaui/libarkts")`
+    const REQUIRE_PATTERN = `require('@koalaui/libarkts');`
     return {
         name: "replace-librkts-import",
         generateBundle(options, bundle) {
             for (const [fileName, asset] of Object.entries(bundle)) {
                 if (!asset.code) continue
                 if (fileName !== "entry.js") continue
-                asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.KOALA_WRAPPER_PATH ?? "@koalaui/libarkts")`)
+                asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.LIBARKTS_PATH ?? "../../libarkts/lib/libarkts.js")`)
             }
         }
     }

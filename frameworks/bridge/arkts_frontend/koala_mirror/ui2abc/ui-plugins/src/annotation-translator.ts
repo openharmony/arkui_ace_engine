@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DecoratorNames, hasDecorator } from "./property-translators/utils"
+import { DecoratorNames, hasDecorator, hasBuilderDecorator } from "./property-translators/utils"
 import { annotation } from "./common/arkts-utils"
 import { CustomComponentNames, InternalAnnotations } from "./utils"
 
@@ -35,12 +35,12 @@ export class AnnotationsTransformer extends arkts.AbstractVisitor {
         // console.log(`builder transform ${node.dumpSrc()} ${arkts.isAnnotationUsage(node)}`)
         const node = this.visitEachChild(beforeVisit)
 
-        if (arkts.isFunctionDeclaration(node) && hasDecorator(node, DecoratorNames.BUILDER)) {
+        if (arkts.isFunctionDeclaration(node) && hasBuilderDecorator(node)) {
             return arkts.factory.updateFunctionDeclaration(node, node.function, [
                 annotation(InternalAnnotations.MEMO)], node.isAnonymous)
         }
         if (this.inStruct && arkts.isMethodDefinition(node) && (
-            hasDecorator(node, DecoratorNames.BUILDER) ||
+            hasBuilderDecorator(node) ||
             node.function?.id?.name == CustomComponentNames.COMPONENT_BUILD_ORI)
         ) {
             node.function!.setAnnotations([annotation(InternalAnnotations.MEMO)])

@@ -102,7 +102,7 @@ export function getName(node: Memoizable): string {
     assertIsNever(node)
 }
 
-// TODO: this should use info from AnalysisVisitor, not obtain it from the node
+// Improve: this should use info from AnalysisVisitor, not obtain it from the node
 // but this require AnalysisVisitor to be run on all sources
 export function isMemo(node: Memoizable) {
     if (arkts.isMethodDefinition(node)) {

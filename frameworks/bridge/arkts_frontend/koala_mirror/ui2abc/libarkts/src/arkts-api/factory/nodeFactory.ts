@@ -15,17 +15,16 @@
 
 import {
     ClassDefinition,
-    ClassProperty,
+    ETSImportDeclaration,
+    ETSModule,
     ETSStructDeclaration,
+    ETSTuple,
     ETSTypeReferencePart,
     MemberExpression,
+    ObjectExpression,
     TryStatement,
-    TSInterfaceDeclaration,
     TSTypeParameter,
     VariableDeclarator,
-    ObjectExpression,
-    ETSTuple,
-    ETSImportDeclaration,
 } from "../../generated"
 import { factory as generatedFactory } from "../../generated/factory"
 import { createScriptFunction, updateScriptFunction } from "../node-utilities/ScriptFunction"
@@ -52,9 +51,15 @@ import { updateETSTuple } from "../node-utilities/ETSTuple"
 import { createArrayExpression, updateArrayExpression } from "../node-utilities/ArrayExpression"
 import { createTSTypeAliasDeclaration, updateTSTypeAliasDeclaration } from "../node-utilities/TSTypeAliasDeclaration"
 import { createClassDeclaration, updateClassDeclaration } from "../node-utilities/ClassDeclaration"
+import { createBlockStatement, updateBlockStatement } from "../node-utilities/BlockStatement"
+import { updateAnnotationUsage } from "../node-utilities/AnnotationUsage"
+import { updateETSModule } from "../node-utilities/ETSModule"
 
 export const factory = {
     ...generatedFactory,
+
+    createETSModule: ETSModule.createETSModule,
+    updateETSModule,
 
     createCallExpression,
     updateCallExpression,
@@ -127,4 +132,11 @@ export const factory = {
 
     createTSTypeAliasDeclaration,
     updateTSTypeAliasDeclaration,
+
+    createBlockStatement,
+    updateBlockStatement,
+
+    updateAnnotationUsage,
+    update1AnnotationUsage: generatedFactory.updateAnnotationUsage,
+    updateInterfaceBody : generatedFactory.updateTSInterfaceBody
 }

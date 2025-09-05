@@ -20,12 +20,12 @@ import { Es2pandaNativeModule as GeneratedEs2pandaNativeModule } from "../../gen
 import { initInterop, InteropNativeModule } from "../../InteropNativeModule"
 import { Context } from "../peers/Context"
 import { Profiler } from "./profiler"
-import { Program } from "../peers/Program"
+import { ArkTsConfig } from "../../generated"
 
 export class global {
     public static filePath: string = "./plugins/input/main.ets"
-    public static packageName: string = ""
-    public static filePathFromPackageRoot: string = global.filePath
+
+    public static arktsconfig?: ArkTsConfig
 
     private static _config?: KNativePointer
     public static set config(config: KNativePointer) {
@@ -37,13 +37,16 @@ export class global {
     public static configIsInitialized(): boolean {
         return global._config !== undefined && global._config !== nullptr
     }
-
-    // TODO: rename to contextPeer
-    public static get context(): KNativePointer {
-        return global.compilerContext.peer ?? throwError('Global.context not initialized')
+    public static resetConfig(): void {
+        global._config = undefined
     }
 
-    // TODO: rename to context when the pointer valued one is eliminated
+    // Improve: rename to contextPeer
+    public static get context(): KNativePointer {
+        return global.compilerContext?.peer ?? throwError('Global.context not initialized')
+    }
+
+    // Improve: rename to context when the pointer valued one is eliminated
     public static compilerContext: Context
 
     private static _es2panda: Es2pandaNativeModule | undefined = undefined
@@ -70,4 +73,7 @@ export class global {
     }
 
     public static profiler = new Profiler()
+
+    // Check node type values during node creation
+    public static validatePeerTypes = false
 }

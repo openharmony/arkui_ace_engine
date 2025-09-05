@@ -115,7 +115,6 @@ function replaceGensymWrappers(code: string): string {
     return code
 }
 
-
 function addExports(code: string): string {
     const exportAstNodes = ["  enum", "let", "const", "class", "abstract class", "@Entry() @Component() final class", "@Component() final class", "interface", "@interface", "type", "enum", "final class", "function",
         "declare interface", "@memo_stable() declare interface",  "@memo_stable() interface",
@@ -125,7 +124,7 @@ function addExports(code: string): string {
             code = code.replaceAll(`\n${astNodeText}`, `\nexport ${astNodeText}`)
         }
     )
-    // TODO this is a temporary workaround and should be replaced with a proper import/export handling in future
+    // Improve: this is a temporary workaround and should be replaced with a proper import/export handling in future
     code = code.replaceAll(/\n(@memo\(\) @BuilderLambda\(\{value:"\w+"\}\)) function/g, '\n$1 export function')
     const fix = [
         ["export @memo() function", "@memo() export function"],
@@ -140,158 +139,10 @@ function addExports(code: string): string {
     return code.replaceAll("\nexport function main()", "\nfunction main()")
 }
 
-function removeAbstractFromInterfaces(code: string): string {
-    const interfaces = [...code.matchAll(/interface([\s\S]*?){([\s\S]*?)\n}\n/g)].map(it => it[0])
-    interfaces.forEach((content) => {
-        const newContent = content.replaceAll('abstract ', '')
-        code = code.replaceAll(content, newContent)
-    })
-    return code
-}
-
-function removeInvalidLambdaTyping(code: string): string {
-    const knownTypes = ['boolean', 'int64', 'void']
-    return code.replaceAll(/\(([^\n\(\)]*?)\): ([\S]*?) => {/g, (match, p1, p2) => {
-        if (knownTypes.includes(p2)) {
-            return match
-        }
-        return `(${p1}) => {`
-    })
-}
-
-function returnOptionalParams(code: string): string {
-    const reduce = (line: string): string => {
-        if (line.includes("constructor")) {
-            return line
-        }
-        for (var i = 0; i < line.length; i++) {
-            if (line[i] == '(') {
-                let ignore = false
-                for (var k = i; k >= 0; k--) {
-                    if (line[k].match(/[a-zA-Z<>_0-9]/)) {
-                        break
-                    }
-                    if (line[k] == ':') {
-                        ignore = true
-                    }
-                }
-                if (ignore) {
-                    continue
-                }
-                const initi = i
-                let j = i + 1, depth = 1
-                let parts: string[] = []
-                while (j < line.length) {
-                    if (line[j] == '(') {
-                        depth++
-                    }
-                    if (line[j] == ')') {
-                        depth--
-                        if (depth == 0) {
-                            parts.push(line.substring(i + 1, j))
-                            break
-                        }
-                    }
-                    if (line[j] == ',' && depth == 1) {
-                        parts.push(line.substring(i + 1, j))
-                        i = j + 1
-                    }
-                    j++
-                }
-                if (depth == 0 && parts.length && parts.every(it => it.includes(": ") && !it.includes("? "))) {
-                    let k = parts.length - 1
-                    while (k >= 0) {
-                        if (parts[k].endsWith(" | undefined")) {
-                            let w = parts[k].substring(0, parts[k].length - " | undefined".length)
-                            let i = w.indexOf(':')
-                            if (w[i - 1] != '?') {
-                                parts[k] = w.substring(0, i) + "?" + w.substring(i)
-                            }
-                        } else {
-                            break
-                        }
-                        k--
-                    }
-                    if (k != parts.length - 1) {
-                        let nline = line.substring(0, initi + 1) + parts.join(', ') + line.substring(j)
-                        return nline
-                    }
-                }
-                i = initi
-            }
-        }
-        return line
-    }
-    return code.split('\n').map((line) => {
-        let nline = reduce(line)
-        while (nline != line) {
-            line = nline
-            nline = reduce(line)
-        }
-        return line
-    }).join('\n')
-}
-
-function fixPropertyLines(code: string): string {
-    /*
-
-    for some properties the following construction is generated:
-
-    private readonly <property>name = false;
-
-    public name(<property>name) { // for readonly properties "setter" is also generated
-        (this).<property>name = <property>name = false; // sometimes there is a typing here
-        return;
-    }
-
-    public name() {
-        return (this).<property>name;
-    }
-
-    this function wraps this back to `readonly name = false;`
-
-    */
-    return code.replaceAll(/(private|public)(.*)?<property>(.*?)\n((.*?)\n){9}/g, (match, p1, p2, p3) => {
-        return `public ${p2} ${p3}`
-    })
-}
-
-function fixDuplicateSettersInInterfaces(code: string): string {
-    /*
-
-    sometimes interfaces contains duplicate setters, this functions fixes it
-
-    */
-    code = code.replaceAll(/\n[ ]*(.*)interface(.*){\n([\s\S]*?)\n[ ]*}\n/g, (match, modifiers, p1, p2: string) => {
-        const keep = p2.split('\n').filter((it) => !it.trimStart().startsWith(`set`))
-        const setters = [...new Set(p2.split('\n').filter((it) => it.trimStart().startsWith(`set`)))]
-        return `\n${modifiers}interface${p1}{\n${keep.join('\n')}\n${setters.join('\n')}\n}\n`
-    })
-    return code
-}
-
 function excludePartialInterfaces(code: string): string {
     return code
     .replaceAll(/export interface (.*)\$partial<>([\s\S]*?)}/g, '')
     .replaceAll(/interface (.*)\$partial<>([\s\S]*?)}/g, '')
-}
-
-function fixNamespace(code: string) {
-    /*
-    namespaces become abstract classes, and enums become final classes
-    enum in namespace -> class in class -> not supported
-
-    we have only one such place, so fix manually
-    */
-    code = code.replaceAll(/export (declare )?abstract class (Profiler|GestureControl|text|common2D) {/g, `export $1 namespace $2 {`)
-    code = code.replaceAll(`public static _$init$_() {}`, ``)
-    code = code.replaceAll(`public static _$initializerBlockInit$_() {}`, ``)
-    code = code.replaceAll(/public static ((?:un)?registerVsyncCallback)/g, "export function $1")
-    code = code.replaceAll(/public static (setCursor)/g, "export function $1")
-    code = code.replaceAll(/public static (restoreDefault)/g, "export function $1")
-    code = code.replaceAll(/public static (requestFocus\(value)/g, "export function $1")
-
-    return code
 }
 
 function fixEnums(code: string) {
@@ -332,8 +183,18 @@ function fixEnums(code: string) {
     return code
 }
 
+function fixEmptyDeclareNamespace(code: string): string {
+    const lines = code.split('\n')
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('export declare namespace') && !lines[i].endsWith('{')) {
+            lines[i] += ' {}'
+        }
+    }
+    return lines.join('\n')
+}
+
 /*
-    TODO:
+    Improve:
      The lowerings insert %% and other special symbols into names of temporary variables.
      Until we keep feeding ast dumps back to the parser this function is needed.
  */
@@ -342,10 +203,8 @@ export function filterSource(text: string): string {
     // console.error(text.split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))
     const dumperUnwrappers = [
         addExports,
-        fixNamespace,
+        fixEmptyDeclareNamespace,
         fixEnums,
-        fixDuplicateSettersInInterfaces,
-        removeAbstractFromInterfaces,
         replaceGensymWrappers, // nested
         replaceGensymWrappers, // nested
         replaceGensymWrappers,
@@ -354,11 +213,12 @@ export function filterSource(text: string): string {
         excludePartialInterfaces,
         (code: string) => code.replaceAll("<cctor>", "_cctor_"),
         (code: string) => code.replaceAll("public constructor() {}", ""),
-        (code: string) => code.replaceAll("@Module()", ""),
-        (code: string) => code.replaceAll("export * as  from", "export * from"),
-        fixPropertyLines
     ]
     // console.error("====")
     // console.error(dumperUnwrappers.reduceRight((code, f) => f(code), text).split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))
     return dumperUnwrappers.reduceRight((code, f) => f(code), text)
+}
+
+export function getEnumName(enumType: any, value: number): string | undefined {
+    return enumType[value];
 }
