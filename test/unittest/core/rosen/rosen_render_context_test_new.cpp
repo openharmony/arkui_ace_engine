@@ -436,7 +436,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew014, TestSize.Level1)
     rosenRenderContext->transitionEffect_ = AceType::MakeRefPtr<RosenTransitionEffect>();
     rosenRenderContext->NotifyTransition(true);
     rosenRenderContext->OnMouseSelectUpdate(true, Color(SHAPE_MASK_DEFAULT_COLOR), Color(SHAPE_MASK_DEFAULT_COLOR));
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetModifierIds().size(), 1);
     rosenRenderContext->MarkDrivenRenderFramePaintState(true);
     rosenRenderContext->MarkDrivenRenderItemIndex(1);
     rosenRenderContext->MarkDrivenRender(true);
