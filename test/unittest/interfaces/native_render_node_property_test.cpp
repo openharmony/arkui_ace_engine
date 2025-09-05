@@ -391,4 +391,20 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest016, TestSize
     auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
     ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: NativeRenderNodePropertyTest017
+ * @tc.desc: Test renderNode transform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest017, TestSize.Level1)
+{
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    
+    // x,y rotation 30 && x,y translate 30.
+    float matrix[] = { 0.866, 0.433, -0.25, 0, 0, 0.866, 0.5, 0, 0.5, 0.25, 0.866, 0, 30, 30, 0, 1 };
+    auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
+    ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
+}
 } // namespace OHOS::Ace

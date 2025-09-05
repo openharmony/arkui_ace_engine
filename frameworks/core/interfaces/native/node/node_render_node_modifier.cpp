@@ -483,98 +483,6 @@ int32_t GetRotation(ArkUIRenderNodeHandle handle, float* x, float* y, float* z)
     return ERROR_CODE_NO_ERROR;
 }
 
-#ifndef MODIFIER_NG
-template<typename T>
-bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value)
-{
-    if (property == nullptr) {
-        property = std::make_shared<Rosen::RSAnimatableProperty<T>>(value);
-        return true;
-    }
-    property->Set(value);
-    return false;
-}
-
-void AddOrChangePerspectiveModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSPerspModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>>& property, const Rosen::Vector4f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSPerspModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeTranslateModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSTranslateModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSTranslateModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeScaleModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSScaleModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSScaleModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeQuaternionModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSQuaternionModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>>& property, const Rosen::Quaternion& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSQuaternionModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeSkewModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSSkewModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>>& property, const Rosen::Vector3f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSSkewModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeScaleZModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSScaleZModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSScaleZModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeTranslateZModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSTranslateZModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSTranslateZModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-#else
 template<typename ModifierName, auto Setter, typename T>
 void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
 {
@@ -582,7 +490,6 @@ void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
     (*modifier.*Setter)(value);
     rsNode->AddModifier(modifier);
 }
-#endif
 
 int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 {
@@ -607,7 +514,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
         static_cast<float>(transform.quaternion.GetW()) };
     Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
     Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[INDEX_2] };
-#if defined(MODIFIER_NG)
+
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
         Rosen::Vector4f>(rsNodeShared, perspectiveValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
@@ -622,30 +529,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
         Rosen::Vector3f>(rsNodeShared, skewValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetQuaternion,
         Rosen::Quaternion>(rsNodeShared, quaternion);
-#else
-    std::shared_ptr<Rosen::RSPerspModifier> perspectivePtr;
-    std::shared_ptr<Rosen::RSTranslateModifier> translateXYPtr;
-    std::shared_ptr<Rosen::RSTranslateZModifier> translateZPtr;
-    std::shared_ptr<Rosen::RSScaleModifier> scaleXYPtr;
-    std::shared_ptr<Rosen::RSScaleZModifier> scaleZPtr;
-    std::shared_ptr<Rosen::RSSkewModifier> skewPtr;
-    std::shared_ptr<Rosen::RSQuaternionModifier> quaternionPtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>> perspectiveValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> translateZValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> scaleXYValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> scaleZValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>> skewValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>> quaternionValuePtr;
 
-    AddOrChangePerspectiveModifier(rsNodeShared, perspectivePtr, perspectiveValuePtr, perspectiveValue);
-    AddOrChangeTranslateModifier(rsNodeShared, translateXYPtr, translateXYValuePtr, xyTranslateValue);
-    AddOrChangeTranslateZModifier(rsNodeShared, translateZPtr, translateZValuePtr, transform.translate[INDEX_2]);
-    AddOrChangeScaleModifier(rsNodeShared, scaleXYPtr, scaleXYValuePtr, xyScaleValue);
-    AddOrChangeScaleZModifier(rsNodeShared, scaleZPtr, scaleZValuePtr, transform.scale[INDEX_2]);
-    AddOrChangeSkewModifier(rsNodeShared, skewPtr, skewValuePtr, skewValue);
-    AddOrChangeQuaternionModifier(rsNodeShared, quaternionPtr, quaternionValuePtr, quaternion);
-#endif
     return ERROR_CODE_NO_ERROR;
 }
 
