@@ -799,7 +799,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         if (usingSharedRuntime) {
             if (GetAnyContextIsLayouting(pipelineContext)) {
-                TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                TAG_LOGD(AceLogTag::ACE_ANIMATION,
                     "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
