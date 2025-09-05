@@ -17,42 +17,97 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString } from '@koalaui/common';
-import { memoEntry2, __context, NodeAttach } from '@koalaui/runtime';
+import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime';
 import { InteropNativeModule } from '@koalaui/interop';
 import { SyntaxItemPeer, ForEachNodePeer } from '../handwritten/RepeatImpl';
+import { DynamicNode, ArkCommonMethodComponent, CommonMethod, OnMoveHandler, ItemDragEventHandler } from './common';
+import { LazyForEachOps } from './arkui-custom'
+import { NodeHolder } from "../handwritten/LazyForEachImpl"
+
+export interface ForEachAttribute<T> extends CommonMethod, DynamicNode {
+    arr: () => Array<T>;
+    setForEachOptions(arr: () => Array<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        return this;
+    }
+}
+
+export class ArkForEachComponent<T> extends ArkCommonMethodComponent implements ForEachAttribute<T> {
+    arr: () => Array<T> = () => new Array<T>();
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
+    keyGenerator?: (item: T, index: number) => string = undefined;
+    onMoveEvent?: OnMoveHandler = undefined;
+    itemDragEvent?: ItemDragEventHandler = undefined;
+
+    public onMove(handler?: OnMoveHandler): this {
+        this.onMoveEvent = handler;
+        return this;
+    }
+
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        this.onMoveEvent = handler;
+        this.itemDragEvent = eventHandler;
+        return this;
+    }
+
+    public setForEachOptions(arr: () => Array<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        this.arr = arr;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        return this;
+    }
+}
+
+function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
-export function ForEach<T>(
-    arr: () => Array<T>,
+export function ForEachImpl<T>(
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
+    style: ((attributes: ForEachAttribute<T>) => void) | undefined
 ) {
-    if (arr === null || arr === undefined) {
+    const receiver = remember(() => {
+        return new ArkForEachComponent<T>()
+    })
+    style?.(receiver)
+    if (receiver.arr === null || receiver.arr === undefined) {
         InteropNativeModule._NativeLog('input array function is null or undefined error. Application error!');
         return;
     }
-    if (typeof itemGenerator !== 'function') {
+    if (typeof receiver.itemGenerator !== 'function') {
         InteropNativeModule._NativeLog('item generator function missing. Application error!');
         return;
     }
-    if (keyGenerator !== undefined && typeof keyGenerator !== 'function') {
+    if (receiver.keyGenerator !== undefined && typeof receiver.keyGenerator !== 'function') {
         InteropNativeModule._NativeLog('key generator is not a function. Application error!');
         return;
     }
+    let nodeHolder = remember(() => new NodeHolder())
     /** @memo */
     const createAndUpdate = (): void => {
-        const array: Array<T> = arr();
+        const array: Array<T> = receiver.arr();
         if (array === null || array === undefined) {
             InteropNativeModule._NativeLog('input array is null or undefined error. Application error!');
             return;
         }
         const length: number = array.length;
-        const key = (element: T, index: int32): int32 => keyGenerator ? hashCodeFromString(keyGenerator!(element, (index as number))) : index;
+        const key = (element: T, index: int32): int32 =>
+            receiver.keyGenerator ? hashCodeFromString(receiver.keyGenerator!(element, (index as number))) : index;
         /** @memo */
         const action = (element: T, index: int32): void => {
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-                itemGenerator(element, (index as number));
+                receiver.itemGenerator(element, (index as number));
             });
         };
         for (let i = 0; i < length; i++) {
@@ -62,5 +117,14 @@ export function ForEach<T>(
     }
     NodeAttach(() => ForEachNodePeer.create(), (node: ForEachNodePeer) => {
         createAndUpdate();
+        nodeHolder.node = node;
     });
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(),
+        onMoveFromTo,
+        receiver.onMoveEvent,
+        receiver.itemDragEvent)
 }
