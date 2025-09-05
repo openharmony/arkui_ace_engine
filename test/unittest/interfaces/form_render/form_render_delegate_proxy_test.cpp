@@ -55,7 +55,7 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_001, TestSize.
     formJsInfo.moduleName = "moduleName";
     formJsInfo.formId = 1;
     EXPECT_EQ(formJsInfo.formId, 1);
-    EXPECT_EQ(renderDelegate->OnSurfaceCreate(nullptr, formJsInfo, newWant), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate->OnSurfaceCreate(nullptr, formJsInfo, newWant), ERR_APPEXECFWK_PARCEL_ERROR);
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
@@ -64,8 +64,8 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_001, TestSize.
 
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_OK));
     EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, newWant), ERR_OK);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
-    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, newWant), ERR_INVALID_VALUE);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_APPEXECFWK_PARCEL_ERROR));
+    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, newWant), ERR_APPEXECFWK_PARCEL_ERROR);
 }
 
 /*
