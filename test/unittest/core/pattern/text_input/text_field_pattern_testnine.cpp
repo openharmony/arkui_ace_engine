@@ -138,7 +138,7 @@ HWTEST_F(TextFieldPatternTestNine, SetPreviewTextOperation001, TestSize.Level0)
 
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -176,7 +176,7 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -185,6 +185,32 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
     pattern_->FinishTextPreviewOperation();
     ChangeValueInfo changeValueInfo;
     EXPECT_FALSE(pattern_->FireOnWillChange(changeValueInfo));
+}
+
+/**
+ * @tc.name: FinishTextPreviewOperation002
+ * @tc.desc: test FinishTextPreviewOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Call FinishTextPreviewOperation.
+     */
+    pattern_->hasPreviewText_ = true;
+    pattern_->contentController_->content_ = u"01234567890";
+    pattern_->FinishTextPreviewOperation();
+    EXPECT_TRUE(pattern_->showCountBorderStyle_);
 }
 
 /**
@@ -381,7 +407,7 @@ HWTEST_F(TextFieldPatternTestNine, ExecuteInputCommand001, TestSize.Level0)
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateMaxLength(123);
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -761,7 +787,7 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     pattern_->InitDragDropCallBack();
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");
@@ -781,12 +807,161 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
 
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     layoutProperty->UpdateTextInputType(TextInputType::JS_ENUM_URL);
-    host->previewOption_.enableEdgeAutoScroll = false;
+    auto dragPreviewOption = host->GetDragPreviewOption();
+    dragPreviewOption.enableEdgeAutoScroll = false;
+    host->SetDragPreviewOptions(dragPreviewOption);
     eventHub->onDragMove_(event, extraParams);
     EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
 
     eventHub->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: InitDragDropCallBack002
+ * @tc.desc: test InitDragDropCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(false);
+
+    pattern_->InitDragDropCallBack();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+
+
+    auto pipeline = pattern_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragManager, nullptr);
+
+    host->isDisallowDropForcedly_ = false;
+    RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    const std::string extraParams("test");
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+    EXPECT_FALSE(pattern_->HasFocus());
+
+    eventHub->onDragLeave_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: InitDragDropCallBack003
+ * @tc.desc: test InitDragDropCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(true);
+
+    pattern_->InitDragDropCallBack();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+
+    auto pipeline = pattern_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragManager, nullptr);
+
+    host->isDisallowDropForcedly_ = false;
+    RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    const std::string extraParams("test");
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+    EXPECT_FALSE(pattern_->HasFocus());
+
+    eventHub->onDragLeave_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: InitDragDropCallBack004
+ * @tc.desc: test InitDragDropCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(true);
+
+    pattern_->InitDragDropCallBack();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+
+
+    auto pipeline = pattern_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragManager, nullptr);
+
+    host->isDisallowDropForcedly_ = true;
+    RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    const std::string extraParams("test");
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_EQ(pattern_->dragRecipientStatus_, DragStatus::NONE);
+    EXPECT_FALSE(pattern_->HasFocus());
+
+    eventHub->onDragLeave_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+
+    // Close the keyboard when dragging enter the textinput/textarea/search from outside it.
+    pattern_->customKeyboardBuilder_ = [] {};
+    pattern_->isCustomKeyboardAttached_ = true;
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
+    pattern_->dragStatus_ = DragStatus::NONE;
+    host->isDisallowDropForcedly_ = false;
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_TRUE(pattern_->isCustomKeyboardAttached_);
 }
 
 /**
@@ -877,6 +1052,7 @@ HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
     auto size = textFieldManager->textFieldInfoMap_.size();
     pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
     pattern_->OnModifyDone();
+    pattern_->HandleOnCopy(true);
     EXPECT_EQ(textFieldManager->textFieldInfoMap_.size(), size + 1);
 }
 

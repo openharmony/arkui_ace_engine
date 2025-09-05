@@ -473,4 +473,24 @@ HWTEST_F(TextTestSixNg, CreateOrUpdateTextEffectTest001, TestSize.Level1)
     auto textEffect = pattern->GetTextEffect();
     EXPECT_EQ(textEffect, nullptr);
 }
+
+/**
+ * @tc.name: IsSelectableAndCopyTest001
+ * @tc.desc: Test IsSelectableAndCopy when textEffect is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, IsSelectableAndCopyTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+
+    // 设置 SELECTABLE 模式和非 None copyOption
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->textEffect_ = TextEffect::CreateTextEffect(); // textEffect 不为空
+
+    EXPECT_TRUE(pattern->IsSelectableAndCopy());
+}
 } // namespace OHOS::Ace::NG

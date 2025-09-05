@@ -917,4 +917,62 @@ HWTEST_F(TextTestNg, UrlSpanApplyToSpanItem001, TestSize.Level1)
     urlSpan.ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     EXPECT_EQ(spanItem->urlOnRelease, nullptr);
 }
+
+/**
+ * @tc.name: GetSpanItemAttributeUseForHtml
+ * @tc.desc: Test GetSpanItemAttributeUseForHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSpanItemAttributeUseForHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set GetSpanItemAttributeUseForHtml func param.
+     */
+    std::optional<TextStyle> textStyle = std::optional<TextStyle>(TextStyle());
+    textStyle->SetFontSize(Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    textStyle->SetFontWeight(FontWeight::MEDIUM);
+    textStyle->SetLineHeight(Dimension(2.2));
+    NG::FontStyle fontStyle;
+    NG::TextLineStyle textLineStyle;
+    /**
+     * @tc.steps: step3. Excute function for GetSpanItemAttributeUseForHtml.
+     */
+    pattern->GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle);
+    EXPECT_EQ(fontStyle.GetFontSize(), Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    EXPECT_EQ(fontStyle.GetFontWeight(), FontWeight::MEDIUM);
+    EXPECT_EQ(textLineStyle.GetLineHeight(), Dimension(2.2));
+}
+
+/**
+ * @tc.name: AsyncHandleOnCopySpanStringHtml
+ * @tc.desc: Test AsyncHandleOnCopySpanStringHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AsyncHandleOnCopySpanStringHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set AsyncHandleOnCopySpanStringHtml func param.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    /**
+     * @tc.steps: step3. Excute function for AsyncHandleOnCopySpanStringHtml.
+     */
+    pattern->AsyncHandleOnCopySpanStringHtml(spanString);
+    EXPECT_EQ(spanString->GetString(), "0123456789");
+    EXPECT_EQ(spanString->GetLength(), 10);
+}
 } // namespace OHOS::Ace::NG

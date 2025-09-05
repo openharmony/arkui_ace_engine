@@ -2569,6 +2569,59 @@ HWTEST_F(TextFieldTenPatternNg, HandleSpanLongPressEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseTextSelectOverlayTest001
+ * @tc.desc: test CheckSwitchToMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, BaseTextSelectOverlayTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    pattern->AttachToFrameNode(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    pattern->selectOverlay_->EnableMenu();
+    pattern->selectOverlay_->BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode::OVERLAY);
+    pattern->selectOverlay_->BaseTextSelectOverlay::NeedsProcessMenuOnWinChange();
+    EXPECT_EQ(pattern->selectOverlay_->BaseTextSelectOverlay::GetHandleLocalPaintRect(
+        OHOS::Ace::NG::DragHandleIndex::NONE), RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+
+/**
+ * @tc.name: GetAncestorNodeViewPort001
+ * @tc.desc: test base_text_select_overlay.cpp GetAncestorNodeViewPort001 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetAncestorNodeViewPort001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(parentPattern1, nullptr);
+    auto parentFrameNode1 = FrameNode::CreateFrameNode("ParentTest", 1, parentPattern1);
+    ASSERT_NE(parentFrameNode1, nullptr);
+    ASSERT_NE(pattern->GetHost(), nullptr);
+    pattern->GetHost()->SetParent(parentFrameNode1);
+
+    textSelectOverlay->hasTransform_ = false;
+    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    textSelectOverlay->hasTransform_ = true;
+    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
  * @tc.name: LeftMouseRelease.
  * @tc.desc: test clear selection by left mouse.
  * @tc.type: FUNC
@@ -2611,5 +2664,29 @@ HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
     auto end = pattern->GetTextSelector().GetStart();
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/**
+ * @tc.name: ApplySelectAreaWithKeyboard
+ * @tc.desc: test ApplySelectAreaWithKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->AttachToFrameNode(frameNode);
+
+    RectF area = RectF(0.0f, -10, 10, 20);
+    pattern->selectOverlay_->ApplySelectAreaWithKeyboard(area);
+    EXPECT_EQ(area.Top(), -10.0f);
+    EXPECT_EQ(area.Height(), 20.0f);
 }
 } // namespace OHOS::Ace::NG

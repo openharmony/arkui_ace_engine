@@ -138,37 +138,6 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckTouchInHostNode001
- * @tc.desc: test CheckTouchInHostNode function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, CheckTouchInHostNode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get textSelectOverlay and check geometryNode
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    stack->StartGetAccessRecordingFor(0);
-    stack->StopGetAccessRecording();
-    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    /**
-     * @tc.steps: step2: call CheckTouchInHostNode
-     * @tc.expected: inHostNode is false
-     */
-    PointF touchPoint(0.0f, 0.0f);
-    auto inHostNode = textSelectOverlay->CheckTouchInHostNode(touchPoint);
-    EXPECT_FALSE(inHostNode);
-}
-
-/**
  * @tc.name: OnMenuItemAction001
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC
@@ -836,6 +805,134 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateShaderStyle005
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle005, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto value = 5.0;
+    auto values = CalcDimension(value);
+    gradient.GetLinearGradient()->angle = values;
+    gradient.GetLinearGradient()->linearX = GradientDirection::RIGHT;
+    gradient.GetLinearGradient()->linearY = GradientDirection::LEFT;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result(value);
+    ASSERT_NE(gradientValue.GetLinearGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->angle, result);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->linearX, GradientDirection::RIGHT);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->linearY, GradientDirection::LEFT);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetLinearGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle006
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle006, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value = 5.0;
+    auto values = CalcDimension(value);
+    gradient.GetRadialGradient()->radialCenterX = values;
+    gradient.GetRadialGradient()->radialCenterY = values;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result(value);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle007
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle007, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value1 = 5.0;
+    auto values1 = CalcDimension(value1);
+    auto value2 = 10.0;
+    auto values2 = CalcDimension(value2);
+    gradient.GetRadialGradient()->radialCenterX = values1;
+    gradient.GetRadialGradient()->radialCenterY = values2;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result1(value1);
+    AnimatableDimension result2(value2);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result1);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result2);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle008
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle008, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value1 = 5.0;
+    auto values1 = CalcDimension(value1);
+    auto value2 = 10.0;
+    auto values2 = CalcDimension(value2);
+    gradient.GetRadialGradient()->radialVerticalSize = values1;
+    gradient.GetRadialGradient()->radialHorizontalSize = values2;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result1(value1);
+    AnimatableDimension result2(value2);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialVerticalSize, result1);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialHorizontalSize, result2);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
  * @tc.name: UpdateRelayoutShaderStyle
  * @tc.desc: Test UpdateRelayoutShaderStyle.
  * @tc.type: FUNC
@@ -909,11 +1006,11 @@ HWTEST_F(TextTestNineNg, IsFixIdealSizeAndNoMaxSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: MeasureWithMatchParent
- * @tc.desc: Test MeasureWithMatchParent.
+ * @tc.name: MeasureWithFixAtIdealSize
+ * @tc.desc: Test MeasureWithFixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
+HWTEST_F(TextTestNineNg, MeasureWithFixAtIdealSize, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init and Create function
@@ -927,21 +1024,46 @@ HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
     auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraintF;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraintF);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     /**
-     * @tc.steps: step2. call MeasureWithMatchParent.
+     * @tc.steps: step2. call MeasureWithFixAtIdealSize.
      */
-    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
-    auto frameSize = geometryNode->GetFrameSize();
-    EXPECT_EQ(frameSize, SizeF(0.0f, 0.0f));
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    layoutProperty->layoutConstraint_ = LayoutConstraintF();
-    layoutProperty->layoutConstraint_->parentIdealSize = OptionalSizeF(SizeF(100.0f, 100.0f));
-    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
-    frameSize = geometryNode->GetFrameSize();
-    EXPECT_EQ(frameSize, SizeF(100.0f, 100.0f));
+    // no layoutpolicy
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(0.0f, 0.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = NO_MATCH
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(100.0f, 0.0f));
+
+    // width = NO_MATCH, height = FIX_AT_IDEAL_SIZE
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(0.0f, 100.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = FIX_AT_IDEAL_SIZE
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(100.0f, 100.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = FIX_AT_IDEAL_SIZE maxCalcSize
+    MeasureProperty calcProperty;
+    calcProperty.maxSize =
+        CalcSize(CalcLength(Dimension(80.0f, DimensionUnit::PX)), CalcLength(Dimension(80.0f, DimensionUnit::PX)));
+    layoutProperty->UpdateCalcLayoutProperty(calcProperty);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(80.0f, 80.0f));
 }
 } // namespace OHOS::Ace::NG

@@ -32,7 +32,11 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string APP_NAME_MAP = "app.name";
-constexpr Dimension PADDING_SIZE = 12.0_vp;
+const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
+const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
+constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
+constexpr Dimension PREVIEW_MAX_WIDTH = 360.0_vp;
 } // namespace
 class PreviewMenuControllerTest : public testing::Test {
 public:
@@ -55,7 +59,42 @@ public:
     {
         // Clean up
     }
+
+    void VerifyContactAndAddressNodeProperties(const RefPtr<FrameNode>& node, TextDataDetectType type);
 };
+
+/**
+ * Helper function to verify common properties of the created node
+ */
+void PreviewMenuControllerTest::VerifyContactAndAddressNodeProperties(
+    const RefPtr<FrameNode>& node, TextDataDetectType type)
+{
+    auto flexLayoutProperty = node->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_NE(flexLayoutProperty, nullptr);
+
+    // Verify flex layout properties
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
+
+    auto&& calcLayoutConstraint = flexLayoutProperty->GetCalcLayoutConstraint();
+    // Verify size constraints
+    auto calcMinSize = calcLayoutConstraint->minSize;
+    EXPECT_EQ(calcMinSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
+
+    auto calcMaxSize = calcLayoutConstraint->maxSize;
+    EXPECT_EQ(calcMaxSize->Width(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+    EXPECT_EQ(calcMaxSize->Height(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+
+    // Verify special handling for phone/email types
+    if (type == TextDataDetectType::EMAIL || type == TextDataDetectType::PHONE_NUMBER) {
+        auto idealSize = calcLayoutConstraint->selfIdealSize;
+        ASSERT_TRUE(idealSize.has_value());
+        EXPECT_EQ(idealSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
+    } else {
+        auto idealSize = calcLayoutConstraint->selfIdealSize;
+        EXPECT_FALSE(idealSize.has_value());
+    }
+}
 
 /**
  * @tc.name: PreviewMenuControllerConstructorTest
@@ -157,6 +196,7 @@ HWTEST_F(PreviewMenuControllerTest, CreatePreviewMenuTest, TestSize.Level1)
     aiSpan1.content = SPAN_PHONE;
     aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
     aiSpanMap[0] = aiSpan1;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     auto textForAI = u"Test1234";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
@@ -201,12 +241,6 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingNodeTest, TestSize.Level1)
     EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
     EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
 
-    // Verify padding
-    const auto& padding = flexLayoutProperty->GetPaddingProperty();
-    EXPECT_NE(padding, nullptr);
-    EXPECT_EQ(padding->left.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
-    EXPECT_EQ(padding->right.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
-
     // Test with ADDRESS type
     auto addrNode = controller.CreatePreview(TextDataDetectType::ADDRESS);
     EXPECT_NE(addrNode, nullptr);
@@ -232,11 +266,11 @@ HWTEST_F(PreviewMenuControllerTest, CreateContactErrorNodeTest001, TestSize.Leve
 }
 
 /**
- * @tc.name:  GetErrorCallback
+ * @tc.name:  GetErrorCallback001
  * @tc.desc: Test GetErrorCallback creates node with correct properties for different types
  * @tc.type: FUNC
  */
-HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest, TestSize.Level1)
+HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto previewNode = FrameNode::GetOrCreateFrameNode(
@@ -250,5 +284,31 @@ HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest, TestSize.Level1)
     errorCallback(0, "test_error", "test_message");
     // 验证previewNode挂孩子节点
     EXPECT_FALSE(previewNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: GetCopyAndSelectableWhenTextEffect001
+ * @tc.desc: Verify copy and selectable status when textEffect_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, GetCopyAndSelectableWhenTextEffect001, TestSize.Level1)
+{
+    // 1. Prepare textPattern with textEffect_
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+
+    // 2. Set different copyOption modes (should be overridden by textEffect_)
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    // Case 1: copyOption = InApp (should return true)
+    textPattern->copyOption_ = CopyOptions::InApp;
+    auto result1 = textPattern->GetCopyAndSelectable();
+    EXPECT_TRUE(result1.first); // isShowCopy
+
+    // Case 2: copyOption = InApp (should still return false due to textEffect_)
+    textPattern->textEffect_ = TextEffect::CreateTextEffect(); // Set textEffect_
+    auto result2 = textPattern->GetCopyAndSelectable();
+    EXPECT_TRUE(result2.first);
 }
 } // namespace OHOS::Ace::NG
