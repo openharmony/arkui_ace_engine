@@ -115,6 +115,17 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
     return;
 }
 
+void QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
+{
+    auto nodePtr =  AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
+    info.index = routerPageResult->index;
+    info.name = routerPageResult->name;
+    info.path = routerPageResult->path;
+    info.state = static_cast<ani_size>(routerPageResult->state);
+    info.pageId = routerPageResult->pageId;
+}
+
 void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
 {
     auto nav = AceType::DynamicCast<FrameNode>(node);
@@ -172,6 +183,20 @@ void QueryNavDestinationInfo0(ani_long node, ArkUINavDestinationInfo& info, ani_
     return;
 }
 
+void QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info)
+{
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
+    CHECK_NULL_VOID(navDestinationResult);
+    info.uniqueId = static_cast<ani_double>(navDestinationResult->uniqueId);
+    info.index = navDestinationResult->index;
+    info.name = navDestinationResult->name;
+    info.navDestinationId = navDestinationResult->navDestinationId;
+    info.navigationId = navDestinationResult->navigationId;
+    info.state = static_cast<ani_size>(navDestinationResult->state);
+    info.mode = static_cast<ani_size>(navDestinationResult->mode);
+    return;
+}
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
     static const ArkUIAniCustomNodeModifier impl = {
@@ -180,7 +205,9 @@ const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
         .queryNavigationInfo = OHOS::Ace::NG::QueryNavigationInfo,
         .queryNavDestinationInfo = OHOS::Ace::NG::QueryNavDestinationInfo,
         .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0,
-        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo
+        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
+        .queryNavDestinationInfo1 = OHOS::Ace::NG::QueryNavDestinationInfo1,
+        .queryRouterPageInfo1 = OHOS::Ace::NG::QueryRouterPageInfo1
     };
     return &impl;
 }
