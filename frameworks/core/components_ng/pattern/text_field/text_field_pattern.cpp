@@ -664,6 +664,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
 void TextFieldPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
+    CHECK_NULL_VOID(!IsNormalInlineState());
     CHECK_NULL_VOID(HasFocus());
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
