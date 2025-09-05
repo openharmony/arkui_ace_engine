@@ -29,7 +29,7 @@ import { TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOp
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../../component/common';
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../../component/common';
 import { OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode } from '../../component/common';
-import { AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from '../../component/common';
+import { AccessibilityFocusCallback, AccessibilityTransparentCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from '../../component/common';
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global.resource"
@@ -517,6 +517,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        this.getPeer().onAccessibilityHoverTransparentAttribute(value);
         return this
     }
     public accessibilityTextHint(value: string | undefined): this {
