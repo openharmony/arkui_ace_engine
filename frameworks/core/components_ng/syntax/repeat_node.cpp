@@ -255,4 +255,9 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
     }
 }
 
+void RepeatNode::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("VirtualScroll: false");
+}
+
 } // namespace OHOS::Ace::NG

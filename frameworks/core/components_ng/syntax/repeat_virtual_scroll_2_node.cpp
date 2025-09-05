@@ -845,4 +845,9 @@ RefPtr<FrameNode> RepeatVirtualScroll2Node::GetFrameNode(int32_t index)
 {
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
 }
+
+void RepeatVirtualScroll2Node::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("VirtualScroll: true");
+}
 } // namespace OHOS::Ace::NG

@@ -241,6 +241,9 @@ public:
         isLoop_ = isLoop;
     }
 
+    void DumpInfo() override;
+    
+
 private:
     RefPtr<UINode> GetFrameChildByIndexImpl(
         uint32_t index, bool needBuild, bool isCache, bool addToRenderTree);
