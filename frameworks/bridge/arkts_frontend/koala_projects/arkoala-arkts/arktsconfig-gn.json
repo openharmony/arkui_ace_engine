@@ -64,12 +64,6 @@
             "@ohos/arkui/observer": [
                 "@ohos.arkui.observer.ets"
             ],
-            "@ohos/intl": [
-                "@ohos.intl.ets"
-            ],
-            "@ohos/arkui/graphics": [
-                "@ohos.arkui.graphics.ets"
-            ],
             "@ohos/promptAction": [
                 "@ohos.promptAction.ets"
             ],
