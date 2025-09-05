@@ -711,4 +711,44 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem003, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 8), 100);
     EXPECT_FALSE(frameNode_->GetChildByIndex(8)->CheckNeedForceMeasureAndLayout());
 }
+
+/**
+ * @tc.name: ShowCacheWithMultiLineItem
+ * @tc.desc: ShowCacheWithMultiLineItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCacheWithMultiLineItem, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateBigItem(0, 1, 0, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE * 2);
+    CreateFixedItems(20);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 4);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE * 0.75);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 6);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 4);
+
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE * 0.75);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 8);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 5);
+
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE * 0.75);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endIndex_, 10);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 6);
+}
 } // namespace OHOS::Ace::NG
