@@ -3223,7 +3223,6 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
@@ -3238,7 +3237,6 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback001, TestSize.Level1)
     jsAccessibilityManager->Register(false);
     jsAccessibilityManager->InitializeCallback();
     EXPECT_EQ(jsAccessibilityManager->windowId_, 1);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3251,7 +3249,6 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
@@ -3266,7 +3263,6 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
     jsAccessibilityManager->Register(true);
     jsAccessibilityManager->InitializeCallback();
     EXPECT_EQ(jsAccessibilityManager->windowId_, 0);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3276,7 +3272,6 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId002, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -3318,7 +3313,6 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateChildrenNodeInCache001, TestSize.Leve
     /**
      * @tc.steps: step1. create PipelineContext
      */
-    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -3378,7 +3372,6 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateChildrenNodeInCache001, TestSize.Leve
  */
 HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoByAccessibilityIdNG001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -3473,7 +3466,6 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct jsAccessibilityManager, test node
      */
-    MockPipelineContext::SetUp();
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -3504,7 +3496,6 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG001, TestSize.Level1)
         root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_FOCUS, context, -1);
     lhs = jsAccessibilityManager->ExecuteActionNG(
         root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS, context, -1);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3517,7 +3508,6 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG002, TestSize.Level1)
     /**
      * @tc.steps: step1. construct jsAccessibilityManager, test node
      */
-    MockPipelineContext::SetUp();
     auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -3544,7 +3534,7 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG002, TestSize.Level1)
         frameNode->GetAccessibilityId(), actionArguments,
         ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, context, 0);
     EXPECT_EQ(processFlag, false);
-    accessibilityProperty->SetSwitchEditableMode (
+    accessibilityProperty->SetSwitchEditableMode(
         [&] (bool switchToEditable) {
             processFlag = true;
         }
@@ -3555,7 +3545,6 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG002, TestSize.Level1)
     EXPECT_EQ(processFlag, true);
 
     root->RemoveChild(frameNode);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3625,7 +3614,6 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForUEA001, TestSize
  */
 HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     auto checkNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<Pattern>(), false);
@@ -3641,7 +3629,6 @@ HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement001, Tes
     bool result = jsAccessibilityManager->FindUIExtensionAccessibilityElement(checkNode,
         customid, commonProperty, infos, context);
     EXPECT_FALSE(result);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3651,7 +3638,6 @@ HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement001, Tes
  */
 HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement002, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
@@ -3669,7 +3655,6 @@ HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement002, Tes
     bool result = jsAccessibilityManager->FindUIExtensionAccessibilityElement(uiExtensionNode,
         customid, commonProperty, infos, context);
     EXPECT_TRUE(result);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -3702,7 +3687,6 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertAceAction001, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
@@ -3727,7 +3711,6 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(instanceId, testKey, node1->GetAccessibilityId());
     prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node1, root, context);
     ASSERT_EQ(prevNode, nullptr);
-    MockPipelineContext::TearDown();
 }
 
 
@@ -3738,7 +3721,6 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
  */
 HWTEST_F(JsAccessibilityManagerTest, sendAccessibilitEvent001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
@@ -3748,6 +3730,5 @@ HWTEST_F(JsAccessibilityManagerTest, sendAccessibilitEvent001, TestSize.Level1)
     frameNode->OnAccessibilityEvent(
             AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
-    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG
