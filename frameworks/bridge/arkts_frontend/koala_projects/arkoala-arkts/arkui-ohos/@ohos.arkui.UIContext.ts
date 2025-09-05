@@ -196,6 +196,11 @@ export class Router {
     }
 }
 
+export interface PageInfo {
+    routerPageInfo?: uiObserver.RouterPageInfo;
+    navDestinationInfo?: uiObserver.NavDestinationInfo;
+}
+
 export interface AtomicServiceBar {
     getBarRect(): Frame;
 }
@@ -479,7 +484,9 @@ export class UIContext {
     public getMediaQuery(): MediaQuery {
         throw Error("getMediaQuery not implemented in UIContext!")
     }
-
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+    }
     public getMeasureUtils() : MeasureUtils {
         throw Error("getMeasureUtils not implemented in UIContext!")
     }

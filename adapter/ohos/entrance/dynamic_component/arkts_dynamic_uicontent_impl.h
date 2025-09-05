@@ -62,6 +62,7 @@ private:
     void HandleCommonInitializeWindowFocus();
     void HandleSurfaceChanged(const RefPtr<Platform::AceViewOhos>& aceView,
         int32_t deviceWidth, int32_t deviceHeight, bool isModelJson);
+    void SetAniLocalContextFromHost();
 
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
 };

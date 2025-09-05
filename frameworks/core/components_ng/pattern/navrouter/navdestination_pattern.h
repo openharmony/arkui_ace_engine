@@ -342,8 +342,8 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
-    std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
+    std::string inspectorId_;
     RefPtr<UINode> customNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;

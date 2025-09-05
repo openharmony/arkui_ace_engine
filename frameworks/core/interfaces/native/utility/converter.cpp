@@ -525,6 +525,13 @@ std::optional<int32_t> ResourceConverter::ToInt()
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    if (type_ == ResourceType::STRING) {
+        auto result = GetStringResource();
+        if (result.has_value() && !result.value().empty()) {
+            /* 16: specifies base 16 (hexadecimal) */
+            return static_cast<uint32_t>(strtol(result.value().c_str(), nullptr, 16));
+        }
+    }
     if (id_ == -1 && !params_.empty()) {
         return resWrapper_->GetSymbolByName(params_.front().c_str());
     } else if (id_ != -1) {
@@ -2606,16 +2613,6 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
     CHECK_NULL_VOID(context);
 
     dst = shadowTheme->GetShadow(shadowStyle, context->GetColorMode());
-}
-
-template<>
-void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
-{
-    ResourceConverter converter(src);
-    if (!dst) {
-        dst = SymbolData();
-    }
-    dst->symbol = converter.ToSymbol();
 }
 
 template<>

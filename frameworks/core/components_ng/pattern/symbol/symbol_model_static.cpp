@@ -87,4 +87,29 @@ void SymbolModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optiona
     }
 }
 
+void SymbolModelStatic::SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, frameNode);
+    }
+}
+
+void SymbolModelStatic::SetFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, frameNode);
+    }
+}
+
+void SymbolModelStatic::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

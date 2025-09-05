@@ -531,6 +531,8 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryNavDestinationInfo)(ani_long node, ArkUINavDestinationInfo& info);
     void (*queryNavDestinationInfo0)(ani_long node, ArkUINavDestinationInfo& info, ani_int isInner);
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
+    void (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
+    void (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_long ptr, uint32_t flag,
