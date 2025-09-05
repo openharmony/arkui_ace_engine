@@ -642,6 +642,11 @@ void SecurityComponentModelNG::SetTipPosition(const TipPosition& value)
     }
 }
 
+void SecurityComponentModelNG::SetUserCancelEvent(const bool& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value);
+}
+
 void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);

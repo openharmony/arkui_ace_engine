@@ -135,8 +135,8 @@ private:
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message);
-    int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
-    int32_t ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event);
+    int32_t ReportSecurityComponentClickEvent(const KeyEvent& event, std::string& message);
+    int32_t ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event, std::string& message);
     void DoTriggerOnclick(int32_t result);
     void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(

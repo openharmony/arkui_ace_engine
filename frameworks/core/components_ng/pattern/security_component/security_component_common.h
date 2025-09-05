@@ -25,6 +25,7 @@ enum class SecurityComponentHandleResult : int32_t {
     DROP_CLICK = -100, // do not call js function
     CLICK_SUCCESS = 0,
     CLICK_GRANT_FAILED = 1,
+    CLICK_GRANT_CANCELED = 2,
 
     GRANT_CANCEL = -64, // Keep consistent with the defined enum of security component service
 };

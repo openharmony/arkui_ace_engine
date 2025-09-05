@@ -53,6 +53,7 @@ public:
     static void SetIconBorderRadius(const JSCallbackInfo& info);
     static void SetStateEffect(const JSCallbackInfo& info);
     static void SetTipPosition(const JSCallbackInfo& info);
+    static void SetUserCancelEvent(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H

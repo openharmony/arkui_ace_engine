@@ -15,6 +15,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -114,8 +115,11 @@ bool SecurityComponentPattern::OnAccessibilityEvent(const SecCompEnhanceEvent& e
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     int res = HANDLE_RES_ERROR;
+    int32_t code = SecurityComponentErrorCode::SUCCESS;
+    std::string message;
 #ifdef SECURITY_COMPONENT_ENABLE
-    res = ReportSecurityComponentClickEvent(event);
+    res = ReportSecurityComponentClickEvent(event, message);
+    code = res;
     if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
         return true;
     }
@@ -123,10 +127,13 @@ bool SecurityComponentPattern::OnAccessibilityEvent(const SecCompEnhanceEvent& e
         SC_LOG_ERROR("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = HANDLE_RES_ERROR;
     }
+    HandleReportSecCompClickEventResult(code, message);
 #endif
     auto jsonNode = JsonUtil::Create(true);
     CHECK_NULL_RETURN(jsonNode, false);
     jsonNode->Put("handleRes", res);
+    jsonNode->Put("code", code);
+    jsonNode->Put("message", message.c_str());
     std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, false);
@@ -164,18 +171,24 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, false);
         int32_t res = 1;
+        int32_t code = SecurityComponentErrorCode::SUCCESS;
+        std::string message;
 #ifdef SECURITY_COMPONENT_ENABLE
-        res = ReportSecurityComponentClickEvent(event);
+        res = ReportSecurityComponentClickEvent(event, message);
+        code = res;
         if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else if (res != 0) {
             SC_LOG_ERROR("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
         }
+        HandleReportSecCompClickEventResult(code, message);
 #endif
         auto jsonNode = JsonUtil::Create(true);
         CHECK_NULL_RETURN(jsonNode, false);
         jsonNode->Put("handleRes", res);
+        jsonNode->Put("code", code);
+        jsonNode->Put("message", message.c_str());
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
         gestureEventHub->ActClick(jsonShrd);
@@ -237,8 +250,10 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetClickPointerEvent(info.GetPointerEvent());
+    int32_t code = SecurityComponentErrorCode::SUCCESS;
     std::string message;
     int res = ReportSecurityComponentClickEvent(gestureInfo, message);
+    code = res;
     if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
         return;
     }
@@ -248,7 +263,10 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     }
     auto jsonNode = JsonUtil::Create(true);
     CHECK_NULL_VOID(jsonNode);
+    HandleReportSecCompClickEventResult(code, message);
     jsonNode->Put("handleRes", res);
+    jsonNode->Put("code", code);
+    jsonNode->Put("message", message.c_str());
     std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     gestureEventHub->ActClick(jsonShrd);
@@ -935,10 +953,23 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
     CHECK_NULL_VOID(host);
     auto jsonNode = JsonUtil::Create(true);
     CHECK_NULL_VOID(jsonNode);
-    if (result != 0) {
-        jsonNode->Put("handleRes", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
-    } else {
+    if (result == static_cast<int32_t>(SecurityComponentHandleResult::CLICK_SUCCESS)) {
         jsonNode->Put("handleRes", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_SUCCESS));
+    } else if (result == static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_CANCELED)) {
+        auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        bool userCancelEvent = layoutProperty->GetUserCancelEvent().value_or(false);
+        if (userCancelEvent) {
+            jsonNode->Put("handleRes", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_CANCELED));
+            jsonNode->Put("code", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_SUCCESS));
+            jsonNode->Put("message", "Permission request is canceled by user.");
+        } else {
+            return;
+        }
+    } else if (result == static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED)) {
+        jsonNode->Put("handleRes", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
+        jsonNode->Put("code", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
+        jsonNode->Put("message", "Creating dialog is failed.");
     }
 
     std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
@@ -1059,7 +1090,8 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
         frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
 }
 
-int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event,
+    std::string& message)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
         SC_LOG_WARN("KeyEventHandler: security component has not registered.");
@@ -1081,17 +1113,18 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
         OnClickAfterFirstUseDialog = [] (int32_t) {};
         return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event, std::move(OnClickAfterFirstUseDialog));
+            frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
     }
 
     OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
         frameNode, pipeline, "ArkUISecurityComponentKeyTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-        frameNode, event, std::move(OnClickAfterFirstUseDialog));
+        frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
 }
 
-int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event)
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event,
+    std::string& message)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
         SC_LOG_WARN("AccessibilityEventHandler: security component has not registered.");
@@ -1113,14 +1146,14 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const SecCom
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
         OnClickAfterFirstUseDialog = [] (int32_t) {};
         return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event, std::move(OnClickAfterFirstUseDialog));
+            frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
     }
 
     OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
         frameNode, pipeline, "ArkUISecurityComponentAccessibilityTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-        frameNode, event, std::move(OnClickAfterFirstUseDialog));
+        frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
 }
 
 void SecurityComponentPattern::HandleReportSecCompClickEventResult(int32_t& code, std::string& message)
