@@ -403,6 +403,22 @@ void SearchPattern::SetAccessibilityAction()
         auto index = pattern->HandleGetCaretIndex();
         return index;
     });
+    textAccessibilityProperty->SetNotifyChildAction(
+        [weak = WeakClaim(this)](const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, AccessibilityActionResult::ACTION_ERROR);
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, AccessibilityActionResult::ACTION_ERROR);
+            auto searchGesture = host->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(searchGesture, AccessibilityActionResult::ACTION_ERROR);
+            pattern->isNotifyChildAction_ = true;
+            searchGesture->ActClick();
+            pattern->isNotifyChildAction_ = false;
+            return AccessibilityActionResult::ACTION_OK;
+        });
     SetSearchFieldAccessibilityAction();
     SetSearchButtonAccessibilityAction();
 }
@@ -412,22 +428,6 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    textFieldAccessibilityProperty->SetActionClick([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto gesture = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gesture);
-        auto actuator = gesture->GetUserClickEventActuator();
-        CHECK_NULL_VOID(actuator);
-        auto callBack = actuator->GetClickEvent();
-        CHECK_NULL_VOID(callBack);
-        GestureEvent gestureEvent;
-        callBack(gestureEvent);
-    });
-
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     textAccessibilityProperty->SetActionSetText([weak = WeakClaim(this)](const std::string& value) {
         auto pattern = weak.Upgrade();
@@ -1679,7 +1679,11 @@ void SearchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
+        if (pattern->isNotifyChildAction_) {
+            pattern->HandleNotifyChildAction(info);
+        } else {
+            pattern->HandleClickEvent(info);
+        }
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
@@ -1700,6 +1704,19 @@ void SearchPattern::HandleClickEvent(GestureEvent& info)
         info.GetLocalLocation().GetY() - textFieldFrameRect.GetY());
     info.SetLocalLocation(relTextFieldLocalLocation);
     textFieldPattern->HandleClickEvent(info);
+}
+
+void SearchPattern::HandleNotifyChildAction(GestureEvent& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto actuator = gesture->GetUserClickEventActuator();
+    CHECK_NULL_VOID(actuator);
+    auto callBack = actuator->GetClickEvent();
+    CHECK_NULL_VOID(callBack);
+    callBack(info);
 }
 
 bool SearchPattern::HandleInputChildOnFocus() const
