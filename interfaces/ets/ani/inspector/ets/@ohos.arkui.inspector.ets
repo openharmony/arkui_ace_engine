@@ -46,6 +46,10 @@
         onDraw(type: 'draw', callback: Callback<void>): void;
         
         offDraw(type: 'draw', callback?: Callback<void>): void;
+
+        onDrawChildren(type: 'drawChildren', callback: Callback<void>): void;
+        
+        offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void;
     }
     
     class ComponentObserverImpl implements ComponentObserver
@@ -72,6 +76,14 @@
         
         public offDraw(type: 'draw', callback?: Callback<void>): void {
             this.off('draw', callback);
+        }
+
+        public onDrawChildren(type: 'drawChildren', callback: Callback<void>): void {
+            this.on('drawChildren', callback);
+        }
+        
+        public offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void {
+            this.off('drawChildren', callback);
         }
         
         public native on(type: string, callback: Callback<void>) : void;

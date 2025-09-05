@@ -25,6 +25,7 @@
 namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
+const char DRAW_CHILDREN_TYPE[] = "drawChildren";
 const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
 const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
 const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
@@ -60,6 +61,13 @@ public:
     {
         if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
             return std::find_if(cbLayoutList_.begin(), cbLayoutList_.end(), [env, cb](const ani_ref& item) -> bool {
+                ani_boolean rs;
+                env->Reference_StrictEquals(cb, item, &rs);
+                return rs == ANI_TRUE;
+            });
+        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+            return std::find_if(cbDrawChildrenList_.begin(), cbDrawChildrenList_.end(),
+                [env, cb](const ani_ref& item) -> bool {
                 ani_boolean rs;
                 env->Reference_StrictEquals(cb, item, &rs);
                 return rs == ANI_TRUE;
@@ -109,6 +117,8 @@ public:
             }
             if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
                 arkTsFrontend->UnregisterLayoutInspectorCallback(id_);
+            } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(id_);
             } else {
                 arkTsFrontend->UnregisterDrawInspectorCallback(id_);
             }
@@ -130,6 +140,8 @@ public:
     {
         if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
             return cbLayoutList_;
+        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+            return cbDrawChildrenList_;
         }
         return cbDrawList_;
     }
@@ -138,6 +150,8 @@ public:
     {
         if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
             return layoutEvent_;
+        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+            return drawChildrenEvent_;
         }
         return drawEvent_;
     }
@@ -146,6 +160,8 @@ public:
     {
         if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
             layoutEvent_ = fun;
+        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+            drawChildrenEvent_ = fun;
         } else {
             drawEvent_ = fun;
         }
@@ -154,8 +170,10 @@ private:
     std::string id_;
     std::list<ani_ref> cbLayoutList_;
     std::list<ani_ref> cbDrawList_;
+    std::list<ani_ref> cbDrawChildrenList_;
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
+    RefPtr<InspectorEvent> drawChildrenEvent_;
 };
 
 static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
@@ -175,7 +193,9 @@ static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object f
     }
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
+    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 &&
+        strcmp(DRAW_TYPE, typeStr.c_str()) != 0 &&
+        strcmp(DRAW_CHILDREN_TYPE, typeStr.c_str()) != 0) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
@@ -195,7 +215,9 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
 {
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
+    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 &&
+        strcmp(DRAW_TYPE, typeStr.c_str()) != 0 &&
+        strcmp(DRAW_CHILDREN_TYPE, typeStr.c_str())) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
@@ -371,8 +393,15 @@ static ani_ref CreateComponentObserver(ani_env *env, ani_string id, const char *
     };
     observer->SetInspectorFuncByType(DRAW_TYPE, AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback)));
     
+    auto drawChildrenCallback = [observer, env]() -> void {
+        observer->CallUserFunction(env, observer->GetCbListByType(DRAW_CHILDREN_TYPE));
+    };
+    observer->SetInspectorFuncByType(DRAW_CHILDREN_TYPE,
+        AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback)));
+
     arkTsFrontend->RegisterLayoutInspectorCallback(observer->GetInspectorFuncByType(LAYOUT_TYPE), key);
     arkTsFrontend->RegisterDrawInspectorCallback(observer->GetInspectorFuncByType(DRAW_TYPE), key);
+    arkTsFrontend->RegisterDrawChildrenInspectorCallback(observer->GetInspectorFuncByType(DRAW_CHILDREN_TYPE), key);
     return context_object;
 }
 
