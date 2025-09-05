@@ -20,7 +20,7 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
@@ -1404,5 +1404,100 @@ HWTEST_F(WaterFlowTestNg, WaterFlowReMeasureTest001, TestSize.Level1)
     // Complete layout to trigger ClearUnlayoutedItems
     layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
     EXPECT_TRUE(layoutAlgorithm->isLayouted_);
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowTopDown001
+ * @tc.desc: Test LazyVGridLayout basic fast scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown001, TestSize.Level1)
+{
+    // Create WaterFlow with reference to existing test pattern
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    // Create LazyVGridLayout items
+    for (int i = 0; i < 10; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        // Add child items to LazyVGrid
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(50.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    // Verify initial state
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 4);
+
+    // Test fast scrolling scenario
+    UpdateCurrentOffset(-1500.0f);
+
+    // Verify layout state after fast scrolling
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+
+    // Verify position calculations
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= pattern_->layoutInfo_->endIndex_; ++i) {
+        auto rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Top(), (i - 5) * 160.0f);
+        EXPECT_EQ(rect.Bottom(), (i - 5 + 1) * 160.0f);
+        EXPECT_EQ(rect.Height(), 160.0f);
+        EXPECT_EQ(rect.Width(), 480.0f);
+    }
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowTopDown002
+ * @tc.desc: Test LazyVGridLayout reverse scrolling stability
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown002, TestSize.Level1)
+{
+    // Create WaterFlow with reference to existing test pattern
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    // Create LazyVGridLayout items
+    for (int i = 0; i < 10; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(50.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    // Initial fast scroll to set up test state
+    UpdateCurrentOffset(-1500.0f);
+
+    // Test reverse scrolling
+    UpdateCurrentOffset(800.0f);
+
+    // Verify state after reverse scrolling
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 0);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= pattern_->layoutInfo_->endIndex_; ++i) {
+        auto rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Top(),  i * 160.0f);
+        EXPECT_EQ(rect.Bottom(), (i + 1) * 160.0f);
+        EXPECT_EQ(rect.Height(), 160.0f);
+        EXPECT_EQ(rect.Width(), 480.0f);
+    }
 }
 } // namespace OHOS::Ace::NG

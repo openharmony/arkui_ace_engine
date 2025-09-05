@@ -164,12 +164,9 @@ void WaterFlowLayoutBase::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    int32_t measuredStartIndex = MeasuredStartIndex();
-    int32_t measuredEndIndex = MeasuredEndIndex();
-
     for (int32_t idx = prevStartIndex_; idx <= prevEndIndex_; ++idx) {
         // Skip if index is within current layout range
-        if (idx >= measuredStartIndex && idx <= measuredEndIndex) {
+        if (idx >= measuredStartIndex_ && idx <= measuredEndIndex_) {
             continue;
         }
 

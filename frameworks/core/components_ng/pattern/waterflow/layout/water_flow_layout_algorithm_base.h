@@ -59,6 +59,10 @@ public:
     // Flag indicating if layout phase is completed.
     bool isLayouted_ = true;
 
+    // Record the index range after measurement completion
+    int32_t measuredStartIndex_ = -1;
+    int32_t measuredEndIndex_ = -1;
+
 protected:
     /**
      * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
@@ -102,18 +106,6 @@ protected:
     * @return RefPtr to the layout information base object.
     */
     virtual RefPtr<WaterFlowLayoutInfoBase> LayoutInfo() const = 0;
-
-    /**
-    * @brief Get the start index of items determined after the measure phase.
-    * @return The start index of the layout range established during measurement.
-    */
-    virtual int32_t MeasuredStartIndex() const = 0;
-
-    /**
-    * @brief Get the end index of items determined after the measure phase.
-    * @return The end index of the layout range established during measurement.
-    */
-    virtual int32_t MeasuredEndIndex() const = 0;
 
     bool syncLoad_ = false;
 

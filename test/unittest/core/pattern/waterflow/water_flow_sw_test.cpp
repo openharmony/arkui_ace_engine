@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
@@ -456,5 +457,130 @@ HWTEST_F(WaterFlowSWTest, InitialLoadOrderBug001, TestSize.Level1)
     // Verify that the first item is at index 0 position
     ASSERT_TRUE(GetItem(0, true));
     EXPECT_EQ(pattern_->GetItemIndex(0, 0), 0);
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowSW001
+ * @tc.desc: Test LazyVGridLayout basic fast scrolling
+ */
+HWTEST_F(WaterFlowSWTest, LazyVGridInWaterFlowSW001, TestSize.Level1)
+{
+    // Create WaterFlow with sliding window mode
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.0f));
+
+    // Create LazyVGridLayouts
+    for (int i = 0; i < 15; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        // Create child items to trigger adjustOffset mechanism
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(80.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    auto swInfo = AceType::DynamicCast<WaterFlowLayoutInfoSW>(pattern_->layoutInfo_);
+    ASSERT_NE(swInfo, nullptr);
+
+    // Verify initial state
+    EXPECT_EQ(swInfo->startIndex_, 0);
+    EXPECT_EQ(swInfo->endIndex_, 3);
+
+    // Test fast scrolling
+    UpdateCurrentOffset(-1200.0f);
+
+    // Verify sliding window state
+    EXPECT_EQ(swInfo->startIndex_, 4);
+    EXPECT_EQ(swInfo->endIndex_, 7);
+
+    // Verify lane positions
+    for (const auto& segment : swInfo->lanes_) {
+        for (const auto& lane : segment) {
+            EXPECT_EQ(lane.startPos, -200);
+            EXPECT_EQ(lane.endPos, 800);
+            EXPECT_LE(lane.startPos, lane.endPos);
+        }
+    }
+
+    // Verify total offset range
+    EXPECT_EQ(swInfo->totalOffset_, -1200);
+
+    // Verify visible items position
+    for (int i = swInfo->startIndex_; i <= swInfo->endIndex_; ++i) {
+        auto rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Top(), (i - 4) * 250 - 200);
+        EXPECT_EQ(rect.Bottom(), (i - 4 + 1) * 250 - 200);
+        EXPECT_EQ(rect.Height(), 250);
+        EXPECT_EQ(rect.Width(), 400);
+    }
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowSW002
+ * @tc.desc: Test LazyVGridLayout reverse and multiple rapid scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, LazyVGridInWaterFlowSW002, TestSize.Level1)
+{
+    // Create WaterFlow with sliding window mode
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.0f));
+
+    // Create LazyVGridLayouts
+    for (int i = 0; i < 15; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(80.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    auto swInfo = AceType::DynamicCast<WaterFlowLayoutInfoSW>(pattern_->layoutInfo_);
+    ASSERT_NE(swInfo, nullptr);
+
+    // Initial scroll to set up test state
+    UpdateCurrentOffset(-1200.0f);
+
+    // Test reverse scrolling
+    UpdateCurrentOffset(600.0f);
+
+    EXPECT_EQ(swInfo->startIndex_, 2);
+    EXPECT_EQ(swInfo->endIndex_, 5);
+
+    // Verify lane consistency after reverse scrolling
+    for (const auto& segment : swInfo->lanes_) {
+        for (const auto& lane : segment) {
+            EXPECT_EQ(lane.startPos, -100);
+            EXPECT_EQ(lane.endPos, 900);
+            EXPECT_LE(lane.startPos, lane.endPos);
+        }
+    }
+
+    // Test multiple rapid scrolls
+    for (int i = 0; i < 3; ++i) {
+        UpdateCurrentOffset(-400.0f);
+        UpdateCurrentOffset(200.0f);
+    }
+
+    // Verify system stability after multiple rapid scrolls
+    EXPECT_EQ(swInfo->startIndex_, 4);
+    EXPECT_EQ(swInfo->endIndex_, 7);
+    EXPECT_EQ(swInfo->totalOffset_, -1200);
 }
 } // namespace OHOS::Ace::NG
