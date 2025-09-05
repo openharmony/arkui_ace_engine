@@ -5194,7 +5194,9 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode001, TestSize.Level1)
         item.content = std::to_string(i);
         menuOptionItems.push_back(item);
     }
-
+    /**
+     * @tc.steps: step2. call CreateMenuNode and check menuWrapperNoShortCut.
+    */
     auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
     ASSERT_NE(themeManagerBase, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
