@@ -38,6 +38,7 @@ void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
 void ValidateNonNegative(std::optional<CalcDimension>& opt);
+void ValidatePositive(std::optional<CalcDimension>& opt);
 void ValidateNonPercent(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<std::string>& opt);
