@@ -45,6 +45,7 @@ public:
         RefPtr<TextFieldTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
+            theme->SetThemeConstants(themeConstants);
             if (!themeConstants) {
                 return theme;
             }
@@ -879,8 +880,23 @@ public:
         return autoFillIconSize_;
     }
 
+    std::string GetCounterFormatString(uint32_t textLength, uint32_t maxLength)
+    {
+        auto themeConstants = themeConstants_.Upgrade();
+        auto defaultFormatStr = std::to_string(textLength) + "/" + std::to_string(maxLength);
+        CHECK_NULL_RETURN(themeConstants, defaultFormatStr);
+        auto resourceAdapter = themeConstants->GetResourceAdapter();
+        CHECK_NULL_RETURN(resourceAdapter, defaultFormatStr);
+        auto formatStr = resourceAdapter->GetStringFormatByName("textinput_text_counter", textLength, maxLength);
+        return formatStr.empty() ? defaultFormatStr : formatStr;
+    }
+
 protected:
     TextFieldTheme() = default;
+    void SetThemeConstants(const RefPtr<ThemeConstants>& themeConstants)
+    {
+        themeConstants_ = WeakPtr<ThemeConstants>(themeConstants);
+    }
     TextStyle textStyle_;
     Color textColor_;
     Color placeholderColor_;
@@ -1030,6 +1046,7 @@ private:
     Color autoFillIconPrimaryColor_;
     Color autoFillIconEmphasizeColor_;
     Dimension autoFillIconSize_ = 24.0_vp;
+    WeakPtr<ThemeConstants> themeConstants_;
 };
 
 } // namespace OHOS::Ace
