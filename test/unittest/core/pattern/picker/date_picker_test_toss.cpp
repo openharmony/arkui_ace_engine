@@ -388,7 +388,7 @@ HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
 
 /**
  * @tc.name: DatePickerPatternDirty000
- * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.desc: test OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
