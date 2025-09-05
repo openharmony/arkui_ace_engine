@@ -664,4 +664,126 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerFocusRectWithPadding, TestSize.Level1)
     pickerPattern->GetInnerFocusPaintRect(rect);
     EXPECT_EQ(rect.GetRect().GetX(), 13.5f);
 }
+
+/**
+ * @tc.name: DatePickerDialogCanLoop001
+ * @tc.desc: Test timePickerNode in DatePickerDialog when canLoop is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.canLoop = false;
+    settingData.useMilitary = false;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    /**
+     * @tc.steps: step2.call CanMove.
+     * @tc.expected:timePickerNode cannot loop when at top.
+     */
+    bool tested = false;
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
+        auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childStackNode);
+        auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+            CHECK_NULL_VOID(childNode);
+            auto timePickerColumnPattern = childNode->GetPattern<TimePickerColumnPattern>();
+            CHECK_NULL_VOID(timePickerColumnPattern);
+            timePickerColumnPattern->SetCurrentIndex(0);
+            EXPECT_FALSE(timePickerColumnPattern->CanMove(false));
+            EXPECT_TRUE(timePickerColumnPattern->CanMove(true));
+            tested = true;
+        }
+    }
+    EXPECT_TRUE(tested);
+}
+
+/**
+ * @tc.name: DatePickerDialogCanLoop002
+ * @tc.desc: Test timePickerNode in DatePickerDialog when canLoop is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.canLoop = true;
+    settingData.useMilitary = false;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    /**
+     * @tc.steps: step2.call CanMove.
+     * @tc.expected:timePickerNode can loop when at top.
+     */
+    bool tested = false;
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
+        auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childStackNode);
+        auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+            CHECK_NULL_VOID(childNode);
+            auto timePickerColumnPattern = childNode->GetPattern<TimePickerColumnPattern>();
+            CHECK_NULL_VOID(timePickerColumnPattern);
+            timePickerColumnPattern->SetCurrentIndex(0);
+            EXPECT_FALSE(timePickerColumnPattern->CanMove(true));
+            EXPECT_TRUE(timePickerColumnPattern->CanMove(true));
+            tested = true;
+        }
+    }
+    EXPECT_TRUE(tested);
+}
 } // namespace OHOS::Ace::NG
