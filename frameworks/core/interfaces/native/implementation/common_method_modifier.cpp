@@ -2345,6 +2345,8 @@ void BorderColorImpl(Ark_NativePointer node,
     if (color) {
         // TODO: Reset value
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    } else {
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     }
 }
 void BorderRadiusImpl(Ark_NativePointer node,
