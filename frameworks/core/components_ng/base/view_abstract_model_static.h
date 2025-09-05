@@ -217,6 +217,13 @@ public:
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
 
+    static void SetBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle,
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
     static void SetBackgroundEffect(FrameNode* frameNode,
         const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 
