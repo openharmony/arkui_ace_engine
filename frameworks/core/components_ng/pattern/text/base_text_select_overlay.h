@@ -187,7 +187,7 @@ public:
     RectF GetPaintRectWithTransform();
     OffsetF GetPaintRectOffsetWithTransform();
     RectF GetVisibleContentRectWithTransform(float epsilon);
-    bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon);
+    virtual bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon);
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
