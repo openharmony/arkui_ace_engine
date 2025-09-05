@@ -27,6 +27,9 @@ public:
     static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue);
+    static void SetFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
 };
 } // namespace OHOS::Ace::NG
 
