@@ -14,6 +14,8 @@
  */
 
 #include "gtest/gtest.h"
+#include "appexecfwk_errors.h"
+#include "form_mgr_errors.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 
 using namespace testing;
@@ -69,15 +71,15 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_001, TestSize.Le
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
     formJsInfo.formId = -1;
-    EXPECT_EQ(renderDelegate->OnSurfaceCreate(nullptr, formJsInfo, want), ERR_NULL_OBJECT);
+    EXPECT_EQ(renderDelegate->OnSurfaceCreate(nullptr, formJsInfo, want), ERR_APPEXECFWK_FORM_INVALID_PARAM);
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_APPEXECFWK_FORM_INVALID_PARAM);
 
     formJsInfo.formId = 1;
-    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_APPEXECFWK_FORM_COMMON_CODE);
 
     std::string onSurfaceCreateKey;
     auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
@@ -118,7 +120,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_003, TestSize.Le
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_003 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
-    EXPECT_EQ(renderDelegate->OnError("", ""), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnError("", ""), ERR_APPEXECFWK_FORM_COMMON_CODE);
 
     std::string onErrorEventKey;
     auto onError = [&onErrorEventKey](
@@ -157,7 +159,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_005, TestSize.Le
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_005 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     uint16_t surfaceId= 11111;
-    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_APPEXECFWK_FORM_COMMON_CODE);
 
     std::string onSurfaceDetachEventKey;
     auto onSurfaceDetach = [&onSurfaceDetachEventKey]() { onSurfaceDetachEventKey = CHECK_KEY; };
@@ -247,7 +249,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_009, TestSize.Le
     MessageParcel reply;
     MessageOption option;
     auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    EXPECT_EQ(ans, ERR_APPEXECFWK_PARCEL_ERROR);
 }
 
 /**
@@ -269,7 +271,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_010, TestSize.Le
     MessageParcel reply;
     MessageOption option;
     auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    EXPECT_EQ(ans, ERR_APPEXECFWK_PARCEL_ERROR);
 }
 
 /**
@@ -293,7 +295,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_011, TestSize.Le
     MessageParcel reply;
     MessageOption option;
     auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    EXPECT_EQ(ans, ERR_APPEXECFWK_PARCEL_ERROR);
 }
 
 /**
@@ -317,7 +319,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_012, TestSize.Le
     MessageParcel reUseReply;
     MessageOption reUseOption;
     auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
-    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+    EXPECT_EQ(reUseAns, ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
 }
 
 /**
@@ -337,7 +339,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_013, TestSize.Le
     MessageParcel reUseReply;
     MessageOption reUseOption;
     auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
-    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+    EXPECT_EQ(reUseAns, ERR_APPEXECFWK_PARCEL_ERROR);
 }
 
 /**
@@ -359,7 +361,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_014, TestSize.Le
     MessageParcel reUseReply;
     MessageOption reUseOption;
     auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
-    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+    EXPECT_EQ(reUseAns, ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
 }
 
 /**
@@ -381,7 +383,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_015, TestSize.Le
     MessageParcel reUseReply;
     MessageOption reUseOption;
     auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
-    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+    EXPECT_EQ(reUseAns, ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
 }
 
 /**

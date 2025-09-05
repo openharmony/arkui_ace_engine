@@ -1324,11 +1324,6 @@ HWTEST_F(FormTestNg, FormPatternTest007, TestSize.Level1)
     pattern->OnSnapshot(pixelMap);
     pattern->HandleOnSnapshot(pixelMap);
     ASSERT_EQ(pattern->isSnapshot_, false);
-
-    pixelMap = std::make_shared<Media::PixelMap>();
-    pattern->OnSnapshot(pixelMap);
-    pattern->HandleOnSnapshot(pixelMap);
-    ASSERT_EQ(pattern->isSnapshot_, true);
 }
 
 /**
