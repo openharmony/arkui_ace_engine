@@ -45,6 +45,7 @@ const auto EXPECTED_RATIO = 0.7f;
 const auto EXPECTED_PERIOD = 250;
 const auto DEFAULT_PERIOD = 1000;
 const auto INITIAL_PERIOD = 0;
+const auto INACTIVE_COLOR = "65535";
 const SysOptions DEFAULT_SYS_OPTIONS = {
     .disableSystemAdaptation = false
 };
@@ -743,7 +744,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestValidValues, Tes
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     modifier_->setBackgroundBlurStyle0(node_, &inputStyleValid, &inputOptionValid);
@@ -822,7 +823,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues3, 
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     modifier_->setBackgroundBlurStyle0(node_, nullptr, &inputOptionValid);
@@ -903,7 +904,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues6, 
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
@@ -946,7 +947,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestValidValues, Tes
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     auto inputSysOptions1 = Converter::ArkValue<Opt_SystemAdaptiveOptions>(
@@ -1036,7 +1037,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues3, 
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     modifier_->setBackgroundBlurStyle1(node_, nullptr, &inputOptionValid, nullptr);
@@ -1115,7 +1116,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues6, 
             }),
             .policy =
                 Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
-            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(INACTIVE_COLOR),
         }
     );
     auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
