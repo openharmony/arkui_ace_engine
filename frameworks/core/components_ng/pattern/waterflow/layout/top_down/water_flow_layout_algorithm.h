@@ -63,14 +63,6 @@ private:
         return layoutInfo_;
     }
 
-    int32_t MeasuredStartIndex() const override {
-        return measuredStartIndex_;
-    }
-
-    int32_t MeasuredEndIndex() const override {
-        return measuredEndIndex_;
-    }
-
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;

@@ -204,16 +204,6 @@ private:
         return info_;
     }
 
-    int32_t MeasuredStartIndex() const override
-    {
-        return info_->StartIndex();
-    }
-
-    int32_t MeasuredEndIndex() const override
-    {
-        return info_->EndIndex();
-    }
-
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };
 } // namespace OHOS::Ace::NG
