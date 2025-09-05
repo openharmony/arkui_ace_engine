@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { ArkUIAniModule } from "arkui.ani"
+import { ArkUIAniModule } from 'arkui.ani'
 import { KPointer } from '@koalaui/interop';
 import { PeerNode, findPeerNode } from '../PeerNode';
 import { int32 } from '@koalaui/common';
-import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, NodeAttach, StateContext } from '@koalaui/runtime';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, StateContext } from '@koalaui/runtime';
 import { ExtendableComponent } from './extendableComponent';
 import { 
     StateDecoratedVariable, 
@@ -32,10 +32,12 @@ import {
     ObserveSingleton
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
-import { UIContextUtil } from "arkui/handwritten/UIContextUtil";
-import { DetachedRootEntryImpl, UIContextImpl } from "arkui/handwritten/UIContextImpl";
-import { CustomComponent } from "./customComponent";
-import { setNeedCreate } from "../ArkComponentRoot";
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/handwritten/UIContextImpl';
+import { CustomComponent } from './customComponent';
+import { setNeedCreate } from '../ArkComponentRoot';
+import { StateMgmtTool } from '#stateMgmtTool';
+import { ArkContentSlotPeer } from './contentSlot';
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -80,7 +82,7 @@ export function compatibleComponent(
                 bindCompatibleProvideCallback(staticComponent!, dynamicComponent!);
                 bindCompatibleLocalStorageCallback(staticComponent!, dynamicComponent!);
             }
-            let resetViewPUFindProvideInterop = global.getProperty("resetViewPUFindProvideInterop");
+            let resetViewPUFindProvideInterop = global.getProperty('resetViewPUFindProvideInterop');
             resetViewPUFindProvideInterop.invoke();
             let resetViewPUInterop = global.getProperty('resetViewPUFindLocalStorageInterop');
             resetViewPUInterop.invoke();
@@ -98,7 +100,7 @@ export function compatibleStaticComponent<T extends CustomComponent<T, T_Options
     options?: T_Options,
     content?: () => void
 ): number {
-    const instantiateImpl = /** @memo */ () => {
+    const instantiateImpl = /** @memo */ (): void => {
         T._instantiateImpl(undefined, factory, options, undefined, content);
     };
 
@@ -135,13 +137,14 @@ export function compatibleStaticComponent<T extends CustomComponent<T, T_Options
 function openInterop(): void {
     const global = ESValue.getGlobal();
     if (!global) {
-        throw Error("cannot find ArkTS1.1 global.");
+        throw Error('cannot find ArkTS1.1 global.');
     }
     const openInterop = global.getProperty('openInterop');
     openInterop.invoke();
     registerCreateWatchFuncCallback();
     registerCreateStaticObservedCallback();
     registerCompatibleStaticComponentCallback();
+    registerMakeBuilderParameterStaticProxy();
 }
 
 function closeInterop(): void {
@@ -323,7 +326,6 @@ export function registerCreateWatchFuncCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForCreateWatchID');
     registerCallback.invoke(createWatchFuncCallback);
-    return;
 }
 
 export function registerCreateStaticObservedCallback(): void {
@@ -333,14 +335,18 @@ export function registerCreateStaticObservedCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
     registerCallback.invoke(makeObservedcallback);
-    return;
 }
 
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
     registerCallback.invoke(compatibleStaticComponent);
-    return;
+}
+
+export function registerMakeBuilderParameterStaticProxy(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
+    registerCallback.invoke(makeBuilderParameterStaticProxy);
 }
 
 /** @memo */
@@ -453,7 +459,7 @@ export function transferCompatibleBuilder<T extends Function>(
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
+        const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             const frozen = manager.frozen;
             manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
@@ -465,16 +471,95 @@ export function transferCompatibleBuilder<T extends Function>(
             manager.frozen = frozen;
         });
 
-        const inc = node.value;
-        const peerNode = findPeerNode(inc);
-        if (peerNode === undefined) {
-            node.dispose();
-            return 0;
-        }
-        uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
-        return peerNode.getPeerPtr() as number;
+        const ptr = node.value.peer.ptr;
+        uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
+        return ptr as number;
     }
     const createDynamicBuilder = ESValue.getGlobal().getProperty('createDynamicBuilder');
     const dynamicBuilder = createDynamicBuilder.invoke(ESValue.wrap(staticBuilderFunc));
     return dynamicBuilder;
+}
+
+
+export function transferCompatibleUpdatableBuilder<T extends Object>(
+    /** @memo */
+    builder: (args: T) => void
+): ESValue {
+    const staticBuilderFunc = (args: T): [number, ()=>void] => {
+        let state: MutableState<int32> | undefined;
+        if (isDynamicObject(args)) {
+            state = updateDynamicObjectForInterop(args);
+        } else {
+            const objType = Type.of(args);
+            let handler = objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            ? (proxy.Proxy.tryGetHandler(args) as InteropBuilderLiteralProxyHandler<T>) // a very slow call so need to judge proxy first
+            : undefined;
+            if (handler) {
+                state = handler!.state;
+            }
+        }
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let manager = uiContext.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
+            const frozen = manager.frozen;
+            manager.frozen = true;
+            ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
+            let r = OBSERVE.renderingComponent;
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            memoEntry1<T, void>(context, 0, builder, args);
+            OBSERVE.renderingComponent = r;
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen;
+        });
+        const ptr = node.value.peer.ptr;
+        uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
+        return [ptr as number, ()=>{ if (state) { state.value++; } }];
+    }
+    const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
+    const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));
+    return dynamicBuilder;
+}
+
+/**
+ * Creates a proxy for static object literal in the ArkTS 1.1 context
+ * to intercept property getter operations.
+ */
+function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: T, sourceGetter: Any): T {
+    const result = proxy.Proxy.create(value, new InteropBuilderLiteralProxyHandler<T>(sourceGetter));
+    return result;
+}
+
+/**
+ * Empowers the proxy object of a dynamic object with ArkTS 1.2's dependency addition capability
+ * through hook functions, thereby enabling it to refresh the 1.2 UI.
+ */
+function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefined {
+    const hookFunc = ESValue.wrap(args).getPropertySafe('__static_interop_hook');
+    if (hookFunc == ESValue.Undefined) return undefined;
+    const staticState = ESValue.wrap(args).getPropertySafe('__static_interop_state').invoke()
+    if (staticState !== ESValue.Undefined) return staticState.unwrap() as MutableState<int32> | undefined;
+    let state: MutableState<int32> = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    hookFunc.invoke(ESValue.wrap(state), ESValue.wrap(()=>{ state.value }));
+    return state;
+}
+
+class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
+    source: ESValue;
+    state: MutableState<int32>;
+    constructor(source: Any) {
+        this.source = ESValue.wrap(source)
+        this.state = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    }
+
+    override get(target: T, name: string): Any {
+        const propertyGetter: ESValue = this.source.getPropertySafe(name);
+        if (propertyGetter === ESValue.Undefined) {
+            return super.get(target, name);
+        }
+        this.state.value;
+        return propertyGetter.invoke().unwrap();
+    }
 }

@@ -40,6 +40,8 @@
           object. The scenario is to use to init a @Link source.
   */
 function makeBuilderParameterProxy(builderName: string, source: Object): Object {
+    // for interop
+    let staticHook: StaticInteropHook | undefined = InteropConfigureStateMgmt.instance.needsInterop() ? new StaticInteropHook() : undefined;
     return new Proxy(source, {
         set(target, prop, val) {
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
@@ -52,10 +54,26 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
             if (!(typeof target === 'object') && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
+            // for interop
+            if (InteropConfigureStateMgmt.instance.needsInterop()) {
+                if (prop === '__static_interop_hook') {
+                    return (state, addRef) => {
+                        staticHook!.state = state;
+                        staticHook!.addRef = addRef;
+                    };
+                }
+                if (prop === '__static_interop_state') {
+                    return () => staticHook.state;
+                }
+            }
             const value = target[prop1];
             if (typeof value !== 'function') {
                 stateMgmtConsole.debug(`      - no fun`);
                 return value;
+            }
+            //for interop
+            if (InteropConfigureStateMgmt.instance.needsInterop() && staticHook.addRef) {
+                staticHook!.addRef();
             }
             const funcRet = value();
             if ((typeof funcRet === 'object') && ('get' in funcRet)) {
