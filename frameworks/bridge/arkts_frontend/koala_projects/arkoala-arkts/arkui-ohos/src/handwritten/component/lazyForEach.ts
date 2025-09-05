@@ -17,7 +17,7 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id, remember } from "@koalaui/runtime"
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, DynamicNode, OnMoveHandler, ItemDragEventHandler } from "./common"
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from "./common"
 import { LazyForEachImplForOptions } from "../handwritten/LazyForEachImpl"
 import { InteropNativeModule } from "@koalaui/interop";
 
@@ -112,7 +112,7 @@ export interface IDataSource<T> {
     unregisterDataChangeListener(listener: DataChangeListener): void;
 }
 
-export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
+export interface LazyForEachAttribute<T> extends DynamicNode {
     dataSource: IDataSource<T> | null;
     setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
@@ -120,6 +120,8 @@ export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
         keyGenerator?: (item: T, index: number) => string): this {
         return this;
     }
+    applyAttributesFinish(): void {}
+    
     onMove(handler?: OnMoveHandler): this {
         return this;
     }
@@ -127,7 +129,7 @@ export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
         return this;
     }
 }
-export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent implements LazyForEachAttribute<T> {
+export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     dataSource: IDataSource<T> | null = null;
     /** @memo */
     itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
@@ -155,6 +157,7 @@ export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent impleme
         this.keyGenerator = keyGenerator;
         return this;
     }
+    applyAttributesFinish(): void {}
 }
 /** @memo */
 export function LazyForEachImpl<T>(
