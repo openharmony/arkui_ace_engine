@@ -624,7 +624,11 @@ HWTEST_F(SvgTransformTestNg, ApplyTransformTest001, TestSize.Level1)
     auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Testing::TestingPath rSPath;
+    RSRoundRect roundRect = RSRoundRect(RSRect(0.0, 0.0, 1.0, 1.0), 0.0, 0.0);
+    rSPath.AddRoundRect(roundRect);
     svgNode->ApplyTransform(rSPath, rule);
+    auto bounds = rSPath.GetBounds();
+    EXPECT_FLOAT_EQ(bounds.GetLeft(), 0.0);
 }
 
 /**
@@ -641,11 +645,15 @@ HWTEST_F(SvgTransformTestNg, ApplyTransformTest002, TestSize.Level1)
     auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Testing::TestingPath rSPath;
+    RSRoundRect roundRect = RSRoundRect(RSRect(0.0, 0.0, 1.0, 1.0), 0.0, 0.0);
+    rSPath.AddRoundRect(roundRect);
     std::vector<std::string> paramVec;
     paramVec.push_back("100");
     NG::TransformInfo transformInfo { "translate", paramVec };
     svgNode->attributes_.transformVec.push_back(transformInfo);
     svgNode->ApplyTransform(rSPath, rule);
+    auto bounds = rSPath.GetBounds();
+    EXPECT_FLOAT_EQ(bounds.GetLeft(), 0.0);
 }
 
 /**
