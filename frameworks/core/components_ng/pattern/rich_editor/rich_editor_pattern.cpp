@@ -4770,10 +4770,7 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
     std::list<RefPtr<SpanItem>> subSpans;
     std::u16string text;
     for (const auto& spanItem : spans) {
-        if (!spanItem || spanItem->spanItemType == SpanItemType::CustomSpan ||
-            spanItem->spanItemType == SpanItemType::SYMBOL) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(spanItem && spanItem->spanItemType != SpanItemType::CustomSpan);
         auto spanEndPos = spanItem->position;
         auto spanStartPos = spanItem->rangeStart;
         if (spanEndPos > start && spanStartPos < end) {
@@ -4782,6 +4779,10 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
             auto spanStart = oldStart <= start ? 0 : oldStart - start;
             auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
             auto newSpanItem = GetSameSpanItem(spanItem);
+            if (spanItem->spanItemType == SpanItemType::PLACEHOLDER ||
+                spanItem->spanItemType == SpanItemType::SYMBOL) {
+                newSpanItem = spanItem->GetSameStyleSpanItem();
+            }
             CHECK_NULL_CONTINUE(newSpanItem);
             newSpanItem->spanItemType = spanItem->spanItemType;
             newSpanItem->interval = {spanStart, spanEnd};

@@ -1080,6 +1080,48 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToStyledString004
+ * @tc.desc: Test spans to styledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString004, TestSize.Level1)
+{
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. init spans
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_1);
+    style.SetRenderStrategy(RENDER_STRATEGY_SINGLE);
+    style.SetEffectStrategy(EFFECT_STRATEGY_NONE);
+    SymbolSpanOptions symbolOptions;
+    symbolOptions.symbolId = SYMBOL_ID;
+    symbolOptions.style = style;
+    richEditorController->AddSymbolSpan(symbolOptions);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options);
+    options.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(options);
+
+    /**
+     * @tc.steps: step2. test ToStyledString
+     */
+    auto spanString = richEditorPattern->ToStyledString(0, 7);
+    ASSERT_NE(spanString, nullptr);
+    EXPECT_EQ(spanString->GetSpanItems().size(), 1);
+}
+
+/**
  * @tc.name: CreateStyledStringByTextStyle
  * @tc.desc: test CreateStyledStringByTextStyle
  * @tc.type: FUNC

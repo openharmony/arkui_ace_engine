@@ -610,8 +610,14 @@ HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest003, TestSize.Level1)
     paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(contentPattern->CreateNodePaintMethod());
     ASSERT_NE(paintMethod, nullptr);
     paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
-    EXPECT_FALSE(richEditorOverlay->floatingCaretVisible_->Get());
+    EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(100.0f, 0));
+    EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
     EXPECT_FALSE(richEditorOverlay->originCaretVisible_->Get());
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(120.0, 0));
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(120.0f, 0));
+    EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
+    EXPECT_TRUE(richEditorOverlay->originCaretVisible_->Get());
 }
 
 /**
