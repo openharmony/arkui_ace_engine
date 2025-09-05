@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo_stable } from '@koala.runtime.annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
 import { ComponentBase } from 'arkui.ComponentBase';

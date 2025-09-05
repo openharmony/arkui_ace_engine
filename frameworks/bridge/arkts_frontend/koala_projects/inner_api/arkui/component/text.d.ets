@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo_stable } from '@koala.runtime.annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,

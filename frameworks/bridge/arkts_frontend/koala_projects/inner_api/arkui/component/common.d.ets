@@ -16,7 +16,7 @@
  * @file
  * @kit ArkUI
  */
-import { memo_stable } from '@koala.runtime.annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import { Resource } from 'global.resource';
 import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape';
 import { LengthMetrics } from 'arkui.Graphics';

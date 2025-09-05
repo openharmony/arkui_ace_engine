@@ -17,7 +17,7 @@ import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
 } from 'arkui.stateManagement.runtime';
-import { memo } from '@koala.runtime.annotations';
+import { memo } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
