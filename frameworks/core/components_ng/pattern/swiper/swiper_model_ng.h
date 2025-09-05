@@ -203,6 +203,8 @@ public:
     static void CreateDigitWithResourceObj(FrameNode*  frameNode,
         const SwiperDigitalParameters& swiperDigitalParameters);
     static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters);
+    static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters,
+        FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

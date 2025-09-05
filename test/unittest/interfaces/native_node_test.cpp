@@ -26,6 +26,7 @@
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/styled_string.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -8921,5 +8922,385 @@ HWTEST_F(NativeNodeTest, NativeNodeOverlayTest002, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
     EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_BOTTOM_END));
+}
+
+/**
+ * @tc.name: SwiperArrowStyleTest001
+ * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperArrowStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 9;
+    const char* arr[size] = {"0", "1", "2", "3", "4", "5", "6", "7", "8"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle textNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(textNode, NODE_TEXT_CONTENT, &content);
+        
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 200;
+        nodeAPI->setAttribute(textNode, NODE_WIDTH, &item);
+        value[0].f32 = 120;
+        nodeAPI->setAttribute(textNode, NODE_HEIGHT, &item);
+        value[0].u32 = 0xFFAFEEEE;
+        nodeAPI->setAttribute(textNode, NODE_BACKGROUND_COLOR, &item);
+        value[0].i32 = 0;
+        nodeAPI->setAttribute(textNode, NODE_TEXT_ALIGN, &item);
+        value[0].f32 = 20;
+        nodeAPI->setAttribute(textNode, NODE_FONT_SIZE, &item);
+        
+        ArkUI_AttributeItem textId = {.string = "SwiperTextId1"};
+        nodeAPI->setAttribute(textNode, NODE_ID, &textId);
+        nodeAPI->addChild(swiper, textNode);
+    }
+
+    /**
+     * @tc.steps: step3. Create an arrowStyle and configure the properties,
+     *            then set the arrowStyle to the NODE_SWIPER_SHOW_DISPLAY_ARROW.
+     */
+    ArkUI_SwiperArrowStyle* arrowStyle = OH_ArkUI_SwiperArrowStyle_Create();
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(arrowStyle, 10);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(arrowStyle, 0xF5DEB3);
+    OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 10);
+    OH_ArkUI_SwiperArrowStyle_SetArrowColor(arrowStyle, 0xDDDDDD);
+    ArkUI_NumberValue valueTemp[1];
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = arrowStyle};
+    valueTemp[0].i32 = 2;
+    auto setResult = nodeAPI->setAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    auto getResult = nodeAPI->getAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW);
+    auto returnObject = static_cast<ArkUI_SwiperArrowStyle*>(getResult->object);
+    ASSERT_NE(returnObject, nullptr);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(arrowStyle), 0xF5DEB3);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowColor(arrowStyle), 0xDDDDDD);
+    OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+    nodeAPI->disposeNode(swiper);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: SwiperArrowStyleTest002
+ * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperArrowStyleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 6;
+    const char* arr[size] = {"0", "1", "2", "3", "4", "5"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(text, NODE_TEXT_CONTENT, &content);
+        
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 300;
+        nodeAPI->setAttribute(text, NODE_WIDTH, &item);
+        value[0].f32 = 150;
+        nodeAPI->setAttribute(text, NODE_HEIGHT, &item);
+        
+        ArkUI_AttributeItem textId = {.string = "SwiperTextId2"};
+        nodeAPI->setAttribute(text, NODE_ID, &textId);
+        nodeAPI->addChild(swiperNode, text);
+    }
+
+    /**
+     * @tc.steps: step3. Create an arrowStyle and configure the properties,
+     *            then set the arrowStyle to the NODE_SWIPER_SHOW_DISPLAY_ARROW.
+     */
+    ArkUI_SwiperArrowStyle* arrowStyle = OH_ArkUI_SwiperArrowStyle_Create();
+    OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 20);
+    OH_ArkUI_SwiperArrowStyle_SetArrowColor(arrowStyle, 0xFF003153);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(arrowStyle, 30);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(arrowStyle, 0x66334455);
+    ArkUI_NumberValue valueTemp[1];
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = arrowStyle};
+    valueTemp[0].i32 = 2;
+    auto setResult = nodeAPI->setAttribute(swiperNode, NODE_SWIPER_SHOW_DISPLAY_ARROW, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    auto getResult = nodeAPI->getAttribute(swiperNode, NODE_SWIPER_SHOW_DISPLAY_ARROW);
+    auto returnObject = static_cast<ArkUI_SwiperArrowStyle*>(getResult->object);
+    ASSERT_NE(returnObject, nullptr);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(arrowStyle), 0x66334455);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowColor(arrowStyle), 0xFF003153);
+    OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest001
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 3;
+    const char* arr[size] = {"0", "1", "2"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle textNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(textNode, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].u32 = 0x00FFFF;
+        nodeAPI->setAttribute(textNode, NODE_BACKGROUND_COLOR, &item);
+        value[0].f32 = 15;
+        nodeAPI->setAttribute(textNode, NODE_FONT_SIZE, &item);
+        value[0].i32 = 5;
+        nodeAPI->setAttribute(textNode, NODE_TEXT_ALIGN, &item);
+        value[0].f32 = 120;
+        nodeAPI->setAttribute(textNode, NODE_HEIGHT, &item);
+        value[0].f32 = 200;
+        nodeAPI->setAttribute(textNode, NODE_WIDTH, &item);
+        ArkUI_AttributeItem textId = {.string = "SwiperIndicatorTextId"};
+        nodeAPI->setAttribute(textNode, NODE_ID, &textId);
+        nodeAPI->addChild(swiper, textNode);
+    }
+
+    /**
+     * @tc.steps: step3. Create an indicator and configure the properties,
+     *            then set the indicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    OH_ArkUI_SwiperDigitIndicator_SetFontSize(indicator, 10);
+    OH_ArkUI_SwiperDigitIndicator_SetFontColor(indicator, 0xF5DEB3);
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(indicator, 10);
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(indicator, 0xDDDDDD);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DIGIT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = indicator};
+    auto setResult = nodeAPI->setAttribute(swiper, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontColor(indicator), 0xF5DEB3);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(indicator), 0xDDDDDD);
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+    nodeAPI->disposeNode(swiper);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest002
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 6;
+    const char* arr[size] = {"a", "b", "c", "d", "e", "f"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(text, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 300;
+        nodeAPI->setAttribute(text, NODE_WIDTH, &item);
+        value[0].f32 = 150;
+        nodeAPI->setAttribute(text, NODE_HEIGHT, &item);
+        nodeAPI->addChild(swiperNode, text);
+    }
+
+    /**
+     * @tc.steps: step3. Create an indicator and configure the properties,
+     *            then set the indicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(indicator, 20);
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(indicator, 0x6B8E23);
+    OH_ArkUI_SwiperDigitIndicator_SetFontSize(indicator, 25);
+    OH_ArkUI_SwiperDigitIndicator_SetFontColor(indicator, 0xDA70D6);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DIGIT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = indicator};
+    auto setResult = nodeAPI->setAttribute(swiperNode, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontColor(indicator), 0xDA70D6);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(indicator), 0x6B8E23);
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest003
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 4;
+    const char* arr[size] = {"a", "b", "c", "d"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle textNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(textNode, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].u32 = 0xF5DEB3;
+        nodeAPI->setAttribute(textNode, NODE_BACKGROUND_COLOR, &item);
+        value[0].f32 = 70;
+        nodeAPI->setAttribute(textNode, NODE_FONT_SIZE, &item);
+        value[0].i32 = 50;
+        nodeAPI->setAttribute(textNode, NODE_TEXT_ALIGN, &item);
+        value[0].f32 = 500;
+        nodeAPI->setAttribute(textNode, NODE_HEIGHT, &item);
+        value[0].f32 = 320;
+        nodeAPI->setAttribute(textNode, NODE_WIDTH, &item);
+        nodeAPI->addChild(swiper, textNode);
+    }
+
+    /**
+     * @tc.steps: step3. Create an swiperIndicator and configure the properties,
+     *            then set the swiperIndicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto swiperIndicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    OH_ArkUI_SwiperIndicator_SetColor(swiperIndicator, 0xDDDDDD);
+    OH_ArkUI_SwiperIndicator_SetSelectedColor(swiperIndicator, 0xF5DEB3);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DOT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = swiperIndicator};
+    auto setResult = nodeAPI->setAttribute(swiper, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(swiperIndicator), 0xDDDDDD);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(swiperIndicator), 0xF5DEB3);
+    OH_ArkUI_SwiperIndicator_Dispose(swiperIndicator);
+    nodeAPI->disposeNode(swiper);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest004
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 7;
+    const char* arr[size] = {"a", "b", "c", "d", "e", "f", "g"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(text, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 430;
+        nodeAPI->setAttribute(text, NODE_WIDTH, &item);
+        value[0].f32 = 170;
+        nodeAPI->setAttribute(text, NODE_HEIGHT, &item);
+        nodeAPI->addChild(swiperNode, text);
+    }
+
+    /**
+     * @tc.steps: step3. Create an swiperIndicator and configure the properties,
+     *            then set the swiperIndicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto swiperIndicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    OH_ArkUI_SwiperIndicator_SetColor(swiperIndicator, 0xffde6355);
+    OH_ArkUI_SwiperIndicator_SetSelectedColor(swiperIndicator, 0xfff5f5f5);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DOT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = swiperIndicator};
+    auto setResult = nodeAPI->setAttribute(swiperNode, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(swiperIndicator), 0xffde6355);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(swiperIndicator), 0xfff5f5f5);
+    OH_ArkUI_SwiperIndicator_Dispose(swiperIndicator);
+    nodeAPI->disposeNode(swiperNode);
 }
 } // namespace OHOS::Ace
