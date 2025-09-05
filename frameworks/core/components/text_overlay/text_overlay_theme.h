@@ -604,6 +604,7 @@ protected:
     TextStyle menuButtonTextStyle_;
     Color buttonClickedColor_;
     Color buttonHoverColor_;
+    Color symbolColor_;
 
 private:
     Border menuBorder_;
@@ -647,7 +648,6 @@ private:
 
     Dimension previewContentSpace_;
     Dimension symbolSize_;
-    Color symbolColor_;
     uint32_t moreSymbolId_ = 0;
     uint32_t backSymbolId_ = 0;
     uint32_t cutSymbolId_ = 0;
