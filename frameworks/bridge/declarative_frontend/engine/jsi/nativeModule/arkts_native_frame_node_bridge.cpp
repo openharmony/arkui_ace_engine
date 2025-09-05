@@ -1757,8 +1757,10 @@ std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
     auto nodeId = frameNode->GetId();
     panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), keyArg, // 3 number of parameters
         valueArg };
-    return [vm, frameNode, params3]() -> bool {
+    return [vm, weak = AceType::WeakClaim(frameNode), params3]() -> bool {
         CHECK_NULL_RETURN(vm, false);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_RETURN(frameNode, false);
         panda::LocalScope scope(vm);
         auto global = JSNApi::GetGlobalObject(vm);
         auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
