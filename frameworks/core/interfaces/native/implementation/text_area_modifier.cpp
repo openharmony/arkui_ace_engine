@@ -195,7 +195,7 @@ void OnSubmit0Impl(Ark_NativePointer node,
     }
     auto onSubmit = [arkCallback = CallbackHelper(*optValue)](int32_t enterKey, NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(enterKey));
-        arkCallback.Invoke(enterKeyType);
+        arkCallback.InvokeSync(enterKeyType);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
@@ -257,7 +257,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t selectionStart, int32_t selectionEnd) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
-        arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);
+        arkCallback.InvokeSync(arkSelectionStart, arkSelectionEnd);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
@@ -274,7 +274,7 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
-        arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
+        arkCallback.InvokeSync(arkTotalOffsetX, arkTotalOffsetY);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
@@ -289,7 +289,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onEditEvent = [arkCallback = CallbackHelper(*optValue)](const bool value) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_Boolean>(value));
     };
     TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
@@ -306,7 +306,7 @@ void OnCopyImpl(Ark_NativePointer node,
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.Invoke(textArkString);
+        arkCallback.InvokeSync(textArkString);
     };
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -323,7 +323,7 @@ void OnCutImpl(Ark_NativePointer node,
     auto onCut = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.Invoke(textArkString);
+        arkCallback.InvokeSync(textArkString);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -347,7 +347,7 @@ void OnPasteImpl(Ark_NativePointer node,
         Ark_PasteEvent arkEvent = {
             .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
         };
-        arkCallback.Invoke(arkContent, arkEvent);
+        arkCallback.InvokeSync(arkContent, arkEvent);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
@@ -598,7 +598,7 @@ void OnDidInsertImpl(Ark_NativePointer node,
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
-        arkCallback.Invoke(insertValue);
+        arkCallback.InvokeSync(insertValue);
     };
     TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -641,7 +641,7 @@ void OnDidDeleteImpl(Ark_NativePointer node,
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
-        arkCallback.Invoke(deleteValue);
+        arkCallback.InvokeSync(deleteValue);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
@@ -772,7 +772,7 @@ void InputFilterImpl(Ark_NativePointer node,
         if (arkOnError) {
             onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::u16string& val) {
                 Converter::ConvContext ctx;
-                arkCallback.Invoke(Converter::ArkValue<Ark_String>(val, &ctx));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_String>(val, &ctx));
             };
         }
     }
@@ -836,7 +836,7 @@ void _onChangeEvent_textImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
-        arkCallback.Invoke(arkContent);
+        arkCallback.InvokeSync(arkContent);
     };
     TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }

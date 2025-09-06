@@ -83,7 +83,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     }
     auto onComplete = [arkCallback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
         Ark_ImageLoadResult result = Converter::ArkValue<Ark_ImageLoadResult>(info);
-        arkCallback.Invoke(result);
+        arkCallback.InvokeSync(result);
     };
     ImageSpanView::SetOnComplete(frameNode, std::move(onComplete));
 }
@@ -99,7 +99,7 @@ void OnErrorImpl(Ark_NativePointer node,
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
         Ark_ImageError result = Converter::ArkValue<Ark_ImageError>(info);
-        arkCallback.Invoke(result);
+        arkCallback.InvokeSync(result);
     };
     ImageSpanView::SetOnError(frameNode, std::move(onError));
 }

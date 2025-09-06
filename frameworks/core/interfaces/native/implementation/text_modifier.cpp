@@ -577,7 +577,7 @@ void OnCopyImpl(Ark_NativePointer node,
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& param) {
         Converter::ConvContext ctx;
-        arkCallback.Invoke(Converter::ArkValue<Ark_String>(param, &ctx));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_String>(param, &ctx));
     };
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
@@ -635,7 +635,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t start, int32_t end) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
     };
 
     TextModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
@@ -670,7 +670,7 @@ void OnMarqueeStateChangeImpl(Ark_NativePointer node,
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)](int32_t marqueeState) {
         auto arkMarqueeState = Converter::ArkValue<Ark_MarqueeState>(marqueeState);
-        callbackHelper.Invoke(arkMarqueeState);
+        callbackHelper.InvokeSync(arkMarqueeState);
     };
     TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(modelCallback));
 }
