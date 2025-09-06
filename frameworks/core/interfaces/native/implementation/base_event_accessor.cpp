@@ -122,6 +122,18 @@ void SetAxisVerticalImpl(Ark_BaseEvent peer,
 {
     LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
 }
+Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    int32_t value = peer->GetBaseInfo()->GetPinchAxisScale();
+    return Converter::ArkValue<Opt_Number>(value);
+}
+void SetAxisPinchImpl(Ark_BaseEvent peer,
+                         const Ark_Number* axisPinch)
+{
+    LOGE("BaseEventAccessor.SetAxisPinchImpl does nothing");
+}
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
@@ -238,6 +250,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetAxisHorizontalImpl,
         BaseEventAccessor::GetAxisVerticalImpl,
         BaseEventAccessor::SetAxisVerticalImpl,
+        BaseEventAccessor::GetAxisPinchImpl,
+        BaseEventAccessor::SetAxisPinchImpl,
         BaseEventAccessor::GetPressureImpl,
         BaseEventAccessor::SetPressureImpl,
         BaseEventAccessor::GetTiltXImpl,

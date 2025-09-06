@@ -4698,6 +4698,10 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseEvent_getAxisVertical(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseEvent_setAxisVertical(ptr: KPointer, axisVertical: number): void
+    @ani.unsafe.Quick
+    native static _BaseEvent_getAxisPinch(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _BaseEvent_setAxisPinch(ptr: KPointer, axisPinch: number): void
     @ani.unsafe.Direct
     native static _BaseEvent_getPressure(ptr: KPointer): number
     @ani.unsafe.Direct
@@ -4928,6 +4932,8 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getHorizontalAxisValue(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _AxisEvent_getVerticalAxisValue(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _AxisEvent_getPinchAxisScaleValue(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _AxisEvent_getAction(ptr: KPointer): int32
     @ani.unsafe.Direct

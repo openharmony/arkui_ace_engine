@@ -350,7 +350,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
-    static Local<JSValueRef> JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* info);
 
     template<typename T>
     static panda::Local<panda::JSValueRef> ToJSValueWithVM(const EcmaVM* vm, T val)

@@ -2356,6 +2356,7 @@ HWTEST_F(PinchRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
      */
     AxisEvent axisEvent;
     axisEvent.sourceTool = SourceTool::MOUSE;
+    axisEvent.pinchAxisScale = 0.5f;
     pinchRecognizerPtr->lastAxisEvent_ = axisEvent;
     pinchRecognizerPtr->inputEventType_ = InputEventType::AXIS;
     TouchEvent touchEvent;
@@ -2363,8 +2364,10 @@ HWTEST_F(PinchRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     pinchRecognizerPtr->lastTouchEvent_ = touchEvent;
     
     GestureEvent info;
+    info.SetPinchAxisScale(1.0f);
     pinchRecognizerPtr->GetGestureEventInfo(info);
     EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
+    EXPECT_EQ(info.GetPinchAxisScale(), 0.5f);
 
     pinchRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
     pinchRecognizerPtr->GetGestureEventInfo(info);

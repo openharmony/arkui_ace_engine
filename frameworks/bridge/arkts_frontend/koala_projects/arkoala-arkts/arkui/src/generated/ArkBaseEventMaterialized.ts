@@ -30,6 +30,7 @@ export interface BaseEvent {
     source: SourceType
     axisHorizontal?: number | undefined
     axisVertical?: number | undefined
+    axisPinch?: number | undefined
     pressure: number
     tiltX: number
     tiltY: number
@@ -73,6 +74,13 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set axisVertical(axisVertical: number | undefined) {
         const axisVertical_NonNull  = (axisVertical as number)
         this.setAxisVertical(axisVertical_NonNull)
+    }
+    get axisPinch(): number | undefined {
+        return this.getAxisPinch()
+    }
+    set axisPinch(axisPinch: number | undefined) {
+        const axisPinch_NonNull  = (axisPinch as number)
+        this.setAxisPinch(axisPinch_NonNull)
     }
     get pressure(): number {
         return this.getPressure()
@@ -158,6 +166,14 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     private setAxisVertical(axisVertical: number): void {
         const axisVertical_casted = axisVertical as (number)
         this.setAxisVertical_serialize(axisVertical_casted)
+        return
+    }
+    private getAxisPinch(): number {
+        return this.getAxisPinch_serialize()
+    }
+    private setAxisPinch(axisPinch: number): void {
+        const axisPinch_casted = axisPinch as (number)
+        this.setAxisPinch_serialize(axisPinch_casted)
         return
     }
     private getPressure(): number {
@@ -250,6 +266,13 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     }
     private setAxisVertical_serialize(axisVertical: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, axisVertical)
+    }
+    private getAxisPinch_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisPinch(this.peer!.ptr)
+        return retval
+    }
+    private setAxisPinch_serialize(axisPinch: number): void {
+        ArkUIGeneratedNativeModule._BaseEvent_setAxisPinch(this.peer!.ptr, axisPinch)
     }
     private getPressure_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getPressure(this.peer!.ptr)
