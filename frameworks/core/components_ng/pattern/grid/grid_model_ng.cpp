@@ -132,6 +132,12 @@ void GridModelNG::SetScrollBarColor(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
+void GridModelNG::SetScrollBarColor(const std::optional<Color>& scrollBarColor)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScrollBarColor(frameNode, scrollBarColor);
+}
+
 void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
@@ -467,11 +473,7 @@ void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Di
 
 void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
 {
-    if (scrollBarColor) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, scrollBarColor.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
-    }
+    ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
 }
 
 void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)

@@ -156,12 +156,24 @@ void ScrollBarModelNG::SetScrollBarColor(FrameNode* frameNode, Color color)
 
 void ScrollBarModelNG::ResetScrollBarColor()
 {
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetScrollBarColor(frameNode);
 }
 
 void ScrollBarModelNG::ResetScrollBarColor(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollBarTheme);
+    Color foregroundColor = scrollBarTheme->GetForegroundColor();
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(foregroundColor);
 }
 
 void ScrollBarModelNG::CreateWithResourceObj(ScrollBarJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)

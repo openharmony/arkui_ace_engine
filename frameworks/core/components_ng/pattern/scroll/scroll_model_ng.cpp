@@ -419,14 +419,14 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto scrollBar = pattern->GetScrollBar();
-    CHECK_NULL_VOID(scrollBar);
-    scrollBar->SetForegroundColor(color);
+    SetScrollBarColor(frameNode, color);
+}
+
+void ScrollModelNG::ResetScrollBarColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetScrollBarColor(frameNode);
 }
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -514,6 +514,11 @@ void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(color);
+}
+
+void ScrollModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, std::nullopt);
 }
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)

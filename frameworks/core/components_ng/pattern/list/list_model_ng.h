@@ -32,6 +32,7 @@ public:
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& value) override;
+    void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetEditMode(bool editMode) override;
@@ -197,6 +198,7 @@ public:
     static void CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
 
 private:
     void AddDragFrameNodeToManager() const;
