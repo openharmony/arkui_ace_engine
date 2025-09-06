@@ -422,6 +422,42 @@ HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSelectedBackgroundColor002
+ * @tc.desc: Test GetSelectedBackgroundColor when GetHost is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSelectedBackgroundColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
+    Font font;
+    font.fontFamilies = { "font1", "font2" };
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    EXPECT_EQ(textModelNG.GetFont(frameNode).fontFamilies.size(), 2);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode001
  * @tc.desc: Test TextPattern OnAttachToFrameNode when GetHost is nullptr.
  * @tc.type: FUNC
@@ -3170,6 +3206,26 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateTextStyleUsingTheme001
+ * @tc.desc: test CreateTextStyleUsingTheme().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateTextStyleUsingTheme001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto pipeline = textFrameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
+        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>(), true);
+    EXPECT_EQ(textStyle.GetTextAlign(), TextAlign::CENTER);
+}
+
+/**
  * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
  * @tc.desc: Verify GetFirstHandleInfo
  * @tc.type: FUNC
@@ -4449,6 +4505,24 @@ HWTEST_F(TextTestNg, ProcessSpanString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessSpanString003
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ProcessSpanString003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
+    */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
+    pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    pattern->dataDetectorAdapter_->textForAI_ = pattern->textForDisplay_;
+    pattern->ProcessSpanString();
+    EXPECT_EQ(pattern->textForDisplay_.length(), 0);
+}
+
+/**
  * @tc.name: UpdateParagraphBySpan002
  * @tc.desc: Test the maxlines of UpdateParagraphBySpan
  * @tc.type: FUNC
@@ -4812,5 +4886,46 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     auto line = textModelNG.GetLineCount(frameNode);
     ASSERT_EQ(line, 0);
+}
+
+/**
+ * @tc.name: TextContentModifierSetSymbolColor001
+ * @tc.desc: Test SetSymbolColor with existing symbolColors (size=2) and input value size=1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifierSetSymbolColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier and initialize symbolColors_ with size=2.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    std::vector<Color> initialColors = { Color::BLUE };
+    TextStyle style;
+    style.SetSymbolColorList(initialColors);
+    textContentModifier->SetDefaultSymbolColor(style);
+
+    // Initialize symbolColors_ with 2 colors
+    std::vector<Color> newColors1 = { Color::RED, Color::BLUE };
+    textContentModifier->SetSymbolColor(newColors1, false);
+    auto resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 2);
+
+    /**
+     * @tc.steps: step2. Call SetSymbolColor with value size=1 (smaller than current symbolColors_)
+     */
+    std::vector<Color> newColors2 = { Color::GREEN };
+    textContentModifier->SetSymbolColor(newColors2, false);
+
+    /**
+     * @tc.steps: step3. Verify symbolColors_ is correctly updated and truncated
+     * @tc.expected: symbolColors_ should have size=1 with the new color
+     */
+    resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 1);
+    EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
 } // namespace OHOS::Ace::NG

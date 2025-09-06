@@ -1060,6 +1060,40 @@ HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleLevelModeChanged002
+ * @tc.desc: test text_select_overlay.cpp OnHandleLevelModeChanged function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
  * @tc.name: CreateParagraph001
  * @tc.desc: test text_layout_algorithm.cpp CreateParagraph function
  * @tc.type: FUNC
