@@ -15,7 +15,7 @@
 
 import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { TypeChecker } from "#components"
+import { TypeChecker } from '#components';
 import { RelativeContainerAttribute, ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle,
     LocalizedBarrierStyle } from '../../component';
 
@@ -47,16 +47,16 @@ export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeCon
 
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         const value_type = runtimeType(value);
-        if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_BarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
+        if ((RuntimeType.OBJECT === value_type && TypeChecker.isArray_BarrierStyle(value)) || (RuntimeType.UNDEFINED === value_type)) {
             const value_casted = value as (Array<BarrierStyle> | undefined);
             this.getPeer()?.barrier0Attribute(value_casted);
             return this;
         }
-        if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_LocalizedBarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
+        if ((RuntimeType.OBJECT === value_type && TypeChecker.isArray_LocalizedBarrierStyle(value)) || (RuntimeType.UNDEFINED === value_type)) {
             const value_casted = value as (Array<LocalizedBarrierStyle> | undefined);
             this.getPeer()?.barrier1Attribute(value_casted);
             return this;
         }
-        throw new Error("Can not select appropriate overload");
+        throw new Error('Can not select appropriate overload');
     }
 }
