@@ -18,14 +18,14 @@ struct Index10 {
   @State isShow: boolean = false;
 
   private scrollModeArr:ScrollSizeMode[] = [ScrollSizeMode.FOLLOW_DETENT, ScrollSizeMode.CONTINUOUS];
-  private scrollModeArrStr:string[] = ["FOLLOW_DETENT", "CONTINUOUS"];
+  private scrollModeArrStr:string[] = ['FOLLOW_DETENT', 'CONTINUOUS'];
   @State scrollModeIndex:number = 0;
 
   @Builder
   myBuilder() {
     Column() {
       Column(){
-        Button("content area refresh timing: " + this.scrollModeArrStr[this.scrollModeIndex])
+        Button('content area refresh timing: ' + this.scrollModeArrStr[this.scrollModeIndex])
           .fontSize(20)
           .margin({ bottom: 10 })
           .onClick(() => {

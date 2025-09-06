@@ -18,7 +18,7 @@ struct Index09 {
 
   @State isShow1: boolean = false;
   private preferTypeArr:SheetType[] = [SheetType.BOTTOM, SheetType.CONTENT_COVER];
-  private preferTypeArrStr:string[] = ["BOTTOM", "CONTENT_COVER"];
+  private preferTypeArrStr:string[] = ['BOTTOM', 'CONTENT_COVER'];
   @State preferTypeIndex:number = 0;
 
   private keyModeArr:SheetKeyboardAvoidMode[] = [
@@ -27,7 +27,7 @@ struct Index09 {
     SheetKeyboardAvoidMode.RESIZE_ONLY,
     SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL
   ];
-  private keyModeArrStr:string[] = ["NONE", " TRANSLATE_AND_RESIZE", "RESIZE_ONLY", "TRANSLATE_AND_SCROLL"];
+  private keyModeArrStr:string[] = ['NONE', ' TRANSLATE_AND_RESIZE', 'RESIZE_ONLY', 'TRANSLATE_AND_SCROLL'];
   @State keyModeIndex:number = 0;
   scroller = new Scroller();
   private arr: number[] = [0, 1, 2, 3, 4, 5, 6];
@@ -38,16 +38,16 @@ struct Index09 {
       Column() {
         TextInput().height('100')
 
-        Text("Page1 Setting").fontSize(20).margin({ bottom: 5 })
+        Text('Page1 Setting').fontSize(20).margin({ bottom: 5 })
 
-        Button("bindSheet page style: " + this.preferTypeArrStr[this.preferTypeIndex])
+        Button('bindSheet page style: ' + this.preferTypeArrStr[this.preferTypeIndex])
           .fontSize(20)
           .margin({ bottom: 5 })
           .onClick(() => {
             this.preferTypeIndex = ++this.preferTypeIndex % this.preferTypeArr.length;
           })
 
-        Button("keyboard avoid: " + this.keyModeArrStr[this.keyModeIndex])
+        Button('keyboard avoid: ' + this.keyModeArrStr[this.keyModeIndex])
           .fontSize(20)
           .margin({ bottom: 5 })
           .onClick(() => {
@@ -70,7 +70,7 @@ struct Index09 {
         TextInput().height('100')
 
         Column() {
-          Button("Close Page 1")
+          Button('Close Page 1')
             .fontSize(20)
             .margin({ top: 10, bottom: 5 })
             .onClick(()=>{
@@ -87,19 +87,19 @@ struct Index09 {
   build() {
     Row(){
       Column(){
-        Button("Show Page 1")
+        Button('Show Page 1')
           .fontSize(20)
           .onClick(() => {
             this.isShow1 = true;
           })
           .bindSheet(this.isShow1, this.myBuilder1(), {
             keyboardAvoidMode: this.keyModeArr[this.keyModeIndex],
-            height: "100vp",
-            width: "400vp",
+            height: '100vp',
+            width: '400vp',
             preferType: this.preferTypeArr[this.preferTypeIndex],
             detents: [SheetSize.MEDIUM, SheetSize.LARGE],
             dragBar: true,
-            title: { title: "Page1", subtitle: "bindSheet"},
+            title: { title: 'Page1', subtitle: 'bindSheet'},
             radius: { topLeft: 0 },
             borderWidth: 10,
             borderColor: Color.Pink,

@@ -55,7 +55,7 @@ struct Index04 {
   private sheetRadius: number = 20;
 
   private preferTypeArr:SheetType[] = [SheetType.BOTTOM, SheetType.CONTENT_COVER];
-  private preferTypeArrStr:string[] = ["BOTTOM", "CONTENT_COVER"];
+  private preferTypeArrStr:string[] = ['BOTTOM', 'CONTENT_COVER'];
   @State preferTypeIndex:number = 0;
 
   // 设置半模态上图片的布局监听
@@ -154,7 +154,7 @@ struct Index04 {
         .width('100%')
         .fontSize(30)
         .padding(20)
-      Image($r("app.media.startIcon"))
+      Image($r('app.media.startIcon'))
         .opacity(this.opacityDegree)
         .width('90%')
         .id('origin')// 挂载半模态页
@@ -175,7 +175,7 @@ struct Index04 {
           // 设置原图为不可交互抗打断
           this.isEnabled = false;
         })
-      Button("bindSheet page style: " + this.preferTypeArrStr[this.preferTypeIndex])
+      Button('bindSheet page style: ' + this.preferTypeArrStr[this.preferTypeIndex])
         .fontSize(20)
         .margin({ top: 10 })
         .onClick(() => {
@@ -230,7 +230,7 @@ struct Index04 {
             ImageNode()
           } else {
             // 抓取布局和占位用，实际不显示
-            Image($r("app.media.startIcon"))
+            Image($r('app.media.startIcon'))
               .visibility(Visibility.Hidden)
           }
         }

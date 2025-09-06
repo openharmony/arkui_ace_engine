@@ -19,11 +19,11 @@ struct Index03 {
   @State isShow1: boolean = false;
   @State isShow2: boolean = false;
   private modalTransitionArr:ModalTransition[] = [ModalTransition.DEFAULT, ModalTransition.NONE, ModalTransition.ALPHA];
-  private modalTransitionArrStr:string[] = ["ModalTransition.DEFAULT", "ModalTransition.NONE", "ModalTransition.ALPHA"];
+  private modalTransitionArrStr:string[] = ['ModalTransition.DEFAULT', 'ModalTransition.NONE', 'ModalTransition.ALPHA'];
   @State modalTransitionIndex:number = 0;
 
   private preferTypeArr:SheetType[] = [SheetType.BOTTOM, SheetType.CONTENT_COVER];
-  private preferTypeArrStr:string[] = ["BOTTOM", "CONTENT_COVER"];
+  private preferTypeArrStr:string[] = ['BOTTOM', 'CONTENT_COVER'];
   @State preferTypeIndex:number = 0;
 
   @State dismissState:boolean = false;
@@ -34,16 +34,16 @@ struct Index03 {
   @Builder
   myBuilder2() {
     Column() {
-      Button("Close Page 2")
+      Button('Close Page 2')
         .fontSize(20)
         .margin({ top: 10, bottom: 10 })
         .onClick(()=>{
           this.isShow2 = false;
         })
 
-      Text("Page1 Setting").fontSize(20).margin({ bottom: 5 })
+      Text('Page1 Setting').fontSize(20).margin({ bottom: 5 })
 
-      Button("bindSheet page style: " + this.preferTypeArrStr[this.preferTypeIndex])
+      Button('bindSheet page style: ' + this.preferTypeArrStr[this.preferTypeIndex])
         .fontSize(20)
         .margin({ bottom: 10 })
         .onClick(() => {
@@ -57,46 +57,46 @@ struct Index03 {
   @Builder
   myBuilder1() {
     Column() {
-      Button("Close Page 1")
+      Button('Close Page 1')
         .fontSize(20)
         .margin({ top: 10, bottom: 5 })
         .onClick(()=>{
           this.isShow1 = false;
         })
 
-      Button("Show Page 2")
+      Button('Show Page 2')
         .fontSize(20)
         .margin({ bottom: 10 })
         .onClick(() => {
           this.isShow2 = true;
         })
         .bindSheet(this.isShow2, this.myBuilder2(), {
-          height: "600vp",
-          width: "300vp",
+          height: '600vp',
+          width: '300vp',
           preferType: SheetType.BOTTOM,
-          detents: ["600vp"],
+          detents: ['600vp'],
           dragBar: true,
-          title: { title: "Page2", subtitle: "bindSheet"},
+          title: { title: 'Page2', subtitle: 'bindSheet'},
           backgroundColor: Color.Gray
         })
 
-      Text("Page1 Setting").fontSize(20).margin({ bottom: 5 })
+      Text('Page1 Setting').fontSize(20).margin({ bottom: 5 })
 
-      Button("bindSheet page style: " + this.preferTypeArrStr[this.preferTypeIndex])
+      Button('bindSheet page style: ' + this.preferTypeArrStr[this.preferTypeIndex])
         .fontSize(20)
         .margin({ bottom: 5 })
         .onClick(() => {
           this.preferTypeIndex = ++this.preferTypeIndex % this.preferTypeArr.length;
         })
 
-      Button("allow to close bindSheet: " + (this.dismissState ? "allow" : "not allow"))
+      Button('allow to close bindSheet: ' + (this.dismissState ? 'allow' : 'not allow'))
         .fontSize(20)
         .margin({ bottom: 5 })
         .onClick(() => {
           this.dismissState = !this.dismissState;
         })
 
-      Button("Page1 width: " + this.page1WidthArr[this.page1WidthIndex])
+      Button('Page1 width: ' + this.page1WidthArr[this.page1WidthIndex])
         .fontSize(20)
         .margin({ bottom: 5 })
         .onClick(() => {
@@ -110,18 +110,18 @@ struct Index03 {
   build() {
     Row(){
       Column(){
-        Button("Show Page 1")
+        Button('Show Page 1')
           .fontSize(20)
           .onClick(() => {
             this.isShow1 = true;
           })
           .bindSheet(this.isShow1, this.myBuilder1(), {
-            height: "100vp",
+            height: '100vp',
             width: this.page1WidthArr[this.page1WidthIndex],
             preferType: this.preferTypeArr[this.preferTypeIndex],
             detents: [SheetSize.MEDIUM, SheetSize.LARGE],
             dragBar: true,
-            title: { title: "Page1", subtitle: "bindSheet"},
+            title: { title: 'Page1', subtitle: 'bindSheet'},
             radius: { topLeft: 0 },
             borderWidth: 10,
             borderColor: Color.Pink,
@@ -134,56 +134,56 @@ struct Index03 {
             maskColor: Color.Yellow,
             modalTransition: this.modalTransitionArr[this.modalTransitionIndex],
             shouldDismiss: (sheetDismiss: SheetDismiss) => {
-              console.log("[TEST INFO] [Page1] shouldDismiss(dismiss)");
+              console.log('[TEST INFO] [Page1] shouldDismiss(dismiss)');
               if (this.dismissState == true) {
-                console.log("[TEST INFO] [Page1] shouldDismiss(dismiss) Begin");
+                console.log('[TEST INFO] [Page1] shouldDismiss(dismiss) Begin');
                 sheetDismiss.dismiss();
-                console.log("[TEST INFO] [Page1] shouldDismiss(dismiss) End");
+                console.log('[TEST INFO] [Page1] shouldDismiss(dismiss) End');
               }
             },
             onWillDismiss: (dismissContentCoverAction: DismissContentCoverAction) => {
               if (dismissContentCoverAction.reason == DismissReason.PRESS_BACK) {
-                console.log("[TEST INFO] [Page1] onWillDismiss PRESS_BACK");
+                console.log('[TEST INFO] [Page1] onWillDismiss PRESS_BACK');
               } else if (dismissContentCoverAction.reason == DismissReason.CLOSE_BUTTON) {
-                console.log("[TEST INFO] [Page1] onWillDismiss CLOSE_BUTTON");
+                console.log('[TEST INFO] [Page1] onWillDismiss CLOSE_BUTTON');
               } else {
-                console.log("[TEST INFO] [Page1] onWillDismiss Other");
+                console.log('[TEST INFO] [Page1] onWillDismiss Other');
               }
               if (this.dismissState == true) {
-                console.log("[TEST INFO] [Page1] onWillDismiss(dismiss) Begin");
+                console.log('[TEST INFO] [Page1] onWillDismiss(dismiss) Begin');
                 dismissContentCoverAction.dismiss();
-                console.log("[TEST INFO] [Page1] onWillDismiss(dismiss) End");
+                console.log('[TEST INFO] [Page1] onWillDismiss(dismiss) End');
               }
             },
             onHeightDidChange: (height: number)=>{
-              console.log("[TEST INFO] [Page1] onHeightDidChange: %d", height);
+              console.log('[TEST INFO] [Page1] onHeightDidChange: %d', height);
             },
             onDetentsDidChange: (height: number)=>{
-              console.log("[TEST INFO] [Page1] onDetentsDidChange: %d", height);
+              console.log('[TEST INFO] [Page1] onDetentsDidChange: %d', height);
             },
             onWidthDidChange: (width: number)=>{
-              console.log("[TEST INFO] [Page1] onWidthDidChange: %d", width);
+              console.log('[TEST INFO] [Page1] onWidthDidChange: %d', width);
             },
             onTypeDidChange: (type: SheetType)=>{
-              console.log("[TEST INFO] [Page1] onTypeDidChange: %d", type);
+              console.log('[TEST INFO] [Page1] onTypeDidChange: %d', type);
             },
             backgroundColor: Color.Gray,
             onWillAppear: ()=>{
-              console.log("[TEST INFO] [Page1] onWillAppear");
+              console.log('[TEST INFO] [Page1] onWillAppear');
             },
             onAppear: ()=>{
-              console.log("[TEST INFO] [Page1] onAppear");
+              console.log('[TEST INFO] [Page1] onAppear');
             },
             onWillDisappear: ()=>{
-              console.log("[TEST INFO] [Page1] onWillDisappear");
+              console.log('[TEST INFO] [Page1] onWillDisappear');
             },
             onDisappear: ()=>{
-              console.log("[TEST INFO] [Page1] onDisappear");
+              console.log('[TEST INFO] [Page1] onDisappear');
             }
           })
 
         Row(){
-          Button("bindSheet transition mode: " + this.modalTransitionArrStr[this.modalTransitionIndex])
+          Button('bindSheet transition mode: ' + this.modalTransitionArrStr[this.modalTransitionIndex])
             .onClick(()=>{
               this.modalTransitionIndex = ++this.modalTransitionIndex % this.modalTransitionArr.length;
             })

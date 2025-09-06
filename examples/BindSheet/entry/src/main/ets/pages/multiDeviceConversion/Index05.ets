@@ -19,22 +19,22 @@ struct Index05 {
   @State modalTransitionIndex:number = 0;
 
   private preferTypeArr:SheetType[] = [SheetType.BOTTOM, SheetType.CONTENT_COVER];
-  private preferTypeArrStr:string[] = ["BOTTOM", "CONTENT_COVER"];
+  private preferTypeArrStr:string[] = ['BOTTOM', 'CONTENT_COVER'];
   @State preferTypeIndex:number = 0;
 
   @Builder
   myBuilder1() {
     Column() {
-      Button("Close Page 1")
+      Button('Close Page 1')
         .fontSize(20)
         .margin({ top: 10, bottom: 5 })
         .onClick(()=>{
           this.isShow1 = false;
         })
 
-      Text("Page1 Setting").fontSize(20).margin({ bottom: 5 })
+      Text('Page1 Setting').fontSize(20).margin({ bottom: 5 })
 
-      Button("bindSheet page style: " + this.preferTypeArrStr[this.preferTypeIndex])
+      Button('bindSheet page style: ' + this.preferTypeArrStr[this.preferTypeIndex])
         .fontSize(20)
         .margin({ bottom: 5 })
         .onClick(() => {
@@ -48,19 +48,19 @@ struct Index05 {
   build() {
     Row(){
       Column(){
-        Button("Show Page 1")
+        Button('Show Page 1')
           .fontSize(20)
           .onClick(() => {
             this.isShow1 = true;
           })
           .bindSheet(this.isShow1, this.myBuilder1(), {
             uiContext: this.getUIContext(),
-            height: "100vp",
-            width: "400vp",
+            height: '100vp',
+            width: '400vp',
             preferType: this.preferTypeArr[this.preferTypeIndex],
             detents: [SheetSize.MEDIUM, SheetSize.LARGE],
             dragBar: true,
-            title: { title: "Page1", subtitle: "bindSheet"},
+            title: { title: 'Page1', subtitle: 'bindSheet'},
             radius: { topLeft: 0 },
             borderWidth: 10,
             borderColor: Color.Pink,
