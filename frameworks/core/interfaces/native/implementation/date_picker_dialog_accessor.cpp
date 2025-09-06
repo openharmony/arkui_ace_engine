@@ -80,7 +80,9 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
 }
 DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions options)
 {
-    DatePickerSettingData settingData;
+    DatePickerSettingData settingData = { .isLunar = false, .lunarswitch = false, .showTime = false,
+        .useMilitary = false, .mode = DatePickerMode::DATE, .isEnableHapticFeedback = true };
+
     settingData.isLunar = Converter::OptConvert<bool>(options.lunar).value_or(settingData.isLunar);
     settingData.lunarswitch = Converter::OptConvert<bool>(options.lunarSwitch).value_or(settingData.lunarswitch);
     auto checkboxSettingData = Converter::OptConvert<CheckboxSettingData>(options.lunarSwitchStyle);
