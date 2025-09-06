@@ -1545,6 +1545,12 @@ void ScrollablePattern::AnimateTo(
         return;
     }
     finalPosition_ = position;
+    scrollToDirection_ = ScrollToDirection::NONE;
+    if (GreatNotEqual(finalPosition_, GetTotalOffset())) {
+        scrollToDirection_ = ScrollToDirection::FORWARD;
+    } else {
+        scrollToDirection_ = ScrollToDirection::BACKWARD;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (smooth) {
@@ -1699,6 +1705,10 @@ void ScrollablePattern::InitSpringOffsetProperty()
         }
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
+        }
+        if ((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) ||
+            (pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta))) {
+            delta = 0;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_ && pattern->GetCanStayOverScroll()) {
