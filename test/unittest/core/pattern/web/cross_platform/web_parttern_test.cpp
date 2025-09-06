@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "frameworks/core/components/web/resource/web_delegate.h"
-#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace::NG {
 
