@@ -1033,6 +1033,17 @@ void DragEventActuator::UpdateGatherAnimatePosition(
     }
 }
 
+void DragEventActuator::UpdateGatherAnimatePosition(
+    const RefPtr<FrameNode>& gatherNode, const OffsetF& GatherNodeOffset)
+{
+    CHECK_NULL_VOID(gatherNode);
+    auto imageContext = gatherNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto offset = imageContext->GetPaintRectWithoutTransform();
+    imageContext->UpdatePosition(OffsetT<Dimension>(
+        Dimension(GatherNodeOffset.GetX() + offset.GetX()), Dimension(GatherNodeOffset.GetY() + offset.GetY())));
+}
+
 void DragEventActuator::UpdatePreviewPositionAndScale(
     const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale)
 {

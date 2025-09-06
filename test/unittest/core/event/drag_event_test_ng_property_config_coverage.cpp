@@ -833,6 +833,33 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest032, TestSize.Leve
 }
 
 /**
+ * @tc.name: DragEventActuatorMountGatherNodeTest033
+ * @tc.desc: Test UpdateGatherAnimatePosition function with FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNodeChildInfo
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateGatherAnimatePosition function with FrameNode.
+     */
+    auto tempOffset = OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f));
+    auto targetOffset = OffsetT<Dimension>(Dimension(COORDINATE_OFFSET.GetX()), Dimension(COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), tempOffset);
+    DragEventActuator::UpdateGatherAnimatePosition(
+        frameNode, { COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY() });
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
+}
+
+/**
  * @tc.name: DragEventActuatorRestartDragTaskTest002
  * @tc.desc: Test RestartDragTask function.
  * @tc.type: FUNC
