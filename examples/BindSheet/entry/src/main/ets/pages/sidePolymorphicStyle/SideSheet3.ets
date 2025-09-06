@@ -43,7 +43,7 @@ struct SheetTransitionExample1 {
       Text('changing the interaction mode of bindSheet')
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("change enableOutsideInteractive = " + this.enableOutsideInteractive)
+      Button('change enableOutsideInteractive = ' + this.enableOutsideInteractive)
         .margin({ top: 5 })
         .onClick(() => {
           this.enableOutsideInteractive = !this.enableOutsideInteractive
@@ -66,38 +66,38 @@ struct SheetTransitionExample1 {
       Text($r('app.string.SideSheet5'))
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("bindSheet-Side")
+      Button('bindSheet-Side')
         .onClick(() => {
           this.isShowSide = true
         })
         .fontSize(20)
         .margin(10)
         .bindSheet($$this.isShowSide, this.sideBuilder(), {
-          title: { title: "SideSheet", subtitle: "default width" },
+          title: { title: 'SideSheet', subtitle: 'default width' },
           backgroundColor: Color.Grey,
           onWillAppear: () => { 
-            console.log("BindSheet onWillAppear.")
+            console.log('BindSheet onWillAppear.')
           },
           onAppear: () => { 
-            console.log("BindSheet onAppear.")
+            console.log('BindSheet onAppear.')
           },
           onWillDisappear: () => { 
-            console.log("BindSheet onWillDisappear.")
+            console.log('BindSheet onWillDisappear.')
           },
           onDisappear: () => { 
-            console.log("BindSheet onDisappear.")
+            console.log('BindSheet onDisappear.')
           },
           preferType: SheetType.SIDE,
           blurStyle: BlurStyle.Regular,
-          maskColor: "#4bffc62d", 
+          maskColor: '#4bffc62d',
           enableOutsideInteractive: this.enableOutsideInteractive,
           borderWidth: this.borderWidths,
           borderColor: this.borderColors,
           onHeightDidChange: (height: number)=>{
-            console.log("height change:" + height)
+            console.log('height change:' + height)
           },
           onTypeDidChange: (data: SheetType) => {
-            console.log("type change:" + data)
+            console.log('type change:' + data)
           },
         })
     }

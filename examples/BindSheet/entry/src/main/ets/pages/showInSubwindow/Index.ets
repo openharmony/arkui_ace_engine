@@ -23,7 +23,7 @@ struct SheetShowInSubwindow {
   @Builder
   bottomBuilder() {
     Column() {
-      Text("Text\n***\n***\nText")
+      Text('Text\n***\n***\nText')
       TextInput()
     }
     .width('100%')
@@ -36,7 +36,7 @@ struct SheetShowInSubwindow {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
 
-      Button("bindSheet-Center")
+      Button('bindSheet-Center')
         .onClick(() => {
           this.isShowBottom = true
         })
@@ -44,25 +44,25 @@ struct SheetShowInSubwindow {
         .margin(10)
         .bindSheet($$this.isShowBottom, this.bottomBuilder(), {
           detents: [300, SheetSize.MEDIUM, SheetSize.LARGE],
-          title: { title: "CenterSheet", subtitle: "realtime follow test" },
+          title: { title: 'CenterSheet', subtitle: 'realtime follow test' },
           onWillAppear: () => {
-            console.log("CenterSheet onWillAppear.")
+            console.log('CenterSheet onWillAppear.')
           },
           onAppear: () => {
-            console.log("CenterSheet onAppear.")
+            console.log('CenterSheet onAppear.')
           },
           onWillDisappear: () => {
-            console.log("CenterSheet onWillDisappear.")
+            console.log('CenterSheet onWillDisappear.')
           },
           onDisappear: () => {
-            console.log("CenterSheet onDisappear.")
+            console.log('CenterSheet onDisappear.')
           },
           showInSubWindow : true,
           onHeightDidChange: (height: number)=>{
-            console.log("BottomSheet height change:" + height)
+            console.log('BottomSheet height change:' + height)
           },
           onTypeDidChange: (data: SheetType) => {
-            console.log("BottomSheet type change:" + data)
+            console.log('BottomSheet type change:' + data)
           },
         })
     }

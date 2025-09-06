@@ -34,20 +34,20 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
     WindowUtils.window = windowStage.getMainWindowSync();
-    WindowUtils.windowWidth_px = WindowUtils.window.getWindowProperties().windowRect.width;
-    WindowUtils.windowHeight_px = WindowUtils.window.getWindowProperties().windowRect.height;
+    WindowUtils.windowWidthPx = WindowUtils.window.getWindowProperties().windowRect.width;
+    WindowUtils.windowHeightPx = WindowUtils.window.getWindowProperties().windowRect.height;
 
-    this.updateBreakpoint(WindowUtils.windowWidth_px)
+    this.updateBreakpoint(WindowUtils.windowWidthPx)
     let avoidArea = WindowUtils.window.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
-    WindowUtils.topAvoidAreaHeight_px = avoidArea.topRect.height;
+    WindowUtils.topAvoidAreaHeightPx = avoidArea.topRect.height;
 
     let navigationArea = WindowUtils.window.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
-    WindowUtils.navigationIndicatorHeight_px = navigationArea.bottomRect.height;
+    WindowUtils.navigationIndicatorHeightPx = navigationArea.bottomRect.height;
 
     try {
       WindowUtils.window.on('windowSizeChange', (data) => {
-        WindowUtils.windowWidth_px = data.width;
-        WindowUtils.windowHeight_px = data.height;
+        WindowUtils.windowWidthPx = data.width;
+        WindowUtils.windowHeightPx = data.height;
         this.updateBreakpoint(data.width);
         AppStorage.setOrCreate('windowSizeChanged', Date.now());
       })
@@ -55,10 +55,10 @@ export default class EntryAbility extends UIAbility {
       WindowUtils.window.on('avoidAreaChange', (data) => {
         if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
           let topRectHeight = data.area.topRect.height;
-          WindowUtils.topAvoidAreaHeight_px = topRectHeight;
+          WindowUtils.topAvoidAreaHeightPx = topRectHeight;
         } else if (data.type == window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
           let bottomRectHeight = data.area.bottomRect.height;
-          WindowUtils.navigationIndicatorHeight_px = bottomRectHeight;
+          WindowUtils.navigationIndicatorHeightPx = bottomRectHeight;
         }
       })
     } catch (exception) {

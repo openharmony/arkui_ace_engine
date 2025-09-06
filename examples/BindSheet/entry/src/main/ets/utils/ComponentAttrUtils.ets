@@ -51,14 +51,14 @@ export class ComponentAttrUtils {
 }
 
 export class RectInfoInPx {
-  left: number = 0;
-  top: number = 0;
-  right: number = 0;
-  bottom: number = 0;
-  width: number = 0;
-  height: number = 0;
+  public left: number = 0;
+  public top: number = 0;
+  public right: number = 0;
+  public bottom: number = 0;
+  public width: number = 0;
+  public height: number = 0;
 }
 
 export class RectJson {
-  $rect: Array<number> = [];
+  public $rect: Array<number> = [];
 }

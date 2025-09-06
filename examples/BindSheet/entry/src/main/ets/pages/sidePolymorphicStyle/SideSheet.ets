@@ -25,7 +25,7 @@ struct SheetTransitionExample {
   @Builder
   bottomBuilder() {
     Column() {
-      Text("Text\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\nText")
+      Text('Text\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\n***\nText')
       TextInput()
     }
     .width('100%')
@@ -60,77 +60,77 @@ struct SheetTransitionExample {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
 
-      Button("bindSheet-Bottom")
+      Button('bindSheet-Bottom')
         .onClick(() => {
           this.isShowBottom = true
         })
         .fontSize(20)
         .margin(10)
         .bindSheet($$this.isShowBottom, this.bottomBuilder(), {
-          title: { title: "BottomSheet", subtitle: "no close button" },
+          title: { title: 'BottomSheet', subtitle: 'no close button' },
           backgroundColor: Color.Grey,
           onWillAppear: () => {
-            console.log("BottomSheet onWillAppear.")
+            console.log('BottomSheet onWillAppear.')
           },
           onAppear: () => {
-            console.log("BottomSheet onAppear.")
+            console.log('BottomSheet onAppear.')
           },
           onWillDisappear: () => {
-            console.log("BottomSheet onWillDisappear.")
+            console.log('BottomSheet onWillDisappear.')
           },
           onDisappear: () => {
-            console.log("BottomSheet onDisappear.")
+            console.log('BottomSheet onDisappear.')
           },
           preferType: SheetType.BOTTOM,
           showClose: false,
           blurStyle: BlurStyle.Regular,
-          maskColor: "#4bffc62d",
+          maskColor: '#4bffc62d',
           enableOutsideInteractive: false,
           borderWidth: {start: LengthMetrics.vp(2)},
           borderColor: Color.Green,
           borderStyle: BorderStyle.Dashed,
           onHeightDidChange: (height: number)=>{
-            console.log("BottomSheet height change:" + height)
+            console.log('BottomSheet height change:' + height)
           },
           onTypeDidChange: (data: SheetType) => {
-            console.log("BottomSheet type change:" + data)
+            console.log('BottomSheet type change:' + data)
           },
         })
 
-      Button("bindSheet-Side")
+      Button('bindSheet-Side')
         .onClick(() => {
           this.isShowSide = true
         })
         .fontSize(20)
         .margin(10)
         .bindSheet($$this.isShowSide, this.sideBuilder(), {
-          title: { title: "SideSheet", subtitle: "has close button" },
+          title: { title: 'SideSheet', subtitle: 'has close button' },
           backgroundColor: Color.Grey,
           onWillAppear: () => {
-            console.log("SideSheet onWillAppear.")
+            console.log('SideSheet onWillAppear.')
           },
           onAppear: () => {
-            console.log("SideSheet onAppear.")
+            console.log('SideSheet onAppear.')
           },
           onWillDisappear: () => {
-            console.log("SideSheet onWillDisappear.")
+            console.log('SideSheet onWillDisappear.')
           },
           onDisappear: () => {
-            console.log("SideSheet onDisappear.")
+            console.log('SideSheet onDisappear.')
           },
           preferType: SheetType.SIDE,
           showClose: true,
           blurStyle: BlurStyle.Regular,
-          maskColor: "#4bffc62d",
+          maskColor: '#4bffc62d',
           enableOutsideInteractive: false,
           borderWidth: {start: LengthMetrics.vp(2)},
           borderColor: Color.Green,
           borderStyle: BorderStyle.Dashed,
           onHeightDidChange: (height: number)=>{
-            console.log("SideSheet height change:" + height)
+            console.log('SideSheet height change:' + height)
           },
           onTypeDidChange: (data: SheetType) => {
-            console.log("SideSheet type change:" + data)
+            console.log('SideSheet type change:' + data)
           },
         })
     }

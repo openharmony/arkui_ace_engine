@@ -22,19 +22,19 @@ struct Index {
     Row(){
       Column(){
         Button($r('app.string.SideSheet6'))
-          .width("100%").fontSize('20vp')
+          .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
-          .onClick(()=>{ router.pushUrl({url: "pages/multiDeviceConversion/Index"}) })
+          .onClick(()=>{ router.pushUrl({url: 'pages/multiDeviceConversion/Index'}) })
 
         Button($r('app.string.SideSheet7'))
-          .width("100%").fontSize('20vp')
+          .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
-          .onClick(()=>{ router.pushUrl({url: "pages/sidePolymorphicStyle/Index"}) })
+          .onClick(()=>{ router.pushUrl({url: 'pages/sidePolymorphicStyle/Index'}) })
 
         Button($r('app.string.SideSheet8'))
-          .width("100%").fontSize('20vp')
+          .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
-          .onClick(()=>{ router.pushUrl({url: "pages/showInSubwindow/Index"}) })
+          .onClick(()=>{ router.pushUrl({url: 'pages/showInSubwindow/Index'}) })
 
       }
       .width('100%')

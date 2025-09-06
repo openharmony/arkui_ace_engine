@@ -16,15 +16,15 @@
 import { BuilderNode, FrameNode, NodeController } from '@kit.ArkUI';
 
 @Builder
-function CardBuilder() {
-  Image($r("app.media.startIcon"))
+function cardBuilder() {
+  Image($r('app.media.startIcon'))
     // 避免第一次加载图片时图片闪烁
     .syncLoad(true)
 }
 
 export class MyNodeController extends NodeController {
-  private CardNode: BuilderNode<[]> | null = null;
-  private wrapBuilder: WrappedBuilder<[]> = wrapBuilder(CardBuilder);
+  private cardNode: BuilderNode<[]> | null = null;
+  private wrapBuilder: WrappedBuilder<[]> = wrapBuilder(cardBuilder);
   private needCreate: boolean = false;
   private isRemove: boolean = false;
 
@@ -37,22 +37,22 @@ export class MyNodeController extends NodeController {
     if(this.isRemove == true){
       return null;
     }
-    if (this.needCreate && this.CardNode == null) {
-      this.CardNode = new BuilderNode(uiContext);
-      this.CardNode.build(this.wrapBuilder)
+    if (this.needCreate && this.cardNode == null) {
+      this.cardNode = new BuilderNode(uiContext);
+      this.cardNode.build(this.wrapBuilder)
     }
-    if (this.CardNode == null) {
+    if (this.cardNode == null) {
       return null;
     }
-    return this.CardNode!.getFrameNode()!;
+    return this.cardNode!.getFrameNode()!;
   }
 
   getNode(): BuilderNode<[]> | null {
-    return this.CardNode;
+    return this.cardNode;
   }
 
   setNode(node: BuilderNode<[]> | null) {
-    this.CardNode = node;
+    this.cardNode = node;
     this.rebuild();
   }
 
@@ -63,8 +63,8 @@ export class MyNodeController extends NodeController {
   }
 
   init(uiContext: UIContext) {
-    this.CardNode = new BuilderNode(uiContext);
-    this.CardNode.build(this.wrapBuilder)
+    this.cardNode = new BuilderNode(uiContext);
+    this.cardNode.build(this.wrapBuilder)
   }
 }
 

@@ -18,7 +18,7 @@ struct Index01 {
 
   @State isShow1: boolean = false;
   private modalTransitionArr:ModalTransition[] = [ModalTransition.DEFAULT, ModalTransition.NONE, ModalTransition.ALPHA];
-  private modalTransitionArrStr:string[] = ["ModalTransition.DEFAULT", "ModalTransition.NONE", "ModalTransition.ALPHA"];
+  private modalTransitionArrStr:string[] = ['ModalTransition.DEFAULT', 'ModalTransition.NONE', 'ModalTransition.ALPHA'];
   @State modalTransitionIndex:number = 0;
 
   @State enableSafeAreaState: boolean = false;
@@ -26,7 +26,7 @@ struct Index01 {
   @Builder
   myBuilder1() {
     Column() {
-      Button("Close Page 1")
+      Button('Close Page 1')
         .fontSize(20)
         .height(60)
         .onClick(()=>{
@@ -40,7 +40,7 @@ struct Index01 {
   build() {
     Row(){
       Column(){
-        Button("Show Page 1")
+        Button('Show Page 1')
           .fontSize(20)
           .onClick(() => {
             this.isShow1 = true;
@@ -50,40 +50,38 @@ struct Index01 {
             modalTransition: this.modalTransitionArr[this.modalTransitionIndex],
             onWillDismiss: (dismissContentCoverAction: DismissContentCoverAction) => {
               if (dismissContentCoverAction.reason == DismissReason.PRESS_BACK) {
-                console.log("[TEST INFO] [Page1] onWillDismiss PRESS_BACK");
-              }
-              else if (dismissContentCoverAction.reason == DismissReason.CLOSE_BUTTON) {
-                console.log("[TEST INFO] [Page1] onWillDismiss CLOSE_BUTTON");
-              }
-              else {
-                console.log("[TEST INFO] [Page1] onWillDismiss Other");
+                console.log('[TEST INFO] [Page1] onWillDismiss PRESS_BACK');
+              } else if (dismissContentCoverAction.reason == DismissReason.CLOSE_BUTTON) {
+                console.log('[TEST INFO] [Page1] onWillDismiss CLOSE_BUTTON');
+              } else {
+                console.log('[TEST INFO] [Page1] onWillDismiss Other');
               }
               dismissContentCoverAction.dismiss();
             },
             backgroundColor: Color.Gray,
             onWillAppear: ()=>{
-              console.log("[TEST INFO] [Page1] onWillAppear");
+              console.log('[TEST INFO] [Page1] onWillAppear');
             },
             onAppear: ()=>{
-              console.log("[TEST INFO] [Page1] onAppear");
+              console.log('[TEST INFO] [Page1] onAppear');
             },
             onWillDisappear: ()=>{
-              console.log("[TEST INFO] [Page1] onWillDisappear");
+              console.log('[TEST INFO] [Page1] onWillDisappear');
             },
             onDisappear: ()=>{
-              console.log("[TEST INFO] [Page1] onDisappear");
+              console.log('[TEST INFO] [Page1] onDisappear');
             }
           })
 
         Row(){
-          Button("bindContentCover transition mode: " + this.modalTransitionArrStr[this.modalTransitionIndex])
+          Button('bindContentCover transition mode: ' + this.modalTransitionArrStr[this.modalTransitionIndex])
             .onClick(()=>{
               this.modalTransitionIndex = ++this.modalTransitionIndex % this.modalTransitionArr.length;
             })
         }.margin({ top: 10, bottom: 10 })
 
         Row(){
-          Button("whether to adapt to the bindContentCover security zone: " + (this.enableSafeAreaState ? "adapt" : "do not handle"))
+          Button('whether to adapt to the bindContentCover security zone: ' + (this.enableSafeAreaState ? 'adapt' : 'do not handle'))
             .onClick(()=>{
               this.enableSafeAreaState = !this.enableSafeAreaState;
             })

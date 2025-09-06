@@ -21,7 +21,12 @@ struct Index09 {
   private preferTypeArrStr:string[] = ["BOTTOM", "CONTENT_COVER"];
   @State preferTypeIndex:number = 0;
 
-  private keyModeArr:SheetKeyboardAvoidMode[] = [SheetKeyboardAvoidMode.NONE, SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE, SheetKeyboardAvoidMode.RESIZE_ONLY, SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL];
+  private keyModeArr:SheetKeyboardAvoidMode[] = [
+    SheetKeyboardAvoidMode.NONE,
+    SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE,
+    SheetKeyboardAvoidMode.RESIZE_ONLY,
+    SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL
+  ];
   private keyModeArrStr:string[] = ["NONE", " TRANSLATE_AND_RESIZE", "RESIZE_ONLY", "TRANSLATE_AND_SCROLL"];
   @State keyModeIndex:number = 0;
   scroller = new Scroller();

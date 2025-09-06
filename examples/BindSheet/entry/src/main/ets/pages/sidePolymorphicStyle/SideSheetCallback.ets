@@ -51,26 +51,26 @@ struct SheetTransitionExample {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
 
-      Button("bindSheet-Side-withMask")
+      Button('bindSheet-Side-withMask')
         .onClick(() => {
           this.isShowSide = true
         })
         .fontSize(20)
         .margin(10)
         .bindSheet($$this.isShowSide, this.sideBuilder(), {
-          title: { title: "SideSheetWithMask", subtitle: "no scrolling across boundaries effect,width=300vp" },
+          title: { title: 'SideSheetWithMask', subtitle: 'no scrolling across boundaries effect,width=300vp' },
           backgroundColor: Color.Grey,
           onWillAppear: () => {
-            console.log("BindSheet onWillAppear.")
+            console.log('BindSheet onWillAppear.')
           },
           onAppear: () => {
-            console.log("BindSheet onAppear.")
+            console.log('BindSheet onAppear.')
           },
           onWillDisappear: () => {
-            console.log("BindSheet onWillDisappear.")
+            console.log('BindSheet onWillDisappear.')
           },
           onDisappear: () => {
-            console.log("BindSheet onDisappear.")
+            console.log('BindSheet onDisappear.')
           },
           preferType: SheetType.SIDE,
           width: 300,
@@ -78,53 +78,51 @@ struct SheetTransitionExample {
           blurStyle: BlurStyle.Regular,
           maskColor: Color.Brown,
           effectEdge : EffectEdge.START & EffectEdge.END,
-          onWillDismiss: ((DismissSheetAction: DismissSheetAction) => {
-            console.log("BindSheet DismissReason:" + DismissSheetAction.reason)
-            if (DismissSheetAction.reason == DismissReason.PRESS_BACK) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.PRESS_BACK")
-            } else if(DismissSheetAction.reason == DismissReason.CLOSE_BUTTON) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.CLOSE_BUTTON")
-            } else if(DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE")
-            } else if(DismissSheetAction.reason == DismissReason.SLIDE) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.SLIDE")
+          onWillDismiss: ((dismissSheetAction: DismissSheetAction) => {
+            console.log('BindSheet DismissReason:' + dismissSheetAction.reason)
+            if (dismissSheetAction.reason == DismissReason.PRESS_BACK) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.PRESS_BACK')
+            } else if(dismissSheetAction.reason == DismissReason.CLOSE_BUTTON) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.CLOSE_BUTTON')
+            } else if(dismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE')
+            } else if(dismissSheetAction.reason == DismissReason.SLIDE) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.SLIDE')
             }
-            DismissSheetAction.dismiss()
+            dismissSheetAction.dismiss()
           }),
-          onWillSpringBackWhenDismiss: ((SpringBackAction: SpringBackAction) => {
-            console.log("BindSheet onWillSpringBackWhenDismiss")
-            // 没有注册springBack, 下拉半模态页面无回弹行为
-            // SpringBackAction.springBack()
+          onWillSpringBackWhenDismiss: ((springBackAction: SpringBackAction) => {
+            console.log('BindSheet onWillSpringBackWhenDismiss')
           }),
           onHeightDidChange: (height: number)=>{
-            console.log("BindSheet height change:" + height)
+            console.log('BindSheet height change:' + height)
           },
           onWidthDidChange: (width: number)=>{
-            console.log("BindSheet width change:" + width)
+            console.log('BindSheet width change:' + width)
           },
         })
 
 
-      Button("bindSheet-Side-NotwithMask")
+      Button('bindSheet-Side-NotwithMask')
         .onClick(() => {
           this.isShowSide2 = true
         })
         .fontSize(20)
         .margin(10)
         .bindSheet($$this.isShowSide2, this.sideBuilder(), {
-          title: { title: "SideSheetNotWithMask", subtitle: "no scrolling across boundaries effect,width=300vp" },
+          title: { title: 'SideSheetNotWithMask', subtitle: 'no scrolling across boundaries effect,width=300vp' },
           backgroundColor: Color.Grey,
           onWillAppear: () => {
-            console.log("BindSheet onWillAppear.")
+            console.log('BindSheet onWillAppear.')
           },
           onAppear: () => {
-            console.log("BindSheet onAppear.")
+            console.log('BindSheet onAppear.')
           },
           onWillDisappear: () => {
-            console.log("BindSheet onWillDisappear.")
+            console.log('BindSheet onWillDisappear.')
           },
           onDisappear: () => {
-            console.log("BindSheet onDisappear.")
+            console.log('BindSheet onDisappear.')
           },
           preferType: SheetType.SIDE,
           width: 300,
@@ -134,29 +132,27 @@ struct SheetTransitionExample {
           enableOutsideInteractive: true,
           effectEdge : EffectEdge.START & EffectEdge.END,
           borderWidth: {start: LengthMetrics.vp(2)},
-          onWillDismiss: ((DismissSheetAction: DismissSheetAction) => {
-            console.log("BindSheet DismissReason:" + DismissSheetAction.reason)
-            if (DismissSheetAction.reason == DismissReason.PRESS_BACK) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.PRESS_BACK")
-            } else if(DismissSheetAction.reason == DismissReason.CLOSE_BUTTON) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.CLOSE_BUTTON")
-            } else if(DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE")
-            } else if(DismissSheetAction.reason == DismissReason.SLIDE) {
-              console.log("BindSheet DismissSheetAction.reason == DismissReason.SLIDE")
+          onWillDismiss: ((dismissSheetAction: DismissSheetAction) => {
+            console.log('BindSheet DismissReason:' + dismissSheetAction.reason)
+            if (dismissSheetAction.reason == DismissReason.PRESS_BACK) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.PRESS_BACK')
+            } else if(dismissSheetAction.reason == DismissReason.CLOSE_BUTTON) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.CLOSE_BUTTON')
+            } else if(dismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.TOUCH_OUTSIDE')
+            } else if(dismissSheetAction.reason == DismissReason.SLIDE) {
+              console.log('BindSheet DismissSheetAction.reason == DismissReason.SLIDE')
             }
-            DismissSheetAction.dismiss()
+            dismissSheetAction.dismiss()
           }),
-          onWillSpringBackWhenDismiss: ((SpringBackAction: SpringBackAction) => {
-            console.log("BindSheet onWillSpringBackWhenDismiss")
-            // 没有注册springBack, 下拉半模态页面无回弹行为
-            // SpringBackAction.springBack()
+          onWillSpringBackWhenDismiss: ((springBackAction: SpringBackAction) => {
+            console.log('BindSheet onWillSpringBackWhenDismiss')
           }),
           onHeightDidChange: (height: number)=>{
-            console.log("BindSheet height change:" + height)
+            console.log('BindSheet height change:' + height)
           },
           onWidthDidChange: (width: number)=>{
-            console.log("BindSheet width change:" + width)
+            console.log('BindSheet width change:' + width)
           },
         })
     }

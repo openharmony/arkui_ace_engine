@@ -125,11 +125,9 @@ struct Index08 {
             onWillDismiss: (dismissContentCoverAction: DismissContentCoverAction) => {
               if (dismissContentCoverAction.reason == DismissReason.PRESS_BACK) {
                 console.log("[TEST INFO] [Page1] onWillDismiss PRESS_BACK");
-              }
-              else if (dismissContentCoverAction.reason == DismissReason.CLOSE_BUTTON) {
+              } else if (dismissContentCoverAction.reason == DismissReason.CLOSE_BUTTON) {
                 console.log("[TEST INFO] [Page1] onWillDismiss CLOSE_BUTTON");
-              }
-              else {
+              } else {
                 console.log("[TEST INFO] [Page1] onWillDismiss Other");
               }
               if (this.dismissState == true) {

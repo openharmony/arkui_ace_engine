@@ -25,27 +25,27 @@ struct BlurExample {
 
   @Builder myBuilder() {
     Column({space: 10}) {
-      Button("close sheet")
+      Button('close sheet')
         .onClick(()=>{
           this.isShow = false;
         })
-      Button("COMPONENT_ULTRA_THIN")
+      Button('COMPONENT_ULTRA_THIN')
         .onClick(()=>{
           this.blurStyle = BlurStyle.COMPONENT_ULTRA_THIN;
         })
-      Button("COMPONENT_THIN")
+      Button('COMPONENT_THIN')
         .onClick(()=>{
           this.blurStyle = BlurStyle.COMPONENT_THIN;
         })
-      Button("COMPONENT_REGULAR")
+      Button('COMPONENT_REGULAR')
         .onClick(()=>{
           this.blurStyle = BlurStyle.COMPONENT_REGULAR;
         })
-      Button("COMPONENT_THICK")
+      Button('COMPONENT_THICK')
         .onClick(()=>{
           this.blurStyle = BlurStyle.COMPONENT_THICK;
         })
-      Button("COMPONENT_ULTRA_THICK")
+      Button('COMPONENT_ULTRA_THICK')
         .onClick(()=>{
           this.blurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
         })
@@ -57,29 +57,29 @@ struct BlurExample {
 
   @Builder ShadowBuilder() {
     Column({space: 5}) {
-      Button("ShadowStyle-OUTER_DEFAULT_SM")
+      Button('ShadowStyle-OUTER_DEFAULT_SM')
         .margin({top: 10})
         .onClick(() => {
           this.shadows = ShadowStyle.OUTER_DEFAULT_SM
         })
-      Button("ShadowStyle-OUTER_DEFAULT_MD")
+      Button('ShadowStyle-OUTER_DEFAULT_MD')
         .onClick(() => {
           this.shadows = ShadowStyle.OUTER_DEFAULT_MD
         })
-      Button("ShadowStyle-OUTER_DEFAULT_LG")
+      Button('ShadowStyle-OUTER_DEFAULT_LG')
         .onClick(() => {
           this.shadows = ShadowStyle.OUTER_DEFAULT_LG
         })
 
-      Button("ShadowOptions-OUTER_FLOATING_SM")
+      Button('ShadowOptions-OUTER_FLOATING_SM')
         .onClick(() => {
           this.shadows = ShadowStyle.OUTER_FLOATING_SM
         })
-      Button("ShadowOptions-OUTER_FLOATING_MD")
+      Button('ShadowOptions-OUTER_FLOATING_MD')
         .onClick(() => {
           this.shadows = ShadowStyle.OUTER_FLOATING_MD
         })
-      Button("ShadowOptions1")
+      Button('ShadowOptions1')
         .onClick(() => {
           this.shadows = {
             radius: 2,
@@ -90,7 +90,7 @@ struct BlurExample {
             fill: false
           }
         })
-      Button("ShadowOptions2")
+      Button('ShadowOptions2')
         .onClick(() => {
           this.shadows = {
             radius: $r('app.float.shadow_radius'),
@@ -101,7 +101,7 @@ struct BlurExample {
             fill: true
           }
         })
-      Button("ShadowOptions3")
+      Button('ShadowOptions3')
         .onClick(() => {
           this.shadows = {
             radius: 30,
@@ -112,7 +112,7 @@ struct BlurExample {
             fill: false
           }
         })
-      Button("ShadowOptions4")
+      Button('ShadowOptions4')
         .onClick(() => {
           this.shadows = {
             radius: 30,
@@ -128,41 +128,41 @@ struct BlurExample {
 
   @Builder maskColorBuilder() {
     Column({space: 5}) {
-      Button("maskColor-0xffff00")
+      Button('maskColor-0xffff00')
         .onClick(()=>{
           this.maskColor = 0xffff00
         })
 
-      Button("maskColor-0x008000")
+      Button('maskColor-0x008000')
         .onClick(()=>{
           this.maskColor = 0x008000
         })
 
-      Button("maskColor-string-rgb")
+      Button('maskColor-string-rgb')
         .onClick(()=>{
           this.maskColor = 'rgb(255, 100, 255)'
         })
 
-      Button("maskColor-string-rgba")
+      Button('maskColor-string-rgba')
         .onClick(()=>{
           this.maskColor = 'rgba(255, 100, 255, 0.5)'
         })
 
-      Button("maskColor-string-#ff00ff")
+      Button('maskColor-string-#ff00ff')
         .onClick(()=>{
           this.maskColor = '#ff00ff'
         })
 
-      Button("maskColor-Resource-#ff00ff")
+      Button('maskColor-Resource-#ff00ff')
         .onClick(()=>{
           this.maskColor = $r('app.color.start_color_purple')
         })
 
-      Button("maskColor-Resource-#ffff0000")
+      Button('maskColor-Resource-#ffff0000')
         .onClick(()=>{
           this.maskColor = $r('app.color.start_color_red')
         })
-      Button("close sheet")
+      Button('close sheet')
         .onClick(()=>{
           this.isShow3 = false;
         })
@@ -178,7 +178,7 @@ struct BlurExample {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
 
-      Button("SideSheet With Shadow")
+      Button('SideSheet With Shadow')
         .onClick(() => {
           this.isShow2 = true
         })
@@ -186,12 +186,12 @@ struct BlurExample {
           $$this.isShow2,
           this.ShadowBuilder(),
           {
-            title: { title: "title", subtitle: "subtitle" },
+            title: { title: 'title', subtitle: 'subtitle' },
             preferType: SheetType.SIDE,
             shadow: this.shadows,
           })
 
-      Button("SideSheet With BlurStyle")
+      Button('SideSheet With BlurStyle')
         .onClick(() => {
           this.isShow = true
         })
@@ -199,12 +199,12 @@ struct BlurExample {
           $$this.isShow,
           this.myBuilder(),
           {
-            title: { title: "title", subtitle: "subtitle" },
+            title: { title: 'title', subtitle: 'subtitle' },
             preferType: SheetType.SIDE,
             blurStyle: this.blurStyle
           })
 
-      Button("SideSheet With maskColor")
+      Button('SideSheet With maskColor')
         .onClick(() => {
           this.isShow3 = true
         })
@@ -212,7 +212,7 @@ struct BlurExample {
           $$this.isShow3,
           this.maskColorBuilder(),
           {
-            title: { title: "title", subtitle: "subtitle" },
+            title: { title: 'title', subtitle: 'subtitle' },
             preferType: SheetType.SIDE,
             maskColor: this.maskColor,
           })

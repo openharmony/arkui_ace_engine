@@ -29,7 +29,7 @@ struct BorderExample {
 
   @Builder myBuilder4() {
     Column({space: 10}) {
-      Button("BorderRadiuses，not available in mirrors")
+      Button('BorderRadiuses，not available in mirrors')
         .onClick(()=>{
           this.sheetRadius = {
             topLeft: 20,
@@ -38,12 +38,12 @@ struct BorderExample {
             bottomRight: 0,
           };
         })
-      Text("topLeft = bottomLeft = 20vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('topLeft = bottomLeft = 20vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin(5)
-      Text("topRight = bottomRight = 0vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('topRight = bottomRight = 0vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin({bottom: 15})
 
-      Button("LocalizedBorderRadiuses，available in mirrors")
+      Button('LocalizedBorderRadiuses，available in mirrors')
         .onClick(()=>{
           this.sheetRadius = {
             topStart: LengthMetrics.vp(40),
@@ -52,12 +52,12 @@ struct BorderExample {
             bottomEnd: LengthMetrics.vp(20)
           };
         })
-      Text("topStart = bottomStart = 40vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('topStart = bottomStart = 40vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin(5)
-      Text("topEnd = bottomEnd = 20vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('topEnd = bottomEnd = 20vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin({bottom: 15})
 
-      Button("sheetRadius = undefined")
+      Button('sheetRadius = undefined')
         .onClick(()=>{
           this.sheetRadius = undefined;
         })
@@ -70,23 +70,23 @@ struct BorderExample {
 
   @Builder myBuilder3() {
     Column({space: 10}) {
-      Button("ResourceColor-Color")
+      Button('ResourceColor-Color')
         .onClick(()=>{
           this.borderColors = Color.Pink;
         })
-      Button("ResourceColor-number")
+      Button('ResourceColor-number')
         .onClick(()=>{
           this.borderColors = 0x008000;
         })
-      Button("ResourceColor-string")
+      Button('ResourceColor-string')
         .onClick(()=>{
           this.borderColors = 'rgba(255, 100, 255, 0.5)';
         })
-      Button("ResourceColor-Resource")
+      Button('ResourceColor-Resource')
         .onClick(()=>{
           this.borderColors = $r('app.color.start_color_purple');
         })
-      Button("EdgeColors")
+      Button('EdgeColors')
         .onClick(()=>{
           this.borderColors = {
             top: 0xffff00,
@@ -95,15 +95,15 @@ struct BorderExample {
             bottom: $r('app.color.start_color_red'),
           };
         })
-      Text("left: 'rgb(255, 100, 255)'").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('left: rgb(255, 100, 255)').fontSize(10).fontWeight(FontWeight.Bold)
         .margin(5)
-      Text("right: '#ff00ff'").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('right: #ff00ff').fontSize(10).fontWeight(FontWeight.Bold)
         .margin({ bottom: 15} )
 
       Text('LocalizedEdgeColor，available in mirrors')
         .fontSize(10).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("LocalizedEdgeColors")
+      Button('LocalizedEdgeColors')
         .onClick(()=>{
           this.borderColors = {
             top: '#ffff0000',
@@ -112,10 +112,10 @@ struct BorderExample {
             start: $r('app.color.start_color_blue')
           };
         })
-      Text("start: blue ").fontSize(10).fontWeight(FontWeight.Bold)
-      Text("end: purple").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('start: blue').fontSize(10).fontWeight(FontWeight.Bold)
+      Text('end: purple').fontSize(10).fontWeight(FontWeight.Bold)
 
-      Button("borderColors = undefined")
+      Button('borderColors = undefined')
         .onClick(()=>{
           this.borderColors = undefined;
         })
@@ -130,7 +130,7 @@ struct BorderExample {
       Text('BorderStyle，not available in mirrors')
         .fontSize(10).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("EdgeStyle")
+      Button('EdgeStyle')
         .onClick(()=>{
           this.borderStyles = {
             top: BorderStyle.Dotted,
@@ -140,20 +140,20 @@ struct BorderExample {
           };
         })
 
-      Button("BorderStyle-Dotted")
+      Button('BorderStyle-Dotted')
         .onClick(()=>{
           this.borderStyles = BorderStyle.Dotted;
         })
-      Button("BorderStyle-Dashed")
+      Button('BorderStyle-Dashed')
         .onClick(()=>{
           this.borderStyles = BorderStyle.Dashed;
         })
-      Button("BorderStyle-Solid")
+      Button('BorderStyle-Solid')
         .onClick(()=>{
           this.borderStyles = BorderStyle.Solid;
         })
 
-      Button("borderStyles = undefined")
+      Button('borderStyles = undefined')
         .onClick(()=>{
           this.borderStyles = undefined;
         })
@@ -165,31 +165,31 @@ struct BorderExample {
 
   @Builder myBuilder() {
     Column({space: 10}) {
-      Button("Dimension-PX")
+      Button('Dimension-PX')
         .onClick(()=>{
           this.borderWidths = '4px';
         })
-      Button("Dimension-VP")
+      Button('Dimension-VP')
         .onClick(()=>{
           this.borderWidths = 5;
         })
-      Button("Dimension-FP")
+      Button('Dimension-FP')
         .onClick(()=>{
           this.borderWidths = '8fp';
         })
-      Button("Dimension-LPX")
+      Button('Dimension-LPX')
         .onClick(()=>{
           this.borderWidths = '6lpx';
         })
-      Button("Dimension-Percentage")
+      Button('Dimension-Percentage')
         .onClick(()=>{
           this.borderWidths = '2%';
         })
-      Button("Dimension-Resource")
+      Button('Dimension-Resource')
         .onClick(()=>{
           this.borderWidths = $r('app.float.borderWidth1');
         })
-      Button("EdgeWidths1")
+      Button('EdgeWidths1')
         .onClick(()=>{
           this.borderWidths = {
             top: '24px',
@@ -201,7 +201,7 @@ struct BorderExample {
       Text('LocalizedEdgeWidth，available in mirrors')
         .fontSize(10).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("LocalizedEdgeWidths1")
+      Button('LocalizedEdgeWidths1')
         .onClick(()=>{
           this.borderWidths = {
             top: LengthMetrics.px(18),
@@ -210,12 +210,12 @@ struct BorderExample {
             start: LengthMetrics.lpx(14),
           };
         })
-      Text("start: 14vp ").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('start: 14vp ').fontSize(10).fontWeight(FontWeight.Bold)
         .margin(5)
-      Text("end: 12vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('end: 12vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin({bottom: 15})
 
-      Button("LocalizedEdgeWidths2")
+      Button('LocalizedEdgeWidths2')
         .onClick(()=>{
           this.borderWidths = {
             top: LengthMetrics.px(4),
@@ -224,12 +224,12 @@ struct BorderExample {
             start: LengthMetrics.percent(0.04),
           };
         })
-      Text("start: 0.04 ").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('start: 0.04 ').fontSize(10).fontWeight(FontWeight.Bold)
         .margin(5)
-      Text("end: 4vp").fontSize(10).fontWeight(FontWeight.Bold)
+      Text('end: 4vp').fontSize(10).fontWeight(FontWeight.Bold)
         .margin({bottom: 15})
 
-      Button("borderWidths = undefined")
+      Button('borderWidths = undefined')
         .onClick(()=>{
           this.borderWidths = undefined;
         })
@@ -249,7 +249,7 @@ struct BorderExample {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
 
-      Button("borderWidth")
+      Button('borderWidth')
         .onClick(() => {
           this.isShow = true
         })
@@ -259,13 +259,13 @@ struct BorderExample {
           $$this.isShow,
           this.myBuilder(),
           {
-            title: { title: "SideSheet", subtitle: "borderWidth" },
+            title: { title: 'SideSheet', subtitle: 'borderWidth' },
             preferType: SheetType.SIDE,
             borderWidth: this.borderWidths,
             borderColor: Color.Red
           })
 
-      Button("borderStyle")
+      Button('borderStyle')
         .onClick(() => {
           this.isShow2 = true
         })
@@ -275,14 +275,14 @@ struct BorderExample {
           $$this.isShow2,
           this.myBuilder2(),
           {
-            title: { title: "SideSheet", subtitle: "borderStyle, 6vp border" },
+            title: { title: 'SideSheet', subtitle: 'borderStyle, 6vp border' },
             preferType: SheetType.SIDE,
             borderStyle: this.borderStyles,
             borderColor: Color.Pink,
             borderWidth: 6
           })
 
-      Button("borderColor")
+      Button('borderColor')
         .onClick(() => {
           this.isShow3 = true
         })
@@ -292,7 +292,7 @@ struct BorderExample {
           $$this.isShow3,
           this.myBuilder3(),
           {
-            title: { title: "SideSheet", subtitle: "borderColor, 6vp border" },
+            title: { title: 'SideSheet', subtitle: 'borderColor, 6vp border' },
             preferType: SheetType.SIDE,
             borderColor: this.borderColors,
             borderWidth: 6
@@ -301,7 +301,7 @@ struct BorderExample {
       Text('left radius in default，mirroring is the opposite')
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
-      Button("radius")
+      Button('radius')
         .onClick(() => {
           this.isShow4 = true
         })
@@ -311,7 +311,7 @@ struct BorderExample {
           $$this.isShow4,
           this.myBuilder4(),
           {
-            title: { title: "SideSheet", subtitle: "radius" },
+            title: { title: 'SideSheet', subtitle: 'radius' },
             preferType: SheetType.SIDE,
             radius: this.sheetRadius,
           })
