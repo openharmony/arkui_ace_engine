@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "ui/animation/frame_rate_range.h"
 
 namespace OHOS::Ace::NG {
 class FrameRateManager : public virtual AceType {

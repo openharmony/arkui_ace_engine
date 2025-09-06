@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "frame_rate_manager.h"
-#include "ui/animation/frame_rate_range.h"
 
 namespace OHOS::Ace::NG {
 uint32_t GetRateTypeOfScene(const std::string& scene)
