@@ -286,6 +286,12 @@ template("ace_core_interfaces_native_node") {
     if (build_ohos_sdk) {
       external_deps -= [ "runtime_core:ani" ]
     }
+    if (ace_engine_feature_wearable) {
+      sources -= [ 
+        "ani/canvas_ani_modifier.cpp",
+        "ani/node_ani_modifier.cpp",
+      ]
+    }
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
