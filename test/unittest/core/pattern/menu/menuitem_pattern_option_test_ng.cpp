@@ -531,6 +531,34 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
 }
 
 /**
+* @tc.name: CreatePasteButton002
+* @tc.desc: Test OptionView whether the created node tag is a pastebutton
+* @tc.type: FUNC
+*/
+HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton002, TestSize.Level1)
+{
+    auto Id = ElementRegister::GetInstance()->MakeUniqueId();
+    auto option = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
+
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MenuView::CreatePasteButton(true, option, row, []() {});
+    auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
+    EXPECT_FALSE(PasteButtonNode.empty());
+}
+
+/**
  * @tc.name: OptionLayoutTest005
  * @tc.desc: Test OptionLayoutAlgorithm Measure
  * @tc.type: FUNC
