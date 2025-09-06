@@ -146,6 +146,11 @@ public:
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
 
+    bool IsStaticStack() override
+    {
+        return false;
+    }
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;

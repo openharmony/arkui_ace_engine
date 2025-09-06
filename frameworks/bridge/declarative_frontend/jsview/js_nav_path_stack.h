@@ -37,6 +37,9 @@ public:
 
     static void JSBind(BindingTarget globalObj);
 
+    static JSRef<JSObject> CreateNavPathStackObjFromStatic(
+        const RefPtr<NG::PipelineContext>& context, const RefPtr<NG::NavigationStack>& stack);
+
     void OnStateChanged()
     {
         if (onStateChangedCallback_) {
@@ -72,6 +75,8 @@ public:
 private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSNavPathStack* stack);
+
+    static JSRef<JSObject> CreateNavPathStackExtentJSObject();
 
     void CopyPathInfo(const JSRef<JSArray>& origin, JSRef<JSArray>& dest, size_t index);
     bool FindNavInfoInPreArray(
