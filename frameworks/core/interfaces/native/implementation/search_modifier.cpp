@@ -229,7 +229,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onEditChange = [arkCallback = CallbackHelper(*optValue)](bool value) {
-        arkCallback.Invoke(value);
+        arkCallback.InvokeSync(value);
     };
     SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
 }
@@ -300,7 +300,7 @@ void OnSubmit0Impl(Ark_NativePointer node,
     ) {
         Converter::ConvContext ctx;
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.Invoke(arkStringValue);
+        arkCallback.InvokeSync(arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
@@ -365,7 +365,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     ) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
-        arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);
+        arkCallback.InvokeSync(arkSelectionStart, arkSelectionEnd);
     };
     SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
@@ -382,7 +382,7 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
-        arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
+        arkCallback.InvokeSync(arkTotalOffsetX, arkTotalOffsetY);
     };
     SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
@@ -399,7 +399,7 @@ void OnCopyImpl(Ark_NativePointer node,
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.Invoke(textArkString);
+        arkCallback.InvokeSync(textArkString);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -416,7 +416,7 @@ void OnCutImpl(Ark_NativePointer node,
     auto onCut = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
         auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
-        arkCallback.Invoke(textArkString);
+        arkCallback.InvokeSync(textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -440,7 +440,7 @@ void OnPasteImpl(Ark_NativePointer node,
         Ark_PasteEvent arkEvent = {
             .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
         };
-        arkCallback.Invoke(arkContent, arkEvent);
+        arkCallback.InvokeSync(arkContent, arkEvent);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
@@ -621,7 +621,7 @@ void OnDidInsertImpl(Ark_NativePointer node,
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
-        arkCallback.Invoke(insertValue);
+        arkCallback.InvokeSync(insertValue);
     };
     SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -664,7 +664,7 @@ void OnDidDeleteImpl(Ark_NativePointer node,
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
-        arkCallback.Invoke(deleteValue);
+        arkCallback.InvokeSync(deleteValue);
     };
     SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
@@ -801,7 +801,7 @@ void InputFilterImpl(Ark_NativePointer node,
     if (arkErrorEvent) {
         errorEvent = [callback = CallbackHelper(*arkErrorEvent)](const std::u16string& val) {
             auto errortArkString = Converter::ArkValue<Ark_String>(val, Converter::FC);
-            callback.Invoke(errortArkString);
+            callback.InvokeSync(errortArkString);
         };
     }
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
@@ -836,7 +836,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        arkCallback.Invoke(arkContent);
+        arkCallback.InvokeSync(arkContent);
     };
     SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }

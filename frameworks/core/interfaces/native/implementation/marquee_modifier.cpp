@@ -175,7 +175,7 @@ void OnStartImpl(Ark_NativePointer node,
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     MarqueeModelNG::SetOnStart(frameNode, std::move(onStart));
 }
@@ -190,7 +190,7 @@ void OnBounceImpl(Ark_NativePointer node,
         return;
     }
     auto onBounce = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     MarqueeModelNG::SetOnBounce(frameNode, onBounce);
 }
@@ -205,7 +205,7 @@ void OnFinishImpl(Ark_NativePointer node,
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     MarqueeModelNG::SetOnFinish(frameNode, onFinish);
 }
