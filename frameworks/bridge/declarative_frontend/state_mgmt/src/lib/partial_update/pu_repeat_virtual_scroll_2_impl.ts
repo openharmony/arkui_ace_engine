@@ -752,6 +752,10 @@ class __RepeatVirtualScroll2Impl<T> {
             }
 
             if (movedDataItem) {
+                const ridMeta = this.meta4Rid_.get(movedDataItem.rid);
+                if (!ridMeta) {
+                    continue;
+                }
                 // data item rendered before, and needed ttype to render has not changed
                 newActiveDataItemAtActiveIndex.rid = movedDataItem.rid;
                 newActiveDataItemAtActiveIndex.state = ActiveDataItem.UINodeExists;
@@ -760,10 +764,6 @@ class __RepeatVirtualScroll2Impl<T> {
                 newL1Rid4Index.set(activeIndex, movedDataItem.rid);
 
                 // index has changed, update it in RepeatItem
-                const ridMeta = this.meta4Rid_.get(movedDataItem.rid);
-                if (!ridMeta) {
-                    continue;
-                }
                 stateMgmtConsole.debug(`new index ${activeIndex} / old index ${movedDataItem.oldIndexStr}: `,
                     `keep in L1: rid ${movedDataItem.rid}, unchanged ttype '${newActiveDataItemAtActiveIndex.ttype}'`);
                 ridMeta.repeatItem_.updateIndex(activeIndex);
