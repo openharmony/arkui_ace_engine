@@ -103,6 +103,7 @@ template("build_component_ng") {
       }
       if (is_arkui_x) {
         include_dirs += [
+          "//foundation/appframework/arkui",
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
           "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
           "//foundation/graphic/graphic_2d/rosen/modules",
