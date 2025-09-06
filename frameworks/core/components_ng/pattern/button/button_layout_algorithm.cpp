@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,6 +175,7 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
 
 void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto host = layoutWrapper->GetHostNode();
@@ -185,6 +186,20 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(buttonTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
+    // label type Without the general ability to use components, pass FIX_AT_IDEAL_SIZE to the child directly.
+    auto layoutPolicy = buttonLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy && layoutPolicy->IsFix()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            auto childLayoutPolicy = child->GetLayoutProperty();
+            CHECK_NULL_VOID(childLayoutPolicy);
+            childLayoutPolicy->UpdateLayoutPolicyProperty(widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), true);
+            childLayoutPolicy->UpdateLayoutPolicyProperty(heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+                false);
+        }
+    }
+
     if (buttonLayoutProperty->HasFontSize() || buttonLayoutProperty->HasControlSize()) {
         auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
         childWrapper->Measure(childConstraint);
@@ -272,6 +287,22 @@ void UpdateHeightIfMatchPolicy(std::optional<NG::LayoutPolicyProperty> layoutPol
     }
 }
 
+void ButtonLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(std::optional<NG::LayoutPolicyProperty> layoutPolicy,
+    const float& topPadding, const float& bottomPadding, SizeF& frameSize)
+{
+    if (layoutPolicy.has_value()) {
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        CHECK_NULL_VOID(heightLayoutPolicy);
+        if (heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            if (GreatOrEqual(childSize_.Height() + topPadding + bottomPadding, frameSize.Height())) {
+                auto actualHeight = childSize_.Height() + topPadding + bottomPadding;
+                frameSize = SizeF(frameSize.Width(), actualHeight);
+            }
+        }
+    }
+    return;
+}
+
 // Called to perform measure current render node.
 void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
@@ -312,6 +343,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
                 actualHeight = std::min(actualHeight, maxHeight);
                 actualHeight = std::max(actualHeight, minHeight);
                 frameSize.SetHeight(maxHeight > defaultHeight ? std::max(defaultHeight, actualHeight) : maxHeight);
+                LayoutPolicyIsFixAtIdelSize(layoutPolicy, topPadding, bottomPadding, frameSize);
                 UpdateHeightIfMatchPolicy(layoutPolicy, frameSize, matchParentHeight);
             }
         }

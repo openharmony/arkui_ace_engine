@@ -2343,6 +2343,68 @@ HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderTestNgMeasureContent0002
+ * @tc.desc: Test Slider MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    SliderModelNG sliderModelNG;
+    constexpr float stepValue = 10.0f;
+    constexpr float startValue = 70.0f;
+    sliderModelNG.Create(startValue, stepValue, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set sliderLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, BLOCK_SIZE_F_ZREO);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, BLOCK_SIZE_F_ZREO);
+}
+
+/**
  * @tc.name: ColorTypeToStringTest001
  * @tc.desc: test ColorTypeToString.
  * @tc.type: FUNC

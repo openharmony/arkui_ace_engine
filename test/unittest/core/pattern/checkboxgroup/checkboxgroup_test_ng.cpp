@@ -101,10 +101,12 @@ const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
 const SizeF TEST_SIZE_100_200 = SizeF(100.0f, 200.0f);
 const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
 const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_40 = SizeF(40.0f, 40.0f);
 const SizeF TEST_SIZE_50 = SizeF(50.0f, 50.0f);
 const SizeF TEST_SIZE_60 = SizeF(60.0f, 60.0f);
 constexpr float TEST_WIDTH_50 = 50.0f;
 constexpr float TEST_HEIGHT_60 = 60.0f;
+constexpr float TEST_HORIZONPADDING = 5.0f;
 } // namespace
 
 class CheckBoxGroupTestNG : public testing::Test {
@@ -2400,6 +2402,209 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest001, TestSize.Level
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: CheckBoxGroupMeasureContentTest002
+ * @tc.desc: Test CheckBoxGroup MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_50);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_HEIGHT_60;
+    checkBoxGroupLayoutAlgorithm->horizontalPadding_ = TEST_HORIZONPADDING;
+    auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_50);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: CheckBoxGroupMeasureContentTest003
+ * @tc.desc: Test CheckBoxGroup MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_50);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_HEIGHT_60;
+    checkBoxGroupLayoutAlgorithm->horizontalPadding_ = TEST_HORIZONPADDING;
+    auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_50);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty);
+    EXPECT_NE(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: CheckBoxGroupMeasureContentTest004
+ * @tc.desc: Test CheckBoxGroup MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_HEIGHT_60;
+    checkBoxGroupLayoutAlgorithm->horizontalPadding_ = TEST_HORIZONPADDING;
+    auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_60);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: CheckBoxGroupMeasureContentTest005
+ * @tc.desc: Test CheckBoxGroup MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_HEIGHT_60;
+    checkBoxGroupLayoutAlgorithm->horizontalPadding_ = TEST_HORIZONPADDING;
+    auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_60);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    checkBoxGroupLayoutAlgorithm->defaultWidth_ = TEST_WIDTH_50;
+    checkBoxGroupLayoutAlgorithm->defaultHeight_ = TEST_HEIGHT_60;
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty);
+    EXPECT_NE(ret, TEST_SIZE_200);
 }
 
 /**

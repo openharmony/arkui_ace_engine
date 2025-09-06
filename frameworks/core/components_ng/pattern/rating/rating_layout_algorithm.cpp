@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,8 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            host->GetGeometryNode()->ResetContent();
-        } else {
-            host->GetGeometryNode()->Reset();
-        }
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ? host->GetGeometryNode()->ResetContent()
+                                                                              : host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
@@ -46,9 +43,21 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto stars = ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum());
     CHECK_EQUAL_RETURN(stars, 0, std::nullopt);
 
+    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
+    // Rating use the mini size specified in the theme, when it is used as indicator.
+    auto defaultHeight =
+        indicator ? ratingTheme->GetRatingMiniHeight().ConvertToPx() : ratingTheme->GetRatingHeight().ConvertToPx();
+    auto defaultWidth = static_cast<float>(defaultHeight * stars);
+
     auto layoutPolicy = ratingLayoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        return LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, stars, defaultWidth, defaultHeight);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        return LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy, stars, defaultWidth, defaultHeight);
     }
     // case 2: rating component is only set with valid width or height
     // return height = width / stars, or width = height * stars.
@@ -62,13 +71,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     }
 
     // case 3: Using the theme's height and width by default if rating component is not set size.
-    SizeF componentSize;
-    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
-    // Rating use the mini size specified in the theme, when it is used as indicator.
-    auto height =
-        indicator ? ratingTheme->GetRatingMiniHeight().ConvertToPx() : ratingTheme->GetRatingHeight().ConvertToPx();
-    componentSize.SetHeight(static_cast<float>(height));
-    componentSize.SetWidth(static_cast<float>(height * stars));
+    SizeF componentSize(static_cast<float>(defaultWidth), static_cast<float>(defaultHeight));
     return contentConstraint.Constrain(componentSize);
 }
 
@@ -141,4 +144,76 @@ std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsMatchParent(const Layo
     return SizeF(width, height);
 }
 
+std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth, float defaultHeight)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    float width = 0.0f;
+    float height = 0.0f;
+    if (layoutPolicy->IsWidthFix() && layoutPolicy->IsHeightFix()) {
+        height = defaultHeight;
+        width = defaultWidth;
+    } else if (layoutPolicy->IsWidthFix()) {
+        if (contentConstraint.selfIdealSize.Height()) {
+            height = contentConstraint.selfIdealSize.Height().value();
+        } else {
+            height = defaultHeight;
+        }
+        width = height * static_cast<float>(stars);
+    } else if (layoutPolicy->IsHeightFix()) {
+        if (contentConstraint.selfIdealSize.Width()) {
+            width = contentConstraint.selfIdealSize.Width().value();
+        } else {
+            width = defaultHeight * static_cast<float>(stars);
+        }
+        height = defaultHeight;
+    }
+    return SizeF(width, height);
+}
+
+std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars, float defaultWidth, float defaultHeight)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    float width = 0.0f;
+    float height = 0.0f;
+    if (stars <= 0) {
+        return SizeF(width, height);
+    }
+    auto parentHeight = contentConstraint.parentIdealSize.Height().value_or(0.0f);
+    auto parentWidth = contentConstraint.parentIdealSize.Width().value_or(0.0f);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+
+    if (layoutPolicy->IsWidthWrap() && layoutPolicy->IsHeightWrap()) {
+        height = std::min(defaultHeight, parentHeight);
+        width = std::min(height * static_cast<float>(stars), parentWidth);
+        if (parentWidth < height * static_cast<float>(stars)) {
+            height = parentWidth / static_cast<float>(stars);
+        }
+    } else if (layoutPolicy->IsWidthWrap()) {
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            height = std::min(defaultHeight, parentHeight);
+            width = std::min(height * static_cast<float>(stars), parentWidth);
+            if (parentWidth < height * static_cast<float>(stars)) {
+                height = parentWidth / static_cast<float>(stars);
+            }
+        } else {
+            height =  selfHeight;
+            width = std::min(height * static_cast<float>(stars), parentWidth);
+        }
+    } else if (layoutPolicy->IsHeightWrap()) {
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            width = std::min(defaultWidth, parentWidth);
+            height = std::min(width / static_cast<float>(stars), parentHeight);
+            if (parentHeight < width / static_cast<float>(stars)) {
+                width = parentHeight * static_cast<float>(stars);
+            }
+        } else {
+            width = selfWidth;
+            height = std::min(width / static_cast<float>(stars), parentHeight);
+        }
+    }
+    return SizeF(width, height);
+}
 } // namespace OHOS::Ace::NG

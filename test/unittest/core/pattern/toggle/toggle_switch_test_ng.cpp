@@ -58,6 +58,7 @@ constexpr float USER_DEFINE_WIDTH = 180.0f;
 constexpr float USER_DEFINE_HEIGHT = 100.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const SizeF TEST_CONTAINER_SIZE(200.0f, 200.0f);
+const SizeF TEST_CONTAINER_SIZE0(0.0f, 0.0f);
 constexpr float TEST_ZERO = 0.0f;
 } // namespace
 
@@ -1746,6 +1747,296 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest014, TestSize.Level1)
     EXPECT_EQ(switchSize->Height(), TEST_CONTAINER_SIZE.Height());
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleFixIdealSizeTest001
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to TEST_CONTAINER_SIZE，NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleFixIdealSizeTest002
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest002, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH,FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    float frameWidth = 0.0f;
+    float frameHeight = 0.0f;
+    switchLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty,
+        frameWidth, frameHeight);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
+}
+
+/**
+ * @tc.name: ToggleWrapContentTest001
+ * @tc.desc: Test toggle switch WrapContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleWrapContentTest001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,WRAP_CONTENT.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to TEST_CONTAINER_SIZE，NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleWrapContentTest002
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleWrapContentTest002, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH,WRAP_CONTENT.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    float frameWidth = 0.0f;
+    float frameHeight = 0.0f;
+    switchLayoutAlgorithm->LayoutPolicyIsWrapContent(contentConstraint, layoutPolicyProperty,
+        frameWidth, frameHeight);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
 }
 
 /**

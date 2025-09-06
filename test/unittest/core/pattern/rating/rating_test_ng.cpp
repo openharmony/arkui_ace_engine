@@ -51,6 +51,7 @@ const bool RATING_INDICATOR = true;
 const bool RATING_INDICATOR_FALSE = false;
 const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
+const int32_t RATING_STAR_NUM_ZERO = 0;
 constexpr double RATING_SCORE = 3.0;
 constexpr double RATING_LAST_SCORE = 5.0;
 const std::string RATING_SCORE_STRING = "";
@@ -108,6 +109,8 @@ constexpr int32_t OFFSET_FIRST = 10;
 constexpr int32_t OFFSET_SECOND = 20;
 const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
 const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
+const SizeF TEST_SIZE_10 = SizeF(10.0f, 10.0f);
 constexpr float TEST_WIDTH_50 = 50.0f;
 constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
@@ -2339,6 +2342,385 @@ HWTEST_F(RatingTestNg, MeasureTest001, TestSize.Level1)
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
     EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+}
+
+/**
+ * @tc.name: MeasureTest002
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: MeasureTest003
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM,
+        TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: MeasureTest004
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    ratingTheme->ratingMiniHeight_ = Dimension(TEST_WIDTH_50);
+    ratingTheme->ratingHeight_ = Dimension(TEST_WIDTH_50);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+}
+
+/**
+ * @tc.name: MeasureTest005
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    ratingTheme->ratingMiniHeight_ = Dimension(TEST_WIDTH_50);
+    ratingTheme->ratingHeight_ = Dimension(TEST_WIDTH_50);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: MeasureTest006
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ratingTheme->ratingMiniHeight_ = Dimension(TEST_WIDTH_50);
+    ratingTheme->ratingHeight_ = Dimension(TEST_WIDTH_50);
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_10);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: MeasureTest007
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_0.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    auto ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
+        contentConstraint, layoutPolicyProperty, DEFAULT_STAR_NUM, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_0.
+     */
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsWrapContent(
+        contentConstraint, layoutPolicyProperty, RATING_STAR_NUM_ZERO, TEST_SIZE_200.Width(), TEST_SIZE_200.Height());
+    EXPECT_EQ(ret, TEST_SIZE_0);
 }
 
 /**
