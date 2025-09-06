@@ -31,7 +31,7 @@
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
-#include "arkoala/framework/native/src/resource_color_helper.h"
+#include "arkoala-arkts/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif

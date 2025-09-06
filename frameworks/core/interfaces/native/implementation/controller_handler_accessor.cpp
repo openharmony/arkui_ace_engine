@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_ControllerHandler peer)
 {
     delete peer;
 }
-Ark_ControllerHandler CtorImpl()
+Ark_ControllerHandler ConstructImpl()
 {
     return new ControllerHandlerPeer();
 }
@@ -36,7 +36,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetWebControllerImpl(Ark_ControllerHandler peer,
-                          Ark_WebviewController controller)
+                          Ark_webview_WebviewController controller)
 {
 #ifdef WEB_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -67,7 +67,7 @@ const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
 {
     static const GENERATED_ArkUIControllerHandlerAccessor ControllerHandlerAccessorImpl {
         ControllerHandlerAccessor::DestroyPeerImpl,
-        ControllerHandlerAccessor::CtorImpl,
+        ControllerHandlerAccessor::ConstructImpl,
         ControllerHandlerAccessor::GetFinalizerImpl,
         ControllerHandlerAccessor::SetWebControllerImpl,
     };

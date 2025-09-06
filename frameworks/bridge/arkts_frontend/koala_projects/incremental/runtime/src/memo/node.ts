@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,17 +32,15 @@ export function NodeAttach<Node extends IncrementalNode>(
     update: (node: Node) => void,
     reuseKey?: string
 ): void {
-    const scope =
-        __context().scope<void>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
+    const scope = __context().scopeEx<undefined>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
     if (scope.unchanged) {
         scope.cached
     } else try {
-        if (!reuseKey) {
+        if (!reuseKey)
             update(__context().node as Node)
-        } else {
+        else
             // reset ID addition to 0 to simplify the reuse process later
             memoEntry(__context(), 0, () => { update(__context().node as Node) })
-        }
     } finally {
         scope.recache()
     }
@@ -58,9 +56,7 @@ export function NodeAttach<Node extends IncrementalNode>(
 /** @memo:intrinsic */
 export function contextNode<T extends IncrementalNode>(kind: uint32 = 1, name?: string): T {
     const node = __context().node
-    if (node?.isKind(kind) == true) {
-        return node as T
-    }
+    if (node?.isKind(kind) == true) return node as T
     throw new Error(name
         ? (name + " cannot be used in context of " + className(node))
         : ("current " + className(node) + " does not contain the specified kind: " + kind)
@@ -83,15 +79,13 @@ export class DataNode<Data> extends IncrementalNode {
         data: Data,
         onDataChange?: () => void
     ): void {
-        const scope = __context().scope<void>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
+        const scope = __context().scopeEx<undefined>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
         const state = scope.param<Data>(0, data)
         if (scope.unchanged) {
             scope.cached
         } else try {
             const node = __context().node as DataNode<Data>
-            if (node.kind != kind) {
-                throw new Error("data node kind changed unexpectedly from " + node.kind + " to " + kind)
-            }
+            if (node.kind != kind) throw new Error("data node kind changed unexpectedly from " + node.kind + " to " + kind)
             node.data = state.value as Data // subscribe to the parameter change
             onDataChange?.()
         } finally {

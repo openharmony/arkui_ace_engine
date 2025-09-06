@@ -60,8 +60,7 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PolylineOptions>(*options);
+    auto opt = Converter::OptConvertPtr<PolylineOptions>(options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
     ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
@@ -70,26 +69,12 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
 }
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
-void PointsImpl(Ark_NativePointer node,
-                const Opt_Array_ShapePoint* value)
+void SetPointsImpl(Ark_NativePointer node,
+                   const Opt_Array_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::optional<ShapePoints> points;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        std::vector<ShapePoint> shapePointArray;
-        for (int32_t i = 0; i < value->value.length; ++i) {
-            auto arkPoint = value->value.array[i];
-            ShapePoint point = {0.0_vp, 0.0_vp};
-            auto x = Converter::OptConvertFromArkLength(arkPoint.value0, DimensionUnit::VP);
-            auto y = Converter::OptConvertFromArkLength(arkPoint.value1, DimensionUnit::VP);
-            point.first = x.value_or(0.0_vp);
-            point.second = y.value_or(0.0_vp);
-            shapePointArray.emplace_back(point);
-        }
-        points = std::make_optional<ShapePoints>(shapePointArray);
-    }
+    auto points = Converter::OptConvertPtr<ShapePoints>(value);
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }
@@ -101,7 +86,7 @@ const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()
     static const GENERATED_ArkUIPolylineModifier ArkUIPolylineModifierImpl {
         PolylineModifier::ConstructImpl,
         PolylineInterfaceModifier::SetPolylineOptionsImpl,
-        PolylineAttributeModifier::PointsImpl,
+        PolylineAttributeModifier::SetPointsImpl,
     };
     return &ArkUIPolylineModifierImpl;
 }

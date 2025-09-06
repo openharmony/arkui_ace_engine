@@ -17,6 +17,7 @@
 
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct PromptActionPeer {
 protected:

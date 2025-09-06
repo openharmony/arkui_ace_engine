@@ -21,14 +21,14 @@
 #include <cstring>
 #include <string>
 #include <memory>
-#include <cassert>
 #include <cstddef>
 #include <vector>
 
 #include "callback-resource.h"
 #include "interop-types.h"
 #include "koala-types.h"
-#include "securec.h"
+#include "interop-logging.h"
+#include "interop-utils.h"
 
 #ifdef __arm__
 #define KOALA_NO_UNALIGNED_ACCESS 1
@@ -46,6 +46,11 @@ template <>
 inline InteropRuntimeType runtimeType(const InteropMaterialized& value) {
   return INTEROP_RUNTIME_OBJECT;
 }
+template<>
+inline InteropRuntimeType runtimeType(const InteropObject& value)
+{
+    return INTEROP_RUNTIME_OBJECT;
+}
 
 static const std::size_t buffer_size = 1024 * 1024; // 1 MB
 static std::size_t offset = 0;
@@ -56,7 +61,7 @@ T* allocArray(const std::array<T, size>& ref) {
   std::size_t space = sizeof(buffer) - offset;
   void* ptr = buffer + offset;
   void* aligned_ptr = std::align(alignof(T), sizeof(T) * size, ptr, space);
-  assert(aligned_ptr != nullptr && "Insufficient space or alignment failed!");
+  ASSERT(aligned_ptr != nullptr && "Insufficient space or alignment failed!");
   offset = (char*)aligned_ptr + sizeof(T) * size - buffer;
   T* array = reinterpret_cast<T*>(aligned_ptr);
   for (size_t i = 0; i < size; ++i) {
@@ -73,16 +78,13 @@ private:
     bool ownData;
     CallbackResourceHolder* resourceHolder;
     void resize(uint32_t newLength) {
-        assert(ownData);
-        assert(newLength > dataLength);
+        ASSERT(ownData);
+        ASSERT(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
-        if (newData == NULL) {
-            return;
+        if (!newData) {
+            INTEROP_FATAL("Cannot allocate memory");
         }
-        if (data == NULL || memcpy_s(newData, newLength, data, position) != 0) {
-            free(newData);
-            return;
-        }
+        interop_memcpy(newData, newLength, data, position);
         free(data);
         data = newData;
         dataLength = newLength;
@@ -92,6 +94,9 @@ public:
         position(0), ownData(true), resourceHolder(resourceHolder) {
         this->dataLength = 256;
         this->data = reinterpret_cast<uint8_t*>(malloc(this->dataLength));
+        if (!this->data) {
+            INTEROP_FATAL("Cannot allocate memory");
+        }
     }
 
     SerializerBase(uint8_t* data, uint32_t dataLength, CallbackResourceHolder* resourceHolder = nullptr):
@@ -122,10 +127,9 @@ public:
     inline void check(int more) {
         if (position + more > dataLength) {
             if (ownData) {
-                resize(dataLength * 3 / 2 + 2);
+                resize((position + more) * 3 / 2 + 2);
             } else {
-                fprintf(stderr, "Buffer overrun: %d > %d\n", position + more, dataLength);
-                assert(false);
+                INTEROP_FATAL("Buffer overrun: %d > %d\n", position + more, dataLength);
             }
         }
     }
@@ -137,61 +141,64 @@ public:
     }
 
     void writeInt32(InteropInt32 value) {
-        check(4);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value, 4);
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropInt32*)(data + position)) = value;
 #endif
-        position += 4;
+        position += sizeof(value);
     }
 
     void writeInt64(InteropInt64 value) {
-        check(8);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value, 8);
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropInt64*)(data + position)) = value;
 #endif
-        position += 8;
+        position += sizeof(value);
     }
 
     void writeUInt64(InteropUInt64 value) {
-        check(8);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value, 8);
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropUInt64*)(data + position)) = value;
 #endif
-        position += 8;
+        position += sizeof(value);
     }
 
     void writeFloat32(InteropFloat32 value) {
-        check(4);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value, 4);
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropFloat32*)(data + position)) = value;
 #endif
-        position += 4;
+        position += sizeof(value);
     }
 
-    void writePointer(InteropNativePointer value) {
-        check(8);
-        int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
+    void writeFloat64(InteropFloat64 value) {
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        if (memcpy_s(data + position, 8, &value64, 8) != 0) {
-            return;
-        }
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
-        *((int64_t*)(data + position)) = value64;
+        *((InteropFloat64*)(data + position)) = value;
 #endif
         position += 8;
     }
 
-    void writeFunction(InteropFunction value) {
-        // TODO: ignored, remove!
-        writeInt32(0x666);
+    void writePointer(InteropNativePointer value) {
+        int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
+        check(sizeof(value64));
+#ifdef KOALA_NO_UNALIGNED_ACCESS
+        interop_memcpy(data + position, dataLength, &value64, sizeof(value64));
+#else
+        *((int64_t*)(data + position)) = value64;
+#endif
+        position += sizeof(value64);
     }
 
     void writeNumber(InteropNumber value) {
@@ -208,42 +215,12 @@ public:
     void writeString(InteropString value) {
         writeInt32(value.length + 1);
         check(value.length + 1);
-        strcpy((char*)(data + position), value.chars);
+        interop_strcpy((char*)(data + position), dataLength, value.chars);
         position += value.length + 1;
     }
 
     void writeBoolean(InteropBoolean value) {
         writeInt8(value);
-    }
-
-    void writeLength(InteropLength value) {
-        InteropRuntimeType tag = (InteropRuntimeType) value.type;
-        writeInt8(tag);
-        switch (tag) {
-            case INTEROP_RUNTIME_NUMBER:
-                writeFloat32(value.value);
-                break;
-            case INTEROP_RUNTIME_OBJECT:
-                writeInt32(value.resource);
-                break;
-            case INTEROP_RUNTIME_STRING: {
-                char buf[64];
-                std::string suffix;
-                switch (value.unit) {
-                    case 0: suffix = "px"; break;
-                    case 1: suffix = "vp"; break;
-                    case 2: suffix = "fp"; break;
-                    case 3: suffix = "%"; break;
-                    case 4: suffix = "lpx"; break;
-                }
-                snprintf(buf, 64, "%.8f%s", value.value, suffix.c_str());
-                InteropString str =  { buf, (InteropInt32) strlen(buf) };
-                writeString(str);
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     void writeCallbackResource(const InteropCallbackResource resource) {
@@ -260,7 +237,7 @@ public:
     }
 
     void writeCustomObject(std::string type, InteropCustomObject value) {
-        // TODO implement
+        // Improve: implement
     }
 
     void writeBuffer(InteropBuffer buffer) {
@@ -272,7 +249,7 @@ public:
     KInteropReturnBuffer toReturnBuffer() {
         if (this->ownData) {
             KInteropReturnBuffer buffer {this->length(), this->release(), [](KNativePointer data, KInt length) { free(data); }};
-            // TODO fix memory issues
+            // Improve: fix memory issues
             return buffer;
         } else {
             return {this->length(), this->data, nullptr};

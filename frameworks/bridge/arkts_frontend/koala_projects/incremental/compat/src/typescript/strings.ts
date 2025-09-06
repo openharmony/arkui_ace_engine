@@ -34,9 +34,7 @@ interface SystemTextDecoder {
 export class CustomTextEncoder {
     static readonly HeaderLen: int32 = Int32Array.BYTES_PER_ELEMENT
 
-    constructor(
-        encoder: SystemTextEncoder|undefined = ((typeof TextEncoder != "undefined") ? new TextEncoder() : undefined)
-    ) {
+    constructor(encoder: SystemTextEncoder|undefined = ((typeof TextEncoder != "undefined") ? new TextEncoder() : undefined)) {
         this.encoder = encoder
     }
 
@@ -157,9 +155,7 @@ export class CustomTextEncoder {
 
 export class CustomTextDecoder {
     static cpArrayMaxSize = 128
-    constructor(
-        decoder: SystemTextDecoder|undefined = ((typeof TextDecoder != "undefined") ? new TextDecoder() : undefined)
-    ) {
+    constructor(decoder: SystemTextDecoder|undefined = ((typeof TextDecoder != "undefined") ? new TextDecoder() : undefined)) {
         this.decoder = decoder
     }
 

@@ -164,6 +164,7 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
         dialogProps.offset.SetX(offsetX);
     }
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(options.sheets);
     auto transitionEffect = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
     if (transitionEffect) {
         dialogProps.transitionEffect = transitionEffect.value();

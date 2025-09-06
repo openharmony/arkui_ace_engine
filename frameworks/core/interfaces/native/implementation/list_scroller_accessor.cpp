@@ -35,7 +35,7 @@ void DestroyPeerImpl(Ark_ListScroller peer)
         peer->DecRefCount();
     }
 }
-Ark_ListScroller CtorImpl()
+Ark_ListScroller ConstructImpl()
 {
     auto peer = Referenced::MakeRefPtr<ListScrollerPeer>();
     peer->IncRefCount();
@@ -45,8 +45,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
-                                      Ark_ListScroller peer,
+Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
                                       const Ark_Number* index,
                                       const Ark_Number* indexInGroup)
 {
@@ -66,8 +65,7 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
     auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
-void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
-                             Ark_ListScroller peer,
+void ScrollToItemInGroupImpl(Ark_ListScroller peer,
                              const Ark_Number* index,
                              const Ark_Number* indexInGroup,
                              const Opt_Boolean* smooth,
@@ -85,13 +83,12 @@ void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
 
     int32_t indexValue = Converter::Convert<int32_t>(*index);
     int32_t indexInGroupValue = Converter::Convert<int32_t>(*indexInGroup);
-    auto smoothValue = smooth ? Converter::OptConvert<bool>(*smooth) : std::nullopt;
-    auto alignValue = align ? Converter::OptConvert<ScrollAlign>(*align) : std::nullopt;
+    auto smoothValue = Converter::OptConvertPtr<bool>(smooth);
+    auto alignValue = Converter::OptConvertPtr<ScrollAlign>(align);
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
         smoothValue.value_or(false), alignValue.value_or(ScrollAlign::NONE));
 }
-void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
-                              Ark_ListScroller peer,
+void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
     CHECK_NULL_VOID(peer);
@@ -101,7 +98,7 @@ void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
         return;
     }
 
-    auto funcOpt = options ? Converter::OptConvert<Callback_Void>(*options) : std::nullopt;
+    auto funcOpt = Converter::OptConvertPtr<Callback_Void>(options);
     if (funcOpt.has_value()) {
         auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
         scrollController->CloseAllSwipeActions(std::move(func));
@@ -109,8 +106,7 @@ void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
         scrollController->CloseAllSwipeActions(nullptr);
     }
 }
-Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
-                                                         Ark_ListScroller peer,
+Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
                                                          const Ark_Number* x,
                                                          const Ark_Number* y)
 {
@@ -135,7 +131,7 @@ const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
 {
     static const GENERATED_ArkUIListScrollerAccessor ListScrollerAccessorImpl {
         ListScrollerAccessor::DestroyPeerImpl,
-        ListScrollerAccessor::CtorImpl,
+        ListScrollerAccessor::ConstructImpl,
         ListScrollerAccessor::GetFinalizerImpl,
         ListScrollerAccessor::GetItemRectInGroupImpl,
         ListScrollerAccessor::ScrollToItemInGroupImpl,

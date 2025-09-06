@@ -18,7 +18,7 @@
 
 #include "ani.h"
 
-#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h"
+#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/base/error/error_code.h"
 #include "utils/ani_utils.h"

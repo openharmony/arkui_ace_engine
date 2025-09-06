@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_JsGeolocation peer)
 {
     delete peer;
 }
-Ark_JsGeolocation CtorImpl()
+Ark_JsGeolocation ConstructImpl()
 {
     return new JsGeolocationPeer();
 }
@@ -50,7 +50,7 @@ const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
 {
     static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {
         JsGeolocationAccessor::DestroyPeerImpl,
-        JsGeolocationAccessor::CtorImpl,
+        JsGeolocationAccessor::ConstructImpl,
         JsGeolocationAccessor::GetFinalizerImpl,
         JsGeolocationAccessor::InvokeImpl,
     };

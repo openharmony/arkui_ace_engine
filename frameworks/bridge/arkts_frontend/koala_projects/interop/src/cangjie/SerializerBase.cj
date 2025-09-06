@@ -16,8 +16,7 @@
 package Interop
 
 import std.binary.*
-import std.math.*
-import std.reflect.*
+import std.math.*   
 import std.collection.*
 
 public enum RuntimeType {
@@ -71,52 +70,99 @@ public abstract class CustomSerializer {
 }
 
 public open class SerializerBase {
-    protected var isHolding: Bool = false
-    private var position: Int64 = 0
-    private var buffer: ArrayList<UInt8> = ArrayList<UInt8>()
+    private var position: Int32 = 0
+    private var _buffer: pointer
+    private var _length: Int32
+
+    private static var pool: ArrayList<SerializerBase> = ArrayList<SerializerBase>(8){i => SerializerBase()}
 
     private static var customSerializers: ?CustomSerializer = Option.None
     static func registerCustomSerializer(serializer: CustomSerializer) {
-        //TODO
+        // Improve:
     }
 
     public init() {
-        this.buffer = ArrayList<UInt8>(Array<UInt8>(96, repeat: UInt8(0)))
+        let length: Int32 = 96
+        this._buffer = InteropNativeModule._Malloc(length)
+        this._length = length
+    }
+    private static var poolTop = 0
+
+    private static func writeu8(_buffer: pointer, offset: Int32, length: Int32, value: Int32): Unit {
+        InteropNativeModule._WriteByte(_buffer, Int64(offset), Int64(length), value)
+    }
+    private static func readu8(_buffer: pointer, offset: Int32, length: Int32): Int32 {
+        return InteropNativeModule._ReadByte(_buffer, Int64(offset), Int64(length))
+    }
+
+    public static func hold() {
+        if (SerializerBase.poolTop == SerializerBase.pool.size) {
+            throw Exception("Pool empty! Release one of taken serializers")
+        }
+        SerializerBase.poolTop += 1
+        return SerializerBase.pool[SerializerBase.poolTop - 1]
     }
     public open func release() {
-        this.isHolding = false
-        // todo handle release resources
+        this.releaseResources()
         this.position = 0
+        // if (refEq(this, SerializerBase.pool[SerializerBase.poolTop - 1])) {
+        //     throw Exception("Serializers should be release in LIFO order")
+        // }
+        SerializerBase.poolTop -= 1;
     }
-    public func asArray(): ArrayList<UInt8> {
-        return this.buffer
+    private func releaseResources() {
+        if (this.heldResourcesCount == 0) {
+            return
+        }
+        for (i in 0..this.heldResourcesCount) {
+            InteropNativeModule._ReleaseCallbackResource(this.heldResources[i])
+        }
+        this.heldResourcesCount = 0
+    }
+    public func asBuffer(): KSerializerBuffer {
+        this._buffer
     }
     public func length(): Int32 {
         return Int32(this.position)
     }
-    public func currentPosition(): Int64 { return this.position }
-    private func checkCapacity(value: Int64) {
+    public func currentPosition(): Int32 { return this.position }
+    private func checkCapacity(value: Int32) {
         if (value < 1) {
             throw Exception("${value} is less than 1")
         }
-        var buffSize = this.buffer.size
+        var buffSize = this._length
         if (this.position > buffSize - value) {
-            let minSize = this.position + value
-            let resizedSize = max(minSize, Int64(round(3.0 * Float64(buffSize) / 2.0)))
-            var resizedBuffer =  ArrayList<UInt8>(this.buffer)
-            while (resizedBuffer.size < resizedSize) {
-                resizedBuffer.add(0)
+            let minSize: Int32 = this.position + value
+            let resizedSize: Int32 = max<Int32>(minSize, Int32(round(1.5 * Float64(buffSize))))
+            let resizedBuffer = InteropNativeModule._Malloc(resizedSize)
+            let oldBuffer = this._buffer
+            for (i in 0..this.position) {
+                SerializerBase.writeu8(resizedBuffer, Int32(i), resizedSize, SerializerBase.readu8(oldBuffer, i, this.position))
             }
-            this.buffer = resizedBuffer
+            this._buffer = resizedBuffer
+            this._length = resizedSize
+            InteropNativeModule._Free(oldBuffer)
         }
     }
     public func writeCustomObject(kind: String, value: Any): Unit {
         var current = SerializerBase.customSerializers
-        // TODO
+        // Improve:
         println("Unsupported custom serialization for ${kind}, write undefined")
         this.writeInt8(Tag.UNDEFINED.value)
     }
+
     private var heldResources: ArrayList<ResourceId> = ArrayList<ResourceId>()
+    private var heldResourcesCount: Int64 = 0
+    private func addHeldResource(resourceId: ResourceId) {
+        if (this.heldResourcesCount == this.heldResources.size) {
+            this.heldResources.add(resourceId)
+        }
+        else {
+            this.heldResources[this.heldResourcesCount] = resourceId
+        }
+        this.heldResourcesCount += 1
+    }
+
     public func holdAndWriteCallback(callback: Any): ResourceId {
         let resourceId = ResourceHolder.instance().registerAndHold(callback)
         this.heldResources.add(resourceId)
@@ -154,32 +200,29 @@ public open class SerializerBase {
         return PromiseAndResourceId<T>(promise, resourceId)
     }
     public func writeFunction(value: Any): Unit {
-        // TODO
-    }
-    private func setBytes<V, T>(position: Int64, value: T): Unit where T <: LittleEndianOrder<V>{
-        var arr = Array<Byte>(100, repeat: 0)
-        let n = value.writeLittleEndian(arr)
-        this.checkCapacity(n)
-        for (i in 0..n) {
-            this.buffer[this.position + i] = arr[i]
-        }
-        this.position += n
+        // Improve:
     }
     public func writeTag(tag: Int32): Unit {
-        this.setBytes(this.position, tag)
+        this.checkCapacity(1)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, tag)  
+        this.position++
+    }
+    public func writeTag(tag: Int8): Unit {
+        this.checkCapacity(1)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, Int32(tag))
+        this.position++
     }
     public func writeNumber(value: ?Float32): Unit {
         if (let Some(value) <- value) {
             if(value == Float32(Int32(value))) {
                 this.writeNumber(Int32(value))
             } else {
-                this.setBytes(this.position, Tag.FLOAT32.value)
-                this.setBytes(this.position, value)
+                this.writeTag(Tag.FLOAT32.value)
+                this.writeInt32(Int64(value.toBits()))
             }
         }
         else {
-            this.buffer[Int64(this.position)] = UInt8(RuntimeType.UNDEFINED.ordinal)
-            this.position++
+            this.writeTag(Tag.UNDEFINED.value)
         }
     }
     public func writeNumber(value: ?Float64): Unit {
@@ -187,65 +230,95 @@ public open class SerializerBase {
             if(value == Float64(Int32(value))) {
                 this.writeNumber(Int32(value))
             } else {
-                this.setBytes(this.position, Tag.FLOAT32.value)
-                this.setBytes(this.position, Float32(value))
+                this.writeTag(Tag.FLOAT32.value)
+                this.writeInt32(Int64(Float32(value).toBits()))
             }
         }
         else {
-            this.buffer[Int64(this.position)] = UInt8(RuntimeType.UNDEFINED.ordinal)
-            this.position++
+            this.writeTag(Tag.UNDEFINED.value)
         }
     }
     public func writeNumber(value: ?Int32): Unit {
         if (let Some(value) <- value) {
-            this.setBytes(this.position, Tag.INT32.value)
-            this.setBytes(this.position, value)
-            }
+            this.writeTag(Tag.INT32.value)
+            this.writeInt32(Int32(value))
+        }
         else {
-            this.buffer[Int64(this.position)] = UInt8(RuntimeType.UNDEFINED.ordinal)
-            this.position++
+            this.writeTag(Tag.UNDEFINED.value)
         }
     }
     public func writeNumber(value: ?Int64): Unit {
+        this.checkCapacity(5)
         if (let Some(value) <- value) {
-            this.setBytes(this.position, Tag.INT32.value)
-            this.setBytes(this.position, Int32(value))
+            this.writeTag(Tag.INT32.value)
+            this.writeInt32(Int32(value))
         }
         else {
-            this.buffer[Int64(this.position)] = UInt8(RuntimeType.UNDEFINED.ordinal)
-            this.position++
+            this.writeTag(Tag.UNDEFINED.value)
         }
     }
     public func writeInt8(value: Int8): Unit {
-        this.setBytes(this.position, value)
+        this.checkCapacity(1)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, Int32(value))
+        this.position += 1
     }
     public func writeInt8(value: Int32): Unit {
-        this.setBytes(this.position, Int8(value))
+        this.checkCapacity(1)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, Int32(value))
+        this.position += 1
     }
     public func writeInt32(value: Int32): Unit {
-        this.setBytes(this.position, Int32(value))
+        this.checkCapacity(4)
+        let arr = Array<UInt8>(4, repeat: 0)
+        value.writeLittleEndian(arr)
+        for (idx in 0..4) {
+            SerializerBase.writeu8(this._buffer, this.position + Int32(idx), this._length, Int32(arr[idx]))
+        }
+        this.position += 4
+    }
+    public func writeInt32(value: Int64): Unit {
+        this.checkCapacity(4)
+        let arr = Array<UInt8>(4, repeat: 0)
+        Int32(value).writeLittleEndian(arr)
+        for (idx in 0..4) {
+            SerializerBase.writeu8(this._buffer, this.position + Int32(idx), this._length, Int32(arr[idx]))
+        }
+        this.position += 4
     }
     public func writeInt64(value: Int64): Unit {
-        this.setBytes(this.position, Int64(value))
+        this.checkCapacity(8)
+        let arr = Array<UInt8>(8, repeat: 0)
+        value.writeLittleEndian(arr)
+        for (idx in 0..8) {
+            SerializerBase.writeu8(this._buffer, this.position + Int32(idx), this._length, Int32(arr[idx]))
+        }
+        this.position += 8
     }
     public func writeFloat32(value: Float32): Unit {
-        this.setBytes(this.position, value)
+        this.checkCapacity(4)
+        this.position += 4
     }
     public func writePointer(ptr: UInt64): Unit {
-        this.setBytes(this.position, ptr)
+        this.checkCapacity(8)
+        let arr = Array<UInt8>(8, repeat: 0)
+        ptr.writeLittleEndian(arr)
+        for (idx in 0..8) {
+            SerializerBase.writeu8(this._buffer, this.position + Int32(idx), this._length, Int32(arr[idx]))
+        }
+        this.position += 8
     }
     public func writeBoolean(value: ?Bool): Unit {
         this.checkCapacity(1)
         if(let Some(value) <- value) {
-            this.setBytes(this.position, value)
+            SerializerBase.writeu8(this._buffer, this.position, this._length, if (value) {1} else {0})
         }
         else {
-            this.buffer[Int64(this.position)] = UInt8(RuntimeType.UNDEFINED.ordinal)
-            this.position++
+            SerializerBase.writeu8(this._buffer, this.position, this._length, RuntimeType.UNDEFINED.ordinal)
         }
+        this.position++
     }
     public func writeMaterialized(value: Object): Unit {
-        // TODO
+        // Improve:
     }
     public func writeCallbackResource(resource: CallbackResource) {
         this.writeInt32(resource.resourceId)
@@ -253,21 +326,30 @@ public open class SerializerBase {
         this.writePointer(resource.release)
     }
     public func writeString(value: String): Unit {
-        this.checkCapacity(4 + value.size * 4 + 1) // length, data
-        this.writeInt32(Int32(value.size + 1))
-        for (i in 0..value.size) {
-            this.setBytes(this.position, value[i])
-        }
-        this.writeInt8(Int8(0))
+        this.checkCapacity(Int32(4 + value.size * 4 + 1)) // length, data
+        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this._length, this.position + 4)
+        this.writeInt32(encodedLength)
+        this.position += encodedLength
     }
-    public func writeBuffer(buffer: Array<UInt8>) {
-        let resourceId = ResourceHolder.instance().registerAndHold(buffer)
-        this.writeCallbackResource(CallbackResource(resourceId, 0, 0))
-        unsafe {
-            let ptr = acquireArrayRawData(buffer).pointer
-            this.writePointer(UInt64(ptr.toUIntNative()))
-            this.writeInt64(buffer.size)
-        }
+    public func writeBuffer(_buffer: Array<UInt8>) {
+        // let resourceId = ResourceHolder.instance().registerAndHold(_buffer)
+        // this.writeCallbackResource(CallbackResource(resourceId, 0, 0))
+        // unsafe {
+        //     let ptr = acquireArrayRawData(_buffer).pointer
+        //     this.writePointer(UInt64(ptr.toUIntNative()))
+        //     this.writeInt64(_buffer.size)
+        // }
+    }
+    public func holdAndWriteObject(obj: Any): ResourceId {
+        return this.holdAndWriteObject(obj, 0, 0)
+    }
+    public func holdAndWriteObject(obj: Any, hold: pointer, release: pointer): ResourceId {
+        let resourceId = ResourceHolder.instance().registerAndHold(obj)
+        this.addHeldResource(resourceId)
+        this.writeInt32(resourceId)
+        this.writePointer(hold)
+        this.writePointer(release)
+        return resourceId
     }
 }
 

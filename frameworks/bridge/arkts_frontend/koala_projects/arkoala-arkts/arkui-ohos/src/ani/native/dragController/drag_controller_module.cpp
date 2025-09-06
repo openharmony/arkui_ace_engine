@@ -20,7 +20,7 @@
 #include "udmf_ani_converter_utils.h"
 #include "utils/ani_utils.h"
 #include "drag_preview.h"
-#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h"
+#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.h"
 
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"

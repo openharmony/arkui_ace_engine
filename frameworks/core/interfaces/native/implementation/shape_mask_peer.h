@@ -27,27 +27,59 @@ const float DEFAULT_WIDTH = 0.0f;
 
 struct BaseShapePeer {
     BaseShapePeer() = default;
-    explicit BaseShapePeer(const RefPtr<OHOS::Ace::BasicShape>& src) : shape(src) {}
     virtual ~BaseShapePeer() = default;
 
-    RefPtr<OHOS::Ace::BasicShape> shape = nullptr;
+    void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        rect = value;
+    }
+    void SetRoundRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        roundRect = value;
+    }
+    void SetCircleShape(const RefPtr<OHOS::Ace::Circle>& value)
+    {
+        ResetAll();
+        circle = value;
+    }
+    void SetOvalShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        oval = value;
+    }
+    void SetCommandPath(const std::string& value)
+    {
+        ResetAll();
+        path = value;
+    }
+
+private:
+    void ResetAll()
+    {
+        rect = nullptr;
+        roundRect = nullptr;
+        circle = nullptr;
+        oval = nullptr;
+        path = std::nullopt;
+    }
+
+public:
+    RefPtr<OHOS::Ace::ShapeRect> rect = nullptr;
+    RefPtr<OHOS::Ace::ShapeRect> roundRect = nullptr;
+    RefPtr<OHOS::Ace::Circle> circle = nullptr;
+    RefPtr<OHOS::Ace::ShapeRect> oval = nullptr;
+    std::optional<std::string> path = std::nullopt;
 };
 
 struct ShapeMaskPeer final : public BaseShapePeer {
 protected:
     ShapeMaskPeer() = default;
-    explicit ShapeMaskPeer(const RefPtr<OHOS::Ace::BasicShape>& src) : BaseShapePeer(src) {}
     ~ShapeMaskPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 
 public:
-    void SetBasicProperties()
-    {
-        shape->SetColor(OHOS::Ace::Color(fillColor));
-        shape->SetStrokeColor(strokeColor);
-        shape->SetStrokeWidth(strokeWidth);
-    }
-
     uint32_t fillColor = DEFAULT_COLOR;
     uint32_t strokeColor = DEFAULT_COLOR;
     float strokeWidth = DEFAULT_WIDTH;

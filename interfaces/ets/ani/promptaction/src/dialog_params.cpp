@@ -22,8 +22,8 @@
 #include "frameworks/core/common/ace_engine.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
-#include "frameworks/core/interfaces/native/utility/external-converter.h"
+#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/implementation/transition_effect_peer_impl.h"
 
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
@@ -968,9 +968,9 @@ bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
 
     Ark_TransitionEffect transitionEffect = (Ark_TransitionEffect)transitionEffectPtr;
     CHECK_NULL_RETURN(transitionEffect, false);
-    result = OHOS::Ace::NG::Converter::Convert<OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>>(
-        transitionEffect);
-    return result != nullptr;
+    CHECK_NULL_RETURN(transitionEffect->handler, false);
+    result = transitionEffect->handler;
+    return true;
 }
 
 bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)

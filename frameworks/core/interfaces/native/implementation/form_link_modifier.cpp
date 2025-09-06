@@ -17,7 +17,6 @@
 
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace {

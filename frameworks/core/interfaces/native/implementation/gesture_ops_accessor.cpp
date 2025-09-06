@@ -267,13 +267,13 @@ void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ar
         gestureHub->AttachGesture(gesturePtr);
     } else {
         gestureHub->AddGesture(gesturePtr);
-    }
-    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
-    if (clickEvent) {
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(true, false);
-        focusHub->SetOnClickCallback(std::move(clickEvent));
+        GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
+        if (clickEvent) {
+            auto focusHub = frameNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetFocusable(true, false);
+            focusHub->SetOnClickCallback(std::move(clickEvent));
+        }
     }
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
     gesturePtr->DecRefCount();

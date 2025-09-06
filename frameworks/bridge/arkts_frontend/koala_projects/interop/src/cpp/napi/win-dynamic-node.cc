@@ -12,8 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
-#include <cstdlib>
+
+#ifdef __cplusplus
+  #include <cstdio>
+  #include <cstdlib>
+#else
+  #include <stdio.h>
+  #include <stdlib.h>
+#endif
+
 #include <windows.h>
 #include "node_api.h"
 
@@ -85,7 +92,12 @@
    op(napi_call_threadsafe_function) \
    op(napi_is_dataview) \
    op(napi_is_arraybuffer) \
-   op(napi_get_dataview_info)
+   op(napi_get_dataview_info) \
+   op(napi_get_value_int64) \
+   op(napi_get_boolean) \
+   op(napi_create_uint32) \
+   op(napi_create_bigint_int64) \
+   op(napi_cancel_async_work) \
 
 #define DECL_NAPI_IMPL(fn_name, ...) decltype(&fn_name) p_##fn_name;
 
@@ -634,4 +646,43 @@ napi_set_named_property(napi_env env,
                         napi_value value) {
   LoadNapiFunctions();
   return p_napi_set_named_property(env, object, utf8name, value);
+}
+
+NAPI_EXTERN napi_status NAPI_CDECL napi_get_value_int64(napi_env env,
+                                 napi_value value,
+                                 int64_t* result)
+{
+  LoadNapiFunctions();
+  return p_napi_get_value_int64(env, value, result);
+}
+
+NAPI_EXTERN napi_status NAPI_CDECL napi_get_boolean(napi_env env,
+  bool value,
+  napi_value* result)
+{
+LoadNapiFunctions();
+return p_napi_get_boolean(env, value, result);
+}
+
+NAPI_EXTERN napi_status NAPI_CDECL napi_create_uint32(napi_env env,
+  uint32_t value,
+  napi_value* result)
+{
+LoadNapiFunctions();
+return p_napi_create_uint32(env, value, result);
+}
+
+NAPI_EXTERN napi_status NAPI_CDECL napi_create_bigint_int64(napi_env env,
+  int64_t value,
+  napi_value* result)
+{
+  LoadNapiFunctions();
+  return p_napi_create_bigint_int64(env, value, result);
+}
+
+NAPI_EXTERN napi_status NAPI_CDECL napi_cancel_async_work(napi_env env,
+                                  napi_async_work work)
+{
+  LoadNapiFunctions();
+  return p_napi_cancel_async_work(env, work);
 }

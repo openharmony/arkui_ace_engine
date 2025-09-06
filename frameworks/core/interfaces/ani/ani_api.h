@@ -371,6 +371,7 @@ struct ArkUIAniImageModifier {
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
+    void* (*getPixelMapPeer)(void* pixelMap);
 };
 
 struct ArkUIWaterFlowSectionGap {

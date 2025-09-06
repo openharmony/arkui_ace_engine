@@ -105,7 +105,7 @@ export interface IMutableKeyedStateMeta {
 }
 
 export interface IObserve {
-    renderingComponent: int;
+    renderingComponent: number;
     renderingId: RenderIdType | undefined;
     shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
 }

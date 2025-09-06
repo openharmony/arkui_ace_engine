@@ -18,10 +18,10 @@
 #include "base/geometry/matrix4.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
-struct Matrix4TransitPeer final {
+struct matrix4_Matrix4TransitPeer final {
     OHOS::Ace::Matrix4 matrix;
 protected:
-    Matrix4TransitPeer() = default;
-    ~Matrix4TransitPeer() = default;
+    matrix4_Matrix4TransitPeer() = default;
+    ~matrix4_Matrix4TransitPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };

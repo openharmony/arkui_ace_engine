@@ -14,31 +14,32 @@
  */
 
 import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
-import { drawing } from "@ohos/graphics/drawing"
+import { default as drawing } from "@ohos.graphics.drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "arkui/component"
+import { DrawContext } from "arkui.Graphics"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "#generated"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
-import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
-import { XComponentOptionsInternal, XComponentParametersInternal } from "arkui/component"
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
+import { XComponentOptionsInternal, XComponentParametersInternal } from "#generated"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { uiObserver }  from "@ohos/arkui/observer"
-import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
-import { NodeAdapter } from '../../FrameNode'
+import { default as uiObserver }  from "@ohos/arkui/observer"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from "@ohos.graphics.scene"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
-
+    native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
+    native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
@@ -176,8 +177,7 @@ export class ArkUIAniModule {
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
     native static _DragController_getDragPreview(): dragController.DragPreview
-    native static _DragController_setForegroundColor(
-        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
+    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void

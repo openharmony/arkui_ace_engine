@@ -16,7 +16,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng_static.h"
@@ -130,8 +129,7 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<FlexOptions>(*value);
+    auto options = Converter::OptConvertPtr<FlexOptions>(value);
     CHECK_NULL_VOID(options);
 
     if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
@@ -167,13 +165,13 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 }
 } // FlexInterfaceModifier
 namespace FlexAttributeModifier {
-void PointLightImpl(Ark_NativePointer node,
-                    const Opt_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node,
+                       const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -209,7 +207,6 @@ const GENERATED_ArkUIFlexModifier* GetFlexModifier()
     static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
         FlexModifier::ConstructImpl,
         FlexInterfaceModifier::SetFlexOptionsImpl,
-        FlexAttributeModifier::PointLightImpl,
     };
     return &ArkUIFlexModifierImpl;
 }

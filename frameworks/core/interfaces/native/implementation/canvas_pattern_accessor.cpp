@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_CanvasPattern peer)
         peer->DecRefCount();
     }
 }
-Ark_CanvasPattern CtorImpl()
+Ark_CanvasPattern ConstructImpl()
 {
     auto peer = Referenced::MakeRefPtr<CanvasPatternPeer>();
     peer->IncRefCount();
@@ -40,7 +40,7 @@ void SetTransformImpl(Ark_CanvasPattern peer,
                       const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
-    auto matrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    auto matrix = Converter::OptConvertPtr<Ark_Matrix2D>(transform);
     peer->SetTransform(matrix);
 }
 
@@ -49,7 +49,7 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
 {
     static const GENERATED_ArkUICanvasPatternAccessor CanvasPatternAccessorImpl {
         CanvasPatternAccessor::DestroyPeerImpl,
-        CanvasPatternAccessor::CtorImpl,
+        CanvasPatternAccessor::ConstructImpl,
         CanvasPatternAccessor::GetFinalizerImpl,
         CanvasPatternAccessor::SetTransformImpl,
     };

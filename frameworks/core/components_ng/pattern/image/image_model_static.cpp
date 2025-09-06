@@ -131,13 +131,8 @@ void ImageModelStatic::SetImageFill(FrameNode* frameNode, const std::optional<Co
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<ImageTheme>();
-        CHECK_NULL_VOID(theme);
-        auto fillColor = theme->GetFillColor();
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, fillColor, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, fillColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     }
 }
 

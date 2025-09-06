@@ -69,7 +69,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to reuse.
      * @returns A recycled scope, or undefined if none is available.
      */
-    reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+    reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         return undefined
     }
 
@@ -80,7 +80,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to recycle.
      * @return true if child is successfully recycled
      */
-    recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+    recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
     }
 
@@ -95,9 +95,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * This method is called to remove this node from the hierarchy and cleanup related resources.
      */
     dispose(): void {
-        if (this._disposed) {
-            return
-        }
+        if (this._disposed) return
         this._disposed = true
         this.detach()
     }
@@ -146,13 +144,9 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      */
     toHierarchy(): string {
         let str = ""
-        for (let node = this._parent; node; node = node!._parent) {
-            str += "  "
-        }
+        for (let node = this._parent; node; node = node!._parent) str += "  "
         str += this.toString()
-        for (let node = this._child; node; node = node!._next) {
-            str += "\n" + node!.toHierarchy()
-        }
+        for (let node = this._child; node; node = node!._next) str += "\n" + node!.toHierarchy()
         return str
     }
 
@@ -192,9 +186,8 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
                 next = next._next
             }
             this._incremental = next
-        } else {
-            throw new Error("unexpected count of child nodes to skip: " + count)
         }
+        else throw new Error("unexpected count of child nodes to skip: " + count)
     }
 
     /**
@@ -203,34 +196,27 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @internal
      */
     incrementalUpdateDone(parent?: IncrementalNode) {
-        if (this._disposed) {
-            throw new Error("child node is already disposed")
-        }
+        if (this._disposed) throw new Error("child node is already disposed")
         this._incremental = undefined
         if (parent) {
             const prev = parent._incremental
             const next = prev ? prev._next : parent._child
             if (this._parent) {
-                if (this._parent != parent) {
-                    throw new Error("child node belongs to another parent")
-                }
-                if (this != next) {
-                    throw new Error("child node is not expected here")
-                }
+                if (this._parent != parent) throw new Error("child node belongs to another parent")
+                if (this != next) throw new Error("child node is not expected here")
                 parent._incremental = this
             } else {
                 parent._incremental = this
                 this._prev = prev
                 this._next = next
                 this._parent = parent
-                if (next) {
-                    next._prev = this
-                }
-                if (prev) {
-                    prev._next = this
-                } else {
-                    parent._child = this
-                }
+                if (next) next._prev = this
+                if (prev) prev._next = this
+                else parent._child = this;
+
+                // TODO: this is to workaround ast dumper bug #24055
+                if (0) {} else {}
+
                 parent.onChildInserted?.(this)
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ export function Repeat(
     count: int32,
     /** @memo */
     action: (index: int32) => void
-) {
+): void {
     for (let i = 0; i < count; i++) {
         memoEntry1<int32, void>(__context(), i, action, i)
     }
@@ -59,7 +59,7 @@ export function RepeatWithKey(
     key: (index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (index: int32) => void
-) {
+): void {
     for (let i = 0; i < count; i++) {
         memoEntry1<int32, void>(__context(), key(i), action, i)
     }
@@ -81,7 +81,7 @@ export function RepeatByArray<T>(
     key: (element: T, index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (element: T, index: int32) => void
-) {
+): void {
     const length = array.length
     for (let i = 0; i < length; i++) {
         const e: T = array[i]
@@ -106,7 +106,7 @@ export function RepeatRange<T>(
     key: (element: T, index: int32) => KoalaCallsiteKey,
     /** @memo */
     action: (element: T, index: int32) => void
-) {
+): void {
     for (let i: int32 = start; i < end; i++) {
         const e: T = element(i)
         memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i)

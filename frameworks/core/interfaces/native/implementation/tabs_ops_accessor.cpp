@@ -29,12 +29,12 @@ Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto mode = Converter::OptConvert<TabBarMode>(*value);
+    auto mode = Converter::OptConvertPtr<TabBarMode>(value);
     if (mode && *mode == TabBarMode::SCROLLABLE) {
         ScrollableBarModeOptions barModeOptions;
         auto defaultMargin = barModeOptions.margin;
         if (options) {
-            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
+            auto optionsOpt = Converter::OptConvertPtr<Ark_ScrollableBarModeOptions>(options);
             if (optionsOpt) {
                 auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
                 Validator::ValidateNonPercent(marginOpt);
@@ -55,8 +55,8 @@ Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     BlurStyleOption option;
-    auto blurStyle = Converter::OptConvert<BlurStyle>(*style);
-    auto bluroption = Converter::OptConvert<BlurStyleOption>(*options);
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(style);
+    auto bluroption = Converter::OptConvertPtr<BlurStyleOption>(options);
     if (bluroption) {
         option = bluroption.value();
     }
@@ -72,7 +72,7 @@ Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto conValue = Converter::OptConvert<int32_t>(*value);
+    auto conValue = Converter::OptConvertPtr<int32_t>(value);
     TabsModelStatic::InitIndex(frameNode, conValue);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {

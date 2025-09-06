@@ -106,12 +106,12 @@ export class LocalStorage {
      * Returns number of properties in LocalStorage
      * same as Map.prototype.size()
      *
-     * @returns { int } return number of properties
+     * @returns { number } return number of properties
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public size(): int {
-        return this.store_.size() as int;
+    public size(): number {
+        return this.store_.size();
     }
 
     /**

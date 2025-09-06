@@ -21,7 +21,7 @@ import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
 import { ObserveWrappedBase } from './observeWrappedBase';
 import { Binding, MutableBinding } from '../utils';
-import { getRawObject, isDynamicObject } from '@component_handwritten/interop';
+import { getRawObject, isDynamicObject } from '#generated';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -52,10 +52,7 @@ export class UIUtilsImpl {
         return !!(handler && StateMgmtTool.isInterfaceProxyHandler(handler));
     }
 
-    public static makeObservedProxyNoCheck<T extends Object>(source: T, allowDeep: boolean, isAPI: boolean = false): T {
-        if (!isAPI) {
-            return StateMgmtTool.createProxy<T>(source, allowDeep);
-        }
+    public static makeObservedProxyNoCheck<T extends Object>(source: T, allowDeep: boolean): T {
         const observed = UIUtilsImpl.getObservedProxy(source, allowDeep);
         if (observed !== undefined) {
             return observed as T;
@@ -63,10 +60,7 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, StateMgmtTool.createProxy<T>(source, allowDeep), allowDeep);
     }
 
-    public static makeObservedArray<T>(source: Array<T>, allowDeep: boolean, isAPI: boolean = false): Array<T> {
-        if (!isAPI) {
-            return new WrappedArray<T>(source, allowDeep);
-        }
+    public static makeObservedArray<T>(source: Array<T>, allowDeep: boolean): Array<T> {
         const observed = UIUtilsImpl.getObserved(source, allowDeep);
         if (observed) {
             return observed;
@@ -74,10 +68,7 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, new WrappedArray<T>(source, allowDeep), allowDeep);
     }
 
-    public static makeObservedDate(source: Date, allowDeep: boolean, isAPI: boolean = false): Date {
-        if (!isAPI) {
-            return new WrappedDate(source, allowDeep);
-        }
+    public static makeObservedDate(source: Date, allowDeep: boolean): Date {
         const observed = UIUtilsImpl.getObserved(source, allowDeep);
         if (observed) {
             return observed;
@@ -85,10 +76,7 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, new WrappedDate(source, allowDeep), allowDeep);
     }
 
-    public static makeObservedMap<K, V>(source: Map<K, V>, allowDeep: boolean, isAPI: boolean = false): Map<K, V> {
-        if (!isAPI) {
-            return new WrappedMap<K, V>(source, allowDeep);
-        }
+    public static makeObservedMap<K, V>(source: Map<K, V>, allowDeep: boolean): Map<K, V> {
         const observed = UIUtilsImpl.getObserved(source, allowDeep);
         if (observed) {
             return observed;
@@ -96,10 +84,7 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, new WrappedMap<K, V>(source, allowDeep), allowDeep);
     }
 
-    public static makeObservedSet<T>(source: Set<T>, allowDeep: boolean, isAPI: boolean = false): Set<T> {
-        if (!isAPI) {
-            return new WrappedSet<T>(source, allowDeep);
-        }
+    public static makeObservedSet<T>(source: Set<T>, allowDeep: boolean): Set<T> {
         const observed = UIUtilsImpl.getObserved(source, allowDeep);
         if (observed) {
             return observed;
@@ -110,7 +95,7 @@ export class UIUtilsImpl {
     // allowDeep is used to mark whether it need to use deep observation
     // normally for V1 it should be false
     // for API and V2, it should be set to true manually
-    public makeObserved<T>(value: T, allowDeep: boolean = false, isAPI: boolean = false): T {
+    public makeObserved<T>(value: T, allowDeep: boolean = false): T {
         if (!value || typeof value !== 'object') {
             return value as T;
         }
@@ -121,19 +106,19 @@ export class UIUtilsImpl {
             return value as T;
         }
         if (value instanceof Array) {
-            return UIUtilsImpl.makeObservedArray(value, allowDeep, isAPI) as T;
+            return UIUtilsImpl.makeObservedArray(value, allowDeep) as T;
         }
         if (value instanceof Date) {
-            return UIUtilsImpl.makeObservedDate(value, allowDeep, isAPI) as T;
+            return UIUtilsImpl.makeObservedDate(value, allowDeep) as T;
         }
         if (value instanceof Map) {
-            return UIUtilsImpl.makeObservedMap(value, allowDeep, isAPI) as T;
+            return UIUtilsImpl.makeObservedMap(value, allowDeep) as T;
         }
         if (value instanceof Set) {
-            return UIUtilsImpl.makeObservedSet(value, allowDeep, isAPI) as T;
+            return UIUtilsImpl.makeObservedSet(value, allowDeep) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
-            return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, allowDeep, isAPI) as T;
+            return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, allowDeep) as T;
         }
         return value;
     }

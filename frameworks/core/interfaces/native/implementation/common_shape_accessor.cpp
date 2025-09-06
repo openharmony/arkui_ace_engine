@@ -22,7 +22,7 @@ namespace CommonShapeAccessor {
 void DestroyPeerImpl(Ark_CommonShape peer)
 {
 }
-Ark_CommonShape CtorImpl()
+Ark_CommonShape ConstructImpl()
 {
     return {};
 }
@@ -50,7 +50,7 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
 {
     static const GENERATED_ArkUICommonShapeAccessor CommonShapeAccessorImpl {
         CommonShapeAccessor::DestroyPeerImpl,
-        CommonShapeAccessor::CtorImpl,
+        CommonShapeAccessor::ConstructImpl,
         CommonShapeAccessor::GetFinalizerImpl,
         CommonShapeAccessor::OffsetImpl,
         CommonShapeAccessor::FillImpl,

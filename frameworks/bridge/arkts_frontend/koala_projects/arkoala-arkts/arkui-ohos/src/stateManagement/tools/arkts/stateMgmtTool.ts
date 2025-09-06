@@ -29,8 +29,8 @@ import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
-import { UIContextUtil } from '../../../handwritten/UIContextUtil';
-import { UIContextImpl } from '../../../handwritten/UIContextImpl';
+import { UIContextUtil } from '../../../base/UIContextUtil';
+import { UIContextImpl } from '../../../base/UIContextImpl';
 import { StateMgmtConsole } from '../stateMgmtDFX';
 import { int32 } from '@koalaui/common';
 export class StateMgmtTool {

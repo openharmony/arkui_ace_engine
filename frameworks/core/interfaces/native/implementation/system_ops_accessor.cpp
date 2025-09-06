@@ -82,6 +82,8 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
                           const Callback_Number_Void* onIdleCallback,
                           const Ark_Number* delayTime)
 {
+    CHECK_NULL_VOID(onFrameCallback);
+    CHECK_NULL_VOID(onIdleCallback);
     CHECK_NULL_VOID(delayTime);
     auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
     auto context = PipelineContext::GetCurrentContext();
@@ -90,9 +92,9 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
         auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
         callback.Invoke(delayTime);
     };
-    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt,
-        int32_t frameCount) -> void {
-        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](uint64_t nanoTimestamp,
+        uint32_t frameCount) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(nanoTimestamp);
         callback.Invoke(delayTime);
     };
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
@@ -114,6 +116,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const std::string& bundleName, con
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     return resourceWrapper;
 }
+#ifdef WRONG_SDK
 Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
 {
     CalcDimension result;
@@ -151,6 +154,7 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
 }
+#endif
 void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
 {
     indexes.clear();
@@ -164,63 +168,19 @@ void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
         indexes.emplace_back(0);
     }
 }
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
 Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
 {
     Color colorColor;
     std::vector<uint32_t> indexes;
     ParseArrayNumber(colorColor, indexes, false);
     Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    auto resId = Converter::Convert<int32_t>(color->id);
-    auto bundleName = Converter::Convert<std::string>(color->bundleName);
-    auto moduleName = Converter::Convert<std::string>(color->moduleName);
-    auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
-    CHECK_NULL_RETURN(resourceWrapper, errValue);
-    if (resId == -1) {
-        auto optParams = Converter::OptConvert<std::vector<std::string>>(color->params);
-        if (!optParams.has_value() || optParams->size() < 1) {
-            return errValue;
-        }
-        auto params = optParams.value();
-        colorColor = resourceWrapper->GetColorByName(params[0]);
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    auto resType = Converter::OptConvert<int32_t>(color->type);
-    if (!resType.has_value()) {
-        return errValue;
-    }
-    auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
-        if (!Color::ParseColorString(value, colorColor)) {
-            return errValue;
-        }
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId);
-        colorColor = Color(ColorAlphaAdapt(value));
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(ResourceType::COLOR)) {
-        colorColor = resourceWrapper->GetColor(resId);
-        ParseArrayNumber(colorColor, indexes, true);
-        indexes.emplace_back(resId);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    return errValue;
+    CHECK_NULL_RETURN(color, errValue);
+    auto result = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_RETURN(result, errValue);
+    ParseArrayNumber(*result, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
-} // namespace SystemOpsAccessor
+} // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
@@ -231,7 +191,6 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::GetResourceIdImpl,
         SystemOpsAccessor::ResourceManagerResetImpl,
         SystemOpsAccessor::SetFrameCallbackImpl,
-        SystemOpsAccessor::ResourceToLengthMetricsImpl,
         SystemOpsAccessor::ColorMetricsResourceColorImpl,
     };
     return &SystemOpsAccessorImpl;
