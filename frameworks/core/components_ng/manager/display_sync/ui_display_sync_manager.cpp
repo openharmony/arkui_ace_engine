@@ -21,7 +21,7 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
 {
     CheckSkipEnableProperty();
     displaySyncRange_->Reset();
-    displaySyncRange_->type_ = 0;
+    displaySyncRange_->type_ = UNKNOWN_FRAME_RATE_TYPE;
 
     if (uiDisplaySyncMap_.empty()) {
         if (sourceVsyncRate_ > 0) {

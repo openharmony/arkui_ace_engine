@@ -19,6 +19,7 @@
 #include "ui/base/ace_type.h"
 
 namespace OHOS::Ace {
+constexpr uint32_t UNKNOWN_FRAME_RATE_TYPE = 0;
 // ace scene
 constexpr uint32_t REFRESH_DRAG_FRAME_RATE_TYPE = (1 << 0);
 constexpr uint32_t SWIPER_DRAG_FRAME_RATE_TYPE = (1 << 1);

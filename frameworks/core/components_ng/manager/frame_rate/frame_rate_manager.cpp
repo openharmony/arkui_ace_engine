@@ -31,7 +31,7 @@ uint32_t GetRateTypeOfScene(const std::string& scene)
     if (iter != sceneRateTypeMap.end()) {
         return iter->second;
     }
-    return 0;
+    return UNKNOWN_FRAME_RATE_TYPE;
 }
 
 bool FrameRateManager::IsRateChanged()
@@ -94,7 +94,7 @@ int32_t FrameRateManager::GetDisplaySyncRate() const
 std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
 {
     int32_t expectedRate = 0;
-    int32_t rateType = 0;
+    int32_t rateType = UNKNOWN_FRAME_RATE_TYPE;
     for (const auto& [_, sceneRate] : nodeRateMap_) {
         const auto& [scene, rate] = sceneRate;
         if (rate <= 0) {

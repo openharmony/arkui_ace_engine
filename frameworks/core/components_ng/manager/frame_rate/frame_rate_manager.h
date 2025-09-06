@@ -52,7 +52,7 @@ private:
     std::unordered_map<int32_t, std::pair<std::string, int32_t>> nodeRateMap_;
     bool isRateChanged_ = false;
     int32_t displaySyncRate_ = 0;
-    uint32_t displaySyncType_ = 0;
+    uint32_t displaySyncType_ = UNKNOWN_FRAME_RATE_TYPE;
     int32_t animateRate_ = 0;
     bool hasFirstFrameAnimation_ = false;
 
