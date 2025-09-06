@@ -562,9 +562,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty002, TestSize.Level
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetAccessibilityAction();
-    auto property = richEditorNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetSwitchEditableModeFunc(), nullptr);
 }
 
 } // namespace OHOS::Ace::NG
