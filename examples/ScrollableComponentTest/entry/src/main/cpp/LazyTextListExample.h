@@ -29,8 +29,7 @@ namespace NativeModule {
 
 std::shared_ptr<ArkUIBaseNode> CreateLazyTextListExample()
 {
-    // 创建组件并挂载
-    // 1：使用智能指针创建List组件。
+    // 使用智能指针创建List组件。
     auto list = std::make_shared<ArkUIListNode>();
     list->SetPercentWidth(1);
     list->SetPercentHeight(1);

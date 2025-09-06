@@ -69,7 +69,7 @@ public:
         }
     }
 
-    std::list<std::shared_ptr<ArkUIBaseNode>> &GetChildren()
+    const std::list<std::shared_ptr<ArkUIBaseNode>> &GetChildren() const
     {
         return children_;
     }
