@@ -110,7 +110,6 @@ struct SymbolSpanStyle {
             && lineSpacing == rhs.lineSpacing
             && symbolColor == rhs.symbolColor
             && fontFeature == rhs.fontFeature
-            && fontFeature == rhs.fontFeature
             && fontWeight == rhs.fontWeight
             && renderingStrategy == rhs.renderingStrategy
             && effectStrategy == rhs.effectStrategy;
