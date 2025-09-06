@@ -2941,6 +2941,17 @@ void RichEditorPattern::SetAccessibilityAction()
         return pattern->GetCaretPosition();
     });
     SetAccessibilityEditAction();
+
+    property->SetSwitchEditableMode([weakPtr = WeakClaim(this)](bool switchToEditable) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Accessibility SwitchEditableMode=%{public}d", switchToEditable);
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!switchToEditable) {
+            pattern->StopEditing();
+            return;
+        }
+        IF_TRUE(auto focusHub = pattern->GetFocusHub(), focusHub->RequestFocusImmediately());
+    });
 }
 
 void RichEditorPattern::SetAccessibilityEditAction()
