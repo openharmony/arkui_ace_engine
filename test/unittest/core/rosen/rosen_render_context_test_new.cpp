@@ -771,7 +771,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
     rosenRenderContext->SetOpacity(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
-    rosenRenderContext->PaintAccessibilityFocus();
+    rosenRenderContext->PaintAccessibilityFocus(false);
     rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, true);
     rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
