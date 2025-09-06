@@ -17,6 +17,7 @@ import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
 } from 'arkui.stateManagement.runtime';
+import { memo } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
@@ -136,7 +137,8 @@ export interface NavigationAttribute extends CommonMethod {
     onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    navDestination(value: ((name: string, param: Object | null | undefined) => void) | undefined): this;
+    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
+        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
     customNavContentTransition(
         value:
             ((
@@ -213,7 +215,8 @@ export declare class ArkNavigationStyle extends ArkCommonMethodStyle implements 
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    public navDestination(value: ((name: string, param: Object | null | undefined) => void) | undefined): this;
+    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
+        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
     public customNavContentTransition(
         value:
             ((
@@ -239,12 +242,8 @@ export declare class ArkNavigationStyle extends ArkCommonMethodStyle implements 
 }
 
 export declare class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
-    public _navDestination: (
-        __memo_context: __memo_context_type,
-        __memo_id: __memo_id_type,
-        name: string,
-        param: Object | null | undefined
-    ) => void;
+    @memo()  public _navDestination: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,
+        name: string, param: (Object | null | undefined)) => void;
     public _needSync: boolean;
     public getPeer(): ArkNavigationPeer;
     public setNavigationOptions(pathInfos?: NavPathStack): this;
@@ -269,13 +268,8 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    public navDestination(
-        value: ((
-                  __memo_context: __memo_context_type,
-                  __memo_id: __memo_id_type,
-                  name: string,
-                  param: Object | null | undefined
-              ) => void) | undefined): this;
+    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
+        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
     public customNavContentTransition(
         value:
             ((

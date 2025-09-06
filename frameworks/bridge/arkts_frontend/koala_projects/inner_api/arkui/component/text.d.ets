@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { memo_stable } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
@@ -252,8 +253,7 @@ export declare class ArkTextStyle extends ArkCommonMethodStyle implements TextAt
     ): this;
 }
 
-/** @memo:stable */
-export declare class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
+@memo_stable() export declare class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
     public initAttributeSet<T>(modifier: AttributeModifier<T>): void;
     public getPeer(): ArkTextPeer;
     public setTextOptions(content?: string | Resource, value?: TextOptions): this;

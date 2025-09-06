@@ -16,6 +16,7 @@
  * @file
  * @kit ArkUI
  */
+import { memo_stable } from '@koalaui.runtime.annotations';
 import { Resource } from 'global.resource';
 import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape';
 import { LengthMetrics } from 'arkui.Graphics';
@@ -763,8 +764,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     ): void;
 }
 
-/** @memo:stable */
-export declare class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
+@memo_stable() export declare class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     public initAttributeSet<T>(modifier: AttributeModifier<T>): void;
     public getPeer(): ArkCommonMethodPeer;
     public getOrCreateGestureEvent(): UIGestureEvent;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { memo_stable } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     ArkCommonMethodComponent,
@@ -123,8 +124,7 @@ export interface TabsAttribute extends CommonMethod {
     _onChangeEvent_index(callback: (index: number) => void): void;
 }
 
-/** @memo:stable */
-export declare class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
+@memo_stable() export declare class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
     public getPeer(): ArkTabsPeer;
     public setTabsOptions(options?: TabsOptions): this;
     public vertical(value: boolean | undefined): this;
