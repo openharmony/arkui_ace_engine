@@ -37,6 +37,40 @@ HWTEST_F(TextFieldUXTest, IsTextArea001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PerformAction001
+ * @tc.desc: Test function PerformAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, PerformAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+    EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.Done");
+}
+
+/**
  * @tc.name: CursorInContentRegion001
  * @tc.desc: Test function CursorInContentRegion.
  * @tc.type: FUNC

@@ -421,6 +421,24 @@ HWTEST_F(TextFieldPatternTestEight, ClearTextContent001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ClearTextContent002
+ * @tc.desc: test ClearTextContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ClearTextContent002, TestSize.Level0)
+{
+    CreateTextField();
+
+    pattern_->ClearTextContent();
+    EXPECT_TRUE(pattern_->contentController_->IsEmpty());
+
+    std::u16string value = u"n";
+    pattern_->contentController_->SetTextValue(value);
+    pattern_->ClearTextContent();
+    EXPECT_FALSE(pattern_->showCountBorderStyle_);
+}
+
+/**
  * @tc.name: HandleButtonMouseEvent001
  * @tc.desc: test HandleButtonMouseEvent
  * @tc.type: FUNC
@@ -1776,6 +1794,32 @@ HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode001, TestSize.Level0)
     pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
     pattern_->OnAttachToFrameNode();
     EXPECT_NE(pipeline->GetFontManager(), nullptr);
+}
+
+/**
+ * @tc.name: InitTheme001
+ * @tc.desc: test InitTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, InitTheme001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+
+    auto frameNode = pattern_->GetHost();
+    auto pipeline = frameNode->GetContext();
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+
+    int32_t lastPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+
+    pattern_->InitTheme();
+
+    auto theme = pattern_->GetTheme();
+    EXPECT_NE(theme, nullptr);
+    EXPECT_NE(pattern_->needToRequestKeyboardOnFocus_, pattern_->independentControlKeyboard_);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(lastPlatformVersion);
 }
 
 /**

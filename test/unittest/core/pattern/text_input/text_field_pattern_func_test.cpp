@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 #include "test/mock/core/common/mock_container.h"
+#include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1771,6 +1772,29 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc088, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyboardPatternFunc01
+ * @tc.desc: test KeyboardPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, KeyboardPatternFunc01, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->DumpInfo();
+    auto spanNode = AceType::MakeRefPtr<NG::SpanNode>(3);
+    keyboard->AddChild(spanNode);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->GetKeyboardHeight();
+    JsonValue jsonValue(nullptr);
+    std::unique_ptr<JsonValue> ret = jsonValue.GetChild();
+    pattern->DumpInfo(ret);
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+}
+
+/**
  * @tc.name: TextPatternFunc089
  * @tc.desc: test OnAreaChangedInner.
  * @tc.type: FUNC
@@ -2659,6 +2683,36 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay016, TestSize.Level1)
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
     auto isHandleVisible = pattern->selectOverlay_->IsHandleVisible(false);
     EXPECT_EQ(isHandleVisible, false);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay017
+ * @tc.desc: test base_text_select_overlay.cpp SetTransformPaintInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetTransformPaintInfo and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectHandleInfo handleInfo;
+    RectF rect;
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->selectOverlay_->SetTransformPaintInfo(handleInfo, rect);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
 }
 
 } // namespace OHOS::Ace

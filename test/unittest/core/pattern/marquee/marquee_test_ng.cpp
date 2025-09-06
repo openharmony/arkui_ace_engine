@@ -33,6 +33,7 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
@@ -1903,6 +1904,72 @@ HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
     EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
 }
 
+/**
+ * @tc.name: MeasureWithLayoutPolicy
+ * @tc.desc: When marquee's width and height set layout policy, check the child's position and self framesize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MeasureWithLayoutPolicy, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto marqueeLayoutAlgorithm = AceType::DynamicCast<MarqueeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(marqueeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. create marquee layoutWrapper.
+     * @tc.expected: step4. related function is called.
+     */
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(textGeometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textGeometryNode->SetFrameWidth(200.0f);
+    textGeometryNode->SetFrameHeight(200.0f);
+    /**
+     * @tc.steps: step5. marquee frameNode and layoutWrapper need to add child.
+     */
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step6. call the MeasureWithLayoutPolicy.
+     */
+    OptionalSizeF optionalSize;
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    EXPECT_FALSE(optionalSize.IsValid());
+    frameNode->GetLayoutProperty()->layoutConstraint_ = LayoutConstraintF();
+    frameNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    ASSERT_NE(optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(optionalSize.Width().value(), 200.0f);
+    frameNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    ASSERT_NE(optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(optionalSize.Height().value(), 200.0f);
+}
 
 /**
  * @tc.name: MarqueeMultiThreadTest01
