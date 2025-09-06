@@ -250,7 +250,6 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
     NG::Gradient gradient;
-    bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
         RefPtr<ResourceObject> resObj;
@@ -261,14 +260,12 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
             }
             return;
         }
-        isResourceColor = true;
-        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         SliderModel::GetInstance()->SetBlockColor(colorVal);
         if (SystemProperties::ConfigChangePerform()) {
             SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
         }
     }
-    SliderModel::GetInstance()->SetBlockColor(gradient, isResourceColor);
+    SliderModel::GetInstance()->SetLinearGradientBlockColor(gradient, false);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)

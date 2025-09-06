@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void SetLinerGradientBlockColor(const Gradient& color)
+    void SetLinearGradientBlockColor(const Gradient& color)
     {
         if (blockGradientColor_) {
             blockGradientColor_->Set(GradientArithmetic(color));
@@ -362,11 +362,11 @@ private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
     RSRect GetBlockRect(float radius);
-    RSRect GetShapCircleBlockRect(const PointF& centerPoint, float drawRadius);
-    RSRect GetShapEllipseBlockRect(const RectF& drawRect);
-    RSRect GetShapPathBlockRect(const SizeF& shapeSize, const PointF& centerPoint);
+    RSRect GetShapeCircleBlockRect(const PointF& centerPoint, float drawRadius);
+    RSRect GetShapeEllipseBlockRect(const RectF& drawRect);
+    RSRect GetShapePathBlockRect(const SizeF& shapeSize, const PointF& centerPoint);
     void CreateDefaultBlockBrush(RSBrush& brush, float& radius);
-    void CreateShapeCircelBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter);
+    void CreateShapeCircleBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter);
     void CreateShapeEllipseBlockBrush(RSBrush& brush, const RectF& drawRect);
     void CreateShapePathBlockBrush(RSBrush& brush, const SizeF& shapeSize, const PointF& blockCenter);
     void CreateShapeRectBlockBrush(RSBrush& brush, RSRect& rsRect);

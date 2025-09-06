@@ -678,7 +678,7 @@ RSRect SliderContentModifier::GetTrackRect()
     return rect;
 }
 
-RSRect SliderContentModifier::GetShapEllipseBlockRect(const RectF& drawRect)
+RSRect SliderContentModifier::GetShapeEllipseBlockRect(const RectF& drawRect)
 {
     RSRect rect;
     rect.SetLeft(drawRect.GetX());
@@ -688,7 +688,7 @@ RSRect SliderContentModifier::GetShapEllipseBlockRect(const RectF& drawRect)
     return rect;
 }
 
-RSRect SliderContentModifier::GetShapPathBlockRect(const SizeF& shapeSize, const PointF& centerPoint)
+RSRect SliderContentModifier::GetShapePathBlockRect(const SizeF& shapeSize, const PointF& centerPoint)
 {
     RSRect rect;
     rect.SetLeft(centerPoint.GetX() - shapeSize.Width() * HALF);
@@ -698,7 +698,7 @@ RSRect SliderContentModifier::GetShapPathBlockRect(const SizeF& shapeSize, const
     return rect;
 }
 
-RSRect SliderContentModifier::GetShapCircleBlockRect(const PointF& centerPoint, float drawRadius)
+RSRect SliderContentModifier::GetShapeCircleBlockRect(const PointF& centerPoint, float drawRadius)
 {
     auto blockCenterX = centerPoint.GetX();
     auto blockCenterY = centerPoint.GetY();
@@ -776,7 +776,7 @@ void SliderContentModifier::DrawBlockShape(DrawingContext& context)
     }
 }
 
-void SliderContentModifier::CreateShapeCircelBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter)
+void SliderContentModifier::CreateShapeCircleBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter)
 {
     std::vector<GradientColor> gradientColors = GetBlockColor();
     if (gradientColors.empty()) {
@@ -791,7 +791,7 @@ void SliderContentModifier::CreateShapeCircelBlockBrush(RSBrush& brush, float dr
     }
     brush.SetAntiAlias(true);
     auto direction = static_cast<Axis>(directionAxis_->Get());
-    RSRect blockRect = GetShapCircleBlockRect(drawCenter, drawRadius);
+    RSRect blockRect = GetShapeCircleBlockRect(drawCenter, drawRadius);
     RSPoint startPoint;
     RSPoint endPoint;
     SetStartEndPointLocation(direction, blockRect, startPoint, endPoint);
@@ -838,7 +838,7 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
     PointF drawCenter(
         blockCenter.GetX() - shapeWidth * HALF + radius, blockCenter.GetY() - shapeHeight * HALF + radius);
     RSBrush brush;
-    CreateShapeCircelBlockBrush(brush, drawRadius, drawCenter);
+    CreateShapeCircleBlockBrush(brush, drawRadius, drawCenter);
     canvas.AttachBrush(brush);
     canvas.DrawCircle(ToRSPoint(drawCenter), drawRadius);
     canvas.DetachBrush();
@@ -860,7 +860,7 @@ void SliderContentModifier::CreateShapeEllipseBlockBrush(RSBrush& brush, const R
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     brush.SetAntiAlias(true);
-    RSRect blockRect = GetShapEllipseBlockRect(drawRect);
+    RSRect blockRect = GetShapeEllipseBlockRect(drawRect);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
     RSPoint endPoint;
@@ -930,7 +930,7 @@ void SliderContentModifier::CreateShapePathBlockBrush(RSBrush& brush, const Size
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     brush.SetAntiAlias(true);
-    RSRect blockRect = GetShapPathBlockRect(shapeSize, blockCenter);
+    RSRect blockRect = GetShapePathBlockRect(shapeSize, blockCenter);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
     RSPoint endPoint;
