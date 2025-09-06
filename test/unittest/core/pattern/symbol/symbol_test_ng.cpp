@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_static.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -806,6 +807,72 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest017, TestSize.Level1)
     auto familyNameValue = fontFamilies.front();
     EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
     EXPECT_EQ(symbolType, SymbolType::SYSTEM);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest018
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest018, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelNG::SetFontColor(node, SYMBOL_COLOR_LIST);
+    SymbolModelStatic::SetFontSize(node, FONT_SIZE_VALUE);
+    SymbolModelStatic::SetFontWeight(node, FontWeight::W100);
+    SymbolModelStatic::SetRenderingStrategy(node, RENDER_STRATEGY);
+    SymbolModelStatic::SetSymbolEffect(node, EFFECT_STRATEGY);
+    SymbolModelNG::SetSymbolEffectOptions(node, SYMBOL_EFFECT_OPTIONS);
+    SymbolModelStatic::SetMinFontScale(node, MIN_FONT_SCALE);
+    SymbolModelStatic::SetMaxFontScale(node, MAX_FONT_SCALE);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
+    const std::unique_ptr<FontStyle>& symbolStyle = textProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto effectOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+    EXPECT_EQ(effectOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(effectOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(effectOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest019
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest019, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelStatic::SetFontSize(node, std::nullopt);
+    SymbolModelStatic::SetFontWeight(node, std::nullopt);
+    SymbolModelStatic::SetRenderingStrategy(node, std::nullopt);
+    SymbolModelStatic::SetSymbolEffect(node, std::nullopt);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
 }
 
 /**
