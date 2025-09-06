@@ -61,41 +61,6 @@ export interface TargetInfo {
     componentId?: number;
 }
 
-export class DynamicSyncScene {
-    private range: ExpectedFrameRateRange;
-    constructor(range: ExpectedFrameRateRange) {
-        this.range = range;
-    }
-
-    setFrameRateRange(range: ExpectedFrameRateRange): void {
-        this.range = range;
-    }
-
-    getFrameRateRange(): ExpectedFrameRateRange {
-        return this.range;
-    }
-}
-
-export const enum SwiperDynamicSyncSceneType {
-    GESTURE = 0,
-    ANIMATION = 1,
-}
-
-export class SwiperDynamicSyncScene extends DynamicSyncScene {
-    readonly type: SwiperDynamicSyncSceneType;
-    nodePtr: KPointer;
-    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
-        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
-        this.type = type;
-        this.nodePtr = nodePtr;
-    }
-
-    setFrameRateRange(range: ExpectedFrameRateRange): void {
-        super.setFrameRateRange(range);
-        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
-    }
-}
-
 export class Font {
     public registerFont(options: font.FontOptions) : void {
         throw Error("registerFont not implemented in Font!")
@@ -187,11 +152,6 @@ export class Router {
     public hideAlertBeforeBackPage(): void {
         throw Error("hideAlertBeforeBackPage not implemented in Router!");
     }
-}
-
-export interface PageInfo {
-    routerPageInfo?: uiObserver.RouterPageInfo;
-    navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 
 export interface AtomicServiceBar {
@@ -477,9 +437,7 @@ export class UIContext {
     public getMediaQuery(): MediaQuery {
         throw Error("getMediaQuery not implemented in UIContext!")
     }
-    public getPageInfoByUniqueId(id: number): PageInfo {
-        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
-    }
+
     public getMeasureUtils() : MeasureUtils {
         throw Error("getMeasureUtils not implemented in UIContext!")
     }

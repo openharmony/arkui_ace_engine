@@ -41,9 +41,7 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
     if (convValue.has_value() && convValue->symbol.has_value()) {
-        SymbolSpanModelStatic::InitialSymbol(frameNode, convValue->symbol.value());
-        SymbolSpanModelStatic::SetFontFamilies(frameNode, convValue->symbolFamilyName);
-        SymbolSpanModelStatic::SetSymbolType(frameNode, convValue->symbolType);
+        SymbolSpanModelNG::InitialSymbol(frameNode, convValue->symbol.value());
     }
 }
 } // SymbolSpanInterfaceModifier

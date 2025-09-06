@@ -1,6 +1,6 @@
 
 import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
-import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, remember } from "@koalaui/runtime"
+import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, NodeAttach } from "@koalaui/runtime"
 import { PeerNode } from "arkui/PeerNode";
 import { ArkComponentRootPeer } from 'arkui/framework'
 import { ArkUIGeneratedNativeModule } from "#components"
@@ -38,32 +38,15 @@ export interface ParallelOption {
     completed?: () => void,
 }
 
-export interface UIParallelAttribute extends CommonMethod {
-    enable?: boolean;
-    updateUseParallel?: boolean;
-
-    setParallelizeUIOptions(options?: ParallelOption): this;
-}
-
-export class ArkParallelComponent extends ArkCommonMethodComponent implements UIParallelAttribute {
-    enable?: boolean = true;
-    initlize?: () => void = undefined;
-    completed?: () => void = undefined;
-    updateUseParallel?: boolean = undefined;
-
-    public setParallelizeUIOptions(options?: ParallelOption): this {
-        this.enable = options?.enable;
-        this.initlize = options?.initlize;
-        this.completed = options?.completed;
-        this.updateUseParallel = options?.updateUseParallel;
-        return this;
-    }
+/** @memo:stable */
+export interface ParallelAttribute {
 }
 
 /** @memo */
-export function ParallelizeUIImpl(
+export function ParallelizeUI(
     /** @memo */
-    style: ((attributes: UIParallelAttribute) => void) | undefined,
+    style: ((attributes: ParallelAttribute) => void) | undefined,
+    options?: ParallelOption | undefined,
     /** @memo */
     content_?: () => void,
 ) {

@@ -15,10 +15,11 @@
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { DecoratedV1VariableBase, DecoratedV2VariableBase } from '../decoratorImpl/decoratorBase';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
+import { InteropNativeModule } from '@koalaui/interop';
 
 export class StateMgmtConsole {
     static log(str: string): void {
-        console.log('StateManagement: [' + str + ']');
+        InteropNativeModule._NativeLog('StateManagement: [' + str + ']');
     }
     static traceBegin(str: string): void {}
     static traceEnd(): void {}

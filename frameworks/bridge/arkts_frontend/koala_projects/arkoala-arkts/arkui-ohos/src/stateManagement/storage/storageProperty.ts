@@ -28,6 +28,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
 
     constructor(key: string, get: GetType<T>, set: SetType<T>) {
         super('AbstractProperty', null, key);
+        StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `);
 
         this.key_ = key;
         this.get_ = get;

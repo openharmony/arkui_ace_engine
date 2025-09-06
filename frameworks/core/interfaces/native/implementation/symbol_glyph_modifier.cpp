@@ -40,9 +40,6 @@ enum class TextFontWeight {
     MEDIUM,
     REGULAR,
 };
-constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
-const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 }
 namespace OHOS::Ace::NG::Converter {
 
@@ -87,30 +84,6 @@ void AssignCast(std::optional<TextFontWeight>& dst, const Ark_String& src)
         dst = static_cast<TextFontWeight>(fontWeight.value());
     }
 }
-
-template<>
-void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
-{
-    ResourceConverter converter(src);
-    if (!dst) {
-        dst = SymbolData();
-    }
-    dst->symbol = converter.ToSymbol();
-    if (!dst->symbol.has_value()) {
-        return;
-    }
-    if (dst->symbol.value() > SYSTEM_SYMBOL_BOUNDARY) {
-        std::string bundleName = converter.BundleName();
-        std::string moduleName = converter.ModuleName();
-        auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
-        std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
-        dst->symbolType = SymbolType::CUSTOM;
-        dst->symbolFamilyName.push_back(customSymbolFamilyName);
-    } else {
-        dst->symbolType = SymbolType::SYSTEM;
-        dst->symbolFamilyName.push_back(DEFAULT_SYMBOL_FONTFAMILY);
-    }
-}
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr float SCALE_LIMIT = 1.f;
@@ -132,9 +105,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Converter::SymbolData>(value);
     if (convValue.has_value() && convValue->symbol.has_value()) {
-        SymbolModelStatic::InitialSymbol(frameNode, convValue->symbol.value());
-        SymbolModelStatic::SetFontFamilies(frameNode, convValue->symbolFamilyName);
-        SymbolModelStatic::SetSymbolType(frameNode, convValue->symbolType);
+        SymbolModelNG::InitialSymbol(frameNode, convValue->symbol.value());
     }
 }
 } // SymbolGlyphInterfaceModifier

@@ -1303,24 +1303,6 @@ export class UIContextImpl extends UIContext {
     getFrameNodeByUniqueId(id: number): FrameNode | null {
         throw new Error("no impl");
     }
-
-    public getPageInfoByUniqueId(id: number): PageInfo {
-        const navDestinationInfo = ArkUIAniModule._CustomNode_QueryNavDestinationInfo1(Double.toInt(id));
-        const routerPageInfo = ArkUIAniModule._CustomNode_QueryRouterPageInfo1(Double.toInt(id));
-        if (navDestinationInfo) {
-            let param = PathStackUtils.getParamByNavDestinationId(navDestinationInfo.navDestinationId);
-            navDestinationInfo.param = param ? param! : undefined;
-        }
-        if (routerPageInfo) {
-            routerPageInfo.context = this;
-        }
-        let pageInfo: PageInfo = {
-            navDestinationInfo: navDestinationInfo,
-            routerPageInfo: routerPageInfo
-        }
-        return pageInfo;
-    }
-    
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }

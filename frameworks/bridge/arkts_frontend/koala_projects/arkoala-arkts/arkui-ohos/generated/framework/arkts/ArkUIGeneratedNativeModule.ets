@@ -1961,12 +1961,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SpanAttribute_setTextShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SpringBackAction_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _SpringBackAction_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _SpringBackAction_springBack(ptr: KPointer): void
-    @ani.unsafe.Direct
     native static _Stack_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _StackInterface_setStackOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

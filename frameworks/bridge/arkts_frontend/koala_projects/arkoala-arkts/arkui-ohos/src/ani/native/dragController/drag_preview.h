@@ -18,6 +18,7 @@
 
 #include "ani.h"
 
+#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/base/error/error_code.h"
 #include "utils/ani_utils.h"
@@ -32,6 +33,28 @@ class DragPreview {
 public:
     DragPreview() = default;
     ~DragPreview() = default;
+
+    static void SetForegroundColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+        Ark_ResourceColor color, ani_long dragPreviewPtr)
+    {
+        CHECK_NULL_VOID(env);
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return;
+        }
+        DragPreview* dragPreview = reinterpret_cast<DragPreview*>(dragPreviewPtr);
+        if (!dragPreview) {
+            HILOGE("AceDrag, convert drag preview failed.");
+            env->DestroyLocalScope();
+            return;
+        }
+        const auto* modifier = GetNodeAniModifier();
+        if (!modifier || !modifier->getDragControllerAniModifier()) {
+            env->DestroyLocalScope();
+            return;
+        }
+        modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(color, dragPreview->previewAsync_);
+        env->DestroyLocalScope();
+    }
 
     static void Animate(
         [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object optionsObj, ani_object handlerObj,

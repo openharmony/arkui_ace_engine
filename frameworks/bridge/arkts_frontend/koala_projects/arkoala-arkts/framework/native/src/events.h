@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import { Bindable } from "#generated"
+#ifndef _EVENTS_H
+#define _EVENTS_H
 
-export class SwiperOpsHandWritten {
-    static hookSwiperAttributeIndexImpl(node: KPointer, value: Bindable<number>) {
-        // SwiperOps.registerIndexCallback(node, value.value, (v) => {
-        //     value.onChange(v)
-        // })
-    }
-}
+#include <stdint.h>
+#include <stdlib.h>
+
+struct EventBuffer {
+    uint8_t buffer[60 * 4];
+};
+void sendEvent(const EventBuffer* event);
+
+#endif

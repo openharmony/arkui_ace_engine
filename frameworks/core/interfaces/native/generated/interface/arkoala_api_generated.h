@@ -2137,6 +2137,7 @@ typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
 typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
+typedef struct Ark_SpringBackAction Ark_SpringBackAction;
 typedef struct Opt_SpringBackAction Opt_SpringBackAction;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
@@ -4758,7 +4759,6 @@ typedef struct Opt_KeySource {
     Ark_KeySource value;
 } Opt_KeySource;
 typedef enum Ark_KeyType {
-    ARK_KEY_TYPE_UNKNOWN = -1,
     ARK_KEY_TYPE_DOWN = 0,
     ARK_KEY_TYPE_UP = 1,
 } Ark_KeyType;

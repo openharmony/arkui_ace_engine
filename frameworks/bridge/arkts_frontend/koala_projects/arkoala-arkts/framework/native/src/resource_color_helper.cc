@@ -13,13 +13,23 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import { Bindable } from "#generated"
+#define KOALA_INTEROP_MODULE ArkUINativeModule
 
-export class SwiperOpsHandWritten {
-    static hookSwiperAttributeIndexImpl(node: KPointer, value: Bindable<number>) {
-        // SwiperOps.registerIndexCallback(node, value.value, (v) => {
-        //     value.onChange(v)
-        // })
-    }
+#include "resource_color_helper.h"
+
+#include "interop-logging.h"
+
+namespace OHOS::Ace {
+Ark_ResourceColor GetResourceColor(int64_t arrayBuff, int32_t length)
+{
+    Ark_ResourceColor value_buf = {};
+    return value_buf;
 }
+
+std::vector<Ark_ResourceColor> GetResourceColorArray(int64_t thisArray, int32_t thisLength)
+{
+    Ark_ResourceColor value_buf = {};
+    return { value_buf };
+}
+
+} // namespace OHOS::Ace

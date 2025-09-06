@@ -68,7 +68,15 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public get(): T {
-        return this.sourceGet_();
+        const value = this.sourceGet_();
+        // @Link V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
+        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+
+        // a @Link get triggers a meta.addRef of the Link source XXXXDecoratedVariable
+        // therefore, when the source changes (its meta.fireChabge), the bindings using
+        // the @Link also update
+        // source will trigger also update
+        return value;
     }
 
     public set(newValue: T): void {

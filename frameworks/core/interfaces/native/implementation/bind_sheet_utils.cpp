@@ -15,7 +15,6 @@
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
-#include "core/interfaces/native/implementation/spring_back_action_peer.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;

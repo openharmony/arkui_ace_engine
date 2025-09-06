@@ -47,7 +47,7 @@ class AniEnvironment implements IAniEnvironment {
 
 interface EnvPropsOptions {
     key: string;
-    defaultValue: int | long | double | string | boolean;
+    defaultValue: number | string | boolean;
 }
 
 /**
@@ -138,7 +138,7 @@ class Environment {
     public static envProps(properties: EnvPropsOptions[]): void {
         properties.forEach((prop) => {
             const key: string = prop.key;
-            const defaultValue: int | long | double | string | boolean = prop.defaultValue;
+            const defaultValue: number | string | boolean = prop.defaultValue;
             Environment.envProp(key, defaultValue);
         });
     }

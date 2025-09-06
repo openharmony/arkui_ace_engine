@@ -156,22 +156,6 @@ namespace OHOS::Ace::NG::Converter {
         if (optBreakpoints.has_value()) {
             toValue.breakpoints = optBreakpoints.value();
         }
-
-        std::vector<std::string> value = toValue.breakpoints;
-        toValue.breakpoints.clear();
-        if (value.size() > MAX_NUMBER_BREAKPOINT - 1) {
-            return toValue;
-        }
-        double width = -1.0;
-        for (size_t i = 0; i < value.size(); i++) {
-            std::string threshold = value[i];
-            CalcDimension valueDimension = StringUtils::StringToCalcDimension(threshold, true, DimensionUnit::PX);
-            if (GreatNotEqual(width, valueDimension.Value())) {
-                break;
-            }
-            width = valueDimension.Value();
-            toValue.breakpoints.push_back(threshold);
-        }
         return toValue;
     }
     template<>

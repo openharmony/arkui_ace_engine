@@ -21,7 +21,7 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui.Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "#generated"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "#generated"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "#generated"
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "#generated"
@@ -49,6 +49,7 @@ export class ArkUIAniModule {
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
+    native static _Common_SetFrameRateRange(ptr: KPointer, value: ExpectedFrameRateRange, type: KInt): void
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
@@ -65,14 +66,21 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
     native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo1(uniqueId: KInt): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
+    native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
+    native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
+    native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
+    native static _SetWaterFlowFooter(ptr: KPointer, footer: KPointer): void
+    native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
+    native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void

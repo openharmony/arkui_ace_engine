@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SPRING_BACK_ACTION_PEER_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SPRING_BACK_ACTION_PEER_H
+#ifndef FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_KOALA_PROJECTS_ARKOALA_FRAMEWORK_NATIVE_SRC_RESOURCE_COLOR_HELPER_H
+#define FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_KOALA_PROJECTS_ARKOALA_FRAMEWORK_NATIVE_SRC_RESOURCE_COLOR_HELPER_H
 
-struct SpringBackActionPeer {
-};
+#include <vector>
 
-extern SpringBackActionPeer g_springBackPeer;
+#include "generated/arkoala_api_generated.h"
+#include "ui/base/macros.h"
 
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SPRING_BACK_ACTION_PEER_H
+namespace OHOS::Ace {
+Ark_ResourceColor ACE_FORCE_EXPORT GetResourceColor(int64_t arrayBuff, int32_t length);
+std::vector<Ark_ResourceColor> ACE_FORCE_EXPORT GetResourceColorArray(int64_t thisArray, int32_t thisLength);
+} // namespace OHOS::Ace
+
+#endif

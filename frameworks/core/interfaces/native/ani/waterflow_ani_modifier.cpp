@@ -17,7 +17,7 @@
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_static.h"
-#include "core/interfaces/native/implementation/frame_node_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/water_flow_scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG {

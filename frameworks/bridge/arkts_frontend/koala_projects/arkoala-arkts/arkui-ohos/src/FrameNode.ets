@@ -38,6 +38,7 @@ export class FrameNode implements MaterializedBase {
   public _nodeId: number = -1;
   protected _commonAttribute: CommonAttribute | undefined = undefined;
   protected _gestureEvent: UIGestureEvent | undefined = undefined;
+  public nodeType_?: string | undefined = undefined;
 
   getType(): string {
     return "CustomFrameNode";
