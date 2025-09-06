@@ -65,6 +65,12 @@ ohos_shared_library("arkoala_native_ani") {
     "xcomponent/xcomponent_module_methods.cpp",
     "condition_scope/condition_scope.cpp",
   ]
+  if (ace_engine_feature_wearable) {
+    sources -= [
+      "canvas/canvas_module.cpp",
+      "module.cpp",
+    ]
+  }
 
   external_deps = [
     "graphic_2d:drawing_ani",
