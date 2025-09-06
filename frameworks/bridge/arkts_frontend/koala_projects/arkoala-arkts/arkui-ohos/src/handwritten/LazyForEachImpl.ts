@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime"
-import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop"
-import { PeerNode } from "../PeerNode"
-import { InternalListener } from "../DataChangeListener"
-import { setNeedCreate } from "../ArkComponentRoot"
-import { int32 } from "@koalaui/common"
-import { IDataSource } from "../component/lazyForEach"
-import { LazyForEachOps } from "../component"
-import { LazyItemNode } from "./LazyItemNode"
-import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
-import { CustomComponent } from "@component_handwritten/customComponent"
+import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from '@koalaui/runtime'
+import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
+import { PeerNode } from '../PeerNode'
+import { InternalListener } from '../DataChangeListener'
+import { setNeedCreate } from '../ArkComponentRoot'
+import { int32 } from '@koalaui/common'
+import { IDataSource } from '../component/lazyForEach'
+import { LazyForEachOps } from '../component'
+import { LazyItemNode } from './LazyItemNode'
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { CustomComponent } from '@component_handwritten/customComponent'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
@@ -100,7 +100,7 @@ function createLazyNode(isRepeat: boolean): PeerNode {
             if (!_peerPtr) {
                 throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
             }
-            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? "Repeat" : "LazyForEach", 0)
+            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? 'Repeat' : 'LazyForEach', 0)
             return _peer
         },
         (node: PeerNode) => {
