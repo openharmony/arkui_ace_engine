@@ -25,7 +25,7 @@
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #else
-#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "nweb_helper.h"
 #endif // ARKUI_CAPI_UNITTEST
