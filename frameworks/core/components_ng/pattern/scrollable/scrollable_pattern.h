@@ -71,6 +71,11 @@ enum class ModalSheetCoordinationMode : char {
     SHEET_SCROLL = 1,
     SCROLLABLE_SCROLL = 2,
 };
+enum class ScrollToDirection {
+    NONE = 0,
+    FORWARD,
+    BACKWARD
+};
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
     Axis axis = Axis::VERTICAL;
@@ -1272,6 +1277,7 @@ private:
     bool isExtScroll_ = false;
     bool isNeedCollectOffset_ = false;
     bool needFullSafeArea_ = false;
+    ScrollToDirection scrollToDirection_ = ScrollToDirection::NONE;
 };
 } // namespace OHOS::Ace::NG
 
