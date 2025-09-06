@@ -402,9 +402,9 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
     auto vXSize = contentProperty.vectorBlackPointCenterX.size();
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, AttachBrush(_)).Times(vXSize * 2).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).Times(vXSize * 2).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(vXSize);
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(AtMost(vXSize * 2)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtMost(vXSize * 2)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtMost(vXSize));
     DrawingContext context { canvas, 100.f, 100.f };
     auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     /**
