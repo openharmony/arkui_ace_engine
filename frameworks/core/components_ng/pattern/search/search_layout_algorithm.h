@@ -87,7 +87,6 @@ private:
     std::optional<float> GetSearchFixAtIdealMaxWidth(LayoutWrapper* layoutWrapper);
     float GetTextFieldMinWidth(LayoutWrapper* layoutWrapper, const RefPtr<SearchTheme>& searchTheme);
     float GetTextFieldMaxWidth(LayoutWrapper* layoutWrapper, LayoutCalPolicy layoutPolicy, float maxWidth);
-    void ResetChildrenMeasureSize();
 
     // cached data
     float maxFontScale_;

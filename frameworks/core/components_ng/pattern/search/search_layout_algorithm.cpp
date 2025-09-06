@@ -528,9 +528,10 @@ double SearchLayoutAlgorithm::CalcSearchWidth(
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     CHECK_NULL_RETURN(calcLayoutConstraint, searchWidth);
-    auto hasMinSize = calcLayoutConstraint->minSize->Width().has_value();
-    auto hasMaxSize = calcLayoutConstraint->maxSize->Width().has_value();
-    auto hasWidth = calcLayoutConstraint->selfIdealSize->Width().has_value();
+    auto hasMinSize = calcLayoutConstraint->minSize.has_value() && calcLayoutConstraint->minSize->Width().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize.has_value() && calcLayoutConstraint->maxSize->Width().has_value();
+    auto hasWidth =
+        calcLayoutConstraint->selfIdealSize.has_value() && calcLayoutConstraint->selfIdealSize->Width().has_value();
     if (hasMinSize && ((hasMaxSize && searchConstraint.minSize.Width() >= searchConstraint.maxSize.Width())
         || (!hasMaxSize && !hasWidth))) {
         return searchConstraint.minSize.Width();
@@ -611,7 +612,6 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    ResetChildrenMeasureSize();
     searchHeight_ = CalcSearchHeight(constraint.value(), layoutWrapper);
     maxFontScale_ = CalculateMaxFontScale(layoutWrapper);
     minFontScale_ = CalculateMinFontScale(layoutWrapper);
@@ -1052,15 +1052,5 @@ float SearchLayoutAlgorithm::GetTextFieldMaxWidth(
         return std::numeric_limits<double>::infinity();
     }
     return maxWidth;
-}
-
-void SearchLayoutAlgorithm::ResetChildrenMeasureSize()
-{
-    searchIconSizeMeasure_.Reset();
-    cancelIconSizeMeasure_.Reset();
-    searchButtonSizeMeasure_.Reset();
-    cancelBtnSizeMeasure_.Reset();
-    textFieldSizeMeasure_.Reset();
-    dividerSizeMeasure_.Reset();
 }
 } // namespace OHOS::Ace::NG
