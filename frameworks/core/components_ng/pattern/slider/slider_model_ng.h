@@ -41,7 +41,7 @@ public:
     void SetSliderMode(const SliderMode& value) override;
     void SetDirection(Axis value) override;
     void SetReverse(bool value) override;
-    void SetBlockColor(const Color& value) override {};
+    void SetBlockColor(const Color& value) override;
     void SetLinearGradientBlockColor(const Gradient& value, bool isResourceColor = false) override;
     void SetTrackBackgroundColor(const Color& value) override {};
     void SetTrackBackgroundColor(const Gradient& value, bool isResourceColor = false) override;
