@@ -336,8 +336,8 @@ void PixelMapImage::DrawToRSCanvas(
     if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
-    ACE_SCOPED_TRACE("DrawToRSCanvas %s-%f-%f-%d-%d", dfxConfig.ToStringWithSrc().c_str(),
-        dfxConfig.GetFrameSizeWidth(), dfxConfig.GetFrameSizeHeight(), pixmap->GetWidth(), pixmap->GetHeight());
+    ACE_SCOPED_TRACE("DrawToRSCanvas %s-%f-%f-%d-%d-%d", dfxConfig.ToStringWithSrc().c_str(),
+        dfxConfig.GetFrameSizeWidth(), dfxConfig.GetFrameSizeHeight(), pixmap->GetWidth(), pixmap->GetHeight(), autoResize->dfxConfig.GetAutoResize());
     const auto& config = GetPaintConfig();
     RSBrush brush;
     RSSamplingOptions options;

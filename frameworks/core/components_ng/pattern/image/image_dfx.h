@@ -55,6 +55,16 @@ public:
         return isTrimMemRecycle_;
     }
 
+    void SetAutoResize(bool autoResize)
+    {
+        autoResize_ = autoResize;
+    }
+
+    bool GetAutoResize() const
+    {
+        return autoResize_;
+    }
+
     int32_t GetNodeId() const
     {
         return nodeInfo_.nodeId_;
@@ -95,6 +105,7 @@ private:
     std::string withSrcInfo_ = "";
     float frameSizeWidth_ = 0.0f;
     float frameSizeHeight_ = 0.0f;
+    bool autoResize_ = false;
 
     void InitToStringWithoutSrc()
     {
@@ -106,6 +117,7 @@ private:
                               .append(std::to_string(nodeInfo_.canvasNodeId_))
                               .append("-")
                               .append(std::to_string(srcType_))
+                              .append(autoResize_ ? "true" : "false")
                               .append("]");
     }
 
@@ -121,6 +133,7 @@ private:
                            .append(std::to_string(srcType_))
                            .append("]-[")
                            .append(imageSrc_)
+                           .append(autoResize_ ? "true" : "false")
                            .append("]");
     }
 };
