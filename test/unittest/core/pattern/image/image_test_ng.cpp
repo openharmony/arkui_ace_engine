@@ -1691,7 +1691,7 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level0)
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     frameNode->MarkModifyDone();
-    EXPECT_TRUE(pattern->loadingCtx_);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
