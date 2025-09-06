@@ -5274,6 +5274,9 @@ class ArkComponent {
     return this;
   }
   customProperty(key, value) {
+    if (this._weakPtr?.invalid()) {
+      return this;
+    }
     let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
     if (!returnBool) {
       const property = new ArkCustomProperty();
