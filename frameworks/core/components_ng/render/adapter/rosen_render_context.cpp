@@ -2967,7 +2967,7 @@ void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibi
 {
     auto isAccessibilityFocus = GetAccessibilityFocus().value_or(false);
     if (isAccessibilityFocus) {
-        PaintAccessibilityFocus();
+        PaintAccessibilityFocus(true);
     }
 }
 
@@ -3011,7 +3011,7 @@ void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
     rsNode_->SetFreeze(isFreezed);
 }
 
-void RosenRenderContext::PaintAccessibilityFocus()
+void RosenRenderContext::PaintAccessibilityFocus(bool isRectUpdate)
 {
     CHECK_NULL_VOID(rsNode_);
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
@@ -3048,6 +3048,20 @@ void RosenRenderContext::PaintAccessibilityFocus()
         frameRect.SetRect(globalRect);
     }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { true, false });
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG && isRectUpdate) {
+        auto paintNodePattern = AceType::DynamicCast<AccessibilityFocusPaintNodePattern>(node->GetPattern());
+        CHECK_NULL_VOID(paintNodePattern);
+        auto focusNode = paintNodePattern->GetFocusNode().Upgrade();
+        CHECK_NULL_VOID(focusNode);
+        auto pipeline = focusNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto rect = pipeline->GetRootRect();
+        std::shared_ptr<Rosen::Rectf> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX() - 100, Rect.GetY() - 100, rect.Width() + 200, rect.Height() + 200);
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, drawRect);
+    }
 }
 
 void RosenRenderContext::UpdateAccessibilityRoundRect()
