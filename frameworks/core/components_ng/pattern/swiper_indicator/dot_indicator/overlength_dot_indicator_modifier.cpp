@@ -103,6 +103,8 @@ void OverlengthDotIndicatorModifier::PaintBackground(
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
     canvas.AttachBrush(brush);
     auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
+    backgroundStart_ = axis_ == Axis::HORIZONTAL ? rectLeft : rectTop;
+    backgroundEnd_ = axis_ == Axis::HORIZONTAL ? rectRight : rectBottom;
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
     canvas.DetachBrush();
 }
@@ -174,8 +176,10 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
             // new point color
             paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
         }
-
-        PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
+        if (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
+            center.GetX() + width * HALF_FLOAT < backgroundEnd_) {
+            PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
+        }
     }
 }
 
@@ -224,9 +228,16 @@ void OverlengthDotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& ma
         longPointRightCenterX_->Set(longPointCenterX.second);
     }
 
-    vectorBlackPointCenterX_->Set(animationEndCenterX_);
-    unselectedIndicatorWidth_->Set(animationEndIndicatorWidth_);
-    unselectedIndicatorHeight_->Set(animationEndIndicatorHeight_);
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointCenterX_->Set(modifier->animationEndCenterX_);
+        modifier->unselectedIndicatorWidth_->Set(modifier->animationEndIndicatorWidth_);
+        modifier->unselectedIndicatorHeight_->Set(modifier->animationEndIndicatorHeight_);
+    });
     itemHalfSizes_->Set(normalItemHalfSizes);
     normalToHoverPointDilateRatio_->Set(NORMAL_FADING_RATIO);
     hoverToNormalPointDilateRatio_->Set(NORMAL_FADING_RATIO);
