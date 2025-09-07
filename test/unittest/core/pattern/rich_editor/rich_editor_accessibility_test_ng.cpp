@@ -551,4 +551,17 @@ HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level
     EXPECT_EQ(text, "");
 }
 
+/**
+ * @tc.name: AccessibilityProperty
+ * @tc.desc: Test GetText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetAccessibilityAction();
+}
+
 } // namespace OHOS::Ace::NG
