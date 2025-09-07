@@ -564,4 +564,54 @@ HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints005, TestSize.Le
     EXPECT_EQ(points[2].x, 305);
     EXPECT_EQ(points[2].y, 5);
 }
+
+
+/**
+ * @tc.name: TextDragPatternCalculateOverlayOffset
+ * @tc.desc: test CalculateOverlayOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textDragPattern and rootNode
+     */
+    TextDragPattern textDragPattern;
+    auto dragNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXTDRAG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetupRootElement();
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    auto rootGeometryNode = rootNode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameOffset(OffsetF(10.f, 10.f));
+    auto containerNode = pipeline->GetContainerModalNode();
+    ASSERT_NE(containerNode, nullptr);
+    auto containerNodeGeometryNode = containerNode->GetGeometryNode();
+    ASSERT_NE(containerNodeGeometryNode, nullptr);
+    containerNodeGeometryNode->SetFrameOffset(OffsetF(20.f, 20.f));
+
+    /**
+     * @tc.steps2: call CalculateOverlayOffset when hostNode is nullptr.
+     * @tc.expected: offset is OffsetF(20.f, 20.f).
+     */
+    OffsetF offset(30.f, 30.f);
+    textDragPattern.CalculateOverlayOffset(dragNode, offset, nullptr);
+    EXPECT_EQ(offset, OffsetF(20.f, 20.f));
+
+    /**
+     * @tc.steps3: call CalculateOverlayOffset when hostNode parent is toolbarItem.
+     * @tc.expected: offset is OffsetF(0.f, 0.f).
+     */
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto toolbarItem = FrameNode::GetOrCreateFrameNode(
+        V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    toolbarItem->AddChild(hostNode);
+    textDragPattern.CalculateOverlayOffset(dragNode, offset, hostNode);
+    EXPECT_EQ(offset, OffsetF(0.f, 0.f));
+}
 } // namespace OHOS::Ace::NG

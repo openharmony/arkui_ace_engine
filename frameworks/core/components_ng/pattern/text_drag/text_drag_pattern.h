@@ -235,7 +235,8 @@ public:
         animatingParagraph_.Reset();
     }
 protected:
-    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode,
+        const RefPtr<FrameNode>& hostNode = nullptr);
     virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
         const OffsetF globalOffset, const OffsetF textStartOffset);
@@ -245,7 +246,8 @@ protected:
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path, float radiusRatio);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
-    static void CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset);
+    static void CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset,
+        const RefPtr<FrameNode>& hostNode = nullptr);
     static void DropBlankLines(std::vector<RectF>& boxes);
 
     void SetLastLineHeight(float lineHeight)
