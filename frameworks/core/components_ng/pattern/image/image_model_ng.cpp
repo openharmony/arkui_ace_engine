@@ -1382,5 +1382,13 @@ void ImageModelNG::ResetSupportSvg2(FrameNode* frameNode)
 {
     SetSupportSvg2(frameNode, false);
 }
+
+bool ImageModelNG::GetSupportSvg2(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, false);
+    return imagePattern->GetSupportSvg2();
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

@@ -8411,6 +8411,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest148, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest149
+ * @tc.desc: Test imageNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest149, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_IMAGE, nullptr, true });
+
+    ArkUI_NumberValue value[] = { { .i32 = true } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2), nullptr);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: NativeNodeTest_OutlineColor001
  * @tc.desc: Test customNode function.
  * @tc.type: FUNC

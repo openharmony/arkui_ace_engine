@@ -3295,6 +3295,7 @@ struct ArkUIImageModifier {
     void (*resetResizableLattice)(ArkUINodeHandle node);
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

@@ -405,6 +405,11 @@ public:
         supportSvg2_ = enable;
     }
 
+    bool GetSupportSvg2()
+    {
+        return supportSvg2_;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();

@@ -163,6 +163,7 @@ public:
         FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
     static void SetSupportSvg2(FrameNode* frameNode, bool enable);
     static void ResetSupportSvg2(FrameNode* frameNode);
+    static bool GetSupportSvg2(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

@@ -1238,6 +1238,13 @@ void ResetSupportSvg2(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::ResetSupportSvg2(frameNode);
 }
+
+int32_t GetSupportSvg2(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ImageModelNG::GetSupportSvg2(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1354,6 +1361,7 @@ const ArkUIImageModifier* GetImageModifier()
         .resetResizableLattice = ResetResizableLattice,
         .setSupportSvg2 = SetSupportSvg2,
         .resetSupportSvg2 = ResetSupportSvg2,
+        .getSupportSvg2 = GetSupportSvg2,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
