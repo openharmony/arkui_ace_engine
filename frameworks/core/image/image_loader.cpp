@@ -283,7 +283,7 @@ std::string FileImageLoader::ParseFilePath(
     return filePath;
 }
 
-#if defined(PREVIEW) 
+#if defined(PREVIEW)
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
     NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
 {
@@ -367,7 +367,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
     }
     auto fileSize = statBuf.st_size;
     auto buffer = std::unique_ptr<void, decltype(&std::free)>(std::malloc(fileSize), std::free);
-    if (!buffer) {
+    if (!buffer || fileSize < 0) {
         close(fd);
         TAG_LOGW(AceLogTag::ACE_IMAGE, "malloc memory failed, %{private}s", realPath);
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
@@ -383,7 +383,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
         return nullptr;
     }
     // Create RSData from the read data.
-    loadResultInfo.fileSize = fileSize;
+    loadResultInfo.fileSize = static_cast<size_t>(fileSize);
     auto result = std::make_shared<RSData>();
     result->BuildFromMalloc(buffer.release(), fileSize);
     return result;
