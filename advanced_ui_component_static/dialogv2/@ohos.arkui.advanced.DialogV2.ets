@@ -14,7 +14,7 @@
  */
 
 import {
-  $r, Row, List, Text, Edge, Color, Radio, vp2px, px2vp, Image, Scroll, Column, Length, Button, Margin, ForEach,
+  $r, Row, List, Text, Edge, Color, Radio, Image, Scroll, Column, Length, Button, Margin, ForEach,
   Builder, Divider, KeyType, Scroller, ListItem, Padding, BarState, ScrollBar, ImageFit, BlurStyle, FlexAlign, KeyEvent,
   Direction, TextAlign, Resource, PixelMap, SheetInfo, Checkbox, Visibility, SizeResult, UIContext, ClickEvent,
   ScrollState, Placement, Dimension, EdgeEffect, Layoutable, ButtonRole, applyStyles, ButtonType, ResourceStr,
@@ -1648,7 +1648,7 @@ struct CustomDialogContentComponent {
         return true;
       }
       let isVertical: boolean = false;
-      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
+      let maxButtonTextSize = this.getUIContext().vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
         BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
       (this.buttons as Array<AdvancedDialogV2Button>).forEach((button) => {
         let contentSize: SizeOptions = this.getUIContext().getMeasureUtils().measureTextSize({
@@ -1897,7 +1897,7 @@ export struct PopoverDialogV2 {
     .onClick((event: ClickEvent) => {
       try {
         let screenSize: display.Display = display.getDefaultDisplaySync();
-        let screenWidth: number = px2vp(screenSize.width);
+        let screenWidth: number = this.getUIContext().px2vp(screenSize.width);
         if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
           this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
         } else {

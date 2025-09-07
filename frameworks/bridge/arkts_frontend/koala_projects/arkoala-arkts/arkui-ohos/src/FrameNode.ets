@@ -50,6 +50,8 @@ export class FrameNode implements MaterializedBase {
   public getPeer(): Finalizable | undefined {
     return this.peer;
   }
+  constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
+  }
   public removeComponentContent<T = undefined>(content: ComponentContent<T>) {
   }
 }

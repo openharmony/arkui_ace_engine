@@ -18,7 +18,7 @@ import {
   ResourceColor, AttributeModifier, ColumnAttribute, Component, TabsController, Builder, Button, ButtonType, Column,
   SymbolGlyph, Text, FontWeight, TextOverflow, TextAlign, FlexAlign, Placement, Color, SymbolEffect, Image, ImageFit,
   PX, FP, LPX, VP, GeometryInfo, Measurable, ConstraintSizeOptions, SizeResult, MeasureResult, Tabs, Visibility,
-  Divider, Row, ForEach, BlurStyle, MenuOptions, Position, ColorMetrics, Rect, ShadowStyle, px2vp, LocalizedPadding,
+  Divider, Row, ForEach, BlurStyle, MenuOptions, Position, ColorMetrics, Rect, ShadowStyle, LocalizedPadding,
   Margin, Padding, SymbolGlyphModifier, ButtonOptions, ClickEvent, CommonMethod, MenuElement, CustomDialog,
   CustomLayout, Layoutable, ClassCastError
 } from '@ohos.arkui.component'
@@ -711,7 +711,7 @@ struct ToolBarDialog {
         let properties: window.WindowProperties =
           this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
         let rect = properties.windowRect;
-        if (px2vp(rect.height as Int) > this.screenWidth) {
+        if (this.getUIContext().px2vp(rect.height as Int) > this.screenWidth) {
           this.maxLines = this.verticalScreenLines;
         } else {
           this.maxLines = this.horizontalsScreenLines;

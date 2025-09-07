@@ -17,7 +17,7 @@ import {
   Component, SelectOption, Flex, FlexAlign, ItemAlign, Row, Column, Badge, BadgePosition, Select, Position, Margin,
   Color, Text, TextOverflow, HorizontalAlign, Area, ForEach, Button, ButtonType, SymbolGlyph, BadgeStyle, BorderStyle,
   KeyType, TouchType, Placement, GeometryInfo, Layoutable, ConstraintSizeOptions, Builder, focusControl, SymbolEffect,
-  Image, TextAlign, BlurStyle, ShadowStyle, px2vp, ButtonOptions, BorderOptions, HoverEvent, Padding, KeyEvent,
+  Image, TextAlign, BlurStyle, ShadowStyle, ButtonOptions, BorderOptions, HoverEvent, Padding, KeyEvent,
   TouchEvent, ClickEvent, CustomPopupOptions, BadgeParamWithNumber, CommonMethod, CustomDialog,
   CustomDialogControllerOptions, PopupStateChangeParam, ClassCastError
 } from '@ohos.arkui.component';
@@ -940,7 +940,7 @@ export struct SelectTitleBarDialog {
       this.mainWindowStage = context.windowStage.getMainWindowSync();
       let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
       let rect = properties.windowRect;
-      if (px2vp(rect.height) > this.screenWidth) {
+      if (this.getUIContext().px2vp(rect.height) > this.screenWidth) {
         this.maxLines = this.verticalScreenLines;
       } else {
         this.maxLines = this.horizontalsScreenLines;

@@ -17,7 +17,7 @@
 import {
   Measurable, ResourceStr, MenuItemOptions, RichEditorController, ResourceColor, Resource, Color, Button, MenuItem,
   ShadowStyle, $r, Builder, BuilderParam, CustomBuilder, RichEditorSelection, RichEditorTextSpanResult, Column, ForEach,
-  ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, px2vp, Component, Length, Menu,
+  ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, Component, Length, Menu,
   RichEditorTextStyle, FontStyle, FontWeight, TextDecorationType, Flex, Visibility, Scroll, FlexWrap, MenuItemGroup,
   OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError
 } from '@ohos.arkui.component';
@@ -346,7 +346,7 @@ struct SelectionMenuComponent {
   }
 
   measureFlexPadding(): number {
-    return Math.floor((this.theme.expandedOptionPadding - px2vp(2.0)) * 10) / 10
+    return Math.floor((this.theme.expandedOptionPadding - this.getUIContext().px2vp(2.0)) * 10) / 10
   }
 
   getFontScale(): number {

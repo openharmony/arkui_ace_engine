@@ -17,7 +17,7 @@ import {
   Resource, ResourceStr, GestureModifier, UIGestureEvent, LongPressGestureHandler, ResourceColor, AttributeModifier,
   ColumnAttribute, Builder, Button, ButtonType, Column, SymbolGlyph, Text, FontWeight, TextOverflow, TextAlign,
   FlexAlign, Placement, Color, SymbolEffect, Image, ImageFit, PX, FP, LPX, VP, GeometryInfo, Measurable, SizeResult,
-  ConstraintSizeOptions, MeasureResult, Divider, Row, ForEach, BlurStyle, ColorMetrics, ShadowStyle, px2vp, $r,
+  ConstraintSizeOptions, MeasureResult, Divider, Row, ForEach, BlurStyle, ColorMetrics, ShadowStyle, $r,
   LocalizedPadding, Margin, Padding, SymbolGlyphModifier, ButtonOptions, ClickEvent, CommonMethod, MenuElement,
   ComponentV2, CustomLayout, MenuOptions, Position, Layoutable, ClassCastError
 } from '@ohos.arkui.component'
@@ -691,7 +691,7 @@ export struct ToolBarV2 {
                         let mainWindowStage = context.windowStage.getMainWindowSync();
                         let properties: window.WindowProperties =
                           mainWindowStage?.getWindowProperties() as window.WindowProperties;
-                        if (px2vp(properties.windowRect.height) > SCREEN_WIDTH_BREAK_POINT) {
+                        if (this.getUIContext().px2vp(properties.windowRect.height) > SCREEN_WIDTH_BREAK_POINT) {
                           this.itemCardTextMaxLine = VERTICAL_SCREEN_TEXT_MAX_LINES;
                         } else {
                           this.itemCardTextMaxLine = HORIZONTAL_SCREEN_TEXT_MAX_LINES;

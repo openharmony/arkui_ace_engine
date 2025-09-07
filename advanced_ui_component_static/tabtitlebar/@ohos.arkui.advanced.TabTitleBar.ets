@@ -15,7 +15,7 @@
 
 import {
   Column, Row, Component, Button, Text, CustomDialog, Array, $r, Flex, List, HoverEvent, ImageLoadResult,
-  Canvas, BlendMode, px2vp, Scroller, ForEach,AttributeModifier, GestureModifier, ListItem, BuilderParam,
+  Canvas, BlendMode, Scroller, ForEach,AttributeModifier, GestureModifier, ListItem, BuilderParam,
   ResourceStr, UIGestureEvent, LongPressGestureHandler, PopupOptions,PopupStateChangeParam, CustomPopupOptions,
   CustomDialogController,ScrollOptions, ScrollAnimationOptions, SwiperController, ResourceColor, Area,
   RenderingContextSettings, CanvasRenderingContext2D, Builder, FontWeight, FlexAlign, KeyEvent,
@@ -160,7 +160,7 @@ export struct TabTitleBar {
       } else {
         tabOffset += TabContentItem.paddingLeft;
         let uiContextMeasure: MeasureUtils = this.getUIContext().getMeasureUtils();
-        tabOffset += px2vp(uiContextMeasure.measureText({
+        tabOffset += this.getUIContext().px2vp(uiContextMeasure.measureText({
           textContent: tabItem.title.toString(),
           fontSize: 18,
           fontWeight: FontWeight.Medium,
@@ -539,7 +539,7 @@ struct TabContentItem {
 
   private completeCallback: ImageOnCompleteCallback | undefined = (info?: ImageCompleteEvent) => {
     let onImageCompleteValue: number =
-      px2vp(info?.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
+      this.getUIContext().px2vp(info?.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
     this.onImageComplete?.(onImageCompleteValue);
   }
 
@@ -548,7 +548,7 @@ struct TabContentItem {
       return;
     }
     let onImageComplete: number =
-      px2vp(event.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight
+      this.getUIContext().px2vp(event.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight
     this.onImageComplete?.(onImageComplete);
   }
 
@@ -1057,7 +1057,7 @@ struct TabTitleBarDialog {
       this.mainWindowStage = context.windowStage.getMainWindowSync();
       let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
       let rect = properties.windowRect;
-      if (px2vp(rect.height) > this.screenWidth) {
+      if (this.getUIContext().px2vp(rect.height) > this.screenWidth) {
         this.maxLines = this.verticalScreenLines;
       } else {
         this.maxLines = this.horizontalsScreenLines;
