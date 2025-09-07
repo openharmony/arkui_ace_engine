@@ -2582,6 +2582,34 @@ void ViewAbstract::SetTabStop(bool tabStop)
     focusHub->SetTabStop(tabStop);
 }
 
+void ViewAbstract::AllowForceDark(bool forceDarkAllowed)
+{
+    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+    node->AllowForceDark(forceDarkAllowed);
+    node->AllowForceDarkByUser(true);
+}
+
+void ViewAbstract::AllowForceDark(UINode* node, bool forceDarkAllowed)
+{
+    CHECK_NULL_VOID(node);
+    node->AllowForceDark(forceDarkAllowed);
+    node->AllowForceDarkByUser(true);
+}
+
+void ViewAbstract::ResetAllowForceDark(UINode* node)
+{
+    CHECK_NULL_VOID(node);
+    node->AllowForceDark(true);
+    node->AllowForceDarkByUser(false);
+}
+
+bool ViewAbstract::GetAllowForceDark(UINode* node)
+{
+    CHECK_NULL_RETURN(node, true);
+    return node->GetForceDarkAllowed();
+}
+
 void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();

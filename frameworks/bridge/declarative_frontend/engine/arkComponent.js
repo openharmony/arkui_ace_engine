@@ -204,6 +204,18 @@ class BackgroundColorModifier extends ModifierWithKey {
   }
 }
 BackgroundColorModifier.identity = Symbol('backgroundColor');
+class AllowForceDarkModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    getUINativeModule().common.allowForceDark(node);
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+AllowForceDarkModifier.identity = Symbol('allowForceDark');
 class WidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4181,6 +4193,10 @@ class ArkComponent {
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    return this;
+  }
+  allowForceDark(value) {
+    modifierWithKey(this._modifiersWithKeys, AllowForceDarkModifier.identity, AllowForceDarkModifier, value);
     return this;
   }
   backgroundImage(src, repeat) {

@@ -1092,6 +1092,10 @@ public:
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
     static void UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
     static void CheckMainThread();
+    static void AllowForceDark(bool forceDarkAllowed);
+    static void AllowForceDark(UINode* node, bool forceDarkAllowed);
+    static void ResetAllowForceDark(UINode* node);
+    static bool GetAllowForceDark(UINode* node);
 
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,

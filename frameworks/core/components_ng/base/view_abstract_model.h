@@ -545,6 +545,7 @@ public:
     virtual void RemoveResObj(const std::string& key) {};
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
+    virtual void AllowForceDark(bool forceDarkAllowed) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

@@ -9585,6 +9585,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("setPixelRoundMode", &JSViewAbstract::SetPixelRoundMode);
     JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
 
+    JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
@@ -12815,6 +12817,14 @@ uint8_t JSViewAbstract::GetPixelRoundMode()
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
+}
+
+void JSViewAbstract::JSAllowForceDark(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->AllowForceDark(info[0]->ToBoolean());
 }
 
 void JSViewAbstract::UnRegisterResource(const std::string& key)

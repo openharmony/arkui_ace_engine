@@ -11158,4 +11158,19 @@ ArkUINativeModuleValue CommonBridge::ResetOnChildTouchTest(ArkUIRuntimeCallInfo*
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::AllowForceDark(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        bool forcedarkAllowed = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->allowForceDark(nativeNode, forcedarkAllowed);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

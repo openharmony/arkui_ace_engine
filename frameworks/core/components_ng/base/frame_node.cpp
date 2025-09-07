@@ -48,6 +48,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -1413,6 +1414,9 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
         SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
     }
 
+    if (!GetForceDarkAllowed()) {
+        ResourceParseUtils::SetIsReloading(false);
+    }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
         pattern_->OnColorConfigurationUpdate();
@@ -1424,6 +1428,9 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
         frameNode->GetOverlayNode()->NotifyColorModeChange(colorMode);
     }
 
+    if (!GetForceDarkAllowed()) {
+        ResourceParseUtils::SetIsReloading(true);
+    }
     UINode::NotifyColorModeChange(colorMode);
 }
 

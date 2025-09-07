@@ -1117,6 +1117,14 @@ public:
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
 
+    void AddNeedReloadNodes(const WeakPtr<UINode>& node);
+    void ReloadNodesResource();
+
+    void NeedReloadResource(bool needReloadResource)
+    {
+        needReloadResource_ = needReloadResource;
+    }
+
     bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
 
     bool IsWindowFocused() const override
@@ -1630,6 +1638,8 @@ private:
     Kit::ArkUIObjectLifecycleCallback objectLifecycleCallback_;
     bool needUpdateTimeForDVSync_ = false;
     uint64_t lastVSyncTime_ = 0;
+    bool needReloadResource_ = false;
+    std::list<WeakPtr<UINode>> needReloadNodes_;
 };
 
 /**

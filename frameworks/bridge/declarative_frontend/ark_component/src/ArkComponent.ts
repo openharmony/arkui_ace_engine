@@ -271,6 +271,19 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class AllowForceDarkModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('allowForceDark');
+  applyPeer(node: KNode, reset: boolean): void {
+    getUINativeModule().common.allowForceDark(node);
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
   constructor(value: ArkBindMenu) {
     super(value);
@@ -4505,6 +4518,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    return this;
+  }
+
+  allowForceDark(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, AllowForceDarkModifier.identity, AllowForceDarkModifier, value);
     return this;
   }
 

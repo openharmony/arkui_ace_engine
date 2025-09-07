@@ -1877,6 +1877,11 @@ public:
         ViewAbstract::ResetResObj(key);
     }
 
+    void AllowForceDark(bool forceDarkAllowed) override
+    {
+        ViewAbstract::AllowForceDark(forceDarkAllowed);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {

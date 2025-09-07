@@ -1278,6 +1278,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnChildTouchTest));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChildTouchTest"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnChildTouchTest));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "allowForceDark"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AllowForceDark));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);

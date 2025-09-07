@@ -2067,6 +2067,16 @@ typedef enum {
      * @since 21
      */
     NODE_POSITION_EDGES = 107,
+    /**
+     * @brief Set whether the component enables the ability to invert colors.
+     * This attribute can be set, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: The parameter type is 1 or 0. \n
+     *
+     * @since 21
+     */
+    NODE_ALLOW_FORCE_DARK = 108,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.

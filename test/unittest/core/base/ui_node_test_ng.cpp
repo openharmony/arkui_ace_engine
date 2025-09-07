@@ -3660,4 +3660,61 @@ HWTEST_F(UINodeTestNg, UINodeTestNg074, TestSize.Level1)
     EXPECT_FALSE(noContainerNode->isDarkMode_);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: UpdateForceDarkAllowedNode001
+ * @tc.desc: Test UpdateForceDarkAllowedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UpdateForceDarkAllowedNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: step1. create node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode("rootNode", 10000, AceType::MakeRefPtr<Pattern>());
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 10000, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("childNode", 10000, AceType::MakeRefPtr<Pattern>());
+    auto grandSonNode = FrameNode::CreateFrameNode("grandSonNode", 10000, AceType::MakeRefPtr<Pattern>());
+    auto otherNode = FrameNode::CreateFrameNode("otherNode", 10000, AceType::MakeRefPtr<Pattern>());
+
+    parentNode->AllowForceDark(false);
+    parentNode->AllowForceDarkByUser(true);
+
+    /**
+     * @tc.steps2: grandSonNode UpdateForceDarkAllowedNode with ConfigChangePerform is false
+     * @tc.expected: otherNode->GetForceDarkAllowed() is true
+     */
+    grandSonNode->AddChild(otherNode);
+    EXPECT_TRUE(otherNode->GetForceDarkAllowed());
+
+    g_isConfigChangePerform = true;
+    /**
+     * @tc.steps3: childNode UpdateForceDarkAllowedNode with ConfigChangePerform is true
+     * @tc.expected: grandSonNode->GetForceDarkAllowed() is true
+     */
+    childNode->AddChild(grandSonNode);
+    EXPECT_TRUE(grandSonNode->GetForceDarkAllowed());
+
+    /**
+     * @tc.steps4: parentNode UpdateForceDarkAllowedNode with parentNode forceDarkAllowed_ is false
+     * @tc.expected: childNode->GetForceDarkAllowed() is false
+     */
+    parentNode->AddChild(childNode);
+    EXPECT_FALSE(childNode->GetForceDarkAllowed());
+
+    /**
+     * @tc.steps4: rootNode UpdateForceDarkAllowedNode with rootNode forceDarkAllowed_ is true
+     * @tc.expected: parentNode->GetForceDarkAllowed() is false
+     */
+    rootNode->AddChild(parentNode);
+    EXPECT_FALSE(parentNode->GetForceDarkAllowed());
+
+    /**
+     * @tc.steps5: rootNode AllowForceDark false
+     * @tc.expected: parentNode->GetForceDarkAllowed() is false
+     */
+    rootNode->AllowForceDark(false);
+    EXPECT_FALSE(parentNode->GetForceDarkAllowed());
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG

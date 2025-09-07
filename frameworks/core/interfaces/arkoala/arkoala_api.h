@@ -2860,6 +2860,9 @@ struct ArkUICommonModifier {
     void (*resetHeightLayoutPolicy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getHeightLayoutPolicy)(ArkUINodeHandle node);
     ArkUI_Bool (*getPositionEdges)(ArkUINodeHandle node, ArkUIStringAndFloat* result, ArkUI_Int32 unit);
+    void (*allowForceDark)(ArkUINodeHandle node, ArkUI_Bool forceDarkAllowed);
+    void (*resetAllowForceDark)(ArkUINodeHandle node);
+    ArkUI_Bool (*getAllowForceDark)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
