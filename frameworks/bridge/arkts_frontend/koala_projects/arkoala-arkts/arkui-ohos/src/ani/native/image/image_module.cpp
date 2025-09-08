@@ -104,4 +104,28 @@ void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_
     }
     modifier->getImageAniModifier()->setDrawingColorFilter(arkNode, &drawingColorFilter);
 }
+
+ani_long Image_ColorFilter_TransferStatic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilter)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (modifier == nullptr || colorFilter == 0) {
+        return 0;
+    }
+    auto colorFilterPeer = modifier->getImageAniModifier()->createColorFilterPeer(colorFilter);
+    if (colorFilterPeer == 0) {
+        return 0;
+    }
+    auto pointer = reinterpret_cast<ani_long>(colorFilterPeer);
+    return pointer;
+}
+
+ani_long Image_ColorFilter_TransferDynamic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilterPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (modifier == nullptr || colorFilterPeer == 0) {
+        return 0;
+    }
+    auto pointer = modifier->getImageAniModifier()->getColorFilter(colorFilterPeer);
+    return pointer;
+}
 } // namespace OHOS::Ace::Ani

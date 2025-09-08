@@ -40,6 +40,8 @@ export class ArkUIAniModule {
     }
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
+    native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
+    native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
