@@ -1440,9 +1440,7 @@ void ImagePattern::OnAttachToFrameNode()
         renderCtx->SetClipToBounds(false);
         renderCtx->SetUsingContentRectForRenderFrame(true);
 
-        // register image frame node to pipeline context to receive memory level notification and window state change
-        // notification
-        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+        // register image frame node to pipeline context to receive window state change notification
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
 }
@@ -1456,7 +1454,6 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
 void ImagePattern::OnAttachToMainTree()

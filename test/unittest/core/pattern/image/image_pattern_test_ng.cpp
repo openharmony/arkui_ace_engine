@@ -179,6 +179,45 @@ HWTEST_F(ImagePatternTestNg, OnSensitiveStyleChange001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnNotifyMemoryLevel001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnNotifyMemoryLevel001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(imageNode, nullptr);
+    RefPtr<ImageRenderProperty> layoutProperty1 = imageNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(layoutProperty1, nullptr);
+
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(ALT_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnNotifyMemoryLevel.
+     * @tc.expected: image_ is not changed.
+     */
+    imagePattern->OnNotifyMemoryLevel(1);
+    EXPECT_NE(imagePattern->image_, nullptr);
+}
+
+/**
  * @tc.name: SetDuration001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
