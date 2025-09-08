@@ -15,28 +15,46 @@
 
 import {addPartialUpdate} from '../ArkUIEntry'
 import {AnimationExtender, AnimateParam} from '../framework'
+import { int32 } from "@koalaui/common"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 
 export function _animateTo(param: AnimateParam, event: (() => void)): void {
     if (!event) {
         return;
     }
-    AnimationExtender.OpenImplicitAnimation(param);
-    event();
-    addPartialUpdate(event, param, (before: boolean) => {
+    let newEvent = ()=>{
+        AnimationExtender.OpenImplicitAnimation(param);
+        event();
+    }
+    addPartialUpdate(newEvent, param, (before: boolean) => {
         if (!before) {
             AnimationExtender.CloseImplicitAnimation();
         }
     })
 }
 
-export function _animationStart(param: AnimateParam, isFirstBuild: boolean) {
+export function _animationStart(param: AnimateParam | undefined, isFirstBuild: boolean) {
     if (isFirstBuild) {
         return
     }
-    AnimationExtender.OpenImplicitAnimation(param);
+    let value_type : int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(param)
+    if ((RuntimeType.UNDEFINED) != (value_type)) {
+        const value_value  = (param as AnimateParam)
+        AnimationExtender.OpenImplicitAnimation(value_value);
+    }
 }
 
-export function _animationEnd(isFirstBuild: boolean, update: (() => void)): void {
+export function _animationStop(value: AnimateParam | undefined, isFirstBuild: boolean, update: (() => void)): void {
+    let value_type : int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(value)
+    if ((RuntimeType.UNDEFINED) == (value_type)) {
+        if (isFirstBuild) {
+            update();
+        }
+        return;
+    }
+
     let param: AnimateParam = {}
     addPartialUpdate(() => {}, param, (before: boolean) => {
         if (before) {

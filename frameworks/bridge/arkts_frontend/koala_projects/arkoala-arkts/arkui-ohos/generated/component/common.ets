@@ -72,6 +72,9 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
+// instructive change start
+import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
+// instructive change end
 export interface BaseEvent {
     target: EventTarget
     timestamp: number
@@ -7379,9 +7382,16 @@ export interface CommonMethod {
     focusBox(value: FocusBoxStyle | undefined): this {
         throw new Error("Unimplemented method focusBox")
     }
-    animation(value: AnimateParam | undefined): this {
-        throw new Error("Unimplemented method animation")
+
+    // instructive change start
+    animationStart(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStart")
     }
+    animationStop(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStop")
+    }
+    // instructive change end
+
     transition(value: TransitionEffect | undefined): this {
         throw new Error("Unimplemented method transition")
     }
@@ -8147,9 +8157,16 @@ export class ArkCommonMethodStyle implements CommonMethod {
     focusBox(value: FocusBoxStyle | undefined): this {
         return this
     }
-    animation(value: AnimateParam | undefined): this {
+
+    // instructive change start
+    public animationStart(value: AnimateParam | undefined): this {
         return this
     }
+    public animationStop(value: AnimateParam | undefined): this {
+        return this
+    }
+    // instructive change end
+
     transition(value: TransitionEffect | undefined): this {
         return this
     }
@@ -9414,14 +9431,27 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public animation(value: AnimateParam | undefined): this {
-        if (this.checkPriority("animation")) {
+
+    // instructive change start
+    public animationStart(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStart")) {
             const value_casted = value as (AnimateParam | undefined)
-            this.getPeer()?.setAnimationAttribute(value_casted)
+            _animationStart(value_casted, this.isFirstBuild);
             return this
         }
         return this
     }
+    public animationStop(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStop")) {
+            _animationStop(value, this.isFirstBuild, () => {
+                this.isFirstBuild = false
+            });
+            return this
+        }
+        return this
+    }
+    // instructive change end
+
     public transition(value: TransitionEffect | undefined): this {
         if (this.checkPriority("transition")) {
             const value_casted = value as (TransitionEffect | undefined)
@@ -10844,7 +10874,9 @@ export function $rawfile(value: string): Resource {
     return GlobalScope.$rawfile(value)
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateTo(value, event)
+    // instructive change start
+    _animateTo(value, event)
+    // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
     GlobalScope.animateToImmediately(value, event)
