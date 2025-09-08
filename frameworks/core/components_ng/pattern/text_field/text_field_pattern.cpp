@@ -4263,6 +4263,14 @@ void TextFieldPattern::UpdateHoverStyle(bool isHover)
     if (!hoverAndPressBgColorEnabled_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    auto hoverEffect = inputEventHub->GetHoverEffect();
+    if (hoverEffect != HoverEffectType::UNKNOWN) {
+        return;
+    }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto theme = GetTheme();

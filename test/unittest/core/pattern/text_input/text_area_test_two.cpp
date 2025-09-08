@@ -666,6 +666,24 @@ HWTEST_F(TextAreaTestTwo, UpdateHoverStyle006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateHoverStyle007
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case set HoverEffectType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle007, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::RED, false); });
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = true;
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
+    inputEventHub->SetHoverEffect(HoverEffectType::SCALE);
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+}
+
+/**
  * @tc.name: UpdatePressStyle001
  * @tc.desc: Test is textarea, UpdatePressStyle(), case hoverAndPressBgColorEnabled_ = false, branch 1-1
  * @tc.type: FUNC
