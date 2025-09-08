@@ -64,10 +64,12 @@ class stateMgmtConsole {
   public static frequentApplicationError(msg: string): void {
     if (!stateMgmtConsole.startTimer) {
       stateMgmtConsole.startTimer = true;
-      setTimeout(() => {
-        stateMgmtConsole.errorLogFlag.clear();
-        stateMgmtConsole.startTimer = false;
-      }, 20000);
+      if (typeof setTimeout === 'function') {
+        setTimeout(() => {
+          stateMgmtConsole.errorLogFlag.clear();
+          stateMgmtConsole.startTimer = false;
+        }, 20000);
+      }
     }
     const count = stateMgmtConsole.errorLogFrequency.get(msg);
     stateMgmtConsole.errorLogFrequency.set(msg, count ? count + 1 : 1);
@@ -83,6 +85,7 @@ class stateMgmtConsole {
     if (stateMgmtConsole.errorLogFrequency.size > stateMgmtConsole.MAX_LOG_TYPES) {
       aceConsole.error(LogTag.STATE_MGMT, `There are more than ${stateMgmtConsole.errorLogFrequency.size} different kinds application error logs, please check the previous log printed.`);
       stateMgmtConsole.errorLogFrequency.clear();
+      typeof setTimeout !== 'function' && stateMgmtConsole.errorLogFlag.clear();
     }
   }
 
