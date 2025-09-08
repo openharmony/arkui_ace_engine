@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -59,6 +60,7 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "ui/resource/resource_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -962,5 +964,734 @@ HWTEST_F(MenuItemTestNg, CreateNavigationMenuItemTest001, TestSize.Level1)
     auto focusHub = menuItemNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_TRUE(focusHub->IsEnabled());
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: Test MenuItemModelNG::ColorTypeToString with different types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, ColorTypeToString, TestSize.Level1)
+{
+    MenuItemModelNG menuItemModel;
+    std::string result = menuItemModel.ColorTypeToString(MenuItemFontColorType::FONT_COLOR);
+    EXPECT_EQ(result, "FontColor");
+    result = menuItemModel.ColorTypeToString(MenuItemFontColorType::LABEL_FONT_COLOR);
+    EXPECT_EQ(result, "LabelFontColor");
+    MenuItemFontColorType unknownType = static_cast<MenuItemFontColorType>(100);
+    result = menuItemModel.ColorTypeToString(unknownType);
+    EXPECT_EQ(result, "Unknown");
+}
+
+/**
+ * @tc.name: DimensionTypeToString
+ * @tc.desc: Test DimensionTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, DimensionTypeToString, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    EXPECT_EQ(model.DimensionTypeToString(MenuItemFontSizeType::FONT_SIZE), "FontSize");
+    EXPECT_EQ(model.DimensionTypeToString(MenuItemFontSizeType::LABEL_FONT_SIZE), "LabelFontSize");
+    MenuItemFontSizeType unknownType = static_cast<MenuItemFontSizeType>(99);
+    EXPECT_EQ(model.DimensionTypeToString(unknownType), "Unknown");
+}
+
+/**
+ * @tc.name: StringTypeToString
+ * @tc.desc: Test StringTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, StringTypeToString, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    EXPECT_EQ(model.StringTypeToString(MenuItemStringType::SELECT_ICON), "SelectIcon");
+    EXPECT_EQ(model.StringTypeToString(MenuItemStringType::CONTENT), "Content");
+    EXPECT_EQ(model.StringTypeToString(MenuItemStringType::LABEL_INFO), "LabelInfo");
+    MenuItemStringType unknownType = static_cast<MenuItemStringType>(99);
+    EXPECT_EQ(model.StringTypeToString(unknownType), "Unknown");
+}
+ 
+/**
+ * @tc.name: FamilyTypeToString
+ * @tc.desc: Test FamilyTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, FamilyTypeToString, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    EXPECT_EQ(model.FamilyTypeToString(MenuItemFontFamilyType::FONT_FAMILY), "FontFamily");
+    EXPECT_EQ(model.FamilyTypeToString(MenuItemFontFamilyType::LABEL_FONT_FAMILY), "LabelFontFamily");
+    MenuItemFontFamilyType unknownType = static_cast<MenuItemFontFamilyType>(99);
+    EXPECT_EQ(model.FamilyTypeToString(unknownType), "Unknown");
+}
+ 
+/**
+ * @tc.name: MediaTypeToString
+ * @tc.desc: Test MediaTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MediaTypeToString, TestSize.Level1)
+{
+    MenuItemModelNG model;
+    EXPECT_EQ(model.MediaTypeToString(MenuItemIconType::START_ICON), "StartIcon");
+    EXPECT_EQ(model.MediaTypeToString(MenuItemIconType::END_ICON), "EndIcon");
+    MenuItemIconType unknownType = static_cast<MenuItemIconType>(99);
+    EXPECT_EQ(model.MediaTypeToString(unknownType), "Unknown");
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj001
+ * @tc.desc: Test CreateWithColorResourceObj MenuItemFontColorType::FONT_COLOR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithColorResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test environment and create MenuItemModelNG
+     * @tc.expected: MenuItemModelNG created with content and label
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node and check initial font color
+     * @tc.expected: Frame node obtained, font color not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource object and call CreateWithColorResourceObj
+     * @tc.expected: Resource object created, method called for FONT_COLOR
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithColorResourceObj(resObj, MenuItemFontColorType::FONT_COLOR);
+ 
+    /**
+     * @tc.steps4: Test with empty cache
+     * @tc.expected: Font color remains unset
+     */
+    std::string key = "";
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, Color::RED.ColorToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+ 
+    /**
+     * @tc.steps5: Test with valid cache
+     * @tc.expected: Font color set to red
+     */
+    key = "MenuItem" + MenuItemModelNG::ColorTypeToString(MenuItemFontColorType::FONT_COLOR);
+    pattern->AddResCache(key, Color::RED.ColorToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+}
+ 
+/**
+ * @tc.name: CreateWithColorResourceObj002
+ * @tc.desc: Test CreateWithColorResourceObj MenuItemFontColorType::LABEL_FONT_COLOR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithColorResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial label font color
+     * @tc.expected: Node obtained, label font color not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetLabelFontColor().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithColorResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithColorResourceObj(resObj, MenuItemFontColorType::LABEL_FONT_COLOR);
+ 
+    /**
+     * @tc.steps4: Add valid cache, reload resources
+     * @tc.expected: Label font color set to red
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::ColorTypeToString(MenuItemFontColorType::LABEL_FONT_COLOR);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, Color::RED.ColorToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetLabelFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetLabelFontColor().value(), Color::RED);
+}
+
+/**
+ * @tc.name: CreateWithDimensionFpResourceObj001
+ * @tc.desc: Test CreateWithDimensionFpResourceObj MenuItemFontSizeType::FONT_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithDimensionFpResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial font size
+     * @tc.expected: Node obtained, font size not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetFontSize().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithDimensionFpResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithDimensionFpResourceObj(resObj, MenuItemFontSizeType::FONT_SIZE);
+ 
+    /**
+     * @tc.steps4: Add invalid cache, reload resources
+     * @tc.expected: Cache added, font size still not set
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::DimensionTypeToString(MenuItemFontSizeType::FONT_SIZE);
+    CalcDimension result1(5.0, DimensionUnit::PERCENT);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, result1.ToString());
+    result1 = CalcDimension();
+    EXPECT_FALSE(result1.IsValid());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(layoutProperty->GetFontSize().has_value());
+ 
+    /**
+     * @tc.steps5: Add valid cache, reload resources
+     * @tc.expected: Font size set to 0.5VP
+     */
+    CalcDimension result2(0.5, DimensionUnit::VP);
+    pattern->AddResCache(key, result2.ToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), result2);
+}
+ 
+/**
+ * @tc.name: CreateWithDimensionFpResourceObj002
+ * @tc.desc: Test CreateWithDimensionFpResourceObj MenuItemFontSizeType::LABEL_FONT_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithDimensionFpResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial label font size
+     * @tc.expected: Node obtained, label font size not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetLabelFontSize().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithDimensionFpResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithDimensionFpResourceObj(resObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
+ 
+    /**
+     * @tc.steps4: Add invalid cache, reload resources
+     * @tc.expected: Cache added, label font size still not set
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::DimensionTypeToString(MenuItemFontSizeType::LABEL_FONT_SIZE);
+    CalcDimension result(5.0, DimensionUnit::PERCENT);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, result.ToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(layoutProperty->GetLabelFontSize().has_value());
+ 
+    /**
+     * @tc.steps5: Add valid cache, reload resources
+     * @tc.expected: Label font size set to 0.5VP
+     */
+    CalcDimension result2(0.5, DimensionUnit::VP);
+    pattern->AddResCache(key, result2.ToString());
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetLabelFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetLabelFontSize().value(), result2);
+}
+
+/**
+ * @tc.name: CreateWithFontFamilyResourceObj001
+ * @tc.desc: Test CreateWithFontFamilyResourceObj MenuItemFontFamilyType::FONT_FAMILY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithFontFamilyResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial font family
+     * @tc.expected: Node obtained, font family not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetFontFamily().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithFontFamilyResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "Test Sans";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    menuItemModelInstance.CreateWithFontFamilyResourceObj(resObj, MenuItemFontFamilyType::FONT_FAMILY);
+ 
+    /**
+     * @tc.steps4: Add cache, reload resources
+     * @tc.expected: Font family set to "Test Sans"
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::FamilyTypeToString(MenuItemFontFamilyType::FONT_FAMILY);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, "Test Sans");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetFontFamily().has_value());
+}
+ 
+/**
+ * @tc.name: CreateWithFontFamilyResourceObj002
+ * @tc.desc: Test CreateWithFontFamilyResourceObj MenuItemFontFamilyType::LABEL_FONT_FAMILY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithFontFamilyResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial label font family
+     * @tc.expected: Node obtained, label font family not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetLabelFontFamily().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithFontFamilyResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "Test Sans";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    menuItemModelInstance.CreateWithFontFamilyResourceObj(resObj, MenuItemFontFamilyType::LABEL_FONT_FAMILY);
+ 
+    /**
+     * @tc.steps4: Add cache, reload resources
+     * @tc.expected: Label font family set to "Test Sans"
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::FamilyTypeToString(MenuItemFontFamilyType::LABEL_FONT_FAMILY);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, "Test Sans");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetLabelFontFamily().has_value());
+}
+
+/**
+ * @tc.name: CreateWithStringResourceObj001
+ * @tc.desc: Test CreateWithStringResourceObj MenuItemStringType::SELECT_ICON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithStringResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial select icon source
+     * @tc.expected: Node obtained, select icon source not set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetSelectIconSrc().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithStringResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithStringResourceObj(resObj, MenuItemStringType::SELECT_ICON);
+ 
+    /**
+     * @tc.steps4: Add empty cache, reload resources
+     * @tc.expected: Cache added, select icon source still not set
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::StringTypeToString(MenuItemStringType::SELECT_ICON);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, "");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(layoutProperty->GetSelectIconSrc().has_value());
+ 
+    /**
+     * @tc.steps5: Add valid cache, reload resources
+     * @tc.expected: Select icon source set to "TEST"
+     */
+    pattern->AddResCache(key, "TEST");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetSelectIconSrc().has_value());
+    EXPECT_EQ(layoutProperty->GetSelectIconSrc().value(), "TEST");
+}
+ 
+/**
+ * @tc.name: CreateWithStringResourceObj002
+ * @tc.desc: Test CreateWithStringResourceObj MenuItemStringType::CONTENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithStringResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, check initial content
+     * @tc.expected: Node obtained, content is set
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetContent().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithStringResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    menuItemModelInstance.CreateWithStringResourceObj(resObj, MenuItemStringType::CONTENT);
+ 
+    /**
+     * @tc.steps4: Add cache, reload resources
+     * @tc.expected: Content updated to "TEST"
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::StringTypeToString(MenuItemStringType::CONTENT);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    pattern->AddResCache(key, "TEST");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetContent().has_value());
+    EXPECT_EQ(layoutProperty->GetContent().value(), "TEST");
+}
+
+/**
+ * @tc.name: CreateWithMediaResourceObj001
+ * @tc.desc: Test CreateWithMediaResourceObj MenuItemIconType::START_ICON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithMediaResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, reset and check start icon
+     * @tc.expected: Node obtained, start icon cleared
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, StartIcon, frameNode);
+    EXPECT_FALSE(layoutProperty->GetStartIcon().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithMediaResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "TEST";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    menuItemModelInstance.CreateWithMediaResourceObj(resObj, MenuItemIconType::START_ICON);
+ 
+    /**
+     * @tc.steps4: Add empty cache, reload resources
+     * @tc.expected: Start icon set (default behavior)
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::MediaTypeToString(MenuItemIconType::START_ICON);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddResCache(key, "");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+ 
+    /**
+     * @tc.steps5: Add valid cache, reload resources
+     * @tc.expected: Start icon updated with valid source
+     */
+    pattern->AddResCache(key, "TEST");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+}
+ 
+/**
+ * @tc.name: CreateWithMediaResourceObj002
+ * @tc.desc: Test CreateWithMediaResourceObj MenuItemIconType::END_ICON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, CreateWithMediaResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize test env, create MenuItemModelNG
+     * @tc.expected: Instance created, properties set
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+ 
+    /**
+     * @tc.steps2: Get frame node, reset and check start icon
+     * @tc.expected: Node obtained, start icon cleared
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, StartIcon, frameNode);
+    EXPECT_FALSE(layoutProperty->GetStartIcon().has_value());
+ 
+    /**
+     * @tc.steps3: Create resource obj, call CreateWithMediaResourceObj
+     * @tc.expected: Resource obj created, method called
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "TEST";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    menuItemModelInstance.CreateWithMediaResourceObj(resObj, MenuItemIconType::END_ICON);
+ 
+    /**
+     * @tc.steps4: Add cache, reload resources
+     * @tc.expected: End icon set to "TEST"
+     */
+    std::string key = "MenuItem" + MenuItemModelNG::MediaTypeToString(MenuItemIconType::END_ICON);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    pattern->AddResCache(key, "TEST");
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(layoutProperty->GetEndIcon().has_value());
+}
+
+/**
+ * @tc.name: UpdateMenuProperty001
+ * @tc.desc: Test UpdateMenuProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, UpdateMenuProperty, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init env and create MenuItem.
+     * @tc.expected: step1. Item created, props set.
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+
+    /**
+     * @tc.steps: step2. Get frame node.
+     * @tc.expected: step2. Node and layout non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Reset icon, trigger config change, update props.
+     * @tc.expected: step3. Icon restored.
+     */
+    layoutProperty->ResetStartIcon();
+    g_isConfigChangePerform = true;
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    /**
+     * @tc.steps: step4. Reset icon, no config change, update props.
+     * @tc.expected: step4. Icon restored.
+     */
+    g_isConfigChangePerform = false;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+}
+
+/**
+ * @tc.name: UpdateMenuProperty002
+ * @tc.desc: Test UpdateMenuProperty hasResources.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, UpdateMenuProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init env and create MenuItem.
+     * @tc.expected: step1. Item created.
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+
+    /**
+     * @tc.steps: step2. Get frame node.
+     * @tc.expected: step2. Node non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Add resource, config change, update props.
+     * @tc.expected: step3. Resource added to manager.
+     */
+    std::string key = "menuItem";
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    itemOption.AddResource(key, resObj, [](const RefPtr<ResourceObject>&, MenuItemProperties&) {});
+    g_isConfigChangePerform = true;
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    pattern->OnColorModeChange(1);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.count(key), 1);
+
+    /**
+     * @tc.steps: step4. Reset icon, no config change, update props.
+     * @tc.expected: step4. Icon restored.
+     */
+    g_isConfigChangePerform = false;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    /**
+     * @tc.steps: step5. Reset icon, config change, update props, then release node.
+     * @tc.expected: step5. Icon restored, no crash.
+     */
+    g_isConfigChangePerform = true;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    frameNode.Reset();
+    pattern->OnColorModeChange(1);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
