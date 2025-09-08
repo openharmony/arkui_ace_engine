@@ -19,19 +19,17 @@
 #include "gmock/gmock.h"
 
 #include "iremote_broker.h"
-#include "iremote_object.h"
+#include "ipc_object_proxy.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-class MockFormIRemoteObject : public IPCObjectStub {
+class MockFormIRemoteObject : public IPCObjectProxy {
 public:
-    MockFormIRemoteObject() : IPCObjectStub(u"mock_i_remote_object") {}
+    MockFormIRemoteObject() : IPCObjectProxy(0, u"mock_i_remote_object") {}
 
     ~MockFormIRemoteObject() {}
 
     MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
-    MOCK_METHOD(int, OnRemoteRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option));
 };
 } // namespace AppExecFwk
 } // namespace OHOS

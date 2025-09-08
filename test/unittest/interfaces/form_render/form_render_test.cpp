@@ -18,11 +18,14 @@
 #include "gtest/gtest.h"
 #include "form_mgr_errors.h"
 #include "test/mock/interfaces/mock_uicontent.h"
+#include "test/mock/interfaces/mock_form_render_delegate_stub.h"
+#include "test/mock/interfaces/mock_i_remote_object_form.h"
 #include "ui_content.h"
 
 #define private public
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_delegate_proxy.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -490,7 +493,17 @@ HWTEST_F(FormRenderTest, FormRenderTest012, TestSize.Level1)
     ASSERT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
+
+    sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
+    ASSERT_NE(iremoteObject, nullptr);
+    sptr<FormRendererDelegateProxy> renderDelegateProxy = new FormRendererDelegateProxy(iremoteObject);
+    ASSERT_NE(renderDelegateProxy, nullptr);
+    formRenderer->formRendererDelegate_ = renderDelegateProxy;
     formRenderer->ResetRenderDelegate();
+    EXPECT_TRUE(formRenderer->formRendererDelegate_);
+    iremoteObject->SetObjectDied(true);
+    formRenderer->ResetRenderDelegate();
+    EXPECT_FALSE(formRenderer->formRendererDelegate_);
 }
 
 /**
@@ -687,8 +700,19 @@ HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2))
-        .WillOnce(Return(rsNode));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillOnce(Return(rsNode));
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    sptr<MockFormRenderDelegateStub> renderDelegateStub = new MockFormRenderDelegateStub();
+    formRenderer->formRendererDelegate_ = renderDelegateStub;
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillRepeatedly(Return(rsNode));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(0);
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _))
+        .WillOnce(Return(ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(1);
     formRenderer->OnSurfaceReuse(formJsInfo);
 }
 
