@@ -2273,7 +2273,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onLoadFinishedV2_ = useNewPipe ? eventHub->GetOnLoadFinishedEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                           webCom->GetOnLoadFinishedEventId(), oldContext);
-        onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent() : nullptr;                                          
+        onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent()
+                                                    : nullptr;                                          
     }
     return true;
 }
