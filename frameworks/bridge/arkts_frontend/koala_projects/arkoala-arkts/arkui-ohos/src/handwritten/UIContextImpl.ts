@@ -24,11 +24,11 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from "@ohos/arkui/UIContext"
+    DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from '@ohos/arkui/UIContext'
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from "arkui/component/common"
+import { KeyEvent, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/component/common'
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -1201,7 +1201,7 @@ export class DetachedRootEntryManager {
          return this.detachedRoots_;
     }
 
-    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>) {
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>): void {
         this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
     }
 
