@@ -1765,6 +1765,37 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSwiperEventCallback001
+ * @tc.desc: Branch: if (swiperPattern->isTouchDown_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SetSwiperEventCallback001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step1. Touch down on indicatorNode_
+     * @tc.expected: Animation still running
+     */
+    pattern_->SetSwiperEventCallback(true);
+    pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
+    EXPECT_TRUE(pattern_->isTouchDown_);
+
+    /**
+     * @tc.steps: step2. Touch up
+     * @tc.expected: Animation still running
+     */
+    ASSERT_NE(pattern_->swiperController_, nullptr);
+    const auto& removeSwiperEventCallback = pattern_->swiperController_->GetRemoveSwiperEventCallback();
+    if (removeSwiperEventCallback) {
+        EXPECT_TRUE(pattern_->isTouchDown_);
+        removeSwiperEventCallback();
+        EXPECT_FALSE(pattern_->isTouchDown_);
+    }
+}
+
+/**
  * @tc.name: OnFontScaleConfigurationUpdate001
  * @tc.desc: Test SwiperPattern OnFontScaleConfigurationUpdate
  * @tc.type: FUNC
