@@ -6681,6 +6681,7 @@ void JSWeb::OnSafeBrowsingCheckFinish(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebSafeBrowsingCheckResult");
     };
