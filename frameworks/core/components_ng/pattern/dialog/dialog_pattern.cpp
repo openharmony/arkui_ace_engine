@@ -1338,6 +1338,9 @@ void DialogPattern::HandleBlurEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    if (UpdateShadow()) {
+        return;
+    }
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
     contentRenderContext_->UpdateBackShadow(
         dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff, host)));
@@ -1348,9 +1351,31 @@ void DialogPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    if (UpdateShadow()) {
+        return;
+    }
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
     contentRenderContext_->UpdateBackShadow(
         dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn, host)));
+}
+
+bool DialogPattern::UpdateShadow()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(contentRenderContext_, false);
+    if (SystemProperties::ConfigChangePerform() && dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        Color shadowColor = shadow.GetColor();
+        auto colorMode = Container::CurrentColorMode();
+        if (colorMode == ColorMode::DARK) {
+            auto result = ColorInverter::Invert(shadowColor, host->GetInstanceId(), host->GetTag());
+            shadow.SetColor(result);
+        }
+        contentRenderContext_->UpdateBackShadow(shadow);
+        return true;
+    }
+    return false;
 }
 
 // XTS inspector

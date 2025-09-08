@@ -593,6 +593,43 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle001, 
     pattern->HandleFocusEvent();
     ASSERT_NE(pattern->contentRenderContext_, nullptr);
 }
+/**
+ * @tc.name: DialogPatternAdditionalTestNgHandle002
+ * @tc.desc: Test DialogPattern Handle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle002, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+
+    Shadow shadow;
+    shadow.SetColor(Color::BLUE);
+    DialogProperties props {
+        .shadow = shadow,
+    };
+    
+    RefPtr<FrameNode> frameNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    MockContainer::Current()->SetColorMode(ColorMode::DARK);
+    pattern->HandleBlurEvent();
+    pattern->HandleFocusEvent();
+    EXPECT_TRUE(pattern->UpdateShadow());
+    MockContainer::Current()->SetColorMode(ColorMode::LIGHT);
+    EXPECT_TRUE(pattern->UpdateShadow());
+    pattern->dialogProperties_.shadow = std::nullopt;
+    EXPECT_FALSE(pattern->UpdateShadow());
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(pattern->UpdateShadow());
+}
 
 /**
  * @tc.name: DialogPatternAdditionalTestNgToJsonValue001
