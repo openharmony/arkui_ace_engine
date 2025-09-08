@@ -50,7 +50,7 @@ const float DEFAULT_STEP_VALUE = 1.0;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
-const int32_t NUM_TEN = 10;
+const int32_t LINEAR_GRADIENT_LIMIT_TO_SLIDER = 10;
 namespace SliderModifier {
 
 thread_local std::string g_strValue;
@@ -282,7 +282,7 @@ void SetLinearBlockColor(ArkUINodeHandle node, const struct ArkUIGradientType* g
             Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
         tempGradient.AddColor(gradientColor);
     }
-    SliderModelNG::SetLinerGradientBlockColor(frameNode, tempGradient, false);
+    SliderModelNG::SetLinearGradientBlockColor(frameNode, tempGradient, false);
 }
 
 void ResetBlockColor(ArkUINodeHandle node)
@@ -783,15 +783,18 @@ ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 }
 
 ArkUI_Int32 GetLinearBlockColor(ArkUINodeHandle node,
-    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+    ArkUI_Uint32 (*colors)[LINEAR_GRADIENT_LIMIT_TO_SLIDER], ArkUI_Float32 (*stop)[LINEAR_GRADIENT_LIMIT_TO_SLIDER])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    NG::Gradient gradient = SliderModelNG::GetLinerGradientBlockColor(frameNode);
+    NG::Gradient gradient = SliderModelNG::GetLinearGradientBlockColor(frameNode);
     std::vector<OHOS::Ace::NG::GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= LINEAR_GRADIENT_LIMIT_TO_SLIDER) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetLinearColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -800,7 +803,7 @@ ArkUI_Int32 GetLinearBlockColor(ArkUINodeHandle node,
 }
 
 ArkUI_Int32 GetLinearSelectColor(ArkUINodeHandle node,
-    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+    ArkUI_Uint32 (*colors)[LINEAR_GRADIENT_LIMIT_TO_SLIDER], ArkUI_Float32 (*stop)[LINEAR_GRADIENT_LIMIT_TO_SLIDER])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
@@ -809,6 +812,9 @@ ArkUI_Int32 GetLinearSelectColor(ArkUINodeHandle node,
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= LINEAR_GRADIENT_LIMIT_TO_SLIDER) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetLinearColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -817,7 +823,7 @@ ArkUI_Int32 GetLinearSelectColor(ArkUINodeHandle node,
 }
 
 ArkUI_Int32 GetLinearTrackBackgroundColor(ArkUINodeHandle node,
-    ArkUI_Uint32 (*colors)[NUM_TEN], ArkUI_Float32 (*stop)[NUM_TEN])
+    ArkUI_Uint32 (*colors)[LINEAR_GRADIENT_LIMIT_TO_SLIDER], ArkUI_Float32 (*stop)[LINEAR_GRADIENT_LIMIT_TO_SLIDER])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
@@ -826,6 +832,9 @@ ArkUI_Int32 GetLinearTrackBackgroundColor(ArkUINodeHandle node,
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= LINEAR_GRADIENT_LIMIT_TO_SLIDER) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetLinearColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;

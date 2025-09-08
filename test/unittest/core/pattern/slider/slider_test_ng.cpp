@@ -886,7 +886,7 @@ HWTEST_F(SliderTestNg, SliderTestNg014, TestSize.Level1)
      */
     SliderModelNG sliderModelNG;
     sliderModelNG.Create(VALUE, STEP, MIN, MAX);
-    sliderModelNG.SetBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    sliderModelNG.SetLinearGradientBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     /**
