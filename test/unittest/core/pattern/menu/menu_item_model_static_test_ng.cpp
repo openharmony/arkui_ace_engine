@@ -186,8 +186,7 @@ HWTEST_F(MenuItemModelStaticTestNg, UpdateMenuProperty001, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "test content";
     MenuItemModelStatic::UpdateMenuProperty(node, itemOption);
-
-    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>(); 
+    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(menuProperty, nullptr);
     EXPECT_EQ(menuProperty->GetContent(), itemOption.content);
 }
