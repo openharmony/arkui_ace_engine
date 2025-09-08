@@ -140,7 +140,7 @@ void ContainerModelToolBarTestNg::GetInstance()
 
 RefPtr<FrameNode> ContainerModelToolBarTestNg::CreateContent()
 {
-    return AceType::MakeRefPtr<FrameNode>("content", 0, AceType::MakeRefPtr<Pattern>());
+    return AceType::MakeRefPtr<FrameNode>("stage", 0, AceType::MakeRefPtr<Pattern>());
 }
 
 void ContainerModelToolBarTestNg::SetMockWindow(WindowMode windowMode)
@@ -169,49 +169,43 @@ void ContainerModelToolBarTestNg::CreateContainerModal()
 void ContainerModelToolBarTestNg::CreateEmptyPage()
 {
     ASSERT_NE(pattern_, nullptr);
-    auto contentNode = pattern_->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto stage = contentNode->GetFirstChild();
-    ASSERT_NE(stage, nullptr);
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+    auto stage = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto page = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto customNode = FrameNode::CreateFrameNode(
-        "customNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    page->AddChild(customNode);
     stage->AddChild(page, 0);
+    stackNode->AddChild(stage, 0);
 }
 
 void ContainerModelToolBarTestNg::CreatePageWithSideBarOnly()
 {
     ASSERT_NE(pattern_, nullptr);
-    auto contentNode = pattern_->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto stage = contentNode->GetFirstChild();
-    ASSERT_NE(stage, nullptr);
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+    auto stage = FrameNode::CreateFrameNode(
+        "stack", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto page = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto customNode = FrameNode::CreateFrameNode(
-        "customNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto sideBarNode = FrameNode::CreateFrameNode(
         V2::SIDE_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
 
-    customNode->AddChild(sideBarNode);
-    page->AddChild(customNode);
+    page->AddChild(sideBarNode);
     stage->AddChild(page, 0);
+    stackNode->AddChild(stage, 0);
 }
 
 void ContainerModelToolBarTestNg::CreatePageWithNavigationOnly()
 {
     ASSERT_NE(pattern_, nullptr);
-    auto contentNode = pattern_->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto stage = contentNode->GetFirstChild();
-    ASSERT_NE(stage, nullptr);
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    auto stage = FrameNode::CreateFrameNode(
+        "stack", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto page = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto customNode = FrameNode::CreateFrameNode(
-        "customNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-
     auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -220,59 +214,55 @@ void ContainerModelToolBarTestNg::CreatePageWithNavigationOnly()
     auto navbarNode = FrameNode::CreateFrameNode(
         V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     navigationNode->AddChild(navbarNode);
-
     auto navDestContentNode = FrameNode::CreateFrameNode(
         "navDestContentNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto navDestNode = FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+
     navDestContentNode->AddChild(navDestNode);
     navigationNode->AddChild(navDestContentNode);
-    customNode->AddChild(navigationNode);
-    page->AddChild(customNode);
+    page->AddChild(navigationNode);
     stage->AddChild(page, 0);
+    stackNode->AddChild(stage, 0);
 }
 
 void ContainerModelToolBarTestNg::CreatePageWithNavDestOnly()
 {
     ASSERT_NE(pattern_, nullptr);
-    auto contentNode = pattern_->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto stage = contentNode->GetFirstChild();
-    ASSERT_NE(stage, nullptr);
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    auto stage = FrameNode::CreateFrameNode(
+        "stack", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto page = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto customNode = FrameNode::CreateFrameNode(
-        "customNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-
     auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
-
     auto navDestContentNode = FrameNode::CreateFrameNode(
         "navDestContentNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto navDestNode = FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+
     navDestContentNode->AddChild(navDestNode);
     navigationNode->AddChild(navDestContentNode);
-    customNode->AddChild(navigationNode);
-    page->AddChild(customNode);
+    page->AddChild(navigationNode);
     stage->AddChild(page, 0);
+    stackNode->AddChild(stage, 0);
 }
 
 void ContainerModelToolBarTestNg::CreatePageWithAllNodes()
 {
     ASSERT_NE(pattern_, nullptr);
-    auto contentNode = pattern_->GetContentNode();
-    ASSERT_NE(contentNode, nullptr);
-    auto stage = contentNode->GetFirstChild();
-    ASSERT_NE(stage, nullptr);
+    auto stackNode = pattern_->GetStackNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    auto stage = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto page = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    auto customNode = FrameNode::CreateFrameNode(
-        "customNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-
     auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -293,28 +283,26 @@ void ContainerModelToolBarTestNg::CreatePageWithAllNodes()
         V2::SIDE_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
 
     sideBarNode->AddChild(navigationNode);
-    customNode->AddChild(sideBarNode);
-    page->AddChild(customNode);
+    page->AddChild(sideBarNode);
     stage->AddChild(page, 0);
+    stackNode->AddChild(stage, 0);
 }
 
 PageNodeAndWidth ContainerModelToolBarTestNg::GetPageNodeAndWidth()
 {
-    PageNodeAndWidth ret {nullptr, 0};
+    PageNodeAndWidth ret { nullptr, 0 };
     CHECK_NULL_RETURN(pattern_, ret);
-    auto contentNode = pattern_->GetContentNode();
-    CHECK_NULL_RETURN(contentNode, ret);
-    auto stage = contentNode->GetFirstChild();
+    auto stackNode = pattern_->GetStackNode();
+    CHECK_NULL_RETURN(stackNode, ret);
+    auto stage = stackNode->GetFirstChild();
     CHECK_NULL_RETURN(stage, ret);
     auto page = stage->GetFirstChild();
     CHECK_NULL_RETURN(page, ret);
-    auto custom = page->GetFirstChild();
-    CHECK_NULL_RETURN(custom, ret);
-    auto customNode = AceType::DynamicCast<FrameNode>(custom);
-    CHECK_NULL_RETURN(customNode, ret);
-    auto customGeometryNode = customNode->GetGeometryNode();
-    CHECK_NULL_RETURN(customGeometryNode, ret);
-    auto pageWidth = customGeometryNode->GetFrameSize().Width();
+    auto pageNode = AceType::DynamicCast<FrameNode>(page);
+    CHECK_NULL_RETURN(pageNode, ret);
+    auto pageGeometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_RETURN(pageGeometryNode, ret);
+    auto pageWidth = pageGeometryNode->GetFrameSize().Width();
     ret.node = page;
     ret.width = pageWidth;
     return ret;
@@ -456,7 +444,7 @@ HWTEST_F(ContainerModelToolBarTestNg, ParsePlacementType, TestSize.Level1)
     auto toolbarItem =
         FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->itemsWillOnTree_[noneNode].push_back(toolbarItem);
-    titleMgr_->ParsePlacementType();
+    titleMgr_->ParsePlacementType(noneNode);
     auto size = titleMgr_->itemsWillOnTree_[noneNode].size();
     EXPECT_EQ(size, 1);
     size = titleMgr_->itemWillAdd_[ItemPlacementType::NONE].size();
@@ -478,11 +466,13 @@ HWTEST_F(ContainerModelToolBarTestNg, ParsePlacementType, TestSize.Level1)
     titleMgr_->itemsWillOnTree_[navbarNode].push_back(toolbarItem);
     CreatePageWithAllNodes();
     titleMgr_->SetHasNavOrSideBarNodes(true);
-    titleMgr_->GetNavOrSideBarNodes();
+    auto pageInfo = GetPageNodeAndWidth();
+    ASSERT_NE(pageInfo.node, nullptr);
+    titleMgr_->GetNavOrSideBarNodes(AceType::DynamicCast<FrameNode>(pageInfo.node));
     auto navigationNode = titleMgr_->navigationNode_.Upgrade();
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->AddChild(navbarNode);
-    titleMgr_->ParsePlacementType();
+    titleMgr_->ParsePlacementType(navigationNode);
     size = titleMgr_->itemsWillOnTree_[navbarNode].size();
     EXPECT_EQ(size, 0);
     size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
@@ -2388,7 +2378,9 @@ HWTEST_F(ContainerModelToolBarTestNg, GetNavOrSideBarNodes, TestSize.Level1)
     ASSERT_NE(titleMgr_, nullptr);
     titleMgr_->InitToolBarManager();
     ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
-    bool ret = titleMgr_->GetNavOrSideBarNodes();
+    auto pageInfo = GetPageNodeAndWidth();
+    ASSERT_NE(pageInfo.node, nullptr);
+    bool ret = titleMgr_->GetNavOrSideBarNodes(AceType::DynamicCast<FrameNode>(pageInfo.node));
     EXPECT_TRUE(ret);
 }
 
@@ -3083,5 +3075,47 @@ HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_005,
     EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, rightRowFocusHub).Upgrade(), pageFocusHub);
     EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, rightRowFocusHub).Upgrade(), nullptr);
     rootNode->RemoveChild(frameNode_);
+}
+
+/**
+ * @tc.name: GetCurrentPageNode
+ * @tc.desc: Test ContainerModelToolBar::GetCurrentPageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, GetCurrentPageNode, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    // Test with nullptr node, expect nullptr return.
+    auto ret = titleMgr_->GetCurrentPageNode(nullptr);
+    EXPECT_EQ(ret, nullptr);
+
+    // Test with non-page node, expect nullptr return.
+    auto node = FrameNode::CreateFrameNode(
+        "node", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ret = titleMgr_->GetCurrentPageNode(node);
+    EXPECT_EQ(ret, nullptr);
+
+    // Test with page node but no parent, expect nullptr return.
+    auto page = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ret = titleMgr_->GetCurrentPageNode(page);
+    EXPECT_EQ(ret, nullptr);
+
+    // Test with page node and non-stage parent, expect nullptr return.
+    auto parent = FrameNode::CreateFrameNode(
+        "parent", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    parent->AddChild(page);
+    ret = titleMgr_->GetCurrentPageNode(page);
+    EXPECT_EQ(ret, nullptr);
+
+    // Test with page node and stage parent, expect non-null return.
+    auto stage = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    parent->RemoveChild(page);
+    stage->AddChild(page);
+    ret = titleMgr_->GetCurrentPageNode(page);
+    EXPECT_NE(ret, nullptr);
 }
 } // namespace OHOS::Ace::NG
