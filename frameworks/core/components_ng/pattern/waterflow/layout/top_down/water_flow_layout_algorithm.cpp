@@ -576,7 +576,7 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
                 { crossSize, mainSize_, axis_ }, layoutProperty, itemWrapper));
         }
     } else {
-        for (auto i = oldStart; i <= layoutInfo_->endIndex_; i++) {
+        for (auto i = layoutInfo_->startIndex_; i <= layoutInfo_->endIndex_; i++) {
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
             CHECK_NULL_VOID(itemWrapper);
 
