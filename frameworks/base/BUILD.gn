@@ -105,6 +105,9 @@ template("ace_base_source_set") {
       ]
     } else {
       external_deps += [ "graphic_2d:librender_service_client" ]
+      if (current_os == "ohos") {
+        external_deps += [ "eventhandler:libeventhandler" ]
+      }
     }
 
     if (is_arkui_x) {

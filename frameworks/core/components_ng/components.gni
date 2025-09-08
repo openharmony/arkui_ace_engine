@@ -135,6 +135,9 @@ template("build_component_ng") {
         external_deps += [ "device_status:devicestatus_client" ]
       }
       external_deps += [ "graphic_2d:librender_service_client" ]
+      if (current_os == "ohos") {
+        external_deps += [ "eventhandler:libeventhandler" ]
+      }
       if (platform == "ohos" || platform == "ohos_ng") {
         external_deps += [
           "graphic_2d:2d_graphics",

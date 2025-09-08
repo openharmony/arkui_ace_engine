@@ -90,6 +90,9 @@ template("napi_dragcontroller_static") {
         "graphic_2d:librender_service_base",
         "graphic_2d:librender_service_client",
       ]
+      if (current_os == "ohos") {
+        external_deps += [ "eventhandler:libeventhandler" ]
+      }
     }
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
