@@ -121,8 +121,9 @@ const std::vector<DragDropInitiatingStatePressTestCase> DRAG_DROP_INITIATING_STA
     DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
         DragDropInitiatingStatus::LIFTING, true, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
         SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE,
-        false, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
+        DragDropInitiatingStatus::PRESS, false, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
 };
 
 void DragDropInitiatingStatePressTestNG::SetUpTestCase()

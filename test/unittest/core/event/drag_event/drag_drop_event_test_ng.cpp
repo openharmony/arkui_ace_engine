@@ -444,10 +444,10 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue015, TestSize.Level1)
     ASSERT_NE(dragDropEventActuator, nullptr);
     ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
     dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->InitializeState();
-    dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->currentState_ = 1;
+    dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->currentState_ = 3;
     bool isMenuShow = false;
     dragDropEventActuator->NotifyMenuShow(isMenuShow);
-    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->currentState_, 1);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->currentState_, 3);
 }
 
 /**
