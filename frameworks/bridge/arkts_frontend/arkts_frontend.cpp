@@ -18,12 +18,12 @@
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace {
 UIContentErrorCode ArktsFrontend::RunPage(
@@ -176,7 +176,7 @@ ani_object LegacyLoadPage(ani_env* env)
     do {
         ani_status state;
         ani_ref linkerRef;
-        if ((state = static_cast<ani_status>(ArktsAniUtils::GetNearestNonBootRuntimeLinker(env, linkerRef))) !=
+        if ((state = static_cast<ani_status>(Ani::AniUtils::GetNearestNonBootRuntimeLinker(env, linkerRef))) !=
             ANI_OK) {
             LOGE("Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
             break;
@@ -202,7 +202,7 @@ ani_object LegacyLoadPage(ani_env* env)
         }
 
         ani_object isInit;
-        if ((state = static_cast<ani_status>(ArktsAniUtils::CreateAniBoolean(env, false, isInit))) != ANI_OK) {
+        if ((state = static_cast<ani_status>(Ani::AniUtils::CreateAniBoolean(env, false, isInit))) != ANI_OK) {
             LOGE("Create Boolean object failed, %{public}d", state);
             break;
         }
@@ -235,7 +235,7 @@ ani_object LegacyLoadPage(ani_env* env)
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
 
     ani_class appClass;
@@ -293,13 +293,13 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
     pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         RunArkoalaEventLoop(env, app);
     });
 
     // register one hook method to pipeline, which will be called at the tail of vsync
     pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
         FireAllArkoalaAsyncEvents(env, app);
     });
 
@@ -332,7 +332,7 @@ ani_ref ArktsFrontend::GetSharedStorage(int32_t id)
 void ArktsFrontend::Destroy()
 {
     CHECK_NULL_VOID(vm_);
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_VOID(env);
     env->GlobalReference_Delete(app_);
     app_ = nullptr;
@@ -344,7 +344,7 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
     ani_object result = nullptr;
     ani_status status;
 
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
@@ -364,7 +364,7 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
 
 void* ArktsFrontend::GetEnv()
 {
-    return ArktsAniUtils::GetAniEnv(vm_);
+    return Ani::AniUtils::GetAniEnv(vm_);
 }
 
 ani_vm *ArktsFrontend::GetVM()
@@ -471,7 +471,7 @@ void ArktsFrontend::OnHide()
 
 void ArktsFrontend::OpenStateMgmtInterop()
 {
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_VOID(env);
 
     ani_status state;
@@ -512,7 +512,7 @@ napi_value ArktsFrontend::GetContextValue()
 
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
 {
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, false);
     CHECK_NULL_RETURN(app_, false);
     CHECK_NULL_RETURN(frameNode, false);
@@ -564,7 +564,7 @@ void ArktsFrontend::NotifyArkoalaConfigurationChange(bool isNeedUpdate)
     if (!isNeedUpdate) {
         return;
     }
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_VOID(env);
     CHECK_NULL_VOID(app_);
     ani_status status;
