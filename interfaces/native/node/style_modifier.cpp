@@ -97,7 +97,7 @@ constexpr uint32_t ARRAY_SIZE = 3;
 constexpr int32_t BACKGROUND_IMAGE_WIDTH_INDEX = 0;
 constexpr int32_t BACKGROUND_IMAGE_HEIGHT_INDEX = 1;
 constexpr float DEFAULT_OPACITY = 1.0f;
-
+constexpr int32_t SLIDER_LINEAR_GRADIENT_LIMIT = 10;
 constexpr int32_t BLUR_STYLE_INDEX = 0;
 constexpr int32_t COLOR_MODE_INDEX = 1;
 constexpr int32_t ADAPTIVE_COLOR_INDEX = 2;
@@ -16164,6 +16164,9 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int colorLength = colorStop->size;
+    if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
             return ERROR_CODE_PARAM_INVALID;
@@ -16188,14 +16191,14 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
 
 const ArkUI_AttributeItem* GetSliderBlockLinearGradientColor(ArkUI_NodeHandle node)
 {
-    ArkUI_Uint32 colors[NUM_10];
-    ArkUI_Float32 stops[NUM_10];
+    ArkUI_Uint32 colors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    ArkUI_Float32 stops[SLIDER_LINEAR_GRADIENT_LIMIT];
     auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getLinearBlockColor(
         node->uiNodeHandle, &colors, &stops);
 
     static ArkUI_ColorStop colorStop;
-    static uint32_t gradientColors[NUM_10];
-    static float gradientStops[NUM_10];
+    static uint32_t gradientColors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    static float gradientStops[SLIDER_LINEAR_GRADIENT_LIMIT];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i];
@@ -16221,6 +16224,9 @@ int32_t SetSliderSelectedLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int colorLength = colorStop->size;
+    if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
             return ERROR_CODE_PARAM_INVALID;
@@ -16243,14 +16249,14 @@ int32_t SetSliderSelectedLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_
 
 const ArkUI_AttributeItem* GetSliderSelectedLinearGradientColor(ArkUI_NodeHandle node)
 {
-    ArkUI_Uint32 colors[NUM_10];
-    ArkUI_Float32 stops[NUM_10];
+    ArkUI_Uint32 colors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    ArkUI_Float32 stops[SLIDER_LINEAR_GRADIENT_LIMIT];
     auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getLinearSelectColor(
         node->uiNodeHandle, &colors, &stops);
 
     static ArkUI_ColorStop colorStop;
-    static uint32_t gradientColors[NUM_10];
-    static float gradientStops[NUM_10];
+    static uint32_t gradientColors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    static float gradientStops[SLIDER_LINEAR_GRADIENT_LIMIT];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i];
@@ -16276,6 +16282,9 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int colorLength = colorStop->size;
+    if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
             return ERROR_CODE_PARAM_INVALID;
@@ -16300,14 +16309,14 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
 
 const ArkUI_AttributeItem* GetSliderTrackLinearGradientColor(ArkUI_NodeHandle node)
 {
-    ArkUI_Uint32 colors[NUM_10];
-    ArkUI_Float32 stops[NUM_10];
+    ArkUI_Uint32 colors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    ArkUI_Float32 stops[SLIDER_LINEAR_GRADIENT_LIMIT];
     auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getLinearTrackBackgroundColor(
         node->uiNodeHandle, &colors, &stops);
 
     static ArkUI_ColorStop colorStop;
-    static uint32_t gradientColors[NUM_10];
-    static float gradientStops[NUM_10];
+    static uint32_t gradientColors[SLIDER_LINEAR_GRADIENT_LIMIT];
+    static float gradientStops[SLIDER_LINEAR_GRADIENT_LIMIT];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i];
