@@ -77,8 +77,7 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalCBoundsRect()
     CalCBackground(contentProperty);
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     auto itemHalfSizes = GetItemHalfSizes(0, contentProperty);
-    if ((totalCount <= 0 && NearZero(contentProperty.longPointLeftCenterX) &&
-        NearZero(contentProperty.longPointRightCenterX)) || itemHalfSizes.size() != ITEM_SIZE) {
+    if (totalCount <= 0 || itemHalfSizes.size() != ITEM_SIZE) {
         return { rectLeft_, rectTop_, rectRight_ - rectLeft_, rectBottom_ - rectTop_ };
     }
 

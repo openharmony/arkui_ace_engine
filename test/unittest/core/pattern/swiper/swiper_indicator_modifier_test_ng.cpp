@@ -2076,14 +2076,20 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier014, TestSize.Level1
     dotIndicatorModifier.longPointDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
     dotIndicatorModifier.indicatorPadding_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
     dotIndicatorModifier.indicatorMargin_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(5.0f, 5.0f));
-    LinearVector<float> itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
-    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
 
     /**
      * @tc.steps: step2.Call CalCBoundsRect when vectorBlackPointCenterX_ is null
      */
+    LinearVector<float> itemHalfSizes = {};
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
     auto result = dotIndicatorModifier.CalCBoundsRect();
     float rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
     EXPECT_EQ(rectLeft, 0.0f);
 
     /**
@@ -2091,6 +2097,14 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier014, TestSize.Level1
      */
     dotIndicatorModifier.vectorBlackPointCenterX_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float> { 100.0f, 200.0f, 300.0f });
+    itemHalfSizes = {};
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
     result = dotIndicatorModifier.CalCBoundsRect();
     rectLeft = std::get<0>(result);
     EXPECT_EQ(rectLeft, 0.0f);
