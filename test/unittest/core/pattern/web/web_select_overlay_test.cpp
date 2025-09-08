@@ -6587,8 +6587,8 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest001, TestSize.Level1)
     RectF selectArea = data;
     WebSelectOverlay overlay(webPattern);
     auto ret = overlay.ComputeSelectAreaRect(selectArea);
-    bool x = NearEqual(ret.GetX(), selectArea.GetX() + offset.GetX());
-    bool y = NearEqual(ret.GetY(), selectArea.GetY() + offset.GetY());
+    bool x = NearEqual(ret.GetX(), size.Width() + offset.GetX());
+    bool y = NearEqual(ret.GetY(), size.Height() + offset.GetY());
     EXPECT_TRUE(x & y);
 }
 
@@ -6619,8 +6619,8 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest002, TestSize.Level1)
     RectF selectArea = data;
     WebSelectOverlay overlay(webPattern);
     auto ret = overlay.ComputeSelectAreaRect(selectArea);
-    bool x = NearEqual(ret.GetX(), selectArea.GetX() + offset.GetX());
-    bool y = NearEqual(ret.GetY(), selectArea.GetY() + offset.GetY());
+    bool x = NearEqual(ret.GetX(), size.Width() + offset.GetX());
+    bool y = NearEqual(ret.GetY(), offset.GetY());
     EXPECT_TRUE(x & y);
 }
 } // namespace OHOS::Ace::NG
