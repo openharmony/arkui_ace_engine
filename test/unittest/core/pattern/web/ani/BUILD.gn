@@ -730,7 +730,10 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
   }
   if (defined(global_parts_info) &&
     defined(global_parts_info.web_webview)) {
-    external_deps += [ "webview:libnweb" ]
+    external_deps += [
+      "webview:libnweb",
+      "webview:libarkweb_utils",
+    ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

@@ -19,7 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
+#include "arkweb_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"

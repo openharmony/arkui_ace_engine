@@ -1453,6 +1453,7 @@ private:
     int64_t lastDragTime_ = 0L;
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
+    WeakPtr<PipelineContext> pipeline_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

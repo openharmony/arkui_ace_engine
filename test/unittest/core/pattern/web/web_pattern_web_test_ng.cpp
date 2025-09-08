@@ -38,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "arkweb_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -418,6 +419,33 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoard, TestSize.Level1)
     webPattern->isFocus_ = false;
     webPattern->isVisible_ = true;
     EXPECT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
+#endif
+}
+
+/**
+ * @tc.name: OnAttachOrDetachContext
+ * @tc.desc: test pipeline_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnAttachOrDetachContext, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_EQ(webPattern->pipeline_.Upgrade(), nullptr);
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
+    ASSERT_NE(webPattern->pipeline_.Upgrade(), nullptr);
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
+    ASSERT_EQ(webPattern->pipeline_.Upgrade(), nullptr);
 #endif
 }
 

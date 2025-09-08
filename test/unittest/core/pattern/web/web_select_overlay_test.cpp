@@ -32,7 +32,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
+#include "arkweb_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"

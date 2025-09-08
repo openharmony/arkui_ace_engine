@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
+#include "arkweb_utils.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3

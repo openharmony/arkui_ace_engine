@@ -1098,6 +1098,12 @@ template("ace_core_ng_source_set") {
           "webview:ohos_base_glue_source",
           "window_manager:libwm",
         ]
+        if (defined(global_parts_info) &&
+          defined(global_parts_info.web_webview)) {
+          external_deps += [
+            "webview:libarkweb_utils",
+          ]
+        }
       } else {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
       }
