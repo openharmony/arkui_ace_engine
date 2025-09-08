@@ -104,6 +104,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
+    FirePageTransitionStart();
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_, type]() {
         auto pattern = weak.Upgrade();
@@ -498,6 +499,15 @@ void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
     }
 }
 
+void PagePattern::FirePageTransitionStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_JUMP);
+}
+
 void PagePattern::FirePageTransitionFinish()
 {
     if (pageTransitionFinish_) {
@@ -507,6 +517,12 @@ void PagePattern::FirePageTransitionFinish()
             onFinish();
         }
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
+    pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
 }
 
 void PagePattern::StopPageTransition()
