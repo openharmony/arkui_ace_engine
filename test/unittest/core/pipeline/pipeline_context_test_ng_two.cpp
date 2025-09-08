@@ -2610,7 +2610,7 @@ HWTEST_F(PipelineContextTestNg, PostTaskResponseRegion001, TestSize.Level1)
     auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
     manager->SetLaterAvoid(true);
     context_->textFieldManager_ = manager;
-    context_->PostTaskResponseRegion();
+    context_->PostTaskResponseRegion(DEFAULT_DELAY_THP);
     EXPECT_FALSE(manager->GetLaterAvoid());
 }
 
