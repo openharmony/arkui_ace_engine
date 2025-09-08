@@ -19,10 +19,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
 class DragBarTheme : public virtual Theme {
     DECLARE_ACE_TYPE(DragBarTheme, Theme);
 
@@ -38,7 +36,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->barColor_ = themeConstants->GetColor(THEME_DRAG_BAR_COLOR);
+            theme->barColor_ = Color(0xffb3b3b3);
             ParsePattern(themeConstants, theme);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {

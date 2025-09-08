@@ -20,7 +20,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -47,12 +46,12 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->foregroundResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_ON);
-            theme->secondaryResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_HALF);
-            theme->backgroundResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_OFF);
-            theme->foregroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_ON);
-            theme->secondaryMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_HALF);
-            theme->backgroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_OFF);
+            theme->foregroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
+            theme->secondaryResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
+            theme->backgroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
+            theme->foregroundMiniResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_ON_SVG;
+            theme->secondaryMiniResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG;
+            theme->backgroundMiniResourceId_ = InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG;
 
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RATING);
             if (pattern) {
