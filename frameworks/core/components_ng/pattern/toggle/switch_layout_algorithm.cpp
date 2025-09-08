@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,11 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        auto geometryNode = frameNode->GetGeometryNode();
-        const bool isApi18OrHigher = frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
-        isApi18OrHigher ? geometryNode->ResetContent() : geometryNode->Reset();
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            frameNode->GetGeometryNode()->ResetContent();
+        } else {
+            frameNode->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -63,15 +65,14 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
     }
-    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
-        LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
-    }
-    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
-        LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy, frameWidth, frameHeight);
-    }
+    float width = 0.0f;
+    float height = 0.0f;
+    CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
 
-    CalcHeightAndWidth(frameNode, height_, width_, frameHeight, frameWidth);
-    return SizeF(width_, height_);
+    width_ = width;
+    height_ = height;
+
+    return SizeF(width, height);
 }
 
 void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -149,60 +150,5 @@ void SwitchLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& c
             frameHeight = contentConstraint.parentIdealSize.Height().value();
         }
     }
-}
-
-void SwitchLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
-    std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
-{
-    CHECK_NULL_VOID(layoutPolicy);
-    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
-    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
-    auto defaultWidth = 0.0f;
-    auto defaultHeight = 0.0f;
-    if (layoutPolicy->IsWidthFix() && layoutPolicy->IsHeightFix()) {
-        frameWidth = defaultWidth;
-        frameHeight = defaultHeight;
-    } else if (layoutPolicy->IsWidthFix()) {
-        if (contentConstraint.selfIdealSize.Height().has_value()) {
-            frameHeight = selfHeight;
-        }
-        frameWidth = defaultWidth;
-    } else if (layoutPolicy->IsHeightFix()) {
-        if (contentConstraint.selfIdealSize.Width().has_value()) {
-            frameWidth = selfWidth;
-        }
-        frameHeight = defaultHeight;
-    }
-    return;
-}
-
-void SwitchLayoutAlgorithm::LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
-    std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
-{
-    CHECK_NULL_VOID(layoutPolicy);
-    auto height = contentConstraint.parentIdealSize.Height().value_or(0.0f);
-    auto width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
-    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
-    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
-    auto defaultWidth = 0.0f;
-    auto defaultHeight = 0.0f;
-
-    if (layoutPolicy->IsWidthWrap() && layoutPolicy->IsHeightWrap()) {
-        frameWidth = width;
-        frameHeight = height;
-    } else if (layoutPolicy->IsWidthWrap()) {
-        frameWidth = width;
-        frameHeight = defaultHeight;
-        if (contentConstraint.selfIdealSize.Height().has_value()) {
-            frameHeight = selfHeight;
-        }
-    } else if (layoutPolicy->IsHeightWrap()) {
-        frameWidth = defaultWidth;
-        frameHeight = height;
-        if (contentConstraint.selfIdealSize.Width().has_value()) {
-            frameWidth = selfWidth;
-        }
-    }
-    return;
 }
 } // namespace OHOS::Ace::NG
