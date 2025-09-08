@@ -3051,7 +3051,7 @@ void RosenRenderContext::PaintAccessibilityFocus(
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { true, false });
     auto node = GetHost();
     CHECK_NULL_VOID(node);
-    if (node->GetTag() == V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG && isRectUpdate) {
+    if ((node->GetTag() == V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG) && isRectUpdate && (localRect != RectT<int32_t>())) {
         std::shared_ptr<Rosen::RectF> drawRect =
             std::make_shared<Rosen::RectF>(localRect.GetX(), localRect.GetY(), localRect.Width(), localRect.Height());
         UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, drawRect);
