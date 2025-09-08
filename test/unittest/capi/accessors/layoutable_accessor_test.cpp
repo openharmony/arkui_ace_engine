@@ -23,6 +23,8 @@ using namespace testing;
 using namespace testing::ext;
 
 const int32_t CHILD_NODE_ID = 117;
+const int32_t FRAME_WIDTH = 12;
+const int32_t FRAME_HEIGHT = 13;
 
 class MockLayoutWrapperChild;
 
@@ -93,8 +95,8 @@ public:
     MOCK_METHOD(const RefPtr<LayoutAlgorithmWrapper>&, GetLayoutAlgorithm, (bool needReset), (override));
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override
     {
-        geometryNode_->SetFrameWidth(12);
-        geometryNode_->SetFrameHeight(13);
+        geometryNode_->SetFrameWidth(FRAME_WIDTH);
+        geometryNode_->SetFrameHeight(FRAME_HEIGHT);
     }
     MOCK_METHOD(void, Layout, (), (override));
     MOCK_METHOD(int32_t, GetTotalChildCount, (), (const, override));

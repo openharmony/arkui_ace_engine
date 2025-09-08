@@ -26,7 +26,7 @@ Ark_DirectionalEdgesT GenEdgesGlobalized(const NG::PaddingPropertyT<float>& edge
 {
     Ark_DirectionalEdgesT edges;
     auto pipeline = PipelineBase::GetCurrentContext();
-    double px2vpScale = pipeline ? 1.0 / pipeline->GetDipScale() : 1.0;
+    double px2vpScale = (pipeline && !NearZero(pipeline->GetDipScale())) ? 1.0 / pipeline->GetDipScale() : 1.0;
     edges.top = Converter::ArkValue<Ark_Number>(edgeNative.top.value_or(0) * px2vpScale);
     edges.bottom = Converter::ArkValue<Ark_Number>(edgeNative.bottom.value_or(0) * px2vpScale);
     if (direction != TextDirection::RTL) {
@@ -43,7 +43,7 @@ Ark_DirectionalEdgesT GenBorderWidthGlobalized(const NG::BorderWidthPropertyT<fl
 {
     Ark_DirectionalEdgesT edges;
     auto pipeline = PipelineBase::GetCurrentContext();
-    double px2vpScale = pipeline ? 1.0 / pipeline->GetDipScale() : 1.0;
+    double px2vpScale = (pipeline && !NearZero(pipeline->GetDipScale())) ? 1.0 / pipeline->GetDipScale() : 1.0;
     edges.top = Converter::ArkValue<Ark_Number>(edgeNative.topDimen.value_or(0) * px2vpScale);
     edges.bottom = Converter::ArkValue<Ark_Number>(edgeNative.bottomDimen.value_or(0) * px2vpScale);
     if (direction != TextDirection::RTL) {
@@ -88,7 +88,7 @@ void LayoutImpl(Ark_Layoutable peer,
     auto x = Converter::OptConvert<Dimension>(position->x);
     auto y = Converter::OptConvert<Dimension>(position->y);
     if (!(x.has_value() || y.has_value())) {
-        LOGE("the position prop is illegal");
+        LOGE("LayoutableAccessor::LayoutImpl the position prop is illegal");
     } else {
         double xVal = x.value_or(Dimension()).ConvertToPx();
         double yVal = y.value_or(Dimension()).ConvertToPx();
@@ -125,7 +125,7 @@ Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
     auto layoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(child->GetLayoutProperty(), DEFAULT_EDGES);
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);return {};
+    return GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);
 }
 Ark_MeasureResult GetMeasureResultImpl(Ark_Layoutable peer)
 {

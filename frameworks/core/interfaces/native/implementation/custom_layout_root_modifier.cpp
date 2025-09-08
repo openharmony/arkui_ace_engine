@@ -24,7 +24,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace{
+namespace {
 const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
 Ark_GeometryInfo GenGeometryInfo(const RefPtr<OHOS::Ace::NG::LayoutProperty>& layoutProperty, double dipScale)
 {
@@ -34,20 +34,26 @@ Ark_GeometryInfo GenGeometryInfo(const RefPtr<OHOS::Ace::NG::LayoutProperty>& la
         originGeoRect = host->GetGeometryNode()->GetFrameRect();
     }
     auto width =
-        GreatNotEqual(originGeoRect.Width(), 0.0f) ? originGeoRect.Width() / dipScale
+        GreatNotEqual(originGeoRect.Width(), 0.0f) ?
+        (NearZero(dipScale) ? originGeoRect.Width() : originGeoRect.Width() / dipScale)
         : layoutProperty->GetLayoutConstraint()
-            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(0.0) / dipScale
+            ? (NearZero(dipScale)
+                ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(0.0)
+                : layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(0.0) / dipScale)
             : 0.0f;
     auto height =
-        GreatNotEqual(originGeoRect.Height(), 0.0f) ? originGeoRect.Height() / dipScale
+        GreatNotEqual(originGeoRect.Height(), 0.0f) ?
+        (NearZero(dipScale) ? originGeoRect.Height() : originGeoRect.Height() / dipScale)
         : layoutProperty->GetLayoutConstraint()
-            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0) / dipScale
+            ? (NearZero(dipScale)
+                ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0)
+                : layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0) / dipScale)
             : 0.0f;
     const std::unique_ptr<NG::BorderWidthProperty>& borderWidth = layoutProperty->GetBorderWidthProperty();
     Ark_GeometryInfo selfLayoutInfo;
-    selfLayoutInfo.width = Converter::ArkValue<Ark_Number>(NearEqual(width, 0.0f)
+    selfLayoutInfo.width = Converter::ArkValue<Ark_Number>((NearEqual(width, 0.0f) && !NearZero(dipScale))
         ? layoutProperty->GetLayoutConstraint()->percentReference.Width() / dipScale : width);
-    selfLayoutInfo.height = Converter::ArkValue<Ark_Number>(NearEqual(height, 0.0f)
+    selfLayoutInfo.height = Converter::ArkValue<Ark_Number>((NearEqual(height, 0.0f) && !NearZero(dipScale))
         ? layoutProperty->GetLayoutConstraint()->percentReference.Height() / dipScale : height);
     selfLayoutInfo.borderWidth.left = Converter::ArkValue<Opt_Length>(borderWidth
         ? borderWidth->leftDimen->ConvertToVp() : 0.0f);
@@ -81,7 +87,8 @@ void SetSubscribeOnMeasureSizeImpl(Ark_NativePointer node,
     auto customNode = reinterpret_cast<NG::CustomMeasureLayoutNode *>(node);
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(value);
-    auto measureSizeFunc = [arkCallback = CallbackHelper(*value), customNode](NG::LayoutWrapper* layoutWrapper) -> void {
+    auto measureSizeFunc =
+        [arkCallback = CallbackHelper(*value), customNode](NG::LayoutWrapper* layoutWrapper) -> void {
         auto layoutProperty = layoutWrapper && layoutWrapper->GetLayoutProperty()
             ? layoutWrapper->GetLayoutProperty() : AceType::MakeRefPtr<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -97,6 +104,7 @@ void SetSubscribeOnMeasureSizeImpl(Ark_NativePointer node,
         auto measureLayoutParam = AceType::MakeRefPtr<MeasureLayoutParam>(layoutWrapper);
         auto childCount = measureLayoutParam->GetTotalChildCount();
         std::vector<Ark_Measurable> measurablePeerVec;
+        measurablePeerVec.reserve(childCount);
         for (int i = 0; i < childCount; i++) {
             auto measurablePeer = PeerUtils::CreatePeer<MeasurablePeer>();
             CHECK_NULL_VOID(measurablePeer);
@@ -129,7 +137,8 @@ void SetSubscribeOnPlaceChildrenImpl(Ark_NativePointer node,
     auto customNode = reinterpret_cast<NG::CustomMeasureLayoutNode *>(node);
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(value);
-    auto placeChildrenFunc = [arkCallback = CallbackHelper(*value), customNode](NG::LayoutWrapper* layoutWrapper) -> void {
+    auto placeChildrenFunc =
+        [arkCallback = CallbackHelper(*value), customNode](NG::LayoutWrapper* layoutWrapper) -> void {
         auto layoutProperty = layoutWrapper && layoutWrapper->GetLayoutProperty()
             ? layoutWrapper->GetLayoutProperty() : AceType::MakeRefPtr<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
