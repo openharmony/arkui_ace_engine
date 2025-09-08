@@ -27,6 +27,7 @@
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
 #include "core/interfaces/native/node/drag_adapter_impl.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
@@ -608,9 +609,13 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnGridScrollStart,
+    NodeModifier::SetOnGridScrollStop,
     NodeModifier::SetOnGridScrollIndex,
+    NodeModifier::SetOnGridScrollFrameBegin,
+    NodeModifier::SetOnGridWillScroll,
+    NodeModifier::SetOnGridDidScroll,
+    NodeModifier::SetOnGridScrollBarUpdate,
 };
 
 const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -828,9 +833,13 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::ResetOnGridScrollStart,
+    NodeModifier::ResetOnGridScrollStop,
     NodeModifier::ResetOnGridScrollIndex,
+    NodeModifier::ResetOnGridScrollFrameBegin,
+    NodeModifier::ResetOnGridWillScroll,
+    NodeModifier::ResetOnGridDidScroll,
+    NodeModifier::ResetOnGridScrollBarUpdate,
 };
 
 const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

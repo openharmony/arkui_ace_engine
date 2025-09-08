@@ -240,6 +240,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
     "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/grid_layout_option.cpp",
     "$ace_root/interfaces/native/node/native_impl.cpp",
     "$ace_root/interfaces/native/node/native_node_extented.cpp",
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
@@ -253,6 +254,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
+    "native_node_two_part_test.cpp",
   ]
 
   configs = [
@@ -493,8 +495,8 @@ ohos_unittest("drag_and_drop_test") {
     "image_framework:pixelmap",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "udmf:udmf_client",
     "udmf:libudmf",
+    "udmf:udmf_client",
   ]
 }
 
@@ -1009,10 +1011,10 @@ group("interfaces_unittest") {
     ":viewport_config_test",
     ":xcomponent_controller_test",
     "ace_gesture:ace_native_gesture_test",
+    "ace_key_event:key_event_test",
     "ace_kit:ace_kit_test",
     "ace_ui_input_event:ui_input_event_test",
-    "ace_key_event:key_event_test",
-    "napi:arkui_napi_test",
     "form_render:ace_form_render_test",
+    "napi:arkui_napi_test",
   ]
 }

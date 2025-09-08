@@ -15,7 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "scroll_test_ng.h"
-
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 namespace OHOS::Ace::NG {
 // using namespace testing;
 // using namespace testing::ext;
@@ -365,5 +367,64 @@ TEST_F(ScrollPatternThreeTestNg, FireObserverOnDidScroll)
      */
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(isCallback);
+}
+
+
+/**
+ * @tc.name: GetDefaultFrictionTest001
+ * @tc.desc: Test ScrollPattern GetDefaultFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, GetDefaultFrictionTest001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), API11_FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), API12_FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+    ASSERT_NE(scrollableTheme, nullptr);
+    auto friction = scrollableTheme->GetFriction();
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), friction);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: GetDefaultFrictionTest002
+ * @tc.desc: Test ScrollPattern GetDefaultFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, GetDefaultFrictionTest002, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), API12_FRICTION);
+  
+    auto originalPipeline = NG::MockPipelineContext::pipeline_;
+    NG::MockPipelineContext::pipeline_ = nullptr;
+    EXPECT_EQ(scrollPattern->GetDefaultFriction(), API12_FRICTION);
+    NG::MockPipelineContext::pipeline_ = originalPipeline;
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

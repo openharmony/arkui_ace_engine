@@ -144,6 +144,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_SCROLL_FRAME_BEGIN;
             } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
                 return ON_WATER_FLOW_SCROLL_FRAME_BEGIN;
+            } else if (arkUINodeType == ARKUI_NODE_GRID) {
+                return ON_GRID_SCROLL_FRAME_BEGIN;
             }
             return ON_SCROLL_FRAME_BEGIN;
         case NODE_SCROLL_EVENT_ON_WILL_SCROLL:
@@ -155,6 +157,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_SCROLL_START;
             } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
                 return ON_WATER_FLOW_SCROLL_START;
+            } else if (arkUINodeType == ARKUI_NODE_GRID) {
+                return ON_GRID_START;
             }
             return ON_SCROLL_START;
         case NODE_SCROLL_EVENT_ON_SCROLL_STOP:
@@ -162,6 +166,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_SCROLL_STOP;
             } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
                 return ON_WATER_FLOW_SCROLL_STOP;
+            } else if (arkUINodeType == ARKUI_NODE_GRID) {
+                return ON_GRID_STOP;
             }
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
@@ -386,6 +392,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_AREA_WILL_CHANGE;
         case NODE_TEXT_INPUT_ON_WILL_CHANGE:
             return ON_TEXT_INPUT_WILL_CHANGE;
+        case NODE_GRID_ON_SCROLL_INDEX:
+            return ON_GRID_SCROLL_TO_INDEX;
+        case NODE_GRID_ON_WILL_SCROLL:
+            return ON_GRID_WILL_SCROLL;
+        case NODE_GRID_ON_DID_SCROLL:
+            return ON_GRID_DID_SCROLL;
+        case NODE_GRID_ON_SCROLL_BAR_UPDATE:
+            return ON_GRID_SCROLL_BAR_UPDATE;
         default:
             return -1;
     }
@@ -642,6 +656,20 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_WILL_CHANGE;
         case ON_TEXT_INPUT_WILL_CHANGE:
             return NODE_TEXT_INPUT_ON_WILL_CHANGE;
+        case ON_GRID_SCROLL_FRAME_BEGIN:
+            return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
+        case ON_GRID_SCROLL_TO_INDEX:
+            return NODE_GRID_ON_SCROLL_INDEX;
+        case ON_GRID_START:
+            return NODE_SCROLL_EVENT_ON_SCROLL_START;
+        case ON_GRID_STOP:
+            return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_GRID_WILL_SCROLL:
+            return NODE_GRID_ON_WILL_SCROLL;
+        case ON_GRID_DID_SCROLL:
+            return NODE_GRID_ON_DID_SCROLL;
+        case ON_GRID_SCROLL_BAR_UPDATE:
+            return NODE_GRID_ON_SCROLL_BAR_UPDATE;
         default:
             return -1;
     }

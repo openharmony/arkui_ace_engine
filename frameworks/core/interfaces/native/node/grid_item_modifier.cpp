@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 
 constexpr int32_t DEFAULT_GRID_ITEM_VALUE = 0;
+const int32_t ERROR_INT_CODE = -1;
 
 void SetGridItemSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
 {
@@ -113,6 +114,20 @@ void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
     GridItemModelNG::SetGridItemStyle(frameNode, static_cast<GridItemStyle>(style));
 }
 
+void ResetGridItemOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetGridItemStyle(frameNode, GridItemStyle::NONE);
+}
+
+ArkUI_Int32 GetGridItemOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int32_t>(GridItemModelNG::GetGridItemStyle(frameNode));
+}
+
 void SetGridItemOnSelect(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -149,6 +164,8 @@ const ArkUIGridItemModifier* GetGridItemModifier()
         .setGridItemColumnEnd = SetGridItemColumnEnd,
         .resetGridItemColumnEnd = ResetGridItemColumnEnd,
         .setGridItemOptions = SetGridItemOptions,
+        .resetGridItemOptions = ResetGridItemOptions,
+        .getGridItemOptions = GetGridItemOptions,
         .setGridItemOnSelect = SetGridItemOnSelect,
         .resetGridItemOnSelect = ResetGridItemOnSelect,
     };

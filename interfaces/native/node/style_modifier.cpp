@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "frame_information.h"
+#include "grid_layout_option.h"
 #include "native_type.h"
 #include "node_model.h"
 #include "node_transition.h"
@@ -343,6 +344,8 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
 };
 
+constexpr float GRID_DEFAULT_SCROLL_BAR_WIDTH = 4.0f;
+constexpr uint32_t GRID_DEFAULT_SCROLL_BAR_COLOR = 0x66182431;
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -5810,14 +5813,26 @@ const ArkUI_AttributeItem* GetScrollFriction(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].f32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowFriction(node->uiNodeHandle);
-    }
+    }  else if (node->type == ARKUI_NODE_GRID) {
+        g_numberValues[0].f32 =
+            GetFullImpl()->getNodeModifiers()->getGridModifier()->getFriction(node->uiNodeHandle);
+    } 
     return &g_attributeItem;
+}
+
+void SetDefaultScrollFriction(ArkUI_NodeHandle node)
+{
+    if (node->type == ARKUI_NODE_GRID) {
+        auto fullImpl = GetFullImpl();
+        fullImpl->getNodeModifiers()->getGridModifier()->resetFriction(node->uiNodeHandle);
+    }
 }
 
 int32_t SetScrollFriction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || LessOrEqual(item->value[NUM_0].f32, 0.0f)) {
+        SetDefaultScrollFriction(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -5828,6 +5843,8 @@ int32_t SetScrollFriction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollFriction(node->uiNodeHandle, friction);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowFriction(node->uiNodeHandle, friction, nullptr);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setFriction(node->uiNodeHandle, friction);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -5843,6 +5860,8 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollFriction(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowFriction(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID)   {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetFriction(node->uiNodeHandle);
     }
 }
 
@@ -5945,14 +5964,27 @@ const ArkUI_AttributeItem* GetScrollScrollBar(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].i32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBar(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        g_numberValues[0].i32 =
+            GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridScrollBar(node->uiNodeHandle);
     }
     return &g_attributeItem;
+}
+
+void SetDefaultScrollBar(ArkUI_NodeHandle node)
+{
+    if (node->type == ARKUI_NODE_GRID) {
+        auto fullImpl = GetFullImpl();
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBar(node->uiNodeHandle,
+            ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO);
+    }
 }
 
 int32_t SetScrollScrollBar(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
+        SetDefaultScrollBar(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -5963,6 +5995,8 @@ int32_t SetScrollScrollBar(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBar(node->uiNodeHandle, attrVal);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBar(node->uiNodeHandle, attrVal);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBar(node->uiNodeHandle, attrVal);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -5978,6 +6012,8 @@ void ResetScrollScrollBar(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBar(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBar(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBar(node->uiNodeHandle);
     }
 }
 
@@ -5992,14 +6028,27 @@ const ArkUI_AttributeItem* GetScrollScrollBarWidth(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].f32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarWidth(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        g_numberValues[0].f32 =
+            GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridScrollBarWidth(node->uiNodeHandle);
     }
     return &g_attributeItem;
+}
+
+void SetDefaultScrollBarWidth(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarWidth(node->uiNodeHandle,
+            GRID_DEFAULT_SCROLL_BAR_WIDTH, GetDefaultUnit(node, UNIT_VP));
+    }
 }
 
 int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || LessNotEqual(item->value[NUM_0].f32, NUM_0)) {
+        SetDefaultScrollBarWidth(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -6014,7 +6063,9 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(
             node->uiNodeHandle, width.c_str());
-    }
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarWidth(node->uiNodeHandle, attrVal, unit);
+    } 
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6028,6 +6079,8 @@ void ResetScrollScrollBarWidth(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBarWidth(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarWidth(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBarWidth(node->uiNodeHandle);
     }
 }
 
@@ -6042,14 +6095,27 @@ const ArkUI_AttributeItem* GetScrollScrollBarColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].u32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarColor(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        g_numberValues[0].u32 =
+            GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridScrollBarColor(node->uiNodeHandle);
     }
     return &g_attributeItem;
+}
+
+void SetDefaultScrollBarColor(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColor(node->uiNodeHandle,
+            GRID_DEFAULT_SCROLL_BAR_COLOR);
+    }
 }
 
 int32_t SetScrollScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
+        SetDefaultScrollBarColor(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -6063,6 +6129,8 @@ int32_t SetScrollScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         auto value = Color(color).ColorToString();
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
             node->uiNodeHandle, value.c_str());
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColor(node->uiNodeHandle, color);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6078,6 +6146,8 @@ void ResetScrollScrollBarColor(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBarColor(node->uiNodeHandle);
     }
 }
 
@@ -6200,14 +6270,27 @@ const ArkUI_AttributeItem* GetScrollEnableScrollInteraction(ArkUI_NodeHandle nod
         g_numberValues[0].i32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowEnableScrollInteraction(
                 node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        g_numberValues[0].i32 =
+            GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridEnableScrollInteraction(node->uiNodeHandle);
     }
     return &g_attributeItem;
+}
+
+void SetDefalutEnableScrollInteraction(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridEnableScrollInteraction(
+            node->uiNodeHandle, true);
+    }
 }
 
 int32_t SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
+        SetDefalutEnableScrollInteraction(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -6220,6 +6303,9 @@ int32_t SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const ArkUI_Attr
             node->uiNodeHandle, enableScrollInteraction);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowEnableScrollInteraction(
+            node->uiNodeHandle, enableScrollInteraction);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridEnableScrollInteraction(
             node->uiNodeHandle, enableScrollInteraction);
     }
     return ERROR_CODE_NO_ERROR;
@@ -6236,6 +6322,16 @@ void ResetScrollEnableScrollInteraction(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getScrollModifier()->resetEnableScrollInteraction(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowEnableScrollInteraction(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridEnableScrollInteraction(node->uiNodeHandle);
+    }
+}
+
+void SetDefaultScrollNestedScroll(ArkUI_NodeHandle node)
+{
+    if (node->type == ARKUI_NODE_GRID) {
+        auto* fullImpl = GetFullImpl();
+        fullImpl->getNodeModifiers()->getGridModifier()->resetNestedScroll(node->uiNodeHandle);
     }
 }
 
@@ -6245,6 +6341,7 @@ int32_t SetScrollNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
     if (actualSize < 0 || !CheckAttributeIsScrollNestedMode(item->value[0].i32) ||
         !CheckAttributeIsScrollNestedMode(item->value[1].i32)) {
+        SetDefaultScrollNestedScroll(node);
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6255,6 +6352,8 @@ int32_t SetScrollNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
             node->uiNodeHandle, first, second);
     } else if (node->type == ARKUI_NODE_LIST) {
         fullImpl->getNodeModifiers()->getListModifier()->setListNestedScroll(node->uiNodeHandle, first, second);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setNestedScroll(node->uiNodeHandle, first, second);
     } else {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(node->uiNodeHandle, first, second);
     }
@@ -6269,6 +6368,8 @@ const ArkUI_AttributeItem* GetScrollNestedScroll(ArkUI_NodeHandle node)
             node->uiNodeHandle, &values);
     } else if (node->type == ARKUI_NODE_LIST) {
         GetFullImpl()->getNodeModifiers()->getListModifier()->getListNestedScroll(node->uiNodeHandle, &values);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        GetFullImpl()->getNodeModifiers()->getGridModifier()->getNestedScroll(node->uiNodeHandle, &values);
     } else {
         GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollNestedScroll(node->uiNodeHandle, &values);
     }
@@ -6286,6 +6387,8 @@ void ResetScrollNestedScroll(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowNestedScroll(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_LIST) {
         GetFullImpl()->getNodeModifiers()->getListModifier()->resetListNestedScroll(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetNestedScroll(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollNestedScroll(node->uiNodeHandle);
     }
@@ -16142,6 +16245,82 @@ const ArkUI_AttributeItem* GetGridFocusWrapMode(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetGridAlignItems(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    ArkUI_Int32 alignment = GRID_ITEM_ALIGNMENT_DEFAULT;
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        GetFullImpl()->getNodeModifiers()->getGridModifier()->setGridAlignItems(node->uiNodeHandle, alignment);
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        alignment = item->value[0].i32;
+        GetFullImpl()->getNodeModifiers()->getGridModifier()->setGridAlignItems(node->uiNodeHandle, alignment);
+        return ERROR_CODE_NO_ERROR;
+    }
+}
+
+void ResetGridAlignItems(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getGridModifier()->resetGridAlignItems(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridAlignItems(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridAlignItems(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
+int32_t SetGridLayoutOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    node->gridLayoutOptions = item->object;
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* gridLayoutOptions = reinterpret_cast<ArkUIGridLayoutOptions>(item->object);
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setGridLayoutOptions(
+        node->uiNodeHandle, gridLayoutOptions);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetGridLayoutOptions(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getGridModifier()->resetGridLayoutOptions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridLayoutOptions(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->gridLayoutOptions;
+    return &g_attributeItem;
+}
+
+int32_t SetGridItemOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    ArkUI_Int32 alignment = GRID_ITEM_STYLE_NONE;
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        GetFullImpl()->getNodeModifiers()->getGridItemModifier()->setGridItemOptions(node->uiNodeHandle, alignment);
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        alignment = item->value[0].i32;
+        GetFullImpl()->getNodeModifiers()->getGridItemModifier()->setGridItemOptions(node->uiNodeHandle, alignment);
+        return ERROR_CODE_NO_ERROR;
+    }
+}
+
+void ResetGridItemOptions(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getGridItemModifier()->resetGridItemOptions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridItemOptions(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridItemModifier()->getGridItemOptions(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
 {
     if (node->type == ARKUI_NODE_SPAN) {
@@ -18001,10 +18180,21 @@ int32_t SetRelativeContainerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, 
     return setters[subTypeId](node, item);
 }
 
+int32_t SetGridItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetGridItemOptions };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "GridItem node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
 int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
-        SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad };
+        SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad, SetGridAlignItems,
+        SetGridLayoutOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18022,10 +18212,21 @@ void ResetRelativeContainerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
+void ResetGridItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Resetter* resetters[] = { ResetGridItemOptions };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "GridItem node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    return resetters[subTypeId](node);
+}
+
 void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
-        ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad };
+        ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad,
+        ResetGridAlignItems, ResetGridLayoutOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -18044,10 +18245,22 @@ const ArkUI_AttributeItem* GetRelativeContainerAttribute(ArkUI_NodeHandle node, 
     return getters[subTypeId](node);
 }
 
+const ArkUI_AttributeItem* GetGridItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Getter* getters[] = { GetGridItemOptions };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "GridItem node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return nullptr;
+    }
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return getters[subTypeId](node);
+}
+
 const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
-        GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad };
+        GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad, GetGridAlignItems,
+        GetGridLayoutOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -18102,7 +18315,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
         SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
         SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
-        SetGridAttribute, nullptr, nullptr, SetEmbeddedComponentAttribute };
+        SetGridAttribute, SetGridItemAttribute, nullptr, SetEmbeddedComponentAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -18132,7 +18345,7 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
         GetXComponentAttribute, GetCheckboxGroupAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
         GetListAttribute, nullptr, GetListItemGroupAttribute, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
-        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute };
+        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute, GetGridItemAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -18159,7 +18372,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute,
         ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
-        ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute };
+        ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute, ResetGridItemAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =

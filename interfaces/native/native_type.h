@@ -90,6 +90,42 @@ typedef struct ArkUI_Node* ArkUI_NodeHandle;
 typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
 
 /**
+ * @brief Defines the return value structure for the <b>onGetIrregularSizeByIndex</b> callback
+ * in <b>Grid</b> layout options.
+ *
+ * @since 21
+ */
+typedef struct {
+    /** Number of rows occupied by the <b>GridItem</b> component. */
+    uint32_t rowSpan;
+    /** Number of columns occupied by the <b>GridItem</b> component. */
+    uint32_t columnSpan;
+} ArkUI_GridItemSize;
+
+/**
+ * @brief Defines the return value structure for the <b>onGetRectByIndex</b> callback in <b>Grid</b> layout options.
+ *
+ * @since 21
+ */
+typedef struct {
+    /** Starting row position of the <b>GridItem</b> component. */
+    uint32_t rowStart;
+    /** Starting column position of the <b>GridItem</b> component. */
+    uint32_t columnStart;
+    /** Number of rows occupied by the <b>GridItem</b> component. */
+    uint32_t rowSpan;
+    /** Number of columns occupied by the <b>GridItem</b> component. */
+    uint32_t columnSpan;
+} ArkUI_GridItemRect;
+
+/**
+ * @brief Defines the <b>Grid</b> layout options.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_GridLayoutOptions ArkUI_GridLayoutOptions;
+
+/**
  * @brief 提供ArkUI native UI的上下文实例对象定义。
  *
  * @since 12
@@ -2735,6 +2771,30 @@ typedef struct {
 } ArkUI_RotationOptions;
 
 /**
+ * @brief Enumerates the grid item alignment modes.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** Use the default alignment mode of the grid. */
+    GRID_ITEM_ALIGNMENT_DEFAULT = 0,
+    /** Set the height of all grid items in a row to match the height of the tallest item in that row. */
+    GRID_ITEM_ALIGNMENT_STRETCH = 1,
+} ArkUI_GridItemAlignment;
+
+/**
+ * @brief Enumerates styles of grid items.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** No style. */
+    GRID_ITEM_STYLE_NONE = 0,
+    /** Hover or press style. */
+    GRID_ITEM_STYLE_PLAIN = 1,
+} ArkUI_GridItemStyle;
+
+/**
  * @brief defines the measure info of the custom span.
  *
  * @since 12
@@ -2905,6 +2965,85 @@ void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context);
 * @since 12
 */
 ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
+
+/**
+ * @brief Creates <b>Grid</b> layout options.
+ *
+ * @return <b>Grid</b> layout options created.
+ * @since 21
+ */
+ArkUI_GridLayoutOptions* OH_ArkUI_GridLayoutOptions_Create();
+
+/**
+ * @brief Disposes of <b>Grid</b> layout options.
+ *
+ * @param option <b>Grid</b> layout options.
+ * @since 21
+ */
+void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option);
+
+/**
+ * @brief Sets the irregular grid item index array for the grid layout.
+ *
+ * @param option <b>Grid</b> layout options.
+ * @param irregularIndexes Array of irregular grid item indexes.
+ * @param size Size of the index array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         If an error code is returned, it may be due to a failure in parameter validation;
+ *         the parameter must not be null.
+ * @since 21
+ */
+int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(
+    ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t size);
+
+/**
+ * @brief Obtains the irregular grid item index array for the grid layout.
+ * When <b>OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback</b> is not set,
+ * the grid item specified in <b>irregularIndexes</b> occupies an entire row of the grid that scrolls vertically or
+ * an entire column of the grid that scrolls horizontally.
+ *
+ * @param option <b>Grid</b> layout options.
+ * @param irregularIndexes Array of irregular grid item indexes.
+ * @param size Size of the index array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
+ *         If an error code is returned, it may be due to a failure in parameter validation;
+ *         the parameter must not be null.
+ * @since 21
+ */
+int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(
+    ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t* size);
+
+/**
+ * @brief Registers a callback to obtain the row and column span for the grid item at the specified index.
+ *
+ * @param option <b>Grid</b> layout options.
+ * @param userData Indicates the custom data.
+ * @param callback Callback that returns the row and column span for the grid item at the specified index.
+ *        itemIndex: grid item index, which must be within the range set by
+ *        {@link OH_ArkUI_GridLayoutOptions_SetIrregularIndexes}.
+ * @since 21
+ */
+void OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback(
+    ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemSize (*callback)(int32_t itemIndex, void* userData));
+
+/**
+ * @brief Registers a callback to obtain the starting row, starting column, row span,
+ * and column span for the grid item at the specified index.
+ *
+ * @param option <b>Grid</b> layout options.
+ * @param userData Indicates the custom data.
+ * @param callback Callback that returns the starting row, starting column, row span,
+ *        and column span for the grid item at the specified index.
+ *        itemIndex: grid item index.
+ * @since 21
+ */
+void OH_ArkUI_GridLayoutOptions_RegisterGetRectByIndexCallback(
+    ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemRect (*callback)(int32_t itemIndex, void* userData));
 
 /**
 * @brief Creates water flow section configuration.

@@ -19,11 +19,15 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+    constexpr Dimension DEFAULT_SCROLL_BAR_WIDTH = 4.0_vp;
+    constexpr Color DEFAULT_SCROLL_BAR_COLOR = Color(0x66182431);
+}
 void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -254,6 +258,14 @@ void GridModelNG::SetAlignItems(GridItemAlignment itemAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign);
 }
 
+GridItemAlignment GridModelNG::GetAlignItems(FrameNode* frameNode)
+{
+    GridItemAlignment alignment = GridItemAlignment::DEFAULT;
+    CHECK_NULL_RETURN(frameNode, alignment);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, AlignItems, alignment, frameNode, alignment);
+    return alignment;
+}
+
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -460,6 +472,13 @@ void GridModelNG::SetScrollBarMode(FrameNode* frameNode, const std::optional<Dis
     }
 }
 
+int32_t GridModelNG::GetScrollBarMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(DisplayMode::AUTO));
+    return static_cast<int32_t>(
+        frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value_or(DisplayMode::AUTO));
+}
+
 void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth)
 {
     if (scrollBarWidth &&
@@ -471,9 +490,23 @@ void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Di
     }
 }
 
+float GridModelNG::GetScrollBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_SCROLL_BAR_WIDTH.ConvertToVp());
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
+}
+
 void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
 {
     ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
+}
+
+uint32_t GridModelNG::GetScrollBarColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_SCROLL_BAR_COLOR.GetValue());
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarColor();
+    return value.GetValue();
 }
 
 void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
@@ -572,9 +605,28 @@ void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOption
     pattern->SetNestedScroll(nestedOpt);
 }
 
+NestedScrollOptions GridModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    defaultOptions.forward = NestedScrollMode::SELF_ONLY;
+    defaultOptions.backward = NestedScrollMode::SELF_ONLY;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
+}
+
 void GridModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
+}
+
+bool GridModelNG::GetScrollEnabled(FrameNode* frameNode)
+{
+    bool value = true;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ScrollEnabled, value, frameNode, value);
+    return value;
 }
 
 void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& value)
@@ -582,10 +634,22 @@ void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>&
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     std::optional<double> friction = value;
-    if (friction.has_value() && LessOrEqual(friction.value(), 0.0f)) {
-        friction.reset();
+    if (!friction.has_value()) {
+        friction = -1.0;
     }
-    pattern->SetFriction(friction.value_or(FRICTION));
+    pattern->SetFriction(friction.value());
+}
+
+double GridModelNG::GetFriction(FrameNode* frameNode)
+{
+    if (frameNode == nullptr) {
+        return ScrollablePattern::GetDefaultFriction();
+    }
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    if (pattern == nullptr) {
+        return ScrollablePattern::GetDefaultFriction();
+    }
+    return pattern->GetFriction();
 }
 
 void GridModelNG::SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode)
@@ -702,6 +766,22 @@ void GridModelNG::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& opti
 
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
+}
+
+void GridModelNG::ResetLayoutOptions(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, frameNode);
+}
+
+std::optional<GridLayoutOptions> GridModelNG::GetLayoutOptions(FrameNode* frameNode)
+{
+    std::optional<GridLayoutOptions> options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, options);
+    options = layoutProperty->GetLayoutOptions();
+    return options;
 }
 
 void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)

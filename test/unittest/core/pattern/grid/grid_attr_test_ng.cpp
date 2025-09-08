@@ -14,6 +14,9 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -21,8 +24,11 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const InspectorFilter filter;
+constexpr Dimension DEFAULT_SCROLL_WIDTH = 4.0_vp;
+constexpr Dimension TEST_10_VP = 10.0_vp;
+constexpr Dimension TEST_20_VP = 20.0_vp;
+constexpr Color DEFAULT_SCROLL_BAR_COLOR = Color(0x66182431);
 } // namespace
-
 class GridAttrTestNg : public GridTestNg {
 public:
     AssertionResult VerifyBigItemRect(int32_t index, RectF expectRect);
@@ -1191,5 +1197,378 @@ HWTEST_F(GridAttrTestNg, Property005, TestSize.Level1)
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selected"), "true");
     EXPECT_EQ(json->GetString("selectable"), "true");
+}
+
+/**
+ * @tc.name: GridItemStyleTest
+ * @tc.desc: GridItem get itemStyle test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemStyleTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto itemModel  = CreateGridItem(60, 550);
+    auto node = GetChildFrameNode(frameNode_, 0);
+    auto pattern = node->GetPattern<GridItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    itemModel.SetGridItemStyle(node.GetRawPtr(), GridItemStyle::NONE);
+    auto itemStyle = itemModel.GetGridItemStyle(node.GetRawPtr());
+    EXPECT_EQ(itemStyle, GridItemStyle::NONE);
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    ASSERT_NE(gridItemPattern, nullptr);
+    EXPECT_EQ(gridItemPattern->GetGridItemStyle(), GridItemStyle::NONE);
+
+    itemModel.SetGridItemStyle(node.GetRawPtr(), GridItemStyle::PLAIN);
+    itemStyle = itemModel.GetGridItemStyle(node.GetRawPtr());
+    EXPECT_EQ(itemStyle, GridItemStyle::PLAIN);
+    EXPECT_EQ(gridItemPattern->GetGridItemStyle(), GridItemStyle::PLAIN);
+
+    itemStyle = itemModel.GetGridItemStyle(nullptr);
+    EXPECT_EQ(itemStyle, GridItemStyle::NONE);
+
+    node->pattern_ = nullptr;
+    itemStyle = itemModel.GetGridItemStyle(node.GetRawPtr());
+    EXPECT_EQ(itemStyle, GridItemStyle::NONE);
+    node->pattern_ = pattern;
+}
+
+/**
+ * @tc.name: AlignItemsTest
+ * @tc.desc: GridModelNG GetAlignItems test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, AlignItemsTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+
+    gridModel.SetAlignItems(node, GridItemAlignment::DEFAULT);
+    EXPECT_EQ(gridModel.GetAlignItems(node), GridItemAlignment::DEFAULT);
+
+    gridModel.SetAlignItems(node, GridItemAlignment::STRETCH);
+    EXPECT_EQ(gridModel.GetAlignItems(node), GridItemAlignment::STRETCH);
+
+    EXPECT_EQ(gridModel.GetAlignItems(nullptr), GridItemAlignment::DEFAULT);
+}
+
+/**
+ * @tc.name: ScrollBarModeTest
+ * @tc.desc: GridModelNG GetScrollBarMode test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, ScrollBarModeTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetScrollBarMode(DisplayMode::ON);
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+    
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    gridModel.SetScrollBarMode(node,  DisplayMode::AUTO);
+    EXPECT_EQ(gridModel.GetScrollBarMode(node), static_cast<int32_t>(DisplayMode::AUTO));
+
+    gridModel.SetScrollBarMode(node, DisplayMode::ON);
+    EXPECT_EQ(gridModel.GetScrollBarMode(node), static_cast<int32_t>(DisplayMode::ON));
+
+    gridModel.SetScrollBarMode(node, DisplayMode::OFF);
+    EXPECT_EQ(gridModel.GetScrollBarMode(node), static_cast<int32_t>(DisplayMode::OFF));
+
+    EXPECT_EQ(gridModel.GetScrollBarMode(nullptr), static_cast<int32_t>(DisplayMode::AUTO));
+}
+
+/**
+ * @tc.name: ScrollBarWidthTest
+ * @tc.desc: GridModelNG GetScrollBarWidth test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, ScrollBarWidthTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ScrollBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto node = AceType::RawPtr(frameNode_);
+    gridModel.SetScrollBarWidth(node, TEST_10_VP);
+    EXPECT_EQ(gridModel.GetScrollBarWidth(node), TEST_10_VP.ConvertToVp());
+
+    gridModel.SetScrollBarWidth(node, TEST_20_VP);
+    EXPECT_EQ(gridModel.GetScrollBarWidth(node), TEST_20_VP.ConvertToVp());
+
+    EXPECT_EQ(gridModel.GetScrollBarWidth(nullptr), DEFAULT_SCROLL_WIDTH.ConvertToVp());
+}
+
+/**
+ * @tc.name: ScrollBarColorTest
+ * @tc.desc: GridModelNG GetScrollColor test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, ScrollBarColorTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ScrollBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    gridModel.SetScrollBarColor(node, Color::RED);
+    EXPECT_EQ(gridModel.GetScrollBarColor(node), Color::RED.GetValue());
+
+    gridModel.SetScrollBarColor(node, Color::BLUE);
+    EXPECT_EQ(gridModel.GetScrollBarColor(node), Color::BLUE.GetValue());
+
+    EXPECT_EQ(gridModel.GetScrollBarColor(nullptr), DEFAULT_SCROLL_BAR_COLOR.GetValue());
+}
+
+/**
+ * @tc.name: GetNestedScrollTest
+ * @tc.desc: GridModelNG GetNestedScroll test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GetNestedScrollTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    NestedScrollOptions retNestedScrollOptions = gridModel.GetNestedScroll(node);
+    EXPECT_EQ(retNestedScrollOptions.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(retNestedScrollOptions.backward, NestedScrollMode::SELF_ONLY);
+
+    NestedScrollOptions nestedScrollOptions;
+    nestedScrollOptions.forward = NestedScrollMode::PARENT_FIRST;
+    nestedScrollOptions.backward = NestedScrollMode::PARENT_FIRST;
+
+    gridModel.SetNestedScroll(node, nestedScrollOptions);
+    retNestedScrollOptions = gridModel.GetNestedScroll(node);
+    EXPECT_EQ(retNestedScrollOptions.forward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(retNestedScrollOptions.backward, NestedScrollMode::PARENT_FIRST);
+
+    retNestedScrollOptions = gridModel.GetNestedScroll(nullptr);
+    EXPECT_EQ(retNestedScrollOptions.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(retNestedScrollOptions.backward, NestedScrollMode::SELF_ONLY);
+
+    node->pattern_ = nullptr;
+    retNestedScrollOptions = gridModel.GetNestedScroll(node);
+    EXPECT_EQ(retNestedScrollOptions.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(retNestedScrollOptions.backward, NestedScrollMode::SELF_ONLY);
+    node->pattern_ = pattern;
+}
+
+/**
+ * @tc.name: GetScrollEnabledTest
+ * @tc.desc: GridModelNG GetScrollEnabled test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GetScrollEnabledTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    gridModel.SetScrollEnabled(node, true);
+    EXPECT_TRUE(gridModel.GetScrollEnabled(node));
+    
+    gridModel.SetScrollEnabled(node, false);
+    EXPECT_FALSE(gridModel.GetScrollEnabled(node));
+
+    EXPECT_TRUE(gridModel.GetScrollEnabled(nullptr));
+}
+
+/**
+ * @tc.name: GetFrictionTest001
+ * @tc.desc: GridModelNG GetFriction test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GetFrictionTest001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    gridModel.SetFriction(node, 0.8);
+    EXPECT_EQ(gridModel.GetFriction(node),  0.8);
+#ifndef WEARABLE_PRODUCT
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ScrollableTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto friction = theme->GetFriction();
+
+    node->pattern_ = nullptr;
+    EXPECT_EQ(node->GetPattern<GridPattern>(), nullptr);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    EXPECT_EQ(gridModel.GetFriction(nullptr), FRICTION);
+    EXPECT_EQ(gridModel.GetFriction(node), FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_EQ(gridModel.GetFriction(nullptr),  API11_FRICTION);
+    EXPECT_EQ(gridModel.GetFriction(node), API11_FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    EXPECT_EQ(gridModel.GetFriction(nullptr),  API12_FRICTION);
+    EXPECT_EQ(gridModel.GetFriction(node), API12_FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    EXPECT_EQ(gridModel.GetFriction(nullptr),  friction);
+    EXPECT_EQ(gridModel.GetFriction(node), friction);
+    node->pattern_ = pattern;
+#endif
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: GetFrictionTest002
+ * @tc.desc: GridModelNG GetFriction test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GetFrictionTest002, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+#ifndef WEARABLE_PRODUCT
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ScrollableTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto friction = theme->GetFriction();
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    gridModel.SetFriction(node, std::optional<double>());
+    EXPECT_EQ(gridModel.GetFriction(node), FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    gridModel.SetFriction(node, std::optional<double>());
+    EXPECT_EQ(gridModel.GetFriction(node), API11_FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    gridModel.SetFriction(node, std::optional<double>());
+    EXPECT_EQ(gridModel.GetFriction(node), API12_FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    gridModel.SetFriction(node, std::optional<double>());
+    EXPECT_EQ(gridModel.GetFriction(node), friction);
+#endif
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: GetDefaultFriction
+ * @tc.desc: Test GetDefaultFriction function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GetDefaultFriction, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ScrollableTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto friction = theme->GetFriction();
+
+#ifndef WEARABLE_PRODUCT
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::API11_FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::API12_FRICTION);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), friction);
+#else
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));;
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::FRICTION);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    EXPECT_EQ(gridPattern->GetDefaultFriction(), OHOS::Ace::NG::FRICTION);
+#endif
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: GetLayoutOptionsTest001
+ * @tc.desc: GridModelNG GetLayoutOptions test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridModelNGTest008, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
+    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
+        if (index == 3) {
+            return GridItemSize { 1, 2 };
+        }
+        return GridItemSize { 1, 4 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GetRectByIndex onGetRectByIndex = [](int32_t index) -> GridItemRect {
+        GridItemRect itemRect = { 0, 0, 1, 1 };
+        return itemRect;
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    gridModel.SetLayoutOptions(node, option);
+    auto retOption = gridModel.GetLayoutOptions(node);
+    ASSERT_NE(retOption, std::nullopt);
+    EXPECT_EQ(retOption->irregularIndexes, option.irregularIndexes);
+    ASSERT_NE(retOption->getSizeByIndex, nullptr);
+    EXPECT_EQ(retOption->getSizeByIndex(3).rows, 1);
+    EXPECT_EQ(retOption->getSizeByIndex(3).columns, 2);
+    EXPECT_EQ(retOption->getSizeByIndex(0).rows, 1);
+    EXPECT_EQ(retOption->getSizeByIndex(0).columns, 4);
 }
 } // namespace OHOS::Ace::NG

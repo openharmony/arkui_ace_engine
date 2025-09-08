@@ -1878,6 +1878,22 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_CHECKBOX_GROUP_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_AXIS, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_AXIS));
+
+    nodeType = static_cast<int32_t>(ARKUI_NODE_GRID);
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_SCROLL_BAR_UPDATE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_SCROLL_BAR_UPDATE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_SCROLL_FRAME_BEGIN));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_SCROLL_INDEX, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_SCROLL_TO_INDEX));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL_START, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_START));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_STOP));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_WILL_SCROLL, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_WILL_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_DID_SCROLL, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_DID_SCROLL));
 }
 
 /**
@@ -2086,6 +2102,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_IMAGE_ANIMATOR_ON_FINISH);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_SCROLL_FRAME_BEGIN);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_SCROLL_TO_INDEX);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_SCROLL_INDEX));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_START);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_SCROLL_START));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_SCROLL_STOP));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_WILL_SCROLL);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_WILL_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_DID_SCROLL);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_DID_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_SCROLL_BAR_UPDATE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_SCROLL_BAR_UPDATE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_EVENT);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_KEY_EVENT));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_PREIME);

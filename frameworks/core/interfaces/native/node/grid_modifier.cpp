@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 #include "grid_modifier.h"
-
+#include <memory>
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
+#include "interfaces/native/node/grid_layout_option.h"
+#include "node_model.h"
 
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_ROWS_TEMPLATE = "1fr";
@@ -36,8 +38,10 @@ constexpr bool DEFAULT_MULTI_SELECTABLE = false;
 constexpr bool DEFAULT_SUPPORT_ANIMATION = false;
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
 const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
-
+using GridSizeCallback = ArkUI_GridItemSize (*)(int32_t, void*);
+using GridRectCallback = ArkUI_GridItemRect (*)(int32_t, void*);
 void SetGridColumnsTemplate(ArkUINodeHandle node, const char* columnsTemplate)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -127,6 +131,13 @@ void ResetGridScrollBar(ArkUINodeHandle node)
     GridModelNG::SetScrollBarMode(frameNode, DEFAULT_SCROLL_BAR);
 }
 
+ArkUI_Int32 GetGridScrollBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return GridModelNG::GetScrollBarMode(frameNode);
+}
+
 void SetGridScrollBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -140,6 +151,13 @@ void ResetGridScrollBarWidth(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetScrollBarWidth(frameNode, DEFAULT_SCROLL_BAR_WIDTH);
+}
+
+ArkUI_Float32 GetGridScrollBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return GridModelNG::GetScrollBarWidth(frameNode);
 }
 
 void SetGridScrollBarColor(ArkUINodeHandle node, uint32_t scrollBarColor)
@@ -157,6 +175,13 @@ void ResetGridScrollBarColor(ArkUINodeHandle node)
 
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     NodeModifier::CreateWithResourceObjGridScrollBarColor(node, nullptr);
+}
+
+ArkUI_Uint32 GetGridScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return GridModelNG::GetScrollBarColor(frameNode);
 }
 
 void SetGridCachedCount(ArkUINodeHandle node, int32_t cachedCount)
@@ -311,6 +336,15 @@ void ResetNestedScroll(ArkUINodeHandle node)
     GridModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
+void GetNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NestedScrollOptions options = GridModelNG::GetNestedScroll(frameNode);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.forward);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.backward);
+}
+
 void SetEnableScroll(ArkUINodeHandle node, ArkUI_Bool ScrollEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -339,6 +373,13 @@ void ResetFriction(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ArkUI_Float32 friction = -1.0;
     GridModelNG::SetFriction(frameNode, friction);
+}
+
+ArkUI_Float32 GetFriction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<float>(GridModelNG::GetFriction(frameNode));
 }
 
 void SetGridFocusWrapMode(ArkUINodeHandle node, int32_t focusWrapMode)
@@ -390,6 +431,13 @@ void ResetGridAlignItems(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetAlignItems(frameNode, GridItemAlignment::DEFAULT);
+}
+
+ArkUI_Int32 GetGridAlignItems(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int32_t>(GridModelNG::GetAlignItems(frameNode));
 }
 
 void SetGridSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoad)
@@ -524,6 +572,65 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
 
+void SetGridEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetScrollEnabled(frameNode, value);
+}
+
+ArkUI_Int32 GetGridEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return GridModelNG::GetScrollEnabled(frameNode);
+}
+
+void ResetGridEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetScrollEnabled(frameNode, true);
+}
+
+void SetGridLayoutOptions(ArkUINodeHandle node, ArkUIGridLayoutOptions option)
+{
+    CHECK_NULL_VOID(option);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridLayoutOptions gridLayoutOptions;
+
+    if (option->size > 0 && !option->irregularIndexes.empty()) {
+        gridLayoutOptions.irregularIndexes.clear();
+        gridLayoutOptions.irregularIndexes.insert(
+            option->irregularIndexes.begin(), option->irregularIndexes.end());
+    }
+    if (option->onGetIrregularSizeByIndex) {
+        auto callback = reinterpret_cast<GridSizeCallback>(option->onGetIrregularSizeByIndex);
+        void* userData = option->irregularSizeUserData;
+        gridLayoutOptions.getSizeByIndex = [callback, userData](int32_t index) -> GridItemSize {
+            ArkUI_GridItemSize arkSize = callback(index, userData);
+            return GridItemSize{arkSize.rowSpan, arkSize.columnSpan};
+        };
+    }
+    if (option->onRectByIndexCallback) {
+        auto callback = reinterpret_cast<GridRectCallback>(option->onRectByIndexCallback);
+        void* userData = option->rectByIndexUserData;
+        gridLayoutOptions.getRectByIndex = [callback, userData](int32_t index) -> GridItemRect {
+            ArkUI_GridItemRect arkRect = callback(index, userData);
+            return GridItemRect{arkRect.rowStart, arkRect.rowSpan, arkRect.columnStart, arkRect.columnSpan};
+        };
+    }
+    GridModelNG::SetLayoutOptions(frameNode, gridLayoutOptions);
+}
+
+void ResetGridLayoutOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::ResetLayoutOptions(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
@@ -539,10 +646,13 @@ const ArkUIGridModifier* GetGridModifier()
         .resetGridRowsGap = ResetGridRowsGap,
         .setGridScrollBar = SetGridScrollBar,
         .resetGridScrollBar = ResetGridScrollBar,
+        .getGridScrollBar = GetGridScrollBar,
         .setGridScrollBarWidth = SetGridScrollBarWidth,
         .resetGridScrollBarWidth = ResetGridScrollBarWidth,
+        .getGridScrollBarWidth = GetGridScrollBarWidth,
         .setGridScrollBarColor = SetGridScrollBarColor,
         .resetGridScrollBarColor = ResetGridScrollBarColor,
+        .getGridScrollBarColor = GetGridScrollBarColor,
         .setGridCachedCount = SetGridCachedCount,
         .resetGridCachedCount = ResetGridCachedCount,
         .setShowCached = SetShowCached,
@@ -566,10 +676,12 @@ const ArkUIGridModifier* GetGridModifier()
         .resetEdgeEffect = ResetEdgeEffect,
         .setNestedScroll = SetNestedScroll,
         .resetNestedScroll = ResetNestedScroll,
+        .getNestedScroll = GetNestedScroll,
         .setEnableScroll = SetEnableScroll,
         .resetEnableScroll = ResetEnableScroll,
         .setFriction = SetFriction,
         .resetFriction = ResetFriction,
+        .getFriction = GetFriction,
         .setGridFocusWrapMode = SetGridFocusWrapMode,
         .resetGridFocusWrapMode = ResetGridFocusWrapMode,
         .getGridFocusWrapMode = GetGridFocusWrapMode,
@@ -585,6 +697,7 @@ const ArkUIGridModifier* GetGridModifier()
         .getCachedCount = GetCachedCount,
         .setGridAlignItems = SetGridAlignItems,
         .resetGridAlignItems = ResetGridAlignItems,
+        .getGridAlignItems = GetGridAlignItems,
         .setSyncLoad = SetGridSyncLoad,
         .resetSyncLoad = ResetGridSyncLoad,
         .getSyncLoad = GetGridSyncLoad,
@@ -606,6 +719,11 @@ const ArkUIGridModifier* GetGridModifier()
         .resetOnGridItemDrop = ResetOnGridItemDrop,
         .createWithResourceObjFriction = CreateWithResourceObjGridFriction,
         .createWithResourceObjScrollBarColor = CreateWithResourceObjGridScrollBarColor,
+        .resetGridEnableScrollInteraction = ResetGridEnableScrollInteraction,
+        .setGridEnableScrollInteraction = SetGridEnableScrollInteraction,
+        .getGridEnableScrollInteraction = GetGridEnableScrollInteraction,
+        .resetGridLayoutOptions = ResetGridLayoutOptions,
+        .setGridLayoutOptions = SetGridLayoutOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -838,6 +956,155 @@ void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj)
     CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     GridModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
+}
+
+void SetOnGridWillScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillScroll = [extraParam](const Dimension& offset, const ScrollState& state,
+                            ScrollSource source) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_WILL_SCROLL;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
+        SendArkUISyncEvent(&event);
+        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
+    };
+    ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
+
+void ResetOnGridWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+
+void SetOnGridDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto setOnDidScroll = [extraParam](const Dimension& offset, const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.subKind = ON_GRID_DID_SCROLL;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(setOnDidScroll));
+}
+
+void ResetOnGridDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+}
+
+void SetOnGridScrollStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScrollStart = [extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_START;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
+void ResetOnGridScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+
+void SetOnGridScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScrollStop = [extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_STOP;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
+void ResetOnGridScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+
+void SetOnGridScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScrollFrameBegin = [extraParam](
+                                  const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_SCROLL_FRAME_BEGIN;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        SendArkUISyncEvent(&event);
+        scrollRes.offset = usePx ? Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::PX)
+                                 : Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
+    };
+    GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+}
+
+void ResetOnGridScrollFrameBegin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+}
+
+void SetOnGridScrollBarUpdate(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onGridScrollBarUpdate =
+        [extraParam](int32_t index, Dimension offset) -> std::pair<std::optional<float>, std::optional<float>> {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.mixedEvent.subKind = ON_GRID_SCROLL_BAR_UPDATE;
+        event.mixedEvent.numberDataLength = 2;
+        event.mixedEvent.numberData[0].i32 = index;
+        event.mixedEvent.numberData[1].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        SendArkUISyncEvent(&event);
+        return std::make_pair(std::optional<float>(event.mixedEvent.numberReturnData[0].f32),
+                              std::optional<float>(event.mixedEvent.numberReturnData[1].f32));
+    };
+    GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onGridScrollBarUpdate));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

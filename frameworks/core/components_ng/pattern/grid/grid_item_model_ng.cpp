@@ -193,6 +193,14 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
     pattern->UpdateGridItemStyle(gridItemStyle);
 }
 
+GridItemStyle GridItemModelNG::GetGridItemStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, GridItemStyle::NONE);
+    auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
+    CHECK_NULL_RETURN(pattern, GridItemStyle::NONE);
+    return pattern->GetGridItemStyle();
+}
+
 void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);

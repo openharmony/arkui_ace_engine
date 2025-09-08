@@ -925,6 +925,8 @@ public:
     {
         return scrollBar_;
     }
+
+    static double GetDefaultFriction();
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNodeMultiThread();

@@ -89,8 +89,11 @@ public:
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap);
     static void SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap);
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& scrollBarMode);
+    static int32_t GetScrollBarMode(FrameNode* frameNode);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth);
+    static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
+    static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static void SetShowCached(FrameNode* frameNode, bool show);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& layoutDirection);
@@ -106,11 +109,15 @@ public:
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static bool GetScrollEnabled(FrameNode* frameNode);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
+    static double GetFriction(FrameNode* frameNode);
     static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
     static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
-    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
+    static GridItemAlignment GetAlignItems(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);
@@ -120,6 +127,8 @@ public:
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
+    static std::optional<GridLayoutOptions> GetLayoutOptions(FrameNode* frameNode);
+    static void ResetLayoutOptions(FrameNode* frameNode);
     static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
     static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
     static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);

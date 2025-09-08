@@ -1454,6 +1454,23 @@ void ScrollablePattern::SetFriction(double friction)
     scrollable->SetUnstaticFriction(friction_);
 }
 
+double ScrollablePattern::GetDefaultFriction()
+{
+    double friction = FRICTION;
+#ifndef WEARABLE_PRODUCT
+    friction = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, friction);
+            auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+            CHECK_NULL_RETURN(scrollableTheme, friction);
+            friction = scrollableTheme->GetFriction();
+    }
+#endif
+    return friction;
+}
+
 void ScrollablePattern::SetVelocityScale(double scale)
 {
     if (LessOrEqual(scale, 0.0)) {
