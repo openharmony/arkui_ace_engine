@@ -115,15 +115,17 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
     return;
 }
 
-void QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
+bool QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
 {
     auto nodePtr =  AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
     auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
+    CHECK_NULL_RETURN(routerPageResult, false);
     info.index = routerPageResult->index;
     info.name = routerPageResult->name;
     info.path = routerPageResult->path;
     info.state = static_cast<ani_size>(routerPageResult->state);
     info.pageId = routerPageResult->pageId;
+    return true;
 }
 
 void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
@@ -183,11 +185,11 @@ void QueryNavDestinationInfo0(ani_long node, ArkUINavDestinationInfo& info, ani_
     return;
 }
 
-void QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info)
+bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info)
 {
     auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
     auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
-    CHECK_NULL_VOID(navDestinationResult);
+    CHECK_NULL_RETURN(navDestinationResult, false);
     info.uniqueId = static_cast<ani_double>(navDestinationResult->uniqueId);
     info.index = navDestinationResult->index;
     info.name = navDestinationResult->name;
@@ -195,7 +197,7 @@ void QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& inf
     info.navigationId = navDestinationResult->navigationId;
     info.state = static_cast<ani_size>(navDestinationResult->state);
     info.mode = static_cast<ani_size>(navDestinationResult->mode);
-    return;
+    return true;
 }
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
