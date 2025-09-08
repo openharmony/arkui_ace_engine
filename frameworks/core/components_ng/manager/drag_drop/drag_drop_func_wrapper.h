@@ -70,6 +70,8 @@ public:
     static OffsetF GetPaintRectCenterToScreen(const RefPtr<FrameNode>& frameNode);
     static OffsetF GetFrameNodeOffsetToScreen(const RefPtr<FrameNode>& frameNode);
     static RectF GetPaintRectToScreen(const RefPtr<FrameNode>& frameNode);
+    static RectF GetPaintRectToWindowWithoutRotate(const RefPtr<FrameNode>& frameNode);
+    static RectF GetPaintRectToScreenWithoutRotate(const RefPtr<FrameNode>& frameNode);
     static void UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset);
     static void UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset);
     static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,

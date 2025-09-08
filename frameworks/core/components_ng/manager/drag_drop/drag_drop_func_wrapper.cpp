@@ -685,6 +685,43 @@ RectF DragDropFuncWrapper::GetPaintRectToScreen(const RefPtr<FrameNode>& frameNo
     return rect;
 }
 
+RectF DragDropFuncWrapper::GetPaintRectToWindowWithoutRotate(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RectF());
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, RectF());
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() * SCALE_HALF, offset.GetY() + paintRect.Height() * SCALE_HALF);
+    float width = paintRect.Width();
+    float height = paintRect.Height();
+    context->GetPointTransformRotate(pointNode);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scale = parent->GetTransformScale();
+        width *= scale.x;
+        height *= scale.y;
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, RectF());
+        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        pointNode.SetX(offset.GetX() + pointNode.GetX());
+        pointNode.SetY(offset.GetY() + pointNode.GetY());
+        renderContext->GetPointTransformRotate(pointNode);
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    auto x = pointNode.GetX() - width * SCALE_HALF;
+    auto y = pointNode.GetY() - height * SCALE_HALF;
+    return RectF(x, y, width, height);
+}
+
+RectF DragDropFuncWrapper::GetPaintRectToScreenWithoutRotate(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RectF());
+    RectF rect = GetPaintRectToWindowWithoutRotate(frameNode);
+    rect += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return rect;
+}
+
 void DragDropFuncWrapper::UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset)
 {
     CHECK_NULL_VOID(frameNode);
