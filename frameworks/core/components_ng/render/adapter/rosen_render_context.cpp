@@ -3058,8 +3058,8 @@ void RosenRenderContext::PaintAccessibilityFocus(bool isRectUpdate)
         auto pipeline = focusNode->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto rect = pipeline->GetRootRect();
-        std::shared_ptr<Rosen::Rectf> drawRect =
-            std::make_shared<Rosen::RectF>(rect.GetX() - 100, Rect.GetY() - 100, rect.Width() + 200, rect.Height() + 200);
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX() - 100, rect.GetY() - 100, rect.Width() + 200, rect.Height() + 200);
         UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, drawRect);
     }
 }
