@@ -51,6 +51,7 @@ group("scroll_test") {
     "pattern/waterflow:water_flow_test_original",
     "pattern/waterflow:water_flow_test_segmented",
     "pattern/waterflow:water_flow_test_sw",
+    "pattern/lazy_layout:lazy_grid_layout_test",
   ]
 }
 
