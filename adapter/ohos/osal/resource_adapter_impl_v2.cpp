@@ -530,6 +530,25 @@ std::string ResourceAdapterImplV2::GetStringByName(const std::string& resName)
     return strResult;
 }
 
+std::string ResourceAdapterImplV2::GetStringFormatByName(const char* resName, ...)
+{
+    std::string strResult = "";
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, strResult);
+    va_list args;
+    va_start(args, resName);
+    auto state = manager->GetStringFormatByName(strResult, resName, args);
+    va_end(args);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get format string by name error, resName=%{public}s, errorCode=%{public}d",
+            resName, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId() : -1, resName,
+            "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
+    }
+    return strResult;
+}
+
 std::string ResourceAdapterImplV2::GetPluralString(uint32_t resId, int quantity)
 {
     std::string strResult = "";
