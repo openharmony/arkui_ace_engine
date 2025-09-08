@@ -91,7 +91,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     applyModifierPatch(peerNode: PeerNode): void {
         super.applyModifierPatch(peerNode)
         const peer: ArkXComponentPeer = peerNode as ArkXComponentPeer
-        if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._onLoad_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onLoad_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -109,7 +109,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (this._onDestroy_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._onDestroy_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onDestroy_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -127,7 +127,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._enableAnalyzer_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._enableAnalyzer_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -145,7 +145,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (this._enableSecure_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._enableSecure_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._enableSecure_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -163,7 +163,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._hdrBrightness_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hdrBrightness_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -181,7 +181,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (this._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._enableTransparentLayer_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (this._enableTransparentLayer_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -206,7 +206,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
             return;
         }
         const modifier = value as XComponentModifier
-        if (modifier._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._onLoad_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onLoad_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
@@ -219,7 +219,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (modifier._onDestroy_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._onDestroy_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onDestroy_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
@@ -232,7 +232,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._enableAnalyzer_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._enableAnalyzer_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
@@ -245,7 +245,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (modifier._enableSecure_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._enableSecure_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._enableSecure_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
@@ -258,7 +258,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
-        if (modifier._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._hdrBrightness_0_flag !== AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hdrBrightness_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
