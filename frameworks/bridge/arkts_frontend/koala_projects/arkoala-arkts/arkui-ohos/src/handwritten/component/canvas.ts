@@ -150,7 +150,7 @@ export function hookDrawImage(peerPtr: CanvasRenderer, image: ImageBitmap | Pixe
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(peerPtr.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
     }
-    else if ((RuntimeType.UNDEFINED) != (image_type)) {
+    else if ((RuntimeType.UNDEFINED) !== (image_type)) {
         const pixelMap = image as PixelMap
         ArkUIAniModule._CanvasRenderer_DrawPixelMap0(peerPtr.peer!.ptr, pixelMap, dx, dy)
     }
@@ -166,7 +166,7 @@ export function hookDrawImage(peerPtr: CanvasRenderer, image: ImageBitmap | Pixe
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(peerPtr.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
     }
-    else if ((RuntimeType.UNDEFINED) != (image_type)) {
+    else if ((RuntimeType.UNDEFINED) !== (image_type)) {
         const pixelMap = image as PixelMap
         ArkUIAniModule._CanvasRenderer_DrawPixelMap1(peerPtr.peer!.ptr, pixelMap, dx, dy, dw, dh)
     }
@@ -182,7 +182,7 @@ export function hookDrawImage(peerPtr: CanvasRenderer, image: ImageBitmap | Pixe
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(peerPtr.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
         thisSerializer.release()
     }
-    else if ((RuntimeType.UNDEFINED) != (image_type)) {
+    else if ((RuntimeType.UNDEFINED) !== (image_type)) {
         const pixelMap = image as PixelMap
         ArkUIAniModule._CanvasRenderer_DrawPixelMap2(peerPtr.peer!.ptr, pixelMap, sx, sy, sw, sh, dx, dy, dw, dh)
     }
@@ -215,7 +215,7 @@ export class ImageBitmap implements MaterializedBase {
         unit_type = runtimeType(unit) 
         if ((RuntimeType.STRING) === (src_type)) {
             const str = src as string
-            if ((RuntimeType.UNDEFINED) != (unit_type)) {
+            if ((RuntimeType.UNDEFINED) !== (unit_type)) {
                 const unit_cast = unit as LengthMetricsUnit
                 return ArkUIAniModule._ImageBitmap_Construct0(str, unit_cast)
             } else {
@@ -223,7 +223,7 @@ export class ImageBitmap implements MaterializedBase {
             }
         } else {
             const pixelMap = src as PixelMap
-            if ((RuntimeType.UNDEFINED) != (unit_type)) {
+            if ((RuntimeType.UNDEFINED) !== (unit_type)) {
                 const unit_cast = unit as LengthMetricsUnit
                 return ArkUIAniModule._ImageBitmap_Construct1(pixelMap, unit_cast)
             } else {
@@ -232,7 +232,7 @@ export class ImageBitmap implements MaterializedBase {
         }
     }
     constructor(src?: PixelMap | string, unit?: LengthMetricsUnit) {
-        if ((src) != (undefined)) {
+        if ((src) !== (undefined)) {
             const ctorPtr: KPointer = ImageBitmap.ctor_imagebitmap((src)!, unit)
             this.peer = new Finalizable(ctorPtr, ImageBitmap.getFinalizer())
         }
@@ -286,7 +286,7 @@ export class ImageData {
         if (width < 0.0 || height < 0.0) {
             return
         }
-        if (unit != undefined) {
+        if (unit !== undefined) {
             this.unit_val = unit
         }
         const density = this.GetDensity()
@@ -302,7 +302,7 @@ export class ImageData {
         if (data === undefined) {
             this.data_val = new Uint8ClampedArray(length)
         } else {
-            if (this.unit_val === LengthMetricsUnit.PX && data.length != length) {
+            if (this.unit_val === LengthMetricsUnit.PX && data.length !== length) {
                 return
             }
             this.data_val = data
