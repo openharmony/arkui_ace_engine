@@ -253,7 +253,7 @@ class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> 
         this.metadataClass = metadataClass
     }
 
-    override get(target: T, name: string): NullishType {
+    override get(target: T, name: string): Any {
         const value = super.get(target, name)
         const targetHandler = ObservableHandler.find(target)
         if (targetHandler && this.metadataClass.isObservedClass) {
@@ -266,7 +266,7 @@ class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> 
         return value
     }
 
-    override set(target: T, name: string, value: NullishType): boolean {
+    override set(target: T, name: string, value: Any): boolean {
         const observable = ObservableHandler.find(target)
         if (observable) {
             observable.onModify(this.metadataClass.trackedProperties?.has(name) ? name : undefined)
