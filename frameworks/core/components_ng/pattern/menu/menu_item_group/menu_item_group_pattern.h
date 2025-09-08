@@ -86,8 +86,9 @@ public:
         return hasStartIcon_;
     }
 
-    const RefPtr<FrameNode> GetBottomDivider() const
+    const RefPtr<FrameNode> GetBottomDivider()
     {
+        CreateBottomDivider();
         return bottomDivider_;
     }
 
@@ -113,7 +114,6 @@ public:
     void OnColorConfigurationUpdate() override;
 protected:
     void OnMountToParentDone() override;
-    void OnAttachToFrameNode() override;
 
 private:
     void ModifyFontSize();
