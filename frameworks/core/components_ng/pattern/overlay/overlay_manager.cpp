@@ -9128,6 +9128,13 @@ void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapp
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
-    EraseMenuInfo(pattern->GetTargetId());
+    auto targetId = pattern->GetTargetId();
+    auto currentMenuWrapper = menuMap_[targetId];
+    CHECK_NULL_VOID(currentMenuWrapper);
+    // When a menu is displayed for multiple times, if a menu is squeezed out, it is necessary to check whether the menu
+    // is the current recorded menu
+    if (currentMenuWrapper->GetId() == menuWrapperNode->GetId()) {
+        EraseMenuInfo(targetId);
+    }
 }
 } // namespace OHOS::Ace::NG
