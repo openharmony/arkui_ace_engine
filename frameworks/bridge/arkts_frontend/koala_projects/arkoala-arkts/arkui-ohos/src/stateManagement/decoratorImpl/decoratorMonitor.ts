@@ -61,7 +61,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         }
         try {
             this.monitorFunction_(this);
-        } catch (e: Exception) {
+        } catch (e) {
             StateMgmtConsole.log(`Error caught while executing @Monitor function: '${e}'`);
         } finally {
             this.values_.forEach((monitorValue: MonitorValueInternal) => {
