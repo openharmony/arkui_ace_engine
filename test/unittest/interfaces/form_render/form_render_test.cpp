@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #include "form_mgr_errors.h"
 #include "test/mock/interfaces/mock_uicontent.h"
+#include "test/mock/interfaces/mock_form_render_delegate_stub.h"
 #include "ui_content.h"
 
 #define private public
@@ -687,8 +688,19 @@ HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2))
-        .WillOnce(Return(rsNode));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillOnce(Return(rsNode));
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    sptr<MockFormRenderDelegateStub> renderDelegateStub = new MockFormRenderDelegateStub();
+    formRenderer->formRendererDelegate_ = renderDelegateStub;
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillRepeatedly(Return(rsNode));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(0);
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _))
+        .WillOnce(Return(ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(1);
     formRenderer->OnSurfaceReuse(formJsInfo);
 }
 

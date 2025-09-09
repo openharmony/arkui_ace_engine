@@ -20,6 +20,8 @@
 
 #include "iremote_broker.h"
 #include "iremote_object.h"
+#include "form_js_info.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_delegate_stub.h"
 
 namespace OHOS {
 namespace Ace {
