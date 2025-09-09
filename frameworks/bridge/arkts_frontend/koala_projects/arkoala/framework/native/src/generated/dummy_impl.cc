@@ -29540,6 +29540,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getAxisPinch(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetAxisPinchImpl(Ark_BaseEvent peer,
+                             const Ark_Number* axisPinch)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setAxisPinch(");
+        WriteToString(&out, axisPinch);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_Number GetPressureImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
@@ -30745,6 +30765,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return {42};
         string out("getVerticalAxisValue(");
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    Ark_Number GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {42};
+        string out("getPinchAxisScaleValue(");
         out.append(") \n");
         out.append("[return {42}] \n");
         appendGroupedLog(1, out);
@@ -44335,6 +44365,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseEventAccessor::SetAxisHorizontalImpl,
             BaseEventAccessor::GetAxisVerticalImpl,
             BaseEventAccessor::SetAxisVerticalImpl,
+            BaseEventAccessor::GetAxisPinchImpl,
+            BaseEventAccessor::SetAxisPinchImpl,
             BaseEventAccessor::GetPressureImpl,
             BaseEventAccessor::SetPressureImpl,
             BaseEventAccessor::GetTiltXImpl,
@@ -44516,6 +44548,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::GetFinalizerImpl,
             AxisEventAccessor::GetHorizontalAxisValueImpl,
             AxisEventAccessor::GetVerticalAxisValueImpl,
+            AxisEventAccessor::GetPinchAxisScaleValueImpl,
             AxisEventAccessor::GetActionImpl,
             AxisEventAccessor::SetActionImpl,
             AxisEventAccessor::GetDisplayXImpl,

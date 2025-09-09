@@ -664,6 +664,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
 void TextFieldPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
+    CHECK_NULL_VOID(!IsNormalInlineState());
     CHECK_NULL_VOID(HasFocus());
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
@@ -1181,7 +1182,8 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
         requestFocusReason_ == RequestFocusReason::DRAG_ENTER || requestFocusReason_ == RequestFocusReason::DRAG_MOVE ||
         requestFocusReason_ == RequestFocusReason::DRAG_END || requestFocusReason_ == RequestFocusReason::AUTO_FILL ||
         requestFocusReason_ == RequestFocusReason::CLICK || requestFocusReason_ == RequestFocusReason::MOUSE ||
-        requestFocusReason_ == RequestFocusReason::DRAG_SELECT;
+        requestFocusReason_ == RequestFocusReason::DRAG_SELECT ||
+        requestFocusReason_ == RequestFocusReason::SWITCH_EDITABLE;
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
         DoProcessAutoFill();
     }
@@ -5143,6 +5145,11 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto isIME = (info.reason == InputReason::IME);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+#if defined(IOS_PLATFORM)
+    if (info.compose.isActive || info.unmarkText) {
+        DeleteByRange(info.compose.start, info.compose.end);
+    }
+#endif
     TwinklingByFocus();
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
@@ -5791,13 +5798,18 @@ bool TextFieldPattern::CursorMoveDown()
     return false;
 }
 
-void TextFieldPattern::Delete(int32_t start, int32_t end)
+void TextFieldPattern::DeleteByRange(int32_t& start, int32_t& end)
 {
     SwapIfLarger(start, end);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
     UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
+}
+
+void TextFieldPattern::Delete(int32_t start, int32_t end)
+{
+    DeleteByRange(start, end);
     if (isLongPress_) {
         CancelGestureSelection();
     }
@@ -5964,6 +5976,22 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             value->selection.baseOffset -= deleteSize;
         }
     }
+#ifdef CROSS_PLATFORM
+    if (value->isDelete) {
+        HandleOnDelete(true);
+        return;
+    } else {
+#ifdef IOS_PLATFORM
+        compose_ = value->compose;
+        unmarkText_ = value->unmarkText;
+#endif
+        if (value->appendText.empty()) {
+            return;
+        }
+        InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+        return;
+    }
+#endif
 #endif
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(result);
@@ -8077,6 +8105,18 @@ void TextFieldPattern::SetAccessibilityEditAction()
         pattern->suppressAccessibilityEvent_ = false;
         pattern->HandleOnPaste();
         pattern->CloseSelectOverlay(true);
+    });
+
+    accessibilityProperty->SetSwitchEditableMode([weakPtr = WeakClaim(this)](bool switchToEditable) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (switchToEditable) {
+            if (!pattern->HasFocus()) {
+                pattern->TextFieldRequestFocus(RequestFocusReason::SWITCH_EDITABLE);
+            }
+        } else {
+            pattern->StopEditing();
+        }
     });
 }
 
@@ -10882,6 +10922,12 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     InsertCommandInfo info;
     info.insertValue = insertValue;
     info.reason = reason;
+#if defined(IOS_PLATFORM)
+    info.compose.start = compose_.GetStart();
+    info.compose.end = compose_.GetEnd();
+    info.compose.isActive = compose_.IsValid();
+    info.unmarkText = unmarkText_;
+#endif
     insertCommands_.emplace(info);
     CloseSelectOverlay(true);
     ScrollToSafeArea();

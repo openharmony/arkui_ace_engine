@@ -15,7 +15,7 @@
 
 import { Assert, suite, test } from "@koalaui/harness"
 import { asArray, int32 } from "@koalaui/common"
-import { TestNode, testRoot, testTick, mutableState, GlobalStateManager, StateContext } from "@koalaui/runtime"
+import { testRoot, testTick, GlobalStateManager } from "@koalaui/runtime"
 import { __id, __key, __context } from "@koalaui/runtime"
 
 import { separatedMemoFunction, SharedLog } from "../common/main_test_module_to_import"

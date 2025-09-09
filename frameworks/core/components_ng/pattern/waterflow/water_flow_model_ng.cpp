@@ -371,9 +371,20 @@ void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
     ScrollableModelNG::SetScrollBarColor(value);
 }
 
+void WaterFlowModelNG::SetScrollBarColor(const std::optional<Color>& scrollBarColor)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScrollBarColor(frameNode, scrollBarColor);
+}
+
 void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
 {
     ScrollableModelNG::SetScrollBarColor(frameNode, value);
+}
+
+void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
 }
 
 uint32_t WaterFlowModelNG::GetScrollBarColor(FrameNode* frameNode)

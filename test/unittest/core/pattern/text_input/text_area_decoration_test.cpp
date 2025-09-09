@@ -1452,4 +1452,16 @@ HWTEST_F(TextAreaDecorationUXTest, TextAreaToJsonValue034, TestSize.Level1)
      */
     EXPECT_EQ(json->GetString("lineHeight"), "3.00px");
 }
+
+/**
+ * @tc.name: TextCounterFormat
+ * @tc.desc: test get counter format text from resournce manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaDecorationUXTest, TextCounterFormat, TestSize.Level1)
+{
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto counter = textFieldTheme->GetCounterFormatString(10, 100);
+    EXPECT_EQ(counter, "10/100");
+}
 }

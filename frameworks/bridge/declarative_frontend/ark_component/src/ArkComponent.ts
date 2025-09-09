@@ -5737,6 +5737,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   customProperty(key: string, value: object): this {
+    if (this._weakPtr?.invalid()) {
+      return this;
+    }
     let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
     if (!returnBool) {
       const property = new ArkCustomProperty();

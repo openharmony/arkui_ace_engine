@@ -73,6 +73,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetPropertyObject("target", target);
     gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
     gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
+    gestureInfoObj->SetProperty<float>("axisPinch", info.GetPinchAxisScale());
     gestureInfoObj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     if (info.GetGestureTypeName() == GestureTypeName::TAP_GESTURE) {
         if (!info.GetFingerList().empty()) {

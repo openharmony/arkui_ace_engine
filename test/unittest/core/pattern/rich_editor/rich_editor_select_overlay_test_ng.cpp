@@ -385,6 +385,19 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
     ASSERT_TRUE(secondHandleInfo.has_value());
     EXPECT_FALSE(secondHandleInfo.value().isShow);
     EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    selectOverlay->hasTransform_ = true;
+    selectOverlay->SetUsingMouse(false);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
+
+    selectOverlay->SetUsingMouse(true);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
 }
 
 /**

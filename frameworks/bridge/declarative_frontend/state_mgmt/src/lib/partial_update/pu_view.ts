@@ -639,9 +639,9 @@ abstract class ViewPU extends PUV2ViewBase
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
       const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-      if (changedElmtIds) {
+      if (changedElmtIds !== undefined) {
         const varName = stateLinkPropVar.info();
-        if (changedElmtIds.size && !this.isFirstRender()) {
+        if (changedElmtIds?.size && !this.isFirstRender()) {
           for (const elmtId of changedElmtIds) {
             this.dirtDescendantElementIds_.add(elmtId);
           }

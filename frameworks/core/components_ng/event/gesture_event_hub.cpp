@@ -920,6 +920,7 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     GestureEvent info;
     info.SetSourceDevice(event.sourceType);
     info.SetTimeStamp(event.timeStamp);
+    info.SetDeviceId(event.deviceId);
     EventTarget target;
     target.id = host->GetInspectorId().value_or("").c_str();
     target.type = host->GetTag();

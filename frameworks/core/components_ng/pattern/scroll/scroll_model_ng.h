@@ -47,6 +47,7 @@ public:
     void SetDisplayMode(int displayMode) override;
     void SetScrollBarWidth(const Dimension& dimension) override;
     void SetScrollBarColor(const Color& color) override;
+    void ResetScrollBarColor() override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
@@ -90,6 +91,7 @@ public:
     static void SetAxis(FrameNode* frameNode, Axis axis);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static void ResetScrollBarColor(FrameNode* frameNode);
     static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static int32_t GetEdgeEffect(FrameNode* frameNode);

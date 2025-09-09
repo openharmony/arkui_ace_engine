@@ -1191,6 +1191,40 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressSafeAreaSetTest001
+ * @tc.desc: Test LayoutPolicy of ProgressSafeAreaSetTest001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressSafeAreaSetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create progress.
+     * @tc.expected: step1. create progress.
+     */
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS2, PROGRESS_TYPE_LINEAR);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. set layoutPolicyProperty match_parent.
+     * @tc.expected: step2. set layoutPolicyProperty match_parent.
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    /**
+     * @tc.steps: step3. get pattern of frameNode.
+     * @tc.expected: step3. check isEnableMatchParent is true.
+     */
+    auto progressPattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(progressPattern, nullptr);
+    EXPECT_TRUE(progressPattern->IsEnableMatchParent());
+    EXPECT_TRUE(progressPattern->IsEnableFix());
+}
+
+/**
  * @tc.name: ProgressSafeAreaTest001
  * @tc.desc: Test LayoutPolicy of ProgressSafeAreaTest001.
  * @tc.type: FUNC

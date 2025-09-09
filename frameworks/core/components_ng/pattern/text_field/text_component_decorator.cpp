@@ -182,7 +182,7 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     CHECK_NULL_VOID(accessibilityProperty);
     std::string counterText;
     if (isVisible) {
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
+        counterText = theme->GetCounterFormatString(textLength, maxLength);
         accessibilityProperty->SetAccessibilityText(GetAccessibilityText(textLength, maxLength));
     } else {
         accessibilityProperty->SetAccessibilityText("");

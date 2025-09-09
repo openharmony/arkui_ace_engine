@@ -16,12 +16,12 @@
 import { ArktsObject } from "./ArktsObject"
 import { global } from "../static/global"
 import { passStringArray } from "../utilities/private"
-import { KNativePointer } from "@koalaui/interop"
+import { KNativePointer, nullptr } from "@koalaui/interop"
 
 export class Config extends ArktsObject {
     constructor(peer: KNativePointer) {
         super(peer)
-        // TODO: wait for getter from api
+        // Improve: wait for getter from api
         this.path = ``
     }
 
@@ -46,6 +46,13 @@ export class Config extends ArktsObject {
                 passStringArray(["", "--arktsconfig", "./arktsconfig.json", global.filePath])
             )
         )
+    }
+
+    destroy() {
+        if (this.peer != nullptr) {
+            global.es2panda._DestroyConfig(this.peer)
+            this.peer = nullptr
+        }
     }
 
     readonly path: string

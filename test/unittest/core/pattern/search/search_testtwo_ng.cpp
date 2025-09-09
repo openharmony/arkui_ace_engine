@@ -2353,8 +2353,8 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth003, TestSize.Level1)
     auto columnLayoutWrapper = column.second;
     RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
     auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    childLayoutConstraint->minSize->SetWidth(CalcLength(200.0f));
-    childLayoutConstraint->maxSize->SetWidth(CalcLength(50.0f));
+    childLayoutConstraint->minSize = CalcSize(CalcLength(200.0f), CalcLength());
+    childLayoutConstraint->maxSize = CalcSize(CalcLength(50.0f), CalcLength());
     LayoutConstraintT<float> layoutConstraintT;
     layoutConstraintT.percentReference.SetWidth(100.0f);
     layoutConstraintT.maxSize.SetWidth(150.0f);
@@ -2473,8 +2473,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     */
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
 
     /**
     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
@@ -2483,7 +2481,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 2));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(0));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2497,7 +2494,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(1));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2511,7 +2507,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(2, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(2));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);

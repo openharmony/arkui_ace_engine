@@ -106,6 +106,7 @@ bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGest
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
     obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
+    obj->SetProperty<float>("axisPinch", info->GetPinchAxisScale());
     obj->SetPropertyObject(
         "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     CreateFingerInfosObject(info, obj);

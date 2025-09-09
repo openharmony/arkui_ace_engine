@@ -90,7 +90,7 @@ suite("remember tests", () => {
         const root = TestNode.create((node) => {
             remember(() => {
                 collector.push("inner")
-                return state.value // not depended // TODO: remember cannot be void
+                return state.value // not depended // Improve: remember cannot be void
             })
             collector.push("outer")
         })

@@ -75,6 +75,7 @@ public:
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
+    void DumpInfo() override;
 
 private:
     std::list<std::string> ids_;

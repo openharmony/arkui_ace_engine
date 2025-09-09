@@ -1411,6 +1411,9 @@ public:
     }
     void SetForceEnableZoom(bool isEnabled);
     bool IsShowHandle();
+    void OnSafeBrowsingCheckFinish(int threat_type);
+    bool IsPcMode();
+    void OnSwitchFreeMultiWindow(bool enable);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1501,6 +1504,8 @@ private:
         const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
     void HandleNativeMouseToTouch(const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
         const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
+    void RegisterFreeMultiWindowListener();
+    void UnregisterFreeMultiWindowListener();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1574,6 +1579,7 @@ private:
     EventCallbackV2 onAdsBlockedV2_;
     EventCallbackV2 onLoadStartedV2_;
     EventCallbackV2 onLoadFinishedV2_;
+    EventCallbackV2 onSafeBrowsingCheckFinishV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1654,6 +1660,8 @@ private:
     double density_ = 0.0;
 
     bool isVisible_ = false;
+
+    sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
 #endif
 };
 

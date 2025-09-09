@@ -126,7 +126,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ;
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
     pattern->customKeyboardBuilder_ = func2;
@@ -1829,8 +1828,11 @@ HWTEST_F(TextFieldPatternTest, TextPattern079, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    DirtySwapConfig config;
+    pattern->OnSyncGeometryNode(config);
 
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern->OnSyncGeometryNode(config);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
     pattern->ProcNormalInlineStateInBlurEvent();

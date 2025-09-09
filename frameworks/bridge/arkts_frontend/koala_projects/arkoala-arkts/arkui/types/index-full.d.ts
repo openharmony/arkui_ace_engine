@@ -1602,6 +1602,7 @@ declare interface BaseEvent {
     source: SourceType;
     axisHorizontal?: number;
     axisVertical?: number;
+    axisPinch?: number;
     pressure: number;
     tiltX: number;
     tiltY: number;

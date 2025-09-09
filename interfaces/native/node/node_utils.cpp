@@ -769,6 +769,13 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type)
+{
+    ArkUI_ContentTransitionEffect* contentTransitionEffect = new ArkUI_ContentTransitionEffect;
+    contentTransitionEffect->contentTransitionType = type;
+    return contentTransitionEffect;
+}
+
 #ifdef __cplusplus
 };
 #endif

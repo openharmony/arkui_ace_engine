@@ -68,6 +68,7 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetStateEffect(const bool& value);
     static void SetTipPosition(const TipPosition& value);
+    static void SetUserCancelEvent(const bool& value);
     static void SetFontColor(const Color& value);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);

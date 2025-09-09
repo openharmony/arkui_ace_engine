@@ -218,6 +218,7 @@ public:
     static void GestureFocusMode(int32_t gestureFocusMode);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
+    static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

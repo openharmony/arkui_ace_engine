@@ -14,7 +14,7 @@
  */
  
 class A {
-    no_this() {
+    no_this(): void {
         console.log("test")
     }
 }

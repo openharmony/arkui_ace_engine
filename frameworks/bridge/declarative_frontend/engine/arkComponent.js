@@ -5274,6 +5274,9 @@ class ArkComponent {
     return this;
   }
   customProperty(key, value) {
+    if (this._weakPtr?.invalid()) {
+      return this;
+    }
     let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
     if (!returnBool) {
       const property = new ArkCustomProperty();
@@ -8705,6 +8708,23 @@ class ImageSupportSvg2Modifier extends ModifierWithKey {
   }
 }
 ImageSupportSvg2Modifier.identity = Symbol('supportSvg2');
+class ImageContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetContentTransition(node);
+    }
+    else {
+      getUINativeModule().image.setContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageContentTransitionModifier.identity = Symbol('contentTransition');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8858,6 +8878,10 @@ class ArkImageComponent extends ArkComponent {
   supportSvg2(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
+    return this;
+  }
+  contentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageContentTransitionModifier.identity, ImageContentTransitionModifier, value);
     return this;
   }
 }

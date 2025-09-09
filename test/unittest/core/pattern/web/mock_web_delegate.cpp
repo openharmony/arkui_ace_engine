@@ -903,6 +903,7 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
 void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details) {}
 void WebDelegate::OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details) {}
 void WebDelegate::OnSafeBrowsingCheckResult(int threat_type) {}
+void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type) {}
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) {}
 void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details) {}
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
@@ -1413,4 +1414,11 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 bool WebDelegate::IsShowHandle() { return false; }
+bool WebDelegate::IsPcMode()
+{
+    return g_setReturnStatus == STATUS_TRUE;
+}
+void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
+void WebDelegate::RegisterFreeMultiWindowListener() {}
+void WebDelegate::UnregisterFreeMultiWindowListener() {}
 } // namespace OHOS::Ace

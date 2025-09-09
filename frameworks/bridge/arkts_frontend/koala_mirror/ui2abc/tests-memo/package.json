@@ -8,35 +8,25 @@
     ],
     "scripts": {
         "clean": "rimraf build dist test/ets test/unmemoized",
-
         "annotate:ui2abc:tests": "node ../annotate annotate-tests.json",
-        "compile:ui2abc:tests": "node ../fast-arktsc --config ./arktsconfig-memo-plugin.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/memo-plugin/test.abc",
+        "configure:ui2abc:tests": "node ../fast-arktsc --config ./arktsconfig-memo-plugin.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/memo-plugin/test.abc",
         "build:ui2abc:tests": "cd build/memo-plugin && ninja",
         "executable:abc": "bash ../../incremental/tools/panda/arkts/ark ./build/memo-plugin/test.abc --ark-boot-files ./build/memo-plugin/test.abc:../../incremental/runtime/build/incremental.abc:../../incremental/harness/build/harness.abc --ark-entry-point @memo-plugin-tests.test.ets.ui2abc_run.ETSGLOBAL::main",
-        "test:arkts:memo-plugin": "npm run build:harness --prefix ../../incremental/harness && npm run annotate:ui2abc:tests && npm run compile:ui2abc:tests && npm run build:ui2abc:tests && npm run executable:abc",
-
-        "unmemoize:arkts:tests": "ets-tsc -b tsconfig-compiler-plugin.json",
-        "compile:arkts:tests": "node ../fast-arktsc --config ./arktsconfig-compiler-plugin.json --compiler ../../incremental/tools/panda/arkts/arktsc --link-name ./build/compiler-plugin/test.abc",
-        "build:arkts:tests": "ninja ${NINJA_OPTIONS} -f build/compiler-plugin/abc/build.ninja",
-        "run:arkts:tests": "bash ../../incremental/tools/panda/arkts/ark ./build/compiler-plugin/test.abc --ark-boot-files ./build/compiler-plugin/test.abc:../../incremental/runtime/build/incremental.abc:../../incremental/harness/build/harness.abc --ark-entry-point @compiler-plugin-tests.test.unmemoized.test.arkts_run.ETSGLOBAL::main",
-        "test:arkts:compiler-plugin": "npm run unmemoize:arkts:tests && npm run compile:arkts:tests && npm run build:arkts:tests && npm run run:arkts:tests",
-
+        "test:arkts:memo-plugin:light": "npm run annotate:ui2abc:tests && npm run configure:ui2abc:tests && npm run build:ui2abc:tests && npm run executable:abc",
+        "test:arkts:memo-plugin": "npm run build:harness --prefix ../../incremental/harness && npm run annotate:ui2abc:tests && npm run configure:ui2abc:tests && npm run build:ui2abc:tests && npm run executable:abc",
         "install:panda": "npm run panda:sdk:install --prefix ../../incremental/tools/panda",
         "compile:deps": "cd ../../incremental && npm run compile && cd runtime && npm run build:incremental:components && cd ../harness && npm run compile:all && npm run build:harness && cd ../compiler-plugin && npm run compile && cd ../../ui2abc && npm run build:all && npm run build:incremental:inc:ui2abc --prefix ../incremental/runtime && cd tests-memo",
-
         "test:ts": "mocha"
     },
     "dependencies": {
-        "@koalaui/common": "1.5.15+devel",
-        "@koalaui/compat": "1.5.15+devel",
+        "@koalaui/common": "file:../../incremental/common",
+        "@koalaui/compat": "file:../../incremental/compat",
         "@koalaui/harness": "file:../../incremental/harness",
-        "@koalaui/build-common": "1.5.15+devel",
+        "@koalaui/build-common": "file:../../incremental/build-common",
         "@koalaui/runtime": "file:../../incremental/runtime",
-
         "@koalaui/annotate": "file:../annotate",
-        "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/compiler-plugin": "file:../../incremental/compiler-plugin",
-        "@koalaui/fast-arktsc": "1.5.15"
+        "@koalaui/ets-tsc": "4.9.5-r6",
+        "@koalaui/fast-arktsc": "file:../fast-arktsc"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.20.0",
@@ -48,5 +38,6 @@
         "source-map-support": "^0.5.21",
         "chai": "^4.3.6",
         "@types/chai": "^4.3.1"
-    }
+    },
+    "version": "1.7.6+devel"
 }

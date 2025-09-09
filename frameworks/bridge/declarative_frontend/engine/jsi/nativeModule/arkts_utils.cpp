@@ -1534,18 +1534,6 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
     return true;
 }
 
-bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
-    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
-{
-    if (!jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
-        return false;
-    }
-    Color color;
-    bool ret = ArkTSUtils::ParseJsColor(vm, jsValue, color, resourceObject, nodeInfo);
-    result = ret ? color.ToString() : "";
-    return ret;
-}
-
 bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     RefPtr<ResourceObject> resourceObject;
@@ -2570,7 +2558,7 @@ Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
 }
 
-Local<JSValueRef> ArkTSUtils::JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info)
+Local<JSValueRef> ArkTSUtils::JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo =
@@ -3080,5 +3068,29 @@ void ArkTSUtils::ParseGradientAngle(
     degree.reset();
     values.push_back({ .i32 = static_cast<ArkUI_Int32>(angleHasValue) });
     values.push_back({ .f32 = static_cast<ArkUI_Float32>(angleValue) });
+}
+
+bool ArkTSUtils::ParseContentTransitionEffect(
+    const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto obj = value->ToObject(vm);
+    auto typeValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "contentTransitionType_"));
+    if (typeValue.IsEmpty() || !typeValue->IsString(vm)) {
+        return false;
+    }
+    static const std::unordered_map<std::string, ContentTransitionType> contentTransitionTypeMap {
+        { "IDENTITY", ContentTransitionType::IDENTITY },
+        { "OPACITY", ContentTransitionType::OPACITY },
+    };
+    auto typeValueStr = typeValue->ToString(vm)->ToString(vm);
+    auto it = contentTransitionTypeMap.find(typeValueStr);
+    if (it == contentTransitionTypeMap.end()) {
+        return false;
+    }
+    contentTransitionType = it->second;
+    return true;
 }
 } // namespace OHOS::Ace::NG

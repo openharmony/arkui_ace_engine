@@ -461,6 +461,7 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetPinchAxisScale(lastAxisEvent_.pinchAxisScale);
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);

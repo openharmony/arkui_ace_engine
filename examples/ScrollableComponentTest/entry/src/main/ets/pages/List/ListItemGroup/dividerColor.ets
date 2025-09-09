@@ -74,7 +74,7 @@ struct ListItemGroupExample {
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (Color | ResourceColor | undefined | null)[] = [
-    $r('app.color.orange'), $r('app.string.color'), Color.Green, $r('app.color.purple'), '12345',
+    $r('app.color.orange'), $r('app.color.pink1'), Color.Green, $r('app.color.purple'), '12345',
     $r('app.color.orange'), undefined, $r('app.color.orange'), null,
     $r('app.color.orange'), '#FFE4E1', $r('app.color.orange'), 50
   ];

@@ -13,8 +13,7 @@
             {
                 "transform": "../memo-plugin",
                 "stage": "checked",
-                "name": "memo",
-                "manuallyDisableInsertingImport": true
+                "name": "memo"
             }
         ]
     }

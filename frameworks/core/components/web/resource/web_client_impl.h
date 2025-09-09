@@ -342,6 +342,7 @@ public:
                                         uint32_t height) override;
     void SetImeShow(bool visible) override;
     bool IsShowHandle() override;
+    void OnSafeBrowsingCheckFinish(int threat_type) override;
     void OnRefreshAccessedHistoryV2(const std::string& url, bool isReload, bool isMainFrame) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

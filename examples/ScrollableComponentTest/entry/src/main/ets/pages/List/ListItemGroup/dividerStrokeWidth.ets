@@ -74,8 +74,8 @@ struct ListItemGroupExample {
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
-    $r('app.string.width'), $r('app.string.width11'), 250, $r('app.string.width'), undefined, $r('app.string.width'),
-    null, $r('app.string.width'), -250, $r('app.string.width'), 0
+    300, 430, 250, 300, undefined, 300,
+    null, 300, -250, 300, 0
   ];
 
   build() {

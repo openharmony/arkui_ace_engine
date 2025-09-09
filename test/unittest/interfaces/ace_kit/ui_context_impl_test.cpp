@@ -690,8 +690,8 @@ HWTEST_F(UIContextImplTest, FoldStatusChangedCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: FoldStatusChangedCallback
- * @tc.desc: Test foldStatusChangedCallback to the normal task list
+ * @tc.name: RotationEndCallback
+ * @tc.desc: Test RotationEndCallback to the normal task list
  * @tc.type: FUNC
  */
 HWTEST_F(UIContextImplTest, RotationEndCallback, TestSize.Level1)

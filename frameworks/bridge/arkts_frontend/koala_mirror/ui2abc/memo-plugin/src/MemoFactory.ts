@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DebugNames, RuntimeNames, isVoidReturn } from "./utils"
+import { DebugNames, RuntimeNames, getRuntimePackage, isVoidReturn } from "./utils"
 
 export class factory {
     // Importing
@@ -40,7 +40,7 @@ export class factory {
     static createContextTypesImportDeclaration(debug: boolean, path?: string): arkts.ETSImportDeclaration {
         const mandatory = [factory.createContextTypeImportSpecifier(), factory.createIdTypeImportSpecifier()]
         return arkts.factory.createETSImportDeclaration(
-            arkts.factory.createStringLiteral(path ?? RuntimeNames.CONTEXT_TYPE_DEFAULT_IMPORT),
+            arkts.factory.createStringLiteral(path ?? getRuntimePackage()),
             debug ? [...mandatory, factory.createHashImportSpecifier()] : mandatory,
             arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
         )
@@ -103,7 +103,7 @@ export class factory {
         return arkts.factory.createIdentifier(`${RuntimeNames.PARAMETER}_${name}`, undefined)
     }
     static createMemoParameterDeclarator(id: number, name: string): arkts.VariableDeclarator {
-        const original = (name == "this" || name == "=t") ?
+        const original = (name == "this") ?
             arkts.factory.createThisExpression() :
             arkts.factory.createIdentifier(name, undefined)
         return arkts.factory.createVariableDeclarator(
@@ -131,30 +131,32 @@ export class factory {
             parameters.map((name, id) => { return factory.createMemoParameterDeclarator(id, name) }),
         )
     }
-    static createMemoParameterModifiedLogging(parameters: string[]): arkts.CallExpression {
-        return arkts.factory.createCallExpression(
-            arkts.factory.createMemberExpression(
-                arkts.factory.createIdentifier(DebugNames.CONSOLE, undefined),
-                arkts.factory.createIdentifier(DebugNames.LOG, undefined),
-                arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
-                false,
-                false,
-            ),
-            [
-                arkts.factory.createStringLiteral(DebugNames.BANNER_PARAMETER),
-                ...parameters.flatMap((name) => { return [
-                    arkts.factory.createStringLiteral(`( ${name} modified:`),
-                    arkts.factory.createMemberExpression(
-                        factory.createMemoParameterIdentifier(name),
-                        arkts.factory.createIdentifier("modified", undefined),
-                        arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_GETTER,
-                        false,
-                        false
-                    ),
-                    arkts.factory.createStringLiteral(`)`),
-                ] })
-            ],
-            undefined,
+    static createMemoParameterModifiedLogging(parameters: string[]): arkts.ExpressionStatement {
+        return arkts.factory.createExpressionStatement(
+            arkts.factory.createCallExpression(
+                arkts.factory.createMemberExpression(
+                    arkts.factory.createIdentifier(DebugNames.CONSOLE, undefined),
+                    arkts.factory.createIdentifier(DebugNames.LOG, undefined),
+                    arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
+                    false,
+                    false,
+                ),
+                [
+                    arkts.factory.createStringLiteral(DebugNames.BANNER_PARAMETER),
+                    ...parameters.flatMap((name) => { return [
+                        arkts.factory.createStringLiteral(`( ${name} modified:`),
+                        arkts.factory.createMemberExpression(
+                            factory.createMemoParameterIdentifier(name),
+                            arkts.factory.createIdentifier("modified", undefined),
+                            arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_GETTER,
+                            false,
+                            false
+                        ),
+                        arkts.factory.createStringLiteral(`)`),
+                    ] })
+                ],
+                undefined,
+            )
         )
     }
     static createMemoParameterAccess(name: string): arkts.MemberExpression {
@@ -203,7 +205,7 @@ export class factory {
                         ],
                         arkts.factory.createTSTypeParameterInstantiation(
                             returnTypeAnnotation
-                                ? [returnTypeAnnotation]
+                                ? [returnTypeAnnotation.clone()]
                                 : [arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID)],
                         ),
                     )
@@ -277,26 +279,28 @@ export class factory {
             undefined,
         )
     }
-    static createUnchangedLogging() {
-        return arkts.factory.createCallExpression(
-            arkts.factory.createMemberExpression(
-                arkts.factory.createIdentifier(DebugNames.CONSOLE, undefined),
-                arkts.factory.createIdentifier(DebugNames.LOG, undefined),
-                arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
-                false,
-                false,
-            ),
-            [
-                arkts.factory.createStringLiteral(DebugNames.BANNER_UNCHANGED),
+    static createUnchangedLogging(): arkts.ExpressionStatement {
+        return arkts.factory.createExpressionStatement(
+            arkts.factory.createCallExpression(
                 arkts.factory.createMemberExpression(
-                    arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
-                    arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE_OK, undefined),
-                    arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_GETTER,
+                    arkts.factory.createIdentifier(DebugNames.CONSOLE, undefined),
+                    arkts.factory.createIdentifier(DebugNames.LOG, undefined),
+                    arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_NONE,
                     false,
-                    false
-                )
-            ],
-            undefined,
+                    false,
+                ),
+                [
+                    arkts.factory.createStringLiteral(DebugNames.BANNER_UNCHANGED),
+                    arkts.factory.createMemberExpression(
+                        arkts.factory.createIdentifier(RuntimeNames.SCOPE, undefined),
+                        arkts.factory.createIdentifier(RuntimeNames.INTERNAL_VALUE_OK, undefined),
+                        arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_GETTER,
+                        false,
+                        false
+                    )
+                ],
+                undefined,
+            )
         )
     }
 
@@ -309,7 +313,7 @@ export class factory {
         return undefined
     }
     static deduceAsWrapperType(node: arkts.TSAsExpression): arkts.TypeNode|undefined {
-        return node.typeAnnotation
+        return node.typeAnnotation?.clone()
     }
     static deduceObjectWrapperType(node: arkts.Expression): arkts.TypeNode|undefined {
         return undefined
@@ -320,17 +324,16 @@ export class factory {
         const params = arrow.function?.params?.map(it => {
             const param = it as arkts.ETSParameterExpression
             return arkts.factory.createETSParameterExpression(
-                arkts.factory.createIdentifier(param.ident!.name),
+                arkts.factory.createIdentifier(param.ident!.name, param.typeAnnotation),
                 param.isOptional,
                 undefined,
-                param.typeAnnotation,
                 undefined
             )
         }) ?? []
         return arkts.factory.createETSFunctionType(
             undefined,
             params,
-            origType,
+            origType.clone(),
             false,
             arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_NONE,
             undefined

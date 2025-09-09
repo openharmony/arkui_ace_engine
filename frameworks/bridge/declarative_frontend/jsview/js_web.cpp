@@ -984,13 +984,15 @@ public:
         }
         auto func = JSRef<JSFunc>::Cast(getThisVarFunction);
         auto thisVar = func->Call(controller, 0, {});
-        int64_t thisPtr = thisVar->ToNumber<int64_t>();
+        int64_t thisPtr = 0;
+        if (thisVar->IsNumber()) {
+            thisPtr = thisVar->ToNumber<int64_t>();
+        }
         for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
             auto getThisVarFunction1 = iter->second.controller_->GetProperty("innerGetThisVar");
             if (getThisVarFunction1->IsFunction()) {
-                auto func1 = JSRef<JSFunc>::Cast(getThisVarFunction1);
-                auto thisVar1 = func1->Call(iter->second.controller_, 0, {});
-                if (thisPtr == thisVar1->ToNumber<int64_t>()) {
+                auto thisVar1 = JSRef<JSFunc>::Cast(getThisVarFunction1)->Call(iter->second.controller_, 0, {});
+                if (thisVar1->IsNumber() && thisPtr == thisVar1->ToNumber<int64_t>()) {
                     parentWebId = iter->second.parentWebId_;
                     return true;
                 }
@@ -1024,7 +1026,10 @@ public:
             }
             auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
             auto webId = func->Call(controller, 0, {});
-            int32_t childWebId = webId->ToNumber<int32_t>();
+            int32_t childWebId = 0;
+            if (!webId.IsEmpty() && webId->IsNumber()) {
+                childWebId = webId->ToNumber<int32_t>();
+            }
             if (childWebId == parentNWebId || childWebId != -1) {
                 WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, false);
                 return;
@@ -2184,6 +2189,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
     JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
+    JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -4799,7 +4805,7 @@ bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
             if (getWebIdFunction->IsFunction()) {
                 auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
                 auto webId = func->Call(controller, 0, {});
-                handler->SetWebController(webId->ToNumber<int32_t>());
+                webId->IsNumber() ? handler->SetWebController(webId->ToNumber<int32_t>()) : void();
             }
             auto completeWindowNewFunction = controller->GetProperty("innerCompleteWindowNew");
             if (completeWindowNewFunction->IsFunction()) {
@@ -6651,6 +6657,36 @@ void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnPdfLoadEvent(jsCallback);
+}
+
+void JSWeb::OnSafeBrowsingCheckFinish(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SafeBrowsingCheckResultEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), SafeBrowsingCheckResultEventToJSValue);
+
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto context = PipelineBase::GetCurrentContext();
+        if (context) {
+            context->UpdateCurrentActiveNode(node);
+        }
+        auto executor = Container::CurrentTaskExecutorSafely();
+        CHECK_NULL_VOID(executor);
+        executor->PostTask([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+            CHECK_NULL_VOID(postFunc);
+            postFunc->Execute(*eventInfo);
+            }, TaskExecutor::TaskType::UI, "ArkUIWebSafeBrowsingCheckResult");
+    };
+    WebModel::GetInstance()->SetSafeBrowsingCheckFinishId(std::move(uiCallback));
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

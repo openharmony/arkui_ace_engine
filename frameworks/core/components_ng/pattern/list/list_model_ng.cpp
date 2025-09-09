@@ -148,6 +148,13 @@ void ListModelNG::SetScrollBarColor(const std::string& value)
 {
     ScrollableModelNG::SetScrollBarColor(value);
 }
+
+void ListModelNG::SetScrollBarColor(const std::optional<Color>& scrollBarColor)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScrollBarColor(frameNode, scrollBarColor);
+}
+
 void ListModelNG::SetScrollBarWidth(const std::string& value)
 {
     ScrollableModelNG::SetScrollBarWidth(value);
@@ -831,6 +838,11 @@ uint32_t ListModelNG::GetScrollBarColor(FrameNode* frameNode)
 void ListModelNG::SetListScrollBarColor(FrameNode* frameNode, const std::string& value)
 {
     ScrollableModelNG::SetScrollBarColor(frameNode, value);
+}
+
+void ListModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
 }
 
 void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)

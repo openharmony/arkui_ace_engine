@@ -454,7 +454,7 @@ void ResetListScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListScrollBarColor(frameNode, "#FF000000");
+    ListModelNG::SetScrollBarColor(frameNode, std::nullopt);
 
     CreateWithResourceObjScrollBarColor(node, nullptr);
 }

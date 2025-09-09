@@ -878,7 +878,9 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateSelectMenuBg();
+    CHECK_NULL_VOID(info_);
+    auto caller = info_->callerFrameNode.Upgrade();
+    host->UpdateSelectMenuBg(caller);
     host->UpdateToolBarFromMainWindow(true, true);
 }
 

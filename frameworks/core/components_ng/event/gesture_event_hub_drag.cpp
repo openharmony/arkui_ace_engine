@@ -261,7 +261,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        auto rect = DragDropFuncWrapper::GetPaintRectToScreen(frameNode) -
+        auto rect = DragDropFuncWrapper::GetPaintRectToScreenWithoutRotate(frameNode) -
             DragDropFuncWrapper::GetCurrentWindowOffset(PipelineContext::GetCurrentContextSafelyWithCheck());
         frameNodeOffset_ = rect.GetOffset();
         frameNodeSize_ = rect.GetSize();
@@ -1765,7 +1765,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     auto gatherNodeOffset = isExpandDisplay
             ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
             : positionToWindow;
-    DragEventActuator::UpdateGatherAnimatePosition(childrenInfo, gatherNodeOffset);
+    DragEventActuator::UpdateGatherAnimatePosition(gatherNode, gatherNodeOffset);
 
     // mount node
     auto subWindowOverlayManager = subWindow->GetOverlayManager();

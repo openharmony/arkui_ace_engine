@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ public:
         PointF circleCenter;
         Gradient selectGradientColor;
         Gradient trackBackgroundColor;
+        Gradient blockGradientColor;
         Color blockColor;
     };
 
@@ -97,6 +98,13 @@ public:
     {
         if (selectGradientColor_) {
             selectGradientColor_->Set(GradientArithmetic(color));
+        }
+    }
+
+    void SetLinearGradientBlockColor(const Gradient& color)
+    {
+        if (blockGradientColor_) {
+            blockGradientColor_->Set(GradientArithmetic(color));
         }
     }
 
@@ -353,7 +361,17 @@ public:
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
+    RSRect GetBlockRect(float radius);
+    RSRect GetShapeCircleBlockRect(const PointF& centerPoint, float drawRadius);
+    RSRect GetShapeEllipseBlockRect(const RectF& drawRect);
+    RSRect GetShapePathBlockRect(const SizeF& shapeSize, const PointF& centerPoint);
+    void CreateDefaultBlockBrush(RSBrush& brush, float& radius);
+    void CreateShapeCircleBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter);
+    void CreateShapeEllipseBlockBrush(RSBrush& brush, const RectF& drawRect);
+    void CreateShapePathBlockBrush(RSBrush& brush, const SizeF& shapeSize, const PointF& blockCenter);
+    void CreateShapeRectBlockBrush(RSBrush& brush, RSRect& rsRect);
     std::vector<GradientColor> GetTrackBackgroundColor() const;
+    std::vector<GradientColor> GetBlockColor() const;
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     void DrawSelectColor(RSBrush& brush, RSRect& rect);
     void DrawBlock(DrawingContext& context);
@@ -383,6 +401,7 @@ private:
     RefPtr<AnimatablePropertyFloat> trackThickness_;
     RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyVectorColor> selectGradientColor_;
+    RefPtr<AnimatablePropertyVectorColor> blockGradientColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 

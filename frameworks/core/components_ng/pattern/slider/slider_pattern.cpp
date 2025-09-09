@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1927,7 +1927,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
         mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Gradient(),
-        Gradient(), Color::TRANSPARENT };
+        Gradient(), Gradient(), Color::TRANSPARENT };
     auto contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
     const auto& content = GetHost()->GetGeometryNode()->GetContent();
@@ -1952,7 +1952,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
-
+    parameters.blockGradientColor = paintProperty->GetBlockGradientColor().value_or(Gradient());
     UpdateParameters();
     GetSelectPosition(parameters, centerWidth, contentOffset);
     GetBackgroundPosition(parameters, centerWidth, contentOffset);

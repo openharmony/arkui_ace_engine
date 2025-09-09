@@ -65,13 +65,13 @@ import {
     isUpdateExpression,
     isVariableDeclaration,
     isVariableDeclarator,
-    isWhileStatement
+    isWhileStatement,
+    Statement
 } from "../generated"
 import { Es2pandaImportKinds } from "../generated/Es2pandaEnums"
 import { factory } from "./factory/nodeFactory"
 import { AstNode } from "./peers/AstNode"
 import { global } from "./static/global"
-import { updateETSModuleByStatements } from "./utilities/public"
 
 type Visitor = (node: AstNode, options?: object) => AstNode
 
@@ -124,7 +124,7 @@ export class GlobalInfo {
     }
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): T {
     if (node === undefined) {
         return node
@@ -132,7 +132,7 @@ function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): 
     return visitor(node) as T
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodesVisitor<T extends AstNode, TIn extends readonly T[] | undefined>(nodes: TIn, visitor: Visitor): T[] | TIn {
     if (nodes === undefined) {
         return nodes
@@ -144,11 +144,14 @@ export function visitEachChild(
     node: AstNode,
     visitor: Visitor
 ): AstNode {
-    global.profiler.visitedNodes ++
+    global.profiler.nodeVisited()
     if (isETSModule(node)) {
-        return updateETSModuleByStatements(
+        return factory.updateETSModule(
             node,
-            nodesVisitor(node.statements, visitor)
+            nodesVisitor(node.statements, visitor),
+            nodeVisitor(node.ident, visitor),
+            node.getNamespaceFlag(),
+            node.program,
         )
     }
     if (isCallExpression(node)) {
@@ -256,7 +259,6 @@ export function visitEachChild(
             nodeVisitor(node.ident, visitor),
             node.isOptional,
             nodeVisitor(node.initializer, visitor),
-            nodeVisitor(node.typeAnnotation, visitor),
             nodesVisitor(node.annotations, visitor),
         )
     }
@@ -428,7 +430,7 @@ export function visitEachChild(
             nodeVisitor(node.typeParams, visitor),
             nodesVisitor(node.params, visitor),
             nodeVisitor(node.returnType, visitor),
-            false, // TODO: how to get it?
+            false, // Improve: how to get it?
             node.flags,
             nodesVisitor(node.annotations, visitor),
         )
@@ -564,7 +566,7 @@ export function visitEachChild(
             node.requiredParams,
         )
     }
-    /** TODO: fix this case!
+    /** Improve: fix this case!
     if (isClassStaticBlock(node)) {
         return factory.updateClassStaticBlock(
 

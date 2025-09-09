@@ -100,6 +100,7 @@ private:
     void RemoveAreaChangeInner();
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
+    bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
     void SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect);

@@ -1263,7 +1263,7 @@ struct SegmentButtonItemArrayComponent {
 class ItemProperty {
   public fontColor: ResourceColor = segmentButtonTheme.FONT_COLOR
   public fontSize: DimensionNoPercentage = segmentButtonTheme.FONT_SIZE
-  public fontWeight: FontWeight = initFontWeight(FontWeight.Regular)
+  public fontWeight: FontWeight = FontWeight.Regular
   public isSelected: boolean = false
 }
 

@@ -22,32 +22,34 @@ import { InternalsTransformer } from "./InternalsTransformer"
 import { ParameterTransformer } from "./ParameterTransformer"
 import { ReturnTransformer } from "./ReturnTranformer"
 import { SignatureTransformer } from "./SignatureTransformer"
-import { DiagnosticVisitor } from "./DiagnosticVisitor"
+import { DiagnosticVisitor } from "./diagnostics/DiagnosticVisitor"
 
 export interface TransformerOptions {
     trace?: boolean,
     contextImport?: string,
     stableForTests?: boolean,
     keepTransformed?: string,
-    manuallyDisableInsertingImport?: boolean,
     addLogging?: boolean,
+    trackContentParam?: boolean,
 }
 
 export default function memoTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
+        const restart = options.restart
+
         const scriptFunctions = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const ETSFunctionTypes = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const analysisVisitor = new AnalysisVisitor(scriptFunctions, ETSFunctionTypes)
         const diagnosticVisitor = new DiagnosticVisitor(scriptFunctions)
-        const positionalIdTracker = new PositionalIdTracker(`${arkts.getPackageName()}.${arkts.getFilePathFromPackageRoot()}`, userPluginOptions?.stableForTests)
+        const positionalIdTracker = new PositionalIdTracker(program.relativeFilePath, userPluginOptions?.stableForTests)
         const signatureTransformer = new SignatureTransformer(scriptFunctions, ETSFunctionTypes)
         const internalsTransformer = new InternalsTransformer(positionalIdTracker)
         const parameterTransformer = new ParameterTransformer(positionalIdTracker)
         const returnTransformer = new ReturnTransformer()
 
-        const node = program.astNode
+        const node = program.ast as arkts.ETSModule
         analysisVisitor.visitor(node)
         diagnosticVisitor.visitor(node)
 
@@ -59,23 +61,27 @@ export default function memoTransformer(
             internalsTransformer,
             parameterTransformer,
             returnTransformer,
-            userPluginOptions?.addLogging ?? false
+            userPluginOptions?.addLogging ?? false,
+            userPluginOptions?.trackContentParam ?? false,
         )
         let result = functionTransformer.visitor(node)
-        if (userPluginOptions?.manuallyDisableInsertingImport != true) {
+        if (restart) {
             if ((functionTransformer.modified || signatureTransformer.modified)) {
-                result = arkts.updateETSModuleByStatements(
+                result = arkts.factory.updateETSModule(
                     result,
                     [
                         factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
                         ...result.statements
-                    ]
+                    ],
+                    result.ident,
+                    result.getNamespaceFlag(),
+                    result.program,
                 )
             }
         }
-        if (userPluginOptions?.keepTransformed) {
-            dumpAstToFile(result, userPluginOptions.keepTransformed)
+        if (userPluginOptions?.keepTransformed && options.isMainProgram) {
+            dumpAstToFile(result, userPluginOptions.keepTransformed, userPluginOptions?.stableForTests ?? false)
         }
-        return result
+        program.setAst(result)
     }
 }

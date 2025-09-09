@@ -875,6 +875,31 @@ HWTEST_F(SliderTestNg, SliderTestNg013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderTestNg014
+ * @tc.desc: Test Slider Block Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties, and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetLinearGradientBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(sliderPaintProperty, nullptr);
+    EXPECT_EQ(true, sliderPaintProperty->GetBlockGradientColor().has_value());
+    EXPECT_EQ(sliderPaintProperty->GetBlockGradientColor().value(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithm001
  * @tc.desc: Test SliderLayoutAlgorithm MeasureContent.
  * @tc.type: FUNC

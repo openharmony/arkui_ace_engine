@@ -270,11 +270,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
      with the elmtIds
 
     returns undefined if variable has _not_ changed
-    returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
+    returns dependentElementIds_ Set if changed
+    returns null when variable is not used on UI
   */
-    public moveElmtIdsForDelayedUpdate(isReused: boolean = false): Set<number> | undefined {
+    public moveElmtIdsForDelayedUpdate(isReused: boolean = false): Set<number> | undefined | null {
+      const dependencies = this.dependentElmtIdsByProperty_.getAllPropertyDependencies();
       const result = (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) ?
-        this.dependentElmtIdsByProperty_.getAllPropertyDependencies() :
+        (dependencies ? dependencies : null) :
         undefined;
       stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
                         ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);

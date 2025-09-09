@@ -22,12 +22,14 @@ import {
     loadNativeModuleLibrary,
     KDouble,
     KUInt,
+    KStringArrayPtr,
 } from "@koalaui/interop"
 import { Es2pandaNativeModule as GeneratedEs2pandaNativeModule, KNativePointerArray } from "./generated/Es2pandaNativeModule"
 import * as path from "path"
 import * as fs from "fs"
+import { Es2pandaPluginDiagnosticType } from "./generated/Es2pandaEnums"
 
-// TODO: this type should be in interop
+// Improve: this type should be in interop
 export type KPtrArray = BigUint64Array
 
 export class Es2pandaNativeModule {
@@ -61,6 +63,24 @@ export class Es2pandaNativeModule {
     _CreateContextFromString(config: KPtr, source: String, filename: String): KPtr {
         throw new Error("Not implemented")
     }
+    _CreateContextFromFile(config: KPtr, filename: String): KPtr {
+        throw new Error("Not implemented")
+    }
+    _CreateCacheContextFromFile(config: KNativePointer, sourceFileName: String, globalContext: KNativePointer, isExternal: KBoolean): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _InsertGlobalStructInfo(context: KNativePointer, str: String): void {
+        throw new Error("Not implemented");
+    }
+    _HasGlobalStructInfo(context: KNativePointer, str: String): KBoolean {
+        throw new Error("Not implemented");
+    }
+    _CreateGlobalContext(config: KNativePointer, externalFileList: KStringArrayPtr, fileNum: KUInt, lspUsage: KBoolean): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _DestroyGlobalContext(context: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
     _DestroyContext(context: KPtr): void {
         throw new Error("Not implemented")
     }
@@ -82,7 +102,7 @@ export class Es2pandaNativeModule {
     _CreateNumberLiteral(context: KPtr, value: KDouble): KPtr {
         throw new Error("Not implemented")
     }
-    _AstNodeUpdateChildren(context: KPtr, node: KPtr): void {
+    _AstNodeSetChildrenParentPtr(context: KPtr, node: KPtr): void {
         throw new Error("Not implemented")
     }
     _AstNodeUpdateAll(context: KPtr, node: KPtr): void {
@@ -97,8 +117,14 @@ export class Es2pandaNativeModule {
     _DeclarationFromIdentifier(context: KPtr, identifier: KPtr): KPtr {
         throw new Error("Not implemented")
     }
+    _ProgramSourceFilePath(context: KNativePointer, instance: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
     _ProgramExternalSources(context: KNativePointer, instance: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
+    }
+    _ProgramDirectExternalSources(context: KNativePointer, instance: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
     }
     _ExternalSourceName(instance: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
@@ -127,12 +153,82 @@ export class Es2pandaNativeModule {
     _SourcePositionLine(context: KNativePointer, instance: KNativePointer): KInt {
         throw new Error("Not implemented");
     }
+    _ConfigGetOptions(config: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _OptionsArkTsConfig(context: KNativePointer, options: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+
+    // From koala-wrapper
+    _ClassVariableDeclaration(context: KNativePointer, classInstance: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _IsMethodDefinition(node: KPtr): KBoolean {
+        throw new Error("Not implemented")
+    }
+    _SourceRangeStart(context: KNativePointer, range: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _SourceRangeEnd(context: KNativePointer, range: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _CreateSourceRange(context: KNativePointer, start: KNativePointer, end: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _IsArrayExpression(node: KPtr): KBoolean {
+        throw new Error("Not implemented")
+    }
+    _ETSParserGetGlobalProgramAbsName(context: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _CreateDiagnosticKind(context: KNativePointer, message: string, type: Es2pandaPluginDiagnosticType): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _CreateDiagnosticInfo(context: KNativePointer, kind: KNativePointer, args: string[], argc: number): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _CreateSuggestionInfo(context: KNativePointer, kind: KNativePointer, args: string[],
+        argc: number, substitutionCode: string): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _LogDiagnostic(context: KNativePointer, kind: KNativePointer, argv: string[], argc: number, pos: KNativePointer): void {
+        throw new Error("Not implemented")
+    }
+    _LogDiagnosticWithSuggestion(context: KNativePointer, diagnosticInfo: KNativePointer,
+        suggestionInfo?: KNativePointer, range?: KNativePointer): void {
+        throw new Error("Not implemented")
+    }
+    _SetUpSoPath(soPath: string): void {
+        throw new Error("Not implemented")
+    }
+    _MemInitialize(): void {
+        throw new Error("Not implemented")
+    }
+    _MemFinalize(): void {
+        throw new Error("Not implemented")
+    }
+    _ProgramCanSkipPhases(context: KNativePointer, program: KNativePointer): boolean {
+        throw new Error("Not implemented")
+    }
+    _GenerateTsDeclarationsFromContext(config: KPtr, outputDeclEts: String, outputEts: String, exportAll: KBoolean, isolated: KBoolean): KPtr {
+        throw new Error("Not implemented")
+    }
+    _GenerateStaticDeclarationsFromContext(config: KPtr, outputPath: String): KPtr {
+        throw new Error("Not implemented")
+    }
+    _AstNodeProgram(context: KNativePointer, instance: KNativePointer): KNativePointer {
+        throw new Error("Not implemented")
+    }
+    _CreateContextGenerateAbcForExternalSourceFiles(config: KPtr, fileCount: KInt, filenames: string[]): KPtr {
+        throw new Error('Not implemented');
+    }
 }
 
 export function findNativeModule(): string {
     const candidates = [
-        path.resolve(__dirname, "../native/build/es2panda.node"),
-        path.resolve(__dirname, "../build/native/build/es2panda.node"),
+        path.resolve(__dirname, "../native/build"),
+        path.resolve(__dirname, "../build/native/build"),
     ]
     let result = undefined
     candidates.forEach(path => {
@@ -141,7 +237,8 @@ export function findNativeModule(): string {
             return
         }
     })
-    if (result) return result
+    if (result)
+        return path.join(result, "es2panda")
     throw new Error("Cannot find native module")
 }
 

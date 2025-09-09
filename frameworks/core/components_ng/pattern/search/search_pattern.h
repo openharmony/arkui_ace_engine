@@ -321,6 +321,7 @@ private:
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
     void InitMargin(const RefPtr<SearchLayoutProperty>& property);
+    void HandleNotifyChildAction(GestureEvent& info);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -356,6 +357,7 @@ private:
     bool isFocusIconColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
+    bool isNotifyChildAction_ = false;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 

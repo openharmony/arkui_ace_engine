@@ -494,7 +494,6 @@ void SetChildTotalCount(Ark_NodeHandle node, int totalCount)
 
 int IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NOT IMPLEMENTED! Arkoala IndexerChecker for %{public}p", nodePtr);
     return 1;
 }
 

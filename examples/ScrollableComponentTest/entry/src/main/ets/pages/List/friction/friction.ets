@@ -78,8 +78,8 @@ struct ListItemGroupExample {
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
-    $r('app.string.friction'), $r('app.string.friction1'), 0.9, $r('app.string.friction'), undefined,
-    $r('app.string.friction'), null, $r('app.string.friction1'), 0.1, $r('app.string.friction'), -99
+    99, 11, 0.9, 99, undefined,
+    99, null, 11, 0.1, 99, -99
   ];
 
   build() {

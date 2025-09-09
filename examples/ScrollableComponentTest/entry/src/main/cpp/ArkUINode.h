@@ -143,6 +143,7 @@ protected:
                 auto type = OH_ArkUI_UIInputEvent_GetAction(uiInputEvent);
                 onTouch_(type, x, y);
             }
+            break;
         }
         case NODE_EVENT_ON_DISAPPEAR: {
             if (onDisappear_) {

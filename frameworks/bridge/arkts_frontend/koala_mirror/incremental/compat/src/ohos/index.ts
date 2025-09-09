@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,13 @@ export {
     AtomicRef,
     asFloat64,
     asString,
+    float64To32,
+    float64ToInt,
+    float64ToLong,
+    float32To64,
     float32FromBits,
     int32BitsFromFloat,
+    charToInt,
     Thunk,
     finalizerRegister,
     finalizerUnregister,
@@ -30,6 +35,8 @@ export {
     Observable,
     ObservableHandler,
     observableProxy,
+    TrackableProps,
+    ObservableClass,
     observableProxyArray,
     propDeepCopy,
     lcClassName,
@@ -50,7 +57,9 @@ export {
     float32,
     float64,
     int8Array,
+    errorAsString,
     unsafeCast,
+    CoroutineLocalValue,
     scheduleCoroutine,
     memoryStats,
     launchJob

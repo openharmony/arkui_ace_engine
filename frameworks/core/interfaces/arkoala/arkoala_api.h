@@ -44,6 +44,7 @@ extern "C" {
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
+#define ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT 10
 #define ARKUI_MAX_ANCHOR_ID_SIZE 50
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -701,6 +702,8 @@ struct ArkUIClipShapeOptions {
     ArkUI_Float32 bottomLeftRadius;
     ArkUI_Float32 topRightRadius;
     ArkUI_Float32 bottomRightRadius;
+    ArkUI_Float32 offsetX;
+    ArkUI_Float32 offsetY;
     ArkUI_CharPtr commands;
 };
 
@@ -2272,6 +2275,15 @@ struct ArkUIRoundRectShape {
     ArkUI_Float32 bottomRightY = 0;
 };
 
+struct ArkUIRenderNodeClipOption {
+    ArkUIRectShape rect;
+    ArkUICircleShape circle;
+    ArkUIRoundRectShape roundRect;
+    ArkUIRectShape oval;
+    const char* commands;
+    int32_t type;
+};
+
 struct ArkUIMaskFill {
     ArkUI_Uint32 fillColor;
     ArkUI_Uint32 strokeColor;
@@ -2593,6 +2605,8 @@ struct ArkUICommonModifier {
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(
         ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit);
+    ArkUI_Bool (*setClipShapeWithObject)(
+        ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUIRenderNodeClipOption* object, ArkUI_Int32 unit);
     void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (*attribute)[2],
         ArkUI_CharPtr commands, ArkUI_Int32 unit);
     void (*resetClip)(ArkUINodeHandle node);
@@ -3294,6 +3308,10 @@ struct ArkUIImageModifier {
     void (*resetResizableLattice)(ArkUINodeHandle node);
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
+    void (*setContentTransition)(ArkUINodeHandle node, ArkUI_Int32 contentTransition);
+    ArkUI_Int32 (*getContentTransition)(ArkUINodeHandle node);
+    void (*resetContentTransition)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -4425,6 +4443,22 @@ struct ArkUISliderModifier {
     void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setShowStepsWithOptions)(
         ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
+    void (*setLinearBlockColor)(
+        ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
+
+    void (*resetLinearTrackBackgroundColor)(ArkUINodeHandle node);
+    void (*resetLinearSelectColor)(ArkUINodeHandle node);
+    void (*resetLinearBlockColor)(ArkUINodeHandle node);
+
+    ArkUI_Int32 (*getLinearTrackBackgroundColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 (*colors)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT],
+        ArkUI_Float32 (*stop)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT]);
+    ArkUI_Int32 (*getLinearSelectColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 (*colors)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT],
+        ArkUI_Float32 (*stop)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT]);
+    ArkUI_Int32 (*getLinearBlockColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 (*colors)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT],
+        ArkUI_Float32 (*stop)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT]);
 };
 
 struct ArkUIProgressModifier {

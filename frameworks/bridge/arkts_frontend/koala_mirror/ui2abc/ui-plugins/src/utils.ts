@@ -24,21 +24,28 @@ export function mangle(value: string): string {
 export enum CustomComponentNames {
     COMPONENT_BUILD_ORI = 'build',
     COMPONENT_CONSTRUCTOR_ORI = 'constructor',
-    COMPONENT_DEFAULT_IMPORT = '@ohos.arkui',
-    COMPONENT_CLASS_NAME = 'StructBase',
+    COMPONENT_CLASS_NAME = 'CustomComponent',
     COMPONENT_INTERFACE_PREFIX = '__Options_',
     COMPONENT_DISPOSE_STRUCT = '__disposeStruct',
     COMPONENT_INITIALIZE_STRUCT = '__initializeStruct',
     COMPONENT_UPDATE_STRUCT = '__updateStruct',
+    COMPONENT_TO_RECORD = '__toRecord',
     COMPONENT_BUILD = '_build',
     REUSABLE_COMPONENT_REBIND_STATE = '__rebindStates',
-    COMPONENT_INITIALIZERS_NAME = 'initializers'
+    COMPONENT_INITIALIZERS_NAME_0 = 'initializers0',
+    COMPONENT_INITIALIZERS_NAME = 'initializers',
+    COMPONENT_IS_ENTRY = 'isEntry',
+    COMPONENT_IS_CUSTOM_LAYOUT = 'isCustomLayoutComponent',
+    COMPONENT_ONPLACECHILDREN_ORI = 'onPlaceChildren',
+    COMPONENT_ONMEASURESIZE_ORI = 'onMeasureSize',
+    COMPONENT_BUILDER_LAMBDA = 'CustomComponent.$_instantiate'
 }
 
 export enum BuilderLambdaNames {
     ANNOTATION_NAME = 'ComponentBuilder',
+    BUILDER_LAMBDA_NAME = 'BuilderLambda',
     ORIGIN_METHOD_NAME = '$_instantiate',
-    TRANSFORM_METHOD_NAME = '_instantiateImpl',
+    TRANSFORM_METHOD_NAME = '$_instantiate',
     STYLE_PARAM_NAME = 'style',
     STYLE_ARROW_PARAM_NAME = 'instance',
     CONTENT_PARAM_NAME = 'content',
@@ -47,10 +54,47 @@ export enum BuilderLambdaNames {
 export enum InternalAnnotations {
     MEMO = 'memo',
     MEMO_STABLE = 'memo_stable',
+    BUILDER_LAMBDA = 'BuilderLambda'
+}
+
+function isKoalaWorkspace() {
+    return process.env.KOALA_WORKSPACE == "1"
+}
+
+export function getRuntimePackage(): string {
+    if (isKoalaWorkspace()) {
+        return '@koalaui/runtime'
+    } else {
+        return 'arkui.stateManagement.runtime'
+    }
+}
+
+export function getRuntimeAnnotationsPackage(): string {
+    if (isKoalaWorkspace()) {
+        return '@koalaui/runtime/annotations'
+    } else {
+        return 'arkui.stateManagement.runtime'
+    }
+}
+
+export function getDecoratorPackage(): string {
+    if (isKoalaWorkspace()) {
+        return '@ohos.arkui'
+    } else {
+        return 'arkui.stateManagement.decorator'
+    }
+}
+
+export function getComponentPackage(): string {
+    if (isKoalaWorkspace()) {
+        return '@ohos.arkui'
+    } else {
+        return '@ohos.arkui.component'
+    }
 }
 
 export function uiAttributeName(componentName: string): string {
-    return `UI${componentName}Attribute`
+    return `${componentName}Attribute`
 }
 export function getCustomComponentOptionsName(className: string): string {
     return `${CustomComponentNames.COMPONENT_INTERFACE_PREFIX}${className}`
@@ -132,7 +176,7 @@ export function makeImport(what: string, asWhat: string, where: string) {
 
 export class Importer {
     storage = new Map<string, [string, string]>()
-    private defaultArkUIImports = [
+    private defaultArkUIImports1 = [
         'Color',
         'ClickEvent', 'FlexAlign',
         'Image', 'Button', 'List',
@@ -142,21 +186,23 @@ export class Importer {
         'TestComponent', 'TestComponentOptions', 'ForEach', 'Text',
         'Margin', 'Padding', 'BorderOptions', 'Curve', 'RouteType', 'TextOverflowOptions',
         'Flex', 'FlexWrap', 'HorizontalAlign', 'Scroll', 'Tabs', 'TabsController', 'TabContent',
-        'NavDestination', 'NavPathStack', 'Literal_String_target_NavigationType_type',
+        'NavDestination', 'NavPathStack',
         'IDataSource', 'DataChangeListener', 'ItemAlign', 'ImageFit', 'FlexDirection',
         'FontWeight', 'Counter', 'Toggle', 'ToggleType', 'BarMode', 'TextAlign', 'VerticalAlign',
         'TextOverflow', 'BarState', 'NavPathInfo', 'Stack', 'Swiper',
-        'ListItem', 'Grid', 'GridItem', 'Navigator', 'Position', 'Axis',
+        'ListItem', 'Navigator', 'Position', 'Axis',
         'TextInput', 'Font', 'Alignment', 'Visibility', 'ImageRepeat', 'SizeOptions', 'Divider',
         'TabBarOptions', 'Navigation', 'Span', 'NavigationMode', 'BarPosition', 'EnterKeyType',
         'LazyForEach',
-        'TestComponent', 'TestComponentOptions', 'UITestComponentAttribute', 'ForEach', 'Text',
+        'UITestComponentAttribute', 'ForEach', 'Text',
         'AppStorage', 'LocalStorage', 'AbstractProperty', 'SubscribedAbstractProperty',
     ]
+    private defaultArkUIImports2 = [ 'TestComponentOptions' ]
+
     constructor() {
-        const withDefaultImports = true
+        const withDefaultImports = isKoalaWorkspace() ? true : false
         if (withDefaultImports) {
-            this.defaultArkUIImports.forEach(it => {
+            this.defaultArkUIImports2.forEach(it => {
                 this.add(it, '@ohos.arkui')
             })
         }
@@ -180,4 +226,16 @@ export class Importer {
 
 export interface ImportingTransformer {
     collectImports(imports: Importer): void
+}
+
+export function createETSTypeReference(typeName: string, typeParamsName?: string[]) {
+    const typeParams = typeParamsName
+        ? arkts.factory.createTSTypeParameterInstantiation(
+            typeParamsName.map(name => arkts.factory.createETSTypeReference(
+                arkts.factory.createETSTypeReferencePart(arkts.factory.createIdentifier(name))
+            ))
+        ) : undefined
+    return arkts.factory.createETSTypeReference(
+        arkts.factory.createETSTypeReferencePart(arkts.factory.createIdentifier(typeName), typeParams)
+    )
 }

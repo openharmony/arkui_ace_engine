@@ -195,6 +195,22 @@ struct ButtonBasicInfo {
     SelectOverlayMenuButtonType buttonType = SelectOverlayMenuButtonType::NORMAL;
 };
 
+ThemeColorMode ConvertColorMode(const ColorMode& colorMode)
+{
+    ThemeColorMode themeColorMode = ThemeColorMode::SYSTEM;
+    switch (colorMode) {
+        case ColorMode::LIGHT:
+            themeColorMode = ThemeColorMode::LIGHT;
+            break;
+        case ColorMode::DARK:
+            themeColorMode = ThemeColorMode::DARK;
+            break;
+        default:
+            break;
+    }
+    return themeColorMode;
+}
+
 int32_t GetCallerScopedId(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     CHECK_NULL_RETURN(info, 0);
@@ -790,31 +806,6 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
     return button;
 }
 
-RefPtr<FrameNode> BuildMoreOrBackSymbol()
-{
-    auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_RETURN(symbol, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, symbol);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(textOverlayTheme, symbol);
-    auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, symbol);
-    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textOverlayTheme->GetMoreSymbolId()));
-    layoutProperty->UpdateFontSize(textOverlayTheme->GetSymbolSize());
-    layoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    layoutProperty->UpdateSymbolColorList({textOverlayTheme->GetSymbolColor()});
-    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    symbolEffectOptions.SetEffectType(SymbolEffectType::REPLACE);
-    symbolEffectOptions.SetScopeType(Ace::ScopeType::WHOLE);
-    symbolEffectOptions.SetIsTxtActive(false);
-    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-    symbol->MarkModifyDone();
-    return symbol;
-}
-
 OffsetF GetPageOffset()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -895,6 +886,7 @@ void GetOptionsParamsHasSymbol(
         params.emplace_back(theme->GetAskCelia(),
             GetMenuCallbackWithContainerId(info->menuCallback.onAskCelia), "", true);
         params.back().symbolId = theme->GetAskCeliaSymbolId();
+        params.back().symbolColor = theme->GetAIMenuSymbolColor();
         params.back().isAskCeliaOption = true;
     }
 }
@@ -1246,7 +1238,11 @@ void SetMenuItemSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionParam&
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
-    layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+    if (param.symbolColor.has_value()) {
+        layoutProperty->UpdateSymbolColorList({ param.symbolColor.value() });
+    } else {
+        layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+    }
     layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     if (param.symbolId != 0) {
@@ -2019,6 +2015,50 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     moreOrBackSymbol_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+RefPtr<FrameNode> SelectOverlayNode::BuildMoreOrBackSymbol()
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto info = pattern->GetSelectOverlayInfo();
+    auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(symbol, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, symbol);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>(GetCallerScopedId(info));
+    CHECK_NULL_RETURN(textOverlayTheme, symbol);
+    auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, symbol);
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textOverlayTheme->GetMoreSymbolId()));
+    layoutProperty->UpdateFontSize(textOverlayTheme->GetSymbolSize());
+    layoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    layoutProperty->UpdateSymbolColorList({ textOverlayTheme->GetSymbolColor() });
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.SetEffectType(SymbolEffectType::REPLACE);
+    symbolEffectOptions.SetScopeType(Ace::ScopeType::WHOLE);
+    symbolEffectOptions.SetIsTxtActive(false);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    symbol->MarkModifyDone();
+    return symbol;
+}
+
+void SelectOverlayNode::SetMenuOptionColor(
+    const std::vector<RefPtr<FrameNode>>& options, const RefPtr<FrameNode>& caller)
+{
+    CHECK_NULL_VOID(caller);
+    auto pipeline = caller->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>(caller->GetThemeScopeId());
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
+    auto color = textStyle.GetTextColor();
+    for (size_t i = 0; i < options.size(); ++i) {
+        auto pattern = options[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFontColor(color, true);
+    }
+}
+
 void SelectOverlayNode::UpdateMoreOrBackSymbolOptionsWithDelay()
 {
     if (!isMoreOrBackSymbolIcon_) {
@@ -2036,7 +2076,7 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptionsWithDelay()
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         if (!selectOverlay->moreOrBackSymbol_) {
-            selectOverlay->moreOrBackSymbol_ = BuildMoreOrBackSymbol();
+            selectOverlay->moreOrBackSymbol_ = selectOverlay->BuildMoreOrBackSymbol();
         }
         auto layoutProperty = selectOverlay->moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
         layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(moreSymbolId));
@@ -2214,10 +2254,11 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::shared_ptr<SelectOver
     CHECK_NULL_VOID(!extensionMenu_);
     std::vector<OptionParam> params = GetDefaultOptionsParams(info);
     addMenuOptionItemsParams(params, info, index);
-    CreatExtensionMenu(std::move(params));
+    auto caller = info->callerFrameNode.Upgrade();
+    CreatExtensionMenu(std::move(params), caller);
 }
 
-void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
+void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller)
 {
     CHECK_NULL_VOID(!params.empty());
     CHECK_NULL_VOID(backButton_);
@@ -2227,6 +2268,13 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_RIGHT;
     menuParam.isShowInSubWindow = false;
+    auto colorMode = pipeline->GetColorMode();
+    if (caller) {
+        colorMode = caller->GetLocalColorMode();
+    }
+    BlurStyleOption styleOption;
+    styleOption.colorMode = ConvertColorMode(colorMode);
+    menuParam.blurStyleOption = styleOption;
     auto menuWrapper = MenuView::Create(
         std::move(params), buttonId, "SelectMoreOrBackButton", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
     CHECK_NULL_VOID(menuWrapper);
@@ -2245,7 +2293,11 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    if (colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        auto options = menuPattern->GetOptions();
+        SetMenuOptionColor(options, caller);
+    }
+    
     ElementRegister::GetInstance()->AddUINode(menu);
     menu->MountToParent(Claim(this));
 
@@ -2269,7 +2321,8 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<Menu
 {
     std::vector<OptionParam> params;
     AddCreateMenuExtensionMenuParams(menuOptionItems, info, startIndex, params);
-    CreatExtensionMenu(std::move(params));
+    auto caller = info->callerFrameNode.Upgrade();
+    CreatExtensionMenu(std::move(params), caller);
 }
 
 std::function<void()> SelectOverlayNode::CreateExtensionMenuOptionCallback(int32_t id,
@@ -2379,7 +2432,8 @@ void SelectOverlayNode::CreateToolBar()
         FrameNode::GetOrCreateFrameNode("SelectMenuInner", ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateSelectOverlay default, id:%{public}d", selectMenu_->GetId());
-    SelectMenuAndInnerInitProperty();
+    auto caller = info->callerFrameNode.Upgrade();
+    SelectMenuAndInnerInitProperty(caller);
     // Menu initial state.
     InitSelectMenuStatus(pattern->GetMode(), info);
 
@@ -2388,20 +2442,24 @@ void SelectOverlayNode::CreateToolBar()
     selectMenu_->MarkModifyDone();
 }
 
-void SelectOverlayNode::SelectMenuAndInnerInitProperty()
+void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& caller)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
-    CHECK_NULL_VOID(shadowTheme);
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenu_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
     auto colorMode = pipeline->GetColorMode();
-    selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
-    selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
+    if (caller) {
+        colorMode = caller->GetLocalColorMode();
+    }
+    if (shadowTheme) {
+        selectMenu_->GetRenderContext()->UpdateBackShadow(
+            shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    }
     selectMenu_->GetRenderContext()->SetClipToFrame(true);
 
     const auto& border = textOverlayTheme->GetMenuBorder();
@@ -2419,10 +2477,11 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
     selectMenuInner_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenuInner_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
+    selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BlurStyleOption styleOption;
     styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.colorMode = ConvertColorMode(colorMode);
     selectMenu_->GetRenderContext()->UpdateBackBlurStyle(styleOption);
-    selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
 
     selectMenuInner_->GetRenderContext()->UpdateOpacity(1.0);
     selectMenuInner_->GetRenderContext()->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -3467,7 +3526,7 @@ void SelectOverlayNode::SwitchToOverlayMode()
     newOverlayManager->SwitchToHandleMode(HandleLevelMode::OVERLAY, false);
 }
 
-void SelectOverlayNode::UpdateSelectMenuBg()
+void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
 {
     CHECK_NULL_VOID(selectMenu_);
     auto pipelineContext = GetContext();
@@ -3475,15 +3534,20 @@ void SelectOverlayNode::UpdateSelectMenuBg()
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    CHECK_NULL_VOID(shadowTheme);
     auto colorMode = pipelineContext->GetColorMode();
+    if (caller) {
+        colorMode = caller->GetLocalColorMode();
+    }
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    if (shadowTheme) {
+        renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    }
     BlurStyleOption styleOption;
     styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-    renderContext->UpdateBackBlurStyle(styleOption);
+    styleOption.colorMode = ConvertColorMode(colorMode);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackBlurStyle(styleOption);
 }
 
 void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info)

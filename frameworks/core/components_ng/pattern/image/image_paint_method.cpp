@@ -202,4 +202,16 @@ void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     imageContentModifier_->SetSensitive(sensitive_);
     imageContentModifier_->SetCanvasImageWrapper(CanvasImageModifierWrapper(canvasImage_));;
 }
+
+bool ImagePaintMethod::NeedsContentTransition()
+{
+    CHECK_NULL_RETURN(canvasImage_, false);
+    auto&& config = canvasImage_->GetPaintConfig();
+    if (config.isSvg_ && !canvasImage_->IsStatic()) {
+        return false;
+    } else if (config.frameCount_ > 1) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

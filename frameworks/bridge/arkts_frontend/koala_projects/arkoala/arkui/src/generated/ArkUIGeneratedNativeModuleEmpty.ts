@@ -5953,6 +5953,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _BaseEvent_setAxisVertical(ptr: KPointer, axisVertical: number): void {
         console.log("_BaseEvent_setAxisVertical")
     }
+    _BaseEvent_getAxisPinch(ptr: KPointer): number {
+        console.log("_BaseEvent_getAxisPinch")
+        return 1
+    }
+    _BaseEvent_setAxisPinch(ptr: KPointer, axisPinch: number): void {
+        console.log("_BaseEvent_setAxisPinch")
+    }
     _BaseEvent_getPressure(ptr: KPointer): number {
         console.log("_BaseEvent_getPressure")
         return 1

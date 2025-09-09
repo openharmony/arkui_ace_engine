@@ -2593,6 +2593,28 @@ HWTEST_F(PipelineContextTestNg, FlushMouseEventForHover001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostTaskResponseRegion001
+ * @tc.desc: Test PostTask Response Region.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PostTaskResponseRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function PostTaskResponseRegion.
+     * @tc.expected: Test the member windowModal_ is not equal to CONTAINER_MODAL.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    EXPECT_FALSE(context_->IsContainerModalVisible());
+
+    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->SetLaterAvoid(true);
+    context_->textFieldManager_ = manager;
+    context_->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+    EXPECT_FALSE(manager->GetLaterAvoid());
+}
+
+/**
  * @tc.name: ConsumeTouchEventsInterpolationTest001
  * @tc.desc: Test ConsumeTouchEventsInterpolation.
  * @tc.type: FUNC
@@ -2656,5 +2678,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg408, TestSize.Level1)
     context_->OnTouchEvent(point, true);
     EXPECT_TRUE(context_->hasIdleTasks_);
 }
+
 } // namespace NG
 } // namespace OHOS::Ace

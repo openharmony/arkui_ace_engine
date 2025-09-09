@@ -1222,6 +1222,31 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FireOnScrollStop
+ * @tc.desc: Test OnTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, FireOnScrollStop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and Scrollable.
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+
+    /**
+     * @tc.steps: step2. ScrollablePattern OnTouchDown
+     * @tc.expected: Click animation stop
+     */
+    bool isStopTrigger = false;
+    OnScrollStopEvent stopEvent = [&isStopTrigger]() { isStopTrigger = true; };
+    scrollPn->nestedScrollVelocity_ = 0;
+    scrollPn->FireOnScrollStop(stopEvent, nullptr);
+    EXPECT_FALSE(scrollPn->isAnimationStop_);
+}
+
+/**
  * @tc.name: FadingEdge001
  * @tc.desc: Test SetFadingEdge
  * @tc.type: FUNC
@@ -1903,5 +1928,6 @@ HWTEST_F(ScrollableTestNg, OnTouchDown001, TestSize.Level1)
     scrollPn->OnTouchDown(touchEvent);
     EXPECT_FALSE(scrollPn->isClickAnimationStop_);
 }
+
 #endif
 } // namespace OHOS::Ace::NG

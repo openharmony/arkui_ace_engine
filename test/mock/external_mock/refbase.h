@@ -28,6 +28,9 @@ public:
         delete ptr;
     }
 
+    sptr(const sptr&) = delete;
+    sptr& operator=(const sptr&) = delete;
+
     T& operator*()
     {
         return *ptr;

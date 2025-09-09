@@ -8377,6 +8377,60 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest148
+ * @tc.desc: Test imageNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest148, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SLIDER);
+    uint32_t colors[] = {0xFFFEBB62, 0xffFFA0A4, 0xffFF0000};
+    float stops[] = {0.0, 0.5, 1};
+    ArkUI_ColorStop linerGrand[] = {{colors, stops, 3}};
+    ArkUI_AttributeItem item = {nullptr, 0, nullptr, linerGrand};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR, &item),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest149
+ * @tc.desc: Test imageNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest149, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_IMAGE, nullptr, true });
+
+    ArkUI_NumberValue value[] = { { .i32 = true } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SUPPORT_SVG2), nullptr);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: NativeNodeTest_OutlineColor001
  * @tc.desc: Test customNode function.
  * @tc.type: FUNC
@@ -8922,6 +8976,309 @@ HWTEST_F(NativeNodeTest, NativeNodeOverlayTest002, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);
     EXPECT_EQ(overlayVal->value[0].i32, static_cast<int32_t>(ARKUI_ALIGNMENT_BOTTOM_END));
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest001
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float left = 10.0f;
+    float right = 100.0f;
+    float top = 10.0f;
+    float bottom = 110.0f;
+    float width = 90.0f;
+    float height = 100.0f;
+
+    ArkUI_NumberValue value[] = {{.i32 = ARKUI_CLIP_TYPE_RECTANGLE}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUIRenderNodeClipOption object;
+    object.type = ArkUIRenderShape::RECT_SHAPE;
+    object.rect.left = left;
+    object.rect.right = right;
+    object.rect.top = top;
+    object.rect.bottom = bottom;
+    item.object = &object;
+
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    auto clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_RECTANGLE);
+    EXPECT_EQ(clipRectShapeVal->value[1].f32, width);
+    EXPECT_EQ(clipRectShapeVal->value[2].f32, height);
+    EXPECT_EQ(clipRectShapeVal->value[9].f32, left);
+    EXPECT_EQ(clipRectShapeVal->value[10].f32, top);
+
+    value[0].i32 = ARKUI_CLIP_TYPE_CIRCLE;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_RECTANGLE);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest002
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float centerX = 120.0f;
+    float centerY = 120.0f;
+    float radius = 90.0f;
+    
+    ArkUI_NumberValue value[] = {{.i32 = ARKUI_CLIP_TYPE_CIRCLE}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUIRenderNodeClipOption object;
+    object.type = ArkUIRenderShape::CIRCLE_SHAPE;
+    object.circle.centerX = centerX;
+    object.circle.centerY = centerY;
+    object.circle.radius = radius;
+    item.object = &object;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    auto clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_CIRCLE);
+    EXPECT_EQ(clipRectShapeVal->value[1].f32, 2*radius);
+    EXPECT_EQ(clipRectShapeVal->value[2].f32, 2*radius);
+
+    value[0].i32 = ARKUI_CLIP_TYPE_RECTANGLE;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_CIRCLE);
+
+    object.type = ArkUIRenderShape::OVAL_SHAPE;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_CIRCLE);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest003
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float left = 10.0f;
+    float right = 100.0f;
+    float top = 10.0f;
+    float bottom = 110.0f;
+    float rectRound = 20.0f;
+    float width = 90.0f;
+    float height = 100.0f;
+
+    ArkUI_NumberValue value[] = {{.i32 = ARKUI_CLIP_TYPE_RECTANGLE}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUIRenderNodeClipOption object;
+    object.type = ArkUIRenderShape::ROUND_RECT_SHAPE;
+    object.roundRect.left = left;
+    object.roundRect.right = right;
+    object.roundRect.top = top;
+    object.roundRect.bottom = bottom;
+    object.roundRect.topLeftX = rectRound;
+    object.roundRect.topLeftY = rectRound;
+    object.roundRect.topRightX = rectRound;
+    object.roundRect.topRightY = rectRound;
+    object.roundRect.bottomLeftX = rectRound;
+    object.roundRect.bottomLeftY = rectRound;
+    object.roundRect.bottomRightX = rectRound;
+    object.roundRect.bottomRightY = rectRound;
+    item.object = &object;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    auto clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_RECTANGLE);
+    EXPECT_EQ(clipRectShapeVal->value[1].f32, width);
+    EXPECT_EQ(clipRectShapeVal->value[2].f32, height);
+    EXPECT_EQ(clipRectShapeVal->value[3].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[4].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[5].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[6].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[7].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[8].f32, rectRound);
+    EXPECT_EQ(clipRectShapeVal->value[9].f32, left);
+    EXPECT_EQ(clipRectShapeVal->value[10].f32, top);
+
+    value[0].i32 = ARKUI_CLIP_TYPE_CIRCLE;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_RECTANGLE);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest004
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float left = 10.0f;
+    float right = 100.0f;
+    float top = 10.0f;
+    float bottom = 110.0f;
+    float width = 90.0f;
+    float height = 100.0f;
+
+    ArkUI_NumberValue value[] = {{.i32 = ARKUI_CLIP_TYPE_ELLIPSE}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUIRenderNodeClipOption object;
+    object.type = ArkUIRenderShape::OVAL_SHAPE;
+    object.oval.left = left;
+    object.oval.right = right;
+    object.oval.top = top;
+    object.oval.bottom = bottom;
+    item.object = &object;
+
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    auto clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_ELLIPSE);
+    EXPECT_EQ(clipRectShapeVal->value[1].f32, width);
+    EXPECT_EQ(clipRectShapeVal->value[2].f32, height);
+    EXPECT_EQ(clipRectShapeVal->value[3].f32, left);
+    EXPECT_EQ(clipRectShapeVal->value[4].f32, top);
+
+    value[0].i32 = ARKUI_CLIP_TYPE_CIRCLE;
+    auto result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_ELLIPSE);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest005
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest005, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue value[] = { { .i32 = 4 }, { .f32 = 10.0f }, { .f32 = 10.0f } };
+    ArkUI_AttributeItem item = {value, 0};
+    ArkUIRenderNodeClipOption object;
+    auto result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    item.size = 1;
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    value[0].i32 = 1;
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR);
+    item.size = 2;
+    item.object = &object;
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue value2[] = { { .i32 = 1 }};
+    ArkUI_AttributeItem item2 = {value2, 1};
+    auto result2 = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item2);
+    EXPECT_EQ(result2, ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue value3[] = { { .i32 = 1 }, { .f32 = -10.0f }};
+    ArkUI_AttributeItem item3 = {value3, 2};
+    auto result3 = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item3);
+    EXPECT_EQ(result3, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest006
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest006, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue value[] = { { .i32 = ARKUI_CLIP_TYPE_PATH } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    ArkUIRenderNodeClipOption object;
+    object.type = ArkUIRenderShape::COMMANDS;
+    object.commands = "M100 0 L200 240 L0 240 Z";
+    item.object = &object;
+    nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    auto clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_PATH);
+    EXPECT_NE(clipRectShapeVal->string, nullptr);
+    value[0].i32 = ARKUI_CLIP_TYPE_CIRCLE;
+    auto result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    clipRectShapeVal = nodeAPI->getAttribute(rootNode, NODE_CLIP_SHAPE);
+    EXPECT_EQ(clipRectShapeVal->value[0].i32, ARKUI_CLIP_TYPE_PATH);
+    object.type = static_cast<ArkUIRenderShape>(-1);
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeSetClipShapeTest007
+ * @tc.desc: Test SetClipShape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest007, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    const char* pathCommands = "M100 0 L200 240 L0 240 Z";
+    ArkUI_NumberValue value[] = { { .i32 = ARKUI_CLIP_TYPE_PATH }, { .f32 = -1.0f }, { .f32 = -1.0f } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    auto result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+
+    item.string = pathCommands;
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    ArkUI_NumberValue value2[] = { { .i32 = ARKUI_CLIP_TYPE_PATH }, { .f32 = 1.0f }, { .f32 = -1.0f } };
+    ArkUI_AttributeItem item2 = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue), pathCommands };
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item2);
+    EXPECT_EQ(result, ERROR_CODE_PARAM_INVALID);
+    ArkUI_NumberValue value3[] = { { .i32 = ARKUI_CLIP_TYPE_PATH }, { .f32 = 1.0f }, { .f32 = 1.0f } };
+    ArkUI_AttributeItem item3 = { value3, sizeof(value3) / sizeof(ArkUI_NumberValue), pathCommands };
+    result = nodeAPI->setAttribute(rootNode, NODE_CLIP_SHAPE, &item3);
+    EXPECT_EQ(result, ERROR_CODE_NO_ERROR);
 }
 
 /**

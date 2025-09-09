@@ -732,6 +732,23 @@ class ImageSupportSvg2Modifier extends ModifierWithKey<boolean> {
     return this.stageValue !== this.value;
   }
 }
+class ImageContentTransitionModifier extends ModifierWithKey<ContentTransitionEffect> {
+  constructor(value: ContentTransitionEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetContentTransition(node);
+    } else {
+      getUINativeModule().image.setContentTransition(node, this.value!);
+
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -908,6 +925,11 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   supportSvg2(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
+    return this;
+  }
+  contentTransition(value: ContentTransitionEffect): this {
+    modifierWithKey(this._modifiersWithKeys, ImageContentTransitionModifier.identity,
+      ImageContentTransitionModifier, value);
     return this;
   }
 }

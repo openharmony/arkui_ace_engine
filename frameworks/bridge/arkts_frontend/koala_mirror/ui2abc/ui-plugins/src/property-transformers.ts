@@ -17,7 +17,7 @@ import * as arkts from "@koalaui/libarkts"
 import { Es2pandaTokenType } from "@koalaui/libarkts"
 
 import { DecoratorNames, DecoratorParameters, hasDecorator } from "./property-translators/utils"
-import { CustomComponentNames, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
+import { CustomComponentNames, getComponentPackage, getDecoratorPackage, getRuntimePackage, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
 import { annotation, classMethods, isAnnotation } from "./common/arkts-utils"
 
 export interface PropertyTransformer extends ImportingTransformer {
@@ -27,6 +27,7 @@ export interface PropertyTransformer extends ImportingTransformer {
     applyOptions(property: arkts.ClassProperty, result: arkts.Statement[]): void
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void
     applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void
 }
 
 function createOptionalClassProperty(
@@ -43,14 +44,15 @@ function createOptionalClassProperty(
     return result
 }
 
-function createWrapperType(name: string, type: arkts.TypeNode): arkts.ETSTypeReference {
-    return arkts.factory.createETSTypeReference(
+export function createWrapperType(name: string, type: arkts.TypeNode, useUnion: boolean = false): arkts.TypeNode {
+    const box = arkts.factory.createETSTypeReference(
         arkts.factory.createETSTypeReferencePart(
             arkts.factory.createIdentifier(name),
-            arkts.factory.createTSTypeParameterInstantiation([type]),
+            arkts.factory.createTSTypeParameterInstantiation([type.clone()]),
             undefined
         )
     )
+    return useUnion ? arkts.factory.createETSUnionType([type.clone(), box]) : box
 }
 
 function backingFieldNameOf(property: arkts.ClassProperty): string {
@@ -71,7 +73,8 @@ function createWrappedProperty(
     wrapperTypeName: string,
     ctorParams: arkts.Expression[] = []
 ): arkts.ClassElement[] {
-    const wrapperType = createWrapperType(wrapperTypeName, property.typeAnnotation!)
+    const wrapperTypeForValue = createWrapperType(wrapperTypeName, property.typeAnnotation!)
+    const wrapperTypeForType = createWrapperType(wrapperTypeName, property.typeAnnotation!)
     const name = property.id!.name
     let ctorArguments: arkts.Expression[] = [...ctorParams, arkts.factory.createStringLiteral(name)]
     if (property.value != undefined) {
@@ -79,8 +82,8 @@ function createWrappedProperty(
     }
     const backingField = arkts.factory.createClassProperty(
         arkts.factory.createIdentifier(backingFieldNameOf(property)),
-        arkts.factory.createETSNewClassInstanceExpression(wrapperType, ctorArguments),
-        wrapperType,
+        arkts.factory.createETSNewClassInstanceExpression(wrapperTypeForValue, ctorArguments),
+        wrapperTypeForType,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE,
         false
     )
@@ -108,7 +111,7 @@ function createWrappedProperty(
         undefined,
         [
         ],
-        property.typeAnnotation,
+        property.typeAnnotation?.clone(),
         true,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD | arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
@@ -149,10 +152,9 @@ function createWrappedProperty(
         undefined,
         [
             arkts.factory.createETSParameterExpression(
-                arkts.factory.createIdentifier("value"),
+                arkts.factory.createIdentifier("value", property.typeAnnotation?.clone()),
                 false,
                 undefined,
-                property.typeAnnotation!
             )
         ],
         undefined,
@@ -179,7 +181,6 @@ function createWrappedProperty(
         false,
         [setter]
     )
-    setter.parent = getter
 
     return [backingField, getter]
 }
@@ -194,7 +195,8 @@ function addTrackablePropertyTo(
     if (!valueType) throw new Error(`@${propertyTypeName}: type is not specified for ${property.id?.name}`)
 
     const propertyName = property.id!.name
-    const propertyType = createWrapperType(propertyTypeName, valueType)
+    const propertyTypeForValue = createWrapperType(propertyTypeName, valueType)
+    const propertyTypeForType = createWrapperType(propertyTypeName, valueType)
     const propertyArgs: arkts.Expression[] = [arkts.factory.createStringLiteral(propertyName)]
     const watches = property.annotations.filter(isWatchDecorator).map(getWatchParameter)
     if (watches.length > 0) {
@@ -218,8 +220,8 @@ function addTrackablePropertyTo(
     }
     const backingField = arkts.factory.createClassProperty(
         arkts.factory.createIdentifier(backingFieldNameOf(property)),
-        arkts.factory.createETSNewClassInstanceExpression(propertyType, propertyArgs),
-        propertyType,
+        arkts.factory.createETSNewClassInstanceExpression(propertyTypeForValue, propertyArgs),
+        propertyTypeForType,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE,
         false
     )
@@ -229,7 +231,7 @@ function addTrackablePropertyTo(
         ]),
         undefined,
         [],
-        valueType,
+        valueType.clone(),
         true,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD | arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
@@ -243,10 +245,9 @@ function addTrackablePropertyTo(
         undefined,
         [
             arkts.factory.createETSParameterExpression(
-                arkts.factory.createIdentifier("value"),
+                arkts.factory.createIdentifier("value", valueType.clone()),
                 false,
                 undefined,
-                valueType
             )
         ],
         undefined,
@@ -271,7 +272,6 @@ function addTrackablePropertyTo(
         false,
         [setter]
     )
-    setter.parent = getter
     result.push(backingField)
     result.push(getter)
 }
@@ -309,6 +309,27 @@ function createWatchCall(clazz: arkts.ClassDeclaration, methodName: string, prop
     )
 }
 
+function addPropertyRecordTo(result: arkts.Expression[], property: arkts.ClassProperty) {
+    result.push(arkts.factory.createProperty(
+        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
+        arkts.factory.createStringLiteral(property.id!.name),
+        arkts.factory.createBinaryExpression(
+            fieldOf(arkts.factory.createTSNonNullExpression(
+                arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME)
+            ), property.id!.name),
+            property.value ?? arkts.factory.createETSNewClassInstanceExpression(
+                arkts.factory.createETSTypeReference(
+                    arkts.factory.createETSTypeReferencePart(
+                        arkts.factory.createIdentifier("Object", undefined), undefined, undefined
+                    )
+                ),
+                []),
+            arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_NULLISH_COALESCING
+        ),
+        false, false
+    ))
+}
+
 export abstract class PropertyTransformerBase implements PropertyTransformer {
     constructor(public decoratorName: DecoratorNames, public className: string) {
     }
@@ -316,7 +337,7 @@ export abstract class PropertyTransformerBase implements PropertyTransformer {
         return hasDecorator(property, this.decoratorName)
     }
     collectImports(importer: Importer): void {
-        importer.add(this.className, "@ohos.arkui")
+        importer.add(this.className, getDecoratorPackage())
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
     }
@@ -326,6 +347,8 @@ export abstract class PropertyTransformerBase implements PropertyTransformer {
     abstract applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void
     applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "aboutToBeDeleted"))
+    }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
     }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
@@ -341,6 +364,9 @@ export class StateTransformer extends PropertyTransformerBase {
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value!]))
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
 }
 
 export class PlainPropertyTransformer implements PropertyTransformer {
@@ -348,7 +374,7 @@ export class PlainPropertyTransformer implements PropertyTransformer {
         return property.annotations.length == 0
     }
     collectImports(imports: Importer): void {
-        imports.add("PlainStructProperty", "@ohos.arkui")
+        imports.add("PlainStructProperty", getDecoratorPackage())
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
         result.push(createOptionalClassProperty(property.id!.name, property))
@@ -361,6 +387,9 @@ export class PlainPropertyTransformer implements PropertyTransformer {
     }
     applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
 }
@@ -370,16 +399,24 @@ export class LinkTransformer extends PropertyTransformerBase {
         super(DecoratorNames.LINK, "LinkDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(arkts.factory.createClassProperty(
-            arkts.factory.createIdentifier(property.id?.name!),
-            undefined,
-            createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!),
-            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
-            false
+       result.push(arkts.factory.createClassProperty(
+                    arkts.factory.createIdentifier(property.id?.name!),
+                    undefined,
+                    createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!, true),
+                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
+                    false
         ))
+        //result.push(createOptionalClassProperty(property.id!.name, property))
     }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "linkTo", [initializerOf(property)]))
+    }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
+    collectImports(imports: Importer): void {
+        imports.add("SubscribedAbstractProperty", getDecoratorPackage())
+        imports.add("LinkDecoratorProperty", getDecoratorPackage())
     }
 }
 
@@ -425,6 +462,9 @@ export class PropTransformer extends PropertyTransformerBase {
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value ?? arkts.factory.createUndefinedLiteral()]))
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "update", [initializerOf(property)]))
     }
@@ -459,6 +499,9 @@ export class ObjectLinkTransformer extends PropertyTransformerBase {
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value ?? arkts.factory.createUndefinedLiteral()]))
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "update", [initializerOf(property)]))
     }
@@ -472,7 +515,7 @@ export function fieldOf(base: arkts.Expression, name: string, optional: boolean 
         false,
         optional
     )
-    //if (optional) return arkts.factory.createChainExpression(result)
+    if (optional) return arkts.factory.createChainExpression(result)
     return result
 }
 
@@ -521,6 +564,9 @@ export class ProvideTransformer extends PropertyTransformerBase {
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "init", [initializerOf(property), property.value!]))
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
+    }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
         const allowOverride = parseAllowOverride(property)
         const params = withStorageKey([], property, this.decoratorName)
@@ -533,7 +579,7 @@ export class ProvideTransformer extends PropertyTransformerBase {
     }
     collectImports(imports: Importer): void {
         super.collectImports(imports)
-        imports.add("once", "@koalaui/runtime")
+        imports.add("once", getRuntimePackage())
     }
 
 }
@@ -575,26 +621,30 @@ export class BuilderParamTransformer implements PropertyTransformer {
     }
     applyDisposeStruct(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        // cause ClassCastError on panda while using default value
+        // LambdaObject$lambda$invoke$805 cannot be cast to std.core.Function0
+        // addPropertyRecordTo(result, property)
+    }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
     }
 }
 
 function applyInitStatement(property: arkts.ClassProperty): arkts.Statement {
     const name = property.id?.name!
-    const identifier = arkts.factory.createIdentifier(name, undefined)
     const initDeclaration = arkts.factory.createVariableDeclaration(
         arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
         [
             arkts.factory.createVariableDeclarator(
                 arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
-                identifier,
+                arkts.factory.createIdentifier(name),
                 initializerOf(property)
             )
         ]
     )
     const initBlock = arkts.factory.createIfStatement(
         arkts.factory.createBinaryExpression(
-            identifier,
+            arkts.factory.createIdentifier(name),
             arkts.factory.createUndefinedLiteral(),
             Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_NOT_EQUAL
         ),
@@ -602,7 +652,7 @@ function applyInitStatement(property: arkts.ClassProperty): arkts.Statement {
             arkts.factory.createExpressionStatement(
                 arkts.factory.createAssignmentExpression(
                     fieldOf(arkts.factory.createThisExpression(), name),
-                    arkts.factory.createTSNonNullExpression(identifier),
+                    arkts.factory.createTSNonNullExpression(arkts.factory.createIdentifier(name)),
                     arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
                 )
             )

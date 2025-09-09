@@ -15,24 +15,24 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { getCustomComponentOptionsName, Importer, InternalAnnotations } from "./utils"
-import { fieldOf, isOptionBackedByPropertyName } from "./property-transformers"
+import { fieldOf } from "./property-transformers"
 import { annotation, backingField } from "./common/arkts-utils"
-import { StructDescriptor, StructTable } from "./struct-recorder";
+import { StructDescriptor, StructsResolver, StructTable } from "./struct-recorder";
 import { DecoratorNames } from "./property-translators/utils";
 
-// For some time we execute this plugin on parrsed stage.
 export class StructCallRewriter extends arkts.AbstractVisitor {
     currentStructRewritten: StructDescriptor | undefined = undefined
     currentStructCalled: StructDescriptor | undefined = undefined
+    isInCall = false
 
-    constructor(private importer: Importer, private structTable: StructTable) {
+    constructor(private structs: StructTable, private importer: Importer) {
         super()
     }
 
     private addImports(statement: arkts.ETSImportDeclaration) {
         statement.specifiers.forEach(it => {
             const name = (it as arkts.ImportSpecifier).imported
-            if (name && this.structTable.findStruct(name)) {
+            if (name && this.structs?.findStruct(name.name)) {
                 this.importer.add(getCustomComponentOptionsName(name.name), statement.source?.str!)
             }
         })
@@ -43,52 +43,37 @@ export class StructCallRewriter extends arkts.AbstractVisitor {
             this.addImports(node)
             return node
         }
-        if (arkts.isClassDeclaration(node)) {
-            const struct = this.structTable.findStruct(node.definition?.ident!)
+        if (arkts.isETSStructDeclaration(node)) {
+            const struct = StructTable.toDescriptor(node)
             this.currentStructRewritten = struct
             const result = this.visitEachChild(node)
             this.currentStructRewritten = undefined
             return result
         }
         if (arkts.isCallExpression(node) && arkts.isIdentifier(node.callee)) {
-            const struct = this.structTable.findStruct(node.callee as arkts.Identifier)
-            let result: arkts.AstNode
-            if (struct) {
-                this.currentStructCalled = struct
-                result = this.visitEachChild(node)
-                this.currentStructCalled = undefined
-            } else {
-                result = this.visitEachChild(node)
-            }
+            this.isInCall = true
+            this.currentStructCalled = this.structs.findStruct(node.callee.name)
+            const result = this.visitEachChild(node)
+            this.currentStructCalled = undefined
+            this.isInCall = false
             return result
         }
-        if (this.currentStructCalled != undefined && arkts.isObjectExpression(node)) {
-            // Iterate over all statements to properly use fields getters
-            return arkts.factory.createTSAsExpression(
-                this.createObjectLiteralRewrite(node),
-                arkts.factory.createTSTypeReference(arkts.factory.createIdentifier(
-                    getCustomComponentOptionsName(this.currentStructCalled.name))),
-                false
-            )
+
+        if (this.currentStructRewritten != undefined && this.isInCall && arkts.isObjectExpression(node)) {
+            return this.createObjectLiteralRewrite(node)
         }
         return this.visitEachChild(node)
     }
 
-    private createObjectLiteralRewrite(expression: arkts.ObjectExpression): arkts.ObjectExpression {
-        return arkts.factory.createObjectExpression(
+    private createObjectLiteralRewrite(expression: arkts.ObjectExpression): arkts.Expression {
+        const rewritten = arkts.factory.createObjectExpression(
             arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
             expression.properties.map(value => {
-                if (arkts.isProperty(value) && arkts.isMemberExpression(value.value)) {
+                if (arkts.isProperty(value) && arkts.isIdentifier(value.value)) {
                     return arkts.factory.createProperty(
                         arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
                         value.key,
-                        this.createMemberRewrite(value.key as arkts.Identifier, value.value), false, false
-                    )
-                } else if (arkts.isProperty(value) && arkts.isIdentifier(value.value)) {
-                    return arkts.factory.createProperty(
-                        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
-                        value.key,
-                        this.createDollarRewrite(value.key as arkts.Identifier, value.value), false, false
+                        this.createDollarRewrite(value.value), false, false
                     )
                 } else if (arkts.isProperty(value) && arkts.isArrowFunctionExpression(value.value)) {
                     return arkts.factory.createProperty(
@@ -101,43 +86,42 @@ export class StructCallRewriter extends arkts.AbstractVisitor {
                 }
             }), false
         )
+        return rewritten
     }
 
-    private createMemberRewrite(targetPropertyNameId: arkts.Identifier, original: arkts.MemberExpression): arkts.Expression {
-        if (!this.currentStructRewritten) return original
-        if (arkts.isThisExpression(original.object) && arkts.isIdentifier(original.property)) {
-            let thisPropertyName = original.property.name
-            let targetPropertyName = targetPropertyNameId.name
-            // Use backing field instead of property value, if using property.
-            let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
-            if (decorators?.find(it => isOptionBackedByPropertyName(it))) {
-                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
-            }
-        }
-        return original
-    }
-
-    private createDollarRewrite(targetPropertyNameId: arkts.Identifier, original: arkts.Identifier): arkts.Expression {
-        if (!this.currentStructRewritten) return original
-        if (original.name.startsWith('$')) {
-            let targetPropertyName = targetPropertyNameId.name
-            let thisPropertyName = original.name.substring(1)
-            // Use backing field instead of property value, if using property.
-            let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
-            if (decorators?.find(it => isOptionBackedByPropertyName(it))) {
-                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
-            }
-        }
-        return original
-    }
-
+    // Improve: FIX, move to checked phase
     private updateArrowFunctionExpression(targetPropertyNameId: arkts.Identifier, original: arkts.ArrowFunctionExpression): arkts.ArrowFunctionExpression {
-        if (!this.currentStructRewritten) return original
         let targetPropertyName = targetPropertyNameId.name
         // Add @memo annotation if using @BuildParam decorated property
         let decorators = this.currentStructCalled?.decoratorsFor(targetPropertyName)
         if (decorators?.find(it => it == DecoratorNames.BUILDER_PARAM)) {
             original.setAnnotations([annotation(InternalAnnotations.MEMO)])
+        }
+        return original
+    }
+
+    private createMemberRewrite(original: arkts.MemberExpression): arkts.Expression {
+        if (!this.currentStructRewritten) return original
+        if (arkts.isThisExpression(original.object) && arkts.isIdentifier(original.property)) {
+            let thisPropertyName = original.property.name
+            // Use backing field instead of property value, if using property.
+            let decorators = this.currentStructRewritten.decoratorsFor(thisPropertyName)
+            if (decorators && decorators.includes(DecoratorNames.LINK)) {
+                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
+            }
+        }
+        return original
+    }
+
+    private createDollarRewrite(original: arkts.Identifier): arkts.Expression {
+        if (!this.currentStructRewritten) return original
+        if (original.name.startsWith('$')) {
+            let thisPropertyName = original.name.substring(1)
+            // Use backing field instead of property value, if using property.
+            let decorators = this.currentStructRewritten?.decoratorsFor(thisPropertyName)
+            if (decorators && decorators.length > 0) {
+                return fieldOf(arkts.factory.createThisExpression(), backingField(thisPropertyName))
+            }
         }
         return original
     }

@@ -17,7 +17,7 @@ import * as util from "../../test-util"
 import * as ts from "../../../src/ts-api"
 
 suite.skip(util.basename(__filename), () => {
-    // TODO: doesn't running now, but compiles (config gets only one file)
+    // Improve: doesn't running now, but compiles (config gets only one file)
     test("sample-1", function() {
         const sample_in =
         `

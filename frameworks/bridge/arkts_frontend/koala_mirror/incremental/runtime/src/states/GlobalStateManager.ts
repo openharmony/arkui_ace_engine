@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { CoroutineLocalValue, KoalaCallsiteKey } from "@koalaui/common"
 import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
 
 /**
@@ -20,7 +21,12 @@ import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, creat
  * @internal
  */
 export class GlobalStateManager {
-    private static current: StateManager | undefined = undefined
+    private static localManager = new CoroutineLocalValue<StateManager>()
+    private static sharedManager: StateManager | undefined = undefined
+
+    private static get current(): StateManager | undefined {
+        return GlobalStateManager.GetLocalManager() ?? GlobalStateManager.sharedManager
+    }
 
     /**
      * The current instance of a global state manager.
@@ -30,7 +36,7 @@ export class GlobalStateManager {
         let current = GlobalStateManager.current
         if (current === undefined) {
             current = createStateManager()
-            GlobalStateManager.current = current
+            GlobalStateManager.sharedManager = current
         }
         return current
     }
@@ -41,6 +47,30 @@ export class GlobalStateManager {
      */
     static reset() {
         GlobalStateManager.current?.reset()
+    }
+
+    /**
+     * Get state manager by coroutine id.
+     * @internal
+     */
+    static GetLocalManager(): StateManager | undefined {
+        return GlobalStateManager.localManager.get()
+    }
+
+    /**
+     * Store state manager by coroutine id.
+     * @internal
+     */
+    static SetLocalManager(manager: StateManager | undefined): void {
+        GlobalStateManager.localManager.set(manager)
+    }
+
+    /**
+     * @return callsite key for a current context or `undefined` for global context
+     * @internal
+     */
+    public static getCurrentScopeId(): KoalaCallsiteKey | undefined {
+        return GlobalStateManager.instance.currentScopeId
     }
 }
 

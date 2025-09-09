@@ -807,7 +807,7 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     }
 
     AxisInfo* axisInfo = obj->Unwrap<AxisInfo>();
-    auto pinchAxisScale = obj->GetProperty("pinchAxisScale");
+    auto pinchAxisScale = obj->GetProperty("axisPinch");
     if (pinchAxisScale->IsNumber()) {
         axisEvent.pinchAxisScale = pinchAxisScale->ToNumber<float>();
     } else if (axisInfo) {

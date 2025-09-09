@@ -12,17 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+import * as os from "os"
 
 const nativeModuleLibraries: Map<string, string> = new Map()
 
 export function loadNativeLibrary(name: string): Record<string, object> {
-    if ((globalThis as any).requireNapi)
-        return (globalThis as any).requireNapi(name, true)
-    else {
-        let suffixedName = name.endsWith(".node") ? name : `${name}.node`
-        try { suffixedName = eval(`require.resolve("${suffixedName}")`) } catch (_) {}
-        return eval(`let exports = {}; process.dlopen({ exports }, "${suffixedName}", 2); exports`)
+    const isHZVM = !!(globalThis as any).requireNapi
+    let nameWithoutSuffix = name.endsWith(".node") ? name.slice(0, name.length - 5) : name
+    let candidates: string[] = [
+        name,
+        `${nameWithoutSuffix}.node`,
+        `${nameWithoutSuffix}_${os.arch()}.node`,
+        `${nameWithoutSuffix}_${os.platform()}_${os.arch()}.node`,
+    ]
+    if (!isHZVM)
+        try { candidates.push(eval(`require.resolve("${nameWithoutSuffix}.node")`)) } catch (_) {}
+
+    for (const candidate of candidates) {
+        try {
+            if (isHZVM)
+                return (globalThis as any).requireNapi(candidate, true)
+            else
+                return eval(`let exports = {}; process.dlopen({ exports }, "${candidate}", 2); exports`)
+        } catch (_) {}
     }
+    throw new Error(`Failed to load native library ${name}. dlopen candidates: ${candidates.join(":")}`)
 }
 
 export function registerNativeModuleLibraryName(nativeModule: string, libraryName: string) {

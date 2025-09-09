@@ -43,10 +43,10 @@ public:
         std::string& message);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const KeyEvent& event,
-        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback, std::string& message);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const SecCompEnhanceEvent& event,
-        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback, std::string& message);
     static bool InitButtonInfoValue(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         const Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool InitButtonInfo(std::string& componentInfo,

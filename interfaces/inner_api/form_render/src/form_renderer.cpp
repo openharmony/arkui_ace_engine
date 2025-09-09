@@ -388,17 +388,21 @@ int32_t FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsI
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     HILOG_INFO("Form OnSurfaceReuse, id: %{public}" PRIu64, rsSurfaceNode->GetId());
-    int32_t ret = ERR_OK;
+    OHOS::AppExecFwk::FormJsInfo newFormJsInfo = formJsInfo;
     if (formJsInfo.uiSyntax == OHOS::AppExecFwk::FormType::ETS) {
-        OHOS::AppExecFwk::FormJsInfo newFormJsInfo = formJsInfo.CopyFormJsInfoWithoutFormData();
-        ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), newFormJsInfo, newWant);
-    } else {
-        ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+        newFormJsInfo = formJsInfo.CopyFormJsInfoWithoutFormData();
     }
-    formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
+    int32_t ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), newFormJsInfo, newWant);
     if (ret != ERR_OK) {
         HILOG_ERROR("Form OnSurfaceReuse failed, code:%{public}d", ret);
     }
+    if (ret == ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND) {
+        int32_t result = formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, newFormJsInfo, newWant);
+        if (result != ERR_OK) {
+            HILOG_ERROR("Form OnSurfaceCreate failed, code:%{public}d", result);
+        }
+    }
+    formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
     return ret;
 }
 
@@ -508,6 +512,10 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 
 void FormRenderer::ResetRenderDelegate()
 {
+    if (formRendererDelegate_ && !formRendererDelegate_->AsObject()->IsObjectDead()) {
+        HILOG_WARN("ResetRenderDelegate formRendererDelegate_ has been replaced.");
+        return;
+    }
     HILOG_INFO("ResetRenderDelegate.");
     RemoveFormDeathRecipient();
     renderDelegateDeathRecipient_ = nullptr;

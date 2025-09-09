@@ -13139,6 +13139,20 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _BaseEvent_getAxisPinch(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._BaseEvent_getAxisPinch(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _BaseEvent_setAxisPinch(ptr: KPointer, axisPinch: number): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._BaseEvent_setAxisPinch(ptr, axisPinch)
+        }
+        throw new Error("Not implemented")
+    }
     static _BaseEvent_getPressure(ptr: KPointer): number {
         if ((this._LoadOnce()) == (true))
         {

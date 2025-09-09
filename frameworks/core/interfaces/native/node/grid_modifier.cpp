@@ -153,12 +153,10 @@ void ResetGridScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto* context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
-    GridModelNG::SetScrollBarColor(frameNode, scrollBarTheme->GetForegroundColor());
+    GridModelNG::SetScrollBarColor(frameNode, std::nullopt);
+
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    NodeModifier::CreateWithResourceObjGridScrollBarColor(node, nullptr);
 }
 
 void SetGridCachedCount(ArkUINodeHandle node, int32_t cachedCount)

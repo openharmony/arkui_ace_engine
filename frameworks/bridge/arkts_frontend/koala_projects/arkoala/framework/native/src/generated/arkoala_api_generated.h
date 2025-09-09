@@ -24453,6 +24453,9 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
     Opt_Number (*getAxisVertical)(Ark_BaseEvent peer);
     void (*setAxisVertical)(Ark_BaseEvent peer,
                             const Ark_Number* axisVertical);
+    Opt_Number (*getAxisPinch)(Ark_BaseEvent peer);
+    void (*setAxisPinch)(Ark_BaseEvent peer,
+                            const Ark_Number* axisPinch);
     Ark_Number (*getPressure)(Ark_BaseEvent peer);
     void (*setPressure)(Ark_BaseEvent peer,
                         const Ark_Number* pressure);
@@ -24642,6 +24645,7 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getHorizontalAxisValue)(Ark_AxisEvent peer);
     Ark_Number (*getVerticalAxisValue)(Ark_AxisEvent peer);
+    Ark_Number (*getPinchAxisScaleValue)(Ark_AxisEvent peer);
     Ark_AxisAction (*getAction)(Ark_AxisEvent peer);
     void (*setAction)(Ark_AxisEvent peer,
                       Ark_AxisAction action);

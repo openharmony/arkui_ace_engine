@@ -1,5 +1,5 @@
 
-function main() {}
+function main(): void {}
 
 
 
@@ -16,12 +16,12 @@ class C implements I {
   private _$property$_prop: boolean = true;
   
   set prop(_$property$_prop: boolean) {
-    (this)._$property$_prop = _$property$_prop;
+    this._$property$_prop = _$property$_prop;
     return;
   }
   
   public get prop(): boolean {
-    return (this)._$property$_prop;
+    return this._$property$_prop;
   }
   
 }

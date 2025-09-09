@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export type NodePointer = pointer // todo: move to NativeModule
+export type NodePointer = pointer // Improve: move to NativeModule
 
 export type KStringPtr = string
 export type KStringPtrArray = FixedArray<byte>

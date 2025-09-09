@@ -35,11 +35,11 @@ export class InteropNativeModule {
     native static _IncrementNumber(value: number): number
     native static _GetPtrVectorElement(ptr1: KPointer, arg: int32): KPointer
     native static _StringLength(ptr1: KPointer): int32
-    native static _StringData(ptr1: KPointer, arr: KUint8ArrayPtr, i: int32): void
+    native static _StringData(ptr1: KPointer, array: KUint8ArrayPtr, arrayLength: int32): void
     native static _StringMake(str1: string): KPointer
     native static _GetPtrVectorSize(ptr1: KPointer): int32
     @ani.unsafe.Quick
-    native static _ManagedStringWrite(str1: string, arr: KPointer, arg: int32): int32
+    native static _ManagedStringWrite(str1: string, array: KPointer, arrayLength: int32, arg: int32): int32
     native static _NativeLog(str1: string): void
     @ani.unsafe.Quick
     native static _Utf8ToString(data: KPointer, offset: int32, length: int32): string
@@ -52,7 +52,10 @@ export class InteropNativeModule {
     native static _CallCallbackSync(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
     native static _CallCallbackResourceHolder(holder: KPointer, resourceId: int32): void
     native static _CallCallbackResourceReleaser(releaser: KPointer, resourceId: int32): void
-    native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string): int32
+    native static _CallbackAwait(pipeline: KPointer): Object
+    native static _UnblockCallbackWait(pipeline: KPointer): void
+
+    native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string, arg3: string): int32
     native static _RunApplication(arg0: int32, arg1: int32): boolean
     native static _StartApplication(appUrl: string, appParams: string): KPointer
     native static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): string
@@ -65,6 +68,8 @@ export class InteropNativeModule {
     native static _WriteByte(data: KPointer, index: int64, length: int64, value: int32): void
     @ani.unsafe.Direct
     native static _Malloc(length: int64): KPointer
+    @ani.unsafe.Direct
+    native static _GetMallocFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _Free(data: KPointer): void
     @ani.unsafe.Quick

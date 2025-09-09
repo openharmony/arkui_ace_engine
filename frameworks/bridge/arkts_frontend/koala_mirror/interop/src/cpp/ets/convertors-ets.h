@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_ETS_H
+#define CONVERTORS_ETS_H
 
 #ifdef KOALA_ETS_NAPI
 
-#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -27,6 +27,7 @@
 
 #include "etsapi.h"
 #include "koala-types.h"
+#include "interop-utils.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -110,9 +111,10 @@ struct InteropTypeConverter<KInteropBuffer> {
       return result;
     }
     static InteropType convertTo(EtsEnv* env, KInteropBuffer value) {
-      ets_byteArray array = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      memcpy(data, (KByte*)value.data, value.length);
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -207,11 +209,12 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ets_byteArray;
     static KInteropReturnBuffer convertFrom(EtsEnv* env, InteropType value) = delete;
     static InteropType convertTo(EtsEnv* env, KInteropReturnBuffer value) {
-      ets_byteArray array = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      memcpy(data, (KByte*)value.data, value.length);
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
-      value.dispose(value.data, value.length);
+      value.dispose(value.data, bufferLength);
       return array;
     };
     static void release(EtsEnv* env, InteropType value, KInteropReturnBuffer converted) {}
@@ -1829,3 +1832,5 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   } while (0)
 
 #endif // KOALA_ETS_NAPI
+
+#endif // CONVERTORS_ETS_H

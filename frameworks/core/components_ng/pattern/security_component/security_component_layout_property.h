@@ -55,6 +55,7 @@ public:
         value->propSymbolIconSize_ = CloneSymbolIconSize();
         value->propStateEffect_ = CloneStateEffect();
         value->propTipPosition_ = CloneTipPosition();
+        value->propUserCancelEvent_ = CloneUserCancelEvent();
         value->propHoverEffect_ = CloneHoverEffect();
         value->propFontStyle_ = CloneFontStyle();
         value->propFontWeight_ = CloneFontWeight();
@@ -100,6 +101,7 @@ public:
         ResetFontSize();
         ResetStateEffect();
         ResetTipPosition();
+        ResetUserCancelEvent();
         ResetHoverEffect();
         ResetFontStyle();
         ResetFontWeight();
@@ -142,6 +144,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StateEffect, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TipPosition, TipPosition, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UserCancelEvent, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverEffect, HoverEffectType, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);

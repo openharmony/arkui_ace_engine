@@ -71,6 +71,11 @@ public:
         return {};
     }
 
+    virtual std::string GetStringFormatByName(const char* resName, ...)
+    {
+        return {};
+    }
+
     virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
 
     virtual std::vector<std::string> GetStringArrayByName(const std::string& resName) const

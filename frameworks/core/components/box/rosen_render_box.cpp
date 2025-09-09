@@ -347,9 +347,11 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
         rsNode->DrawOnNode(
 #ifndef USE_ROSEN_DRAWING
-            Rosen::RSModifierType::OVERLAY_STYLE, [weak = WeakClaim(this), position](std::shared_ptr<SkCanvas> canvas) {
+            Rosen::ModifierNG::RSModifierType::OVERLAY_STYLE,
+            [weak = WeakClaim(this), position](std::shared_ptr<SkCanvas> canvas) {
 #else
-            Rosen::RSModifierType::OVERLAY_STYLE, [weak = WeakClaim(this), position](std::shared_ptr<RSCanvas> canvas) {
+            Rosen::ModifierNG::RSModifierType::OVERLAY_STYLE,
+            [weak = WeakClaim(this), position](std::shared_ptr<RSCanvas> canvas) {
 #endif
                 auto renderBox = weak.Upgrade();
                 if (renderBox == nullptr) {
@@ -385,7 +387,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             LOGE("rsNode is null.");
             return;
         }
-        rsnode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
+        rsnode->DrawOnNode(Rosen::ModifierNG::RSModifierType::OVERLAY_STYLE,
 #ifndef USE_ROSEN_DRAWING
             [size = GetLayoutSize(), margin = GetMargin()](std::shared_ptr<SkCanvas> canvas) {
                 SkAutoCanvasRestore acr(canvas.get(), true);

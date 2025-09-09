@@ -4138,5 +4138,9 @@
     {
         "first_introduced": "21",
         "name": "OH_ArkUI_ListItemSwipeAction_Collapse"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_ContentTransitionEffect_Create"
     }
 ]

@@ -2948,4 +2948,15 @@ void ImagePattern::OnColorModeChange(uint32_t colorMode)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+ContentTransitionType ImagePattern::GetContentTransitionParam()
+{
+    CHECK_NULL_RETURN(imagePaintMethod_, ContentTransitionType::IDENTITY);
+    bool needsContentTransition = imagePaintMethod_->NeedsContentTransition();
+    CHECK_NULL_RETURN(needsContentTransition, ContentTransitionType::IDENTITY);
+    auto paintProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ContentTransitionType::IDENTITY);
+    auto contentTransition = paintProperty->GetContentTransition().value_or(ContentTransitionType::IDENTITY);
+    return contentTransition;
+}
 } // namespace OHOS::Ace::NG

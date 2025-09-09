@@ -269,6 +269,8 @@ private:
     float blackPointCenterMoveRate_ = 0.0f;
     float longPointLeftCenterMoveRate_ = 0.0f;
     float longPointRightCenterMoveRate_ = 0.0f;
+    float backgroundStart_ = 0.0f;
+    float backgroundEnd_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     bool isCustomSizeValue_ = false;

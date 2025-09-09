@@ -858,6 +858,17 @@ HWTEST_F(TextFieldModifyTest, DoCallback014, TestSize.Level1)
     pattern_->SetAccessibilityAction();
     accessibilityProperty->actionMoveTextImpl_.operator()(1, true);
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 6);
+
+    auto switchEditableFunc = accessibilityProperty->GetSwitchEditableModeFunc();
+    ASSERT_NE(switchEditableFunc, nullptr);
+    switchEditableFunc(true);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::SWITCH_EDITABLE);
+    pattern_->isCaretTwinkling_ = true;
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetCurrentFocus(true);
+    switchEditableFunc(false);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 
 /**

@@ -113,7 +113,7 @@ KStringPtr getString(napi_env env, napi_value value) {
   return result;
 }
 
-KNativePointer getPointer(napi_env env, napi_value value) {
+KNativePointer getPointerSlow(napi_env env, napi_value value) {
     napi_valuetype valueType = getValueTypeChecked(env, value);
     if (valueType == napi_valuetype::napi_external) {
         KNativePointer result = nullptr;
@@ -310,11 +310,11 @@ const std::vector<std::pair<std::string, napi_type_t>>& Exports::getMethods(cons
 //
 // Callback dispatcher
 //
-// TODO Should we get rid of explicit Node_* declrations and hide the naming convention behind the macro definitions?
+// Improve: Should we get rid of explicit Node_* declrations and hide the naming convention behind the macro definitions?
 
 static napi_ref g_koalaNapiCallbackDispatcher = nullptr;
 
-// TODO: shall we pass name in globalThis instead of object reference?
+// Improve: shall we pass name in globalThis instead of object reference?
 napi_value Node_SetCallbackDispatcher(napi_env env, napi_callback_info cbinfo) {
     fprintf(stderr, "Node_SetCallbackDispatcher!\n");
 

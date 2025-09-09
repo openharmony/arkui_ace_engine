@@ -13,39 +13,235 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_WASM_H
+#define CONVERTORS_WASM_H
 
 #include "koala-types.h"
 
-#include <assert.h>
 #include <emscripten.h>
 #define KOALA_INTEROP_EXPORT EMSCRIPTEN_KEEPALIVE extern "C"
+
+#include "interop-logging.h"
 
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
-    static T convertFrom(InteropType value) { return value; }
-    static InteropType convertTo(T value) { return value; }
+    static T convertFrom(InteropType value) = delete;
+    static InteropType convertTo(T value) = delete;
+    static void release(InteropType value, T converted) {}
 };
 
 template<>
 struct InteropTypeConverter<KStringPtr> {
     using InteropType = const uint8_t*;
     static KStringPtr convertFrom(InteropType value) {
+        if (value == nullptr) return KStringPtr();
         KStringPtr result;
-        if (value == nullptr) {
-            return KStringPtr();
-        } else {
-            int len = (value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24));
-            return KStringPtr((const char*)(value + 4), len, true);
-        }
+        int len = (value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24));
+        return KStringPtr(value + 4, len, true);
     }
-    static InteropType convertTo(KStringPtr value) = delete;
+    static InteropType convertTo(KStringPtr &value) {
+        return (InteropType)value.c_str();
+    };
 };
 
-template <typename T>
-inline T getArgument(typename InteropTypeConverter<T>::InteropType arg) {
-    return InteropTypeConverter<T>::convertFrom(arg);
+template<>
+struct InteropTypeConverter<KBoolean> {
+    using InteropType = bool;
+    static KBoolean convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(KBoolean value) { return value; }
+    static void release(InteropType value, KBoolean converted) {}
+};
+
+
+template<>
+struct InteropTypeConverter<KInt> {
+    using InteropType = int;
+    static KInt convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(KInt value) { return value; }
+    static void release(InteropType value, KInt converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KUInt> {
+    using InteropType = uint32_t;
+    static KUInt convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(KUInt value) { return value; }
+    static void release(InteropType value, KUInt converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KByte> {
+    using InteropType = uint8_t;
+    static KByte convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(KByte value) { return value; }
+    static void release(InteropType value, KByte converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KFloat> {
+    using InteropType = float;
+    static KFloat convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(InteropFloat32 value) { return value; }
+    static void release(InteropType value, KFloat converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KNativePointer> {
+    using InteropType = void *;
+    static KNativePointer convertFrom(InteropType value) {
+      return reinterpret_cast<KNativePointer>(value);
+    }
+    static InteropType convertTo(KNativePointer value) {
+      return reinterpret_cast<void *>(value);
+    }
+    static void release(InteropType value, KNativePointer converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KNativePointerArray> {
+    using InteropType = void **;
+    static KNativePointerArray convertFrom(InteropType value) {
+      return reinterpret_cast<KNativePointerArray>(value);
+    }
+    static InteropType convertTo(KNativePointerArray value) {
+      return reinterpret_cast<void **>(value);
+    }
+    static void release(InteropType value, KNativePointerArray converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KLong> {
+    using InteropType = long;
+    static KLong convertFrom(InteropType value) {
+      return value;
+    }
+    static InteropType convertTo(KLong value) {
+      return value;
+    }
+    static void release(InteropType value, KLong converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KULong> {
+    using InteropType = uint64_t;
+    static KULong convertFrom(InteropType value) {
+      return static_cast<KULong>(value);
+    }
+    static InteropType convertTo(KULong value) {
+      return static_cast<uint64_t>(value);
+    }
+    static void release(InteropType value, KULong converted) {}
+};
+
+
+template<>
+struct InteropTypeConverter<KInt*> {
+    using InteropType = int32_t*;
+    static KInt* convertFrom(InteropType value) {
+      if (!value) return nullptr;
+      return value;
+    }
+    static InteropType convertTo(KInt* value) = delete;
+    static void release(InteropType value, KInt* converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KFloat*> {
+    using InteropType = float*;
+    static KFloat* convertFrom(InteropType value) {
+      if (!value) return nullptr;
+      return value;
+    }
+    static InteropType convertTo(KFloat* value) = delete;
+    static void release(InteropType value, KFloat* converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KByte*> {
+    using InteropType = unsigned char *;
+    static KByte* convertFrom(InteropType value) {
+     if (!value) return nullptr;
+      return (KByte*)value;
+    }
+    static InteropType convertTo(KByte* value) = delete;
+    static void release(InteropType value, KByte* converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KUShort*> {
+    using InteropType = unsigned short *;
+    static KUShort* convertFrom(InteropType value) {
+     if (!value) return nullptr;
+      return (KUShort*)value;
+    }
+    static InteropType convertTo(KUShort* value) = delete;
+    static void release(InteropType value, KUShort* converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KShort*> {
+    using InteropType = short *;
+    static KShort* convertFrom(InteropType value) {
+     if (!value) return nullptr;
+      return (KShort*)value;
+    }
+    static InteropType convertTo(KShort* value) = delete;
+    static void release(InteropType value, KShort* converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KStringArray> {
+    using InteropType = const unsigned char *;
+    static KStringArray convertFrom(InteropType value) {
+     if (!value) return nullptr;
+      return (KStringArray)value;
+    }
+    static InteropType convertTo(KStringArray value) = delete;
+    static void release(InteropType value, KStringArray converted) {
+      if (value) delete value;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KSerializerBuffer> {
+    using InteropType = long;
+    static KSerializerBuffer convertFrom(InteropType value) {
+      return reinterpret_cast<KSerializerBuffer>(static_cast<intptr_t>(value));
+    }
+    static InteropType convertTo(KSerializerBuffer value) = delete;
+    static void release(InteropType value, KSerializerBuffer converted) {}
+};
+
+template <> struct InteropTypeConverter<KInteropNumber> {
+  using InteropType = double;
+  static KInteropNumber convertFrom(InteropType value) {
+    return KInteropNumber::fromDouble(value);
+  }
+  static InteropType convertTo(KInteropNumber value) {
+    return value.asDouble();
+  }
+  static void release(InteropType value, KInteropNumber converted) {}
+};
+
+template <typename Type>
+inline Type getArgument(typename InteropTypeConverter<Type>::InteropType arg) {
+  return InteropTypeConverter<Type>::convertFrom(arg);
+}
+
+template <typename Type>
+inline void releaseArgument(typename InteropTypeConverter<Type>::InteropType arg, Type& data) {
+  InteropTypeConverter<Type>::release(arg, data);
 }
 
 template <typename T>
@@ -53,7 +249,7 @@ inline typename InteropTypeConverter<T>::InteropType makeResult(T value) {
     return InteropTypeConverter<T>::convertTo(value);
 }
 
-// TODO: Rewrite all others to typed convertors.
+// Improve: Rewrite all others to typed convertors.
 
 #define KOALA_INTEROP_0(name, Ret)                                         \
 KOALA_INTEROP_EXPORT Ret name() {                                          \
@@ -816,12 +1012,14 @@ KOALA_INTEROP_EXPORT void name(                                            \
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     assert(false); /* TODO: implement*/ \
+     ASSERT(false); /* Improve: implement*/ \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-      assert(false); /* TODO: implement*/ \
+      ASSERT(false); /* Improve: implement*/ \
      return __VA_ARGS__; \
    } while (0)
+
+#endif // CONVERTORS_WASM_H

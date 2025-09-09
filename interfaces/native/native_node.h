@@ -924,7 +924,44 @@ typedef enum {
      * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
      * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the overlay attribute, which can be set, reset, and obtained as required through APIs.
      *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: mask text.\n
+     * .value[0]?.i32: position of the overlay relative to the component. Optional.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1]?.f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. Optional. \n
+     * .value[2]?.f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp. Optional.
+     * \n
+     * .value[3]?.i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * In most cases, this parameter should be set to Auto, this allowing the system to handle
+     * the layout direction automatically. If you need to keep a specific direction in any situation, set it to
+     * either LTR (Left-to-Right) or RTL (Right-to-Left). Optional.
+     * \n
+     * .object: the node tree used as the overlay.
+     * The parameter type is {@link ArkUI_NodeHandle}.
+     * The default value is <b>nullptr.</b> \n
+     * this parameter is conflict with .string, and it has lower priority than .string. Optional.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: mask text.\n
+     * .value[0].i32: position of the overlay relative to the component.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
+     * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
+     * .value[3].i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * .object: the overlay node handle. \n
+     *
+     * @since 21
      */
     NODE_OVERLAY,
     /**
@@ -2939,6 +2976,32 @@ typedef enum {
      * @since 21
      */
     NODE_IMAGE_ORIENTATION = 4020,
+    /**
+     * @brief Set the range of SVG parsing capabilities supported through enable switch.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: enable switch.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: enable switch.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SUPPORT_SVG2 = 4021, 
+    /**
+     * @brief Set the animation effect for the image content transformation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     * 
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_CONTENT_TRANSITION = 4022,
     /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -5058,6 +5121,71 @@ typedef enum {
 	 * @since 20
      */
     NODE_SLIDER_SUFFIX,
+
+    /**
+     * @brief Defines the color of the slider block. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR,
+
+    /**
+     * @brief Defines the background color of the slider. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR,
+
+    /**
+     * @brief Defines the color of the selected part of the slider track. This attribute can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR,
 
     /**
      * @brief Sets whether the radio button is selected.

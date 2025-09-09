@@ -1566,6 +1566,12 @@ void ScrollablePattern::AnimateTo(
         return;
     }
     finalPosition_ = position;
+    scrollToDirection_ = ScrollToDirection::NONE;
+    if (GreatNotEqual(finalPosition_, GetTotalOffset())) {
+        scrollToDirection_ = ScrollToDirection::FORWARD;
+    } else {
+        scrollToDirection_ = ScrollToDirection::BACKWARD;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (smooth) {
@@ -1720,6 +1726,10 @@ void ScrollablePattern::InitSpringOffsetProperty()
         }
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
+        }
+        if ((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) ||
+            (pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta))) {
+            delta = 0;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_ && pattern->GetCanStayOverScroll()) {
@@ -3052,7 +3062,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     }
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->DisableNotifyResponseRegionChanged();
+        pipeline->SetTHPNotifyState(ThpNotifyState::SCROLL_MOVING);
     }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
@@ -3262,17 +3272,6 @@ void ScrollablePattern::OnScrollStop(
             scrollBar->ScheduleDisappearDelayTask();
         }
         StartScrollBarAnimatorByProxy();
-        if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
-            auto taskExecutor = pipeline->GetTaskExecutor();
-            const uint32_t delay = 100; // 100: ms
-            taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
-            auto task = [weak = WeakClaim(pipeline)]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
-            };
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
-        }
         SetUiDvsyncSwitch(false);
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
@@ -3305,6 +3304,10 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     SetScrollSource(SCROLL_FROM_NONE);
     ResetLastSnapTargetIndex();
     ResetScrollableSnapDirection();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
+    pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
 }
 
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)

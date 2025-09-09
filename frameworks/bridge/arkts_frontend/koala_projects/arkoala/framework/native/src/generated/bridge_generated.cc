@@ -35820,6 +35820,25 @@ void impl_BaseEvent_setAxisVertical(Ark_NativePointer thisPtr, KInteropNumber ax
         GetAccessors()->getBaseEventAccessor()->setAxisVertical(self, (const Ark_Number*) (&axisVertical));
 }
 KOALA_INTEROP_DIRECT_V2(BaseEvent_setAxisVertical, Ark_NativePointer, KInteropNumber)
+KInteropReturnBuffer impl_BaseEvent_getAxisPinch(Ark_NativePointer thisPtr) {
+        Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getBaseEventAccessor()->getAxisPinch(self);
+        Serializer _retSerializer {};
+        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
+        retValue_type = runtimeType(retValue);
+        _retSerializer.writeInt8(retValue_type);
+        if ((INTEROP_RUNTIME_UNDEFINED) != (retValue_type)) {
+            const auto retValue_value = retValue.value;
+            _retSerializer.writeNumber(retValue_value);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(BaseEvent_getAxisPinch, KInteropReturnBuffer, Ark_NativePointer)
+void impl_BaseEvent_setAxisPinch(Ark_NativePointer thisPtr, KInteropNumber axisPinch) {
+        Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
+        GetAccessors()->getBaseEventAccessor()->setAxisPinch(self, (const Ark_Number*) (&axisPinch));
+}
+KOALA_INTEROP_DIRECT_V2(BaseEvent_setAxisPinch, Ark_NativePointer, KInteropNumber)
 Ark_Number impl_BaseEvent_getPressure(Ark_NativePointer thisPtr) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         return GetAccessors()->getBaseEventAccessor()->getPressure(self);
@@ -36578,6 +36597,11 @@ Ark_Number impl_AxisEvent_getVerticalAxisValue(Ark_NativePointer thisPtr) {
         return GetAccessors()->getAxisEventAccessor()->getVerticalAxisValue(self);
 }
 KOALA_INTEROP_DIRECT_1(AxisEvent_getVerticalAxisValue, KInteropNumber, Ark_NativePointer)
+Ark_Number impl_AxisEvent_getPinchAxisScaleValue(Ark_NativePointer thisPtr) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        return GetAccessors()->getAxisEventAccessor()->getPinchAxisScaleValue(self);
+}
+KOALA_INTEROP_DIRECT_1(AxisEvent_getPinchAxisScaleValue, KInteropNumber, Ark_NativePointer)
 Ark_Int32 impl_AxisEvent_getAction(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         return GetAccessors()->getAxisEventAccessor()->getAction(self);

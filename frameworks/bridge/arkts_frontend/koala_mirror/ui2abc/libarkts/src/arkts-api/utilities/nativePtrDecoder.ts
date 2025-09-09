@@ -61,7 +61,7 @@ export class NativePtrDecoder extends ArrayDecoder<pointer> {
         return global.interop._GetPtrVectorSize(blob)
     }
     disposeArray(blob: pointer): void {
-        // TODO
+        // Improve:
     }
     getArrayElement(blob: pointer, index: int32): pointer {
         return global.interop._GetPtrVectorElement(blob, index)
