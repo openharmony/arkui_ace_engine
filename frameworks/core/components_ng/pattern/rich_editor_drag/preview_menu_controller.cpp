@@ -332,15 +332,15 @@ RefPtr<FrameNode> PreviewMenuController::CreateContactAndAddressPreviewNode(Text
     flexLayoutProperty->UpdatePadding({ padding, padding, padding, padding });
     flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
+    std::optional<CalcLength> minHeight = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
     std::optional<CalcLength> maxHeight = CalcLength(GetPreviewMaxHeight(frameNode));
-    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
+    std::optional<CalcLength> maxWidth = CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx()));
     flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
     flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
 
     // Adaptive internal content height for URL and address.
     if (type == TextDataDetectType::EMAIL || type == TextDataDetectType::PHONE_NUMBER) {
-        std::optional<CalcLength> height = CalcLength(PREVIEW_MIN_HEIGHT);
+        std::optional<CalcLength> height = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
         flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -358,8 +358,8 @@ RefPtr<FrameNode> PreviewMenuController::CreateLinkingPreviewNode()
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     flexLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     std::optional<CalcLength> maxHeight = CalcLength(GetPreviewMaxHeight(frameNode));
-    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
-    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
+    std::optional<CalcLength> maxWidth = CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx()));
+    std::optional<CalcLength> minHeight = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
     flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
     flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
     std::optional<CalcLength> height = CalcLength(Dimension(PERCENT_FULL, DimensionUnit::PERCENT));
@@ -370,16 +370,17 @@ RefPtr<FrameNode> PreviewMenuController::CreateLinkingPreviewNode()
 
 Dimension PreviewMenuController::GetPreviewMaxHeight(const RefPtr<FrameNode>& frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, PREVIEW_MAX_WIDTH);
+    auto maxWidth = Dimension(PREVIEW_MAX_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(frameNode, maxWidth);
     auto context = frameNode->GetContext();
-    CHECK_NULL_RETURN(context, PREVIEW_MAX_WIDTH);
+    CHECK_NULL_RETURN(context, maxWidth);
     auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, PREVIEW_MAX_WIDTH);
+    CHECK_NULL_RETURN(safeAreaManager, maxWidth);
     auto bottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
     auto top = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
     auto containerId = Container::CurrentId();
     auto container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_RETURN(container, PREVIEW_MAX_WIDTH);
+    CHECK_NULL_RETURN(container, maxWidth);
     // Get FreeMultiWindow status of main window or host window
     auto isFreeMultiWindow = container->IsFreeMultiWindow();
     float height;
