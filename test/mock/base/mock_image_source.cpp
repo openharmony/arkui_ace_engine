@@ -38,7 +38,12 @@ bool ImageSource::IsAstc(const uint8_t* data, size_t size)
 
 ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
 {
-    return {0, 0};
+    return { 0, 0 };
+}
+
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+{
+    return MockImageSource::mockImageSource_;
 }
 
 } // namespace OHOS::Ace

@@ -493,8 +493,8 @@ ohos_unittest("drag_and_drop_test") {
     "image_framework:pixelmap",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "udmf:udmf_client",
     "udmf:libudmf",
+    "udmf:udmf_client",
   ]
 }
 
@@ -770,6 +770,7 @@ ohos_unittest("js_drawable_descriptor_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/task_pool_preview.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/base/source_info.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/core/pixelmap_drawable_descriptor.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_bridge.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/js_drawable_descriptor.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/loader/image_loader.cpp",
@@ -1009,10 +1010,10 @@ group("interfaces_unittest") {
     ":viewport_config_test",
     ":xcomponent_controller_test",
     "ace_gesture:ace_native_gesture_test",
+    "ace_key_event:key_event_test",
     "ace_kit:ace_kit_test",
     "ace_ui_input_event:ui_input_event_test",
-    "ace_key_event:key_event_test",
-    "napi:arkui_napi_test",
     "form_render:ace_form_render_test",
+    "napi:arkui_napi_test",
   ]
 }

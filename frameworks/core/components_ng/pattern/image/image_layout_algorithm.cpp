@@ -199,63 +199,11 @@ void ImageLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    if (IsImageAnimationLayout(layoutWrapper)) {
-        PerformImageAnimationLayout(layoutWrapper);
-        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            child->Layout();
-        }
-        return;
-    }
     BoxLayoutAlgorithm::Layout(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->FinishMeasureForOnComplete();
-}
-
-void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrapper)
-{
-    // update child position.
-    CHECK_NULL_VOID(layoutWrapper);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0);
-    auto top = padding.top.value_or(0);
-    auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-    }
-    // Update child position.
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (!child) {
-            continue;
-        }
-        SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        auto translate = Alignment::GetAlignPosition(size, childSize, align);
-        if (!child->GetHostNode() || child->GetHostNode()->GetTag() != V2::IMAGE_ETS_TAG) {
-            translate += paddingOffset;
-        }
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
-    }
-    // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
-        content->SetOffset(translate);
-    }
-}
-
-bool ImageLayoutAlgorithm::IsImageAnimationLayout(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
-    CHECK_NULL_RETURN(pattern, false);
-    CHECK_EQUAL_RETURN(pattern->GetIsAnimation(), true, true);
-    return false;
 }
 } // namespace OHOS::Ace::NG

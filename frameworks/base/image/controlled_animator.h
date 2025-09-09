@@ -48,6 +48,7 @@ public:
     void SetFillMode(FillMode fillMode);
     FillMode GetFillMode() const;
     void SetRunningIdx(int32_t runningIdx);
+    int32_t GetRunningIdx() const;
     void SetDuration(int32_t duration);
     int32_t GetDuration() const;
     void SetIteration(int32_t iteration);

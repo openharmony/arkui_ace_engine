@@ -25,7 +25,6 @@ config("config_svg_parse_test") {
 ohos_unittest("parse_test_ng") {
   module_out_path = svg_test_output_path
   sources = [
-    "$ace_root/frameworks/base/base64/base64_util.cpp",
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
@@ -238,7 +237,6 @@ ohos_unittest("svg_context_test_ng") {
   module_out_path = svg_test_output_path
 
   sources = [
-    "$ace_root/frameworks/base/base64/base64_util.cpp",
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/core/animation/svg_animate.cpp",
     "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
@@ -315,7 +313,6 @@ ohos_unittest("svg_node_test_ng") {
   module_out_path = svg_test_output_path
 
   sources = [
-    "$ace_root/frameworks/base/base64/base64_util.cpp",
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/core/animation/svg_animate.cpp",

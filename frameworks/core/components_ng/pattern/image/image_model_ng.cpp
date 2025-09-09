@@ -93,33 +93,17 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    if (src.empty() && !imageInfoConfig.pixelMap && pattern->GetIsAnimation()) {
-        pattern->SetSrcUndefined(true);
-        return;
-    }
-
     // set draggable for framenode
     SetFrameNodeDraggable(frameNode, imageInfoConfig.isImageSpan);
-    auto srcInfo = CreateSourceInfo(
-        imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
-    srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
-
-    if (pattern->GetImageType() != ImageType::BASE) {
-        if (pattern->GetHasSizeChanged()) {
-            pattern->ResetPictureSize();
-        }
-        pattern->StopAnimation();
-        pattern->ResetImages();
-        if (!frameNode->GetChildren().empty()) {
-            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
-            frameNode->RemoveChild(imageFrameNode);
-        }
-    }
+    pattern->SetImageType(imageInfoConfig.type);
     pattern->SetNeedLoadAlt(true);
-    pattern->SetImageType(ImageType::BASE);
-
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+    pattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
+    if (imageInfoConfig.type != ImageType::ANIMATED_DRAWABLE) {
+        auto srcInfo = CreateSourceInfo(
+            imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
+        srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
+        ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+    }
     SetImageFillSetByUser(false);
 }
 
@@ -140,19 +124,7 @@ void ImageModelNG::ResetImage()
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedLoadAlt(false);
     pattern->ResetImageAndAlt();
-    if (pattern->GetImageType() == ImageType::ANIMATED_DRAWABLE) {
-        if (pattern->GetHasSizeChanged()) {
-            pattern->ResetPictureSize();
-        }
-        pattern->StopAnimation();
-        pattern->ResetImages();
-        if (!frameNode->GetChildren().empty()) {
-            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
-            frameNode->RemoveChild(imageFrameNode);
-        }
-        pattern->SetImageType(ImageType::BASE);
-    }
+    pattern->ResetDrawableDescriptor();
 }
 
 void ImageModelNG::ResetImage(FrameNode* frameNode)
@@ -180,58 +152,6 @@ void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pi
 {
     auto srcInfo = ImageSourceInfo(pixMap);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
-}
-
-void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::IMAGE_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(imageNode);
-        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        CHECK_NULL_VOID(imageLayoutProperty);
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        frameNode->AddChild(imageNode);
-    }
-    stack->Push(frameNode);
-
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    if (!pattern->GetIsAnimation()) {
-        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-        CHECK_NULL_VOID(castImageLayoutProperty);
-        castImageLayoutProperty->Reset();
-        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
-        CHECK_NULL_VOID(castImageRenderProperty);
-        castImageRenderProperty->Reset();
-        pattern->ResetImageAndAlt();
-        pattern->ResetImageProperties();
-    }
-    // set draggable for framenode
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<ImageTheme>();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
-    }
-    frameNode->SetDraggable(draggable);
-    pattern->SetSrcUndefined(false);
-    pattern->StopAnimation();
-    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    std::vector<ImageProperties> images = imageList;
-    pattern->SetImages(std::move(images));
-    pattern->SetDuration(duration);
-    pattern->SetIteration(iteration);
-    pattern->StartAnimation();
 }
 
 RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
@@ -635,41 +555,13 @@ void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
 
 void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
 {
-#ifndef ACE_UNITTEST
-    CHECK_NULL_VOID(animatedDrawableDescriptor);
-    std::vector<RefPtr<PixelMap>> pixelMaps;
-    int32_t duration = -1;
-    int32_t iterations = 1;
-    if (!PixelMap::GetPxielMapListFromAnimatedDrawable(animatedDrawableDescriptor, pixelMaps, duration, iterations)) {
-        return;
-    }
-    std::vector<ImageProperties> images;
-    for (int32_t i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
-        ImageProperties image;
-        image.pixelMap = pixelMaps[i];
-        images.push_back(image);
-    }
-
-    if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(imageNode);
-        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        CHECK_NULL_VOID(imageLayoutProperty);
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        frameNode->AddChild(imageNode);
-    }
-
-    auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-
-    pattern->StopAnimation();
+    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(animatedDrawableDescriptor);
+    CHECK_NULL_VOID(pattern);
+    auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
     pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    pattern->SetImages(std::move(images));
-    pattern->SetDuration(duration);
-    pattern->SetIteration(iterations);
-    pattern->StartAnimation();
-#endif
+    pattern->UpdateDrawableDescriptor(drawable);
 }
 
 void ImageModelNG::SetResource(FrameNode* frameNode, void* resource)
@@ -1191,19 +1083,7 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetImage();
-    if (pattern->GetImageType() == ImageType::ANIMATED_DRAWABLE) {
-        if (pattern->GetHasSizeChanged()) {
-            pattern->ResetPictureSize();
-        }
-        pattern->StopAnimation();
-        pattern->ResetImages();
-        if (!frameNode->GetChildren().empty()) {
-            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
-            frameNode->RemoveChild(imageFrameNode);
-        }
-        pattern->SetImageType(ImageType::BASE);
-    }
+    pattern->ResetDrawableDescriptor();
 }
 
 void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
@@ -1243,10 +1123,6 @@ void HandleSrcResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         CHECK_NULL_VOID(pattern);
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
-        if (src.empty() && pattern->GetIsAnimation()) {
-            pattern->SetSrcUndefined(true);
-            return;
-        }
         RefPtr<PixelMap> pixmap = nullptr;
         auto srcInfo = CreateSourceInfo(src, pixmap, resObj->GetBundleName(), resObj->GetModuleName());
         srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
@@ -1266,10 +1142,6 @@ void HandleAltResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         CHECK_NULL_VOID(pattern);
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
-        if (src.empty() && pattern->GetIsAnimation()) {
-            pattern->SetSrcUndefined(true);
-            return;
-        }
         RefPtr<PixelMap> pixmap = nullptr;
         auto srcInfo = CreateSourceInfo(src, pixmap, resObj->GetBundleName(), resObj->GetModuleName());
         pattern->UpdateImageAlt(srcInfo);

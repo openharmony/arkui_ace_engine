@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/image_animator/controlled_animator.h"
+#include "base/image/controlled_animator.h"
 
 #include <utility>
 #include "ui/base/referenced.h"
@@ -53,6 +53,11 @@ FillMode ControlledAnimator::GetFillMode() const
 void ControlledAnimator::SetRunningIdx(int32_t runningIdx)
 {
     runningIdx_ = runningIdx;
+}
+
+int32_t ControlledAnimator::GetRunningIdx() const
+{
+    return runningIdx_;
 }
 
 void ControlledAnimator::SetDuration(int32_t duration)

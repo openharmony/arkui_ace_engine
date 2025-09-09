@@ -132,7 +132,6 @@ public:
     static RefPtr<FrameNode> CreateSyncImageNode();
     static RefPtr<FrameNode> CreateSyncWebImageNode();
     static RefPtr<PixelMap> CreatePixelMap(const std::string& src);
-    static RefPtr<FrameNode> CreatePixelMapAnimator(int32_t number = 1);
 };
 
 template <class LayoutPropertyCls = ImageLayoutProperty,

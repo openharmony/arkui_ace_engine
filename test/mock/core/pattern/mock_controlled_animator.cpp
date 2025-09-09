@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/image_animator/controlled_animator.h"
+#include "base/image/controlled_animator.h"
 
 #include <utility>
 #include "core/animation/animation_pub.h"

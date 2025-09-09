@@ -75,7 +75,6 @@ public:
     void SetHdrBrightness(float hdrBrightness) override {}
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
     void SetOrientation(ImageRotateOrientation orientation) override {}
-    void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
     bool GetIsAnimation() override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override {};
     void SetImageFillSetByUser(bool value) override {};

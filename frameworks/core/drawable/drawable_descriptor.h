@@ -20,10 +20,10 @@
 
 namespace OHOS::Ace {
 enum class DrawableType {
-    BASE,
-    LAYERED,
-    ANIMATED,
-    PIXELMAP,
+    BASE = 0,
+    LAYERED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3,
 };
 
 struct MediaData {
@@ -31,8 +31,24 @@ struct MediaData {
     size_t len = 0;
 };
 
+struct DrawableDescriptorLoadResult {
+    int32_t imageWidth_ = 0;
+    int32_t imageHeight_ = 0;
+    int32_t errorCode = 0;
+};
+
 class ACE_FORCE_EXPORT DrawableDescriptor : public AceType {
+    DECLARE_ACE_TYPE(DrawableDescriptor, AceType);
+
 public:
+    using UpdateCallback = std::function<void(const RefPtr<PixelMap>& pixelMap)>;
+    using LoadCallback = std::function<void(DrawableDescriptorLoadResult result)>;
+
+    struct ImageSize {
+        int32_t width = 0;
+        int32_t height = 0;
+    };
+
     DrawableDescriptor() = default;
     virtual ~DrawableDescriptor() = default;
 
@@ -46,9 +62,32 @@ public:
         return DrawableType::BASE;
     }
 
+    virtual int32_t GetOriginalWidth()
+    {
+        return -1;
+    }
+
+    virtual int32_t GetOriginalHeight()
+    {
+        return -1;
+    }
+
+    virtual DrawableDescriptorLoadResult LoadSync()
+    {
+        return {};
+    }
+
+    virtual void LoadAsync(const LoadCallback&& callback) {}
+
+    virtual void RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback) {}
+
+    virtual void UnRegisterUpdateCallback(int32_t nodeId) {}
+
+protected:
+    ImageSize imageSize_;
+
 private:
     virtual void CreatePixelMap() {}
 };
-}; // namesapce OHOS::Ace
-
+}; // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H

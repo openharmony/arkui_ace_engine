@@ -31,7 +31,6 @@ public:
     void Create(ImageInfoConfig& imageInfoConfig) override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
-    void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;

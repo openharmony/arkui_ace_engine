@@ -62,7 +62,6 @@ constexpr float BADGED_SIDE_Y = 7.0f;
 constexpr float SIDE = 192.0f;
 constexpr float NOT_ADAPTIVE_SIZE = 288.0f;
 constexpr float HALF = 0.5f;
-const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
 constexpr int DECIMAL_BASE = 10;
 
@@ -857,58 +856,6 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #endif
     resMgr->GetStringByName(PREVIEW_LOAD_RESOURCE_ID, data);
     return data;
-}
-
-SharedPixelMap AnimatedDrawableDescriptor::GetPixelMap()
-{
-    if (pixelMapList_.empty()) {
-        return nullptr;
-    }
-    return pixelMapList_[0];
-}
-
-DrawableDescriptor::DrawableType AnimatedDrawableDescriptor::GetDrawableType()
-{
-    return DrawableType::ANIMATED;
-}
-
-std::vector<SharedPixelMap> AnimatedDrawableDescriptor::GetPixelMapList()
-{
-    return pixelMapList_;
-}
-
-int32_t AnimatedDrawableDescriptor::GetDuration()
-{
-    if (duration_ <= 0) {
-        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
-    }
-    return duration_;
-}
-
-int32_t AnimatedDrawableDescriptor::GetIterations()
-{
-    if (iterations_ < -1) {
-        iterations_ = 1;
-    }
-    return iterations_;
-}
-
-void AnimatedDrawableDescriptor::SetDuration(int32_t duration)
-{
-    if (duration <= 0) {
-        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
-    } else {
-        duration_ = duration;
-    }
-}
-
-void AnimatedDrawableDescriptor::SetIterations(int32_t iterations)
-{
-    if (iterations < -1) {
-        iterations_ = 1;
-    } else {
-        iterations_ = iterations;
-    }
 }
 
 // drawable factory implement

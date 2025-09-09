@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-
 #include "node_extened.h"
+#include "node_model.h"
 
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+constexpr uint32_t ANIMATED_TYPE = 2;
 
 ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromPixelMap(OH_PixelmapNativeHandle pixelMap)
 {
@@ -41,22 +43,29 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
     drawableDescriptor->pixelMapArray = array;
     drawableDescriptor->size = size;
-    std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
+    auto* drawable = OHOS::Ace::NodeModel::CreateDrawable(ANIMATED_TYPE);
+    std::vector<void*> rawPixelMaps;
     for (int32_t index = 0; index < size; index++) {
         if (!array[index]) {
             continue;
         }
-        pixelMapList.push_back(array[index]->GetInnerPixelmap());
+        auto pixelMap = array[index]->GetInnerPixelmap();
+        rawPixelMaps.push_back(reinterpret_cast<void*>(&pixelMap));
     }
     int32_t duration = -1;
     int32_t iteration = 1;
-    drawableDescriptor->animatedDrawableDescriptor =
-        std::make_shared<OHOS::Ace::Napi::AnimatedDrawableDescriptor>(pixelMapList, duration, iteration);
+    OHOS::Ace::NodeModel::SetTotalDuration(drawable, duration);
+    OHOS::Ace::NodeModel::SetIterations(drawable, iteration);
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(drawable);
+    drawableDescriptor->newDrawableDescriptor = drawable;
     return drawableDescriptor;
 }
 
 void OH_ArkUI_DrawableDescriptor_Dispose(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
+    if (drawableDescriptor->newDrawableDescriptor) {
+        OHOS::Ace::NodeModel::DecreaseRefDrawable(drawableDescriptor->newDrawableDescriptor);
+    }
     delete drawableDescriptor;
 }
 
@@ -82,30 +91,29 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimatedPixelMapArraySize(ArkUI_DrawableD
 void OH_ArkUI_DrawableDescriptor_SetAnimationDuration(ArkUI_DrawableDescriptor* drawableDescriptor, int32_t duration)
 {
     CHECK_NULL_VOID(drawableDescriptor);
-    CHECK_NULL_VOID(drawableDescriptor->animatedDrawableDescriptor);
-    drawableDescriptor->animatedDrawableDescriptor->SetDuration(duration);
+    CHECK_NULL_VOID(drawableDescriptor->newDrawableDescriptor);
+    OHOS::Ace::NodeModel::SetTotalDuration(drawableDescriptor->newDrawableDescriptor, duration);
 }
 
 int32_t OH_ArkUI_DrawableDescriptor_GetAnimationDuration(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
     CHECK_NULL_RETURN(drawableDescriptor, -1);
-    CHECK_NULL_RETURN(drawableDescriptor->animatedDrawableDescriptor, -1);
-    return drawableDescriptor->animatedDrawableDescriptor->GetDuration();
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, -1);
+    return OHOS::Ace::NodeModel::GetTotalDuration(drawableDescriptor->newDrawableDescriptor);
 }
 
-void OH_ArkUI_DrawableDescriptor_SetAnimationIteration(
-    ArkUI_DrawableDescriptor* drawableDescriptor, int32_t iteration)
+void OH_ArkUI_DrawableDescriptor_SetAnimationIteration(ArkUI_DrawableDescriptor* drawableDescriptor, int32_t iteration)
 {
     CHECK_NULL_VOID(drawableDescriptor);
-    CHECK_NULL_VOID(drawableDescriptor->animatedDrawableDescriptor);
-    drawableDescriptor->animatedDrawableDescriptor->SetIterations(iteration);
+    CHECK_NULL_VOID(drawableDescriptor->newDrawableDescriptor);
+    OHOS::Ace::NodeModel::SetIterations(drawableDescriptor->newDrawableDescriptor, iteration);
 }
 
 int32_t OH_ArkUI_DrawableDescriptor_GetAnimationIteration(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
     CHECK_NULL_RETURN(drawableDescriptor, 1);
-    CHECK_NULL_RETURN(drawableDescriptor->animatedDrawableDescriptor, 1);
-    return drawableDescriptor->animatedDrawableDescriptor->GetIterations();
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, 1);
+    return OHOS::Ace::NodeModel::GetIterations(drawableDescriptor->newDrawableDescriptor);
 }
 
 #ifdef __cplusplus

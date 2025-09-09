@@ -34,6 +34,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
@@ -43,6 +44,7 @@ struct ACE_FORCE_EXPORT ImageInfoConfig {
     ImageType type = ImageType::BASE;
     std::shared_ptr<std::string> src;
     RefPtr<PixelMap> pixelMap;
+    RefPtr<DrawableDescriptor> drawable;
     std::string bundleName;
     std::string moduleName;
     bool isUriPureNumber = false;
@@ -71,8 +73,6 @@ public:
     virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
     virtual void ResetImage() = 0;
-    virtual void CreateAnimation(
-        const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
     virtual void SetImageFill(const Color& color) = 0;
     virtual void ResetImageFill() = 0;

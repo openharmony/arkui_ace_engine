@@ -236,33 +236,6 @@ private:
     bool customized_ = false;
 };
 
-class DRAWABLE_FORCE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {
-public:
-    AnimatedDrawableDescriptor(std::vector<SharedPixelMap> pixelMaps, int32_t duration, int32_t iterations)
-        : pixelMapList_(std::move(pixelMaps)), duration_(duration), iterations_(iterations) {};
-
-    ~AnimatedDrawableDescriptor() override = default;
-
-    SharedPixelMap GetPixelMap() override;
-
-    DrawableType GetDrawableType() override;
-
-    std::vector<SharedPixelMap> GetPixelMapList();
-
-    int32_t GetDuration();
-
-    int32_t GetIterations();
-
-    void SetDuration(int32_t duration);
-
-    void SetIterations(int32_t iterations);
-
-private:
-    std::vector<SharedPixelMap> pixelMapList_;
-    int32_t duration_ = -1;
-    int32_t iterations_ = 1;
-};
-
 class DRAWABLE_FORCE_EXPORT DrawableDescriptorFactory {
 public:
     using DrawableType = DrawableDescriptor::DrawableType;
