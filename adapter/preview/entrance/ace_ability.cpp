@@ -370,11 +370,12 @@ void AceAbility::InitEnv()
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(0.0f, 0.0f), Size(runArgs_.deviceWidth, runArgs_.deviceHeight)));
+        pipelineContext->UpdateSystemSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, window));
+        pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
+        pipelineContext->UpdateNavSafeArea(GetViewSafeAreaByType(
+            Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, window));
     }
     container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
-    pipelineContext->UpdateSystemSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, window));
-    pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
-    pipelineContext->UpdateNavSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, window));
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.

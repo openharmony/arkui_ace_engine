@@ -100,8 +100,9 @@ public:
         if (GetElementId() == ElementRegister::UndefinedElementId) {
             // first render case, add the ElementRegistry
             ACE_DCHECK(element_ == nullptr);
-
-            SetElementId(component_->GetElementId());
+            if (component_) {
+                SetElementId(component_->GetElementId());
+            }
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
