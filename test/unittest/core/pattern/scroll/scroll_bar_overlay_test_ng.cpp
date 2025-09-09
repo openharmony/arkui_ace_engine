@@ -176,7 +176,7 @@ HWTEST_F(ScrollBarOverlayTestNg, SetCrossModeOffset002, TestSize.Level1)
 HWTEST_F(ScrollBarOverlayTestNg, SetBoundsRect, TestSize.Level1)
 {
     ScrollBarOverlayModifier scrollBarOverlayModifier;
-    Offset offset(0.0, 0.0);
+    Offset offset(10.0, 10.0);
     Size size(10.0, 200.0);
     scrollBarOverlayModifier.SetOpacity(AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX));
     scrollBarOverlayModifier.barColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
