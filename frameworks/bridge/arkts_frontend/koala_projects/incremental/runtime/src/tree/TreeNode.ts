@@ -135,7 +135,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     forEach(action: (node: TreeNode, index: float64) => void): void {
         // must be int32, but ArkTS array.forEach requires index to be float64
-        this.myChildren.forEach(action)
+        this.myChildren.forEach((n, i) => action(n, i))
     }
 
     /**
@@ -143,7 +143,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     every(predicate: (node: TreeNode, index: float64) => boolean): boolean {
         // must be int32, but ArkTS array.every requires index to be float64
-        return this.myChildren.every(predicate)
+        return this.myChildren.every((n, i) => predicate(n, i))
     }
 
     /**
@@ -151,7 +151,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     some(predicate: (node: TreeNode, index: float64) => boolean): boolean {
         // must be int32, but ArkTS array.some requires index to be float64
-        return this.myChildren.some(predicate)
+        return this.myChildren.some((n, i) => predicate(n, i))
     }
 
     /**
