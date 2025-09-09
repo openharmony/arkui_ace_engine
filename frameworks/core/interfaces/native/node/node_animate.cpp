@@ -70,20 +70,19 @@ void PrintNodeAnimationInfo(const AnimationOption& option,
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "nodeAnimate:keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
+                "nodeAnimate:keyframe inf iteration. dur:%{public}d",
                 option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "nodeAnimate:%{public}s iteration is infinite."
-                "duration:%{public}d, curve:%{public}s",
+                "nodeAnimate:%{public}s inf iteration. dur:%{public}d, curve:%{public}s",
                 animationInterfaceName,
-                option.GetDuration(), option.GetCurve()->ToString().c_str());
+                option.GetDuration(), option.GetCurve()->ToSimpleString().c_str());
         }
         return;
     }
     if (cnt) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "nodeAnimate:%{public}s starts, [%{public}s], finish cnt:%{public}d",
-            animationInterfaceName, option.ToString().c_str(), cnt.value());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "nodeAnimate:%{public}s starts, %{public}s, cnt:%{public}d",
+            animationInterfaceName, option.ToSimpleString().c_str(), cnt.value());
     }
 }
 
@@ -136,7 +135,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "node_animate:when call animateTo, node stack is not empty, not suitable for animateTo."
-            "param is [option:%{public}s]", option.ToString().c_str());
+            "param is [option:%{public}s]", option.ToSimpleString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
     auto triggerId = context->id;

@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_CURVE_H
 
 #include <functional>
+#include <iomanip>
 #include <math.h>
+#include <sstream>
 
 #include "ui/base/ace_type.h"
 #include "ui/base/macros.h"
@@ -27,6 +29,7 @@ namespace OHOS::Ace {
 class NativeCurveHelper;
 
 constexpr double SQUARE = 2.0;
+constexpr int32_t PRECISION = 2;
 
 // The running time of the curve needs to be normalized to the interval of 0.0 to 1.0;
 // Relatively, the corresponding value of the curve also needs to be normalized to the interval of 0.0 to 1.0;
@@ -48,6 +51,11 @@ public:
     // Each subclass needs to override this method to implement motion in the 0.0 to 1.0 time range.
     virtual float MoveInternal(float time) = 0;
     virtual const std::string ToString()
+    {
+        return "";
+    }
+
+    virtual const std::string ToSimpleString()
     {
         return "";
     }
@@ -135,6 +143,11 @@ public:
     {
         std::string curveString("linear");
         return curveString;
+    }
+
+    const std::string ToSimpleString() override
+    {
+        return ToString();
     }
 
     bool IsEqual(const RefPtr<Curve>& curve) const override
@@ -231,6 +244,11 @@ public:
         return curveString;
     }
 
+    const std::string ToSimpleString() override
+    {
+        return ToString();
+    }
+
     bool IsEqual(const RefPtr<Curve>& curve) const override
     {
         auto other = AceType::DynamicCast<StepsCurve>(curve);
@@ -273,6 +291,10 @@ public:
     {
         return "customCallback";
     }
+    const std::string ToSimpleString() override
+    {
+        return ToString();
+    }
 private:
     std::function<float(float)> interpolateFunc_;
 
@@ -300,6 +322,15 @@ public:
         curveString.append(std::string("(") + std::to_string(response_) + comma + std::to_string(dampingRatio_) +
                            comma + std::to_string(blendDuration_) + std::string(")"));
         return curveString;
+    }
+    const std::string ToSimpleString() override
+    {
+        const int32_t precision = 3;
+        std::stringstream ss;
+        std::string comma(",");
+        ss << "responsiveSpring(" << std::fixed << std::setprecision(precision) << response_
+           << comma << dampingRatio_ << comma << blendDuration_ << ")";
+        return ss.str();
     }
     bool IsEqual(const RefPtr<Curve>& curve) const override
     {
@@ -366,6 +397,15 @@ public:
         curveString.append(std::string("(") + std::to_string(velocity_) + comma + std::to_string(mass_) + comma +
                            std::to_string(stiffness_) + comma + std::to_string(damping_) + std::string(")"));
         return curveString;
+    }
+
+    const std::string ToSimpleString() override
+    {
+        std::stringstream ss;
+        std::string comma(",");
+        ss << "interSpring(" << std::fixed << std::setprecision(PRECISION) << velocity_
+           << comma << mass_ << comma << stiffness_ << comma << damping_ << ")";
+        return ss.str();
     }
 
     bool IsEqual(const RefPtr<Curve>& curve) const override
