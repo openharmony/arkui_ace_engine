@@ -53,6 +53,7 @@ public:
     ~TextFieldManagerNG() override;
 
     void SetClickPosition(const Offset& position) override;
+
     const Offset& GetClickPosition() override
     {
         return position_;
@@ -244,6 +245,16 @@ public:
     {
         return clickPositionOffset_;
     }
+    
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
+
+    void RemoveAvoidKeyboardCallback(int32_t id)
+    {
+        avoidCustomKeyboardCallbacks_.erase(id);
+        avoidSystemKeyboardCallbacks_.erase(id);
+    }
+
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
@@ -270,16 +281,6 @@ public:
     {
         return isImeAttached_;
     }
-
-    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
-
-    void RemoveAvoidKeyboardCallback(int32_t id)
-    {
-        avoidCustomKeyboardCallbacks_.erase(id);
-        avoidSystemKeyboardCallbacks_.erase(id);
-    }
-
-    void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
     int32_t GetContextTriggerAvoidTaskOrientation() const
     {

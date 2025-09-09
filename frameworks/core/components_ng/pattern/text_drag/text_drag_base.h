@@ -81,7 +81,6 @@ public:
         return OffsetF(0, 0);
     }
 
-    virtual void OnDragNodeDetachFromMainTree() {};
     virtual void ResetAISelected(AIResetSelectionReason reason) {}
     virtual void ShowAIEntityMenuForCancel() {}
     virtual bool IsPreviewMenuShow()
@@ -89,6 +88,7 @@ public:
         return false;
     }
 
+    virtual void OnDragNodeDetachFromMainTree() {};
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);
 };
 } // namespace OHOS::Ace::NG
