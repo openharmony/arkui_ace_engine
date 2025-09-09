@@ -52,7 +52,7 @@ struct previewMenuBuilder4 {
           .fontSize('15dp')
           .height('30%')
         List(){
-          ForEach(this.BblockArr, (item: string) => {
+          ForEach(this.blockArr, (item: string) => {
             ListItem() {
               Image(item)
                 .width(100)
@@ -69,7 +69,7 @@ struct previewMenuBuilder4 {
         .onDrop((event: DragEvent)=>{
           let records:Array<UDC.UnifiedRecord> = event.getData().getRecords();
           this.targetImage = (records[0] as UDC.Image).imageUri;
-          this.BblockArr.push(this.targetImage)
+          this.blockArr.push(this.targetImage)
           console.log('targetImage：' + this.targetImage);
           if(records.length > 0) {
             this.imgState = Visibility.Visible;
