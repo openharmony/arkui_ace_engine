@@ -3247,6 +3247,10 @@ frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @arkuieve
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @arkuievent
 frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @arkuievent
 frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @arkuievent
+frameworks/core/interfaces/native/ani/waterflow_ani_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/ani/waterflow_ani_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
