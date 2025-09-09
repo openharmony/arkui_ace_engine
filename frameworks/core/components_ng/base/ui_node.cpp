@@ -163,7 +163,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    ACE_SCOPED_TRACE("xyz addchild child:%d, parent:%d", child->GetId(), GetId());
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
