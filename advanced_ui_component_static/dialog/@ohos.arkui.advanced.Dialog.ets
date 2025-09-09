@@ -19,9 +19,9 @@ import {
   ThemeColorMode, Builder, ForEach, Column, Row, Checkbox, Text, TextOverflow, Image, ImageFit, Scroll, KeyEvent,
   NestedScrollMode, UIContext, Length, Component, BuilderParam, GeometryInfo, Layoutable, ConstraintSizeOptions,
   Measurable, SizeResult, MeasureResult, SheetInfo, CommonMethod, List, ListItem, Button, Direction, Radio, HitTestMode,
-  Edge, ButtonType, ButtonStyleMode, Divider, VP, focusControl, BarState, LocalizedPadding, BlurStyle, Color, vp2px,
+  Edge, ButtonType, ButtonStyleMode, Divider, VP, focusControl, BarState, LocalizedPadding, BlurStyle, Color,
   CustomDialogControllerOptions, EdgeEffect, TextHeightAdaptivePolicy, FlexAlign, ButtonRole, ButtonAttribute,
-  KeyType, Resource, LoadingProgress, Dimension, px2vp, Placement, ShadowStyle, CustomPopupOptions, Padding,
+  KeyType, Resource, LoadingProgress, Dimension, Placement, ShadowStyle, CustomPopupOptions, Padding,
   LocalizedMargin, Margin, ClickEvent, ScrollState, OnCheckboxChangeCallback, $r, PopupStateChangeParam,
   ScrollOnScrollCallback, SizeChangeCallback, applyStyles, CustomDialog, ButtonOptions as ButtonParam, CustomLayout,
   WithTheme, RelativeContainer, BaseGestureEvent, GestureRecognizer, ScrollBar, GestureControl, VerticalAlign,
@@ -1686,7 +1686,7 @@ struct CustomDialogContentComponent {
         return true;
       }
       let isVertical: boolean = false;
-      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
+      let maxButtonTextSize = this.getUIContext().vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
       BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
       (this.buttons as Array<ButtonOptions>).forEach((button) => {
         try {
@@ -2022,7 +2022,7 @@ export struct PopoverDialog {
     .onClick((event: ClickEvent) => {
       try {
         let screenSize: display.Display = display.getDefaultDisplaySync();
-        let screenWidth: number = px2vp(screenSize.width);
+        let screenWidth: number = this.getUIContext().px2vp(screenSize.width);
         if (screenWidth - BUTTON_HORIZONTAL_MARGIN() - BUTTON_HORIZONTAL_MARGIN() > MAX_DIALOG_WIDTH) {
           this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
         } else {

@@ -19,7 +19,7 @@ import {
   Row, Builder, Column, Text, FontWeight, TextAlign, TextOverflow, TextHeightAdaptivePolicy, HorizontalAlign,
   GeometryInfo, Layoutable, ConstraintSizeOptions, Measurable, SizeResult, ForEach, Color, CommonMethod, StateStyles,
   BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType, Button, ButtonType, SymbolGlyph, SymbolEffectStrategy,
-  SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, px2vp, $r, Margin,
+  SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, $r, Margin,
   Padding, ButtonOptions, SymbolGlyphModifier, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
   GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback, ClassCastError
 } from '@ohos.arkui.component';
@@ -1017,7 +1017,7 @@ struct EditableTitleBarDialog {
     let properties: window.WindowProperties =
       this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
     let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
+    if (this.getUIContext().px2vp(rect.height) > this.screenWidth) {
       this.maxLines = this.verticalScreenLines;
     } else {
       this.maxLines = this.horizontalsScreenLines;

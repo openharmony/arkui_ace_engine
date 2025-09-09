@@ -14,7 +14,7 @@
  */
 
 import {
-  $r, Row, Text, List, Axis, Area, Flex, vp2px, Color, Stack, Length, Button, ICurve, Column, Scroll, Canvas, Builder,
+  $r, Row, Text, List, Axis, Area, Flex, Color, Stack, Length, Button, ICurve, Column, Scroll, Canvas, Builder,
   ForEach, Padding, Resource, ListItem, BarState, Position, FlexWrap, BlendMode, BlurStyle, Alignment, animateTo,
   Component, TouchType, FontWeight, ClickEvent, HoverEvent, TouchEvent, Visibility, ButtonType, EdgeEffect, SymbolGlyph,
   BorderStyle, ResourceStr, ScrollState, EffectScope, VoidCallback, TextOverflow, CommonMethod, BuilderParam,
@@ -440,7 +440,7 @@ struct MultiFilterRow {
         if (i === 0) {
           continue;
         } else {
-          itemWidth += vp2px(TEXT_HOT_AREA_WIDTH * 2);
+          itemWidth += this.getUIContext().vp2px(TEXT_HOT_AREA_WIDTH * 2);
         }
         if (curLineRetainWidth - itemWidth >= 0) {
           curLineRetainWidth -= itemWidth;
@@ -453,7 +453,7 @@ struct MultiFilterRow {
           if (curLine === 1) {
             curLine += 1;
             curLineRetainWidth =
-              this.filterColumnWidth - vp2px(ARROW_IMG_SIZE * (this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE));
+              this.filterColumnWidth - this.getUIContext().vp2px(ARROW_IMG_SIZE * (this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE));
             i--;
           } else {
             break;
@@ -822,7 +822,7 @@ struct MultiFilterRow {
         }
       }.width(PERCENT_100)
       .onAreaChange((_oldValue: Area, newValue: Area) => {
-        this.filterColumnWidth = vp2px(parseInt(newValue.width.toString(), 0))
+        this.filterColumnWidth = this.getUIContext().vp2px(parseInt(newValue.width.toString(), 0))
         if (this.twoLineModeItemNumRow.value === 0) {
           let curLineSum: number = this.calcMultiFilterRowItemNum();
           this.twoLineModeItemNumRow.value = curLineSum;

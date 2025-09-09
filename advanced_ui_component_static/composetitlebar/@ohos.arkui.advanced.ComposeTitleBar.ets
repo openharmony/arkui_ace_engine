@@ -20,7 +20,7 @@ import {
   BorderStyle, KeyType, TouchType, Placement, CustomPopupOptions, GeometryInfo, Layoutable, ConstraintSizeOptions,
   Builder, focusControl, LocalizedPadding, Padding, PopupStateChangeParam, SymbolEffectStrategy, SymbolEffect,
   TextAlign, BlurStyle, CustomComponent, ButtonOptions, HoverEvent, KeyEvent, TouchEvent, ClickEvent, ShadowStyle,
-  px2vp, Margin, ClassCastError
+  Margin, ClassCastError
 } from '@ohos.arkui.component';
 import resourceManager from '@ohos.resourceManager';
 import { State, Observed, PropRef, StorageProp, Watch, StorageLink, Provide, Consume, Link } from '@ohos.arkui.stateManagement'
@@ -934,7 +934,7 @@ struct ComposeTitleBarDialog {
       this.mainWindowStage = context.windowStage.getMainWindowSync();
       let properties: window.WindowProperties = this.mainWindowStage!.getWindowProperties();
       let rect = properties.windowRect;
-      if (px2vp(rect.height) > this.screenWidth) {
+      if (this.getUIContext().px2vp(rect.height) > this.screenWidth) {
         this.maxLines = this.verticalScreenLines;
       } else {
         this.maxLines = this.horizontalsScreenLines;
