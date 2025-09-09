@@ -1028,7 +1028,11 @@ public:
 
     void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
 
+    // remove task of ResponseRegionChanged
     void DisableNotifyResponseRegionChanged() override;
+
+    // re-Post task of ResponseRegionChanged
+    void PostTaskResponseRegion(int32_t delay) override;
 
     void SetLocalColorMode(ColorMode colorMode)
     {

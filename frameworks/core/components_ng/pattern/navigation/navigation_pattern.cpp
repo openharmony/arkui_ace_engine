@@ -4765,6 +4765,12 @@ bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
 void NavigationPattern::OnStartOneTransitionAnimation()
 {
     runningTransitionCount_++;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::NAVIGATION_TRANSITION);
 }
 
 void NavigationPattern::OnFinishOneTransitionAnimation()
@@ -4773,6 +4779,13 @@ void NavigationPattern::OnFinishOneTransitionAnimation()
     if (runningTransitionCount_ == 0) {
         OnAllTransitionAnimationFinish();
     }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
+    pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
 }
 
 void NavigationPattern::GetAllNodes(

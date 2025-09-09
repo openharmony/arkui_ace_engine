@@ -933,6 +933,114 @@ HWTEST_F(StageTestNg, StageManagerTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PagePattern FirePageTransitionStart001
+ * @tc.desc: Test the PagePattern Fire Page Transition Start
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePattern_FirePageTransitionStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+    pattern->FirePageTransitionStart();
+
+    /**
+     * @tc.steps: step3. create safeAreaInsets_ .
+     * @tc.expected: create seccuessful.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(0);
+    SafeAreaInsets::Inset insetleft;
+    insetleft.end = 5;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+
+    /**
+     * @tc.steps: step4. test BeforeCreateLayoutWrapper .
+     * @tc.expected: GetInstallationFree is true.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+}
+
+/**
+ * @tc.name: PagePattern FirePageTransitionFinish001
+ * @tc.desc: Test the PagePattern Fire Page Transition Finish
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePattern_FirePageTransitionFinish001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+    pattern->FirePageTransitionFinish();
+
+    /**
+     * @tc.steps: step3. create safeAreaInsets_ .
+     * @tc.expected: create seccuessful.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(0);
+    SafeAreaInsets::Inset insetleft;
+    insetleft.end = 5;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+
+    /**
+     * @tc.steps: step4. test BeforeCreateLayoutWrapper .
+     * @tc.expected: GetInstallationFree is true.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+}
+
+/**
  * @tc.name: PagePatternTest001
  * @tc.desc: Testing OnDirtyLayoutWrapperSwap of PagePattern work correctly.
  * @tc.type: FUNC

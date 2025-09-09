@@ -1890,6 +1890,49 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged006, Te
 }
 
 /**
+ * @tc.name: OnStartOneTransitionAnimation
+ * @tc.desc: Start Transition Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnStartOneTransitionAnimation001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
+    navigationPattern->OnStartOneTransitionAnimation();
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnFinishOneTransitionAnimation
+ * @tc.desc: Finish Transition Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnFinishOneTransitionAnimation001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    navigationPattern->OnFinishOneTransitionAnimation();
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: UpdatePrimaryContentIfNeeded001
  * @tc.desc: Branch: property->UpdateVisibility(primaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
  *                   => true
