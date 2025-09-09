@@ -334,10 +334,10 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
 std::optional<std::string> ResourceConverter::GetPluralResource()
 {
     std::optional<std::string> result;
-    if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
+    if (id_ != -1 && params_.size() >= 2) {  // 2 means quantity and count in params_
         result = resWrapper_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
         ReplaceHolder(result.value(), params_, 1);
-    } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
+    } else if (params_.size() >= 3) {  // 3 means resName, quantity and count in params_
         result = resWrapper_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
         ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
     } else {
