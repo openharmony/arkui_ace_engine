@@ -126,6 +126,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:data_ability_helper",
       "ability_runtime:napi_common",
       "ability_runtime:ui_extension",
+      "ability_runtime:service_extension",
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
