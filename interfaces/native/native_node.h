@@ -924,7 +924,44 @@ typedef enum {
      * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
      * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the overlay attribute, which can be set, reset, and obtained as required through APIs.
      *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: mask text.\n
+     * .value[0]?.i32: position of the overlay relative to the component. Optional.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1]?.f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. Optional. \n
+     * .value[2]?.f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp. Optional.
+     * \n
+     * .value[3]?.i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * In most cases, this parameter should be set to Auto, this allowing the system to handle
+     * the layout direction automatically. If you need to keep a specific direction in any situation, set it to
+     * either LTR (Left-to-Right) or RTL (Right-to-Left). Optional.
+     * \n
+     * .object: the node tree used as the overlay.
+     * The parameter type is {@link ArkUI_NodeHandle}.
+     * The default value is <b>nullptr.</b> \n
+     * this parameter is conflict with .string, and it has lower priority than .string. Optional.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: mask text.\n
+     * .value[0].i32: position of the overlay relative to the component.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
+     * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
+     * .value[3].i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * .object: the overlay node handle. \n
+     *
+     * @since 21
      */
     NODE_OVERLAY,
     /**
