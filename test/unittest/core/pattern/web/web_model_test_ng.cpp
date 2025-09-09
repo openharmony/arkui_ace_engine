@@ -299,7 +299,7 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept005, TestSize.Level1)
     webModelNG.SetSafeBrowsingCheckFinishId([&callbackCalled](const std::shared_ptr<BaseEventInfo> info) {
         callbackCalled = true;
     });
-    webEventHub->FireOnSafeBrowsingCheckResultEvent(mockEventInfo);
+    webEventHub->FireOnSafeBrowsingCheckFinishEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
     webModelNG.SetHorizontalScrollBarAccessEnabled(true);
     webModelNG.SetVerticalScrollBarAccessEnabled(true);
@@ -3696,7 +3696,7 @@ HWTEST_F(WebModelTestNg, SetOnPageVisible001, TestSize.Level1)
     callbackCalled = false;
     webModelNG.SetOnSafeBrowsingCheckFinish(AccessibilityManager::RawPtr(frameNode), jsCallback);
     ASSERT_NE(webEventHub, nullptr);
-    webEventHub->FireOnSafeBrowsingCheckResultEvent(mockEventInfo);
+    webEventHub->FireOnSafeBrowsingCheckFinishEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
 #endif
 }
