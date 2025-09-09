@@ -2,59 +2,101 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "module description",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "description",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "label",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "fontWeight",
-      "value": "900"
+      "value": "900",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "textCreateContent",
-      "value": "浅色模式"
+      "value": "浅色模式",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "TextFontFamily",
-      "value": "HarmonyOS Sans"
+      "value": "HarmonyOS Sans",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "TextMinFontSizeFp",
-      "value": "16fp"
+      "value": "16fp",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "TextMaxFontSizeFp",
-      "value": "16fp"
+      "value": "16fp",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "TextResponseRegionWidth",
-      "value": "50%"
+      "value": "50%",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "TextInputPlaceholder",
-      "value": "浅色模式"
+      "value": "浅色模式",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "ModeWeight400_900",
-      "value": "400"
+      "value": "400",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "inputFilter",
-      "value": "[a-z]"
+      "value": "[a-z]",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "Long",
-      "value": "长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试"
+      "value": "长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试",
+      "attr": {
+        "translatable": false
+      }
     },
     {
       "name": "20vp",
-      "value": "20vp"
+      "value": "20vp",
+      "attr": {
+        "translatable": false
+      }
     }
   ]
 }

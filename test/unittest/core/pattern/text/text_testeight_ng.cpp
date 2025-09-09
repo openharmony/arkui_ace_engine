@@ -103,7 +103,7 @@ HWTEST_F(TextTestEightNg, DumpInfo001, TestSize.Level1)
 
 /**
  * @tc.name: DumpInfo002
- * @tc.desc: test DumpInfo.
+ * @tc.desc: test DumpInfo when pManager_ is nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestEightNg, DumpInfo002, TestSize.Level1)
