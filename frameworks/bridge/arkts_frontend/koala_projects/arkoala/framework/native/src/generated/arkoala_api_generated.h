@@ -2669,12 +2669,13 @@ typedef struct Ark_Union_String_CustomBuilder Ark_Union_String_CustomBuilder;
 typedef struct Opt_Union_String_CustomBuilder Opt_Union_String_CustomBuilder;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent Ark_Union_String_CustomBuilder_ComponentContent;
 typedef struct Opt_Union_String_CustomBuilder_ComponentContent Opt_Union_String_CustomBuilder_ComponentContent;
-typedef struct Ark_Union_String_Number_Buffer_Resource Ark_Union_String_Number_Buffer_Resource;
-typedef struct Opt_Union_String_Number_Buffer_Resource Opt_Union_String_Number_Buffer_Resource;
+typedef struct Ark_Union_String_Int32_Buffer_Resource Ark_Union_String_Int32_Buffer_Resource;
+typedef struct Opt_Union_String_Int32_Buffer_Resource Opt_Union_String_Int32_Buffer_Resource;
 typedef struct Ark_Union_String_Number_Resource Ark_Union_String_Number_Resource;
 typedef struct Opt_Union_String_Number_Resource Opt_Union_String_Number_Resource;
 typedef struct Ark_Union_String_Number_Resource_Buffer Ark_Union_String_Number_Resource_Buffer;
 typedef struct Opt_Union_String_Number_Resource_Buffer Opt_Union_String_Number_Resource_Buffer;
+typedef struct Ark_Union_String_Int32_Resource_Buffer Ark_Union_String_Int32_Resource_Buffer;
 typedef struct Ark_Union_String_PixelMap_Resource Ark_Union_String_PixelMap_Resource;
 typedef struct Opt_Union_String_PixelMap_Resource Opt_Union_String_PixelMap_Resource;
 typedef struct Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier;
@@ -7410,8 +7411,8 @@ typedef struct Opt_OnScrollFrameBeginHandlerResult {
     Ark_OnScrollFrameBeginHandlerResult value;
 } Opt_OnScrollFrameBeginHandlerResult;
 typedef struct Ark_OnSearchResultReceiveEvent {
-    Ark_Number activeMatchOrdinal;
-    Ark_Number numberOfMatches;
+    Ark_Int32 activeMatchOrdinal;
+    Ark_Int32 numberOfMatches;
     Ark_Boolean isDoneCounting;
 } Ark_OnSearchResultReceiveEvent;
 typedef struct Opt_OnSearchResultReceiveEvent {
@@ -14064,7 +14065,7 @@ typedef struct Opt_OnBeforeUnloadEvent {
 typedef struct Ark_OnClientAuthenticationEvent {
     Ark_ClientAuthenticationHandler handler;
     Ark_String host;
-    Ark_Number port;
+    Ark_Int32 port;
     Array_String keyTypes;
     Array_String issuers;
 } Ark_OnClientAuthenticationEvent;
@@ -14094,7 +14095,7 @@ typedef struct Ark_OnDownloadStartEvent {
     Ark_String userAgent;
     Ark_String contentDisposition;
     Ark_String mimetype;
-    Ark_Number contentLength;
+    Ark_Int64 contentLength;
 } Ark_OnDownloadStartEvent;
 typedef struct Opt_OnDownloadStartEvent {
     Ark_Tag tag;
@@ -16358,19 +16359,19 @@ typedef struct Opt_Union_String_CustomBuilder_ComponentContent {
     Ark_Tag tag;
     Ark_Union_String_CustomBuilder_ComponentContent value;
 } Opt_Union_String_CustomBuilder_ComponentContent;
-typedef struct Ark_Union_String_Number_Buffer_Resource {
+typedef struct Ark_Union_String_Int32_Buffer_Resource {
     Ark_Int32 selector;
     union {
         Ark_String value0;
-        Ark_Number value1;
+        Ark_Int32 value1;
         Ark_Buffer value2;
         Ark_Resource value3;
     };
-} Ark_Union_String_Number_Buffer_Resource;
-typedef struct Opt_Union_String_Number_Buffer_Resource {
+} Ark_Union_String_Int32_Buffer_Resource;
+typedef struct Opt_Union_String_Int32_Buffer_Resource {
     Ark_Tag tag;
-    Ark_Union_String_Number_Buffer_Resource value;
-} Opt_Union_String_Number_Buffer_Resource;
+    Ark_Union_String_Int32_Buffer_Resource value;
+} Opt_Union_String_Int32_Buffer_Resource;
 typedef struct Ark_Union_String_Number_Resource {
     Ark_Int32 selector;
     union {
@@ -16396,6 +16397,15 @@ typedef struct Opt_Union_String_Number_Resource_Buffer {
     Ark_Tag tag;
     Ark_Union_String_Number_Resource_Buffer value;
 } Opt_Union_String_Number_Resource_Buffer;
+typedef struct Ark_Union_String_Int32_Resource_Buffer {
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Int32 value1;
+        Ark_Resource value2;
+        Ark_Buffer value3;
+    };
+} Ark_Union_String_Int32_Resource_Buffer;
 typedef struct Ark_Union_String_PixelMap_Resource {
     Ark_Int32 selector;
     union {
@@ -27752,12 +27762,12 @@ typedef struct GENERATED_ArkUIConsoleMessageAccessor {
     void (*destroyPeer)(Ark_ConsoleMessage peer);
     Ark_ConsoleMessage (*ctor)(const Ark_String* message,
                                const Ark_String* sourceId,
-                               const Ark_Number* lineNumber,
+                               const Ark_Int32* lineNumber,
                                Ark_MessageLevel messageLevel);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getMessage)(Ark_ConsoleMessage peer);
     Ark_String (*getSourceId)(Ark_ConsoleMessage peer);
-    Ark_Number (*getLineNumber)(Ark_ConsoleMessage peer);
+    Ark_Int32 (*getLineNumber)(Ark_ConsoleMessage peer);
     Ark_MessageLevel (*getMessageLevel)(Ark_ConsoleMessage peer);
 } GENERATED_ArkUIConsoleMessageAccessor;
 
@@ -27778,14 +27788,14 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     Ark_WebResourceResponse (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getResponseData)(Ark_WebResourceResponse peer);
-    Opt_Union_String_Number_Buffer_Resource (*getResponseDataEx)(Ark_WebResourceResponse peer);
+    Opt_Union_String_Int32_Buffer_Resource (*getResponseDataEx)(Ark_WebResourceResponse peer);
     Ark_String (*getResponseEncoding)(Ark_WebResourceResponse peer);
     Ark_String (*getResponseMimeType)(Ark_WebResourceResponse peer);
     Ark_String (*getReasonMessage)(Ark_WebResourceResponse peer);
     Array_Header (*getResponseHeader)(Ark_WebResourceResponse peer);
-    Ark_Number (*getResponseCode)(Ark_WebResourceResponse peer);
+    Ark_Int32 (*getResponseCode)(Ark_WebResourceResponse peer);
     void (*setResponseData)(Ark_WebResourceResponse peer,
-                            const Ark_Union_String_Number_Resource_Buffer* data);
+                            const Ark_Union_String_Int32_Resource_Buffer* data);
     void (*setResponseEncoding)(Ark_WebResourceResponse peer,
                                 const Ark_String* encoding);
     void (*setResponseMimeType)(Ark_WebResourceResponse peer,
@@ -27795,7 +27805,7 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     void (*setResponseHeader)(Ark_WebResourceResponse peer,
                               const Array_Header* header);
     void (*setResponseCode)(Ark_WebResourceResponse peer,
-                            const Ark_Number* code);
+                            const Ark_Int32* code);
     void (*setResponseIsReady)(Ark_WebResourceResponse peer,
                                Ark_Boolean IsReady);
     Ark_Boolean (*getResponseIsReady)(Ark_WebResourceResponse peer);
@@ -27806,7 +27816,7 @@ typedef struct GENERATED_ArkUIWebResourceErrorAccessor {
     Ark_WebResourceError (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getErrorInfo)(Ark_WebResourceError peer);
-    Ark_Number (*getErrorCode)(Ark_WebResourceError peer);
+    Ark_Int32 (*getErrorCode)(Ark_WebResourceError peer);
 } GENERATED_ArkUIWebResourceErrorAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

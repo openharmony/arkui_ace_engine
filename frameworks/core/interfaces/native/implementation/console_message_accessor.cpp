@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_ConsoleMessage peer)
 }
 Ark_ConsoleMessage CtorImpl(const Ark_String* message,
                             const Ark_String* sourceId,
-                            const Ark_Number* lineNumber,
+                            const Ark_Int32* lineNumber,
                             Ark_MessageLevel messageLevel)
 {
     CHECK_NULL_RETURN(message, nullptr);
@@ -65,11 +65,11 @@ Ark_String GetSourceIdImpl(Ark_ConsoleMessage peer)
     result = peer->webConsoleLog->GetSourceId();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
+Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->webConsoleLog, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->webConsoleLog->GetLineNumber());
+    return Converter::ArkValue<Ark_Int32>(peer->webConsoleLog->GetLineNumber());
 }
 Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
 {

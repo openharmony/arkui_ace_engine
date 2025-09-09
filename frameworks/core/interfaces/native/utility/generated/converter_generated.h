@@ -1912,7 +1912,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Number_Buffer_Resource& src)
+                   const Ark_Union_String_Int32_Buffer_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1946,6 +1946,23 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_String_Number_Resource_Buffer& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_String_Int32_Resource_Buffer& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -4616,7 +4633,7 @@ ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
 ASSIGN_OPT(Opt_Union_SizeOptions_ImageSize)
 ASSIGN_OPT(Opt_Union_String_Array_String)
 ASSIGN_OPT(Opt_Union_String_CustomBuilder_ComponentContent)
-ASSIGN_OPT(Opt_Union_String_Number_Buffer_Resource)
+ASSIGN_OPT(Opt_Union_String_Int32_Buffer_Resource)
 ASSIGN_OPT(Opt_Union_String_Number_Resource)
 ASSIGN_OPT(Opt_Union_String_Number_Resource_Buffer)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource)
