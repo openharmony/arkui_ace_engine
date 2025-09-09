@@ -383,7 +383,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
         return nullptr;
     }
     // Create RSData from the read data.
-    loadResultInfo.fileSize = fileSize;
+    loadResultInfo.fileSize = static_cast<size_t>(fileSize);
     auto result = std::make_shared<RSData>();
     result->BuildFromMalloc(buffer.release(), fileSize);
     return result;
