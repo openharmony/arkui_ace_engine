@@ -138,7 +138,6 @@ void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
     CHECK_NULL_VOID(pathInfo);
     NavDestinationState state = NavDestinationState::NONE;
     NavDestinationMode mode = host->GetNavDestinationMode();
-    auto uniqueId = host->GetId();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         state = pattern->GetNavDestinationState();
         if (state == NavDestinationState::NONE) {
