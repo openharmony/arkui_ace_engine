@@ -220,7 +220,7 @@ float SearchLayoutAlgorithm::CalculateTextFieldWidth(
 
     auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if (style != CancelButtonStyle::INVISIBLE) {
-        textFieldWidth = textFieldWidth - cancelButtonWidth;
+        textFieldWidth = textFieldWidth - cancelButtonWidth - searchTheme->GetRightPaddingWithButton().ConvertToPx();
     }
     if (style == CancelButtonStyle::INVISIBLE && !searchButtonEvent->IsEnabled()) {
         // right padding without cancel button and search button
