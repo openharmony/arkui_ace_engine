@@ -569,9 +569,17 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
     // need to order the child.
     if (!caches_.IsMoveFromToExist()) {
         caches_.ForEachL1Node(
-            [&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+            [&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void {
+                if (node) {
+                    children_.emplace_back(node);
+                }
+            });
     } else {
-        caches_.ForEachL1NodeWithOnMove([&](const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+        caches_.ForEachL1NodeWithOnMove([&](const RefPtr<UINode>& node) -> void {
+            if (node) {
+                children_.emplace_back(node);
+            }
+        });
     }
 
     return children_;
