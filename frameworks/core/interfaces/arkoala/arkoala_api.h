@@ -702,6 +702,8 @@ struct ArkUIClipShapeOptions {
     ArkUI_Float32 bottomLeftRadius;
     ArkUI_Float32 topRightRadius;
     ArkUI_Float32 bottomRightRadius;
+    ArkUI_Float32 offsetX;
+    ArkUI_Float32 offsetY;
     ArkUI_CharPtr commands;
 };
 
@@ -2273,6 +2275,15 @@ struct ArkUIRoundRectShape {
     ArkUI_Float32 bottomRightY = 0;
 };
 
+struct ArkUIRenderNodeClipOption {
+    ArkUIRectShape rect;
+    ArkUICircleShape circle;
+    ArkUIRoundRectShape roundRect;
+    ArkUIRectShape oval;
+    const char* commands;
+    int32_t type;
+};
+
 struct ArkUIMaskFill {
     ArkUI_Uint32 fillColor;
     ArkUI_Uint32 strokeColor;
@@ -2594,6 +2605,8 @@ struct ArkUICommonModifier {
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(
         ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit);
+    ArkUI_Bool (*setClipShapeWithObject)(
+        ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUIRenderNodeClipOption* object, ArkUI_Int32 unit);
     void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (*attribute)[2],
         ArkUI_CharPtr commands, ArkUI_Int32 unit);
     void (*resetClip)(ArkUINodeHandle node);
