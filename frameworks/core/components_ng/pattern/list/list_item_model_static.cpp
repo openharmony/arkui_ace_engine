@@ -47,7 +47,7 @@ RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCr
 void ListItemModelStatic::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -55,7 +55,7 @@ void ListItemModelStatic::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&&
 void ListItemModelStatic::SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -88,7 +88,7 @@ void ListItemModelStatic::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -98,7 +98,7 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
     OnStateChangedEvent&& onStateChange, const std::optional<Dimension>& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
