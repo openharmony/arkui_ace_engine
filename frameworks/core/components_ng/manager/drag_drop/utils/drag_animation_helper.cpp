@@ -1344,17 +1344,18 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
     }
 }
 
-float DragAnimationHelper::GetPreviewMenuAnimationRate()
+bool DragAnimationHelper::ShouldSetOffsetForMenuDrag()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, 1.0f);
+    CHECK_NULL_RETURN(pipeline, true);
     auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, 1.0f);
+    CHECK_NULL_RETURN(dragDropManager, true);
     auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
-    CHECK_NULL_RETURN(menuWrapperNode, 1.0f);
+    CHECK_NULL_RETURN(menuWrapperNode, true);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, 1.0f);
-    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
-    return animationInfo.clipRate;
+    CHECK_NULL_RETURN(menuWrapperPattern, true);
+    auto state = menuWrapperPattern->IsDragMenuLiftAnimationFinish();
+    menuWrapperPattern->SetDragMenuLiftAnimationFinishState(true);
+    return state;
 }
 } // namespace OHOS::Ace::NG
