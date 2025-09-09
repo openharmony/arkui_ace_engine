@@ -58,6 +58,24 @@ void deserializeAndCallSyncAccessibilityFocusCallback(Ark_VMContext vmContext, K
     Ark_Boolean isFocus = thisDeserializer.readBoolean();
     _callSync(vmContext, _resourceId, isFocus);
 }
+void deserializeAndCallAccessibilityTransparentCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(thisDeserializer.readTouchEvent());
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncAccessibilityTransparentCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointer());
+    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(thisDeserializer.readTouchEvent());
+    callSyncMethod(vmContext, resourceId, event);
+}
 void deserializeAndCallAsyncCallback_Array_TextMenuItem_Array_TextMenuItem(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -7505,6 +7523,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
     switch (kind) {
         case 589030517/*Kind_AccessibilityCallback*/: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
         case 1715445305/*Kind_AccessibilityFocusCallback*/: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
+        case -1651707213/*Kind_AccessibilityTransparentCallback*/: return deserializeAndCallAccessibilityTransparentCallback(thisArray, thisLength);
         case 300202685/*Kind_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem*/: return deserializeAndCallAsyncCallback_Array_TextMenuItem_Array_TextMenuItem(thisArray, thisLength);
         case 1289587365/*Kind_AsyncCallback_image_PixelMap_Void*/: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisArray, thisLength);
         case -1581515233/*Kind_AsyncCallback_TextMenuItem_TextRange_Boolean*/: return deserializeAndCallAsyncCallback_TextMenuItem_TextRange_Boolean(thisArray, thisLength);
@@ -7830,6 +7849,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
     switch (kind) {
         case 589030517/*Kind_AccessibilityCallback*/: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
         case 1715445305/*Kind_AccessibilityFocusCallback*/: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
+        case -1651707213/*Kind_AccessibilityTransparentCallback*/: return deserializeAndCallSyncAccessibilityTransparentCallback(vmContext, thisArray, thisLength);
         case 300202685/*Kind_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem*/: return deserializeAndCallSyncAsyncCallback_Array_TextMenuItem_Array_TextMenuItem(vmContext, thisArray, thisLength);
         case 1289587365/*Kind_AsyncCallback_image_PixelMap_Void*/: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
         case -1581515233/*Kind_AsyncCallback_TextMenuItem_TextRange_Boolean*/: return deserializeAndCallSyncAsyncCallback_TextMenuItem_TextRange_Boolean(vmContext, thisArray, thisLength);
