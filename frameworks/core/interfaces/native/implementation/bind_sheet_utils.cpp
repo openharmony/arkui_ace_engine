@@ -156,6 +156,7 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.enableHoverMode = OptConvert<bool>(sheetOptions.enableHoverMode);
     sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
     sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
+    sheetStyle.instanceId = OptConvert<int32_t>(sheetOptions.uiContext);
     auto effectEdge = OptConvert<int>(sheetOptions.effectEdge.value).value_or(3);
     switch (effectEdge) {
         case EFFECT_EDGE_ZERO:
