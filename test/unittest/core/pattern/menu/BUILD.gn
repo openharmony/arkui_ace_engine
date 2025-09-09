@@ -41,5 +41,7 @@ ace_unittest("menu_test_ng") {
     "menuitemgroup_test_ng.cpp",
     "menuwrapper_test_ng.cpp",
     "submenu_test_ng.cpp",
+    "menu_item_model_static_test_ng.cpp",
+    "menu_model_static_test_ng.cpp",
   ]
 }
