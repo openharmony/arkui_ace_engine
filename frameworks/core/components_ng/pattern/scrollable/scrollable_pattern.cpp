@@ -3062,7 +3062,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     }
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->SetTHPNotifyState(ThpNotifyState::SCROLL_MOVE);
+        pipeline->SetTHPNotifyState(ThpNotifyState::SCROLL_MOVING);
     }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",

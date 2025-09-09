@@ -505,7 +505,7 @@ void PagePattern::FirePageTransitionStart()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_JUMP);
+    pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_TRANSITION);
 }
 
 void PagePattern::FirePageTransitionFinish()

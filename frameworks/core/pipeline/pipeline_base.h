@@ -87,11 +87,11 @@ enum class ThpNotifyState {
     // post task immediately
     DEFAULT,
     // post task after animation
-    NAVIGATION_JUMP,
-    ROUTER_JUMP,
-    SCROLL_MOVE,
+    NAVIGATION_TRANSITION,
+    ROUTER_TRANSITION,
+    SCROLL_MOVING,
 };
-constexpr int32_t DEFAULT_DELAY_THP = 300;
+constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
 
 struct FontInfo;
 struct FontConfigJsonInfo;

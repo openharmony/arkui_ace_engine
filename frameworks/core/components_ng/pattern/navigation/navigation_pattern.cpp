@@ -4770,7 +4770,7 @@ void NavigationPattern::OnStartOneTransitionAnimation()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->SetTHPNotifyState(ThpNotifyState::NAVIGATION_JUMP);
+    pipeline->SetTHPNotifyState(ThpNotifyState::NAVIGATION_TRANSITION);
 }
 
 void NavigationPattern::OnFinishOneTransitionAnimation()
