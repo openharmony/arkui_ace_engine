@@ -2273,6 +2273,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onLoadFinishedV2_ = useNewPipe ? eventHub->GetOnLoadFinishedEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                           webCom->GetOnLoadFinishedEventId(), oldContext);
+        onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent()
+                                                      : nullptr;
     }
     return true;
 }
@@ -9178,5 +9180,13 @@ bool WebDelegate::IsShowHandle()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->IsShowHandle();
+}
+
+void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type)
+{
+    if (onSafeBrowsingCheckFinishV2_) {
+        onSafeBrowsingCheckFinishV2_(
+            std::make_shared<SafeBrowsingCheckResultEvent>(threat_type));
+    }
 }
 } // namespace OHOS::Ace

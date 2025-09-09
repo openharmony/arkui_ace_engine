@@ -1411,6 +1411,7 @@ public:
     }
     void SetForceEnableZoom(bool isEnabled);
     bool IsShowHandle();
+    void OnSafeBrowsingCheckFinish(int threat_type);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1574,6 +1575,7 @@ private:
     EventCallbackV2 onAdsBlockedV2_;
     EventCallbackV2 onLoadStartedV2_;
     EventCallbackV2 onLoadFinishedV2_;
+    EventCallbackV2 onSafeBrowsingCheckFinishV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
