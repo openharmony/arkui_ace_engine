@@ -6276,7 +6276,7 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
     CHECK_NULL_VOID(delegate_);
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     if (type == WindowSizeChangeReason::MAXIMIZE) {
-        WindowMaximize();
+        WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
         return;
     }
     AdjustRotationRenderFit(type);
@@ -6371,14 +6371,10 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
     }
 }
 
-void WebPattern::WindowMaximize()
+void WebPattern::WindowMaximize(WebWindowMaximizeReason reason)
 {
     if (!SystemProperties::GetWebDebugMaximizeResizeOptimize()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not enabled");
-        return;
-    }
-    WebInfoType webInfoType = GetWebInfoType();
-    if (webInfoType != WebInfoType::TYPE_2IN1) {
         return;
     }
     if (layoutMode_ != WebLayoutMode::NONE || renderMode_ != RenderMode::ASYNC_RENDER) {
@@ -6388,11 +6384,15 @@ void WebPattern::WindowMaximize()
     if (!isAttachedToMainTree_ || !isVisible_) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize, webId: %{public}d", GetWebId());
-    if (renderContextForSurface_) {
-        renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
-    }
-    if (delegate_) {
+    CHECK_NULL_VOID(delegate_);
+    WebInfoType webInfoType = GetWebInfoType();
+    if (webInfoType == WebInfoType::TYPE_2IN1 ||
+        (webInfoType == WebInfoType::TYPE_TABLET && delegate_->IsNWebEx() &&
+            (delegate_->IsPcMode() || reason == WebWindowMaximizeReason::EXIT_FREE_MULTI_MODE))) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize, webId: %{public}d", GetWebId());
+        if (renderContextForSurface_) {
+            renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
+        }
         delegate_->MaximizeResize();
     }
 }
