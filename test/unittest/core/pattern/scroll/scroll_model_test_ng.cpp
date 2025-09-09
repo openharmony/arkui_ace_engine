@@ -1264,6 +1264,10 @@ HWTEST_F(ScrollModelNGTestNg, SetScrollBarColor_OneParameter, TestSize.Level1)
      */
     scrollModelNG.SetScrollBarColor(color);
     EXPECT_EQ(scrollModelNG.GetScrollBarColor(AceType::RawPtr(scrollNode)), color.GetValue());
+
+    scrollModelNG.ResetScrollBarColor();
+    auto scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
 }
 
 /**

@@ -85,9 +85,17 @@ HWTEST_F(ListModelTestNg, SetScrollBarColor, TestSize.Level1)
      * @tc.steps: step2. Calling the SetScrollBarColor function
      * @tc.expected: The ScrollBarColor is updated
      */
+    model.SetScrollBarColor(Color::BLUE);
+    model.SetScrollBarColor(std::nullopt);
+    auto scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
     model.SetScrollBarColor(SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(paintProperty->GetScrollBarColor()->GetValue(), Color::FromString(SCROLLBAR_COLOR_BLUE).GetValue());
+    model.SetScrollBarColor(std::nullopt);
     CreateDone();
+
+    scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
 }
 
 /**
