@@ -72,6 +72,10 @@ public:
     void RemoveRectChangeListener(int32_t id);
     void NotifyRectChange(const RectF& rect);
     void CallRectChange();
+    void SetCustomAppBarNode(const RefPtr<CustomAppBarNode>& customAppBarNode)
+    {
+        customAppBarNodeNode_ = customAppBarNode;
+    }
 private:
     void UpdateLayoutMargin();
     void UpdateOverlayLayout();

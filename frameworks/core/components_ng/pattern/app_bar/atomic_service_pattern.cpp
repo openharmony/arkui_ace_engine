@@ -231,11 +231,6 @@ void AtomicServicePattern::OnLanguageConfigurationUpdate()
 
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()
 {
-    if (customAppBarNodeNode_) {
-        return customAppBarNodeNode_;
-    }
-    auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();
-    customAppBarNodeNode_ = AceType::DynamicCast<CustomAppBarNode>(customAppBarNode);
     return customAppBarNodeNode_;
 }
 
