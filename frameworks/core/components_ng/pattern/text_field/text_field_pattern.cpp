@@ -11410,7 +11410,7 @@ void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeT
     event.type = AccessibilityEventType::TEXT_CHANGE;
     event.nodeId = host->GetAccessibilityId();
     std::string finalText;
-    if (IsInPasswordMode()) {
+    if (IsInPasswordMode() && GetTextObscured()) {
         char16_t obscuring =
         Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
         finalText = UtfUtils::Str16DebugToStr8(std::u16string(changeString.length(), obscuring));
