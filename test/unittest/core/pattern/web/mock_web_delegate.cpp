@@ -1416,10 +1416,7 @@ void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 bool WebDelegate::IsShowHandle() { return false; }
 bool WebDelegate::IsPcMode()
 {
-    if (g_setReturnStatus == STATUS_TRUE) {
-        return true;
-    }
-    return false;
+    return g_setReturnStatus == STATUS_TRUE;
 }
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
