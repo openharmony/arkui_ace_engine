@@ -612,6 +612,10 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle002, 
     shadow.SetColor(Color::BLUE);
     DialogProperties props {
         .shadow = shadow,
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
     };
     
     RefPtr<FrameNode> frameNode = DialogView::CreateDialogNode(props, contentNode);
@@ -622,13 +626,13 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle002, 
     MockContainer::Current()->SetColorMode(ColorMode::DARK);
     pattern->HandleBlurEvent();
     pattern->HandleFocusEvent();
-    EXPECT_TRUE(pattern->UpdateShadow());
+    EXPECT_TRUE(pattern->InvertShadowColor());
     MockContainer::Current()->SetColorMode(ColorMode::LIGHT);
-    EXPECT_TRUE(pattern->UpdateShadow());
+    EXPECT_TRUE(pattern->InvertShadowColor());
     pattern->dialogProperties_.shadow = std::nullopt;
-    EXPECT_FALSE(pattern->UpdateShadow());
+    EXPECT_FALSE(pattern->InvertShadowColor());
     g_isConfigChangePerform = false;
-    EXPECT_FALSE(pattern->UpdateShadow());
+    EXPECT_FALSE(pattern->InvertShadowColor());
 }
 
 /**

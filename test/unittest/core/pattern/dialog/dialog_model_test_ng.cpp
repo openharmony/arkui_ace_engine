@@ -626,7 +626,6 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg015, TestSize.Level1)
  */
 HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
 {
-    auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = false;
 
     Shadow shadow;
@@ -644,7 +643,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
         .borderColor = borderColor,
         .backgroundColor = Color::BLUE,
         .blurStyleOption = blurStyleOption,
-        .effectOption = effectOption
+        .effectOption = effectOption,
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
     };
 
     /**
@@ -687,7 +690,9 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
     EXPECT_EQ(resEffectOption->color.ColorToString(), props.effectOption->color.ColorToString());
     EXPECT_EQ(resEffectOption->inactiveColor.ColorToString(), props.effectOption->inactiveColor.ColorToString());
 
-    g_isConfigChangePerform = isConfigChangePerform;
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
 }
 /**
  * @tc.name: DialogModelTestNg043
@@ -696,7 +701,6 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
  */
 HWTEST_F(DialogModelTestNg, DialogModelTestNg043, TestSize.Level1)
 {
-    //测试customstyle为true时的场景
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
 
@@ -705,6 +709,10 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg043, TestSize.Level1)
 
     DialogProperties props {
         .customStyle = true,
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
     };
     auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
     ASSERT_NE(dialogNode, nullptr);
@@ -734,14 +742,18 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg043, TestSize.Level1)
  */
 HWTEST_F(DialogModelTestNg, DialogModelTestNg044, TestSize.Level1)
 {
-    //测默认值
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
 
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);
 
-    DialogProperties props;
+    DialogProperties props {
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
+    };
     auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
     ASSERT_NE(dialogNode, nullptr);
 
@@ -761,7 +773,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg044, TestSize.Level1)
     EXPECT_EQ(resBgColor->ColorToString(), theme->GetBackgroundColor().ColorToString());
 
     auto resBorderColor = contentRenderContext->GetBorderColor();
-    EXPECT_EQ(resBorderColor->topColor->ColorToString(), theme->GetBackgroudBorderColor().ColorToString());
+    EXPECT_EQ(resBorderColor->topColor->ColorToString(), theme->GetBackgroundBorderColor().ColorToString());
 
     
     auto resBlurStyleOption = contentRenderContext->GetBackBlurStyle();

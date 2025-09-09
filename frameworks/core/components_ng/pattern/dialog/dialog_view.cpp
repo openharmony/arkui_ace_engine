@@ -55,6 +55,7 @@ void SetDialogTransitionEffects(
 
 void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
+    CHECK_NULL_VOID(dialogProps.hasCustomMaskColor);
     if (dialogProps.maskColor.has_value()) {
         Color maskColor = dialogProps.maskColor.value();
         RefPtr<ResourceObject> resObj;
@@ -79,9 +80,12 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
 
             auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
             CHECK_NULL_VOID(dialogLayoutProp);
+            // is app subwindow
             auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
             auto isModal = dialogLayoutProp->GetIsModal().value_or(true);
             auto isSceneBoardDialog = dialogLayoutProp->GetIsSceneBoardDialog().value_or(false);
+            // app subwindow dialog's mask is on top of the main window
+            // No need to update app subwindow dialog's background color.
             if ((!isSubWindow && isModal) || isSceneBoardDialog) {
                 dialogContext->UpdateBackgroundColor(maskColor);
             }
@@ -90,7 +94,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         };
         auto pattern = dialog->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->AddResObj("dialog_maskcolor", resObj, std::move(updateFunc));
+        pattern->AddResObj("dialog.maskcolor", resObj, std::move(updateFunc));
         
         auto dialogContext = dialog->GetRenderContext();
         CHECK_NULL_VOID(dialogContext);
@@ -99,6 +103,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
         auto isModal = dialogLayoutProp->GetIsModal().value_or(true);
         auto isSceneBoardDialog = dialogLayoutProp->GetIsSceneBoardDialog().value_or(false);
+        // if the current mode is dark color mode，update property immediately.
         if ((!isSubWindow && isModal) || isSceneBoardDialog) {
             dialogContext->UpdateBackgroundColor(maskColor);
         }
@@ -107,6 +112,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
 
 void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
+    CHECK_NULL_VOID(dialogProps.hasCustomShadowColor);
     if (dialogProps.shadow.has_value()) {
         Shadow shadow = dialogProps.shadow.value();
         Color shadowColor = shadow.GetColor();
@@ -149,6 +155,7 @@ void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties
 
 void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
+    CHECK_NULL_VOID(dialogProps.hasCustomBackgroundColor);
     if (dialogProps.backgroundColor.has_value()) {
         Color backgroundColor = dialogProps.backgroundColor.value();
         RefPtr<ResourceObject> resObj;
@@ -207,7 +214,7 @@ void UpdateAndAddBorderTopColorCallback(RefPtr<FrameNode> dialog, BorderColorPro
 
             Color topBorderColor;
             auto state = ResourceParseUtils::ParseResColor(resObj, topBorderColor);
-            topBorderColor = state ? topBorderColor : dialogTheme->GetBackgroudBorderColor();
+            topBorderColor = state ? topBorderColor : dialogTheme->GetBackgroundBorderColor();
 
             auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
             CHECK_NULL_VOID(contentNode);
@@ -253,7 +260,7 @@ void UpdateAndAddBorderBottomColorCallback(RefPtr<FrameNode> dialog, BorderColor
 
             Color bottomBorderColor;
             auto state = ResourceParseUtils::ParseResColor(resObj, bottomBorderColor);
-            bottomBorderColor = state ? bottomBorderColor : dialogTheme->GetBackgroudBorderColor();
+            bottomBorderColor = state ? bottomBorderColor : dialogTheme->GetBackgroundBorderColor();
 
             auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
             CHECK_NULL_VOID(contentNode);
@@ -300,7 +307,7 @@ void UpdateAndAddBorderLeftColorCallback(RefPtr<FrameNode> dialog, BorderColorPr
 
             Color leftBorderColor;
             auto state = ResourceParseUtils::ParseResColor(resObj, leftBorderColor);
-            leftBorderColor = state ? leftBorderColor : dialogTheme->GetBackgroudBorderColor();
+            leftBorderColor = state ? leftBorderColor : dialogTheme->GetBackgroundBorderColor();
 
             auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
             CHECK_NULL_VOID(contentNode);
@@ -316,7 +323,7 @@ void UpdateAndAddBorderLeftColorCallback(RefPtr<FrameNode> dialog, BorderColorPr
         };
         auto pattern = dialog->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->AddResObj("dialog_bordercolor_left", resObj, std::move(updateFunc));
+        pattern->AddResObj("dialog.borderColor.leftColor", resObj, std::move(updateFunc));
 
         auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
         CHECK_NULL_VOID(contentNode);
@@ -347,7 +354,7 @@ void UpdateAndAddBorderRightColorCallback(RefPtr<FrameNode> dialog, BorderColorP
 
             Color rightBorderColor;
             auto state = ResourceParseUtils::ParseResColor(resObj, rightBorderColor);
-            rightBorderColor = state ? rightBorderColor : dialogTheme->GetBackgroudBorderColor();
+            rightBorderColor = state ? rightBorderColor : dialogTheme->GetBackgroundBorderColor();
 
             auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
             CHECK_NULL_VOID(contentNode);
@@ -377,6 +384,7 @@ void UpdateAndAddBorderRightColorCallback(RefPtr<FrameNode> dialog, BorderColorP
 
 void UpdateAndAddBorderColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
+    CHECK_NULL_VOID(dialogProps.hasCustomBorderColor);
     if (dialogProps.borderColor.has_value()) {
         BorderColorProperty borderColor = dialogProps.borderColor.value();
         UpdateAndAddBorderTopColorCallback(dialog, borderColor);
@@ -404,14 +412,14 @@ void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogP
             auto state = ResourceParseUtils::ParseResColor(resObj, inactiveColor);
             inactiveColor = state ? inactiveColor : Color::TRANSPARENT;
 
-            auto dialogProps = pattern->GetDialogProperties();
-            auto blurStyleOption = dialogProps.blurStyleOption.value();
-            blurStyleOption.inactiveColor = inactiveColor;
             auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
             CHECK_NULL_VOID(contentNode);
             auto contentRenderContext = contentNode->GetRenderContext();
             CHECK_NULL_VOID(contentRenderContext);
-            contentRenderContext->UpdateBackBlurStyle(blurStyleOption);
+            auto currentBackBlurStyle = contentRenderContext->GetBackBlurStyle();
+            CHECK_NULL_VOID(currentBackBlurStyle.has_value());
+            currentBackBlurStyle->inactiveColor = inactiveColor;
+            contentRenderContext->UpdateBackBlurStyle(currentBackBlurStyle);
             contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             contentNode->MarkModifyDone();
         };
@@ -509,7 +517,7 @@ void UpdateAndAddEffectOptionCallback(RefPtr<FrameNode> dialog, const DialogProp
         auto currentEffectOption = contentRenderContext->GetBackgroundEffect();
         CHECK_NULL_VOID(currentEffectOption.has_value());
         currentEffectOption->inactiveColor = inactiveColor;
-        contentRenderContext->UpdateBackgroundEffect(effectOption);
+        contentRenderContext->UpdateBackgroundEffect(currentEffectOption);
     }
 }
 void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
@@ -517,7 +525,6 @@ void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
-    //  深浅色切换--> 遍历ArkUI树node--> 执行Pattern中的updateFunc---> 重读资源（利用反色算法）、设置资源、标脏---> 绘制
     UpdateAndAddMaskColorCallback(dialog, dialogProps);
 
     UpdateAndAddShadowCallback(dialog, dialogProps);

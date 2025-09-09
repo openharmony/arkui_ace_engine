@@ -527,7 +527,7 @@ public:
         return dialogBackgroundBlurStyle_;
     }
 
-    const Color& GetBackgroudBorderColor() const
+    const Color& GetBackgroundBorderColor() const
     {
         return backgroundBorderColor_;
     }

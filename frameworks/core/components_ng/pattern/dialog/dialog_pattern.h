@@ -450,7 +450,7 @@ private:
     void OnDetachFromMainTree() override;
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
-    bool UpdateShadow();
+    bool InvertShadowColor();
     void OnWindowShow() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
