@@ -268,6 +268,7 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
       }
       AsyncAddComputedV2.addComputed(this, BaseClass.name);
       AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
+      WeakRefPool.asyncRegisterToFinalizationRegistry(this);
     }
   };
   Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
