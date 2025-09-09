@@ -117,6 +117,7 @@ private:
                               .append(std::to_string(nodeInfo_.canvasNodeId_))
                               .append("-")
                               .append(std::to_string(srcType_))
+                              .append("-")
                               .append(autoResize_ ? "true" : "false")
                               .append("]");
     }
@@ -131,9 +132,10 @@ private:
                            .append(std::to_string(nodeInfo_.canvasNodeId_))
                            .append("-")
                            .append(std::to_string(srcType_))
+                           .append("-")
+                           .append(autoResize_ ? "true" : "false")
                            .append("]-[")
                            .append(imageSrc_)
-                           .append(autoResize_ ? "true" : "false")
                            .append("]");
     }
 };
