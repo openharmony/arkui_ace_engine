@@ -72,6 +72,9 @@ template("ace_core_pipeline_source_set") {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         external_deps += [ "graphic_2d:librender_service_client" ]
+        if (current_os == "ohos") {
+          external_deps += [ "eventhandler:libeventhandler" ]
+        }
         if (ace_use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         }

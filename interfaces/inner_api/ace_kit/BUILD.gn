@@ -87,6 +87,9 @@ ohos_source_set("ace_kit") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
+    if (current_os == "ohos") {
+      external_deps += [ "eventhandler:libeventhandler" ]
+    }
   }
 
   if (current_os == "ohos") {
