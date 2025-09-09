@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -47,6 +47,8 @@ import { default as image } from "@ohos.multimedia.image"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
+import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
+import { TargetInfo } from "@ohos.arkui.UIContext"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -1518,6 +1520,114 @@ export class NodeContainerOps {
         const value_casted = value as (((event: TouchEvent) => void) | undefined)
         NodeContainerOps.setOnTouchEvent_serialize(self_casted, value_casted)
         return
+    }
+}
+export class PromptActionExtender {
+    static openPopup_serialize(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TargetInfo_serializer.write(thisSerializer, target)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PopupCommonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_openPopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updatePopup_serialize(content: KPointer, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        PopupCommonOptions_serializer.write(thisSerializer, options)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_updatePopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closePopup_serialize(content: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_closePopup(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static openMenu_serialize(content: KPointer, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TargetInfo_serializer.write(thisSerializer, target)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            MenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_openMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updateMenu_serialize(content: KPointer, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        MenuOptions_serializer.write(thisSerializer, options)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_updateMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closeMenu_serialize(content: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._PromptActionExtender_closeMenu(content, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static openPopup(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        const content_casted = content as (KPointer)
+        const target_casted = target as (TargetInfo)
+        const options_casted = options as (PopupCommonOptions | undefined)
+        return PromptActionExtender.openPopup_serialize(content_casted, target_casted, options_casted)
+    }
+    public static updatePopup(content: KPointer, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        const content_casted = content as (KPointer)
+        const options_casted = options as (PopupCommonOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return PromptActionExtender.updatePopup_serialize(content_casted, options_casted, partialUpdate_casted)
+    }
+    public static closePopup(content: KPointer): Promise<void> {
+        const content_casted = content as (KPointer)
+        return PromptActionExtender.closePopup_serialize(content_casted)
+    }
+    public static openMenu(content: KPointer, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const content_casted = content as (KPointer)
+        const target_casted = target as (TargetInfo)
+        const options_casted = options as (MenuOptions | undefined)
+        return PromptActionExtender.openMenu_serialize(content_casted, target_casted, options_casted)
+    }
+    public static updateMenu(content: KPointer, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const content_casted = content as (KPointer)
+        const options_casted = options as (MenuOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return PromptActionExtender.updateMenu_serialize(content_casted, options_casted, partialUpdate_casted)
+    }
+    public static closeMenu(content: KPointer): Promise<void> {
+        const content_casted = content as (KPointer)
+        return PromptActionExtender.closeMenu_serialize(content_casted)
     }
 }
 export class RenderServiceNode {

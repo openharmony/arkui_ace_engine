@@ -14982,6 +14982,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ProgressMaskAccessor
+    namespace PromptActionExtenderAccessor {
+    void OpenPopupImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Ark_TargetInfo* target,
+                       const Opt_PopupCommonOptions* options,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void UpdatePopupImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Ark_PopupCommonOptions* options,
+                        const Opt_Boolean* partialUpdate,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void ClosePopupImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer content,
+                      const Ark_TargetInfo* target,
+                      const Opt_MenuOptions* options,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Ark_MenuOptions* options,
+                        const Opt_Boolean* partialUpdate,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    } // PromptActionExtenderAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -19631,6 +19677,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ProgressMaskPeer {
         virtual ~ProgressMaskPeer() = default;
     };
+    const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor()
+    {
+        static const GENERATED_ArkUIPromptActionExtenderAccessor PromptActionExtenderAccessorImpl {
+            PromptActionExtenderAccessor::OpenPopupImpl,
+            PromptActionExtenderAccessor::UpdatePopupImpl,
+            PromptActionExtenderAccessor::ClosePopupImpl,
+            PromptActionExtenderAccessor::OpenMenuImpl,
+            PromptActionExtenderAccessor::UpdateMenuImpl,
+            PromptActionExtenderAccessor::CloseMenuImpl,
+        };
+        return &PromptActionExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
@@ -20971,6 +21030,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPinchRecognizerAccessor,
             GetPixelMapMockAccessor,
             GetProgressMaskAccessor,
+            GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderServiceNodeAccessor,

@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { extractors } from "#handwritten"
-import { UIContext } from "@ohos.arkui.UIContext"
+import { UIContext, TargetInfo } from "@ohos.arkui.UIContext"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
@@ -31,5 +31,49 @@ export class UIContext_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return extractors.fromUIContextPtr(ptr)
+    }
+}
+export class TargetInfo_serializer {
+    public static write(buffer: SerializerBase, value: TargetInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForId  = value.id
+        if (valueHolderForId instanceof string) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForIdForIdx0  = valueHolderForId as string
+            valueSerializer.writeString(valueHolderForIdForIdx0)
+        } else if (valueHolderForId instanceof number) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForIdForIdx1  = valueHolderForId as number
+            valueSerializer.writeNumber(valueHolderForIdForIdx1)
+        }
+        const valueHolderForComponentId  = value.componentId
+        if (valueHolderForComponentId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForComponentIdTmpValue  = valueHolderForComponentId!
+            valueSerializer.writeNumber(valueHolderForComponentIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): TargetInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const idTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let idTmpBuf : string | number | undefined
+        if (idTmpBufUnionSelector == (0).toChar()) {
+            idTmpBuf = (valueDeserializer.readString() as string)
+        } else if (idTmpBufUnionSelector == (1).toChar()) {
+            idTmpBuf = (valueDeserializer.readNumber() as number)
+        } else {
+            throw new Error("One of the branches for idTmpBuf has to be chosen through deserialisation.")
+        }
+        const idTmpResult : string | number = (idTmpBuf as string | number)
+        const componentIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let componentIdTmpBuf : number | undefined = undefined
+        if ((componentIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            componentIdTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const componentIdTmpResult : number | undefined = componentIdTmpBuf
+        let value : TargetInfo = ({id: idTmpResult, componentId: componentIdTmpResult} as TargetInfo)
+        return value
     }
 }

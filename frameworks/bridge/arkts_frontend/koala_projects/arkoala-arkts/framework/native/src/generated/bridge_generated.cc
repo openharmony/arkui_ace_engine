@@ -31640,6 +31640,74 @@ void impl_ProgressMask_enableBreathingAnimation(Ark_NativePointer thisPtr, Ark_B
         GetAccessors()->getProgressMaskAccessor()->enableBreathingAnimation(self, value);
 }
 KOALA_INTEROP_DIRECT_V2(ProgressMask_enableBreathingAnimation, Ark_NativePointer, Ark_Boolean)
+void impl_PromptActionExtender_openPopup(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TargetInfo targetValueTemp = TargetInfo_serializer::read(thisDeserializer);;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_PopupCommonOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = PopupCommonOptions_serializer::read(thisDeserializer);
+        }
+        Opt_PopupCommonOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->openPopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Ark_TargetInfo*>(&targetValueTemp), static_cast<Opt_PopupCommonOptions*>(&optionsValueTemp), static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_openPopup, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptActionExtender_updatePopup(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_PopupCommonOptions optionsValueTemp = PopupCommonOptions_serializer::read(thisDeserializer);;
+        const auto partialUpdateValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean partialUpdateValueTempTmpBuf = {};
+        partialUpdateValueTempTmpBuf.tag = partialUpdateValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((partialUpdateValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            partialUpdateValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean partialUpdateValueTemp = partialUpdateValueTempTmpBuf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->updatePopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Ark_PopupCommonOptions*>(&optionsValueTemp), static_cast<Opt_Boolean*>(&partialUpdateValueTemp), static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_updatePopup, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptActionExtender_closePopup(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->closePopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_closePopup, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptActionExtender_openMenu(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TargetInfo targetValueTemp = TargetInfo_serializer::read(thisDeserializer);;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_MenuOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = MenuOptions_serializer::read(thisDeserializer);
+        }
+        Opt_MenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->openMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Ark_TargetInfo*>(&targetValueTemp), static_cast<Opt_MenuOptions*>(&optionsValueTemp), static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_openMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptActionExtender_updateMenu(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_MenuOptions optionsValueTemp = MenuOptions_serializer::read(thisDeserializer);;
+        const auto partialUpdateValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean partialUpdateValueTempTmpBuf = {};
+        partialUpdateValueTempTmpBuf.tag = partialUpdateValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((partialUpdateValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            partialUpdateValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean partialUpdateValueTemp = partialUpdateValueTempTmpBuf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->updateMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Ark_MenuOptions*>(&optionsValueTemp), static_cast<Opt_Boolean*>(&partialUpdateValueTemp), static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_updateMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptActionExtender_closeMenu(KVMContext vmContext, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromiseValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionExtenderAccessor()->closeMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), content, static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
+}
+KOALA_INTEROP_CTX_V3(PromptActionExtender_closeMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PulseSymbolEffect_construct() {
         return GetAccessors()->getPulseSymbolEffectAccessor()->construct();
 }

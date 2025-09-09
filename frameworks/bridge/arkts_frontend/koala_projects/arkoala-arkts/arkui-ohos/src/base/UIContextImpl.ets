@@ -62,6 +62,7 @@ import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeseri
 import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
+import { PromptActionExtender } from '../framework';
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -957,125 +958,51 @@ export class PromptActionImpl extends PromptAction {
     }
 
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        const target_casted = target as (TargetInfo)
-        const options_casted = options as (PopupCommonOptions | undefined)
-        return this.openPopup_serialize(content_casted, target_casted, options_casted)
+        let ptr: KPointer = 0;
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer;
+        }
+        return PromptActionExtender.openPopup(ptr, target, options);
     }
 
     updatePopup(content: ComponentContent, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        const options_casted = options as (PopupCommonOptions)
-        const partialUpdate_casted = partialUpdate as (Boolean | undefined)
-        return this.updatePopup_serialize(content_casted, options_casted, partialUpdate_casted)
+        let ptr: KPointer = 0;
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer;
+        }
+        return PromptActionExtender.updatePopup(ptr, options, partialUpdate);
     }
 
     closePopup(content: ComponentContent): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        return this.closePopup_serialize(content_casted)
-    }
-
-    private openPopup_serialize(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    private updatePopup_serialize(content: ComponentContent, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        // thisSerializer.writePopupCommonOptions(options)
-        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
-        partialUpdate_type = runtimeType(partialUpdate)
-        thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
-            const partialUpdate_value  = partialUpdate!
-            thisSerializer.writeBoolean(partialUpdate_value)
-        }
-        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        let ptr: KPointer = 0
+        let ptr: KPointer = 0;
         if (content.getNodePtr() != undefined) {
-            ptr = content.getNodePtr() as KPointer
+            ptr = content.getNodePtr() as KPointer;
         }
-        // ArkUIGeneratedNativeModule._PromptAction_updatePopup(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private closePopup_serialize(content: ComponentContent): Promise<void> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        let ptr: KPointer = 0
-        if (content.getNodePtr() != undefined) {
-            ptr = content.getNodePtr() as KPointer
-        }
-        // ArkUIGeneratedNativeModule._PromptAction_closePopup(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
+        return PromptActionExtender.closePopup(ptr);
     }
 
     openMenu(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        const target_casted = target as (TargetInfo)
-        const options_casted = options as (MenuOptions | undefined)
-        return this.openMenu_serialize(content_casted, target_casted, options_casted)
+        let ptr: KPointer = 0;
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer;
+        }
+        return PromptActionExtender.openMenu(ptr, target, options);
     }
 
     updateMenu(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        const options_casted = options as (MenuOptions)
-        const partialUpdate_casted = partialUpdate as (Boolean | undefined)
-        return this.updateMenu_serialize(content_casted, options_casted, partialUpdate_casted)
+        let ptr: KPointer = 0;
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer;
+        }
+        return PromptActionExtender.updateMenu(ptr, options, partialUpdate);
     }
 
     closeMenu(content: ComponentContent): Promise<void> {
-        const content_casted = content as (ComponentContent)
-        return this.closeMenu_serialize(content_casted)
-    }
-
-    private openMenu_serialize(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        // thisSerializer.writeTargetInfo(target)
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            // thisSerializer.writeMenuOptions(options_value)
-        }
-        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        let ptr: KPointer = 0
+        let ptr: KPointer = 0;
         if (content.getNodePtr() != undefined) {
-            ptr = content.getNodePtr() as KPointer
+            ptr = content.getNodePtr() as KPointer;
         }
-        // ArkUIGeneratedNativeModule._PromptAction_openMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private updateMenu_serialize(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        // thisSerializer.writeMenuOptions(options)
-        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
-        partialUpdate_type = runtimeType(partialUpdate)
-        thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
-            const partialUpdate_value  = partialUpdate!
-            thisSerializer.writeBoolean(partialUpdate_value)
-        }
-        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        let ptr: KPointer = 0
-        if (content.getNodePtr() != undefined) {
-            ptr = content.getNodePtr() as KPointer
-        }
-        // ArkUIGeneratedNativeModule._PromptAction_updateMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private closeMenu_serialize(content: ComponentContent): Promise<void> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        let ptr: KPointer = 0
-        if (content.getNodePtr() != undefined) {
-            ptr = content.getNodePtr() as KPointer
-        }
-        // ArkUIGeneratedNativeModule._PromptAction_closeMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
+        return PromptActionExtender.closeMenu(ptr);
     }
 }
 
