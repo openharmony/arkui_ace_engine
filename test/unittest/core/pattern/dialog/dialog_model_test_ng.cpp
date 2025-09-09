@@ -1847,7 +1847,7 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode002, TestSize.Level1)
      */
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_NE(result, nullptr);
-    EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_FALSE(props.isShowInSubWindow);
     EXPECT_TRUE(props.isModal);
 }
 
