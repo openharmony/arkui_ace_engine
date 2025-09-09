@@ -1629,7 +1629,11 @@ void ListItemGroupLayoutAlgorithm::LayoutCacheItem(LayoutWrapper* layoutWrapper,
         SetListItemIndex(layoutWrapper, wrapper, index);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         if (wrapper->CheckNeedForceMeasureAndLayout()) {
+            wrapper->SetActive();
             wrapper->Layout();
+            if (!show) {
+                wrapper->SetActive(false);
+            }
         } else {
             SyncGeometry(wrapper);
         }
