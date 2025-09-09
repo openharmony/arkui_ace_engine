@@ -61,6 +61,8 @@ template("ace_core_interfaces_native") {
       defines += [ "WEB_SUPPORTED" ]
       external_deps += [
         "ability_runtime:app_context",
+        "bundle_framework:appexecfwk_core_headers",
+        "common_event_service:cesfwk_innerkits",
         "webview:libnweb",
         "image_framework:image_ani",
         "image_framework:image_native",
