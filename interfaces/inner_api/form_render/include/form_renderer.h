@@ -83,6 +83,8 @@ private:
     bool obscurationMode_ = false;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    float layoutWidth_ = 0.0f;
+    float layoutHeight_ = 0.0f;
     float borderWidth_ = 0.0f;
     float lastBorderWidth_ = 0.0f;
     bool fontScaleFollowSystem_ = true;

@@ -82,6 +82,7 @@ public:
         UpdateFormSharedImage, void(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap));
     MOCK_METHOD1(SetFormWidth, void(const float width));
     MOCK_METHOD1(SetFormHeight, void(const float height));
+    MOCK_METHOD4(SetFormViewScale, void(float width, float height, float layoutWidth, float layoutHeight));
     MOCK_METHOD0(GetFormWidth, float());
     MOCK_METHOD0(GetFormHeight, float());
     MOCK_METHOD4(OnFormSurfaceChange, void(float width, float height, OHOS::Rosen::WindowSizeChangeReason reason,

@@ -52,14 +52,15 @@ FormRenderer::~FormRenderer()
 
 void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f. \
-        formJsInfo.formData.size = %{public}zu. formJsInfo.imageDataMap.size = %{public}zu.",
-        width_, height_, borderWidth_,
-        formJsInfo.formData.size(),
-        formJsInfo.imageDataMap.size());
+    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f,"
+        " layoutWidth =  %{public}f, layoutHeight = %{public}f. formJsInfo.formData.size = %{public}zu."
+        " formJsInfo.imageDataMap.size = %{public}zu.", width_, height_, borderWidth_, layoutWidth_, layoutHeight_,
+        formJsInfo.formData.size(), formJsInfo.imageDataMap.size());
     SetAllowUpdate(allowUpdate_);
-    uiContent_->SetFormWidth(width_ - borderWidth_ * DOUBLE);
-    uiContent_->SetFormHeight(height_ - borderWidth_ * DOUBLE);
+    float uiWidth = width_ - borderWidth_ * DOUBLE;
+    float uiHeight = height_ - borderWidth_ * DOUBLE;
+    uiContent_->SetFormWidth(uiWidth);
+    uiContent_->SetFormHeight(uiHeight);
     lastBorderWidth_ = borderWidth_;
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
@@ -78,6 +79,7 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
             static_cast<int32_t>(AppExecFwk::AddFormFailedErrorType::UI_CONTENT_INIT_FAILED),
             0);
     }
+    uiContent_->SetFormViewScale(uiWidth, uiHeight, layoutWidth_, layoutHeight_);
 }
 
 void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -145,6 +147,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
+    layoutWidth_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, width_);
+    layoutHeight_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_HEIGHT_KEY, height_);
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
@@ -304,6 +308,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         borderWidth_ = borderWidth;
         uiContent_->SetFormWidth(resizedWidth);
         uiContent_->SetFormHeight(resizedHeight);
+        uiContent_->SetFormViewScale(resizedWidth, resizedHeight, layoutWidth_, layoutHeight_);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
         HILOG_INFO("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
@@ -559,8 +564,9 @@ int32_t FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppE
 
 void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f.",
-        width_, height_, borderWidth_);
+    HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
+        " layoutWidth_ = %{public}f, layoutHeight_ = %{public}f.", width_, height_, borderWidth_,
+        layoutWidth_, layoutHeight_);
     SetAllowUpdate(allowUpdate_);
     float width = width_ - borderWidth_ * DOUBLE;
     float height = height_ - borderWidth_ * DOUBLE;
@@ -568,6 +574,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         || !NearEqual(borderWidth_, lastBorderWidth_)) {
         uiContent_->SetFormWidth(width);
         uiContent_->SetFormHeight(height);
+        uiContent_->SetFormViewScale(width, height, layoutWidth_, layoutHeight_);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
         HILOG_INFO("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);

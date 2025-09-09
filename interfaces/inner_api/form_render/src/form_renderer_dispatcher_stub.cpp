@@ -100,8 +100,12 @@ int32_t FormRendererDispatcherStub::HandleSetAllowUpdate(MessageParcel &data, Me
 
 int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParcel& data, MessageParcel& reply)
 {
-    float width = data.ReadFloat();
-    float height = data.ReadFloat();
+    OHOS::AppExecFwk::FormSurfaceInfo* formSurfaceInfo =
+        data.ReadParcelable<OHOS::AppExecFwk::FormSurfaceInfo>();
+    if (formSurfaceInfo == nullptr) {
+        HILOG_ERROR("Read formSurfaceInfo failed");
+        return ERR_INVALID_VALUE;
+    }
     uint32_t reason = static_cast<uint32_t>(data.ReadUint32());
     bool hasRSTransaction = data.ReadBool();
     std::shared_ptr<Rosen::RSTransaction> transaction = nullptr;
@@ -109,9 +113,9 @@ int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParc
         std::shared_ptr<Rosen::RSTransaction> transactionTmp(data.ReadParcelable<Rosen::RSTransaction>());
         transaction = transactionTmp;
     }
-    float borderWdidth = data.ReadFloat();
-    DispatchSurfaceChangeEvent(width, height, reason, transaction, borderWdidth);
+    DispatchSurfaceChangeEvent(*formSurfaceInfo, reason, transaction);
     reply.WriteInt32(ERR_OK);
+    delete formSurfaceInfo;
     return ERR_OK;
 }
 

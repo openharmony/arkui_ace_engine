@@ -189,6 +189,7 @@ public:
         return formHeight_;
     }
 
+    void SetFormViewScale(float width, float height, float layoutWidth, float layoutHeight) override;
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;

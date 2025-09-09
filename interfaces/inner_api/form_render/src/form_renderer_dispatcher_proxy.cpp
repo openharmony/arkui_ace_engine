@@ -88,8 +88,8 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
     }
 }
 
-void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
+void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo,
+    uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -97,13 +97,8 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
         return;
     }
 
-    if (!data.WriteFloat(width)) {
-        HILOG_ERROR("write width fail, action error");
-        return;
-    }
-
-    if (!data.WriteFloat(height)) {
-        HILOG_ERROR("write height fail, action error");
+    if (!data.WriteParcelable(&formSurfaceInfo)) {
+        HILOG_ERROR("write formSurfaceInfo fail");
         return;
     }
 
@@ -125,11 +120,6 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
             return;
         }
         rsTransaction->SetParentPid(pid);
-    }
-
-    if (!data.WriteFloat(borderWidth)) {
-        HILOG_ERROR("write borderWidth fail, action error");
-        return;
     }
 
     MessageParcel reply;

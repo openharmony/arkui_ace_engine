@@ -233,10 +233,11 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest011, TestSize
 {
     sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
-    float width = 11;
-    float height = 22;
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = 11;
+    formSurfaceInfo.height = 22;
     if (renderDispatcher != nullptr) {
-        renderDispatcher->DispatchSurfaceChangeEvent(width, height);
+        renderDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
         flag = true;
     }
     EXPECT_TRUE(flag);
@@ -253,10 +254,11 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest012, TestSize
 {
     sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     bool flag = false;
-    float width = 11;
-    float height = 22;
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = 11;
+    formSurfaceInfo.height = 22;
     if (renderDispatcher != nullptr) {
-        renderDispatcher->DispatchSurfaceChangeEvent(width, height);
+        renderDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
         flag = true;
     }
     EXPECT_TRUE(flag);
@@ -332,13 +334,9 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest016, TestSize
     sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
     constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT);
     MessageParcel data;
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
     data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
-    float width = 1.0;
-    float height = 1.0;
-    float borderWidth = 1.0;
-    data.WriteBool(width);
-    data.WriteBool(height);
-    data.WriteBool(borderWidth);
+    data.WriteParcelable(&formSurfaceInfo);
     MessageParcel reply;
     MessageOption option;
     if (renderDispatcher != nullptr) {

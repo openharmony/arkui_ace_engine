@@ -117,8 +117,8 @@ bool FormRendererDispatcherImpl::IsVisible()
     return isVisible_;
 }
 
-void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
+void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo,
+    uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {
@@ -133,14 +133,14 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
 #else
     reason = static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
 #endif
-    handler->PostTask([content = uiContent_, width, height, reason, rsTransaction, borderWidth, this]() {
+    handler->PostTask([content = uiContent_, formSurfaceInfo, reason, rsTransaction, this]() {
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
 
-        HandleSurfaceChangeEvent(uiContent, width, height, reason, rsTransaction, borderWidth);
+        HandleSurfaceChangeEvent(uiContent, formSurfaceInfo, reason, rsTransaction);
     });
 
     auto formRenderer = formRenderer_.lock();
@@ -148,11 +148,12 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         HILOG_WARN("formRenderer is nullptr");
         return;
     }
-    formRenderer->OnSurfaceChange(width, height, borderWidth);
+    formRenderer->OnSurfaceChange(formSurfaceInfo.width, formSurfaceInfo.height, formSurfaceInfo.borderWidth);
 }
 
-void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width,
-    float height, uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
+void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent,
+    const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     bool needSync = false;
     if (rsTransaction && rsTransaction->GetSyncId() > 0) {
@@ -187,12 +188,7 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     } else {
         Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
     }
-    float uiWidth = width - borderWidth * DOUBLE;
-    float uiHeight = height - borderWidth * DOUBLE;
-    uiContent->SetFormWidth(uiWidth);
-    uiContent->SetFormHeight(uiHeight);
-    uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
-        rsTransaction);
+    UpdateFormSurface(uiContent, formSurfaceInfo, reason, rsTransaction);
     if (isMultiInstanceEnabled_) {
         Rosen::RSNode::CloseImplicitAnimation(rsUIContext);
     } else {
@@ -206,6 +202,19 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     } else {
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
+}
+
+void FormRendererDispatcherImpl::UpdateFormSurface(const std::shared_ptr<UIContent>& uiContent,
+    const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    float uiWidth = formSurfaceInfo.width - formSurfaceInfo.borderWidth * DOUBLE;
+    float uiHeight = formSurfaceInfo.height - formSurfaceInfo.borderWidth * DOUBLE;
+    uiContent->SetFormWidth(uiWidth);
+    uiContent->SetFormHeight(uiHeight);
+    uiContent->SetFormViewScale(uiWidth, uiHeight, formSurfaceInfo.layoutWidth, formSurfaceInfo.layoutHeight);
+    uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
+        rsTransaction);
 }
 
 void FormRendererDispatcherImpl::SetObscured(bool isObscured)

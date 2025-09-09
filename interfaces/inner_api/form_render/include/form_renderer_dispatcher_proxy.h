@@ -40,8 +40,8 @@ public:
     void SetAllowUpdate(bool allowUpdate) override;
     void SetMultiInstanceEnabled(bool isMultiInstanceEnabled) override;
 
-    void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
+    void DispatchSurfaceChangeEvent(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void SetObscured(bool isObscured) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;

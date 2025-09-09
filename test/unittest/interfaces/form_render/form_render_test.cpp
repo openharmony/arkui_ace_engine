@@ -299,7 +299,10 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
         _, _)).WillOnce(Return());
-    formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = FORM_WIDTH_2;
+    formSurfaceInfo.height = FORM_HEIGHT_2;
+    formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
     // formRenderer is null
@@ -309,7 +312,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
         _, _)).WillOnce(Return());
     onSurfaceChangeEventKey = "";
-    formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
+    formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_NE(onSurfaceChangeEventKey, CHECK_KEY);
 
