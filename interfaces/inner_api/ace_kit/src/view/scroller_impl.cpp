@@ -235,7 +235,13 @@ double ScrollerImpl::GetContentTop(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(scrollablePattern, 0.0);
     auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
     auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
-
+    auto listPattern = AceType::DynamicCast<NG::ListPattern>(scrollablePattern);
+    if (listPattern) {
+        auto scrollableEdge = GetScrollableEdge<Edge::TOP>(jsScroller_, node);
+        auto contentEdge = GetContentEdge<Edge::TOP>(jsScroller_, node);
+        APP_LOGD("[HDS_TABS] scrollableEdge %{public}f contentEdge %{public}f", scrollableEdge, contentEdge);
+        return std::max(scrollableEdge, contentEdge);
+    }
     bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemStart()) ||
         (!waterFlowPattern && !scrollPattern && !IsAtStart());
     if (isNeedGetScrollableEdge) {
@@ -250,7 +256,13 @@ double ScrollerImpl::GetContentBottom(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(scrollablePattern, 0.0);
     auto scrollPattern = AceType::DynamicCast<NG::ScrollPattern>(scrollablePattern);
     auto waterFlowPattern = AceType::DynamicCast<NG::WaterFlowPattern>(scrollablePattern);
-
+    auto listPattern = AceType::DynamicCast<NG::ListPattern>(scrollablePattern);
+    if (listPattern) {
+        auto scrollableEdge = GetScrollableEdge<Edge::BOTTOM>(jsScroller_, node);
+        auto contentEdge = GetContentEdge<Edge::BOTTOM>(jsScroller_, node);
+        APP_LOGD("[HDS_TABS] scrollableEdge %{public}f contentEdge %{public}f", scrollableEdge, contentEdge);
+        return std::min(scrollableEdge, contentEdge);
+    }
     bool isNeedGetScrollableEdge = (waterFlowPattern && !waterFlowPattern->GetItemEnd()) ||
         (!waterFlowPattern && !scrollPattern && !IsAtEnd());
     if (isNeedGetScrollableEdge) {
