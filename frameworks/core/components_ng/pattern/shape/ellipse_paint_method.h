@@ -65,9 +65,7 @@ public:
         RectF rect(dx, dy, width, height);
         return [rect, shapePaintProperty, paintWrapper](RSCanvas& canvas) {
                     EllipsePainter::DrawEllipse(canvas, rect, *shapePaintProperty);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

@@ -64,9 +64,7 @@ public:
         CHECK_EQUAL_RETURN(contentSize.IsPositive(), false, nullptr);
         return [shapePaintProperty, isClose = isClose_, paintWrapper](RSCanvas& canvas) {
                     PolygonPainter::DrawPolygon(canvas, *shapePaintProperty, isClose);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

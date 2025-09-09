@@ -59,9 +59,7 @@ public:
 
         return [rect = rect_, rectPaintProperty, paintWrapper](RSCanvas& canvas) {
                     RectPainter::DrawRect(canvas, rect, *rectPaintProperty);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

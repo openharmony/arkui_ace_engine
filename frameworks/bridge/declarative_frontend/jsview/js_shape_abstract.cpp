@@ -379,7 +379,7 @@ void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
     RefPtr<ResourceObject> widthResObj;
-    if (!ParseJsDimensionVp(jsValue, value, widthResObj)) {
+    if (!ParseJsDimensionVp(jsValue, value, widthResObj) || !basicShape_) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && widthResObj) {
@@ -396,9 +396,7 @@ void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
-    if (basicShape_) {
-        basicShape_->SetWidth(value);
-    }
+    basicShape_->SetWidth(value);
 }
 
 void JSShapeAbstract::ObjectHeight(const JSCallbackInfo& info)
