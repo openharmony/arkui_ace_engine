@@ -52,8 +52,8 @@ public:
         PointF circleCenter;
         Gradient selectGradientColor;
         Gradient trackBackgroundColor;
-        Gradient blockGradientColor;
-        Color blockColor;
+        std::optional<Gradient> blockGradientColor;
+        std::optional<Color> blockColor;
     };
 
     explicit SliderContentModifier(const Parameters& parameters, UpdateImageCenterCallback updateImageCenter);
@@ -105,13 +105,6 @@ public:
     {
         if (blockGradientColor_) {
             blockGradientColor_->Set(GradientArithmetic(color));
-        }
-    }
-
-    void SetBlockColor(Color color)
-    {
-        if (blockColor_) {
-            blockColor_->Set(LinearColor(color));
         }
     }
 
@@ -402,7 +395,6 @@ private:
     RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyVectorColor> selectGradientColor_;
     RefPtr<AnimatablePropertyVectorColor> blockGradientColor_;
-    RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 
     RefPtr<AnimatablePropertyFloat> trackBorderRadius_;

@@ -282,7 +282,7 @@ void SetLinearBlockColor(ArkUINodeHandle node, const struct ArkUIGradientType* g
             Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
         tempGradient.AddColor(gradientColor);
     }
-    SliderModelNG::SetLinearGradientBlockColor(frameNode, tempGradient, false);
+    SliderModelNG::SetLinearGradientBlockColor(frameNode, tempGradient);
 }
 
 void ResetBlockColor(ArkUINodeHandle node)
